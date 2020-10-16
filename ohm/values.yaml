@@ -1,0 +1,17 @@
+osmSeed:
+  db:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
+  web:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
+  tilerDb:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
+  tilerServer:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
