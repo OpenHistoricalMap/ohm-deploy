@@ -1,6 +1,6 @@
 charts:
   - name: ohm-deploy
-    imagePrefix: openhistoricalmap/ohm-
+    imagePrefix: openhistoricalmap/
 
     images:
       web:
