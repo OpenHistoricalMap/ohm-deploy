@@ -8,7 +8,7 @@ charts:
       db:
         valuesPath: osmSeed.db.image
       tiler-db:
-        valuesPath: tilerDb.image
+        valuesPath: osmSeed.tilerDb.image
       tiler-server:
-        valuesPath: tilerServer.image
+        valuesPath: osmSeed.tilerServer.image
       
