@@ -23,4 +23,36 @@ jobs:
       run: chartpress --push
       env:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
-
+    - name: Substitute secrets
+      uses: bluwy/substitute-string-action@v1
+      with:
+        _input-file: 'values.staging.template.yaml'
+        _format-key: '{{key}}'
+        _output-file: 'values.staging.yaml'
+        AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
+        MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+        MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+        MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+        MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+        STAGING_DB: ${{ secrets.STAGING_DB }}
+        STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
+        STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
+        STAGING_DOMAIN_NAME: ${{ secrets.STAGING_DOMAIN_NAME }}
+        STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
+        STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+        STAGING_TILER_DB: ${{ secrets.STAGING_TILER_DB }}
+        STAGING_TILER_DB_EBS: ${{ secrets.STAGING_TILER_DB_EBS }}
+        STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
+        STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
+        STAGING_TILER_DB_USER: ${{ secrets.STAGING_TILER_DB_USER }}
+        STAGING_TILER_IMPOSM_EBS: ${{ secrets.STAGING_TILER_IMPOSM_EBS }}
+        STAGING_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.STAGING_TILER_IMPOSM_REPLICATION_URL }}
+        STAGING_TILER_SERVER_EBS: ${{ secrets.STAGING_TILER_SERVER_EBS }}
+        STAGING_TM_API_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
+        STAGING_TM_API_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
+        STAGING_TM_API_DB: ${{ secrets.STAGING_TM_API_DB }}
+        STAGING_TM_API_DB_HOST: ${{ secrets.STAGING_TM_API_DB_HOST }}
+        STAGING_TM_API_DB_PASSWORD: ${{ secrets.STAGING_TM_API_DB_PASSWORD }}
+        STAGING_TM_API_DB_USER: ${{ secrets.STAGING_TM_API_DB_USER }}
+        STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
