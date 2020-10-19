@@ -1,0 +1,12 @@
+
+apiVersion: v1
+name: ohm-deploy
+version: 0.0.1
+appVersion: 0.0.1
+description: OpenHistoricalMap Deploy Chart
+home: https://github.com/OpenHistoricalMap/ohm-deploy
+sources:
+  - https://github.com/OpenHistoricalMap/ohm-deploy
+kubeVersion: '>=1.15.0-0'
+tillerVersion: '>=2.11.0-0'
+
