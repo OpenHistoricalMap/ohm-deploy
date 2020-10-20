@@ -105,22 +105,35 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
+    - name: Setup Kubectl and Helm Dependencies
+      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+      run: |
+       apt-get install python-pip curl wget ca-certificates jq
+       pip install awscli
+       curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl
+       chmod +x /usr/bin/kubectl
+       curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator
+       chmod +x /usr/bin/aws-iam-authenticator
+       wget https://get.helm.sh/helm-v3.2.4-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm
+       chmod +x /usr/local/bin/helm
+
+    - name: Update kube-config staging
+      if: github.ref == 'refs/heads/staging'
+      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
+
+    - name: Update kube-config prod
+      if: github.ref == 'refs/heads/main'
+      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production
+
     - name: Install helm dependencies for
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
       run: cd ohm && helm dep up
 
     - name: Staging - helm deploy
       if: github.ref == 'refs/heads/staging'
-      uses: koslibpro/helm-eks-action@master
-      env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-      with:
-        command: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+      run: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
 
     - name: Production - helm deploy
       if: github.ref == 'refs/heads/main'
       uses: koslibpro/helm-eks-action@master
-      env:
-        KUBE_CONFIG_DATA: ${{ secrets.PRODUCTION_KUBE_CONFIG_DATA }}
-      with:
-        command: helm upgrade production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
+      run: helm upgrade production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
