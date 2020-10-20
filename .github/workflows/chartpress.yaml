@@ -135,5 +135,4 @@ jobs:
 
     - name: Production - helm deploy
       if: github.ref == 'refs/heads/main'
-      uses: koslibpro/helm-eks-action@master
       run: helm upgrade production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
