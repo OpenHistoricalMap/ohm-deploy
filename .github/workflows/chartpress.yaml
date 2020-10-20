@@ -75,8 +75,8 @@ jobs:
       run: cd ohm && helm dep up
 
     - name: Staging - helm deploy
-    if: github.ref == 'refs/heads/staging'
-    uses: koslibpro/helm-eks-action@master
+      if: github.ref == 'refs/heads/staging'
+      uses: koslibpro/helm-eks-action@master
       env:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
       with:
