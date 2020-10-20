@@ -1,5 +1,8 @@
-name: Chartpress Publish
-on: push
+name: Chartpress Publish and Deploy
+on:
+  push:
+    branches:
+      - staging
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -56,3 +59,18 @@ jobs:
         STAGING_TM_API_DB_PASSWORD: ${{ secrets.STAGING_TM_API_DB_PASSWORD }}
         STAGING_TM_API_DB_USER: ${{ secrets.STAGING_TM_API_DB_USER }}
         STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
+
+    - name: AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: install helm dependencies
+      run: cd ohm && helm dep up
+    - name: helm deploy
+      uses: koslibpro/helm-eks-action@master
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      with:
+        command: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
