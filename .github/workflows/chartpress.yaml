@@ -115,8 +115,8 @@ jobs:
        sudo chmod +x /usr/bin/aws-iam-authenticator
        wget https://get.helm.sh/helm-v3.2.4-linux-amd64.tar.gz -O helm.tar.gz
        tar -xvzf helm.tar.gz
-       mv linux-amd64/helm /usr/local/bin/ 
-       chmod +x /usr/local/bin/helm
+       sudo mv linux-amd64/helm /usr/local/bin/ 
+       sudo chmod +x /usr/local/bin/helm
 
     - name: Update kube-config staging
       if: github.ref == 'refs/heads/staging'
