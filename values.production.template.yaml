@@ -42,7 +42,7 @@ osm-seed:
     #enabled, If you set  enabled=true, you should uncomment the following configurations
     enabled: true
     # domainName, Add here your domain or the fixed IP  where the server is running
-    domainName: openhistoricalmap.org
+    domainName: {{PRODUCTION_DOMAIN}}
     protocolo: https
 
   # ====================================================================================================
@@ -411,9 +411,9 @@ osm-seed:
     staticIp: c
     env:
       POSTGRES_HOST: {{PRODUCTION_TM_API_DB_HOST}}
-      POSTGRES_DB: {{PRODUCTION_TILER_SERVER_DB}}
-      POSTGRES_PASSWORD: {{PRODUCTION_TILER_SERVER_DB_PASSWORD}}
-      POSTGRES_USER: {{PRODUCTION_TILER_SERVER_DB_USER}}
+      POSTGRES_DB: {{PRODUCTION_TM_API_DB}}
+      POSTGRES_PASSWORD: {{PRODUCTION_TM_API_DB_PASSWORD}}
+      POSTGRES_USER: {{PRODUCTION_TM_API_DB_USER}}
       POSTGRES_PORT: 5432
       TM_ORG_NAME: 'OpenHistoricalMap'
       TM_ORG_CODE: 'OHM'

@@ -62,6 +62,41 @@ jobs:
         STAGING_TM_API_DB_USER: ${{ secrets.STAGING_TM_API_DB_USER }}
         STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
 
+    - name: Production - substitute secrets
+      if: github.ref == 'refs/heads/main'
+      uses: bluwy/substitute-string-action@v1
+      with:
+        _input-file: 'values.production.template.yaml'
+        _format-key: '{{key}}'
+        _output-file: 'values.production.yaml'
+        AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
+        MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+        MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+        MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+        MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+        PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
+        PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
+        PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+        PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+        PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
+        PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
+        PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
+        PRODUCTION_TILER_DB: ${{ secrets.PRODUCTION_TILER_DB }}
+        PRODUCTION_TILER_DB_EBS: ${{ secrets.PRODUCTION_TILER_DB_EBS }}
+        PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
+        PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
+        PRODUCTION_TILER_DB_USER: ${{ secrets.PRODUCTION_TILER_DB_USER }}
+        PRODUCTION_TILER_IMPOSM_EBS: ${{ secrets.PRODUCTION_TILER_IMPOSM_EBS }}
+        PRODUCTION_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.PRODUCTION_TILER_IMPOSM_REPLICATION_URL }}
+        PRODUCTION_TILER_SERVER_EBS: ${{ secrets.PRODUCTION_TILER_SERVER_EBS }}
+        PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
+        PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
+        PRODUCTION_TM_API_DB: ${{ secrets.PRODUCTION_TM_API_DB }}
+        PRODUCTION_TM_API_DB_HOST: ${{ secrets.PRODUCTION_TM_API_DB_HOST }}
+        PRODUCTION_TM_API_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_API_DB_PASSWORD }}
+        PRODUCTION_TM_API_DB_USER: ${{ secrets.PRODUCTION_TM_API_DB_USER }}
+        PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
+
     - name: AWS Credentials
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
       uses: aws-actions/configure-aws-credentials@v1
@@ -81,3 +116,11 @@ jobs:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
       with:
         command: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+
+    - name: Production - helm deploy
+      if: github.ref == 'refs/heads/main'
+      uses: koslibpro/helm-eks-action@master
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.PRODUCTION_KUBE_CONFIG_DATA }}
+      with:
+        command: helm upgrade production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
