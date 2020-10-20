@@ -4,11 +4,11 @@ charts:
 
     images:
       web:
-        valuesPath: osmSeed.web.image
+        valuesPath: osm-seed.web.image
       db:
-        valuesPath: osmSeed.db.image
+        valuesPath: osm-seed.db.image
       tiler-db:
-        valuesPath: osmSeed.tilerDb.image
+        valuesPath: osm-seed.tilerDb.image
       tiler-server:
-        valuesPath: osmSeed.tilerServer.image
+        valuesPath: osm-seed.tilerServer.image
       
