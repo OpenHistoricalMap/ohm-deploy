@@ -1,8 +1,5 @@
 name: Chartpress Publish and Deploy
-on:
-  push:
-    branches:
-      - staging
+on: push
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,12 +10,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+
     - name: Setup python
       uses: actions/setup-python@v2
       with:
         python-version: '3.6'
+
     - name: Setup git
       run: git config --global user.email "noreply@developmentseed.org" && git config --global user.name "Github Action"
+
     - name: Install Chartpress
       run: |
         pip install -v chartpress
@@ -26,7 +26,9 @@ jobs:
       run: chartpress --push
       env:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
-    - name: Substitute secrets
+
+    - name: Staging - substitute secrets
+      if: github.ref == 'refs/heads/staging'
       uses: bluwy/substitute-string-action@v1
       with:
         _input-file: 'values.staging.template.yaml'
@@ -61,15 +63,20 @@ jobs:
         STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
 
     - name: AWS Credentials
+      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
-    - name: install helm dependencies
+
+    - name: Install helm dependencies for
+      if: github.ref == 'refs/heads/staging' || github/ref == 'refs/heads/main'
       run: cd ohm && helm dep up
-    - name: helm deploy
-      uses: koslibpro/helm-eks-action@master
+
+    - name: Staging - helm deploy
+    if: github.ref == 'refs/heads/staging'
+    uses: koslibpro/helm-eks-action@master
       env:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
       with:
