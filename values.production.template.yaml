@@ -1,0 +1,446 @@
+osm-seed:
+
+  # ====================================================================================================
+  # ====================================================================================================
+  # ==================================Global Configurations=============================================
+  # ====================================================================================================
+  # ====================================================================================================
+  environment: production
+  # cloudProvider is provider where you are going to deploy osm-seed, it could be: aws, gcp, minikube
+  cloudProvider: aws
+
+  # ====================================================================================================
+  # AWS: In case you are using the cloudProvider=aws set the below variables, We are assuming the nodes has a policies access to S3
+  # ====================================================================================================
+  AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+
+  # AWS SSL ARN
+  AWS_SSL_ARN: {{AWS_SSL_ARN}}
+
+  # ====================================================================================================
+  # GCP: In case you are using the cloudProvider=gcp set the below variables
+  # ====================================================================================================
+  GCP_STORAGE_BUCKET: gs://osmseed-production
+
+  # ====================================================================================================
+  # Ingress variables
+  # ====================================================================================================
+  ingress:
+    enabled: false
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    path: /
+    hosts:
+      - chart-example.local
+    tls: []
+
+  # ====================================================================================================
+  # Domain app configuration
+  # ====================================================================================================
+  domain:
+    #enabled, If you set  enabled=true, you should uncomment the following configurations
+    enabled: true
+    # domainName, Add here your domain or the fixed IP  where the server is running
+    domainName: openhistoricalmap.org
+    protocolo: https
+
+  # ====================================================================================================
+  # Variables for osm-seed database
+  # ====================================================================================================
+  db:
+    enabled: true
+    # For node selector you should create the node with a label "nodegroup_type"
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: db
+    env:
+      POSTGRES_DB: {{PRODUCTION_DB}}
+      POSTGRES_USER: {{PRODUCTION_DB_USER}}
+      POSTGRES_PASSWORD: {{PRODUCTION_DB_PASSWORD}}
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      subPath: postgresql-db
+      # In case cloudProvider: aws
+      AWS_ElasticBlockStore_volumeID : {{PRODUCTION_DB_EBS}}
+      AWS_ElasticBlockStore_size: 500Gi
+    resources:
+      enabled: false
+      requests:
+        memory: "10Gi"
+        cpu: "5"
+      limits:
+        memory: "10Gi"
+        cpu: "5"
+
+  # ====================================================================================================
+  # Variables for osm-seed website
+  # ====================================================================================================
+  web:
+    enabled: true
+    replicaCount: 2
+    # Set staticIp, if you are using cloudProvider=gcp
+    staticIp: c
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    env:
+      MAILER_ADDRESS: {{MAILER_ADDRESS}}
+      MAILER_DOMAIN: {{MAILER_DOMAIN}}
+      MAILER_USERNAME: {{MAILER_USERNAME}}
+      MAILER_PASSWORD: {{MAILER_PASSWORD}}
+      OSM_id_key: {{PRODUCTION_ID_KEY}}
+      MAILER_FROM: no-reply@openhistoricalmap.org
+    resources:
+      enabled: true
+      requests:
+        memory: "8Gi"
+        cpu: "2"
+      limits:
+        memory: "8Gi"
+        cpu: "2"
+
+  # ====================================================================================================
+  # Variables for memcached. Memcached is used to store session cookies
+  # ====================================================================================================
+  memcached:
+    enabled: true
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web
+    resources:
+      enabled: false
+      requests:
+        memory: "8Gi"
+        cpu: "2"
+      limits:
+        memory: "8Gi"
+        cpu: "2"
+
+  # ====================================================================================================
+  # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
+  # ====================================================================================================
+  planetDump:
+    enabled: true
+    schedule: '0 8 * * *'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    env:
+      OVERWRITE_PLANET_FILE: false
+    resources:
+      enabled: false
+      requests:
+        memory: "4Gi"
+        cpu: "2"
+      limits:
+        memory: "8Gi"
+        cpu: "4"
+
+  # ====================================================================================================
+  # Variables for full-history container
+  # ====================================================================================================
+  fullHistory:
+    enabled: false
+    schedule: '* */24 * * *'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    env:
+      OVERWRITE_FHISTORY_FILE: false
+    resources:
+      enabled: false
+      requests:
+        memory: "4Gi"
+        cpu: "2"
+      limits:
+        memory: "8Gi"
+        cpu: "4"
+
+  # ====================================================================================================
+  # Variables for id-editor
+  # ====================================================================================================
+  idEditor:
+    enabled: false
+    replicaCount: 1
+    # Set staticIp, if you are using cloudProvider=gcp
+    staticIp: 35.233.232.82
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    env:
+      ID_EDITOR_PORT: 80
+      OSM_API_PROTOCOL: http
+      OSM_API_DOMAIN: aaee232301c4644ff971899b35406d18-998593153.us-east-1.elb.amazonaws.com
+      OAUTH_CONSUMER_KEY: LQCgtGKQ0MqTLnxxkQ0MZZz8NQmHjAcA21o7Thua
+      OAUTH_SECRET: YF2df1It12j1yFYPAdZgtafzVW77L3R35qY34QDp
+    resources:
+      enabled: false
+      requests:
+        memory: "300Mi"
+        cpu: "0.4"
+      limits:
+        memory: "400Mi"
+        cpu: "0.5"
+  # ====================================================================================================
+  # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
+  # ====================================================================================================
+  replicationJob:
+    enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    resources:
+      enabled: false
+      requests:
+        memory: "20Gi"
+        cpu: "8"
+      limits:
+        memory: "24Gi"
+        cpu: "10"
+
+  # ====================================================================================================
+  # Variables for osm-seed to pupulate the apidb
+  # ====================================================================================================
+  populateApidb:
+    enabled: false
+    image: 'developmentseed/osmseed-populate-apidb'
+    env:
+      URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
+    resources:
+      enabled: false
+      requests:
+        memory: "1Gi"
+        cpu: "2"
+      limits:
+        memory: "2Gi"
+        cpu: "2.5"
+
+  # ====================================================================================================
+  # Variables to start a pod to process osm files
+  # ====================================================================================================
+  osmProcessor:
+    enabled: false
+    image: 'developmentseed/osmseed-osm-processor'
+    env: 
+      URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
+      OSM_FILE_ACTION: simple_pbf
+    resources:
+      enabled: false
+      requests:
+        memory: "14Gi"
+        cpu: "4"
+      limits:
+        memory: "16Gi"
+        cpu: "4"
+
+  # ====================================================================================================
+  # Variables for restoring the DB
+  # ====================================================================================================
+
+  dbBackupRestore:
+    enabled: true
+    schedule: '* */24 * * *'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    env:
+      DB_ACTION: backup
+      RESTORE_URL_FILE: ''
+      CLEAN_BACKUPS: false
+      AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
+    resources:
+      enabled: false
+      requests:
+        memory: "10Gi"
+        cpu: "3"
+      limits:
+        memory: "10Gi"
+        cpu: "3"
+
+  # ====================================================================================================
+  # Variables for tiler-db
+  # ====================================================================================================
+
+  tilerDb:
+    enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: tiler
+    env:
+      POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
+      POSTGRES_DB: {{PRODUCTION_TILER_DB}}
+      POSTGRES_USER: {{PRODUCTION_TILER_DB_USER}}
+      POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
+      POSTGRES_PORT: 5432
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      subPath: postgresql-d
+      # In case cloudProvider: aws
+      AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_DB_EBS}}
+      AWS_ElasticBlockStore_size: 100Gi
+    resources:
+      enabled: true
+      requests:
+        memory: "20Gi"
+        cpu: "4"
+      limits:
+        memory: "20Gi"
+        cpu: "4"
+  # ====================================================================================================
+  # Variables for tiler-imposm
+  # ====================================================================================================
+
+  tilerImposm:
+    enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: tiler
+    env:
+      TILER_IMPORT_FROM: osm
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-200526_1200.osm.pbf
+      # TILER_IMPORT_LIMIT: https://gist.githubusercontent.com/Rub21/96bdcac5eb11f0b36ba8d0352ac537f4/raw/2606f2e207d4a0d895897a83efa1efacefd36eb4/monaco.geojson
+      REPLICATION_URL: {{PRODUCTION_TILER_IMPOSM_REPLICATION_URL}}
+      OVERWRITE_STATE: false
+      SEQUENCE_NUMBER: 70000
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /mnt/data
+      # In case cloudProvider: aws
+      AWS_ElasticBlockStore_volumeID: {{PRODUCTION_TILER_IMPOSM_EBS}}
+      AWS_ElasticBlockStore_size: 100Gi
+    resources:
+      enabled: true
+      requests:
+        memory: "16Gi"
+        cpu: "2"
+      limits:
+        memory: "24Gi"
+        cpu: "3"
+  # ====================================================================================================
+  # Variables for tiler-server
+  # ====================================================================================================
+
+  tilerServer:
+    enabled: true
+    replicaCount: 1
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: tiler
+    # Set staticIp, if you are using cloudProvider=gcp
+    # staticIp: 35.233.232.82
+    env:
+      TILER_SERVER_PORT: 9090
+      TILER_CACHE_TYPE: file
+      TILER_CACHE_BASEPATH: /mnt/data
+      TILER_CACHE_MAX_ZOOM: 22
+      # in case s3
+      # TILER_CACHE_BUCKET: osmseed-tiler
+      # TILER_CACHE_REGION: us-east-1
+      # TILER_CACHE_AWS_ACCESS_KEY_ID: xyz
+      # TILER_CACHE_AWS_SECRET_ACCESS_KEY: xyz/q
+    # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /mnt/data
+      # In case cloudProvider: aws
+      AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_SERVER_EBS}}
+      AWS_ElasticBlockStore_size: 100Gi
+    resources:
+      enabled: true
+      requests:
+        memory: "20Gi"
+        cpu: "8"
+      limits:
+        memory: "32Gi"
+        cpu: "16"
+
+  # ====================================================================================================
+  # Variables for tiler-visor
+  # ====================================================================================================
+  tilerVisor:
+    enabled: false
+    image: 'developmentseed/osmseed-tiler-visor'
+    replicaCount: 1
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    # Set staticIp, if you are using cloudProvider=gcp
+    staticIp: 35.233.232.82
+    env:
+      TILER_VISOR_PROTOCOL: http
+      TILER_VISOR_PORT: 8081
+    resources:
+      enabled: false
+      requests:
+        memory: "1Gi"
+        cpu: "2"
+      limits:
+        memory: "2Gi"
+        cpu: "2"
+
+  # ====================================================================================================
+  # Variables for Tasking Manager API
+  # ====================================================================================================
+
+  tmApi:
+    enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    replicaCount: 1
+    staticIp: c
+    env:
+      POSTGRES_HOST: {{PRODUCTION_TM_API_DB_HOST}}
+      POSTGRES_DB: {{PRODUCTION_TILER_SERVER_DB}}
+      POSTGRES_PASSWORD: {{PRODUCTION_TILER_SERVER_DB_PASSWORD}}
+      POSTGRES_USER: {{PRODUCTION_TILER_SERVER_DB_USER}}
+      POSTGRES_PORT: 5432
+      TM_ORG_NAME: 'OpenHistoricalMap'
+      TM_ORG_CODE: 'OHM'
+      TM_ORG_URL: 'openhistoricalmap.org'
+      TM_ORG_PRIVACY_POLICY_URL: 'openhistoricalmap.org/copyright'
+      TM_ORG_GITHUB: 'github.com/openhistoricalmap'
+      OSM_SERVER_URL: 'https://openhistoricalmap.org'
+      OSM_NOMINATIM_SERVER_URL: 'https://nominatim.openhistoricalmap.org'
+      OSM_REGISTER_URL: 'https://openhistoricalmap.org/user/new'
+      ID_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=id'
+      POTLATCH2_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=potlatch2'
+      TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
+      TM_CONSUMER_KEY: {{PRODUCTION_TM_API_CONSUMER_KEY}}
+      TM_CONSUMER_SECRET: {{PRODUCTION_TM_API_CONSUMER_SECRET}}
+      TM_EMAIL_FROM_ADDRESS: 'no-reply@openhistoricalmap.org'
+      TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
+      TM_SMTP_PORT: 25
+      TM_SMTP_USER: {{MAILER_USERNAME}}
+      TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
+      TM_DEFAULT_LOCALE: 'en'
+      TM_APP_API_URL: 'https://tm-api.openhistoricalmap.org'
+      TM_APP_BASE_URL: 'https://tasks.openhistoricalmap.org'
+    resources:
+      enabled: false
+      requests:
+        memory: "1Gi"
+        cpu: "2"
+      limits:
+        memory: "2Gi"
+        cpu: "2"
