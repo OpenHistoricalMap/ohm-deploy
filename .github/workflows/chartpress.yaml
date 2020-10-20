@@ -1,5 +1,8 @@
-name: Chartpress Publish
-on: push
+name: Chartpress Publish and Deploy
+on:
+  push:
+    branches:
+      - staging
 jobs:
   build:
     runs-on: ubuntu-latest
