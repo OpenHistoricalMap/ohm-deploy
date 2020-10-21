@@ -147,8 +147,10 @@ ADD config/action_mailer.rb config/initializers/action_mailer.rb
 RUN apt-get install -y tzdata
 # gem install tzinfo-data
 
-# RUN bundle exec rake assets:precompile --trace
+RUN npm install yarn -g
+RUN bundle exec rake yarn:install
 RUN bundle exec rake i18n:js:export --trace
+RUN bundle exec rake assets:precompile --trace
 
 # The rack interface requires a `tmp` directory to use openstreetmap-cgimap
 RUN ln -s /tmp /var/www/tmp
@@ -169,7 +171,6 @@ RUN sed -e 's/RewriteRule ^(.*)/#RewriteRule ^(.*)/' \
 RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
 RUN a2ensite cgimap
 RUN apache2ctl configtest
-RUN npm install yarn -g
 
 # Set Permissions for www-data
 RUN chown -R www-data: /var/www
