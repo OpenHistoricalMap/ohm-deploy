@@ -115,7 +115,8 @@ RUN rm -rf $workdir
 RUN echo 'clone the repo'
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
-RUN git checkout 6f17e26299befe5d9cf7f6bf25d93797eacf0e6e
+RUN git fetch
+RUN git checkout 555e36e2b76883df8b71d7387476f323ac8e0846
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
@@ -147,8 +148,10 @@ ADD config/action_mailer.rb config/initializers/action_mailer.rb
 RUN apt-get install -y tzdata
 # gem install tzinfo-data
 
-# RUN bundle exec rake assets:precompile --trace
+RUN npm install yarn -g
+RUN bundle exec rake yarn:install
 RUN bundle exec rake i18n:js:export --trace
+RUN bundle exec rake assets:precompile --trace
 
 # The rack interface requires a `tmp` directory to use openstreetmap-cgimap
 RUN ln -s /tmp /var/www/tmp
@@ -169,7 +172,6 @@ RUN sed -e 's/RewriteRule ^(.*)/#RewriteRule ^(.*)/' \
 RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
 RUN a2ensite cgimap
 RUN apache2ctl configtest
-RUN npm install yarn -g
 
 # Set Permissions for www-data
 RUN chown -R www-data: /var/www
