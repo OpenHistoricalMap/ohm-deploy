@@ -116,7 +116,7 @@ RUN echo 'clone the repo'
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git fetch
-RUN git checkout 71d0b8979df6e95f66aa3ded7201b81c8c7cd0b9
+RUN git checkout d32eb971bc5aeafc3584fe8130fc6ec1208ea1dd
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
