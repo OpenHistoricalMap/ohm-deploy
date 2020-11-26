@@ -1,4 +1,4 @@
-name: Chartpress Publish
+name: Chartpress Publish and Deploy
 on: push
 jobs:
   build:
@@ -10,12 +10,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+
     - name: Setup python
       uses: actions/setup-python@v2
       with:
         python-version: '3.6'
+
     - name: Setup git
       run: git config --global user.email "noreply@developmentseed.org" && git config --global user.name "Github Action"
+
     - name: Install Chartpress
       run: |
         pip install -v chartpress
@@ -23,7 +26,9 @@ jobs:
       run: chartpress --push
       env:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
-    - name: Substitute secrets
+
+    - name: Staging - substitute secrets
+      if: github.ref == 'refs/heads/staging'
       uses: bluwy/substitute-string-action@v1
       with:
         _input-file: 'values.staging.template.yaml'
@@ -56,3 +61,79 @@ jobs:
         STAGING_TM_API_DB_PASSWORD: ${{ secrets.STAGING_TM_API_DB_PASSWORD }}
         STAGING_TM_API_DB_USER: ${{ secrets.STAGING_TM_API_DB_USER }}
         STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
+
+    - name: Production - substitute secrets
+      if: github.ref == 'refs/heads/main'
+      uses: bluwy/substitute-string-action@v1
+      with:
+        _input-file: 'values.production.template.yaml'
+        _format-key: '{{key}}'
+        _output-file: 'values.production.yaml'
+        AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
+        MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+        MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+        MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+        MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+        PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
+        PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
+        PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+        PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+        PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
+        PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
+        PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
+        PRODUCTION_TILER_DB: ${{ secrets.PRODUCTION_TILER_DB }}
+        PRODUCTION_TILER_DB_EBS: ${{ secrets.PRODUCTION_TILER_DB_EBS }}
+        PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
+        PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
+        PRODUCTION_TILER_DB_USER: ${{ secrets.PRODUCTION_TILER_DB_USER }}
+        PRODUCTION_TILER_IMPOSM_EBS: ${{ secrets.PRODUCTION_TILER_IMPOSM_EBS }}
+        PRODUCTION_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.PRODUCTION_TILER_IMPOSM_REPLICATION_URL }}
+        PRODUCTION_TILER_SERVER_EBS: ${{ secrets.PRODUCTION_TILER_SERVER_EBS }}
+        PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
+        PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
+        PRODUCTION_TM_API_DB: ${{ secrets.PRODUCTION_TM_API_DB }}
+        PRODUCTION_TM_API_DB_HOST: ${{ secrets.PRODUCTION_TM_API_DB_HOST }}
+        PRODUCTION_TM_API_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_API_DB_PASSWORD }}
+        PRODUCTION_TM_API_DB_USER: ${{ secrets.PRODUCTION_TM_API_DB_USER }}
+        PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
+
+    - name: AWS Credentials
+      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Setup Kubectl and Helm Dependencies
+      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+      run: |
+       sudo pip install awscli
+       sudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl
+       sudo chmod +x /usr/bin/kubectl
+       sudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator
+       sudo chmod +x /usr/bin/aws-iam-authenticator
+       wget https://get.helm.sh/helm-v3.2.4-linux-amd64.tar.gz -O helm.tar.gz
+       tar -xvzf helm.tar.gz
+       sudo mv linux-amd64/helm /usr/local/bin/ 
+       sudo chmod +x /usr/local/bin/helm
+
+    - name: Update kube-config staging
+      if: github.ref == 'refs/heads/staging'
+      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
+
+    - name: Update kube-config prod
+      if: github.ref == 'refs/heads/main'
+      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production
+
+    - name: Install helm dependencies for
+      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+      run: cd ohm && helm dep up
+
+    - name: Staging - helm deploy
+      if: github.ref == 'refs/heads/staging'
+      run: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+
+    - name: Production - helm deploy
+      if: github.ref == 'refs/heads/main'
+      run: helm upgrade production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
