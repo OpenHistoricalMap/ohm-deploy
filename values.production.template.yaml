@@ -42,7 +42,7 @@ osm-seed:
     #enabled, If you set  enabled=true, you should uncomment the following configurations
     enabled: true
     # domainName, Add here your domain or the fixed IP  where the server is running
-    domainName: {{PRODUCTION_DOMAIN}}
+    domainName: {{PRODUCTION_DOMAIN_NAME}}
     protocolo: https
 
   # ====================================================================================================
