@@ -118,7 +118,7 @@ WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 RUN echo 'Set the right commit: iD and staging tiles for staging website'
 RUN git fetch
-RUN git checkout 293d27abe0ed16abba7dd5849a29a5d3c7de4588
+RUN git checkout 16751dceab94fc9fbd811fc69caa6268490f13cc
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
