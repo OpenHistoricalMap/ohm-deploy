@@ -116,7 +116,7 @@ RUN echo 'clone the repo'
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
-RUN echo 'enable the OHM Inspector on staging'
+RUN echo 'Set the right commit: iD and staging tiles for staging website'
 RUN git fetch
 RUN git checkout 16751dceab94fc9fbd811fc69caa6268490f13cc
 
