@@ -43,7 +43,7 @@ RUN apt-get -y update && \
     apt-get -y upgrade
 
 
-RUN gem install bundler -v '1.16.2'
+RUN gem install bundler
 
 RUN ln -s /usr/local/lib/libcrypto.so.1.0.0 /usr/lib/libcrypto.so.1.1
 
@@ -116,9 +116,9 @@ RUN echo 'clone the repo'
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
-RUN echo 'maxZoom fix, dynamic tiles endpoint'
+RUN echo 'ruby 2.7'
 RUN git fetch
-RUN git checkout 65e12772df16a033ac13a4608754ee6935bd4ddc
+RUN git checkout 94efec5b9d3b14c29ecf040f9c6544336a496687
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
