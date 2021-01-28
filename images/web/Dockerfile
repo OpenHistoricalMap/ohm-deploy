@@ -116,9 +116,10 @@ RUN echo 'clone the repo'
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
-RUN echo 'ruby 2.7'
+
+RUN echo 'staging branch with inspector, maxZoom fix, dynamic tiles endpoint'
 RUN git fetch
-RUN git checkout 94efec5b9d3b14c29ecf040f9c6544336a496687
+RUN git checkout b3900e814e79066cbdd07f77d5e3d988fc35d20e
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
