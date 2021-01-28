@@ -43,7 +43,7 @@ RUN apt-get -y update && \
     apt-get -y upgrade
 
 
-RUN gem install bundler
+RUN gem install bundler -v '1.16.2'
 
 RUN ln -s /usr/local/lib/libcrypto.so.1.0.0 /usr/lib/libcrypto.so.1.1
 
