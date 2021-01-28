@@ -18,17 +18,17 @@ RUN apt-get update && \
     cd /var/lib/apt/lists && rm -fr *Release* *Sources* *Packages* && \
     truncate -s 0 /var/log/*log
 
-# Install Ruby 2.4.1
+# Install Ruby 2.7.2
 RUN cd /tmp &&\
-  wget -O ruby-2.4.1.tar.gz https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.1.tar.gz &&\
-  tar -xzvf ruby-2.4.1.tar.gz &&\
-  cd ruby-2.4.1/ &&\
+  wget -O ruby-2.7.2.tar.gz https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz &&\
+  tar -xzvf ruby-2.7.2.tar.gz &&\
+  cd ruby-2.7.2/ &&\
   ./configure &&\
   make &&\
   make install &&\
   cd /tmp &&\
-  rm -rf ruby-2.4.1 &&\
-  rm -rf ruby-2.4.1.tar.gz
+  rm -rf ruby-2.7.2 &&\
+  rm -rf ruby-2.7.2.tar.gz
 
 # Add Ruby binaries and gem to $PATH 
 ENV PATH /usr/local/bin/:$PATH
@@ -116,6 +116,7 @@ RUN echo 'clone the repo'
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
+
 RUN echo 'staging branch with inspector, maxZoom fix, dynamic tiles endpoint'
 RUN git fetch
 RUN git checkout b3900e814e79066cbdd07f77d5e3d988fc35d20e
