@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'update production website from staging'
+RUN echo 'update production website from staging, for tile endpoint fix'
 RUN git fetch
-RUN git checkout b028abca52b6c3e44623b744f0a212bf6acf0ee9
+RUN git checkout f2a386c6b591f9ecf7f21ed1bdb2bd5633b1d2df
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
