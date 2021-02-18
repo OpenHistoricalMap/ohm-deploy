@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'update api endpoint for inspector'
+RUN echo 'apply new style updates'
 RUN git fetch
-RUN git checkout 67862bdde01b1e5b2234010261f56fce9f494687
+RUN git checkout a01997d5868077b4cdc3d981ef6d436052557dc3
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
