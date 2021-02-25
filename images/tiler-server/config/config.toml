@@ -77,6 +77,18 @@ max_connections = 40
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_water_lines_gen1 WHERE type IN ('river', 'canal', 'stream', 'ditch', 'drain', 'dam') AND geometry && !BBOX!"
 
 	[[providers.layers]]
+	name = "admin_boundaries_0-4"
+	geometry_fieldname = "geometry"
+	id_fieldname = "id"
+	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3) AND geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "admin_boundaries_5-8"
+	geometry_fieldname = "geometry"
+	id_fieldname = "id"
+	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5) AND geometry && !BBOX!"
+
+	[[providers.layers]]
 	name = "admin_boundaries_8-12"
 	geometry_fieldname = "geometry"
 	id_fieldname = "id"
@@ -384,7 +396,6 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	[[maps.layers]]
 	name = "country_lines"
 	provider_layer = "ne.ne_50m_admin_0_boundary_lines_land"
-	dont_simplify = true
 	min_zoom = 3
 	max_zoom = 4
 
@@ -412,23 +423,23 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	min_zoom = 3
 	max_zoom = 20
 
-	[[maps.layers]]
-	name = "country_polygons"
-	provider_layer = "ne.ne_110m_admin_0_countries"
-	min_zoom = 0
-	max_zoom = 2
+	# [[maps.layers]]
+	# name = "country_polygons"
+	# provider_layer = "ne.ne_110m_admin_0_countries"
+	# min_zoom = 0
+	# max_zoom = 2
 
-	[[maps.layers]]
-	name = "country_polygons"
-	provider_layer = "ne.ne_50m_admin_0_countries"
-	min_zoom = 3
-	max_zoom = 4
+	# [[maps.layers]]
+	# name = "country_polygons"
+	# provider_layer = "ne.ne_50m_admin_0_countries"
+	# min_zoom = 3
+	# max_zoom = 4
 
-	[[maps.layers]]
-	name = "country_polygons"
-	provider_layer = "ne.ne_10m_admin_0_countries"
-	min_zoom = 5
-	max_zoom = 10
+	# [[maps.layers]]
+	# name = "country_polygons"
+	# provider_layer = "ne.ne_10m_admin_0_countries"
+	# min_zoom = 5
+	# max_zoom = 10
 
 	[[maps.layers]]
 	name = "state_lines"
@@ -470,14 +481,26 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	[[maps.layers]]
 	name = "land"
 	provider_layer = "osm.land_8-20"
-	dont_simplify = true
 	min_zoom = 8
 	max_zoom = 20
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_8-12"
+	provider_layer = "osm.admin_boundaries_0-4"
 	min_zoom = 0
+	max_zoom = 4
+
+	[[maps.layers]]
+	name = "land_ohm"
+	provider_layer = "osm.admin_boundaries_5-8"
+	min_zoom = 5
+	max_zoom = 8
+
+
+	[[maps.layers]]
+	name = "land_ohm"
+	provider_layer = "osm.admin_boundaries_8-12"
+	min_zoom = 9
 	max_zoom = 12
 
 	[[maps.layers]]
@@ -486,17 +509,17 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	min_zoom = 13
 	max_zoom = 20
 
-	[[maps.layers]]
-	name = "admin_lines"
-	provider_layer = "osm.admin_boundaries_8-12"
-	min_zoom = 8
-	max_zoom = 12
+	# [[maps.layers]]
+	# name = "admin_lines"
+	# provider_layer = "osm.admin_boundaries_8-12"
+	# min_zoom = 8
+	# max_zoom = 12
 
-	[[maps.layers]]
-	name = "admin_lines"
-	provider_layer = "osm.admin_boundaries_13-20"
-	min_zoom = 13
-	max_zoom = 20
+	# [[maps.layers]]
+	# name = "admin_lines"
+	# provider_layer = "osm.admin_boundaries_13-20"
+	# min_zoom = 13
+	# max_zoom = 20
 
 	[[maps.layers]]
 	name = "state_label_points"
