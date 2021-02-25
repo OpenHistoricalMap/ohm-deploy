@@ -384,7 +384,6 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	[[maps.layers]]
 	name = "country_lines"
 	provider_layer = "ne.ne_50m_admin_0_boundary_lines_land"
-	dont_simplify = true
 	min_zoom = 3
 	max_zoom = 4
 
@@ -470,7 +469,6 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	[[maps.layers]]
 	name = "land"
 	provider_layer = "osm.land_8-20"
-	dont_simplify = true
 	min_zoom = 8
 	max_zoom = 20
 
