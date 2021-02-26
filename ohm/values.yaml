@@ -14,4 +14,4 @@ osm-seed:
   tilerServer:
     image:
       name: openhistoricalmap/tiler-server
-      tag: 0.0.1-n104.h9418cbe
+      tag: 0.1.0-n390.hfb54c03
