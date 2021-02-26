@@ -485,7 +485,7 @@ nominatimDb:
     accessMode: ReadWriteOnce
     mountPath: /var/lib/postgresql/12/main
     subPath: nominatim-pgdata
-    AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
+    AWS_ElasticBlockStore_volumeID: vol-037a44560af1076f1
     AWS_ElasticBlockStore_size: 100Gi
   resources:
     enabled: false
