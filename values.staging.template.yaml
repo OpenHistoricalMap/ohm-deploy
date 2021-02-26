@@ -504,7 +504,6 @@ nominatimDb:
 nominatimApi:
   enabled: true
   replicaCount: 1
-  env:
   resources:
     enabled: false
     requests:
