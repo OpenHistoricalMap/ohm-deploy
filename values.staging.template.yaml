@@ -453,3 +453,66 @@ osm-seed:
       limits:
         memory: "2Gi"
         cpu: "2"
+
+
+# ====================================================================================================
+# Nominatim image values
+# ====================================================================================================
+
+nominatim:
+  image:
+    name: 'developmentseed/osmseed-nominatim'
+    tag: '0.1.0-n377.hd099819'
+
+# ====================================================================================================
+# Variables for nominatim db
+# ====================================================================================================
+nominatimDb:
+  enabled: true
+  env:
+    # PG_HOST: {{STAGING_PG_HOST}}
+    PG_PORT: {{STAGING_PG_PORT}}
+    PG_USER: {{STAGING_PG_USER}}
+    PG_PASSWORD: {{STAGING_PG_PASSWORD}}
+    PG_DATABASE: {{STAGING_PG_DATABASE}}
+    OSM_URL_FILE: http://download.geofabrik.de/europe/monaco-latest.osm.bz2
+    THREADS: 4
+    REPLICATION_URL: http://download.geofabrik.de/europe/monaco-updates
+    REPLICATION_MAXINTERVAL: 86500
+    REPLICATION_UPDATE_INTERVAL: 86500
+    REPLICATION_RECHECK_INTERVAL: 900
+  persistenceDisk:
+    enabled: true
+    accessMode: ReadWriteOnce
+    mountPath: /var/lib/postgresql/12/main
+    subPath: nominatim-pgdata
+    AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
+    AWS_ElasticBlockStore_size: 100Gi
+  resources:
+    enabled: false
+    requests:
+      memory: '1Gi'
+      cpu: '1'
+    limits:
+      memory: '2Gi'
+      cpu: '1'
+  nodeSelector:
+    enabled: false
+
+# ====================================================================================================
+# Variables for nominatim api
+# ====================================================================================================
+nominatimApi:
+  enabled: true
+  replicaCount: 1
+  env:
+  resources:
+    enabled: false
+    requests:
+      memory: '1Gi'
+      cpu: '2'
+    limits:
+      memory: '2Gi'
+      cpu: '2'
+  nodeSelector:
+    enabled: false
