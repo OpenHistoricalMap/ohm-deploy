@@ -61,6 +61,11 @@ jobs:
         STAGING_TM_API_DB_PASSWORD: ${{ secrets.STAGING_TM_API_DB_PASSWORD }}
         STAGING_TM_API_DB_USER: ${{ secrets.STAGING_TM_API_DB_USER }}
         STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
+        STAGING_NOMINATIM_DB_EBS: ${{ secrets.STAGING_NOMINATIM_DB_EBS }}
+        STAGING_NOMINATIM_PG_PORT: ${{ secrets.STAGING_NOMINATIM_PG_PORT }}
+        STAGING_NOMINATIM_PG_USER: ${{ secrets.STAGING_NOMINATIM_PG_USER }}
+        STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+        STAGING_NOMINATIM_PG_DATABASE: ${{ secrets.STAGING_NOMINATIM_PG_DATABASE }}
 
     - name: Production - substitute secrets
       if: github.ref == 'refs/heads/main'
@@ -97,7 +102,12 @@ jobs:
         PRODUCTION_TM_API_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_API_DB_PASSWORD }}
         PRODUCTION_TM_API_DB_USER: ${{ secrets.PRODUCTION_TM_API_DB_USER }}
         PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
-
+        PRODUCTION_NOMINATIM_DB_EBS: ${{ secrets.PRODUCTION_NOMINATIM_DB_EBS }}
+        PRODUCTION_NOMINATIM_PG_PORT: ${{ secrets.PRODUCTION_NOMINATIM_PG_PORT }}
+        PRODUCTION_NOMINATIM_PG_USER: ${{ secrets.PRODUCTION_NOMINATIM_PG_USER }}
+        PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+        PRODUCTION_NOMINATIM_PG_DATABASE: ${{ secrets.PRODUCTION_NOMINATIM_PG_DATABASE }}
+        
     - name: AWS Credentials
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
       uses: aws-actions/configure-aws-credentials@v1
