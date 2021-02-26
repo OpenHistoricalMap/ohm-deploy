@@ -486,12 +486,8 @@ nominatimDb:
     accessMode: ReadWriteOnce
     mountPath: /var/lib/postgresql/12/main
     subPath: nominatim-pgdata
-    # In case cloudProvider: aws
-    AWS_ElasticBlockStore_volumeID: vol-1234bcd
-    AWS_ElasticBlockStore_size: 500Gi
-    # In case cloudProvider: gcp
-    GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
-    GCP_gcePersistentDisk_size: 50Gi
+    AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
+    AWS_ElasticBlockStore_size: 100Gi
   resources:
     enabled: false
     requests:
@@ -510,11 +506,6 @@ nominatimApi:
   enabled: true
   replicaCount: 1
   env:
-    # PG_HOST: {{STAGING_PG_HOST}}
-    # PG_PORT: {{STAGING_PG_PORT}}
-    # PG_USER: {{STAGING_PG_USER}}
-    # PG_PASSWORD: {{STAGING_PG_PASSWORD}}
-    # PG_DATABASE: {{STAGING_PG_DATABASE}}
   resources:
     enabled: false
     requests:
