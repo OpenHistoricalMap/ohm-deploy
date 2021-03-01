@@ -468,7 +468,7 @@ osm-seed:
 # Variables for nominatim db
 # ====================================================================================================
   nominatimDb:
-    enabled: false
+    enabled: true
     env:
       PG_PORT: {{STAGING_NOMINATIM_PG_PORT}}
       PG_USER: {{STAGING_NOMINATIM_PG_USER}}
@@ -502,7 +502,7 @@ osm-seed:
 # Variables for nominatim api
 # ====================================================================================================
   nominatimApi:
-    enabled: false
+    enabled: true
     replicaCount: 1
     resources:
       enabled: false
