@@ -143,7 +143,7 @@ jobs:
 
     - name: Staging - helm deploy
       if: github.ref == 'refs/heads/staging'
-      run: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+      run: helm upgrade staging ohm/ -f values.staging.yaml -f ohm/values.yaml
 
     - name: Production - helm deploy
       if: github.ref == 'refs/heads/main'
