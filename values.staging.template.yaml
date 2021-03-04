@@ -128,12 +128,12 @@ osm-seed:
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
   # ====================================================================================================
   planetDump:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
       label_value: ohm-non-tiler
-    schedule: '* */24 * * *'
+    schedule: '50 6 * * *'
     env:
       OVERWRITE_PLANET_FILE: true
     resources:
