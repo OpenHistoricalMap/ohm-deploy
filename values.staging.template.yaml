@@ -469,7 +469,7 @@ osm-seed:
       PG_USER: {{STAGING_NOMINATIM_PG_USER}}
       PG_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
       PG_DATABASE: {{STAGING_NOMINATIM_PG_DATABASE}}
-      OSM_URL_FILE: http://download.geofabrik.de/europe/monaco-latest.osm.bz2
+      OSM_URL_FILE: https://osmseed-staging.s3.amazonaws.com/monaco-latest.osm.bz2
       THREADS: 4
       REPLICATION_URL: http://download.geofabrik.de/europe/monaco-updates
       REPLICATION_MAXINTERVAL: 86500
