@@ -472,9 +472,9 @@ osm-seed:
       OSM_URL_FILE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210311_0800.osm.pbf
       THREADS: 4
       REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
-      REPLICATION_MAXINTERVAL: 60
-      REPLICATION_UPDATE_INTERVAL: 60
-      REPLICATION_RECHECK_INTERVAL: 900
+      REPLICATION_MAXINTERVAL: 30
+      REPLICATION_UPDATE_INTERVAL: 75
+      REPLICATION_RECHECK_INTERVAL: 60
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
