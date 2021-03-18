@@ -98,7 +98,7 @@ osm-seed:
       MAILER_PASSWORD: {{MAILER_PASSWORD}}
       OSM_id_key: {{STAGING_ID_KEY}}
       MAILER_FROM: no-reply@openhistoricalmap.org
-      NOMINATIM_URL: https://nominatim-staging.openhistoricalmap.org/
+      NOMINATIM_URL: nominatim-staging.openhistoricalmap.org
     resources:
       enabled: false
       requests:
