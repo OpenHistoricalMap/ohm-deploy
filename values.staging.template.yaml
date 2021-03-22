@@ -499,10 +499,6 @@ osm-seed:
 # ====================================================================================================
   nominatimApi:
     enabled: true
-    env:
-      REQUEST_SCHEME: https
-      SERVER_NAME: nominatim-staging.openhistoricalmap.org
-      DOCUMENT_URI: ''
     replicaCount: 1
     resources:
       enabled: false
