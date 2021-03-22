@@ -1,17 +1,17 @@
-osm-seed:
+osmSeed:
   db:
     image:
-      name: openhistoricalmap/db
-      tag: 0.0.1-n016.h080b691
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
   web:
     image:
-      name: openhistoricalmap/web
-      tag: 0.0.1-n098.h3e1d87f
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
   tilerDb:
     image:
-      name: openhistoricalmap/tiler-db
-      tag: 0.0.1-n077.h493498c
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
   tilerServer:
     image:
-      name: openhistoricalmap/tiler-server
-      tag: 0.0.1-n110.h0c069e0
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
