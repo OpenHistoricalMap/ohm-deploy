@@ -499,6 +499,7 @@ osm-seed:
 # ====================================================================================================
   nominatimApi:
     enabled: true
+    stagingEnv: true
     env:
       BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
     replicaCount: 1
