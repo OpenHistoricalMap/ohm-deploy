@@ -84,6 +84,7 @@ osm-seed:
   # ====================================================================================================
   web:
     enabled: true
+    stagingEnv: false
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
@@ -499,7 +500,6 @@ osm-seed:
 # ====================================================================================================
   nominatimApi:
     enabled: true
-    stagingEnv: true
     env:
       BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
     replicaCount: 1
