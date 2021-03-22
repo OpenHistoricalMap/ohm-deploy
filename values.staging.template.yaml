@@ -84,7 +84,6 @@ osm-seed:
   # ====================================================================================================
   web:
     enabled: true
-    stagingEnv: false
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
