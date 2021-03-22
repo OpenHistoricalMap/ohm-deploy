@@ -1,4 +1,4 @@
-osmSeed:
+osm-seed:
   db:
     image:
       name: chartpress_replace_me
