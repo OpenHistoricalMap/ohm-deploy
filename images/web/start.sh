@@ -21,6 +21,9 @@ sed -i -e 's/osmseed-test@developmentseed.org/'$MAILER_FROM'/g' $workdir/config/
 # Set up iD key
 sed -i -e 's/id-key-to-be-replaced/'$OSM_id_key'/g' $workdir/config/application.yml
 
+# Add nominatim url
+sed -i -e 's/nominatim-url-to-be-replaced/'$NOMINATIM_URL'/g' $workdir/config/application.yml
+
 # Print the log while compiling the assets
 until $(curl -sf -o /dev/null $SERVER_URL); do
     echo "Waiting to start rails ports server..."
