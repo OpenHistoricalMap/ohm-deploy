@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'deploy iD date filtering to staging'
+RUN echo 'try mimemagic update'
 RUN git fetch
-RUN git checkout 07cea0397bbdc061f2b9e3b0886131ea4ae213f1
+RUN git checkout 644df04f7eee0ef401f4f6f1a09674d9f0ae4d58
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
