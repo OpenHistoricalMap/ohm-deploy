@@ -77,19 +77,19 @@ max_connections = 40
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_water_lines_gen1 WHERE type IN ('river', 'canal', 'stream', 'ditch', 'drain', 'dam') AND geometry && !BBOX!"
 
 	[[providers.layers]]
-	name = "admin_boundaries_0-3"
+	name = "admin_boundaries_0-2"
 	geometry_fieldname = "geometry"
 	id_fieldname = "id"
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2) AND geometry && !BBOX!"
 
 	[[providers.layers]]
-	name = "admin_boundaries_4-6"
+	name = "admin_boundaries_3-5"
 	geometry_fieldname = "geometry"
 	id_fieldname = "id"
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4) AND geometry && !BBOX!"
 
 	[[providers.layers]]
-	name = "admin_boundaries_7-8"
+	name = "admin_boundaries_6-7"
 	geometry_fieldname = "geometry"
 	id_fieldname = "id"
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6) AND geometry && !BBOX!"
@@ -101,13 +101,13 @@ max_connections = 40
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8) AND geometry && !BBOX!"
 
 	[[providers.layers]]
-	name = "admin_boundaries_9-12"
+	name = "admin_boundaries_9-10"
 	geometry_fieldname = "geometry"
 	id_fieldname = "id"
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9) AND geometry && !BBOX!"
 
 	[[providers.layers]]
-	name = "admin_boundaries_13-20"
+	name = "admin_boundaries_11-20"
 	geometry_fieldname = "geometry"
 	id_fieldname = "id"
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10) AND geometry && !BBOX!"
@@ -498,21 +498,21 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_0-3"
+	provider_layer = "osm.admin_boundaries_0-2"
 	min_zoom = 0
-	max_zoom = 3
+	max_zoom = 2
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_4-6"
-	min_zoom = 4
-	max_zoom = 6
+	provider_layer = "osm.admin_boundaries_3-5"
+	min_zoom = 3
+	max_zoom = 5
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_7-8"
-	min_zoom = 7
-	max_zoom = 8
+	provider_layer = "osm.admin_boundaries_6-7"
+	min_zoom = 6
+	max_zoom = 7
 
 	[[maps.layers]]
 	name = "land_ohm"
@@ -522,14 +522,14 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_9-12"
+	provider_layer = "osm.admin_boundaries_9-10"
 	min_zoom = 9
-	max_zoom = 12
+	max_zoom = 10
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_13-20"
-	min_zoom = 13
+	provider_layer = "osm.admin_boundaries_11-20"
+	min_zoom = 11
 	max_zoom = 20
 
 	# [[maps.layers]]
