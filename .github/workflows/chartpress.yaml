@@ -66,6 +66,7 @@ jobs:
         STAGING_NOMINATIM_PG_USER: ${{ secrets.STAGING_NOMINATIM_PG_USER }}
         STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
         STAGING_NOMINATIM_PG_DATABASE: ${{ secrets.STAGING_NOMINATIM_PG_DATABASE }}
+        STAGING_OVERPASS_API_DB_EBS: ${{ secrets.STAGING_OVERPASS_API_DB_EBS }}
 
     - name: Production - substitute secrets
       if: github.ref == 'refs/heads/main'
