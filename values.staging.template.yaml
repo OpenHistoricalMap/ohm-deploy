@@ -520,8 +520,8 @@ osm-seed:
   overpassApi:
     enabled: true
     env:
-      OVERPASS_META: yes
-      OVERPASS_MODE: init
+      OVERPASS_META: 'yes'
+      OVERPASS_MODE: 'init'
       OVERPASS_PLANET_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210422_0800.osm.pbf
       OVERPASS_DIFF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       OVERPASS_RULES_LOAD: 10
