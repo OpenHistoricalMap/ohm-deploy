@@ -529,7 +529,7 @@ overpassApi:
   persistenceDisk:
     enabled: true
     accessMode: ReadWriteOnce
-    AWS_ElasticBlockStore_volumeID : {{STAGING_OVERPASS_API_DB_EBS}}
+    AWS_ElasticBlockStore_volumeID: {{STAGING_OVERPASS_API_DB_EBS}}
     AWS_ElasticBlockStore_size: 100Gi
   resources:
     enabled: false
