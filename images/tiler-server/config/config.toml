@@ -44,7 +44,7 @@ max_connections = 40
 	name = "water_areas_gen0"
 	geometry_fieldname = "geometry"
 	id_fieldname = "id"
-	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, name, type, area, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_water_areas_gen0 WHERE type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 1000000000 AND geometry && !BBOX!"
+	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, name, type, area, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_water_areas_gen0 WHERE type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 500000000 AND geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "water_areas_gen0_6"
