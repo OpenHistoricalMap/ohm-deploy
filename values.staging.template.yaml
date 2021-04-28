@@ -523,7 +523,7 @@ osm-seed:
       OVERPASS_META: 'yes'
       OVERPASS_MODE: 'init'
       OVERPASS_PLANET_URL: 'http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210428_0800.osm.pbf'
-      OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/'
+      OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
       OVERPASS_RULES_LOAD: '10'
       OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
     persistenceDisk:
