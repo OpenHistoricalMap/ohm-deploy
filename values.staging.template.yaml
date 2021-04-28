@@ -522,8 +522,8 @@ osm-seed:
     env:
       OVERPASS_META: 'yes'
       OVERPASS_MODE: 'init'
-      OVERPASS_PLANET_URL: 'http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210422_0800.osm.pbf'
-      OVERPASS_DIFF_URL: 'https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/'
+      OVERPASS_PLANET_URL: 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
+      OVERPASS_DIFF_URL: 'http://download.openstreetmap.fr/replication/europe/monaco/minute/'
       OVERPASS_RULES_LOAD: '10'
       OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
     persistenceDisk:
