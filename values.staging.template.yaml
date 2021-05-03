@@ -473,7 +473,7 @@ osm-seed:
       PG_DATABASE: {{STAGING_NOMINATIM_PG_DATABASE}}
       OSM_URL_FILE: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210428_0800.osm.pbf
       THREADS: 4
-      REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
       REPLICATION_MAXINTERVAL: 30
       REPLICATION_UPDATE_INTERVAL: 75
       REPLICATION_RECHECK_INTERVAL: 60
