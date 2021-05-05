@@ -394,7 +394,7 @@ osm-seed:
       label_key: nodegroup-type
       label_value: ohm
     replicaCount: 1
-    commad: './tile_cache_downloader.sh & ./expire-watcher.sh'
+    command: './tile_cache_downloader.sh & ./expire-watcher.sh'
     resources:
       enabled: false
       requests:
