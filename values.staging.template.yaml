@@ -293,7 +293,7 @@ osm-seed:
       POSTGRES_USER: {{STAGING_TILER_DB_USER}}
       POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
-      POSTGRES_DB_MAX_CONNECTIONS: 1000
+      POSTGRES_DB_MAX_CONNECTIONS: 4000
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
