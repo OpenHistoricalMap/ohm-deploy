@@ -51,4 +51,5 @@ COPY ./start.sh .
 COPY ./expire-watcher.sh .
 COPY ./seed-by-diffs.sh .
 COPY ./tile_cache_downloader.sh .
+COPY ./cache_cleaner.sh .
 # CMD ./start.sh & ./tile_cache_downloader.sh & ./expire-watcher.sh

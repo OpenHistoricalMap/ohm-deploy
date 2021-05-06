@@ -396,7 +396,7 @@ osm-seed:
       label_key: nodegroup-type
       label_value: ohm
     replicaCount: 1
-    command: 'pwd && ls && /go/tile_cache_downloader.sh & /go/expire-watcher.sh'
+    command: './cache_cleaner.sh'
     resources:
       enabled: false
       requests:
