@@ -367,7 +367,9 @@ osm-seed:
       TILER_CACHE_BUCKET: tiler-cache-staging
       TILER_CACHE_AWS_ACCESS_KEY_ID: {{STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID}}
       TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
-    # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
+      # This bucket is only for reading
+      AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
+      # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
     persistenceDisk:
       enabled: false
       accessMode: ReadWriteOnce
