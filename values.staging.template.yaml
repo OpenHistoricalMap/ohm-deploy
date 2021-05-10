@@ -354,7 +354,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup-type
       label_value: ohm
-    replicaCount: 5
+    replicaCount: 10
     commad: './start.sh'
     # Set staticIp, if you are using cloudProvider=gcp
     # staticIp: 35.233.232.82
@@ -377,7 +377,7 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
       AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "2Gi"
         cpu: "2"
