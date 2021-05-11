@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'pull iD from release'
+RUN echo 'deploy map style updates'
 RUN git fetch
-RUN git checkout 8e353846932abd6e7d4cf6250dfcd533120ac8a4
+RUN git checkout e4b46c0802ca2c6e177c1d30f30e5bf407322586
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
