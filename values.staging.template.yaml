@@ -354,7 +354,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup-type
       label_value: ohm
-    replicaCount: 5
+    replicaCount: 2
     commad: './start.sh'
     # Set staticIp, if you are using cloudProvider=gcp
     # staticIp: 35.233.232.82
