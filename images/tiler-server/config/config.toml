@@ -199,11 +199,11 @@ max_connections = 40
 	id_fieldname = "id"
 	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_place_points WHERE geometry && !BBOX!"
 
-	[[providers.layers]]
-	name = "place_areas"
-	geometry_fieldname = "geometry"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_place_areas WHERE geometry && !BBOX!"
+	# [[providers.layers]]
+	# name = "place_areas"
+	# geometry_fieldname = "geometry"
+	# id_fieldname = "id"
+	# sql = "SELECT ST_AsBinary(geometry) AS geometry, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_place_areas WHERE geometry && !BBOX!"
 
 	# Other (Man Made, Historic, Military, Power, Barrier etc)
 	[[providers.layers]]
