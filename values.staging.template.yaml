@@ -305,10 +305,10 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "10Gi"
+        memory: "20Gi"
         cpu: "6"
       limits:
-        memory: "10Gi"
+        memory: "20Gi"
         cpu: "6"
 
   # ====================================================================================================
@@ -379,11 +379,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "6Gi"
-        cpu: "3"
+        memory: "20Gi"
+        cpu: "6"
       limits:
-        memory: "6Gi"
-        cpu: "3"
+        memory: "32Gi"
+        cpu: "16"
 
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
