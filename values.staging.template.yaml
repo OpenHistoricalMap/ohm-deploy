@@ -370,7 +370,7 @@ osm-seed:
       TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
       # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
     persistenceDisk:
-      enabled: false
+      enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
