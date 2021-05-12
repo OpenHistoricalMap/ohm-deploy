@@ -360,7 +360,7 @@ osm-seed:
     # staticIp: 35.233.232.82
     env:
       TILER_SERVER_PORT: 9090
-      TILER_CACHE_TYPE: s3
+      TILER_CACHE_TYPE: file
       TILER_CACHE_BASEPATH: /mnt/data
       TILER_CACHE_MAX_ZOOM: 22
       # in case s3
@@ -389,7 +389,7 @@ osm-seed:
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
