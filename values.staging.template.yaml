@@ -293,7 +293,11 @@ osm-seed:
       POSTGRES_USER: {{STAGING_TILER_DB_USER}}
       POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
-      POSTGRES_DB_MAX_CONNECTIONS: 4000
+      POSTGRES_DB_MAX_CONNECTIONS: 500
+      POSTGRES_DB_SHARED_BUFFERS: 5GB
+      POSTGRES_DB_WORK_MEM: 15MB
+      POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
+      POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -323,11 +327,11 @@ osm-seed:
       label_value: ohm
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210506_0800.osm.pbf
+      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210518_0800.osm.pbf
       # TILER_IMPORT_LIMIT: https://gist.githubusercontent.com/Rub21/96bdcac5eb11f0b36ba8d0352ac537f4/raw/2606f2e207d4a0d895897a83efa1efacefd36eb4/monaco.geojson
       #{{STAGING_TILER_IMPOSM_REPLICATION_URL}}
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: 400000
+      SEQUENCE_NUMBER: 412500
       OVERWRITE_STATE: false
     persistenceDisk:
       enabled: true
@@ -354,13 +358,13 @@ osm-seed:
       enabled: true
       label_key: nodegroup-type
       label_value: ohm
-    replicaCount: 1
+    replicaCount: 3
     commad: './start.sh'
     # Set staticIp, if you are using cloudProvider=gcp
     # staticIp: 35.233.232.82
     env:
       TILER_SERVER_PORT: 9090
-      TILER_CACHE_TYPE: file
+      TILER_CACHE_TYPE: s3
       TILER_CACHE_BASEPATH: /mnt/data
       TILER_CACHE_MAX_ZOOM: 22
       # in case s3
@@ -370,14 +374,14 @@ osm-seed:
       TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
       # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
     persistenceDisk:
-      enabled: true
+      enabled: false
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
       AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
       AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "20Gi"
         cpu: "6"
@@ -389,7 +393,7 @@ osm-seed:
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
