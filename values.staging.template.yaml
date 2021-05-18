@@ -381,13 +381,13 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
       AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "20Gi"
-        cpu: "6"
+        memory: "6Gi"
+        cpu: "3"
       limits:
-        memory: "32Gi"
-        cpu: "16"
+        memory: "6Gi"
+        cpu: "3"
 
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
@@ -492,6 +492,10 @@ osm-seed:
 # ====================================================================================================
   nominatimDb:
     enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup-type
+      label_value: ohm-non-tiler
     env:
       PG_PORT: {{STAGING_NOMINATIM_PG_PORT}}
       PG_USER: {{STAGING_NOMINATIM_PG_USER}}
@@ -518,14 +522,16 @@ osm-seed:
       limits:
         memory: '2Gi'
         cpu: '1'
-    nodeSelector:
-      enabled: false
 
 # ====================================================================================================
 # Variables for nominatim api
 # ====================================================================================================
   nominatimApi:
     enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup-type
+      label_value: ohm-non-tiler
     env:
       BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
     replicaCount: 1
