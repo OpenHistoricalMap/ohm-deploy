@@ -21,7 +21,7 @@ jobs:
 
     - name: Install Chartpress
       run: |
-        pip install -v chartpress
+        pip install -v chartpress && pip install six
     - name: Run Chartpress
       run: chartpress --push
       env:
