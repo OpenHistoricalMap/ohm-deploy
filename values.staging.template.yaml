@@ -551,6 +551,10 @@ osm-seed:
 # ====================================================================================================
   overpassApi:
     enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup-type
+      label_value: ohm-non-tiler
     env:
       OVERPASS_META: 'yes'
       OVERPASS_MODE: 'init'
@@ -571,5 +575,3 @@ osm-seed:
       limits:
         memory: '2Gi'
         cpu: '2'
-    nodeSelector:
-      enabled: false
