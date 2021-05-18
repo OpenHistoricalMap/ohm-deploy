@@ -383,10 +383,10 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "8Gi"
+        memory: "6Gi"
         cpu: "4"
       limits:
-        memory: "8Gi"
+        memory: "6Gi"
         cpu: "4"
 
   # ====================================================================================================
