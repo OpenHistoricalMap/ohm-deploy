@@ -384,10 +384,10 @@ osm-seed:
       enabled: true
       requests:
         memory: "8Gi"
-        cpu: "8"
+        cpu: "4"
       limits:
         memory: "8Gi"
-        cpu: "8"
+        cpu: "4"
 
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
