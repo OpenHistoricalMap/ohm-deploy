@@ -29,7 +29,7 @@ database = "${POSTGRES_DB}"
 user = "${POSTGRES_USER}"
 password = "${POSTGRES_PASSWORD}"
 srid = 3857
-max_connections = 300
+max_connections = 100
 
 	[[providers.layers]]
 	name = "land_0-20"
