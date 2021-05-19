@@ -11,4 +11,3 @@ charts:
         valuesPath: osm-seed.tilerDb.image
       tiler-server:
         valuesPath: osm-seed.tilerServer.image
-      
