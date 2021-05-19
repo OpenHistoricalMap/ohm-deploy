@@ -318,10 +318,10 @@ osm-seed:
       enabled: true
       requests:
         memory: "15Gi"
-        cpu: "8"
+        cpu: "6"
       limits:
         memory: "15Gi"
-        cpu: "8"
+        cpu: "6"
 
   # ====================================================================================================
   # Variables for tiler-imposm
