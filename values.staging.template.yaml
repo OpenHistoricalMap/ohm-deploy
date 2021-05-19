@@ -293,11 +293,19 @@ osm-seed:
       POSTGRES_USER: {{STAGING_TILER_DB_USER}}
       POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
+      # for 20Gi
+      # POSTGRES_DB_MAX_CONNECTIONS: 500
+      # POSTGRES_DB_SHARED_BUFFERS: 5GB
+      # POSTGRES_DB_WORK_MEM: 15MB
+      # POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
+      # POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
+
+      #for 15Gi
       POSTGRES_DB_MAX_CONNECTIONS: 500
-      POSTGRES_DB_SHARED_BUFFERS: 5GB
-      POSTGRES_DB_WORK_MEM: 15MB
-      POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
-      POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
+      POSTGRES_DB_SHARED_BUFFERS: 3GB
+      POSTGRES_DB_WORK_MEM: 7MB
+      POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
+      POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -309,11 +317,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "20Gi"
-        cpu: "6"
+        memory: "15Gi"
+        cpu: "8"
       limits:
-        memory: "20Gi"
-        cpu: "6"
+        memory: "15Gi"
+        cpu: "8"
 
   # ====================================================================================================
   # Variables for tiler-imposm
