@@ -1,4 +1,4 @@
-FROM mdillon/postgis:9.5
+FROM postgis/postgis:12-3.1
 RUN apt-get update
 RUN apt-get install -y git ca-certificates
 
