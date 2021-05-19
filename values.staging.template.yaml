@@ -366,7 +366,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup-type
       label_value: ohm
-    replicaCount: 4
+    replicaCount: 1
     commad: './start.sh'
     # Set staticIp, if you are using cloudProvider=gcp
     # staticIp: 35.233.232.82
@@ -391,11 +391,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "8Gi"
-        cpu: "4"
+        memory: "16Gi"
+        cpu: "8"
       limits:
-        memory: "8Gi"
-        cpu: "4"
+        memory: "16Gi"
+        cpu: "8"
 
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
