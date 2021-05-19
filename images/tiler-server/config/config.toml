@@ -500,11 +500,11 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	# min_zoom = 5
 	# max_zoom = 7
 
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_0-20"
-	min_zoom = 0
-	max_zoom = 20
+	# [[maps.layers]]
+	# name = "land"
+	# provider_layer = "osm.land_0-20"
+	# min_zoom = 0
+	# max_zoom = 20
 
 	[[maps.layers]]
 	name = "land_ohm"
