@@ -11,7 +11,7 @@ RUN apk add musl-dev=1.1.24-r3 \
 
 RUN mkdir -p /go/src/github.com/go-spatial/tegola
 RUN git clone https://github.com/go-spatial/tegola.git /go/src/github.com/go-spatial/tegola
-RUN cd /go/src/github.com/go-spatial/tegola && git checkout v0.12.1
+RUN cd /go/src/github.com/go-spatial/tegola && git checkout v0.13.0
 RUN cd /go/src/github.com/go-spatial/tegola/cmd/tegola \
 	&& go build -gcflags "-N -l" -o /opt/tegola \ 
 	&& chmod a+x /opt/tegola
