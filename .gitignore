@@ -1,2 +1,4 @@
-docker-compose.yml
 .env-tiler
+tiler-db-data
+tiler-imposm-data-2
+tiler-imposm-data
