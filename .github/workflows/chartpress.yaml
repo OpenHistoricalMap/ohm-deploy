@@ -110,7 +110,8 @@ jobs:
         PRODUCTION_NOMINATIM_PG_USER: ${{ secrets.PRODUCTION_NOMINATIM_PG_USER }}
         PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
         PRODUCTION_NOMINATIM_PG_DATABASE: ${{ secrets.PRODUCTION_NOMINATIM_PG_DATABASE }}
-        
+        PRODUCTION_OVERPASS_API_DB_EBS: ${{ secrets.PRODUCTION_OVERPASS_API_DB_EBS }}
+
     - name: AWS Credentials
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
       uses: aws-actions/configure-aws-credentials@v1
