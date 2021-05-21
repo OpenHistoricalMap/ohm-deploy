@@ -285,6 +285,12 @@ osm-seed:
       POSTGRES_USER: {{PRODUCTION_TILER_DB_USER}}
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
+      # for 20GB
+      POSTGRES_DB_MAX_CONNECTIONS: 500
+      POSTGRES_DB_SHARED_BUFFERS: 5GB
+      POSTGRES_DB_WORK_MEM: 15MB
+      POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
+      POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -313,11 +319,11 @@ osm-seed:
       label_value: tiler
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-200526_1200.osm.pbf
+      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210521_0800.osm.pbf
       # TILER_IMPORT_LIMIT: https://gist.githubusercontent.com/Rub21/96bdcac5eb11f0b36ba8d0352ac537f4/raw/2606f2e207d4a0d895897a83efa1efacefd36eb4/monaco.geojson
-      REPLICATION_URL: {{PRODUCTION_TILER_IMPOSM_REPLICATION_URL}}
+      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       OVERWRITE_STATE: false
-      SEQUENCE_NUMBER: 70000
+      SEQUENCE_NUMBER: 415500
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -339,26 +345,27 @@ osm-seed:
 
   tilerServer:
     enabled: true
-    replicaCount: 1
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: tiler
+    replicaCount: 2
+    commad: './start.sh'
     # Set staticIp, if you are using cloudProvider=gcp
     # staticIp: 35.233.232.82
     env:
       TILER_SERVER_PORT: 9090
-      TILER_CACHE_TYPE: file
+      TILER_CACHE_TYPE: s3
       TILER_CACHE_BASEPATH: /mnt/data
       TILER_CACHE_MAX_ZOOM: 22
       # in case s3
-      # TILER_CACHE_BUCKET: osmseed-tiler
-      # TILER_CACHE_REGION: us-east-1
-      # TILER_CACHE_AWS_ACCESS_KEY_ID: xyz
-      # TILER_CACHE_AWS_SECRET_ACCESS_KEY: xyz/q
+      TILER_CACHE_REGION: us-east-1
+      TILER_CACHE_BUCKET: tiler-cache-production
+      TILER_CACHE_AWS_ACCESS_KEY_ID: {{PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID}}
+      TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
     # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
     persistenceDisk:
-      enabled: true
+      enabled: false
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
@@ -367,11 +374,31 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "20Gi"
-        cpu: "8"
+        memory: "8Gi"
+        cpu: "4"
       limits:
-        memory: "32Gi"
-        cpu: "16"
+        memory: "8Gi"
+        cpu: "4"
+  
+  # ====================================================================================================
+  # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
+  # ====================================================================================================
+  tilerServerCacheCleaner:
+    enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: tiler
+    replicaCount: 1
+    command: './cache_cleaner.sh'
+    resources:
+      enabled: false
+      requests:
+        memory: '1Gi'
+        cpu: '2'
+      limits:
+        memory: '2Gi'
+        cpu: '2'
 
   # ====================================================================================================
   # Variables for tiler-visor
@@ -498,3 +525,33 @@ osm-seed:
         cpu: '2'
     nodeSelector:
       enabled: false
+
+# ====================================================================================================
+# Variables for overpass-api
+# ====================================================================================================
+  overpassApi:
+    enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+    env:
+      OVERPASS_META: 'yes'
+      OVERPASS_MODE: 'init'
+      OVERPASS_PLANET_URL: 'http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210521_0800.osm.pbf'
+      OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
+      OVERPASS_RULES_LOAD: '10'
+      OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      AWS_ElasticBlockStore_volumeID: {{PRODUCTION_OVERPASS_API_DB_EBS}}
+      AWS_ElasticBlockStore_size: 100Gi
+    resources:
+      enabled: false
+      requests:
+        memory: '1Gi'
+        cpu: '2'
+      limits:
+        memory: '2Gi'
+        cpu: '2'

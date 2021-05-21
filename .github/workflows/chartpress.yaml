@@ -21,7 +21,7 @@ jobs:
 
     - name: Install Chartpress
       run: |
-        pip install -v chartpress
+        pip install -v chartpress && pip install six
     - name: Run Chartpress
       run: chartpress --push
       env:
@@ -54,6 +54,8 @@ jobs:
         STAGING_TILER_IMPOSM_EBS: ${{ secrets.STAGING_TILER_IMPOSM_EBS }}
         STAGING_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.STAGING_TILER_IMPOSM_REPLICATION_URL }}
         STAGING_TILER_SERVER_EBS: ${{ secrets.STAGING_TILER_SERVER_EBS }}
+        STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+        STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
         STAGING_TM_API_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
         STAGING_TM_API_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
         STAGING_TM_API_DB: ${{ secrets.STAGING_TM_API_DB }}
@@ -66,6 +68,7 @@ jobs:
         STAGING_NOMINATIM_PG_USER: ${{ secrets.STAGING_NOMINATIM_PG_USER }}
         STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
         STAGING_NOMINATIM_PG_DATABASE: ${{ secrets.STAGING_NOMINATIM_PG_DATABASE }}
+        STAGING_OVERPASS_API_DB_EBS: ${{ secrets.STAGING_OVERPASS_API_DB_EBS }}
 
     - name: Production - substitute secrets
       if: github.ref == 'refs/heads/main'
@@ -95,6 +98,8 @@ jobs:
         PRODUCTION_TILER_IMPOSM_EBS: ${{ secrets.PRODUCTION_TILER_IMPOSM_EBS }}
         PRODUCTION_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.PRODUCTION_TILER_IMPOSM_REPLICATION_URL }}
         PRODUCTION_TILER_SERVER_EBS: ${{ secrets.PRODUCTION_TILER_SERVER_EBS }}
+        PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+        PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
         PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
         PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
         PRODUCTION_TM_API_DB: ${{ secrets.PRODUCTION_TM_API_DB }}
@@ -107,7 +112,8 @@ jobs:
         PRODUCTION_NOMINATIM_PG_USER: ${{ secrets.PRODUCTION_NOMINATIM_PG_USER }}
         PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
         PRODUCTION_NOMINATIM_PG_DATABASE: ${{ secrets.PRODUCTION_NOMINATIM_PG_DATABASE }}
-        
+        PRODUCTION_OVERPASS_API_DB_EBS: ${{ secrets.PRODUCTION_OVERPASS_API_DB_EBS }}
+
     - name: AWS Credentials
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
       uses: aws-actions/configure-aws-credentials@v1
@@ -143,7 +149,7 @@ jobs:
 
     - name: Staging - helm deploy
       if: github.ref == 'refs/heads/staging'
-      run: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+      run: helm upgrade staging ohm/ -f values.staging.yaml -f ohm/values.yaml
 
     - name: Production - helm deploy
       if: github.ref == 'refs/heads/main'
