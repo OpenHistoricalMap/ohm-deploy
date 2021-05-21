@@ -379,6 +379,26 @@ osm-seed:
       limits:
         memory: "32Gi"
         cpu: "16"
+  
+  # ====================================================================================================
+  # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
+  # ====================================================================================================
+  tilerServerCacheCleaner:
+    enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: tiler
+    replicaCount: 1
+    command: './cache_cleaner.sh'
+    resources:
+      enabled: false
+      requests:
+        memory: '1Gi'
+        cpu: '2'
+      limits:
+        memory: '2Gi'
+        cpu: '2'
 
   # ====================================================================================================
   # Variables for tiler-visor
