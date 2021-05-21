@@ -285,7 +285,7 @@ osm-seed:
       POSTGRES_USER: {{PRODUCTION_TILER_DB_USER}}
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
-      # for 20Gi
+      # for 20GB
       POSTGRES_DB_MAX_CONNECTIONS: 500
       POSTGRES_DB_SHARED_BUFFERS: 5GB
       POSTGRES_DB_WORK_MEM: 15MB
@@ -349,7 +349,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: tiler
-    replicaCount: 1
+    replicaCount: 2
     commad: './start.sh'
     # Set staticIp, if you are using cloudProvider=gcp
     # staticIp: 35.233.232.82
@@ -374,11 +374,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "20Gi"
-        cpu: "8"
+        memory: "8Gi"
+        cpu: "4"
       limits:
-        memory: "32Gi"
-        cpu: "16"
+        memory: "8Gi"
+        cpu: "4"
   
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
