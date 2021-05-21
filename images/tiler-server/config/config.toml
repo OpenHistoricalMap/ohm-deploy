@@ -22,7 +22,7 @@ type = "prometheus"
 #   OpenStreetMap (OSM)
 [[providers]]
 name = "osm"
-type = "postgis"
+type = "mvt_postgis"
 host = "${POSTGRES_HOST}"
 port = "${POSTGRES_PORT}"
 database = "${POSTGRES_DB}"
