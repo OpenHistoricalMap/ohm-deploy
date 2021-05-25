@@ -35,18 +35,17 @@ for f in $imp_list; do
     while IFS= read -r tile
     do
         bounds="$(python tile2bounds.py $tile)"
-        echo tegola cache purge \
-        --config=/opt/tegola_config/config.toml \
-        --min-zoom=0 --max-zoom=20 \
-        --bounds=$bounds \
-        tile-name=$tile
-        
+        minZoom=${tile%%/*}
+        set -x;
         tegola cache purge \
-        --config=/opt/tegola_config/config.toml \
-        --min-zoom=0 --max-zoom=20 \
-        --bounds=$bounds \
+            --config=/opt/tegola_config/config.toml \
+            --min-zoom=$minZoom \
+            --max-zoom=20 \
+            --overwrite=true \
+            --bounds=$bounds \
         tile-name=$tile
         err=$?
+        set +x;
         if [[ $err != "0" ]]; then
             #error
             echo "tegola exited with error code $err"
