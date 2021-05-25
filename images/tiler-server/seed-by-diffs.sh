@@ -35,10 +35,11 @@ for f in $imp_list; do
     while IFS= read -r tile
     do
         bounds="$(python tile2bounds.py $tile)"
+        minZoom=${tile%%/*}
         set -x;
         tegola cache purge \
             --config=/opt/tegola_config/config.toml \
-            --min-zoom=0 \
+            --min-zoom=$minZoom \
             --max-zoom=20 \
             --overwrite=true \
             --bounds=$bounds \
