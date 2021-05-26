@@ -34,23 +34,35 @@ for f in $imp_list; do
     # Read each line on the tiles file
     while IFS= read -r tile
     do
-        bounds="$(python tile2bounds.py $tile)"
-        minZoom=${tile%%/*}
-        set -x;
-        tegola cache purge \
-            --config=/opt/tegola_config/config.toml \
-            --min-zoom=$minZoom \
-            --max-zoom=20 \
-            --overwrite=true \
-            --bounds=$bounds \
-        tile-name=$tile
-        err=$?
-        set +x;
-        if [[ $err != "0" ]]; then
-            #error
-            echo "tegola exited with error code $err"
-            # rm $queued_jobs
-            exit
+        bounds="$(python3 tile2bounds.py $tile)"
+        # Get tiles values
+        arraytile=($(echo "$tile" | tr '/' '\n'))
+        zoom=${arraytile[0]}
+        x=${arraytile[1]}
+        y=${arraytile[2]}
+
+        # Check if cache  tile files are in s3
+        if [ "$TILER_CACHE_TYPE" == "s3" ] && [ ! -z "$zoom" ] &&  [ ! -z "$x" ]; then
+            set -x;
+            aws s3 rm --recursive s3://${TILER_CACHE_BUCKET}${TILER_CACHE_BASEPATH}/osm/$zoom/$x/
+            set +x;
+        fi
+
+        if [ "$TILER_CACHE_TYPE" == "file" ]; then
+            set -x;
+            tegola cache purge \
+                --config=/opt/tegola_config/config.toml \
+                --min-zoom=$minZoom \
+                --max-zoom=20 \
+                --overwrite=true \
+                --bounds=$bounds \
+                tile-name=$tile
+            err=$?
+            set +x;
+            if [[ $err != "0" ]]; then
+                echo "tegola exited with error code $err"
+                exit
+            fi
         fi
     done < "$f"
     echo "$f" >> $completed_jobs
