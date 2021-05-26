@@ -32,10 +32,10 @@ RUN apk add --update \
     openssl-dev
 
 # Install aws-cli and  gsutil
-RUN pip install awscli \
-    && pip install gsutil
+RUN pip3 install awscli \
+    && pip3 install gsutil
 
-RUN pip install mercantile \
+RUN pip3 install mercantile \
     && apk del build-deps \
     && rm -rf /var/cache/apk/* \
     && apk --purge -v del py-pip
