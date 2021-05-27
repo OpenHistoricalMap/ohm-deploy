@@ -36,8 +36,9 @@ for f in $imp_list; do
         --format="/zxy" \
         --min-zoom=0 \
         --max-zoom=20 \
-        --overwrite=true
+        --overwrite=true &
     set +x
+    sleep 10
     # while IFS= read -r tile; do
     #     bounds="$(python3 tile2bounds.py $tile)"
     #     # Get tiles values
