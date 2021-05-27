@@ -29,30 +29,37 @@ if [ -f $queued_jobs ]; then
 fi
 
 for f in $imp_list; do
-    echo "seeding from $f"
-    # Read each line on the tiles file
-    while IFS= read -r tile; do
-        bounds="$(python3 tile2bounds.py $tile)"
-        # Get tiles values
-        arraytile=($(echo "$tile" | tr '/' '\n'))
-        zoom=${arraytile[0]}
-        x=${arraytile[1]}
-        y=${arraytile[2]}
-        set -x
-        tegola cache purge \
-            --config=/opt/tegola_config/config.toml \
-            --min-zoom=$zoom \
-            --max-zoom=20 \
-            --overwrite=true \
-            --bounds=$bounds \
-            tile-name=$tile
-        err=$?
-        set +x
-        if [[ $err != "0" ]]; then
-            echo "tegola exited with error code $err"
-            exit
-        fi
-    done <"$f"
+    echo "Purge tiles from...$f"
+    set -x
+    tegola cache purge tile-list $f \
+        --config=/opt/tegola_config/config.toml \
+        --format="/zxy" \
+        --min-zoom=0 \
+        --max-zoom=20 \
+        --overwrite=true
+    set +x
+    # while IFS= read -r tile; do
+    #     bounds="$(python3 tile2bounds.py $tile)"
+    #     # Get tiles values
+    #     arraytile=($(echo "$tile" | tr '/' '\n'))
+    #     zoom=${arraytile[0]}
+    #     x=${arraytile[1]}
+    #     y=${arraytile[2]}
+    #     set -x
+    #     tegola cache purge \
+    #         --config=/opt/tegola_config/config.toml \
+    #         --min-zoom=$zoom \
+    #         --max-zoom=20 \
+    #         --overwrite=true \
+    #         --bounds=$bounds \
+    #         tile-name=$tile
+    #     err=$?
+    #     set +x
+    #     if [[ $err != "0" ]]; then
+    #         echo "tegola exited with error code $err"
+    #         exit
+    #     fi
+    # done <"$f"
     echo "$f" >>$completed_jobs
     mv $f $completed_dir
 done
