@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'zoom to feature when selected, also resolve timesldier race condition'
+RUN echo 'fix the race condition fix to load timeslider when no feature is selected'
 RUN git fetch
-RUN git checkout 16ceb8d2db93a182bb8ff4e5229237692c2e094f
+RUN git checkout 3daeb28d3c11a5a6543b8c844fae8c891c1163fd
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
