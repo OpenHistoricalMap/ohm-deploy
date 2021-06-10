@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'update ohm logo'
+RUN echo 'update minZoom and zoom to date'
 RUN git fetch
-RUN git checkout 08a29a2ecb04f41d31e0bd43182b94ba5b2a042c
+RUN git checkout be82376253c42ca6388d80440e206553c8026f63
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
