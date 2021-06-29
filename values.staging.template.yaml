@@ -339,8 +339,8 @@ osm-seed:
       # TILER_IMPORT_LIMIT: https://gist.githubusercontent.com/Rub21/96bdcac5eb11f0b36ba8d0352ac537f4/raw/2606f2e207d4a0d895897a83efa1efacefd36eb4/monaco.geojson
       #{{STAGING_TILER_IMPOSM_REPLICATION_URL}}
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: 412500
-      OVERWRITE_STATE: false
+      SEQUENCE_NUMBER: 451152
+      OVERWRITE_STATE: true
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
