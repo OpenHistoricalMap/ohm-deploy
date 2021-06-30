@@ -298,7 +298,7 @@ osm-seed:
       subPath: postgresql-d
       # In case cloudProvider: aws
       AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_DB_EBS}}
-      AWS_ElasticBlockStore_size: 100Gi
+      AWS_ElasticBlockStore_size: 1000Gi
     resources:
       enabled: true
       requests:
