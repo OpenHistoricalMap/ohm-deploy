@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'fix state where timeslider tries to load again and breaks page'
+RUN echo 'fix state where timeslider tries to load again and breaks page, production merge'
 RUN git fetch
-RUN git checkout e08f20eb59be02ccd843e0860ed7b5cbf387b14b
+RUN git checkout ee34e731418485b64d2b2784544b6f4e9124b791
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
