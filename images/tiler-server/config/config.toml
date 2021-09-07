@@ -275,6 +275,13 @@ max_connections = 40
 	id_fieldname = "id"
 	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, nullif(as_numeric(height),-1) AS height, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_buildings WHERE geometry && !BBOX!"
 
+	# transport_associated_streets
+	[[providers.layers]]
+	name = "transport_associated_streets"
+	geometry_fieldname = "geometry"
+	geometry_type = "LineString"
+	id_fieldname = "id"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!), m.member, r.osm_id, m.name, m.relname, m.index, r.type, r.tags->'start_date' as start_date, r.tags->'end_date' as end_date, isodatetodecimaldate(pad_date(r.tags->'start_date', 'start')) AS start_decdate, isodatetodecimaldate(pad_date(r.tags->'end_date', 'end')) AS end_decdate FROM osm_relations r, osm_relation_members m WHERE r.osm_id=m.osm_id and r.type='associatedStreet' and geometry && !BBOX!"
 
 [[maps]]
 name = "osm"
@@ -516,3 +523,10 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	provider_layer = "osm.buildings"
 	min_zoom = 14
 	max_zoom = 20
+
+	[[maps.layers]]
+	name = "transport_associated_streets"
+	provider_layer = "osm.transport_associated_streets"
+	min_zoom = 7
+	max_zoom = 20
+	
