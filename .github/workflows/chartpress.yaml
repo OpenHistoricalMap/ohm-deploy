@@ -70,6 +70,8 @@ jobs:
         STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
         STAGING_NOMINATIM_PG_DATABASE: ${{ secrets.STAGING_NOMINATIM_PG_DATABASE }}
         STAGING_OVERPASS_API_DB_EBS: ${{ secrets.STAGING_OVERPASS_API_DB_EBS }}
+        STAGING_NEW_RELIC_LICENSE_KEY: ${{ secrets.STAGING_NEW_RELIC_LICENSE_KEY }}
+        STAGING_NEW_RELIC_APP_NAME: ${{ secrets.STAGING_NEW_RELIC_APP_NAME }}
 
     - name: Production - substitute secrets
       if: github.ref == 'refs/heads/main'
@@ -114,6 +116,8 @@ jobs:
         PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
         PRODUCTION_NOMINATIM_PG_DATABASE: ${{ secrets.PRODUCTION_NOMINATIM_PG_DATABASE }}
         PRODUCTION_OVERPASS_API_DB_EBS: ${{ secrets.PRODUCTION_OVERPASS_API_DB_EBS }}
+        PRODUCTION_NEW_RELIC_LICENSE_KEY: ${{ secrets.PRODUCTION_NEW_RELIC_LICENSE_KEY }}
+        PRODUCTION_NEW_RELIC_APP_NAME: ${{ secrets.PRODUCTION_NEW_RELIC_APP_NAME }}
 
     - name: AWS Credentials
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
