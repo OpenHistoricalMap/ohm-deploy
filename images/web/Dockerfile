@@ -124,7 +124,7 @@ RUN git checkout 535a198d6ce0f1ea54173009dbbd8eeb48f737b0
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
 RUN echo "gem 'therubyracer'" >> Gemfile
-
+RUN echo "gem 'newrelic_rpm'" >> Gemfile
 RUN gem install nokogiri -- --use-system-libraries
 
 # Install app dependencies
@@ -176,6 +176,7 @@ RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
 RUN a2ensite cgimap
 RUN apache2ctl configtest
 
+Run
 # Set Permissions for www-data
 RUN chown -R www-data: /var/www
 
