@@ -96,6 +96,8 @@ osm-seed:
       OSM_id_key: {{PRODUCTION_ID_KEY}}
       MAILER_FROM: no-reply@openhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
+      NEW_RELIC_LICENSE_KEY: {{PRODUCTION_NEW_RELIC_LICENSE_KEY}}
+      NEW_RELIC_APP_NAME: {{PRODUCTION_NEW_RELIC_APP_NAME}}
     resources:
       enabled: true
       requests:
