@@ -18,15 +18,6 @@ common: &default_settings
   distributed_tracing:
     enabled: true
   log_level: info
-development:
-  <<: *default_settings
-  app_name: ${NEW_RELIC_APP_NAME} (Development)
-test:
-  <<: *default_settings
-  monitor_mode: false
-staging:
-  <<: *default_settings
-  app_name: ${NEW_RELIC_APP_NAME} (Staging)
 production:
   <<: *default_settings" > $workdir/config/newrelic.yml
 
