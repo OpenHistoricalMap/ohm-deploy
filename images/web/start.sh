@@ -11,6 +11,16 @@ production:
   password: ${POSTGRES_PASSWORD}
   encoding: utf8" > $workdir/config/database.yml
 
+echo "
+common: &default_settings
+  license_key: ${NEW_RELIC_LICENSE_KEY}
+  app_name: ${NEW_RELIC_APP_NAME}
+  distributed_tracing:
+    enabled: true
+  log_level: info
+production:
+  <<: *default_settings" > $workdir/config/newrelic.yml
+
 # Setting up the SERVER_URL and SERVER_PROTOCOL
 sed -i -e 's/server_url: "localhost"/server_url: "'$SERVER_URL'"/g' $workdir/config/application.yml
 sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/application.yml

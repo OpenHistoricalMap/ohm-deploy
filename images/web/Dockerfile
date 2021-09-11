@@ -124,7 +124,7 @@ RUN git checkout 535a198d6ce0f1ea54173009dbbd8eeb48f737b0
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
 RUN echo "gem 'therubyracer'" >> Gemfile
-
+RUN echo "gem 'newrelic_rpm'" >> Gemfile
 RUN gem install nokogiri -- --use-system-libraries
 
 # Install app dependencies
