@@ -117,14 +117,14 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'rebuild iD to pick up new default fields'
+RUN echo 'fix timeslider race condition, add better iD date validation'
 RUN git fetch
-RUN git checkout 535a198d6ce0f1ea54173009dbbd8eeb48f737b0
+RUN git checkout 210a3f038ef72a61565daf6d25de86a03dde2ffc
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
 RUN echo "gem 'therubyracer'" >> Gemfile
-
+RUN echo "gem 'newrelic_rpm'" >> Gemfile
 RUN gem install nokogiri -- --use-system-libraries
 
 # Install app dependencies
