@@ -152,12 +152,12 @@ osm-seed:
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
       label_value: ohm-non-tiler
-    schedule: '* */24 * * *'
+    schedule: '30 * * * *'
     env:
       OVERWRITE_FHISTORY_FILE: false
     resources:
