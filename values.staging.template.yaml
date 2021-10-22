@@ -152,7 +152,7 @@ osm-seed:
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup-type

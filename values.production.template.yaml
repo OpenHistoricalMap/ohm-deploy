@@ -150,7 +150,7 @@ osm-seed:
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: true
+    enabled: false
     schedule: '* 1 * * *'
     nodeSelector:
       enabled: true
