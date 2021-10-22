@@ -119,7 +119,7 @@ WORKDIR $workdir
 
 RUN echo 'fix timeslider params reload, remove welcom mat'
 RUN git fetch
-RUN git checkout c74d64c9938e17ae5e768433b2a487c02fc0f984
+RUN git checkout 313932a0c65a6105c2bb841f31069fdd1b455c1f
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
