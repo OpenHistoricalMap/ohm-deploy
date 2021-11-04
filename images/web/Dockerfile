@@ -117,7 +117,7 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'fix timeslider params reload, remove welcom mat'
+RUN echo 'remove welcome mat, fix timeslider'
 RUN git fetch
 RUN git checkout 313932a0c65a6105c2bb841f31069fdd1b455c1f
 
