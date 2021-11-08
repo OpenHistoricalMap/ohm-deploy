@@ -593,8 +593,8 @@ osm-seed:
     env:
       URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
       URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
-      URL_PLANET_FILE: '-'
-      URL_HISTORY_PLANET_FILE: '-'
+      URL_PLANET_FILE: 'none'
+      URL_HISTORY_PLANET_FILE: 'none'
       TIME_UPDATE_INTERVAL: 7d
       INSTANCE_NAME: 'OHM Taginfo'
       INSTANCE_DESCRIPTION: '<b>taginfo instance</b>'
