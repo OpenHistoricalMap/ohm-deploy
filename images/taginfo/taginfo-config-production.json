@@ -1,0 +1,26 @@
+{
+    "instance": {
+        "url": "https://staging.openhistoricalmap.org",
+        "name": "OpenHistoricalMap Taginfo",
+        "description": "<b>taginfo instance</b>",
+        "about": "<p>This site is maintained by openhistoricalmap.</p>",
+        "icon": "https://wiki.openstreetmap.org/w/images/e/e6/Ohm_logo_small.png",
+        "contact": "admin@openhistoricalmap.org",
+        "area": "World",
+        "access_control_allow_origin": "*",
+        "sections": ["download", "taginfo"]
+    },
+    "turbo": {
+        "max_auto": 1000,
+        "url_prefix": "https://overpass-api.openhistoricalmap.org",
+        "wizard_area": "global"
+    },
+    "sources": {
+        "master": {
+            "min_count_tags": 1,
+            "min_tag_combination_count": 1,
+            "min_count_for_map": 1,
+            "min_count_relations_per_type": 1
+        }
+    }
+}
