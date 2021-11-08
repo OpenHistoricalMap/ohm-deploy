@@ -561,16 +561,16 @@ osm-seed:
 # Variables for taginfo
 # ====================================================================================================
   taginfo:
-    enabled: false
+    enabled: true
     env:
       URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
       URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
-      URL_PLANET_FILE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-200526_0000.osm.pbf
-      URL_HISTORY_PLANET_FILE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/history-200526_0000.osh.pbf
+      URL_PLANET_FILE: '-'
+      URL_HISTORY_PLANET_FILE: '-'
       TIME_UPDATE_INTERVAL: 7d
       INSTANCE_NAME: 'OHM Taginfo'
-      INSTANCE_DESCRIPTION: 'This is a <b>taginfo test instance</b>'
-      INSTANCE_ICON: /img/logo/world.png
+      INSTANCE_DESCRIPTION: '<b>taginfo instance</b>'
+      INSTANCE_ICON: https://wiki.openstreetmap.org/w/images/e/e6/Ohm_logo_small.png
       INSTANCE_CONTACT: 'admin@openhistoricalmap.org'
       TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
       DOWNLOAD_DB: 'languages wiki'
