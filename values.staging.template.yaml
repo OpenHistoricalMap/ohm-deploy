@@ -268,7 +268,7 @@ osm-seed:
       label_value: ohm-non-tiler
     env:
       RESTORE_URL_FILE: ''
-      DB_ACTION: restore
+      DB_ACTION: backup
       CLEAN_BACKUPS: false
     resources:
       enabled: false
