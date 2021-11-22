@@ -260,8 +260,8 @@ osm-seed:
   # ====================================================================================================
 
   dbBackupRestore:
-    enabled: false
-    schedule: '* * * * *'
+    enabled: true
+    schedule: '0 * * * *'
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
