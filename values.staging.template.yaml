@@ -270,6 +270,7 @@ osm-seed:
       RESTORE_URL_FILE: ''
       DB_ACTION: backup
       CLEAN_BACKUPS: false
+      AWS_S3_BUCKET: s3://osmseed-staging
     resources:
       enabled: false
       requests:
