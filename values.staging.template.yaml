@@ -260,16 +260,17 @@ osm-seed:
   # ====================================================================================================
 
   dbBackupRestore:
-    enabled: false
-    schedule: '* * * * *'
+    enabled: true
+    schedule: '* */24 * * *'
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
       label_value: ohm-non-tiler
     env:
       RESTORE_URL_FILE: ''
-      DB_ACTION: restore
+      DB_ACTION: backup
       CLEAN_BACKUPS: false
+      AWS_S3_BUCKET: s3://osmseed-staging
     resources:
       enabled: false
       requests:
