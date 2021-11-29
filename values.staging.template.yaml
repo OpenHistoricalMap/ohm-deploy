@@ -545,6 +545,8 @@ osm-seed:
       label_value: ohm-non-tiler
     env:
       BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
+      OSMSEED_WEB_API_DOMAIN: staging.openhistoricalmap.org
+      OSMSEED_OVERPASS_API_DOMAIN: staging-overpass-api.openhistoricalmap.org
     replicaCount: 1
     resources:
       enabled: false

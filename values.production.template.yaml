@@ -515,7 +515,9 @@ osm-seed:
   nominatimApi:
     enabled: true
     env:
-      BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
+      BASE_URL: 'https://nominatim.openhistoricalmap.org/'
+      OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
+      OSMSEED_OVERPASS_API_DOMAIN: overpass-api.openhistoricalmap.org
     replicaCount: 1
     resources:
       enabled: false
