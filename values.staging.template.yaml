@@ -57,7 +57,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: db
     env:
       POSTGRES_DB: {{STAGING_DB}}
       POSTGRES_USER: {{STAGING_DB_USER}}
@@ -87,7 +87,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     replicaCount: 2
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
@@ -118,7 +118,7 @@ osm-seed:
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
-      label_value: ohm-non-tiler
+      label_value: web
     resources:
       enabled: false
       requests:
@@ -135,7 +135,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     schedule: '50 6 * * *'
     env:
       OVERWRITE_PLANET_FILE: true
@@ -156,7 +156,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     schedule: '0 0 * * 0'
     env:
       OVERWRITE_FHISTORY_FILE: false
@@ -177,7 +177,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     replicaCount: 1
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: 35.233.232.82
@@ -204,7 +204,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     resources:
       enabled: false
       requests:
@@ -222,7 +222,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     env:
       URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
     resources:
@@ -242,7 +242,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     env: 
       URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
       OSM_FILE_ACTION: simple_pbf
@@ -265,7 +265,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: db
     env:
       RESTORE_URL_FILE: ''
       DB_ACTION: backup
@@ -289,7 +289,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm
+      label_value: tiler
     env:
       POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
       POSTGRES_DB: {{STAGING_TILER_DB}}
@@ -335,7 +335,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm
+      label_value: tiler
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210913_0800.osm.pbf
@@ -368,7 +368,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm
+      label_value: tiler
     replicaCount: 1
     commad: './start.sh'
     # Set staticIp, if you are using cloudProvider=gcp
@@ -392,7 +392,7 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
       AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "16Gi"
         cpu: "8"
@@ -408,7 +408,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm
+      label_value: tiler
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
@@ -428,7 +428,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: tiler
     replicaCount: 1
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: 35.233.232.82
@@ -454,7 +454,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     replicaCount: 1
     staticIp: c
     env:
@@ -506,7 +506,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     env:
       PG_PORT: {{STAGING_NOMINATIM_PG_PORT}}
       PG_USER: {{STAGING_NOMINATIM_PG_USER}}
@@ -542,7 +542,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     env:
       BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
       OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
@@ -567,7 +567,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup-type
-      label_value: ohm-non-tiler
+      label_value: web
     env:
       OVERPASS_META: 'yes'
       OVERPASS_MODE: 'init'
@@ -593,6 +593,10 @@ osm-seed:
 # ====================================================================================================
   taginfo:
     enabled: true
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup-type
+      label_value: web
     env:
       URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
       URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
