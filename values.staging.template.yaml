@@ -136,7 +136,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: web
-    schedule: '50 6 * * *'
+    schedule: '* */24 * * *'
     env:
       OVERWRITE_PLANET_FILE: true
     resources:
