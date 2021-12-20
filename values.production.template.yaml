@@ -216,7 +216,6 @@ osm-seed:
   # ====================================================================================================
   populateApidb:
     enabled: false
-    image: 'developmentseed/osmseed-populate-apidb'
     env:
       URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
     resources:
@@ -233,7 +232,6 @@ osm-seed:
   # ====================================================================================================
   osmProcessor:
     enabled: false
-    image: 'developmentseed/osmseed-osm-processor'
     env: 
       URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
       OSM_FILE_ACTION: simple_pbf
@@ -407,7 +405,6 @@ osm-seed:
   # ====================================================================================================
   tilerVisor:
     enabled: false
-    image: 'developmentseed/osmseed-tiler-visor'
     replicaCount: 1
     nodeSelector:
       enabled: true
