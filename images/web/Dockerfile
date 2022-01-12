@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'remove welcome mat, fix timeslider'
+RUN echo 'fix https in vendor files, add staging/prod switch on map style sprite'
 RUN git fetch
-RUN git checkout 313932a0c65a6105c2bb841f31069fdd1b455c1f
+RUN git checkout ef293ef88c32e6e71f9ed7f6fd9f35ced8aeb104
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
