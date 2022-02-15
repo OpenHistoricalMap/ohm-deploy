@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'update em-GB locale file'
+RUN echo 'update em-GB locale file, CJK characters'
 RUN git fetch
-RUN git checkout fc8555bec0e495483c5614a5e0d56999f8ed7d5e
+RUN git checkout d7780127b51b1e26cf1477c1b1d14e068557cf86
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
