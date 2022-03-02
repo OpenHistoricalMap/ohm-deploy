@@ -11,17 +11,14 @@ function downloadExpiredTiles() {
     dateStr="$(date -d '-1 min' +'%Y-%m-%dT%H:%M:%S.000Z')"
     # Store log of request
     echo "Date:${dateStr}" >>$s3_tiles_expired_log
-    echo "Getting expired tiles from... $dateStr"
+    # echo "Getting expired tiles from... $dateStr"
     if [ "$CLOUDPROVIDER" == "aws" ]; then
         # Download list of latest files according to dateStr
         today=$(date +%Y%m%d)
-        set -x
-        aws s3api list-objects-v2 \
+        (set -x; aws s3api list-objects-v2 \
             --bucket ${AWS_S3_BUCKET#*"s3://"} \
             --prefix imposm/imposm3_expire_dir/$today \
-            --query "Contents[?LastModified>'$dateStr']" >$workDir/imposm/tmp_s3_file.json
-        set +x
-
+            --query "Contents[?LastModified>'$dateStr']" >$workDir/imposm/tmp_s3_file.json )
         # Filter tiles with extencion .tiles
         cat $workDir/imposm/tmp_s3_file.json |
             jq -c '[ .[] | select( .Key | contains(".tiles")) ]' |
@@ -30,9 +27,7 @@ function downloadExpiredTiles() {
 
         # Download the expired tiles that is needed for cleaning cache
         while IFS= read -r tileFile; do
-            set -x
-            aws s3 cp ${AWS_S3_BUCKET}/${tileFile} $workDir/${tileFile}
-            set +x
+            (set -x; aws s3 cp ${AWS_S3_BUCKET}/${tileFile} $workDir/${tileFile})
             echo "${AWS_S3_BUCKET}/${tileFile}" >>$s3_tiles_expired_log
         done <$workDir/imposm/tmp_s3_file.list
 
