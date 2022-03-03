@@ -109,7 +109,11 @@ osm-seed:
       limits:
         memory: "2Gi"
         cpu: "2"
-
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 3
+      cpuUtilization: 80
   # ====================================================================================================
   # Variables for memcached. Memcached is used to store session cookies
   # ====================================================================================================
