@@ -31,9 +31,8 @@ RUN apk add --update \
     musl-dev \
     openssl-dev
 
-# Install aws-cli and  gsutil
-RUN pip3 install awscli \
-    && pip3 install gsutil
+# Install aws-cli
+RUN pip3 install awscli
 
 RUN pip3 install mercantile \
     && apk del build-deps \
