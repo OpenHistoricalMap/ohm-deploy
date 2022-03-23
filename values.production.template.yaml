@@ -351,8 +351,6 @@ osm-seed:
       label_value: tiler
     replicaCount: 2
     commad: './start.sh'
-    # Set staticIp, if you are using cloudProvider=gcp
-    # staticIp: 35.233.232.82
     env:
       TILER_SERVER_PORT: 9090
       TILER_CACHE_TYPE: s3
