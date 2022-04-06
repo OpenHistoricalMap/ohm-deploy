@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'another update to default OHM map style'
+RUN echo 'match z2 vector with raster tiles, plus map style updates'
 RUN git fetch
-RUN git checkout ed4215295ef0ecc64b57a50025db9b0f06d40894
+RUN git checkout 66e66b3681d2a02c1d4817d78c2d5df161c58cbb
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
