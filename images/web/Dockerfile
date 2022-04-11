@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'match z2 vector with raster tiles, plus map style updates'
+RUN echo 'add maxbounds to map to avoid issues with syncing vector and raster tiles at extreme off-map zooms'
 RUN git fetch
-RUN git checkout 66e66b3681d2a02c1d4817d78c2d5df161c58cbb
+RUN git checkout 025b86e94a8b7e7ee8d1192f9ae2f7ffc5c7065f
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
