@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'add maxbounds to map to avoid issues with syncing vector and raster tiles at extreme off-map zooms'
+RUN echo 'fix maxbounds order of lat lng'
 RUN git fetch
-RUN git checkout 025b86e94a8b7e7ee8d1192f9ae2f7ffc5c7065f
+RUN git checkout 3f8d4b5a312e4ec77d91f08de81597ef06115b6a
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
