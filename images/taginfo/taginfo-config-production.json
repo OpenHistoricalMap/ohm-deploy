@@ -12,7 +12,7 @@
     },
     "turbo": {
         "max_auto": 1000,
-        "url_prefix": "https://overpass-api.openhistoricalmap.org",
+        "url_prefix": "https://openhistoricalmap.github.io/overpass-turbo/?",
         "wizard_area": "global"
     },
     "sources": {
