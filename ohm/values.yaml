@@ -15,3 +15,7 @@ osm-seed:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  tmApi:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
