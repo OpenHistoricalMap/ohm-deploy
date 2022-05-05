@@ -22,7 +22,7 @@ osm-seed:
   # AWS: Specify ARN for SSL certificate, currently assumes a single wildcard cert
   # ====================================================
 
-  AWS_SSL_ARN: false
+  AWS_SSL_ARN: {{AWS_SSL_ARN}}
 
   # Specify serviceType.
   #
