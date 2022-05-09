@@ -17,33 +17,37 @@ osm-seed:
   # AWS SSL ARN
   AWS_SSL_ARN: {{AWS_SSL_ARN}}
 
-  # ====================================================================================================
-  # GCP: In case you are using the cloudProvider=gcp set the below variables
-  # ====================================================================================================
-  GCP_STORAGE_BUCKET: gs://osmseed-production
+  # Specify serviceType.
+  #
+  # serviceType can be one of three values: 'NodePort', 'ClusterIP' or 'LoadBalancer'
+  # Use `NodePort` for local testing on minikube.
+  #
+  # The recommended setting is `ClusterIP`, and then following the instructions to
+  # point a DNS record to the cluster IP address. This will setup the ingress rules
+  # for all services as subdomains and configure SSL using Lets Encrypt.
+  #
+  # If you specify `LoadBalancer` as the service type, if you also specify
+  # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
+  # as the SSL certificate for your services. Else, you will need to configure
+  # SSL separately. 
+  serviceType: LoadBalancer
+
+  # Domain that is pointed to the clusterIP
+  # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
+  # Then, the cluster configuration will setup services at their respective subdomains:
+  # - web.osmseed.example.com
+  # - overpass.osmseed.example.com
+  # - nominatim.osmseed.example.com
+  # - etc.
+  domain: osmseed-staging.openhistoricalmap.org
 
   # ====================================================================================================
-  # Ingress variables
+  # Configuration for Lets Encrypt setup
   # ====================================================================================================
-  ingress:
-    enabled: false
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    path: /
-    hosts:
-      - chart-example.local
-    tls: []
 
-  # ====================================================================================================
-  # Domain app configuration
-  # ====================================================================================================
-  domain:
-    #enabled, If you set  enabled=true, you should uncomment the following configurations
-    enabled: true
-    # domainName, Add here your domain or the fixed IP  where the server is running
-    domainName: {{PRODUCTION_DOMAIN_NAME}}
-    protocolo: https
+  # Admin Email address used when generating Lets Encrypt certificates.
+  # You will be notified of expirations, etc. on this email address.
+  adminEmail: ruben@developmentseed.org
 
   # ====================================================================================================
   # Variables for osm-seed database
