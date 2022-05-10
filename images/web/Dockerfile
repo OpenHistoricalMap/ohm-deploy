@@ -117,9 +117,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 
-RUN echo 'fix maxbounds order of lat lng'
+RUN echo 'add Arabic support'
 RUN git fetch
-RUN git checkout 3f8d4b5a312e4ec77d91f08de81597ef06115b6a
+RUN git checkout ddc0bfc74da13276d819276a3d5ae1d3ef7925f2
 
 # Install the javascript runtime required by the `execjs` gem in
 RUN apt-get install -y libv8-dev
