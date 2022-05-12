@@ -11,7 +11,7 @@ services:
     volumes:
       - ../data/db-data:/var/lib/postgresql/data
     env_file:
-      - ./.env
+      - ./.env.example
   web:
     image: osmseed-web:v1
     build:
@@ -20,7 +20,7 @@ services:
     ports:
       - '80:80'
     env_file:
-      - ./.env
+      - ./.env.example
   # tiler-db:
   #   image: osmseed-tiler-db:v1
   #   build:
@@ -31,7 +31,7 @@ services:
   #   volumes:
   #     - ./tiler-db-data:/var/lib/postgresql/data
   #   env_file:
-  #     - ./.env
+  #     - ./.env.example
   # tiler-imposm:
   #   image: osmseed-tiler-imposm:v1
   #   build:
@@ -40,7 +40,7 @@ services:
   #   volumes:
   #     - ./tiler-imposm-data-2:/mnt/data
   #   env_file:
-  #     - ./.env
+  #     - ./.env.example
   #   command: >
   #     /bin/bash -c "./start.sh"
   # tiler-server:
@@ -57,7 +57,7 @@ services:
   #     echo Starting tiles server!;
   #     ./start.sh"
   #   env_file:
-  #     - ./.env
+  #     - ./.env.example
   # tiler-cache-cleaner:
   #   image: tiler-cache-cleaner:v1
   #   build:
@@ -70,4 +70,4 @@ services:
   #     echo Starting cache cleaner!;
   #     ./cache_cleaner.sh"
   #   env_file:
-  #     - ./.env
+  #     - ./.env.example
