@@ -21,6 +21,8 @@ services:
       - '80:80'
     env_file:
       - ./.env.example
+    volumes:
+      - ./../../ohm-website:/var/www
   # tiler-db:
   #   image: osmseed-tiler-db:v1
   #   build:
