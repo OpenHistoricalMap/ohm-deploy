@@ -46,7 +46,7 @@ docker-compose exec web bash
 Once in the container run the following CLI:
 
 ```sh
-workdir="/var/www"
+export workdir="/var/www"
 export RAILS_ENV=production
 #### Because we can not set up many env variable in build process, we are going to process here!
 
