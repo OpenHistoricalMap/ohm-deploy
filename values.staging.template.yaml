@@ -46,7 +46,7 @@ osm-seed:
   # - overpass.osmseed.example.com
   # - nominatim.osmseed.example.com
   # - etc.
-  domain: osmseed-staging.openhistoricalmap.org
+  domain: staging.openhistoricalmap.org
 
   # ====================================================================================================
   # Configuration for Lets Encrypt setup
