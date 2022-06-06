@@ -21,34 +21,66 @@ docker-compose exec web bash
 ### Step 1: Clone [ohm-website](https://github.com/OpenHistoricalMap/ohm-website) and [ohm-deploy](https://github.com/OpenHistoricalMap/ohm-deploy/) repositories in the same level
 
 ```sh
-git clone git@github.com:OpenHistoricalMap/ohm-website.git && cd ohm-website && git checkout merge-osm-website
-cd ../
-git clone git@github.com:OpenHistoricalMap/ohm-deploy.git && cd ohm-deploy && git checkout new_web_version
 
+git clone https://github.com/OpenHistoricalMap/ohm-website.git && cd ohm-website && git checkout merge-osm-website
+cd ../
+git clone https://github.com/OpenHistoricalMap/ohm-deploy.git && cd ohm-deploy && git checkout new_web_version
+cd ../
 ```
 
-### Step 2: Open a new terminal tab and and build and start the containers
+### Step 2:
+
+Replace the web section in the file `ohm-deploy/images/docker-compose.yml` with the following configuration:
+
+```yaml
+web:
+  image: osmseed-web:v1
+  build:
+    context: ./web
+    dockerfile: Dockerfile
+  ports:
+    - '80:80'
+  env_file:
+    - ./.env.example
+  volumes:
+    - ./../../ohm-website:/var/www
+```
+
+### Step 3:
+
+Edit `ohm-deploy/images/web/Dockerfile` and replace the CMD line as following:
+
+```
+# CMD sh $workdir/start.sh
+CMD ["tail", "-f", "/dev/null"]
+```
+
+### Step 4: Open a new terminal tab and and build and start the containers
 
 ```sh
-# cd ohm-deploy
-cd images/
+cd ohm-deploy/images/
 docker-compose up --build
 ```
 
-### Step 3: Accessing to the container environment
+This will show the PostgreSQL server setting up its initial database then becoming ready for connections.
 
-The following code will access to the container en attached the `ohm-website` folder to `/var/www`, so any change in `ohm-website` will reflect in the container
+### Step 5: Creating config files in the container environment
+
+Run the following CLI under `ohm-deploy/images/` where the `docker-compose.yml` is found.
+
+The following code will connect to the "web" container which attaches the `../../ohm-website` folder to `/var/www`, so any change in `ohm-website` will be reflected in the container's `/var/www` and vice versa.
 
 ```sh
 docker-compose exec web bash
 ```
 
-Once in the container run the following CLI:
+Once in the container run the following CLI to fill in settings:
 
 ```sh
+#### MOST ENV VARIABLES ARE SET IN DOCKER CONFIG e.g. DB, MAILER, ETC.
+
 export workdir="/var/www"
 export RAILS_ENV=production
-#### Because we can not set up many env variable in build process, we are going to process here!
 
 #### SETTING UP THE PRODUCTION DATABASE
 echo " # Production DB
@@ -77,21 +109,44 @@ sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings
 #### SET UP ID KEY
 sed -i -e 's/#id_key: ""/id_key: "'$OSM_id_key'"/g' $workdir/config/settings.yml
 
-## SET NOMINATIM URL
-sed -i -e 's/nominatim.openstreetmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
+#### SET NOMINATIM URL
+sed -i -e "s@https://nominatim.openstreetmap.org/@$NOMINATIM_URL@g" $workdir/config/settings.yml
 
+#### CREATE A BLANK LOCAL SETTINGS FILE
+touch $workdir/config/settings.local.yml
+
+### STORAGE CONFIG
+cp $workdir/config/example.storage.yml $workdir/config/storage.yml
 ```
 
-### Step 4: Testing Rails CLI
+### Step 6: Running Rails CLI
+
+Still within the container, run these commands to install Rake packages and to test everything.
+
+You will see warnings about pngcrush, jpegtran, and other image format tools; ignore them.
 
 ```sh
 bundle exec rails db:migrate
+
 bundle exec rake yarn:install
+yarnpkg --ignore-engines install
+
 bundle exec rake i18n:js:export
-## The following line is falling for assets compilation
+
+## asset compilation fails the first time; run yarnpkg after it fails, then try again
 bundle exec rake assets:precompile --trace
+yarnpkg --ignore-engines install
+bundle exec rake assets:precompile --trace
+
 # bundle exec rake jobs:work
 # bundle exec rails test:all
+```
+
+### Step 7: Start the web server
+
+Still within the container:
+
+```
 ## Start server in port 80
 bundle exec rails server -p 80
 ```
