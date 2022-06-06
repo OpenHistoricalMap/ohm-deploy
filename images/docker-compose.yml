@@ -11,18 +11,30 @@ services:
     volumes:
       - ./data/db-data:/var/lib/postgresql/data
     env_file:
-      - ./.env.example
-  web:
-    image: osmseed-web:v1
-    build:
-      context: ./web
-      dockerfile: Dockerfile
-    ports:
-      - '80:80'
-    env_file:
-      - ./.env.example
+      - ./.env
+  # web:
+  #   image: osmseed-web:v1
+  #   build:
+  #     context: ./web
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '80:80'
+  #   env_file:
+  #     - ./.env
+
+  db-backup-restore:
+    image: developmentseed/osmseed-backup-restore:v1
     volumes:
-      - ./../../ohm-website:/var/www
+      - ./../:/mnt/data
+    command: >
+      /bin/bash -c "
+        /start.sh
+      "
+    env_file:
+      -  ./.env
+
+
+
   # tiler-db:
   #   image: osmseed-tiler-db:v1
   #   build:
