@@ -23,7 +23,10 @@ services:
   #     - ./.env
 
   db-backup-restore:
-    image: developmentseed/osmseed-backup-restore:v1
+    image: osmseed-backup-restore:v1
+    build:
+      context: ./backup-restore
+      dockerfile: Dockerfile
     volumes:
       - ./../:/mnt/data
     command: >
@@ -32,9 +35,6 @@ services:
       "
     env_file:
       -  ./.env
-
-
-
   # tiler-db:
   #   image: osmseed-tiler-db:v1
   #   build:
