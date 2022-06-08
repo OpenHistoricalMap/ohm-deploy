@@ -1,646 +1,647 @@
 osm-seed:
 
+    # ====================================================================================================
+    # ====================================================================================================
+    # ==================================Global Configurations=============================================
+    # ====================================================================================================
+    # ====================================================================================================
+    
+    # The version of the image group in osm-seed, get it here: https://hub.docker.com/r/developmentseed/osmseed-web/tags/
+    # osmSeedVersion: ohm-b8a0ed1
+  
+    environment: staging
+    # cloudProvider is provider where you are going to deploy osm-seed, it could be: aws, gcp, minikube
+    cloudProvider: aws
+  
+    # ====================================================================================================
+    # AWS: In case you are using the cloudProvider=aws set the below variables, We are assuming the nodes has a policies access to S3
+    # ====================================================================================================
+    AWS_S3_BUCKET: {{STAGING_S3_BUCKET}}
+  
+    # ====================================================
+    # AWS: Specify ARN for SSL certificate, currently assumes a single wildcard cert
+    # ====================================================
+  
+    AWS_SSL_ARN: {{AWS_SSL_ARN}}
+  
+    # Specify serviceType.
+    #
+    # serviceType can be one of three values: 'NodePort', 'ClusterIP' or 'LoadBalancer'
+    # Use `NodePort` for local testing on minikube.
+    #
+    # The recommended setting is `ClusterIP`, and then following the instructions to
+    # point a DNS record to the cluster IP address. This will setup the ingress rules
+    # for all services as subdomains and configure SSL using Lets Encrypt.
+    #
+    # If you specify `LoadBalancer` as the service type, if you also specify
+    # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
+    # as the SSL certificate for your services. Else, you will need to configure
+    # SSL separately. 
+    serviceType: LoadBalancer
+  
+    # Domain that is pointed to the clusterIP
+    # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
+    # Then, the cluster configuration will setup services at their respective subdomains:
+    # - web.osmseed.example.com
+    # - overpass.osmseed.example.com
+    # - nominatim.osmseed.example.com
+    # - etc.
+    domain: staging.openhistoricalmap.org
+  
+    # ====================================================================================================
+    # Configuration for Lets Encrypt setup
+    # ====================================================================================================
+  
+    # Admin Email address used when generating Lets Encrypt certificates.
+    # You will be notified of expirations, etc. on this email address.
+    adminEmail: ruben@developmentseed.org
+    # ====================================================================================================
+    # ====================================================================================================
+    # ==================================Pods Configurations===============================================
+    # ====================================================================================================
+    # ====================================================================================================
+    # ====================================================================================================
+    # Variables for osm-seed database
+    # ====================================================================================================
+    db:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: db
+      env:
+        POSTGRES_DB: {{STAGING_DB}}
+        POSTGRES_USER: {{STAGING_DB_USER}}
+        POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
+      persistenceDisk:
+        enabled: true
+        accessMode: ReadWriteOnce
+        mountPath: /var/lib/postgresql/data
+        subPath: postgresql-db
+        # In case cloudProvider: aws
+        AWS_ElasticBlockStore_volumeID : {{STAGING_DB_EBS}}
+        AWS_ElasticBlockStore_size: 500Gi
+      resources:
+        enabled: false
+        requests:
+          memory: "10Gi"
+          cpu: "5"
+        limits:
+          memory: "10Gi"
+          cpu: "5"
+  
+    # ====================================================================================================
+    # Variables for osm-seed website
+    # ====================================================================================================
+    web:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      replicaCount: 2
+      # Set staticIp, if you are using cloudProvider=gcp
+      staticIp: c
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      env:
+        MAILER_ADDRESS: {{MAILER_ADDRESS}}
+        MAILER_DOMAIN: {{MAILER_DOMAIN}}
+        MAILER_USERNAME: {{MAILER_USERNAME}}
+        MAILER_PASSWORD: {{MAILER_PASSWORD}}
+        OSM_id_key: {{STAGING_ID_KEY}}
+        MAILER_FROM: no-reply@openhistoricalmap.org
+        NOMINATIM_URL: nominatim-staging.openhistoricalmap.org
+        NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
+        NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
+      resources:
+        enabled: false
+        requests:
+          memory: "1Gi"
+          cpu: "2"
+        limits:
+          memory: "2Gi"
+          cpu: "2"
+      autoscaling:
+        enabled: false
+        minReplicas: 1
+        maxReplicas: 3
+        cpuUtilization: 80
+    # ====================================================================================================
+    # Variables for memcached. Memcached is used to store session cookies
+    # ====================================================================================================
+    memcached:
+      enabled: true
+      nodeSelector:
+        enabled: false
+        label_key: nodegroup_type
+        label_value: web
+      resources:
+        enabled: false
+        requests:
+          memory: "8Gi"
+          cpu: "2"
+        limits:
+          memory: "8Gi"
+          cpu: "2"
+    # ====================================================================================================
+    # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
+    # ====================================================================================================
+    planetDump:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      schedule: '* */24 * * *'
+      env:
+        OVERWRITE_PLANET_FILE: true
+      resources:
+        enabled: false
+        requests:
+          memory: "14Gi"
+          cpu: "4"
+        limits:
+          memory: "16Gi"
+          cpu: "4"
+  
+    # ====================================================================================================
+    # Variables for full-history container
+    # ====================================================================================================
+    fullHistory:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      schedule: '0 0 * * 0'
+      env:
+        OVERWRITE_FHISTORY_FILE: false
+      resources:
+        enabled: false
+        requests:
+          memory: "14Gi"
+          cpu: "4"
+        limits:
+          memory: "16Gi"
+          cpu: "4"
+  
+    # ====================================================================================================
+    # Variables for id-editor
+    # ====================================================================================================
+    idEditor:
+      enabled: false
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      replicaCount: 1
+      # Set staticIp, if you are using cloudProvider=gcp
+      staticIp: 35.233.232.82
+      env:
+        ID_EDITOR_PORT: 80
+        OSM_API_PROTOCOL: http
+        OSM_API_DOMAIN: a03968e659140407d87c7e30e02372af-131263895.us-east-1.elb.amazonaws.com
+        OAUTH_CONSUMER_KEY: 8NxmyUVwO4beulAzSoMv1zOcghz2rWrwmrLZ4Sis
+        OAUTH_SECRET: q30neDRV1oqDArJyqMEnGVDr0BnUNVUiwxM7QuHN
+      resources:
+        enabled: false
+        requests:
+          memory: "300Mi"
+          cpu: "0.4"
+        limits:
+          memory: "400Mi"
+          cpu: "0.5"
+  
+    # ====================================================================================================
+    # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
+    # ====================================================================================================
+    replicationJob:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      resources:
+        enabled: false
+        requests:
+          memory: "20Gi"
+          cpu: "8"
+        limits:
+          memory: "24Gi"
+          cpu: "10"
+  
+    # ====================================================================================================
+    # Variables for osm-seed to pupulate the apidb
+    # ====================================================================================================
+    populateApidb:
+      enabled: false
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      env:
+        URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
+      resources:
+        enabled: false
+        requests:
+          memory: "1Gi"
+          cpu: "2"
+        limits:
+          memory: "2Gi"
+          cpu: "2.5"
+  
+    # ====================================================================================================
+    # Variables to start a pod to process osm files
+    # ====================================================================================================
+    osmProcessor:
+      enabled: false
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      env: 
+        URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
+        OSM_FILE_ACTION: simple_pbf
+      resources:
+        enabled: false
+        requests:
+          memory: "14Gi"
+          cpu: "4"
+        limits:
+          memory: "16Gi"
+          cpu: "4"
+  
+    # ====================================================================================================
+    # Variables for restoring the DB
+    # ====================================================================================================
+  
+    dbBackupRestore:
+      enabled: true
+      schedule: '* * * * *'
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: db
+      env:
+        RESTORE_URL_FILE: https://osmseed-staging.s3.amazonaws.com/test-db/migration/osmseed-db-220608_0000.sql.gz
+        DB_ACTION: backup
+        CLEAN_BACKUPS: false
+        AWS_S3_BUCKET: s3://osmseed-staging
+      resources:
+        enabled: false
+        requests:
+          memory: "10Gi"
+          cpu: "3"
+        limits:
+          memory: "10Gi"
+          cpu: "3"
+  
+    # ====================================================================================================
+    # Variables for tiler-db
+    # ====================================================================================================
+  
+    tilerDb:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: tiler
+      env:
+        POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
+        POSTGRES_DB: {{STAGING_TILER_DB}}
+        POSTGRES_USER: {{STAGING_TILER_DB_USER}}
+        POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
+        POSTGRES_PORT: 5432
+        # for 20Gi
+        # POSTGRES_DB_MAX_CONNECTIONS: 500
+        # POSTGRES_DB_SHARED_BUFFERS: 5GB
+        # POSTGRES_DB_WORK_MEM: 15MB
+        # POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
+        # POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
+  
+        #for 15Gi
+        POSTGRES_DB_MAX_CONNECTIONS: 500
+        POSTGRES_DB_SHARED_BUFFERS: 3GB
+        POSTGRES_DB_WORK_MEM: 7MB
+        POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
+        POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
+      persistenceDisk:
+        enabled: true
+        accessMode: ReadWriteOnce
+        mountPath: /var/lib/postgresql/data
+        subPath: postgresql-d
+        # In case cloudProvider: aws
+        AWS_ElasticBlockStore_volumeID : {{STAGING_TILER_DB_EBS}}
+        AWS_ElasticBlockStore_size: 100Gi
+      resources:
+        enabled: false
+        requests:
+          memory: "15Gi"
+          cpu: "5"
+        limits:
+          memory: "15Gi"
+          cpu: "5"
+  
+    # ====================================================================================================
+    # Variables for tiler-imposm
+    # ====================================================================================================
+  
+    tilerImposm:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: tiler
+      env:
+        TILER_IMPORT_FROM: osm
+        TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220315_0800.osm.pbf
+        # TILER_IMPORT_LIMIT: https://gist.githubusercontent.com/Rub21/96bdcac5eb11f0b36ba8d0352ac537f4/raw/2606f2e207d4a0d895897a83efa1efacefd36eb4/monaco.geojson
+        #{{STAGING_TILER_IMPOSM_REPLICATION_URL}}
+        REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+        SEQUENCE_NUMBER: 662000
+        OVERWRITE_STATE: true
+      persistenceDisk:
+        enabled: true
+        accessMode: ReadWriteOnce
+        mountPath: /mnt/data
+        # In case cloudProvider: aws
+        AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_IMPOSM_EBS}}
+        AWS_ElasticBlockStore_size: 100Gi
+      resources:
+        enabled: false
+        requests:
+          memory: "20Gi"
+          cpu: "8"
+        limits:
+          memory: "24Gi"
+          cpu: "10"
+    # ====================================================================================================
+    # Variables for tiler-server
+    # ====================================================================================================
+  
+    tilerServer:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: tiler
+      replicaCount: 1
+      commad: './start.sh'
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      env:
+        TILER_SERVER_PORT: 9090
+        TILER_CACHE_TYPE: s3
+        TILER_CACHE_BASEPATH: /mnt/data
+        TILER_CACHE_MAX_ZOOM: 22
+        # in case s3
+        TILER_CACHE_REGION: us-east-1
+        TILER_CACHE_BUCKET: tiler-cache-staging
+        TILER_CACHE_AWS_ACCESS_KEY_ID: {{STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID}}
+        TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
+        # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
+      persistenceDisk:
+        enabled: false
+        accessMode: ReadWriteOnce
+        mountPath: /mnt/data
+        # In case cloudProvider: aws
+        AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
+        AWS_ElasticBlockStore_size: 100Gi
+      resources:
+        enabled: false
+        requests:
+          memory: "16Gi"
+          cpu: "8"
+        limits:
+          memory: "16Gi"
+          cpu: "8"
+  
+    # ====================================================================================================
+    # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
+    # ====================================================================================================
+    tilerServerCacheCleaner:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: tiler
+      replicaCount: 1
+      command: './cache_cleaner.sh'
+      resources:
+        enabled: false
+        requests:
+          memory: '1Gi'
+          cpu: '2'
+        limits:
+          memory: '2Gi'
+          cpu: '2'
+  
+    # ====================================================================================================
+    # Variables for tiler-visor
+    # ====================================================================================================
+    tilerVisor:
+      enabled: false
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: tiler
+      replicaCount: 1
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      # Set staticIp, if you are using cloudProvider=gcp
+      staticIp: 35.233.232.82
+      env:
+        TILER_VISOR_PROTOCOL: http
+        TILER_VISOR_PORT: 8081
+      resources:
+        enabled: false
+        requests:
+          memory: "1Gi"
+          cpu: "2"
+        limits:
+          memory: "2Gi"
+          cpu: "2"
+  
+  
+    # ====================================================================================================
+    # Variables for Tasking Manager API
+    # ====================================================================================================
+  
+    tmApi:
+      enabled: true
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      replicaCount: 1
+      staticIp: c
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      env:
+        POSTGRES_HOST: {{STAGING_TM_API_DB_HOST}}
+        POSTGRES_DB: {{STAGING_TM_API_DB}}
+        POSTGRES_PASSWORD: {{STAGING_TM_API_DB_PASSWORD}}
+        POSTGRES_USER: {{STAGING_TM_API_DB_USER}}
+        POSTGRES_PORT: 5432
+        TM_ORG_NAME: 'OpenHistoricalMap'
+        TM_ORG_CODE: 'OHM'
+        TM_ORG_URL: 'openhistoricalmap.org'
+        TM_ORG_PRIVACY_POLICY_URL: 'openhistoricalmap.org/copyright'
+        TM_ORG_GITHUB: 'github.com/openhistoricalmap'
+        OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
+        OSM_NOMINATIM_SERVER_URL: 'https://nominatim.openhistoricalmap.org'
+        OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
+        ID_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=id'
+        POTLATCH2_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=potlatch2'
+        TM_SECRET: {{STAGING_TM_API_SECRET}}
+        TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
+        TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
+        TM_EMAIL_FROM_ADDRESS: 'no-reply@openhistoricalmap.org'
+        TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
+        TM_SMTP_PORT: 25
+        TM_SMTP_USER: {{MAILER_USERNAME}}
+        TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
+        TM_DEFAULT_LOCALE: 'en'
+        TM_APP_API_URL: 'https://staging-tm-api.openhistoricalmap.org'
+        TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
+      resources:
+        enabled: false
+        requests:
+          memory: "1Gi"
+          cpu: "2"
+        limits:
+          memory: "2Gi"
+          cpu: "2"
+  
+  
   # ====================================================================================================
-  # ====================================================================================================
-  # ==================================Global Configurations=============================================
-  # ====================================================================================================
+  # Nominatim image values
   # ====================================================================================================
   
-  # The version of the image group in osm-seed, get it here: https://hub.docker.com/r/developmentseed/osmseed-web/tags/
-  # osmSeedVersion: ohm-b8a0ed1
-
-  environment: staging
-  # cloudProvider is provider where you are going to deploy osm-seed, it could be: aws, gcp, minikube
-  cloudProvider: aws
-
   # ====================================================================================================
-  # AWS: In case you are using the cloudProvider=aws set the below variables, We are assuming the nodes has a policies access to S3
+  # Variables for nominatim db
   # ====================================================================================================
-  AWS_S3_BUCKET: {{STAGING_S3_BUCKET}}
-
-  # ====================================================
-  # AWS: Specify ARN for SSL certificate, currently assumes a single wildcard cert
-  # ====================================================
-
-  AWS_SSL_ARN: {{AWS_SSL_ARN}}
-
-  # Specify serviceType.
-  #
-  # serviceType can be one of three values: 'NodePort', 'ClusterIP' or 'LoadBalancer'
-  # Use `NodePort` for local testing on minikube.
-  #
-  # The recommended setting is `ClusterIP`, and then following the instructions to
-  # point a DNS record to the cluster IP address. This will setup the ingress rules
-  # for all services as subdomains and configure SSL using Lets Encrypt.
-  #
-  # If you specify `LoadBalancer` as the service type, if you also specify
-  # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
-  # as the SSL certificate for your services. Else, you will need to configure
-  # SSL separately. 
-  serviceType: LoadBalancer
-
-  # Domain that is pointed to the clusterIP
-  # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
-  # Then, the cluster configuration will setup services at their respective subdomains:
-  # - web.osmseed.example.com
-  # - overpass.osmseed.example.com
-  # - nominatim.osmseed.example.com
-  # - etc.
-  domain: staging.openhistoricalmap.org
-
-  # ====================================================================================================
-  # Configuration for Lets Encrypt setup
-  # ====================================================================================================
-
-  # Admin Email address used when generating Lets Encrypt certificates.
-  # You will be notified of expirations, etc. on this email address.
-  adminEmail: ruben@developmentseed.org
-  # ====================================================================================================
-  # ====================================================================================================
-  # ==================================Pods Configurations===============================================
-  # ====================================================================================================
-  # ====================================================================================================
-  # ====================================================================================================
-  # Variables for osm-seed database
-  # ====================================================================================================
-  db:
-    enabled: true
-    nodeSelector:
+    nominatimDb:
       enabled: true
-      label_key: nodegroup_type
-      label_value: db
-    env:
-      POSTGRES_DB: {{STAGING_DB}}
-      POSTGRES_USER: {{STAGING_DB_USER}}
-      POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
-    persistenceDisk:
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      env:
+        PG_PORT: {{STAGING_NOMINATIM_PG_PORT}}
+        PG_USER: {{STAGING_NOMINATIM_PG_USER}}
+        PG_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
+        PG_DATABASE: {{STAGING_NOMINATIM_PG_DATABASE}}
+        OSM_URL_FILE: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210503_0800.osm.pbf
+        THREADS: 4
+        REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+        REPLICATION_MAXINTERVAL: 30
+        REPLICATION_UPDATE_INTERVAL: 75
+        REPLICATION_RECHECK_INTERVAL: 60
+      persistenceDisk:
+        enabled: true
+        accessMode: ReadWriteOnce
+        mountPath: /var/lib/postgresql/data
+        subPath: nominatim-pgdata
+        AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
+        AWS_ElasticBlockStore_size: 100Gi
+      resources:
+        enabled: false
+        requests:
+          memory: '1Gi'
+          cpu: '1'
+        limits:
+          memory: '2Gi'
+          cpu: '1'
+  
+  # ====================================================================================================
+  # Variables for nominatim api
+  # ====================================================================================================
+    nominatimApi:
       enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/data
-      subPath: postgresql-db
-      # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID : {{STAGING_DB_EBS}}
-      AWS_ElasticBlockStore_size: 500Gi
-    resources:
-      enabled: false
-      requests:
-        memory: "10Gi"
-        cpu: "5"
-      limits:
-        memory: "10Gi"
-        cpu: "5"
-
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      env:
+        BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
+        OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
+        OSMSEED_OVERPASS_API_DOMAIN: overpass-api.openhistoricalmap.org
+      replicaCount: 1
+      resources:
+        enabled: false
+        requests:
+          memory: '1Gi'
+          cpu: '2'
+        limits:
+          memory: '2Gi'
+          cpu: '2'
+      nodeSelector:
+        enabled: false
+  
   # ====================================================================================================
-  # Variables for osm-seed website
+  # Variables for overpass-api
   # ====================================================================================================
-  web:
-    enabled: false
-    nodeSelector:
+    overpassApi:
       enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    replicaCount: 2
-    # Set staticIp, if you are using cloudProvider=gcp
-    staticIp: c
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    env:
-      MAILER_ADDRESS: {{MAILER_ADDRESS}}
-      MAILER_DOMAIN: {{MAILER_DOMAIN}}
-      MAILER_USERNAME: {{MAILER_USERNAME}}
-      MAILER_PASSWORD: {{MAILER_PASSWORD}}
-      OSM_id_key: {{STAGING_ID_KEY}}
-      MAILER_FROM: no-reply@openhistoricalmap.org
-      NOMINATIM_URL: nominatim-staging.openhistoricalmap.org
-      NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
-      NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
-    resources:
-      enabled: false
-      requests:
-        memory: "1Gi"
-        cpu: "2"
-      limits:
-        memory: "2Gi"
-        cpu: "2"
-    autoscaling:
-      enabled: false
-      minReplicas: 1
-      maxReplicas: 3
-      cpuUtilization: 80
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      env:
+        OVERPASS_META: 'yes'
+        OVERPASS_MODE: 'init'
+        OVERPASS_PLANET_URL: 'http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210428_0800.osm.pbf'
+        OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
+        OVERPASS_RULES_LOAD: '10'
+        OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
+      persistenceDisk:
+        enabled: true
+        accessMode: ReadWriteOnce
+        AWS_ElasticBlockStore_volumeID: {{STAGING_OVERPASS_API_DB_EBS}}
+        AWS_ElasticBlockStore_size: 200Gi
+      resources:
+        enabled: false
+        requests:
+          memory: '1Gi'
+          cpu: '2'
+        limits:
+          memory: '2Gi'
+          cpu: '2'
   # ====================================================================================================
-  # Variables for memcached. Memcached is used to store session cookies
+  # Variables for taginfo
   # ====================================================================================================
-  memcached:
-    enabled: false
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    resources:
-      enabled: false
-      requests:
-        memory: "8Gi"
-        cpu: "2"
-      limits:
-        memory: "8Gi"
-        cpu: "2"
-  # ====================================================================================================
-  # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
-  # ====================================================================================================
-  planetDump:
-    enabled: false
-    nodeSelector:
+    taginfo:
       enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    schedule: '* */24 * * *'
-    env:
-      OVERWRITE_PLANET_FILE: true
-    resources:
-      enabled: false
-      requests:
-        memory: "14Gi"
-        cpu: "4"
-      limits:
-        memory: "16Gi"
-        cpu: "4"
-
-  # ====================================================================================================
-  # Variables for full-history container
-  # ====================================================================================================
-  fullHistory:
-    enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    schedule: '0 0 * * 0'
-    env:
-      OVERWRITE_FHISTORY_FILE: false
-    resources:
-      enabled: false
-      requests:
-        memory: "14Gi"
-        cpu: "4"
-      limits:
-        memory: "16Gi"
-        cpu: "4"
-
-  # ====================================================================================================
-  # Variables for id-editor
-  # ====================================================================================================
-  idEditor:
-    enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    replicaCount: 1
-    # Set staticIp, if you are using cloudProvider=gcp
-    staticIp: 35.233.232.82
-    env:
-      ID_EDITOR_PORT: 80
-      OSM_API_PROTOCOL: http
-      OSM_API_DOMAIN: a03968e659140407d87c7e30e02372af-131263895.us-east-1.elb.amazonaws.com
-      OAUTH_CONSUMER_KEY: 8NxmyUVwO4beulAzSoMv1zOcghz2rWrwmrLZ4Sis
-      OAUTH_SECRET: q30neDRV1oqDArJyqMEnGVDr0BnUNVUiwxM7QuHN
-    resources:
-      enabled: false
-      requests:
-        memory: "300Mi"
-        cpu: "0.4"
-      limits:
-        memory: "400Mi"
-        cpu: "0.5"
-
-  # ====================================================================================================
-  # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
-  # ====================================================================================================
-  replicationJob:
-    enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    resources:
-      enabled: false
-      requests:
-        memory: "20Gi"
-        cpu: "8"
-      limits:
-        memory: "24Gi"
-        cpu: "10"
-
-  # ====================================================================================================
-  # Variables for osm-seed to pupulate the apidb
-  # ====================================================================================================
-  populateApidb:
-    enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    env:
-      URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
-    resources:
-      enabled: false
-      requests:
-        memory: "1Gi"
-        cpu: "2"
-      limits:
-        memory: "2Gi"
-        cpu: "2.5"
-
-  # ====================================================================================================
-  # Variables to start a pod to process osm files
-  # ====================================================================================================
-  osmProcessor:
-    enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    env: 
-      URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
-      OSM_FILE_ACTION: simple_pbf
-    resources:
-      enabled: false
-      requests:
-        memory: "14Gi"
-        cpu: "4"
-      limits:
-        memory: "16Gi"
-        cpu: "4"
-
-  # ====================================================================================================
-  # Variables for restoring the DB
-  # ====================================================================================================
-
-  dbBackupRestore:
-    enabled: true
-    schedule: '* * * * *'
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: db
-    env:
-      RESTORE_URL_FILE: https://osmseed-staging.s3.amazonaws.com/test-db/migration/osmseed-db-220608_0000.sql.gz
-      DB_ACTION: restore
-      CLEAN_BACKUPS: false
-      AWS_S3_BUCKET: s3://osmseed-staging
-    resources:
-      enabled: false
-      requests:
-        memory: "10Gi"
-        cpu: "3"
-      limits:
-        memory: "10Gi"
-        cpu: "3"
-
-  # ====================================================================================================
-  # Variables for tiler-db
-  # ====================================================================================================
-
-  tilerDb:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: tiler
-    env:
-      POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-      POSTGRES_DB: {{STAGING_TILER_DB}}
-      POSTGRES_USER: {{STAGING_TILER_DB_USER}}
-      POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
-      POSTGRES_PORT: 5432
-      # for 20Gi
-      # POSTGRES_DB_MAX_CONNECTIONS: 500
-      # POSTGRES_DB_SHARED_BUFFERS: 5GB
-      # POSTGRES_DB_WORK_MEM: 15MB
-      # POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
-      # POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
-
-      #for 15Gi
-      POSTGRES_DB_MAX_CONNECTIONS: 500
-      POSTGRES_DB_SHARED_BUFFERS: 3GB
-      POSTGRES_DB_WORK_MEM: 7MB
-      POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
-      POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/data
-      subPath: postgresql-d
-      # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID : {{STAGING_TILER_DB_EBS}}
-      AWS_ElasticBlockStore_size: 100Gi
-    resources:
-      enabled: false
-      requests:
-        memory: "15Gi"
-        cpu: "5"
-      limits:
-        memory: "15Gi"
-        cpu: "5"
-
-  # ====================================================================================================
-  # Variables for tiler-imposm
-  # ====================================================================================================
-
-  tilerImposm:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: tiler
-    env:
-      TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220315_0800.osm.pbf
-      # TILER_IMPORT_LIMIT: https://gist.githubusercontent.com/Rub21/96bdcac5eb11f0b36ba8d0352ac537f4/raw/2606f2e207d4a0d895897a83efa1efacefd36eb4/monaco.geojson
-      #{{STAGING_TILER_IMPOSM_REPLICATION_URL}}
-      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: 662000
-      OVERWRITE_STATE: true
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /mnt/data
-      # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_IMPOSM_EBS}}
-      AWS_ElasticBlockStore_size: 100Gi
-    resources:
-      enabled: false
-      requests:
-        memory: "20Gi"
-        cpu: "8"
-      limits:
-        memory: "24Gi"
-        cpu: "10"
-  # ====================================================================================================
-  # Variables for tiler-server
-  # ====================================================================================================
-
-  tilerServer:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: tiler
-    replicaCount: 1
-    commad: './start.sh'
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    env:
-      TILER_SERVER_PORT: 9090
-      TILER_CACHE_TYPE: s3
-      TILER_CACHE_BASEPATH: /mnt/data
-      TILER_CACHE_MAX_ZOOM: 22
-      # in case s3
-      TILER_CACHE_REGION: us-east-1
-      TILER_CACHE_BUCKET: tiler-cache-staging
-      TILER_CACHE_AWS_ACCESS_KEY_ID: {{STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID}}
-      TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
-      # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
-    persistenceDisk:
-      enabled: false
-      accessMode: ReadWriteOnce
-      mountPath: /mnt/data
-      # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
-      AWS_ElasticBlockStore_size: 100Gi
-    resources:
-      enabled: false
-      requests:
-        memory: "16Gi"
-        cpu: "8"
-      limits:
-        memory: "16Gi"
-        cpu: "8"
-
-  # ====================================================================================================
-  # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
-  # ====================================================================================================
-  tilerServerCacheCleaner:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: tiler
-    replicaCount: 1
-    command: './cache_cleaner.sh'
-    resources:
-      enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        memory: '2Gi'
-        cpu: '2'
-
-  # ====================================================================================================
-  # Variables for tiler-visor
-  # ====================================================================================================
-  tilerVisor:
-    enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: tiler
-    replicaCount: 1
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    # Set staticIp, if you are using cloudProvider=gcp
-    staticIp: 35.233.232.82
-    env:
-      TILER_VISOR_PROTOCOL: http
-      TILER_VISOR_PORT: 8081
-    resources:
-      enabled: false
-      requests:
-        memory: "1Gi"
-        cpu: "2"
-      limits:
-        memory: "2Gi"
-        cpu: "2"
-
-
-  # ====================================================================================================
-  # Variables for Tasking Manager API
-  # ====================================================================================================
-
-  tmApi:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    replicaCount: 1
-    staticIp: c
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    env:
-      POSTGRES_HOST: {{STAGING_TM_API_DB_HOST}}
-      POSTGRES_DB: {{STAGING_TM_API_DB}}
-      POSTGRES_PASSWORD: {{STAGING_TM_API_DB_PASSWORD}}
-      POSTGRES_USER: {{STAGING_TM_API_DB_USER}}
-      POSTGRES_PORT: 5432
-      TM_ORG_NAME: 'OpenHistoricalMap'
-      TM_ORG_CODE: 'OHM'
-      TM_ORG_URL: 'openhistoricalmap.org'
-      TM_ORG_PRIVACY_POLICY_URL: 'openhistoricalmap.org/copyright'
-      TM_ORG_GITHUB: 'github.com/openhistoricalmap'
-      OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
-      OSM_NOMINATIM_SERVER_URL: 'https://nominatim.openhistoricalmap.org'
-      OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
-      ID_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=id'
-      POTLATCH2_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=potlatch2'
-      TM_SECRET: {{STAGING_TM_API_SECRET}}
-      TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
-      TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
-      TM_EMAIL_FROM_ADDRESS: 'no-reply@openhistoricalmap.org'
-      TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
-      TM_SMTP_PORT: 25
-      TM_SMTP_USER: {{MAILER_USERNAME}}
-      TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
-      TM_DEFAULT_LOCALE: 'en'
-      TM_APP_API_URL: 'https://staging-tm-api.openhistoricalmap.org'
-      TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
-    resources:
-      enabled: false
-      requests:
-        memory: "1Gi"
-        cpu: "2"
-      limits:
-        memory: "2Gi"
-        cpu: "2"
-
-
-# ====================================================================================================
-# Nominatim image values
-# ====================================================================================================
-
-# ====================================================================================================
-# Variables for nominatim db
-# ====================================================================================================
-  nominatimDb:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    env:
-      PG_PORT: {{STAGING_NOMINATIM_PG_PORT}}
-      PG_USER: {{STAGING_NOMINATIM_PG_USER}}
-      PG_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
-      PG_DATABASE: {{STAGING_NOMINATIM_PG_DATABASE}}
-      OSM_URL_FILE: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210503_0800.osm.pbf
-      THREADS: 4
-      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
-      REPLICATION_MAXINTERVAL: 30
-      REPLICATION_UPDATE_INTERVAL: 75
-      REPLICATION_RECHECK_INTERVAL: 60
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/data
-      subPath: nominatim-pgdata
-      AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
-      AWS_ElasticBlockStore_size: 100Gi
-    resources:
-      enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '1'
-      limits:
-        memory: '2Gi'
-        cpu: '1'
-
-# ====================================================================================================
-# Variables for nominatim api
-# ====================================================================================================
-  nominatimApi:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    env:
-      BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
-      OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
-      OSMSEED_OVERPASS_API_DOMAIN: overpass-api.openhistoricalmap.org
-    replicaCount: 1
-    resources:
-      enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        memory: '2Gi'
-        cpu: '2'
-    nodeSelector:
-      enabled: false
-
-# ====================================================================================================
-# Variables for overpass-api
-# ====================================================================================================
-  overpassApi:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    env:
-      OVERPASS_META: 'yes'
-      OVERPASS_MODE: 'init'
-      OVERPASS_PLANET_URL: 'http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-210428_0800.osm.pbf'
-      OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
-      OVERPASS_RULES_LOAD: '10'
-      OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      AWS_ElasticBlockStore_volumeID: {{STAGING_OVERPASS_API_DB_EBS}}
-      AWS_ElasticBlockStore_size: 200Gi
-    resources:
-      enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        memory: '2Gi'
-        cpu: '2'
-# ====================================================================================================
-# Variables for taginfo
-# ====================================================================================================
-  taginfo:
-    enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    env:
-      URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
-      URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
-      URL_PLANET_FILE: 'none'
-      URL_HISTORY_PLANET_FILE: 'none'
-      TIME_UPDATE_INTERVAL: 7d
-      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/staging/images/taginfo/taginfo-config-staging.json
-      TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
-      DOWNLOAD_DB: 'languages wiki'
-      CREATE_DB: 'db projects chronology'
-    resources:
-      enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        memory: '2Gi'
-        cpu: '2'
-    nodeSelector:
-      enabled: false
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      env:
+        URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
+        URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
+        URL_PLANET_FILE: 'none'
+        URL_HISTORY_PLANET_FILE: 'none'
+        TIME_UPDATE_INTERVAL: 7d
+        OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/staging/images/taginfo/taginfo-config-staging.json
+        TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
+        DOWNLOAD_DB: 'languages wiki'
+        CREATE_DB: 'db projects chronology'
+      resources:
+        enabled: false
+        requests:
+          memory: '1Gi'
+          cpu: '2'
+        limits:
+          memory: '2Gi'
+          cpu: '2'
+      nodeSelector:
+        enabled: false
+  
