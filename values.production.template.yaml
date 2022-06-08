@@ -39,7 +39,7 @@ osm-seed:
   # - overpass.osmseed.example.com
   # - nominatim.osmseed.example.com
   # - etc.
-  domain: osmseed-staging.openhistoricalmap.org
+  domain: openhistoricalmap.org
 
   # ====================================================================================================
   # Configuration for Lets Encrypt setup
@@ -88,6 +88,8 @@ osm-seed:
     replicaCount: 2
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -355,6 +357,8 @@ osm-seed:
       label_value: tiler
     replicaCount: 2
     commad: './start.sh'
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
       TILER_SERVER_PORT: 9090
       TILER_CACHE_TYPE: s3
@@ -438,6 +442,8 @@ osm-seed:
       label_value: web
     replicaCount: 1
     staticIp: c
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
       POSTGRES_HOST: {{PRODUCTION_TM_API_DB_HOST}}
       POSTGRES_DB: {{PRODUCTION_TM_API_DB}}
@@ -518,6 +524,8 @@ osm-seed:
       OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
       OSMSEED_OVERPASS_API_DOMAIN: overpass-api.openhistoricalmap.org
     replicaCount: 1
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     resources:
       enabled: false
       requests:
@@ -538,6 +546,8 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: web
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
       OVERPASS_META: 'yes'
       OVERPASS_MODE: 'init'
@@ -563,6 +573,8 @@ osm-seed:
 # ====================================================================================================
   taginfo:
     enabled: true
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
       URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
       URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
