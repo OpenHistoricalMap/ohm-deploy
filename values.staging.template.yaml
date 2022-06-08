@@ -94,12 +94,12 @@ osm-seed:
     # Variables for osm-seed website
     # ====================================================================================================
     web:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      replicaCount: 2
+      replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
       serviceAnnotations:
@@ -131,7 +131,7 @@ osm-seed:
     # Variables for memcached. Memcached is used to store session cookies
     # ====================================================================================================
     memcached:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -148,12 +148,12 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      schedule: '* */5 * * *'
+      schedule: '* */1 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
       resources:
@@ -169,12 +169,12 @@ osm-seed:
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      schedule: '* */5 * * *'
+      schedule: '* */1 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
       resources:
@@ -217,7 +217,7 @@ osm-seed:
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -278,14 +278,14 @@ osm-seed:
   
     dbBackupRestore:
       enabled: true
-      schedule: '* */5 * * *'
+      schedule: '* */1 * * *'
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
         label_value: db
       env:
         RESTORE_URL_FILE: https://osmseed-staging.s3.amazonaws.com/test-db/migration/osmseed-db-220608_0000.sql.gz
-        DB_ACTION: backup
+        DB_ACTION: restore
         CLEAN_BACKUPS: false
         AWS_S3_BUCKET: s3://osmseed-staging
       resources:
