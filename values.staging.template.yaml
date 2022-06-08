@@ -153,7 +153,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      schedule: '* */24 * * *'
+      schedule: '* */5 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
       resources:
@@ -174,7 +174,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      schedule: '0 0 * * 0'
+      schedule: '* */5 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
       resources:
@@ -278,7 +278,7 @@ osm-seed:
   
     dbBackupRestore:
       enabled: true
-      schedule: '* * * * *'
+      schedule: '* */5 * * *'
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
