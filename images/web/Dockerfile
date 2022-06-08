@@ -76,7 +76,7 @@ RUN chmod 600 $workdir/config/database.yml $workdir/config/secrets.yml
 RUN yarn install
 RUN bundle exec rake yarn:install
 RUN bundle exec rake i18n:js:export
-# RUN bundle exec rake assets:precompile
+RUN bundle exec rake assets:precompile
 
 # The rack interface requires a `tmp` directory to use openstreetmap-cgimap
 RUN ln -s /tmp /var/www/tmp
