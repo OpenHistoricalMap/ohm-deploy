@@ -52,9 +52,9 @@ RUN git clone -b merge-osm-website-gin20220525 https://github.com/OpenHistorical
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-# RUN echo 'add Arabic support'
+# RUN echo 'upstream OSM with JS and iD changes in place'
 # RUN git fetch
-# RUN git checkout ddc0bfc74da13276d819276a3d5ae1d3ef7925f2
+# RUN git checkout b148a04c3b5f5167db7386abff8c7934fad6ee58
 
 # Install Ruby packages
 RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
