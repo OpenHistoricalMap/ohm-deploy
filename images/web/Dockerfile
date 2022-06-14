@@ -52,9 +52,9 @@ RUN git clone -b merge-osm-website-gin20220525 https://github.com/OpenHistorical
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-# RUN echo 'upstream OSM with JS and iD changes in place'
+# RUN echo 'another attempt to fix iD'
 # RUN git fetch
-# RUN git checkout b148a04c3b5f5167db7386abff8c7934fad6ee58
+# RUN git checkout e95387ffced67a0ae3b0f3f2c25ad7e49ec281db
 
 # Install Ruby packages
 RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
