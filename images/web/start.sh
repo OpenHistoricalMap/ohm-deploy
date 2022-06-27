@@ -32,6 +32,8 @@ sed -i -e 's/#id_key: ""/id_key: "'$OSM_id_key'"/g' $workdir/config/settings.yml
 
 ## SET NOMINATIM URL
 sed -i -e 's/nominatim.openstreetmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
+## SET OVERPASS URL
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.yml
 
 #### CHECK IF DB IS ALREADY UP AND START THE APP
 flag=true

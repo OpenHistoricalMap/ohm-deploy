@@ -112,6 +112,7 @@ osm-seed:
         OSM_id_key: {{STAGING_ID_KEY}}
         MAILER_FROM: no-reply@openhistoricalmap.org
         NOMINATIM_URL: nominatim-staging.openhistoricalmap.org
+        OVERPASS_URL: staging-overpass-api.openhistoricalmap.org
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
       resources:
