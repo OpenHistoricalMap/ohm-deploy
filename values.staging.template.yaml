@@ -518,7 +518,8 @@ osm-seed:
   # ====================================================================================================
     nominatimApi:
       enabled: true
-      serviceAnnotations: {}
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       replicaCount: 1
       env:
         PBF_URL: http://osmseed-staging.s3.amazonaws.com/planet/planet-latest.osm.pbf
