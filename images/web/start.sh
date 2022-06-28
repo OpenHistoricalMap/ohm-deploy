@@ -49,7 +49,9 @@ while "$flag" = true; do
     sleep 2
   done &
 
-  # bundle exec rake assets:precompile --trace
+  # Enable assets:precompile, to take lates changes for assets in $workdir/config/settings.yml.
+  time bundle exec rake assets:precompile
+
   bundle exec rails db:migrate
   # Start the delayed jobs queue worker and  Start the app
   bundle exec rake jobs:work &
