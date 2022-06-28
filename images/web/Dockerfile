@@ -63,6 +63,10 @@ RUN echo "gem 'net-http'" >> Gemfile
 # Install Ruby packages
 RUN gem install bundler && bundle install
 
+# update vendored iD
+RUN rm -rf vendor/assets/iD
+RUN vendorer
+
 # Configure database.yml and secrets.yml
 RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
 RUN touch $workdir/config/settings.local.yml
