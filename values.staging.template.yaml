@@ -519,68 +519,50 @@ osm-seed:
   # ====================================================================================================
   
   # ====================================================================================================
-  # Variables for nominatim db
-  # ====================================================================================================
-    nominatimDb:
-      enabled: true
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: web
-      env:
-        PG_PORT: {{STAGING_NOMINATIM_PG_PORT}}
-        PG_USER: {{STAGING_NOMINATIM_PG_USER}}
-        PG_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
-        PG_DATABASE: {{STAGING_NOMINATIM_PG_DATABASE}}
-        OSM_URL_FILE: http://osmseed-staging.s3.amazonaws.com/planet/planet-latest.osm.pbf
-        THREADS: 4
-        REPLICATION_URL:  http://s3.amazonaws.com/osmseed-staging/replication/minute
-        REPLICATION_MAXINTERVAL: 30
-        REPLICATION_UPDATE_INTERVAL: 75
-        REPLICATION_RECHECK_INTERVAL: 60
-      persistenceDisk:
-        enabled: true
-        accessMode: ReadWriteOnce
-        mountPath: /var/lib/postgresql/data
-        subPath: nominatim-pgdata
-        AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
-        AWS_ElasticBlockStore_size: 100Gi
-      resources:
-        enabled: false
-        requests:
-          memory: '1Gi'
-          cpu: '1'
-        limits:
-          memory: '2Gi'
-          cpu: '1'
-  
-  # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
-    nominatimApi:
+  nominatimApi:
+    enabled: true
+    serviceAnnotations: {}
+    replicaCount: 1
+    env:
+      PBF_URL: http://osmseed-staging.s3.amazonaws.com/planet/planet-latest.osm.pbf
+      REPLICATION_URL: http://s3.amazonaws.com/osmseed-staging/replication/minute
+      REPLICATION_UPDATE_INTERVAL: 86400
+      REPLICATION_RECHECK_INTERVAL: 900
+      FREEZE: false
+      IMPORT_WIKIPEDIA: false
+      IMPORT_US_POSTCODES: false
+      IMPORT_GB_POSTCODES: false
+      IMPORT_TIGER_ADDRESSES: false
+      THREADS: 8
+      NOMINATIM_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
+      PGDATA: /var/lib/postgresql/12/main
+    resources:
+      enabled: false
+      requests:
+        memory: '1Gi'
+        cpu: '2'
+      limits:
+        memory: '2Gi'
+        cpu: '2'
+    persistenceDisk:
       enabled: true
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: web
-      serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      env:
-        BASE_URL: 'https://nominatim-staging.openhistoricalmap.org/'
-        OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
-        OSMSEED_OVERPASS_API_DOMAIN: overpass-api.openhistoricalmap.org
-      replicaCount: 1
-      resources:
-        enabled: false
-        requests:
-          memory: '1Gi'
-          cpu: '2'
-        limits:
-          memory: '2Gi'
-          cpu: '2'
-      nodeSelector:
-        enabled: false
-  
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/12/main
+      subPath: nominatim-pgdata
+      # Minikube
+      localVolumeHostPath: /mnt/nominatim-db-data
+      localVolumeSize: 10Gi
+      # AWS
+      AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
+      AWS_ElasticBlockStore_size: 100Gi
+      # GCP
+      GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
+      GCP_gcePersistentDisk_size: 50Gi
+    nodeSelector:
+      enabled: false
+
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
@@ -617,7 +599,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
