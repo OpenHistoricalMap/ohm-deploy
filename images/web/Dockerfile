@@ -52,9 +52,9 @@ RUN git clone -b merge-osm-website-gin20220525 https://github.com/OpenHistorical
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-# RUN echo 'update content and en-GB locale file'
+# RUN echo 'update content and en, en-GB locale file'
 # RUN git fetch
-# RUN git checkout ff522fd0e1f95aa41bd26a608ea62c09bc36bdce
+# RUN git checkout a042dfc3bc32fdf481e49711dfa8ae87594dc6a5
 
 # Install Ruby packages
 RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
