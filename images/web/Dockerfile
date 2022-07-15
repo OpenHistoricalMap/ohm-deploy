@@ -47,7 +47,7 @@ RUN npm install -g svgo
 RUN rm -rf $workdir/html
 # GITSHA value at 15-02-2022
 # ENV OPENSTREETMAP_WEBSITE_GITSHA=c24b5481812aba9e83da1fd855ccb37f92c5d75e
-RUN git clone -b merge-osm-website https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+RUN git clone -b merge-osm-website-gin20220525 https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 # RUN git clone --depth 1 https://github.com/openstreetmap/openstreetmap-website.git $workdir
 WORKDIR $workdir
 
