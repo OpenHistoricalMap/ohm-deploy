@@ -47,14 +47,14 @@ RUN npm install -g svgo
 RUN rm -rf $workdir/html
 # GITSHA value at 15-02-2022
 # ENV OPENSTREETMAP_WEBSITE_GITSHA=c24b5481812aba9e83da1fd855ccb37f92c5d75e
-RUN git clone -b merge-osm-website https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+# RUN git clone -b merge-osm-website https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 # RUN git clone --depth 1 https://github.com/openstreetmap/openstreetmap-website.git $workdir
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-# RUN echo 'update content and en, en-GB locale file'
-# RUN git fetch
-# RUN git checkout a042dfc3bc32fdf481e49711dfa8ae87594dc6a5
+RUN echo 'update to latest timeslider, fewer oauth options'
+RUN git fetch
+RUN git checkout 2d7f96500472718cd8fb05d18ab0ef473b9fdb48
 
 # Install Ruby packages
 RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
