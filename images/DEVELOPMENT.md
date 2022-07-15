@@ -124,6 +124,18 @@ bundle exec rake assets:precompile --trace
 # bundle exec rails test:all
 ```
 
+### Step 6b: Proxy to staging
+
+If you want to proxy to staging database to more easily test login, editing, etc., then do the following:
+
+1. Inside the container, set this ENV variable:
+`POSTGRES_HOST=host.docker.internal`
+
+2. In another terminal window, run this proxy command:
+`kubectl port-forward staging-db-0 5432:5432`
+
+Note this assumes you have permissions to access that Kubernetes context.
+
 ### Step 7: Start the web server
 
 Still within the container:
