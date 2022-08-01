@@ -84,7 +84,7 @@ osm-seed:
   # Variables for osm-seed website
   # ====================================================================================================
   web:
-    enabled: true
+    enabled: false
     replicaCount: 2
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
@@ -117,7 +117,7 @@ osm-seed:
   # Variables for memcached. Memcached is used to store session cookies
   # ====================================================================================================
   memcached:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
@@ -135,7 +135,7 @@ osm-seed:
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
   # ====================================================================================================
   planetDump:
-    enabled: true
+    enabled: false
     schedule: '0 8 * * *'
     nodeSelector:
       enabled: true
@@ -156,7 +156,7 @@ osm-seed:
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: true
+    enabled: false
     schedule: '0 0 * * 0'
     nodeSelector:
       enabled: true
@@ -203,7 +203,7 @@ osm-seed:
   # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   replicationJob:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -256,14 +256,14 @@ osm-seed:
 
   dbBackupRestore:
     enabled: true
-    schedule: '* */24 * * *'
+    schedule: '0 */3 * * *'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: web
     env:
-      DB_ACTION: backup
-      RESTORE_URL_FILE: ''
+      DB_ACTION: restore
+      RESTORE_URL_FILE: https://osmseed-production-db.s3.amazonaws.com/database/osmseed-db-220803_0000.sql.gz
       CLEAN_BACKUPS: false
       AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
     resources:
