@@ -278,14 +278,14 @@ osm-seed:
     # ====================================================================================================
   
     dbBackupRestore:
-      enabled: true
-      schedule: '0 1 * * *'
+      enabled: false
+      schedule: '0 */3 * * *'
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
         label_value: db
       env:
-        RESTORE_URL_FILE: https://osmseed-staging.s3.amazonaws.com/test-db/migration/osmseed-db-220608_0000.sql.gz
+        RESTORE_URL_FILE: https://osmseed-production-db.s3.amazonaws.com/database/osmseed-db-220802_0000.sql.gz
         DB_ACTION: backup
         CLEAN_BACKUPS: false
         AWS_S3_BUCKET: s3://osmseed-staging
