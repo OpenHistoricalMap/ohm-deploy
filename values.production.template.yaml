@@ -85,7 +85,7 @@ osm-seed:
   # ====================================================================================================
   web:
     enabled: true
-    replicaCount: 2
+    replicaCount: 1
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
     serviceAnnotations:
