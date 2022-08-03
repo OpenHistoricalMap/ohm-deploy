@@ -517,7 +517,7 @@ osm-seed:
         memory: '2Gi'
         cpu: '2'
     persistenceDisk:
-      enabled: false
+      enabled: true
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/12/main
       subPath: nominatim-pgdata
