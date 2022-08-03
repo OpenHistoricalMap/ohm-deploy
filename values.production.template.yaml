@@ -84,8 +84,8 @@ osm-seed:
   # Variables for osm-seed website
   # ====================================================================================================
   web:
-    enabled: false
-    replicaCount: 2
+    enabled: true
+    replicaCount: 1
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
     serviceAnnotations:
@@ -102,6 +102,7 @@ osm-seed:
       OSM_id_key: {{PRODUCTION_ID_KEY}}
       MAILER_FROM: no-reply@openhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
+      OVERPASS_URL: overpass-api.openhistoricalmap.org
       NEW_RELIC_LICENSE_KEY: {{PRODUCTION_NEW_RELIC_LICENSE_KEY}}
       NEW_RELIC_APP_NAME: {{PRODUCTION_NEW_RELIC_APP_NAME}}
     resources:
@@ -112,12 +113,16 @@ osm-seed:
       limits:
         memory: "8Gi"
         cpu: "2"
-
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 3
+      cpuUtilization: 80
   # ====================================================================================================
   # Variables for memcached. Memcached is used to store session cookies
   # ====================================================================================================
   memcached:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
@@ -135,7 +140,7 @@ osm-seed:
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
   # ====================================================================================================
   planetDump:
-    enabled: false
+    enabled: true
     schedule: '0 0 * * *'
     nodeSelector:
       enabled: true
@@ -156,7 +161,7 @@ osm-seed:
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: false
+    enabled: true
     schedule: '0 0 * * 0'
     nodeSelector:
       enabled: true
@@ -203,7 +208,7 @@ osm-seed:
   # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   replicationJob:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -262,7 +267,7 @@ osm-seed:
       label_key: nodegroup_type
       label_value: web
     env:
-      DB_ACTION: restore
+      DB_ACTION: backup
       RESTORE_URL_FILE: https://osmseed-production-db.s3.us-east-1.amazonaws.com/database/osmseed-db-220803_1606.sql.gz?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEDcaCXNhLWVhc3QtMSJIMEYCIQC6oYShK01LFCHNNOP0%2Bch5uKeAcpSmfRLxnaaygUYd5QIhAKt0OtxclFyJrX1qqdOfOgcylfVGBi%2FizMIIISenxD%2FbKoQDCJD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQAhoMNjE4MzgwMjQyMjQ3IgzdtXrtIBspySZIJ0Yq2AJ0RovZahua04PQ%2FBWVGLhmQPxRiN6Pe5evt2FUuVFdrSMGaqfxo3YAGTezOmviYoqtrHf7NZHRcHQx9RTB4Nk2rmeZfQ9xepB7semK0G3VbzDqsVTzglFDxk52xqpESYYf6vVbORyBDJvjvlCjUAXLH1PqOlj%2FFDd5A3UK3%2FCSJc9JfYh1LVkz4md6ug3mh0KYpUL0%2FipBVpQTcN0PCkVJTTPWOBXmn9qnYMUJg2LNRVMkgIr7AA2MmmSVzPhj%2FfnaHIXCCbHlJ5RA9IgpftC%2FEvTrP2cvgcV03YOWSq9sSMg%2B%2B0xDWn7stI9PsKoakHX%2B%2BtsxHimJ4uGTY8I7DsV915Kzgx1aRlJ5MYjOtbSuMOfhZP6FSwLGRTPw7qvS0kLFKHAwCYLsd7GF6%2FHadTbLSJ0Zx0EqPYVjyIKfwZ5fu204xUkGhCqBlHuQBQhoG%2FMxcnYf53NoSTChm6qXBjqyAkr7doHwSC9HTJYlIq7gixhkZ29BfaHp8jq0gIBW7aAEC3idFdN2ZQd9pHQAgN4fKYrOmC%2Bbf9njZH91%2BEvzwpEHXyho8E8lPSQJGJZnAquRzJkzJ23%2F4zF51Rf2WMSpmYMHyWXodLLP4yYj%2Bgk%2Bg%2FbUsDYhkq4%2B%2F5%2Bf7YLCmvi%2BdO%2B5GEZEa%2B1iPghxd%2BH8eQk9jUlebsI3fh01f%2Bv6TbzgGieM7eqXYeH0JTZDZGEJlPdbUzMHKcj6G6kuTX4nvD9YDPQzUYAoVwu2gwjvrjaHRaK8NKMlEC7JCIlsWrVzjVR%2FtXlBybrZ5rSdZNeTIDDof5lS8O%2F9qqyhTel4pObDPNosj6jCOVPe3geM5ZNZVbL4ATUdJ5oU3BcTm%2FMcerATv%2FysoVrskKNuDMjHoT3fkA%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220803T172639Z&X-Amz-SignedHeaders=host&X-Amz-Expires=2400&X-Amz-Credential=ASIAY76SVVVDSEAYVNUG%2F20220803%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6ed260d9d775bbc6b0d4f5e08575552270c970a81afa2254f87b62c3b97730c2
       CLEAN_BACKUPS: false
       AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
@@ -481,67 +486,59 @@ osm-seed:
         cpu: "2"
 
 
-# ====================================================================================================
-# Variables for nominatim db
-# ====================================================================================================
-  nominatimDb:
-    enabled: true
-    env:
-      PG_PORT: {{PRODUCTION_NOMINATIM_PG_PORT}}
-      PG_USER: {{PRODUCTION_NOMINATIM_PG_USER}}
-      PG_PASSWORD: {{PRODUCTION_NOMINATIM_PG_PASSWORD}}
-      PG_DATABASE: {{PRODUCTION_NOMINATIM_PG_DATABASE}}
-      OSM_URL_FILE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-210322_0800.osm.pbf
-      THREADS: 4
-      REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
-      REPLICATION_MAXINTERVAL: 30
-      REPLICATION_UPDATE_INTERVAL: 75
-      REPLICATION_RECHECK_INTERVAL: 60
-    persistenceDisk:
+  
+  # ====================================================================================================
+  # Variables for nominatim api
+  # ====================================================================================================
+    nominatimApi:
       enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/data
-      subPath: nominatim-pgdata
-      AWS_ElasticBlockStore_volumeID: {{PRODUCTION_NOMINATIM_DB_EBS}}
-      AWS_ElasticBlockStore_size: 100Gi
-    resources:
-      enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '1'
-      limits:
-        memory: '2Gi'
-        cpu: '1'
-    nodeSelector:
-      enabled: false
-# ====================================================================================================
-# Variables for nominatim api
-# ====================================================================================================
-  nominatimApi:
-    enabled: true
-    env:
-      BASE_URL: 'https://nominatim.openhistoricalmap.org/'
-      OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
-      OSMSEED_OVERPASS_API_DOMAIN: overpass-api.openhistoricalmap.org
-    replicaCount: 1
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    resources:
-      enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        memory: '2Gi'
-        cpu: '2'
-    nodeSelector:
-      enabled: false
+      serviceAnnotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      replicaCount: 1
+      env:
+        PBF_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220803_0800.osm.pbf
+        REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+        REPLICATION_UPDATE_INTERVAL: 86400
+        REPLICATION_RECHECK_INTERVAL: 900
+        FREEZE: false
+        IMPORT_WIKIPEDIA: false
+        IMPORT_US_POSTCODES: false
+        IMPORT_GB_POSTCODES: false
+        IMPORT_TIGER_ADDRESSES: false
+        THREADS: 8
+        NOMINATIM_PASSWORD: {{PRODUCTION_NOMINATIM_PG_PASSWORD}}
+        PGDATA: /var/lib/postgresql/12/main
+      resources:
+        enabled: false
+        requests:
+          memory: '1Gi'
+          cpu: '2'
+        limits:
+          memory: '2Gi'
+          cpu: '2'
+      persistenceDisk:
+        enabled: true
+        accessMode: ReadWriteOnce
+        mountPath: /var/lib/postgresql/12/main
+        subPath: nominatim-pgdata
+        # Minikube
+        localVolumeHostPath: /mnt/nominatim-db-data
+        localVolumeSize: 10Gi
+        # AWS
+        AWS_ElasticBlockStore_volumeID: {{PRODUCTION_NOMINATIM_DB_EBS}}
+        AWS_ElasticBlockStore_size: 100Gi
+        # GCP
+        GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
+        GCP_gcePersistentDisk_size: 50Gi
+      nodeSelector:
+        enabled: false
+
 
 # ====================================================================================================
 # Variables for overpass-api
 # ====================================================================================================
   overpassApi:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -572,7 +569,7 @@ osm-seed:
 # Variables for taginfo
 # ====================================================================================================
   taginfo:
-    enabled: true
+    enabled: false
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
