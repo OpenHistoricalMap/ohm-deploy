@@ -22,7 +22,7 @@ api_version: "0.6"
 #   database_readonly - database and site in read-only mode
 #   database_offline - database offline with site in emergency mode
 #   gpx_offline - gpx storage offline
-status: "api_readonly"
+status: "online"
 # The maximum area you're allowed to request, in square degrees
 max_request_area: 0.25
 # Number of GPS trace/trackpoints returned per-page
