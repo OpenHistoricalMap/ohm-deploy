@@ -280,7 +280,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerDb:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -318,7 +318,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerImposm:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -350,7 +350,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerServer:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -390,7 +390,7 @@ osm-seed:
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -485,7 +485,7 @@ osm-seed:
 # Variables for nominatim db
 # ====================================================================================================
   nominatimDb:
-    enabled: true
+    enabled: false
     env:
       PG_PORT: {{PRODUCTION_NOMINATIM_PG_PORT}}
       PG_USER: {{PRODUCTION_NOMINATIM_PG_USER}}
@@ -518,7 +518,7 @@ osm-seed:
 # Variables for nominatim api
 # ====================================================================================================
   nominatimApi:
-    enabled: true
+    enabled: false
     env:
       BASE_URL: 'https://nominatim.openhistoricalmap.org/'
       OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
@@ -541,7 +541,7 @@ osm-seed:
 # Variables for overpass-api
 # ====================================================================================================
   overpassApi:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -572,7 +572,7 @@ osm-seed:
 # Variables for taginfo
 # ====================================================================================================
   taginfo:
-    enabled: true
+    enabled: false
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
