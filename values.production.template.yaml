@@ -491,7 +491,7 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: false
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       replicaCount: 1
@@ -517,15 +517,15 @@ osm-seed:
           memory: '2Gi'
           cpu: '2'
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/12/main
         subPath: nominatim-pgdata
         # Minikube
         localVolumeHostPath: /mnt/nominatim-db-data
-        localVolumeSize: 10Gi
+        localVolumeSize: 20Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-027de8fd65e565399
+        AWS_ElasticBlockStore_volumeID: {{PRODUCTION_NOMINATIM_DB_EBS}}
         AWS_ElasticBlockStore_size: 100Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
