@@ -84,7 +84,7 @@ osm-seed:
   # Variables for osm-seed website
   # ====================================================================================================
   web:
-    enabled: false
+    enabled: true
     replicaCount: 1
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
@@ -102,6 +102,7 @@ osm-seed:
       OSM_id_key: {{PRODUCTION_ID_KEY}}
       MAILER_FROM: no-reply@openhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
+      OVERPASS_URL: overpass-api.openhistoricalmap.org
       NEW_RELIC_LICENSE_KEY: {{PRODUCTION_NEW_RELIC_LICENSE_KEY}}
       NEW_RELIC_APP_NAME: {{PRODUCTION_NEW_RELIC_APP_NAME}}
     resources:
@@ -112,12 +113,16 @@ osm-seed:
       limits:
         memory: "8Gi"
         cpu: "2"
-
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 3
+      cpuUtilization: 80
   # ====================================================================================================
   # Variables for memcached. Memcached is used to store session cookies
   # ====================================================================================================
   memcached:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
@@ -255,7 +260,7 @@ osm-seed:
   # ====================================================================================================
 
   dbBackupRestore:
-    enabled: true
+    enabled: false
     schedule: '0 0 * * *'
     nodeSelector:
       enabled: true
@@ -280,7 +285,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerDb:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -318,7 +323,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerImposm:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -350,7 +355,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerServer:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -390,7 +395,7 @@ osm-seed:
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
