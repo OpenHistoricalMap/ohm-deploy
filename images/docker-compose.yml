@@ -1,0 +1,26 @@
+version: '3.4'
+services:
+  db:
+    platform: linux/amd64
+    image: osmseed-db:v1
+    build:
+      context: ../images/db
+      dockerfile: Dockerfile
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data/db-data:/var/lib/postgresql/data
+    env_file:
+      - ./.env.example
+  web:
+    image: osmseed-web:v1
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+    env_file:
+      - ./.env.example
+    ####### Enable for development mode
+    # volumes:
+    #   - ./../../ohm-website:/var/www

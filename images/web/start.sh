@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 workdir="/var/www"
-# Because we can not set up many env variable sin build process, we are going to process here!
-# Setting up the production database
+export RAILS_ENV=production
+#### Because we can not set up many env variable in build process, we are going to process here!
+
+#### SETTING UP THE PRODUCTION DATABASE
 echo " # Production DB
 production:
   adapter: postgresql
@@ -9,44 +11,49 @@ production:
   database: ${POSTGRES_DB}
   username: ${POSTGRES_USER}
   password: ${POSTGRES_PASSWORD}
-  encoding: utf8" > $workdir/config/database.yml
+  encoding: utf8" >$workdir/config/database.yml
 
-echo "
-common: &default_settings
-  license_key: ${NEW_RELIC_LICENSE_KEY}
-  app_name: ${NEW_RELIC_APP_NAME}
-  distributed_tracing:
-    enabled: true
-  log_level: info
-production:
-  <<: *default_settings" > $workdir/config/newrelic.yml
+#### SETTING UP SERVER_URL AND SERVER_PROTOCOL
+sed -i -e 's/server_url: "openstreetmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
+sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
 
-# Setting up the SERVER_URL and SERVER_PROTOCOL
-sed -i -e 's/server_url: "localhost"/server_url: "'$SERVER_URL'"/g' $workdir/config/application.yml
-sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/application.yml
+#### SETTING UP MAIL SENDER
+sed -i -e 's/smtp_address: "localhost"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_domain: "localhost"/smtp_domain: "'$MAILER_DOMAIN'"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_enable_starttls_auto: false/smtp_enable_starttls_auto: true/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_authentication: null/smtp_authentication: "login"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_user_name: null/smtp_user_name: "'$MAILER_USERNAME'"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_password: null/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir/config/settings.yml
+sed -i -e 's/openstreetmap@example.com/'$MAILER_FROM'/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.yml
 
-# Setting up the email
-sed -i -e 's/osmseed-test@developmentseed.org/'$MAILER_FROM'/g' $workdir/config/application.yml
+#### SET UP ID KEY
+sed -i -e 's/#id_key: ""/id_key: "'$OSM_id_key'"/g' $workdir/config/settings.yml
 
-# Set up iD key
-sed -i -e 's/id-key-to-be-replaced/'$OSM_id_key'/g' $workdir/config/application.yml
+## SET NOMINATIM URL
+sed -i -e 's/nominatim.openstreetmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
 
-# Add nominatim url
-sed -i -e 's/nominatim-url-to-be-replaced/'$NOMINATIM_URL'/g' $workdir/config/application.yml
+## SET OVERPASS URL
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.yml
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
-# Print the log while compiling the assets
-until $(curl -sf -o /dev/null $SERVER_URL); do
+#### CHECK IF DB IS ALREADY UP AND START THE APP
+flag=true
+while "$flag" = true; do
+  pg_isready -h $POSTGRES_HOST -p 5432 >/dev/null 2>&2 || continue
+  flag=false
+  # Print the log while compiling the assets
+  until $(curl -sf -o /dev/null $SERVER_URL); do
     echo "Waiting to start rails ports server..."
     sleep 2
-done &
+  done &
 
-# Precompile again, to catch the env variables
-RAILS_ENV=production rake assets:precompile --trace
+  # Enable assets:precompile, to take lates changes for assets in $workdir/config/settings.yml.
+  time bundle exec rake assets:precompile
 
-# db:migrate
-bundle exec rails db:migrate
-
-# Start the delayed jobs queue worker
-# Start the app
-
-bundle exec rake jobs:work & apachectl -k start -DFOREGROUND
+  bundle exec rails db:migrate
+  # Start the delayed jobs queue worker and  Start the app
+  bundle exec rake jobs:work &
+  apachectl -k start -DFOREGROUND
+done
