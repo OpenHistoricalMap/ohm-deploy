@@ -303,7 +303,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerDb:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -349,7 +349,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -358,7 +358,7 @@ osm-seed:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://osmseed-staging.s3.amazonaws.com/planet/planet-latest.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/osmseed-staging/replication/minute/
-        SEQUENCE_NUMBER: 347000
+        SEQUENCE_NUMBER: 383659
         OVERWRITE_STATE: true
       persistenceDisk:
         enabled: true
@@ -380,7 +380,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -420,7 +420,7 @@ osm-seed:
     # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
     # ====================================================================================================
     tilerServerCacheCleaner:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
