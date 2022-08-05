@@ -303,7 +303,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerDb:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -349,7 +349,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -380,7 +380,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -420,7 +420,7 @@ osm-seed:
     # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
     # ====================================================================================================
     tilerServerCacheCleaner:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
