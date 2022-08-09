@@ -611,7 +611,7 @@ osm-seed:
         OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/staging/images/taginfo/taginfo-config-staging.json
         TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
         DOWNLOAD_DB: 'languages wiki'
-        CREATE_DB: 'db projects chronology'
+        CREATE_DB: 'db projects'
       resources:
         enabled: false
         requests:
