@@ -37,7 +37,7 @@ osm-seed:
     # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
     # as the SSL certificate for your services. Else, you will need to configure
     # SSL separately. 
-    serviceType: ClusterIP
+    serviceType: LoadBalancer
   
     # Domain that is pointed to the clusterIP
     # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
@@ -46,7 +46,7 @@ osm-seed:
     # - overpass.osmseed.example.com
     # - nominatim.osmseed.example.com
     # - etc.
-    domain: osmseed-dev.openhistoricalmap.org
+    domain: staging.openhistoricalmap.org
   
     # ====================================================================================================
     # Configuration for Lets Encrypt setup
@@ -149,7 +149,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -170,7 +170,7 @@ osm-seed:
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -218,7 +218,7 @@ osm-seed:
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -278,7 +278,7 @@ osm-seed:
     # ====================================================================================================
   
     dbBackupRestore:
-      enabled: false
+      enabled: true
       schedule: '0 0 * * *'
       nodeSelector:
         enabled: true
@@ -303,7 +303,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerDb:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -349,7 +349,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -380,7 +380,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -420,7 +420,7 @@ osm-seed:
     # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
     # ====================================================================================================
     tilerServerCacheCleaner:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -468,7 +468,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -517,7 +517,7 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: false
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       replicaCount: 1
@@ -563,7 +563,7 @@ osm-seed:
   # Variables for overpass-api
   # ====================================================================================================
     overpassApi:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -595,7 +595,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
