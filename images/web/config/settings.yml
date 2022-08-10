@@ -80,7 +80,8 @@ nominatim_url: "https://nominatim.openstreetmap.org/"
 # Default editor
 default_editor: "id"
 # OAuth application for the web site
-#oauth_application: ""
+oauth_application: "OAUTH_CLIENT_ID"
+oauth_key: "OAUTH_KEY"
 # OAuth consumer key for iD
 #id_key: ""
 # Imagery to return in capabilities as blacklisted

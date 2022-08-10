@@ -54,9 +54,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'switch to commit from production branch on ohm-website'
+RUN echo 'switch to commit from staging branch on ohm-website'
 RUN git fetch
-RUN git checkout c2c20d01cc933f0ff8ca4b962c82b7750367a23e
+RUN git checkout 6a279be9df074ce2d26d9f7ee23a44796e681c10
 
 # Install Ruby packages
 RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile

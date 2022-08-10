@@ -110,6 +110,8 @@ osm-seed:
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
         OSM_id_key: {{STAGING_ID_KEY}}
+        OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
+        OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: no-reply@openhistoricalmap.org
         NOMINATIM_URL: nominatim-staging.openhistoricalmap.org
         OVERPASS_URL: staging-overpass-api.openhistoricalmap.org
@@ -358,7 +360,7 @@ osm-seed:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://osmseed-staging.s3.amazonaws.com/planet/planet-latest.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/osmseed-staging/replication/minute/
-        SEQUENCE_NUMBER: 347000
+        SEQUENCE_NUMBER: 383659
         OVERWRITE_STATE: true
       persistenceDisk:
         enabled: true
@@ -595,7 +597,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type

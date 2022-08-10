@@ -100,6 +100,8 @@ osm-seed:
       MAILER_USERNAME: {{MAILER_USERNAME}}
       MAILER_PASSWORD: {{MAILER_PASSWORD}}
       OSM_id_key: {{PRODUCTION_ID_KEY}}
+      OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
+      OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
       MAILER_FROM: no-reply@openhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
