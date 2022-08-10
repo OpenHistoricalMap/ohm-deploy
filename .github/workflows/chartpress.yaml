@@ -46,6 +46,8 @@ jobs:
         STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
         STAGING_DOMAIN_NAME: ${{ secrets.STAGING_DOMAIN_NAME }}
         STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
+        STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
+        STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
         STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
         STAGING_TILER_DB: ${{ secrets.STAGING_TILER_DB }}
         STAGING_TILER_DB_EBS: ${{ secrets.STAGING_TILER_DB_EBS }}
