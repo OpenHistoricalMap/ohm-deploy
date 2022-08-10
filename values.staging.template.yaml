@@ -110,6 +110,8 @@ osm-seed:
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
         OSM_id_key: {{STAGING_ID_KEY}}
+        OAUTH_CLIENT_ID: {{ STAGING_OAUTH_CLIENT_ID }}
+        OAUTH_KEY: {{ STAGING_OAUTH_KEY }}
         MAILER_FROM: no-reply@openhistoricalmap.org
         NOMINATIM_URL: nominatim-staging.openhistoricalmap.org
         OVERPASS_URL: staging-overpass-api.openhistoricalmap.org

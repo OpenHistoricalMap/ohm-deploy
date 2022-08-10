@@ -27,8 +27,13 @@ sed -i -e 's/smtp_password: null/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir
 sed -i -e 's/openstreetmap@example.com/'$MAILER_FROM'/g' $workdir/config/settings.yml
 sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.yml
 
+
 #### SET UP ID KEY
 sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
+
+### SET UP OAUTH ID AND KEY
+sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml
+sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
 
 
 #### Setup env vars for memcached server
