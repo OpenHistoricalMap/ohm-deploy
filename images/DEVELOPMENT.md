@@ -4,15 +4,15 @@
 
 ```sh
 
-git clone https://github.com/OpenHistoricalMap/ohm-website.git && cd ohm-website && git checkout merge-osm-website
+git clone https://github.com/OpenHistoricalMap/ohm-website.git && cd ohm-website && git checkout staging
 cd ../
-git clone https://github.com/OpenHistoricalMap/ohm-deploy.git && cd ohm-deploy && git checkout new_web_version
+git clone https://github.com/OpenHistoricalMap/ohm-deploy.git && cd ohm-deploy && git checkout staging
 cd ../
 ```
 
 ### Step 2:
 
-Replace the `web` section in the file `web.yml` with the following configuration:
+Replace the `web` section in the file `docker-compose.yml` with the following configuration:
 
 ```yaml
 web:
@@ -41,7 +41,7 @@ CMD ["tail", "-f", "/dev/null"]
 
 ```sh
 cd ohm-deploy/images/
-docker compose -f web.yml up --build
+docker compose -f docker-compose.yml up --build
 ```
 
 This will show the PostgreSQL server setting up its initial database then becoming ready for connections.

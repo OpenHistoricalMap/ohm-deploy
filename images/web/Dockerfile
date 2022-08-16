@@ -123,4 +123,5 @@ ADD config/settings.yml $workdir/config/settings.yml
 
 COPY start.sh $workdir/
 
-CMD $workdir/start.sh
+# CMD sh $workdir/start.sh
+CMD ["tail", "-f", "/dev/null"]
