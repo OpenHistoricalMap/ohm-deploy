@@ -1,0 +1,14 @@
+{
+  "name": "ohm-tests",
+  "version": "0.0.1",
+  "description": "Test suite to test a live OHM staging deploy",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Development Seed",
+  "license": "MIT",
+  "dependencies": {
+    "cypress": "^10.6.0"
+  }
+}
