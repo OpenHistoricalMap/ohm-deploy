@@ -115,9 +115,6 @@ yarnpkg --ignore-engines install
 
 bundle exec rake i18n:js:export
 
-## asset compilation fails the first time; run yarnpkg after it fails, then try again
-bundle exec rake assets:precompile --trace
-yarnpkg --ignore-engines install
 bundle exec rake assets:precompile --trace
 
 # bundle exec rake jobs:work
@@ -126,7 +123,9 @@ bundle exec rake assets:precompile --trace
 
 ### Step 6b: Proxy to staging
 
-If you want to proxy to staging database to more easily test login, editing, etc., then do the following:
+Based on the above instructions, you will have a blank local database without any user accounts. If you try to make a user account, you'll be unable to complete the process because it needs to send an email but the local server isn't configured to do that. 
+
+Instead, proxy to the staging database to more easily test login, editing, etc. Do the following:
 
 1. Inside the container, set this ENV variable:
 `POSTGRES_HOST=host.docker.internal`
