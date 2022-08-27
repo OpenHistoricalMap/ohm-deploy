@@ -56,7 +56,13 @@ The following code will connect to the "web" container which attaches the `../..
 docker-compose exec web bash
 ```
 
-Once in the container run the following CLI to fill in settings:
+For some folks, the above command doesn't seem to do anyhting. If you run into that, try
+
+```sh
+docker exec -it images-web-1 /bin/bash
+```
+
+Once in the container run the following CLI to fill in settings. You can paste this whole block in at once.
 
 ```sh
 #### MOST ENV VARIABLES ARE SET IN DOCKER CONFIG e.g. DB, MAILER, ETC.
@@ -107,9 +113,13 @@ Still within the container, run these commands to install Rake packages and to t
 
 You will see warnings about pngcrush, jpegtran, and other image format tools; ignore them.
 
+Do this step only if you do not plan to proxy the staging database (as described in Step 6b below)
 ```sh
 bundle exec rails db:migrate
+```
 
+Then run these, one at a time and let them complete:
+```sh
 bundle exec rake yarn:install
 yarnpkg --ignore-engines install
 
@@ -117,6 +127,7 @@ bundle exec rake i18n:js:export
 
 bundle exec rake assets:precompile --trace
 
+# skip these
 # bundle exec rake jobs:work
 # bundle exec rails test:all
 ```
@@ -141,5 +152,17 @@ Still within the container:
 
 ```
 ## Start server in port 80
+bundle exec rails server -p 80
+```
+### Beyond 7: Making and then seeing changes
+
+When you make code changes, you will need to come back to terminal, ctrl-C out of the rails server, then run
+
+```sh
+bundle exec rake assets:precompile --trace
+```
+
+Wait for it to complete, then do this again to see changes:
+```sh
 bundle exec rails server -p 80
 ```
