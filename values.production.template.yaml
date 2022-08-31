@@ -332,10 +332,10 @@ osm-seed:
       label_value: tiler
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220804_0000.osm.pbf
+      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220831_0000.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       OVERWRITE_STATE: true
-      SEQUENCE_NUMBER: 799492
+      SEQUENCE_NUMBER: 830000
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
