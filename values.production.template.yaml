@@ -85,7 +85,7 @@ osm-seed:
   # ====================================================================================================
   web:
     enabled: true
-    replicaCount: 1
+    replicaCount: 2
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
     serviceAnnotations:
@@ -332,10 +332,10 @@ osm-seed:
       label_value: tiler
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220804_0000.osm.pbf
+      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220908_0000.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       OVERWRITE_STATE: true
-      SEQUENCE_NUMBER: 799492
+      SEQUENCE_NUMBER: 838000
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -552,6 +552,7 @@ osm-seed:
       OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
       OVERPASS_RULES_LOAD: '10'
       OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: '810000'
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
