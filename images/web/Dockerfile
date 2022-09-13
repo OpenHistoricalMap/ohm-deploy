@@ -54,9 +54,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'switch to commit from staging branch on ohm-website'
+RUN echo 'latest carto updates to main OHM map style'
 RUN git fetch
-RUN git checkout 6a279be9df074ce2d26d9f7ee23a44796e681c10
+RUN git checkout 9f1c20c25524259901d71f938ce2ba71d4865550
 
 # Install Ruby packages
 RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
