@@ -506,6 +506,8 @@ osm-seed:
         TM_DEFAULT_LOCALE: 'en'
         TM_APP_API_URL: 'https://staging-tm-api.openhistoricalmap.org'
         TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
+        TM_IMPORT_MAX_FILESIZE: 3000000
+        TM_MAX_AOI_AREA: 15000
       resources:
         enabled: false
         requests:
