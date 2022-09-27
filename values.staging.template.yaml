@@ -537,7 +537,7 @@ osm-seed:
         IMPORT_TIGER_ADDRESSES: false
         THREADS: 8
         NOMINATIM_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
-        PGDATA: /var/lib/postgresql/12/main
+        PGDATA: /var/lib/postgresql/14/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
       resources:
@@ -551,7 +551,7 @@ osm-seed:
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        mountPath: /var/lib/postgresql/12/main
+        mountPath: /var/lib/postgresql/14/main
         subPath: nominatim-pgdata
         # Minikube
         localVolumeHostPath: /mnt/nominatim-db-data
