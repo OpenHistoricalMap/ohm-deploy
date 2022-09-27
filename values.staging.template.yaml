@@ -539,7 +539,7 @@ osm-seed:
         NOMINATIM_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
         PGDATA: /var/lib/postgresql/14/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
-        UPDATE_MODE: continuous
+        UPDATE_MODE: catch-up
       resources:
         enabled: false
         requests:
