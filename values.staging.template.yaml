@@ -540,6 +540,7 @@ osm-seed:
         PGDATA: /var/lib/postgresql/14/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
+        OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
       resources:
         enabled: false
         requests:
