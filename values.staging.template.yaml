@@ -526,10 +526,10 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       replicaCount: 1
       env:
-        PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220921_0000.osm.pbf
+        PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220928_0000.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
-        REPLICATION_UPDATE_INTERVAL: 851000
-        REPLICATION_RECHECK_INTERVAL: 900
+        REPLICATION_UPDATE_INTERVAL: 60
+        REPLICATION_RECHECK_INTERVAL: 30
         FREEZE: false
         IMPORT_WIKIPEDIA: false
         IMPORT_US_POSTCODES: false
@@ -537,7 +537,10 @@ osm-seed:
         IMPORT_TIGER_ADDRESSES: false
         THREADS: 8
         NOMINATIM_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
-        PGDATA: /var/lib/postgresql/12/main
+        PGDATA: /var/lib/postgresql/14/main
+        NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
+        UPDATE_MODE: continuous
+        OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
       resources:
         enabled: false
         requests:
@@ -549,7 +552,7 @@ osm-seed:
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        mountPath: /var/lib/postgresql/12/main
+        mountPath: /var/lib/postgresql/14/main
         subPath: nominatim-pgdata
         # Minikube
         localVolumeHostPath: /mnt/nominatim-db-data
