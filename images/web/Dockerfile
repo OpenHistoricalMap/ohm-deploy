@@ -54,9 +54,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'Locale file updates for better translation'
+RUN echo 'updates from translatewiki plus latest carto updates'
 RUN git fetch
-RUN git checkout 20de3ba4512cb7daee042e15c0eae16ad818679c
+RUN git checkout 30b5f15e3f0bfad06043c049a05db158955c062b
 
 # Install Ruby packages
 RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
