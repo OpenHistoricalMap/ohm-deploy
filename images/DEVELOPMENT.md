@@ -148,7 +148,18 @@ Instead, proxy to the staging database to more easily test login, editing, etc. 
 2. In another terminal window, run this proxy command:
 `kubectl port-forward staging-db-0 5432:5432`
 
-Note this assumes you have permissions to access that Kubernetes context.
+Note this assumes 
+1. AWS CLI is installed
+2. You have permissions to access that Kubernetes context
+
+The steps to getting the right permissions and context are as follows
+1. If you haven't already, create an named profile with your OHM key and secret at `~/.aws/credentials`. See [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) for details
+2. Switch to this profile using `export AWS_DEFAULT_PROFILE=ohm_profile_name`
+3. Confirm with `aws sts get-caller-identity`, which should show the ohm profile details
+4. Create a kube config file using
+```bash
+aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
+```
 
 ### Step 7: Start the web server
 
