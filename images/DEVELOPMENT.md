@@ -12,7 +12,7 @@ cd ../
 
 ### Step 2:
 
-Replace the `web` section in the file `docker-compose.yml` with the following configuration:
+Replace the `web` section in the file `ohm-deploy/images/docker-compose.yml` with the following configuration:
 
 ```yaml
 web:
@@ -41,6 +41,10 @@ CMD ["tail", "-f", "/dev/null"]
 
 ```sh
 cd ohm-deploy/images/
+
+# first create an empty directory to hold database data
+mkdir -p data/db-data
+
 docker compose -f docker-compose.yml up --build
 ```
 
