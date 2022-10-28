@@ -140,7 +140,9 @@ bundle exec rake assets:precompile --trace
 
 Based on the above instructions, you will have a blank local database without any user accounts. If you try to make a user account, you'll be unable to complete the process because it needs to send an email but the local server isn't configured to do that. 
 
-Instead, proxy to the staging database to more easily test login, editing, etc. Do the following:
+Instead, proxy to the staging database to more easily test login, editing, etc. You must have an account on the OHM AWS account to do this.
+
+Do the following:
 
 1. Inside the container, set this ENV variable:
 `POSTGRES_HOST=host.docker.internal`
@@ -153,13 +155,28 @@ Note this assumes
 2. You have permissions to access that Kubernetes context
 
 The steps to getting the right permissions and context are as follows
-1. If you haven't already, create an named profile with your OHM key and secret at `~/.aws/credentials`. See [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) for details
+1. If you haven't already, create a named profile with your OHM key and secret at `~/.aws/credentials`. See [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) for details
 2. Switch to this profile using `export AWS_DEFAULT_PROFILE=ohm_profile_name`
 3. Confirm with `aws sts get-caller-identity`, which should show the ohm profile details
 4. Create a kube config file using
 ```bash
 aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
 ```
+5. Edit the usermap in the kubectl to add your user info. Use these commands
+```bash
+kubectl describe configmap -n kube-system aws-auth
+kubectl edit -n kube-system configmap/aws-auth
+```
+
+You may need to run the second one with `sudo` to be able to edit and save. That command opens a `vi` editor on a config file with elements like this:
+```yaml
+   - groups:
+      - system:masters
+      userarn: arn:aws:iam::ID:user/username
+      username: username
+```
+
+Get your ARN ID and username from AWS's IAM settings to fill in the above.
 
 ### Step 7: Start the web server
 
