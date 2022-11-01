@@ -188,6 +188,8 @@ bundle exec rails server -p 80
 ```
 ### Beyond 7: Making and then seeing changes
 
+View the development site on http://localhost/ or http://0.0.0.0:80
+
 When you make code changes, you will need to come back to terminal, ctrl-C out of the rails server, then run
 
 ```sh
