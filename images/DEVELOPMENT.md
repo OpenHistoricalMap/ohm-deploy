@@ -142,9 +142,9 @@ Press `ctrl + c` to stop the apache process and then export the values and run t
 
 
 ```sh
-export OPENSTREETMAP_id_key=sBjUHKUQhcWeLHJHgjjAwbbOZWKAYBuCdNenngJB
-export OAUTH_CLIENT_ID=YrbH_Uhf0GI1-swzjofNKrmhxchFoIUWZf4xAxmross
-export OAUTH_KEY=Qdl3u5rNBb7twclmqod_XmvgEVwJhcZ6WQ--6jyKUdg
+export OPENSTREETMAP_id_key=...
+export OAUTH_CLIENT_ID=...
+export OAUTH_KEY=...
 
 #### SET UP ID KEY
 sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
@@ -155,26 +155,10 @@ sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
 apachectl -k start -DFOREGROUND
 ```
 
+Make sure that the following lines are uncomment in `config/settings.yml` 
 
-<!-- 
-
-### Step 6: Proxy to staging
-
-If you want to proxy to staging database to more easily test login, editing, etc., then do the following:
-
-1. Inside the container, set this ENV variable:
-`POSTGRES_HOST=host.docker.internal`
-
-2. In another terminal window, run this proxy command:
-`kubectl port-forward staging-db-0 5432:5432`
-
-Note this assumes you have permissions to access that Kubernetes context.
-
-### Step 7: Start the web server
-
-Still within the container:
-
-```sh
-## Start server in port 80
-bundle exec rails server -p 80 --log-to-stdout
-``` -->
+```yml
+# oauth_application: "OAUTH_CLIENT_ID"
+# oauth_key: "OAUTH_KEY"
+# id_key: "xyz"
+```
