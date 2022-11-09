@@ -1,3 +1,4 @@
+.env
 .env-tiler
 tiler-db-data
 tiler-imposm-data-2
