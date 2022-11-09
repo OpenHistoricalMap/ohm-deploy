@@ -13,7 +13,7 @@ git clone https://github.com/OpenHistoricalMap/ohm-deploy.git
 
 ### Step 2:
 
-Uncomment the `volumes` section in `web` - `docker-compose.yml` 👇
+Uncomment the `volumes` section in `web` - `images/docker-compose.yml` 👇
 
 ```yaml
 web:
@@ -35,9 +35,13 @@ web:
 cd ohm-deploy/images/
 docker-compose build
 # Start DB 
-docker-compose up db
-# start  in dev moode API
+docker-compose up db -d
+# Start memcached
+docker-compose up memcached -d
+
+# Start web in Dev Mode
 docker compose run --service-ports web bash
+
 ```
 
 You will have PostgreSQL server setting up its initial database then becoming ready for connections.
@@ -51,8 +55,9 @@ Once in the web container is running, execute the following CLI to fill in setti
 ```sh
 #### MOST ENV VARIABLES ARE SET IN DOCKER CONFIG e.g. DB, MAILER, ETC.
 
-export workdir="/var/www"
+workdir="/var/www"
 export RAILS_ENV=production
+#### Because we can not set up many env variable in build process, we are going to process here!
 
 #### SETTING UP THE PRODUCTION DATABASE
 echo " # Production DB
@@ -78,41 +83,80 @@ sed -i -e 's/smtp_password: null/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir
 sed -i -e 's/openstreetmap@example.com/'$MAILER_FROM'/g' $workdir/config/settings.yml
 sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.yml
 
-#### SET UP ID KEY
-sed -i -e 's/#id_key: ""/id_key: "'$OSM_id_key'"/g' $workdir/config/settings.yml
+#### Setup env vars for memcached server
+sed -i -e 's/#memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.yml
 
-#### SET NOMINATIM URL
-sed -i -e "s@https://nominatim.openstreetmap.org/@$NOMINATIM_URL@g" $workdir/config/settings.yml
+## SET NOMINATIM URL
+sed -i -e 's/nominatim.openstreetmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
 
-#### CREATE A BLANK LOCAL SETTINGS FILE
+## SET OVERPASS URL
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.yml
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
+
 touch $workdir/config/settings.local.yml
-
-### STORAGE CONFIG
 cp $workdir/config/example.storage.yml $workdir/config/storage.yml
+echo "#secrets
+production:
+  secret_key_base: $(bundle exec rake secret)" >$workdir/config/secrets.yml 
+chmod 600 $workdir/config/database.yml $workdir/config/secrets.yml
+
 ```
 
-### Step 5: Running Rails CLI
+### Step 5: Comment out OAUTH configuration in local ohm-website
+
+Comment out the following lines in `ohm-website/config/settings.yml`
+
+```yml
+# oauth_application: "OAUTH_CLIENT_ID"
+# oauth_key: "OAUTH_KEY"
+# id_key: "xyz"
+```
+
+### Step 6: Running Rails CLI
 
 Still within the container, run these commands to install Rake packages and to test everything.
 
 You will see warnings about pngcrush, jpegtran, and other image format tools; ignore them.
 
 ```sh
+yarn install --trace
+bundle exec rake yarn:install --trace
+bundle exec rake i18n:js:export --trace
+bundle exec rake assets:precompile
 bundle exec rails db:migrate
-
-bundle exec rake yarn:install
-yarnpkg --ignore-engines install
-
-bundle exec rake i18n:js:export
-
-## asset compilation fails the first time; run yarnpkg after it fails, then try again
-bundle exec rake assets:precompile --trace
-yarnpkg --ignore-engines install
-bundle exec rake assets:precompile --trace
-
-# bundle exec rake jobs:work
-# bundle exec rails test:all
+bundle exec rake jobs:work &
+apachectl -k start -DFOREGROUND
 ```
+
+### Step 7: Create a user and OAUTH Tokens
+
+- Create a user: https://localhost/user/new, if the configuration is correct you will receive an email to confirm your local account
+
+- Create [**OAuth 1 settings**](https://user-images.githubusercontent.com/1152236/200726786-648fa334-9993-46e2-bff1-ae76f279a638.png) and set the value from [`Consumer Key`](https://user-images.githubusercontent.com/1152236/200725897-739a2b7c-03cb-4064-accf-58f21e191d6d.png) into `OPENSTREETMAP_id_key`
+
+
+- Create [**OAuth 2 applications**](https://user-images.githubusercontent.com/1152236/200727159-cf44055e-98c6-4beb-9285-dab467b3ff90.png) and set the value from [`Client ID`](https://user-images.githubusercontent.com/1152236/200727284-679e070d-dee6-4118-a9f4-2bd72ed527f9.png) into `OAUTH_CLIENT_ID` and `Client Secret` into `OAUTH_KEY`.
+
+Press `ctrl + c` to stop the apache process and then export the values and run the following command lines, it will update the `config/settings.yml` file
+
+
+```sh
+export OPENSTREETMAP_id_key=sBjUHKUQhcWeLHJHgjjAwbbOZWKAYBuCdNenngJB
+export OAUTH_CLIENT_ID=YrbH_Uhf0GI1-swzjofNKrmhxchFoIUWZf4xAxmross
+export OAUTH_KEY=Qdl3u5rNBb7twclmqod_XmvgEVwJhcZ6WQ--6jyKUdg
+
+#### SET UP ID KEY
+sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
+### SET UP OAUTH ID AND KEY
+sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml
+sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
+
+apachectl -k start -DFOREGROUND
+```
+
+
+<!-- 
 
 ### Step 6: Proxy to staging
 
@@ -132,5 +176,5 @@ Still within the container:
 
 ```sh
 ## Start server in port 80
-bundle exec rails server -p 80
-```
+bundle exec rails server -p 80 --log-to-stdout
+``` -->
