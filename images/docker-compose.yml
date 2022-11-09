@@ -21,6 +21,12 @@ services:
       - '80:80'
     env_file:
       - ./.env.example
-    ####### Enable for development mode
-    # volumes:
-    #   - ./../../ohm-website:/var/www
+    ########## Enable for development mode
+    volumes:
+      - ./../../ohm-website:/var/www
+    ##########
+  memcached:
+      container_name: memcached
+      image: memcached:latest
+      ports:
+          - "11211:11211"
