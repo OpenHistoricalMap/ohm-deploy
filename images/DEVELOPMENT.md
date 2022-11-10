@@ -31,13 +31,15 @@ web:
 
 ### Step 3: Build and start the containers
 
+Make sure you have the environment variables set. See `ohm-deploy/images/.env.example` for reference.
+
 ```sh
 cd ohm-deploy/images/
 docker-compose build
 # Start DB 
-docker-compose up db -d
+docker-compose up -d db
 # Start memcached
-docker-compose up memcached -d
+docker-compose up -d memcached
 
 # Start web in Dev Mode
 docker compose run --service-ports web bash
