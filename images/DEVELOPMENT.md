@@ -33,6 +33,8 @@ web:
 
 Make sure you have the environment variables set. See `ohm-deploy/images/.env.example` for reference.
 
+Also if you have an existing `/data` directory in `ohm-deploy/images`, delete that before starting the `db` container.
+
 ```sh
 cd ohm-deploy/images/
 docker-compose build
@@ -48,7 +50,7 @@ docker compose run --service-ports web bash
 
 You will have PostgreSQL server setting up its initial database then becoming ready for connections.
 
-If you are connected to an existing DB, set the value in env.exampleand avoid starting the local DB
+If you are connected to an existing DB, set the value in env.example and avoid starting the local DB
 
 ### Step 4: Setup configuration
 
@@ -102,6 +104,7 @@ echo "#secrets
 production:
   secret_key_base: $(bundle exec rake secret)" >$workdir/config/secrets.yml 
 chmod 600 $workdir/config/database.yml $workdir/config/secrets.yml
+
 
 ```
 
