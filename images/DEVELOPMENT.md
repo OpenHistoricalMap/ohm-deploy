@@ -138,18 +138,35 @@ apachectl -k start -DFOREGROUND
 
 - Create a user: https://localhost/user/new, if the configuration is correct you will receive an email to confirm your local account
 
-- Create [**OAuth 1 settings**](https://user-images.githubusercontent.com/1152236/200726786-648fa334-9993-46e2-bff1-ae76f279a638.png) and set the value from [`Consumer Key`](https://user-images.githubusercontent.com/1152236/200725897-739a2b7c-03cb-4064-accf-58f21e191d6d.png) into `OPENSTREETMAP_id_key`
+- If you do not receive an email, you can also manually activate the user. See these [OSM docs](https://github.com/openstreetmap/openstreetmap-website/blob/master/CONFIGURE.md#managing-users) for guidance. If you have just installed from scratch and signed up, then a command like this will enable the username you just created (run this inside the website Docker container):
+```sh
+$ bundle exec rails console
+>> user = User.find_by(:id => 1)
+>> user.activate!
+=> true
+```
 
+Next you will need to log into localhost and set up authentication for localhost to allow iD to function.
 
-- Create [**OAuth 2 applications**](https://user-images.githubusercontent.com/1152236/200727159-cf44055e-98c6-4beb-9285-dab467b3ff90.png) and set the value from [`Client ID`](https://user-images.githubusercontent.com/1152236/200727284-679e070d-dee6-4118-a9f4-2bd72ed527f9.png) into `OAUTH_CLIENT_ID` and `Client Secret` into `OAUTH_KEY`.
+- Make sure that the following lines are uncommented in `config/settings.yml`
+```yml
+# oauth_application: "OAUTH_CLIENT_ID"
+# oauth_key: "OAUTH_KEY"
+# id_key: "xyz"
+```
+- Create [**OAuth 1 settings**](https://user-images.githubusercontent.com/1152236/200726786-648fa334-9993-46e2-bff1-ae76f279a638.png) and set the value from [`Consumer Key`](https://user-images.githubusercontent.com/1152236/200725897-739a2b7c-03cb-4064-accf-58f21e191d6d.png) into `OPENSTREETMAP_id_key` in the shell script below.
 
-Press `ctrl + c` to stop the apache process and then export the values and run the following command lines, it will update the `config/settings.yml` file
+- Create [**OAuth 2 applications**](https://user-images.githubusercontent.com/1152236/200727159-cf44055e-98c6-4beb-9285-dab467b3ff90.png) and set the value from [`Client ID`](https://user-images.githubusercontent.com/1152236/200727284-679e070d-dee6-4118-a9f4-2bd72ed527f9.png) into `OAUTH_CLIENT_ID` and `Client Secret` into `OAUTH_KEY` in the shell script below.
+
+Press `ctrl + c` to stop the apache process and then export the values to run the following command lines, it will update the `config/settings.yml` file
 
 
 ```sh
-export OPENSTREETMAP_id_key=...
-export OAUTH_CLIENT_ID=...
-export OAUTH_KEY=...
+#OAUTH 1
+export OPENSTREETMAP_id_key=yourkeyhere
+#OAUTH 2
+export OAUTH_CLIENT_ID=yourkeyhere
+export OAUTH_KEY=yourkeyhere
 
 #### SET UP ID KEY
 sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
@@ -158,12 +175,4 @@ sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml
 sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
 
 apachectl -k start -DFOREGROUND
-```
-
-Make sure that the following lines are uncomment in `config/settings.yml` 
-
-```yml
-# oauth_application: "OAUTH_CLIENT_ID"
-# oauth_key: "OAUTH_KEY"
-# id_key: "xyz"
 ```
