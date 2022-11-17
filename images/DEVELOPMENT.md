@@ -130,7 +130,7 @@ bundle exec rake yarn:install --trace
 bundle exec rake i18n:js:export --trace
 bundle exec rake assets:precompile
 bundle exec rails db:migrate
-bundle exec rake jobs:work &
+# bundle exec rake jobs:work &
 apachectl -k start -DFOREGROUND
 ```
 
@@ -143,6 +143,8 @@ apachectl -k start -DFOREGROUND
 $ bundle exec rails console
 >> user = User.find_by(:id => 1)
 >> user.activate!
+=> true
+>> user.save!
 => true
 ```
 
@@ -163,10 +165,10 @@ Press `ctrl + c` to stop the apache process and then export the values to run th
 
 ```sh
 #OAUTH 1
-export OPENSTREETMAP_id_key=yourkeyhere
+export OPENSTREETMAP_id_key=djP5CLULYfRem9SHrUeJTxWqUOFnmc1mevjAlMzM
 #OAUTH 2
-export OAUTH_CLIENT_ID=yourkeyhere
-export OAUTH_KEY=yourkeyhere
+export OAUTH_CLIENT_ID=CGDhQTZAJbZSWjw0JuUvIDFYhUrOAj_lEUJ9cs9d9ao
+export OAUTH_KEY=0o-rbo-aNPvkw9xD6Hy-J5lhwFGkoUc_aULOoeJZA5s
 
 #### SET UP ID KEY
 sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
@@ -174,5 +176,6 @@ sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/se
 sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml
 sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
 
+bundle exec rake assets:precompile
 apachectl -k start -DFOREGROUND
 ```
