@@ -165,10 +165,10 @@ Press `ctrl + c` to stop the apache process and then export the values to run th
 
 ```sh
 #OAUTH 1
-export OPENSTREETMAP_id_key=djP5CLULYfRem9SHrUeJTxWqUOFnmc1mevjAlMzM
+export OPENSTREETMAP_id_key=yourkeyhere
 #OAUTH 2
-export OAUTH_CLIENT_ID=CGDhQTZAJbZSWjw0JuUvIDFYhUrOAj_lEUJ9cs9d9ao
-export OAUTH_KEY=0o-rbo-aNPvkw9xD6Hy-J5lhwFGkoUc_aULOoeJZA5s
+export OAUTH_CLIENT_ID=yourkeyhere
+export OAUTH_KEY=yourkeyhere
 
 #### SET UP ID KEY
 sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
@@ -177,5 +177,4 @@ sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml
 sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
 
 bundle exec rake assets:precompile
-apachectl -k start -DFOREGROUND
-```
+apachectl -k start -DFOREGROUND```
