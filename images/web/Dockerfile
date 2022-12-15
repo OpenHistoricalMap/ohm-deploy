@@ -58,9 +58,9 @@ RUN echo 'update iD to pull from staging branch for latest version'
 RUN git fetch
 RUN git checkout 8201ea64a15e7dfee4b85e86b7d48a1d7065ae4c
 
-# Install Ruby packages
-RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
-RUN echo "gem 'net-http'" >> Gemfile
+# # Install Ruby packages
+# RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
+# RUN echo "gem 'net-http'" >> Gemfile
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
