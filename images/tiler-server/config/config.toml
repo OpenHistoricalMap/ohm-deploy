@@ -212,7 +212,7 @@ max_connections = 40
 	geometry_fieldname = "geometry"
 	geometry_type = "linestring"
 	id_fieldname = "osm_id"
-	sql = """SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, osm_id, name, ref, class, type, tunnel, bridge, access, service, ford, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+	sql = """SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, osm_id, name, ref, class, type, tunnel, bridge, access, service, ford, tags->'construction' as construction, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 			FROM osm_transport_lines 
 			WHERE type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 'funicular', 'taxiway', 'runway', 'proposed', 'construction', 'disused', 'abandoned', 'razed', 'apron', 'ferry')  
 			AND geometry && !BBOX!"""
@@ -222,7 +222,7 @@ max_connections = 40
 	geometry_fieldname = "geometry"
 	geometry_type = "linestring"
 	id_fieldname = "id"
-	sql = """SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, ref, class, type, tunnel, bridge, access, service, ford, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+	sql = """SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, ref, class, type, tunnel, bridge, access, service, ford, tags->'construction' as construction, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 			FROM osm_transport_lines 
 			WHERE type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 'funicular', 'taxiway', 'runway', 'residential', 'taxiway', 'runway', 'proposed', 'construction', 'disused', 'abandoned', 'razed', 'apron', 'ferry')  
 			AND geometry && !BBOX!"""
@@ -232,7 +232,7 @@ max_connections = 40
 	geometry_fieldname = "geometry"
 	geometry_type = "linestring"
 	id_fieldname = "id"
-	sql = """SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, ref, class, type, tunnel, bridge, access, service, ford, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+	sql = """SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, ref, class, type, tunnel, bridge, access, service, ford, tags->'construction' as construction, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 			FROM osm_transport_lines 
 			WHERE geometry && !BBOX!"""
 
