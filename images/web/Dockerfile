@@ -56,11 +56,11 @@ WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 RUN echo 'update iD to pull from staging branch for latest version'
 RUN git fetch
-RUN git checkout 58fcafceb24426e5a125a540b99a694cf6b47db4
+RUN git checkout 8201ea64a15e7dfee4b85e86b7d48a1d7065ae4c
 
-# Install Ruby packages
-RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
-RUN echo "gem 'net-http'" >> Gemfile
+# # Install Ruby packages
+# RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
+# RUN echo "gem 'net-http'" >> Gemfile
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
