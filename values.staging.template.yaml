@@ -110,6 +110,7 @@ osm-seed:
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
         OSM_id_key: {{STAGING_ID_KEY}}
+        OSM_id_application: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: no-reply@openhistoricalmap.org
