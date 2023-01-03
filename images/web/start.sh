@@ -29,7 +29,7 @@ sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings
 
 
 #### SET UP ID KEY
-sed -i -e 's/id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
+sed -i -e 's/id_application: ""/id_application: "'$ID_APPLICATION'"/g' $workdir/config/settings.yml
 
 ### SET UP OAUTH ID AND KEY
 sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml

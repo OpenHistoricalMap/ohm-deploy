@@ -54,9 +54,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'update iD to pull from staging branch for latest version'
+RUN echo 'update map styles and fix timeslider params for years <1000'
 RUN git fetch
-RUN git checkout 8201ea64a15e7dfee4b85e86b7d48a1d7065ae4c
+RUN git checkout a6b60bd0305c642d3c94007e5427ca43c9ca5668
 
 # # Install Ruby packages
 # RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
