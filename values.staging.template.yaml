@@ -109,7 +109,7 @@ osm-seed:
         MAILER_DOMAIN: {{MAILER_DOMAIN}}
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
-        ID_APPLICATION: {{STAGING_ID_APPLICATION}}
+        OSM_id_key: {{STAGING_ID_APPLICATION}} #FIXME we should use id_application to be consistent
         # OSM_id_application: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
