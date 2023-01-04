@@ -84,6 +84,7 @@ oauth_application: "OAUTH_CLIENT_ID"
 oauth_key: "OAUTH_KEY"
 # OAuth consumer key for iD
 id_application: ""
+#id_key: ""
 # Imagery to return in capabilities as blacklisted
 imagery_blacklist:
   # Current Google imagery URLs have google or googleapis in the domain
