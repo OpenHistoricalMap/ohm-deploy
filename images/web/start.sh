@@ -47,15 +47,6 @@ sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.yml
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
-### REPLACE KEYS for iD
-DEV_CLIENT_ID="0tmNTmd0Jo1dQp4AUmMBLtGiD9YpMuXzHefitcuVStc"
-DEV_KEY="BTlNrNxIPitHdL4sP2clHw5KLoee9aKkA7dQbc0Bj7Q"
-files=$(find ./*/assets/ -type f -exec grep -l "$DEV_CLIENT_ID" {} \;)
-for f in $files; do
-  sed -i -e 's/'$DEV_CLIENT_ID'/'$OAUTH_CLIENT_ID'/g' $f
-  sed -i -e 's/'$DEV_KEY'/'$OAUTH_KEY'/g' $f
-done
-
 #### CHECK IF DB IS ALREADY UP AND START THE APP
 flag=true
 while "$flag" = true; do
