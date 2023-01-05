@@ -56,7 +56,11 @@ WORKDIR $workdir
 # change the echo here with a reason for changing the commithash
 RUN echo 'update map styles and fix timeslider params for years <1000'
 RUN git fetch
-RUN git checkout a6b60bd0305c642d3c94007e5427ca43c9ca5668
+# RUN git checkout a6b60bd0305c642d3c94007e5427ca43c9ca5668
+
+# test staging oauth2
+RUN git checkout f0ef99c6b5c01688247f71a6879685a592ec5325
+
 
 # # Install Ruby packages
 # RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
