@@ -54,12 +54,9 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'update map styles and fix timeslider params for years <1000'
+RUN echo 'get id.html.erb from upstream'
 RUN git fetch
-# RUN git checkout a6b60bd0305c642d3c94007e5427ca43c9ca5668
-
-# test staging oauth2
-RUN git checkout f0ef99c6b5c01688247f71a6879685a592ec5325
+RUN git checkout 0dc65588326b809a5a04fa356a878a52e43280ba
 
 
 # # Install Ruby packages
