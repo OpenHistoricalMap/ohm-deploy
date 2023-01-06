@@ -109,7 +109,8 @@ osm-seed:
         MAILER_DOMAIN: {{MAILER_DOMAIN}}
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
-        OSM_id_key: {{STAGING_ID_KEY}}
+        OSM_id_key: {{STAGING_ID_APPLICATION}} #FIXME we should use id_application to be consistent
+        # OSM_id_application: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: no-reply@openhistoricalmap.org
@@ -475,7 +476,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      replicaCount: 1
+      replicaCount: 2
       staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -526,7 +527,7 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       replicaCount: 1
       env:
-        PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220928_0000.osm.pbf
+        PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-221012_0000.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30

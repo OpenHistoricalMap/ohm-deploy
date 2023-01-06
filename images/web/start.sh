@@ -29,7 +29,7 @@ sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings
 
 
 #### SET UP ID KEY
-sed -i -e 's/#id_key: ""/id_key: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
+sed -i -e 's/id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
 
 ### SET UP OAUTH ID AND KEY
 sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml
@@ -59,7 +59,7 @@ while "$flag" = true; do
   done &
 
   # Enable assets:precompile, to take lates changes for assets in $workdir/config/settings.yml.
-  time bundle exec rake assets:precompile
+  time bundle exec rake i18n:js:export assets:precompile
 
   bundle exec rails db:migrate
   # Start the delayed jobs queue worker and  Start the app
