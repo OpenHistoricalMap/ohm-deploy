@@ -15,7 +15,7 @@ jobs:
         with:
           NOMINATIM_API: 'https://nominatim-staging.openhistoricalmap.org'
           NOMINATIM_BUCKET: 'nominatim-staging.openhistoricalmap.org'
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
@@ -23,7 +23,7 @@ jobs:
         with:
           NOMINATIM_API: 'https://nominatim.openhistoricalmap.org'
           NOMINATIM_BUCKET: 'nominatim.openhistoricalmap.org'
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_NOMINATIM_CLOUDFRONT_ID }}
 
       - name: Checkout nominatim-ui repo
         uses: actions/checkout@v2
