@@ -29,7 +29,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: OpenHistoricalMap/nominatim-ui
-          # token: ${{env.GIT_TOKEN}}
+          # token: ${{ env.GIT_TOKEN }}
+
+      - name: Use Node.js 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
 
       - name: Cache node modules
         id: cache-node-modules
@@ -52,6 +57,7 @@ jobs:
         run: |
           echo "Nominatim_Config.Nominatim_API_Endpoint = '${NOMINATIM_API}';" >> dist/theme/config.theme.js
           npm run build
+          
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
@@ -64,5 +70,5 @@ jobs:
       - name: Push data to s3 and clean cloudfront cache
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
         run: |
-          aws s3 sync nominatim-ui/dist ${NOMINATIM_BUCKET}
+          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
