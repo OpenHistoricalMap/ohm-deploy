@@ -13,7 +13,7 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
-          OVERPASS_API: staging-overpass-api.openhistoricalmap.org
+          OVERPASS_API: overpass-api-staging.openhistoricalmap.org
           OVERPASS_BUCKET: overpass-turbo-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_OVERPASS_CLOUDFRONT_ID }}
 
@@ -61,4 +61,4 @@ jobs:
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
         run: |
           aws s3 sync build/ s3://${OVERPASS_BUCKET}/
-          # aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
+          aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
