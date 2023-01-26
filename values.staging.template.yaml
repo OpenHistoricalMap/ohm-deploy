@@ -527,7 +527,7 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       replicaCount: 1
       env:
-        PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-230109_0000.osm.pbf
+        PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-230126_0000.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
