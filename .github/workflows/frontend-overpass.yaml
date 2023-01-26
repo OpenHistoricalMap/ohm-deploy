@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          # token: ${{env.GIT_TOKEN}}
+          # token: ${{env.DEV_GITHUB_TOKEN}}
 
       - name: Use Node.js 10
         uses: actions/setup-node@v1
