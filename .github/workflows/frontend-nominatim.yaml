@@ -1,0 +1,81 @@
+name: Build and Publish Nominatim site
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+jobs:
+  nominatim:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Set environment variables - Staging
+        if: github.ref == 'refs/heads/staging'
+        uses: allenevans/set-env@v2.0.0
+        with:
+          NOMINATIM_API: 'https://nominatim-api-staging.openhistoricalmap.org/'
+          NOMINATIM_BUCKET: 'nominatim-staging.openhistoricalmap.org'
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}
+
+      - name: Set environment variables - Production
+        if: github.ref == 'refs/heads/main'
+        uses: allenevans/set-env@v2.0.0
+        with:
+          NOMINATIM_API: 'https://nominatim-api.openhistoricalmap.org/'
+          NOMINATIM_BUCKET: 'nominatim.openhistoricalmap.org'
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_NOMINATIM_CLOUDFRONT_ID }}
+
+      - name: Checkout nominatim-ui repo
+        uses: actions/checkout@v2
+        with:
+          repository: OpenHistoricalMap/nominatim-ui
+          ref: 81e184d68b5bbe09a18eca79e9a73c08971bcf74
+          # token: ${{ env.DEV_GITHUB_TOKEN }}
+
+      - name: Use Node.js 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install modules
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Build nominatim-ui frontend
+        run: |
+          echo "Nominatim_Config.Nominatim_API_Endpoint = '${NOMINATIM_API}';" >> dist/theme/config.theme.js
+          npm run build
+          
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install aws cli
+        run: |
+          python -m pip install --upgrade pip
+          pip install awscli
+
+      - name: Push data to s3 and clean cloudfront cache
+        run: |
+          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/
+          aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
