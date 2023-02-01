@@ -1,5 +1,9 @@
 name: Build and Publish overpass-turbo site
-on: push
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
 jobs:
   overpass-turbo:
     runs-on: ubuntu-latest
@@ -59,10 +63,10 @@ jobs:
           pip install awscli
 
       - name: Push data to s3 and clean cloudfront cache
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
         run: |
           aws s3 sync build/ s3://${OVERPASS_BUCKET}/
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
