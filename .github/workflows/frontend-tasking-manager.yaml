@@ -1,0 +1,109 @@
+name: Build and Publish tasking-maanager site
+on: push
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+jobs:
+  tm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Set environment variables - Staging
+        # if: github.ref == 'refs/heads/staging'
+        uses: allenevans/set-env@v2.0.0
+        with:
+          TM_APP_BASE_URL: ${{ secrets.STAGING_TM_APP_BASE_URL }}
+          TM_APP_API_URL: ${{ secrets.STAGING_TM_APP_API_URL }}
+          TM_APP_API_VERSION: ${{ secrets.STAGING_TM_APP_API_VERSION }}
+          TM_ORG_NAME: ${{ secrets.STAGING_TM_ORG_NAME }}
+          TM_ORG_CODE: ${{ secrets.STAGING_TM_ORG_CODE }}
+          TM_ORG_URL: ${{ secrets.STAGING_TM_ORG_URL }}
+          TM_ORG_PRIVACY_POLICY_URL: ${{ secrets.STAGING_TM_ORG_PRIVACY_POLICY_URL }}
+          TM_ORG_TWITTER: ${{ secrets.STAGING_TM_ORG_TWITTER }}
+          TM_ORG_GITHUB: ${{ secrets.STAGING_TM_ORG_GITHUB }}
+          TM_CONSUMER_KEY: ${{ secrets.STAGING_TM_CONSUMER_KEY }}
+          TM_CONSUMER_SECRET: ${{ secrets.STAGING_TM_CONSUMER_SECRET }}
+          OSM_SERVER_URL: ${{ secrets.STAGING_OSM_SERVER_URL }}
+          OSM_REGISTER_URL: ${{ secrets.STAGING_OSM_REGISTER_URL }}
+          ID_EDITOR_URL: ${{ secrets.STAGING_ID_EDITOR_URL }}
+          POTLATCH2_EDITOR_URL: ${{ secrets.STAGING_POTLATCH2_EDITOR_URL }}
+          MAP_MAX_AREA: ${{ secrets.MAP_MAX_AREA }}
+          TM_MAX_AOI_AREA: ${{ secrets.STAGING_TM_MAX_AOI_AREA }}
+          TM_IMPORT_MAX_FILESIZE: ${{ secrets.STAGING_TM_IMPORT_MAX_FILESIZE }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_STAGING_BUCKET_NAME }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TASKING_MANG_DISTRIBUTION_ID }}
+
+      - name: Set environment variables - Production
+        if: github.ref == 'refs/heads/main'
+        uses: allenevans/set-env@v2.0.0
+        with:
+          TM_APP_BASE_URL: ${{ secrets.PRODUCTION_TM_APP_BASE_URL }}
+          TM_APP_API_URL: ${{ secrets.PRODUCTION_TM_APP_API_URL }}
+          TM_APP_API_VERSION: ${{ secrets.PRODUCTION_TM_APP_API_VERSION }}
+          TM_ORG_NAME: ${{ secrets.PRODUCTION_TM_ORG_NAME }}
+          TM_ORG_CODE: ${{ secrets.PRODUCTION_TM_ORG_CODE }}
+          TM_ORG_URL: ${{ secrets.PRODUCTION_TM_ORG_URL }}
+          TM_ORG_PRIVACY_POLICY_URL: ${{ secrets.PRODUCTION_TM_ORG_PRIVACY_POLICY_URL }}
+          TM_ORG_TWITTER: ${{ secrets.PRODUCTION_TM_ORG_TWITTER }}
+          TM_ORG_GITHUB: ${{ secrets.PRODUCTION_TM_ORG_GITHUB }}
+          TM_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_CONSUMER_KEY }}
+          TM_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_CONSUMER_SECRET }}
+          OSM_SERVER_URL: ${{ secrets.PRODUCTION_OSM_SERVER_URL }}
+          OSM_REGISTER_URL: ${{ secrets.PRODUCTION_OSM_REGISTER_URL }}
+          ID_EDITOR_URL: ${{ secrets.PRODUCTION_ID_EDITOR_URL }}
+          POTLATCH2_EDITOR_URL: ${{ secrets.PRODUCTION_POTLATCH2_EDITOR_URL }}
+          MAP_MAX_AREA: ${{ secrets.MAP_MAX_AREA }}
+          TM_MAX_AOI_AREA: ${{ secrets.PRODUCTION_TM_MAX_AOI_AREA }}
+          TM_IMPORT_MAX_FILESIZE: ${{ secrets.PRODUCTION_TM_IMPORT_MAX_FILESIZE }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_PRODUCTION_BUCKET_NAME }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TASKING_MANG_DISTRIBUTION_ID }}
+
+      - name: Checkout tasking-manager repo
+        uses: actions/checkout@v2
+        with:
+          repository: OpenHistoricalMap/tasking-manager
+          ref: 3902d566d9d2d8d5a9c37bf61894ed649b581ee5
+          # token: ${{env.DEV_GITHUB_TOKEN}}
+
+      - uses: actions/checkout@v1
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+
+      - name: Yarn Install
+        run: |
+          cd frontend && yarn cache clean && yarn install
+
+      - name: Build
+        run: |
+          cd frontend && yarn build
+
+      - name: Unit Tests
+        run: |
+          cd frontend && yarn test --testPathIgnorePatterns internationalization.test.js 
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install aws cli
+        run: |
+          python -m pip install --upgrade pip
+          pip install awscli
+
+      - name: Clean cache in cloudfront
+        run: |
+          aws s3 sync frontend/build s3://${AWS_S3_BUCKET}/ --acl public-read --delete
+          aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          
