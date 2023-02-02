@@ -48,15 +48,15 @@ RUN npm install -g svgo
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
 # GITSHA value at 15-02-2022
-# ENV OPENSTREETMAP_WEBSITE_GITSHA=c24b5481812aba9e83da1fd855ccb37f92c5d75e
-RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+# ENV OPENSTREETMAP_WEBSITE_GITSHA=2ebbf2c82b38f9641b1600695cd8b37e65e41658
+RUN git clone -b master --depth 1 https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 # RUN git clone --depth 1 https://github.com/openstreetmap/openstreetmap-website.git $workdir
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'get id.html.erb from upstream'
 RUN git fetch
-RUN git checkout 0dc65588326b809a5a04fa356a878a52e43280ba
+# RUN git checkout $OPENSTREETMAP_WEBSITE_GITSHA
 
 
 # # Install Ruby packages
@@ -94,6 +94,7 @@ RUN a2dissite 000-default
 RUN a2ensite production
 
 # Install Passenger + Apache module
+RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
 RUN apt-get update && apt-get install -y libapache2-mod-passenger
 
 # Enable the Passenger Apache module and restart Apache
