@@ -67,8 +67,8 @@ RUN git fetch
 RUN gem install bundler && bundle install
 
 # update vendored iD
-RUN rm -rf vendor/assets/iD
-RUN vendorer
+# RUN rm -rf vendor/assets/iD
+# RUN vendorer
 
 # Configure database.yml and secrets.yml
 RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
