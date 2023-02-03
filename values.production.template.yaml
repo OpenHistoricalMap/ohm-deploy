@@ -458,14 +458,14 @@ osm-seed:
       POSTGRES_PORT: 5432
       TM_ORG_NAME: 'OpenHistoricalMap'
       TM_ORG_CODE: 'OHM'
-      TM_ORG_URL: 'openhistoricalmap.org'
-      TM_ORG_PRIVACY_POLICY_URL: 'openhistoricalmap.org/copyright'
+      TM_ORG_URL: 'www.openhistoricalmap.org'
+      TM_ORG_PRIVACY_POLICY_URL: 'www.openhistoricalmap.org/copyright'
       TM_ORG_GITHUB: 'github.com/openhistoricalmap'
-      OSM_SERVER_URL: 'https://openhistoricalmap.org'
+      OSM_SERVER_URL: 'https://www.openhistoricalmap.org'
       OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api.openhistoricalmap.org'
-      OSM_REGISTER_URL: 'https://openhistoricalmap.org/user/new'
-      ID_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=id'
-      POTLATCH2_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=potlatch2'
+      OSM_REGISTER_URL: 'https://www.openhistoricalmap.org/user/new'
+      ID_EDITOR_URL: 'https://www.openhistoricalmap.org/edit?editor=id'
+      POTLATCH2_EDITOR_URL: 'https://www.openhistoricalmap.org/edit?editor=potlatch2'
       TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
       TM_CONSUMER_KEY: {{PRODUCTION_TM_API_CONSUMER_KEY}}
       TM_CONSUMER_SECRET: {{PRODUCTION_TM_API_CONSUMER_SECRET}}
