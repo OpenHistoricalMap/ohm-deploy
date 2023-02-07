@@ -26,8 +26,8 @@ jobs:
           TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
           TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
-          TM_CONSUMER_KEY: ${{ secrets.STAGING_TM_CONSUMER_KEY }}
-          TM_CONSUMER_SECRET: ${{ secrets.STAGING_TM_CONSUMER_SECRET }}
+          TM_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
+          TM_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
@@ -35,7 +35,7 @@ jobs:
           TM_MAX_AOI_AREA: 15000
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TM_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TM_CLOUDFRONT_DISTRIBUTION_ID }}
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
@@ -50,8 +50,8 @@ jobs:
           TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
           TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
-          TM_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_CONSUMER_KEY }}
-          TM_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_CONSUMER_SECRET }}
+          TM_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
+          TM_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
           OSM_SERVER_URL: https://www.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
@@ -59,7 +59,7 @@ jobs:
           TM_MAX_AOI_AREA: 15000
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
 
       - name: Checkout tasking-manager repo
         uses: actions/checkout@v2
