@@ -361,7 +361,7 @@ osm-seed:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://osmseed-staging.s3.amazonaws.com/planet/planet-latest.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/osmseed-staging/replication/minute/
-        SEQUENCE_NUMBER: 383659
+        SEQUENCE_NUMBER: 429337
         OVERWRITE_STATE: true
       persistenceDisk:
         enabled: true
