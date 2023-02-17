@@ -49,9 +49,11 @@ RUN npm install -g svgo
 RUN rm -rf $workdir/html
 # GITSHA value at 15-02-2022
 # ENV OPENSTREETMAP_WEBSITE_GITSHA=2ebbf2c82b38f9641b1600695cd8b37e65e41658
-RUN git clone -b master --depth 1 https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+RUN git clone -b master https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 # RUN git clone --depth 1 https://github.com/openstreetmap/openstreetmap-website.git $workdir
 WORKDIR $workdir
+
+RUN git checkout ebe13a68a72165fded4a60053c037abe8059798c
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'get id.html.erb from upstream'
