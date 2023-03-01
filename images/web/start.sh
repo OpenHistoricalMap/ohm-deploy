@@ -14,7 +14,7 @@ production:
   encoding: utf8" >$workdir/config/database.yml
 
 #### SETTING UP SERVER_URL AND SERVER_PROTOCOL
-sed -i -e 's/server_url: "openstreetmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
+sed -i -e 's/server_url: "openhistoricalmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
 sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
 
 #### SETTING UP MAIL SENDER
