@@ -11,7 +11,7 @@ license_url: "http://opendatacommons.org/licenses/odbl/1-0/"
 # Support email address
 support_email: "openstreetmap@example.com"
 # Sender addresses for emails
-email_from: "OpenStreetMap <openstreetmap@example.com>"
+email_from: "OpenHistoricalMap <openstreetmap@example.com>"
 email_return_path: "openstreetmap@example.com"
 # API version
 api_version: "0.6"
