@@ -73,6 +73,7 @@ jobs:
           pip install awscli
 
       - name: Push data to s3 and clean cloudfront cache
+        if: ${{ success() }}
         run: |
           aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
