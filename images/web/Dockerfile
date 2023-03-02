@@ -49,8 +49,8 @@ RUN npm install -g svgo
 RUN rm -rf $workdir/html
 
 # GITSHA value at Mar 1, 2023
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=d3a09ef835e5cde9e89529e97cac4522d5ede6b3
-RUN git clone -b master https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=1cc43f18696333a225b0ae2fd15fb11cc3e8ba74
+RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
