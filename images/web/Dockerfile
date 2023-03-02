@@ -50,7 +50,7 @@ RUN rm -rf $workdir/html
 
 # GITSHA value at Mar 1, 2023
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=d3a09ef835e5cde9e89529e97cac4522d5ede6b3
-RUN git clone -b https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+RUN git clone -b master https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
