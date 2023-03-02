@@ -47,23 +47,16 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-# GITSHA value at 15-02-2022
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=1c36c51c96134290e00f29687cbde04cb9ca226d
-RUN git clone -b master https://github.com/OpenHistoricalMap/ohm-website.git $workdir
-# RUN git clone --depth 1 https://github.com/openstreetmap/openstreetmap-website.git $workdir
-WORKDIR $workdir
 
+# GITSHA value at Mar 1, 2023
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=d3a09ef835e5cde9e89529e97cac4522d5ede6b3
+RUN git clone -b https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'get id.html.erb from upstream'
 RUN git fetch
-# RUN git checkout $OPENSTREETMAP_WEBSITE_GITSHA
-
-
-# # Install Ruby packages
-# RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
-# RUN echo "gem 'net-http'" >> Gemfile
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
