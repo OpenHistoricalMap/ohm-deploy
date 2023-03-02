@@ -14,7 +14,7 @@ production:
   encoding: utf8" >$workdir/config/database.yml
 
 #### SETTING UP SERVER_URL AND SERVER_PROTOCOL
-sed -i -e 's/server_url: "openstreetmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
+sed -i -e 's/server_url: "openhistoricalmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
 sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
 
 #### SETTING UP MAIL SENDER
@@ -40,7 +40,7 @@ sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
 sed -i -e 's/#memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.yml
 
 ## SET NOMINATIM URL
-sed -i -e 's/nominatim.openstreetmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
+sed -i -e 's/nominatim.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
 
 ## SET OVERPASS URL
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.yml

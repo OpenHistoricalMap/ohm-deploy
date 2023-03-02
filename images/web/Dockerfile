@@ -47,28 +47,23 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-# GITSHA value at 15-02-2022
-# ENV OPENSTREETMAP_WEBSITE_GITSHA=c24b5481812aba9e83da1fd855ccb37f92c5d75e
-RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir
-# RUN git clone --depth 1 https://github.com/openstreetmap/openstreetmap-website.git $workdir
+
+# GITSHA value at Mar 1, 2023
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=1cc43f18696333a225b0ae2fd15fb11cc3e8ba74
+RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
+RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'get id.html.erb from upstream'
 RUN git fetch
-RUN git checkout 0dc65588326b809a5a04fa356a878a52e43280ba
-
-
-# # Install Ruby packages
-# RUN echo "gem 'image_optim_pack', :git => 'https://github.com/toy/image_optim_pack.git'" >> Gemfile
-# RUN echo "gem 'net-http'" >> Gemfile
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
 
 # update vendored iD
-RUN rm -rf vendor/assets/iD
-RUN vendorer
+# RUN rm -rf vendor/assets/iD
+# RUN vendorer
 
 # Configure database.yml and secrets.yml
 RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
@@ -94,6 +89,7 @@ RUN a2dissite 000-default
 RUN a2ensite production
 
 # Install Passenger + Apache module
+RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
 RUN apt-get update && apt-get install -y libapache2-mod-passenger
 
 # Enable the Passenger Apache module and restart Apache
