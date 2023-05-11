@@ -598,4 +598,22 @@ osm-seed:
         cpu: '2'
     nodeSelector:
       enabled: false
-      
+# ====================================================================================================
+# Variables for osm-simple-metrics
+# ====================================================================================================
+  osmSimpleMetrics:
+    enabled: true
+    image:
+      name: ''
+      tag: ''
+    schedule: '*/10 * * * *'
+    resources:
+      enabled: false
+      requests:
+        memory: '1Gi'
+        cpu: '2'
+      limits:
+        memory: '2Gi'
+        cpu: '2'
+    nodeSelector:
+      enabled: false
