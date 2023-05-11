@@ -604,8 +604,6 @@ osm-seed:
   osmSimpleMetrics:
     enabled: true
     image:
-      name: ''
-      tag: ''
     schedule: '*/10 * * * *'
     resources:
       enabled: false
