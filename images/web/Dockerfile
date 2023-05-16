@@ -49,7 +49,7 @@ RUN npm install -g svgo
 RUN rm -rf $workdir/html
 
 RUN echo "Updates: website-16/05/2023, iD-03/03/2023"
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=1a0abbf8075508041d8fce956cb7ff98b641f152
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=a753c1350699b3b27e23643ad87f2e64d2829641
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
