@@ -48,8 +48,8 @@ RUN npm install -g svgo
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
 
-RUN echo "Updates: website-08/05/2023, iD-03/03/2023"
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=a2cb6499a1d03197fb82dfb57e2ea815c2945b97
+RUN echo "Updates: website-16/05/2023, iD-03/03/2023"
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=1a0abbf8075508041d8fce956cb7ff98b641f152
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
