@@ -603,8 +603,7 @@ osm-seed:
 # ====================================================================================================
   osmSimpleMetrics:
     enabled: true
-    image:
-    schedule: '*/10 * * * *'
+    schedule: '0 2 * * *'
     resources:
       enabled: false
       requests:
