@@ -442,18 +442,18 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	name = "water_lines"
 	provider_layer = "osm.water_lines_gen0"
 	min_zoom = 8
-	max_zoom = 12
+	max_zoom = 9
 
 	[[maps.layers]]
 	name = "water_lines"
 	provider_layer = "osm.water_lines_gen1"
-	min_zoom = 13
-	max_zoom = 14
+	min_zoom = 10
+	max_zoom = 11
 
 	[[maps.layers]]
 	name = "water_lines"
 	provider_layer = "osm.water_lines"
-	min_zoom = 15
+	min_zoom = 12
 	max_zoom = 20
 
 	# Transport Lines (Roads, Rail, Aviation)
