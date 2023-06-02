@@ -429,12 +429,12 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	name = "water_areas"
 	provider_layer = "osm.water_areas_gen1"
 	min_zoom = 10
-	max_zoom = 12
+	max_zoom = 11
 
 	[[maps.layers]]
 	name = "water_areas"
 	provider_layer = "osm.water_areas"
-	min_zoom = 13
+	min_zoom = 12
 	max_zoom = 20
 
 	# Water Lines
