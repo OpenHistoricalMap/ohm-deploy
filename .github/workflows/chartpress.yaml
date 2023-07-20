@@ -29,7 +29,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
 
     - name: Staging - substitute secrets
-      if: github.ref == 'refs/heads/staging || github.ref == 'refs/heads/develop'
+      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
       uses: bluwy/substitute-string-action@v1
       with:
         _input-file: 'values.staging.template.yaml'
