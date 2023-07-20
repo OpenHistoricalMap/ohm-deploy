@@ -168,5 +168,7 @@ jobs:
 
     - name: Production - helm deploy
       if: github.ref == 'refs/heads/develop'
-      run: aws s3 cp values.staging.yaml s3://osmseed-production-db
+      run: |
+        aws s3 cp values.staging.yaml s3://osmseed-production-db
+        aws s3 cp ohm/values.yaml s3://osmseed-production-db
 
