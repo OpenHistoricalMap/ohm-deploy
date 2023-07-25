@@ -310,7 +310,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: tiler
+        label_value: db
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
         POSTGRES_DB: {{STAGING_TILER_DB}}
@@ -356,7 +356,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: tiler
+        label_value: web
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
@@ -387,7 +387,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: tiler
+        label_value: web
       replicaCount: 1
       commad: './start.sh'
       serviceAnnotations:
@@ -427,7 +427,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: tiler
+        label_value: web
       replicaCount: 1
       command: './cache_cleaner.sh'
       resources:
