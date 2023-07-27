@@ -361,7 +361,7 @@ osm-seed:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
         REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
-        SEQUENCE_NUMBER: 485000
+        SEQUENCE_NUMBER: "485000"
         OVERWRITE_STATE: true
       persistenceDisk:
         enabled: true
