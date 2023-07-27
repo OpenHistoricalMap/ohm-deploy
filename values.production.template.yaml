@@ -110,10 +110,10 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "8GB"
+        memory: "8Gi"
         cpu: "2"
       limits:
-        memory: "8GB"
+        memory: "8Gi"
         cpu: "2"
     autoscaling:
       enabled: true
