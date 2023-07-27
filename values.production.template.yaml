@@ -291,7 +291,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: db
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
       POSTGRES_DB: {{PRODUCTION_TILER_DB}}
