@@ -344,7 +344,7 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: {{PRODUCTION_TILER_IMPOSM_EBS}}
       AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "16Gi"
         cpu: "2"
@@ -408,7 +408,7 @@ osm-seed:
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "8Gi"
         cpu: "1"
