@@ -152,7 +152,7 @@ jobs:
 
     - name: Update kube-config prod
       if: github.ref == 'refs/heads/main'
-      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production
+      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
 
     - name: Install helm dependencies for
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
