@@ -152,7 +152,7 @@ jobs:
 
     - name: Update kube-config prod
       if: github.ref == 'refs/heads/main'
-      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production
+      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
 
     - name: Install helm dependencies for
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
@@ -160,8 +160,8 @@ jobs:
 
     - name: Staging - helm deploy
       if: github.ref == 'refs/heads/staging'
-      run: helm upgrade staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+      run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
 
     - name: Production - helm deploy
       if: github.ref == 'refs/heads/main'
-      run: helm upgrade production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
+      run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml

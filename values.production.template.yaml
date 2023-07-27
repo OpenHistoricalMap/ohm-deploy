@@ -110,15 +110,15 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "8Gi"
-        cpu: "2"
+        memory: "2Gi"
+        cpu: "1"
       limits:
-        memory: "8Gi"
+        memory: "2Gi"
         cpu: "2"
     autoscaling:
-      enabled: false
-      minReplicas: 1
-      maxReplicas: 3
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 10
       cpuUtilization: 80
   # ====================================================================================================
   # Variables for memcached. Memcached is used to store session cookies
@@ -147,7 +147,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: job
     env:
       OVERWRITE_PLANET_FILE: false
     resources:
@@ -168,7 +168,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: job
     env:
       OVERWRITE_FHISTORY_FILE: false
     resources:
@@ -267,7 +267,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: job
     env:
       DB_ACTION: backup
       RESTORE_URL_FILE: https://osmseed-production-db.s3.us-east-1.amazonaws.com/database/osmseed-db-220803_1606.sql.gz?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEDcaCXNhLWVhc3QtMSJIMEYCIQC6oYShK01LFCHNNOP0%2Bch5uKeAcpSmfRLxnaaygUYd5QIhAKt0OtxclFyJrX1qqdOfOgcylfVGBi%2FizMIIISenxD%2FbKoQDCJD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQAhoMNjE4MzgwMjQyMjQ3IgzdtXrtIBspySZIJ0Yq2AJ0RovZahua04PQ%2FBWVGLhmQPxRiN6Pe5evt2FUuVFdrSMGaqfxo3YAGTezOmviYoqtrHf7NZHRcHQx9RTB4Nk2rmeZfQ9xepB7semK0G3VbzDqsVTzglFDxk52xqpESYYf6vVbORyBDJvjvlCjUAXLH1PqOlj%2FFDd5A3UK3%2FCSJc9JfYh1LVkz4md6ug3mh0KYpUL0%2FipBVpQTcN0PCkVJTTPWOBXmn9qnYMUJg2LNRVMkgIr7AA2MmmSVzPhj%2FfnaHIXCCbHlJ5RA9IgpftC%2FEvTrP2cvgcV03YOWSq9sSMg%2B%2B0xDWn7stI9PsKoakHX%2B%2BtsxHimJ4uGTY8I7DsV915Kzgx1aRlJ5MYjOtbSuMOfhZP6FSwLGRTPw7qvS0kLFKHAwCYLsd7GF6%2FHadTbLSJ0Zx0EqPYVjyIKfwZ5fu204xUkGhCqBlHuQBQhoG%2FMxcnYf53NoSTChm6qXBjqyAkr7doHwSC9HTJYlIq7gixhkZ29BfaHp8jq0gIBW7aAEC3idFdN2ZQd9pHQAgN4fKYrOmC%2Bbf9njZH91%2BEvzwpEHXyho8E8lPSQJGJZnAquRzJkzJ23%2F4zF51Rf2WMSpmYMHyWXodLLP4yYj%2Bgk%2Bg%2FbUsDYhkq4%2B%2F5%2Bf7YLCmvi%2BdO%2B5GEZEa%2B1iPghxd%2BH8eQk9jUlebsI3fh01f%2Bv6TbzgGieM7eqXYeH0JTZDZGEJlPdbUzMHKcj6G6kuTX4nvD9YDPQzUYAoVwu2gwjvrjaHRaK8NKMlEC7JCIlsWrVzjVR%2FtXlBybrZ5rSdZNeTIDDof5lS8O%2F9qqyhTel4pObDPNosj6jCOVPe3geM5ZNZVbL4ATUdJ5oU3BcTm%2FMcerATv%2FysoVrskKNuDMjHoT3fkA%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220803T172639Z&X-Amz-SignedHeaders=host&X-Amz-Expires=2400&X-Amz-Credential=ASIAY76SVVVDSEAYVNUG%2F20220803%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6ed260d9d775bbc6b0d4f5e08575552270c970a81afa2254f87b62c3b97730c2
@@ -291,7 +291,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: tiler
+      label_value: web
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
       POSTGRES_DB: {{PRODUCTION_TILER_DB}}
@@ -329,10 +329,10 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: tiler
+      label_value: web
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-230109_0000.osm.pbf
+      TILER_IMPORT_PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-230727_1030.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       OVERWRITE_STATE: true
       SEQUENCE_NUMBER: 929000
@@ -360,7 +360,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: tiler
+      label_value: web
     replicaCount: 2
     commad: './start.sh'
     serviceAnnotations:
@@ -386,12 +386,16 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "8Gi"
-        cpu: "4"
+        memory: "2Gi"
+        cpu: "1"
       limits:
-        memory: "8Gi"
-        cpu: "4"
-  
+        memory: "10Gi"
+        cpu: "2"
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 60  
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
@@ -400,18 +404,22 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: tiler
+      label_value: web
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: '1Gi'
-        cpu: '2'
+        memory: "8Gi"
+        cpu: "1"
       limits:
-        memory: '2Gi'
-        cpu: '2'
-
+        memory: "10Gi"
+        cpu: "2"
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 2
+      cpuUtilization: 60
   # ====================================================================================================
   # Variables for tiler-visor
   # ====================================================================================================
@@ -499,7 +507,7 @@ osm-seed:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     replicaCount: 1
     env:
-      PBF_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-230126_0000.osm.pbf
+      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-230727_1030.osm.pbf
       REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
       REPLICATION_UPDATE_INTERVAL: 60
       REPLICATION_RECHECK_INTERVAL: 30
@@ -537,7 +545,9 @@ osm-seed:
       GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
       GCP_gcePersistentDisk_size: 50Gi
     nodeSelector:
-      enabled: false
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
 
 # ====================================================================================================
 # Variables for overpass-api
@@ -597,7 +607,9 @@ osm-seed:
         memory: '2Gi'
         cpu: '2'
     nodeSelector:
-      enabled: false
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
 # ====================================================================================================
 # Variables for osm-simple-metrics
 # ====================================================================================================
@@ -613,4 +625,6 @@ osm-seed:
         memory: '2Gi'
         cpu: '2'
     nodeSelector:
-      enabled: false
+      enabled: true
+      label_key: nodegroup_type
+      label_value: job

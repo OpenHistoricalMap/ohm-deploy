@@ -5,3 +5,6 @@ tiler-imposm-data
 tiler-imposm
 images/data/
 data/
+images/.env
+images/tiler.yml
+values.dev.yaml
