@@ -157,7 +157,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job
-      schedule: '0 */5 * * *'
+      schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
       resources:
@@ -178,7 +178,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job
-      schedule: '0 */5 * * *'
+      schedule: '0 0 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
       resources:
@@ -282,7 +282,7 @@ osm-seed:
   
     dbBackupRestore:
       enabled: true
-      schedule: '0 */5 * * *'
+      schedule: '0 0 * * *'
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
