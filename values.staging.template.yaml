@@ -173,7 +173,7 @@ osm-seed:
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -665,10 +665,10 @@ osm-seed:
   # ====================================================================================================
     monitoringReplication:
       enabled: true
-      schedule: '*/1 * * * *'
+      schedule: '*/30 * * * *'
       env:
-        CREATE_MISSING_FILES: "none"
-        REPLICATION_SEQUENCE_NUMBER: "400000"
+        CREATE_MISSING_FILES: "empty"
+        REPLICATION_SEQUENCE_NUMBER: "000000"
       resources:
         enabled: false
         requests:
