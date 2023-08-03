@@ -223,7 +223,7 @@ osm-seed:
     replicationJob:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       resources:
@@ -354,7 +354,7 @@ osm-seed:
     tilerImposm:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       env:
@@ -614,7 +614,7 @@ osm-seed:
     taginfo:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       serviceAnnotations:
