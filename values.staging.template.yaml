@@ -119,7 +119,7 @@ osm-seed:
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
