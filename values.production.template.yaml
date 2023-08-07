@@ -628,3 +628,25 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: job
+  # ====================================================================================================
+  # Variables for replication nomitoring task
+  # ====================================================================================================
+  monitoringReplication:
+    enabled: true
+    schedule: '*/30 * * * *'
+    env:
+      CREATE_MISSING_FILES: "empty"
+      REPLICATION_SEQUENCE_NUMBER: "000000"
+    resources:
+      enabled: false
+      requests:
+        memory: '1Gi'
+        cpu: '2'
+      limits:
+        memory: '2Gi'
+        cpu: '2'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
+      

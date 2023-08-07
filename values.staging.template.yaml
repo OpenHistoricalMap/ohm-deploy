@@ -119,7 +119,7 @@ osm-seed:
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
@@ -173,7 +173,7 @@ osm-seed:
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -223,7 +223,7 @@ osm-seed:
     replicationJob:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       resources:
@@ -354,7 +354,7 @@ osm-seed:
     tilerImposm:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       env:
@@ -614,7 +614,7 @@ osm-seed:
     taginfo:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       serviceAnnotations:
@@ -659,3 +659,25 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job
+
+  # ====================================================================================================
+  # Variables for replication nomitoring task
+  # ====================================================================================================
+    monitoringReplication:
+      enabled: true
+      schedule: '*/30 * * * *'
+      env:
+        CREATE_MISSING_FILES: "empty"
+        REPLICATION_SEQUENCE_NUMBER: "000000"
+      resources:
+        enabled: false
+        requests:
+          memory: '1Gi'
+          cpu: '2'
+        limits:
+          memory: '2Gi'
+          cpu: '2'
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
