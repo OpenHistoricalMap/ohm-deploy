@@ -33,17 +33,18 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: d66745b41cc989187c3df14737f8790fcfb20ca3
+          ref: 43d1d9aa7e8bbb7152c89354900fdd327f9f7ffe
           # token: ${{env.DEV_GITHUB_TOKEN}}
 
-      - name: Use Node.js 10
+      - name: Use Node.js 12
         uses: actions/setup-node@v1
         with:
-          node-version: 10
+          node-version: 12
 
       - name: Install modules
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
+          rm package-lock.json
           npm cache clean --force
           npm cache verify
           npm install
