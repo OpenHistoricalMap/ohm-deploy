@@ -444,8 +444,8 @@ osm-seed:
           cpu: "2"
       env:
         KILL_PROCESS: manually
-        MAX_NUM_PS: 3
-        PROCESS_NAME: bash
+        MAX_NUM_PS: 4
+        PROCESS_NAME: tegola
       autoscaling:
         enabled: true
         minReplicas: 1
