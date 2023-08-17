@@ -394,7 +394,7 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
         TILER_SERVER_PORT: 9090
-        TILER_CACHE_TYPE: file
+        TILER_CACHE_TYPE: s3
         TILER_CACHE_BASEPATH: /mnt/data
         TILER_CACHE_MAX_ZOOM: 22
         # in case s3
@@ -442,11 +442,15 @@ osm-seed:
         limits:
           memory: "10Gi"
           cpu: "2"
+      env:
+        KILL_PROCESS: manually
+        MAX_NUM_PS: 3
+        PROCESS_NAME: bash
       autoscaling:
-        enabled: false
+        enabled: true
         minReplicas: 1
-        maxReplicas: 2
-        cpuUtilization: 60
+        maxReplicas: 1
+        cpuUtilization: 90
     # ====================================================================================================
     # Variables for tiler-visor
     # ====================================================================================================
