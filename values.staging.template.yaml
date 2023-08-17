@@ -394,7 +394,7 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
         TILER_SERVER_PORT: 9090
-        TILER_CACHE_TYPE: s3
+        TILER_CACHE_TYPE: file
         TILER_CACHE_BASEPATH: /mnt/data
         TILER_CACHE_MAX_ZOOM: 22
         # in case s3
