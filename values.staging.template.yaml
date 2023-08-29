@@ -443,11 +443,11 @@ osm-seed:
           memory: "10Gi"
           cpu: "2"
       env:
-        KILL_PROCESS: manually
+        KILL_PROCESS: none
         MAX_NUM_PS: 4
         PROCESS_NAME: tegola
       autoscaling:
-        enabled: true
+        enabled: false
         minReplicas: 1
         maxReplicas: 1
         cpuUtilization: 90
@@ -685,3 +685,18 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
+# ====================================================================================================
+# Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
+# ====================================================================================================
+    changesetReplicationJob:
+      enabled: true
+      resources:
+        enabled: false
+        requests:
+          memory: '20Gi'
+          cpu: '8'
+        limits:
+          memory: '24Gi'
+          cpu: '10'
+      nodeSelector:
+        enabled: false
