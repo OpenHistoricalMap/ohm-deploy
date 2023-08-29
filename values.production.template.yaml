@@ -113,7 +113,7 @@ osm-seed:
         memory: "2Gi"
         cpu: "1"
       limits:
-        memory: "2Gi"
+        memory: "4Gi"
         cpu: "2"
     autoscaling:
       enabled: true
@@ -408,13 +408,13 @@ osm-seed:
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "8Gi"
-        cpu: "1"
-      limits:
-        memory: "10Gi"
+        memory: "1Gi"
         cpu: "2"
+      limits:
+        memory: "2Gi"
+        cpu: "4"
     env:
       KILL_PROCESS: none
       MAX_NUM_PS: 5
