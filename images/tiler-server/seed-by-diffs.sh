@@ -35,7 +35,7 @@ for f in $imp_list; do
         --format="/zxy" \
         --min-zoom=0 \
         --max-zoom=20 \
-        --overwrite=true )
+        --overwrite=true 1> /dev/null & )
     sleep 10
     echo "$f" >>$completed_jobs
     mv $f $completed_dir
