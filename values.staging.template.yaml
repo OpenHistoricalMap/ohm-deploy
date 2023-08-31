@@ -443,7 +443,7 @@ osm-seed:
           memory: "10Gi"
           cpu: "2"
       env:
-        KILL_PROCESS: none
+        KILL_PROCESS: manually
         MAX_NUM_PS: 4
         PROCESS_NAME: tegola
       autoscaling:
@@ -616,7 +616,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -641,10 +641,6 @@ osm-seed:
         limits:
           memory: '2Gi'
           cpu: '2'
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================

@@ -416,7 +416,7 @@ osm-seed:
         memory: "2Gi"
         cpu: "4"
     env:
-      KILL_PROCESS: none
+      KILL_PROCESS: manually
       MAX_NUM_PS: 5
       PROCESS_NAME: tegola
     autoscaling:
