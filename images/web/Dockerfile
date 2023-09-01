@@ -48,7 +48,7 @@ RUN npm install -g svgo
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
 
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=284909db296078187f0338149bc9e7667e5a01c9
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=1ec64f07bda4becdaa5254e027594d82e38afc98
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
@@ -89,7 +89,7 @@ RUN a2ensite production
 
 # Install Passenger + Apache module
 RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-RUN apt-get update && apt-get install -y libapache2-mod-passenger
+RUN apt-get update && apt-get install -y libapache2-mod-passenger lighttpd
 
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
@@ -103,11 +103,11 @@ RUN /usr/sbin/passenger-memory-stats
 RUN a2enmod proxy proxy_http rewrite
 
 # Config the virtual host apache2
-ADD config/cgimap.conf /tmp/
-RUN sed -e 's/RewriteRule ^(.*)/#RewriteRule ^(.*)/' \
-        -e 's/\/var\/www/\/var\/www\/public/g' \
-        /tmp/cgimap.conf > /etc/apache2/sites-available/cgimap.conf
-RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
+# ADD config/cgimap.conf /tmp/
+# RUN sed -e 's/RewriteRule ^(.*)/#RewriteRule ^(.*)/' \
+#         -e 's/\/var\/www/\/var\/www\/public/g' \
+#         /tmp/cgimap.conf > /etc/apache2/sites-available/cgimap.conf
+# RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
 RUN a2ensite cgimap
 RUN apache2ctl configtest
 
@@ -115,7 +115,8 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Add settings
-ADD config/settings.yml $workdir/config/settings.yml
+ADD config/settings.yml $workdir/config/
+ADD config/lighttpd.conf $workdir/config/
 
 COPY start.sh $workdir/
 
