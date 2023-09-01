@@ -100,7 +100,7 @@ RUN /usr/bin/passenger-config validate-install
 RUN /usr/sbin/passenger-memory-stats
 
 # Enable required apache modules for the cgimap Apache service
-RUN a2enmod proxy proxy_http rewrite
+RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests
 
 # Config the virtual host apache2
 # ADD config/cgimap.conf /tmp/
@@ -108,7 +108,7 @@ RUN a2enmod proxy proxy_http rewrite
 #         -e 's/\/var\/www/\/var\/www\/public/g' \
 #         /tmp/cgimap.conf > /etc/apache2/sites-available/cgimap.conf
 # RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
-RUN a2ensite cgimap
+# RUN a2ensite cgimap
 RUN apache2ctl configtest
 
 # Set Permissions for www-data
