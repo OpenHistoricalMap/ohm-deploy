@@ -48,7 +48,7 @@ RUN npm install -g svgo
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
 
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=1ec64f07bda4becdaa5254e027594d82e38afc98
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=284909db296078187f0338149bc9e7667e5a01c9
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
