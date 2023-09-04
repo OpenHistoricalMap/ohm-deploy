@@ -18,14 +18,17 @@ RUN apt-get update \
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
- 
-RUN apt-get update && apt-get install -y nodejs yarn
+RUN apt-get update && apt-get install -y nodejs yarn && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install openstreetmap-cgimap requiriments
-RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev \
+RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
   libboost-dev libboost-program-options-dev libfmt-dev \
   libmemcached-dev libcrypto++-dev libargon2-dev libyajl-dev \
-  build-essential automake autoconf libtool
+  automake autoconf libtool && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 # Install cgimap
 ENV cgimap /tmp/openstreetmap-cgimap
@@ -43,7 +46,6 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=284909db296078187f0338149bc9e7667e5a01c9
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
@@ -55,10 +57,6 @@ RUN git fetch
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
-
-# update vendored iD
-# RUN rm -rf vendor/assets/iD
-# RUN vendorer
 
 # Configure database.yml and secrets.yml
 RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
@@ -99,12 +97,6 @@ RUN /usr/sbin/passenger-memory-stats
 RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests
 
 # Config the virtual host apache2
-# ADD config/cgimap.conf /tmp/
-# RUN sed -e 's/RewriteRule ^(.*)/#RewriteRule ^(.*)/' \
-#         -e 's/\/var\/www/\/var\/www\/public/g' \
-#         /tmp/cgimap.conf > /etc/apache2/sites-available/cgimap.conf
-# RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
-# RUN a2ensite cgimap
 RUN apache2ctl configtest
 
 # Set Permissions for www-data
