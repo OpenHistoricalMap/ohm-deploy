@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+git FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir /var/www
 
@@ -22,20 +22,16 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN apt-get update && apt-get install -y nodejs yarn
 
 # Install openstreetmap-cgimap requiriments
-RUN apt-get update \
-    && apt-get -y install \
-    libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev \
-    libboost-dev libboost-program-options-dev libboost-filesystem-dev \
-    libboost-system-dev libboost-locale-dev libmemcached-dev \
-    libcrypto++-dev libargon2-dev libyajl-dev automake autoconf libtool libvips-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev \
+  libboost-dev libboost-program-options-dev libfmt-dev \
+  libmemcached-dev libcrypto++-dev libargon2-dev libyajl-dev \
+  build-essential automake autoconf libtool
 
 # Install cgimap
 ENV cgimap /tmp/openstreetmap-cgimap
+ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-# openstreetmap-cgimap version at Jun 21, 2021
-RUN cd $cgimap && git checkout v0.8.6
+RUN cd $cgimap && git checkout $CGIMAP_GITSHA
 RUN cd $cgimap && \
     ./autogen.sh && \
     ./configure && \
