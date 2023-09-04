@@ -22,20 +22,16 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN apt-get update && apt-get install -y nodejs yarn
 
 # Install openstreetmap-cgimap requiriments
-RUN apt-get update \
-    && apt-get -y install \
-    libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev \
-    libboost-dev libboost-program-options-dev libboost-filesystem-dev \
-    libboost-system-dev libboost-locale-dev libmemcached-dev \
-    libcrypto++-dev libargon2-dev libyajl-dev automake autoconf libtool libvips-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev \
+  libboost-dev libboost-program-options-dev libfmt-dev \
+  libmemcached-dev libcrypto++-dev libargon2-dev libyajl-dev \
+  build-essential automake autoconf libtool
 
 # Install cgimap
 ENV cgimap /tmp/openstreetmap-cgimap
+ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-# openstreetmap-cgimap version at Jun 21, 2021
-RUN cd $cgimap && git checkout v0.8.6
+RUN cd $cgimap && git checkout $CGIMAP_GITSHA
 RUN cd $cgimap && \
     ./autogen.sh && \
     ./configure && \
@@ -89,7 +85,7 @@ RUN a2ensite production
 
 # Install Passenger + Apache module
 RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-RUN apt-get update && apt-get install -y libapache2-mod-passenger
+RUN apt-get update && apt-get install -y libapache2-mod-passenger lighttpd
 
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
@@ -100,22 +96,23 @@ RUN /usr/bin/passenger-config validate-install
 RUN /usr/sbin/passenger-memory-stats
 
 # Enable required apache modules for the cgimap Apache service
-RUN a2enmod proxy proxy_http rewrite
+RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests
 
 # Config the virtual host apache2
-ADD config/cgimap.conf /tmp/
-RUN sed -e 's/RewriteRule ^(.*)/#RewriteRule ^(.*)/' \
-        -e 's/\/var\/www/\/var\/www\/public/g' \
-        /tmp/cgimap.conf > /etc/apache2/sites-available/cgimap.conf
-RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
-RUN a2ensite cgimap
+# ADD config/cgimap.conf /tmp/
+# RUN sed -e 's/RewriteRule ^(.*)/#RewriteRule ^(.*)/' \
+#         -e 's/\/var\/www/\/var\/www\/public/g' \
+#         /tmp/cgimap.conf > /etc/apache2/sites-available/cgimap.conf
+# RUN chmod 644 /etc/apache2/sites-available/cgimap.conf
+# RUN a2ensite cgimap
 RUN apache2ctl configtest
 
 # Set Permissions for www-data
 RUN chown -R www-data: $workdir
 
 # Add settings
-ADD config/settings.yml $workdir/config/settings.yml
+ADD config/settings.yml $workdir/config/
+ADD config/lighttpd.conf $workdir/config/
 
 COPY start.sh $workdir/
 
