@@ -75,7 +75,9 @@ jobs:
         STAGING_OVERPASS_API_DB_EBS: ${{ secrets.STAGING_OVERPASS_API_DB_EBS }}
         STAGING_NEW_RELIC_LICENSE_KEY: ${{ secrets.STAGING_NEW_RELIC_LICENSE_KEY }}
         STAGING_NEW_RELIC_APP_NAME: ${{ secrets.STAGING_NEW_RELIC_APP_NAME }}
-
+        STAGING_OSMCHA_PG_USER: ${{ secrets.STAGING_OSMCHA_PG_USER }}
+        STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
+        STAGING_OSMCHA_PG_DATABASE: ${{ secrets.STAGING_OSMCHA_PG_DATABASE }}
     - name: Production - substitute secrets
       if: github.ref == 'refs/heads/main'
       uses: bluwy/substitute-string-action@v1
@@ -124,6 +126,9 @@ jobs:
         PRODUCTION_OVERPASS_API_DB_EBS: ${{ secrets.PRODUCTION_OVERPASS_API_DB_EBS }}
         PRODUCTION_NEW_RELIC_LICENSE_KEY: ${{ secrets.PRODUCTION_NEW_RELIC_LICENSE_KEY }}
         PRODUCTION_NEW_RELIC_APP_NAME: ${{ secrets.PRODUCTION_NEW_RELIC_APP_NAME }}
+        PRODUCTION_OSMCHA_PG_USER: ${{ secrets.PRODUCTION_OSMCHA_PG_USER }}
+        PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+        PRODUCTION_OSMCHA_PG_DATABASE: ${{ secrets.PRODUCTION_OSMCHA_PG_DATABASE }}
 
     - name: AWS Credentials
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
