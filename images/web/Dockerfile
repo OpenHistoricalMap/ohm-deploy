@@ -88,6 +88,8 @@ RUN apt-get update && apt-get install -y libapache2-mod-passenger lighttpd
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
 RUN a2enmod passenger
+RUN a2enmod headers
+RUN a2enmod setenvif
 
 # Check installation
 RUN /usr/bin/passenger-config validate-install

@@ -742,7 +742,7 @@ osm-seed:
     # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     osmchaDb:
-      enabled: true
+      enabled: false
       env:
         POSTGRES_DB: {{STAGING_OSMCHA_PG_DATABASE}}
         POSTGRES_USER: {{STAGING_OSMCHA_PG_USER}}
