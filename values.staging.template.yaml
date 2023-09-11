@@ -703,9 +703,6 @@ osm-seed:
     # ====================================================================================================
     osmchaWeb:
       enabled: false
-      image:
-        name: ''
-        tag: ''
       env:
         DJANGO_CACHES: "{'default': {'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache', 'LOCATION': '127.0.0.1:11211'}}"
         DJANGO_DEBUG: "False"
@@ -746,9 +743,6 @@ osm-seed:
     # ====================================================================================================
     osmchaDb:
       enabled: true
-      image:
-        name: ''
-        tag: ''
       env:
         POSTGRES_DB: {{STAGING_OSMCHA_PG_DATABASE}}
         POSTGRES_USER: {{STAGING_OSMCHA_PG_USER}}
