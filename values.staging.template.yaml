@@ -702,11 +702,12 @@ osm-seed:
     # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
       env:
+        OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
         DJANGO_CACHES: "{'default': {'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache', 'LOCATION': '127.0.0.1:11211'}}"
         DJANGO_DEBUG: "False"
-        DJANGO_SECRET_KEY: "123456789"
+        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}
         DJANGO_SECURE_BROWSER_XSS_FILTER: "True"
         DJANGO_SECURE_SSL_REDIRECT: "True"
         DJANGO_SECURE_CONTENT_TYPE_NOSNIFF: "True"
@@ -718,15 +719,18 @@ osm-seed:
         DJANGO_SERVER_EMAIL: "server@openhistoricalmap.org"
         DJANGO_EMAIL_SUBJECT_PREFIX: "osmcha"
         DJANGO_CHANGESETS_FILTER: "{'some_filter_key': 'some_filter_value'}"
-        # OAUTH_OSM_KEY: "your_osm_oauth_key"
-        # OAUTH_OSM_SECRET: "your_osm_oauth_secret"
+        OAUTH_OSM_KEY: {{STAGING_OSMCHA_CONSUMER_KEY}}
+        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_CONSUMER_SECRET}}
         DJANGO_ANON_USER_THROTTLE_RATE: "10/h"
         DJANGO_COMMON_USER_THROTTLE_RATE: "100/h"
         DJANGO_NON_STAFF_USER_THROTTLE_RATE: "50/h"
-        OAUTH_REDIRECT_URI: "https://staging.openhistoricalmap.org/oauth/callback"
-        OSMCHA_FRONTEND_VERSION: "v1.0.0"
+        OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/oauth-landing.html
         DJANGO_ENABLE_CHANGESET_COMMENTS: "True"
         DJANGO_OSM_COMMENTS_API_KEY: "test"
+        OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
+        DJANGO_ROOT: /app
+        DJANGO_SETTINGS_MODULE: config.settings.local
+        C_FORCE_ROOT: "False"
       resources:
         enabled: false
         requests:
@@ -742,7 +746,7 @@ osm-seed:
     # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       env:
         POSTGRES_DB: {{STAGING_OSMCHA_PG_DATABASE}}
         POSTGRES_USER: {{STAGING_OSMCHA_PG_USER}}
@@ -756,7 +760,7 @@ osm-seed:
           memory: '24Gi'
           cpu: '10'
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         # Minikube
