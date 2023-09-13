@@ -31,15 +31,15 @@ RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
   rm -rf /var/lib/apt/lists/*
 
 # Install cgimap
-ENV cgimap /tmp/openstreetmap-cgimap
-ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
-RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-RUN cd $cgimap && git checkout $CGIMAP_GITSHA
-RUN cd $cgimap && \
-    ./autogen.sh && \
-    ./configure && \
-    make && \
-    make install
+# ENV cgimap /tmp/openstreetmap-cgimap
+# ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
+# RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
+# RUN cd $cgimap && git checkout $CGIMAP_GITSHA
+# RUN cd $cgimap && \
+#     ./autogen.sh && \
+#     ./configure && \
+#     make && \
+#     make install
 
 # Install svgo required
 RUN npm install -g svgo
@@ -78,6 +78,8 @@ RUN ln -s /tmp /var/www/tmp
 
 # Add Apache configuration file
 ADD config/production.conf /etc/apache2/sites-available/production.conf
+RUN a2enmod headers
+RUN a2enmod setenvif
 RUN a2dissite 000-default
 RUN a2ensite production
 
@@ -88,8 +90,6 @@ RUN apt-get update && apt-get install -y libapache2-mod-passenger lighttpd
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
 RUN a2enmod passenger
-RUN a2enmod headers
-RUN a2enmod setenvif
 
 # Check installation
 RUN /usr/bin/passenger-config validate-install
