@@ -31,15 +31,15 @@ RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
   rm -rf /var/lib/apt/lists/*
 
 # Install cgimap
-# ENV cgimap /tmp/openstreetmap-cgimap
-# ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
-# RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-# RUN cd $cgimap && git checkout $CGIMAP_GITSHA
-# RUN cd $cgimap && \
-#     ./autogen.sh && \
-#     ./configure && \
-#     make && \
-#     make install
+ENV cgimap /tmp/openstreetmap-cgimap
+ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
+RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
+RUN cd $cgimap && git checkout $CGIMAP_GITSHA
+RUN cd $cgimap && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install
 
 # Install svgo required
 RUN npm install -g svgo
