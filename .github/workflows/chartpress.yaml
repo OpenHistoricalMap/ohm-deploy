@@ -75,7 +75,12 @@ jobs:
         STAGING_OVERPASS_API_DB_EBS: ${{ secrets.STAGING_OVERPASS_API_DB_EBS }}
         STAGING_NEW_RELIC_LICENSE_KEY: ${{ secrets.STAGING_NEW_RELIC_LICENSE_KEY }}
         STAGING_NEW_RELIC_APP_NAME: ${{ secrets.STAGING_NEW_RELIC_APP_NAME }}
-
+        STAGING_OSMCHA_PG_USER: ${{ secrets.STAGING_OSMCHA_PG_USER }}
+        STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
+        STAGING_OSMCHA_PG_DATABASE: ${{ secrets.STAGING_OSMCHA_PG_DATABASE }}
+        STAGING_OSMCHA_CONSUMER_KEY: ${{ secrets.STAGING_OSMCHA_CONSUMER_KEY }}
+        STAGING_OSMCHA_CONSUMER_SECRET: ${{ secrets.STAGING_OSMCHA_CONSUMER_SECRET }}
+        STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
     - name: Production - substitute secrets
       if: github.ref == 'refs/heads/main'
       uses: bluwy/substitute-string-action@v1
@@ -124,7 +129,12 @@ jobs:
         PRODUCTION_OVERPASS_API_DB_EBS: ${{ secrets.PRODUCTION_OVERPASS_API_DB_EBS }}
         PRODUCTION_NEW_RELIC_LICENSE_KEY: ${{ secrets.PRODUCTION_NEW_RELIC_LICENSE_KEY }}
         PRODUCTION_NEW_RELIC_APP_NAME: ${{ secrets.PRODUCTION_NEW_RELIC_APP_NAME }}
-
+        PRODUCTION_OSMCHA_PG_USER: ${{ secrets.PRODUCTION_OSMCHA_PG_USER }}
+        PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+        PRODUCTION_OSMCHA_PG_DATABASE: ${{ secrets.PRODUCTION_OSMCHA_PG_DATABASE }}
+        PRODUCTION_OSMCHA_CONSUMER_KEY: ${{ secrets.PRODUCTION_OSMCHA_CONSUMER_KEY }}
+        PRODUCTION_OSMCHA_CONSUMER_SECRET: ${{ secrets.PRODUCTION_OSMCHA_CONSUMER_SECRET }}
+        PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
     - name: AWS Credentials
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
       uses: aws-actions/configure-aws-credentials@v1
@@ -135,17 +145,7 @@ jobs:
 
     - name: Setup Kubectl and Helm Dependencies
       if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
-      run: |
-       sudo pip install awscli --ignore-installed six
-       sudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl
-       sudo chmod +x /usr/bin/kubectl
-       sudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator
-       sudo chmod +x /usr/bin/aws-iam-authenticator
-       wget https://get.helm.sh/helm-v3.5.0-linux-amd64.tar.gz -O helm.tar.gz
-       tar -xvzf helm.tar.gz
-       sudo mv linux-amd64/helm /usr/local/bin/ 
-       sudo chmod +x /usr/local/bin/helm
-
+      run: "sudo pip install awscli --ignore-installed six\nsudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl\nsudo chmod +x /usr/bin/kubectl\nsudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator\nsudo chmod +x /usr/bin/aws-iam-authenticator\nwget https://get.helm.sh/helm-v3.5.0-linux-amd64.tar.gz -O helm.tar.gz\ntar -xvzf helm.tar.gz\nsudo mv linux-amd64/helm /usr/local/bin/ \nsudo chmod +x /usr/local/bin/helm\n #magic___^_^___line\n"
     - name: Update kube-config staging
       if: github.ref == 'refs/heads/staging'
       run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
