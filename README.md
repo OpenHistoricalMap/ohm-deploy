@@ -5,6 +5,8 @@ OpenHistoricalMap deploy based on the osm-seed chart
 
 This repo is used for deploying to Staging and Production for the main parts of the stack that runs OpenHistoricalMap.org. 
 
+This repo is **not** used for local development. Each part of the stack has its own local dev methods. For the OHM Website, following the documentation at https://github.com/OpenHistoricalMap/ohm-website#docker-for-local-development.
+
 Commits to `main` and `staging` will kick off a Github Actions build process that takes somewhere between 30 and 45 minutes.
 
 You can't really test this code locally, which can make it tempting to commit changes directly to `staging` or `main`. Don't do it! Since every commit kicks off a build, it is still best practice to make all changes in a branch so you can review them, or ask someone else to do so, before merging in and kicking off a build.

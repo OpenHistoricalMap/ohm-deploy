@@ -19,5 +19,3 @@ docker-compose exec web bash
 ```
 
 - Wait couple of minutes and open http://localhost, Follow the [documentation](CONFIGURE.md) for interact with the page in local mode.
-
-- For development follow the [documentation](DEVELOPMENT.md).
