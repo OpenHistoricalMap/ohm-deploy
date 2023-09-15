@@ -52,7 +52,7 @@ jobs:
           TM_ORG_GITHUB: github.com/openhistoricalmap
           TM_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
           TM_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
-          OSM_SERVER_URL: https://openhistoricalmap.org
+          OSM_SERVER_URL: https://wwww.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
           POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
