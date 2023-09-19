@@ -99,7 +99,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      replicaCount: 2
+      replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
       serviceAnnotations:
