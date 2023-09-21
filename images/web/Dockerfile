@@ -96,7 +96,7 @@ RUN /usr/bin/passenger-config validate-install
 RUN /usr/sbin/passenger-memory-stats
 
 # Enable required apache modules for the cgimap Apache service
-RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests
+RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests proxy_fcgi
 
 # Config the virtual host apache2
 RUN apache2ctl configtest
@@ -106,7 +106,6 @@ RUN chown -R www-data: $workdir
 
 # Add settings
 ADD config/settings.yml $workdir/config/
-ADD config/lighttpd.conf $workdir/config/
 
 COPY start.sh $workdir/
 
