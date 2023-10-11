@@ -490,7 +490,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      replicaCount: 2
+      replicaCount: 1
       staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -503,13 +503,13 @@ osm-seed:
         TM_ORG_NAME: 'OpenHistoricalMap'
         TM_ORG_CODE: 'OHM'
         TM_ORG_URL: 'openhistoricalmap.org'
-        TM_ORG_PRIVACY_POLICY_URL: 'openhistoricalmap.org/copyright'
+        TM_ORG_PRIVACY_POLICY_URL: 'staging.openhistoricalmap.org/copyright'
         TM_ORG_GITHUB: 'github.com/openhistoricalmap'
         OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
         OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api-staging.openhistoricalmap.org'
         OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
-        ID_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=id'
-        POTLATCH2_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=potlatch2'
+        ID_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=id'
+        POTLATCH2_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=potlatch2'
         TM_SECRET: {{STAGING_TM_API_SECRET}}
         TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
         TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}

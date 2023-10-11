@@ -38,13 +38,13 @@ jobs:
         AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
         MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
         MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
-        MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
-        MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+        MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
+        MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
         STAGING_DB: ${{ secrets.STAGING_DB }}
         STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
         STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
         STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
-        STAGING_DOMAIN_NAME: ${{ secrets.STAGING_DOMAIN_NAME }}
+        STAGING_DOMAIN_NAME: staging.openhistoricalmap.org
         STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
         STAGING_ID_APPLICATION: ${{ secrets.STAGING_ID_APPLICATION }}
         STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
