@@ -105,15 +105,15 @@ osm-seed:
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
+      
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
         MAILER_DOMAIN: staging.openhistoricalmap.org
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
-        OSM_id_key: {{STAGING_ID_APPLICATION}} #FIXME we should use id_application to be consistent
-        # OSM_id_application: {{STAGING_ID_APPLICATION}}
+        OSM_id_key: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
-        MAILER_FROM: no-reply@openhistoricalmap.org
+        MAILER_FROM: no-reply@staging.openhistoricalmap.org
         NOMINATIM_URL: nominatim-api-staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api-staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
