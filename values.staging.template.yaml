@@ -106,7 +106,7 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
-        MAILER_DOMAIN: {{MAILER_DOMAIN}}
+        MAILER_DOMAIN: staging.openhistoricalmap.org
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
         OSM_id_key: {{STAGING_ID_APPLICATION}} #FIXME we should use id_application to be consistent
