@@ -96,7 +96,7 @@ osm-seed:
       label_value: web
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
-      MAILER_DOMAIN: {{MAILER_DOMAIN}}
+      MAILER_DOMAIN: openhistoricalmap.org
       MAILER_USERNAME: {{MAILER_USERNAME}}
       MAILER_PASSWORD: {{MAILER_PASSWORD}}
       OSM_id_key: {{PRODUCTION_ID_APPLICATION}}

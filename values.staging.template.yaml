@@ -99,21 +99,20 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      replicaCount: 2
+      replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
-        MAILER_DOMAIN: {{MAILER_DOMAIN}}
+        MAILER_DOMAIN: staging.openhistoricalmap.org
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
-        OSM_id_key: {{STAGING_ID_APPLICATION}} #FIXME we should use id_application to be consistent
-        # OSM_id_application: {{STAGING_ID_APPLICATION}}
+        OSM_id_key: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
-        MAILER_FROM: no-reply@openhistoricalmap.org
+        MAILER_FROM: no-reply@staging.openhistoricalmap.org
         NOMINATIM_URL: nominatim-api-staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api-staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
@@ -132,7 +131,7 @@ osm-seed:
         maxReplicas: 10
         cpuUtilization: 80
       cgimap:
-        enabled: false
+        enabled: true
     # ====================================================================================================
     # Variables for memcached. Memcached is used to store session cookies
     # ====================================================================================================
@@ -490,7 +489,7 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      replicaCount: 2
+      replicaCount: 1
       staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -503,13 +502,13 @@ osm-seed:
         TM_ORG_NAME: 'OpenHistoricalMap'
         TM_ORG_CODE: 'OHM'
         TM_ORG_URL: 'openhistoricalmap.org'
-        TM_ORG_PRIVACY_POLICY_URL: 'openhistoricalmap.org/copyright'
+        TM_ORG_PRIVACY_POLICY_URL: 'staging.openhistoricalmap.org/copyright'
         TM_ORG_GITHUB: 'github.com/openhistoricalmap'
         OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
         OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api-staging.openhistoricalmap.org'
         OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
-        ID_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=id'
-        POTLATCH2_EDITOR_URL: 'https://openhistoricalmap.org/edit?editor=potlatch2'
+        ID_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=id'
+        POTLATCH2_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=potlatch2'
         TM_SECRET: {{STAGING_TM_API_SECRET}}
         TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
         TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
