@@ -105,7 +105,6 @@ osm-seed:
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
-      
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
         MAILER_DOMAIN: staging.openhistoricalmap.org
         MAILER_USERNAME: {{MAILER_USERNAME}}
