@@ -732,6 +732,11 @@ osm-seed:
         DJANGO_ROOT: /app
         DJANGO_SETTINGS_MODULE: config.settings.local
         C_FORCE_ROOT: "False"
+        REACT_APP_OSM_URL: https://staging.openhistoricalmap.org
+        REACT_APP_OSM_API: https://staging.openhistoricalmap.org/api/0.6
+        REACT_APP_OVERPASS_BASE: https://overpass-api-staging.openhistoricalmap.org/api/interpreter
+        REACT_APP_NOMINATIM_URL: https://nominatim-api-staging.openhistoricalmap.org
+        OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
       resources:
         enabled: false
         requests:
