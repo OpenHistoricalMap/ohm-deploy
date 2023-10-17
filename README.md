@@ -31,11 +31,11 @@ That said, there are times when we have published feature branches to `staging` 
 
 ## More details on process for changing, testing, and deploying
 
-This is what the process of making changes to openhistocialmap.org looks like:
+This is what the process of making changes to openhistoricalmap.org looks like:
 
 1. Based on `staging`, make a feature-branch at `ohm-website` like `newinspector-stack` or `map-style-202101` or similar. 
-2. Running the `ohm-website` locally, make and test your changes locally in that feature branch. You can and should push work-in-progeress changes to your feature branch on github.com, so we can all see what's happening if needed. But don't commit directly to `staging` on `ohm-website`.
-3. When your changes are working as desired, submit a PR from your feature branches into staging. Assign Dan, Sanjay, or Sajjad to review that PR. We can merge into `staging` and then update the commit hash on the staging brnach of this repo, here https://github.com/OpenHistoricalMap/ohm-deploy/blob/staging/images/web/Dockerfile#L119-L121
+2. Running the `ohm-website` locally, make and test your changes locally in that feature branch. You can and should push work-in-progress changes to your feature branch on github.com, so we can all see what's happening if needed. But don't commit directly to `staging` on `ohm-website`.
+3. When your changes are working as desired, submit a PR from your feature branches into staging. Assign Dan, Sanjay, or Sajjad to review that PR. We can merge into `staging` and then update the commit hash on the staging branch of this repo, here https://github.com/OpenHistoricalMap/ohm-deploy/blob/staging/images/web/Dockerfile#L119-L121
 4. When we do that and push here, that kicks off a Github Actions automated deploy that will make your changes live on https://staging.openhistoricalmap.org.
 5. Test on Staging. This is when we can review with folks who are not running locally, share with the community, etc.
 6. When we're all happy with the code on Staging, we go back to `ohm-website` repo and make a PR of `staging` into `production` and then update the commit hash on the `main` branch in this OHM-deploy repo, which then kicks off deploy to production to make changes live on https://openhistoricalmap.org.
