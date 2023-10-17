@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir /var/www
 
@@ -6,11 +6,13 @@ ENV workdir /var/www
 ENV RAILS_ENV=production
 
 # Install the openstreetmap-website dependencies
-RUN apt-get update \ 
+RUN apt-get update \
     && apt-get install -y \
-    ruby2.7 libruby2.7 ruby2.7-dev libmagickwand-dev libxml2-dev libxslt1-dev \
-    apache2 apache2-dev build-essential git-core firefox-geckodriver postgresql-client \
+    ruby ruby-dev ruby-bundler libmagickwand-dev libxml2-dev libxslt1-dev \
+    apache2 apache2-dev build-essential git-core postgresql-client \
     libpq-dev libsasl2-dev imagemagick libffi-dev libgd-dev libarchive-dev libbz2-dev curl \
+    default-jre-headless file gpg-agent libvips-dev locales software-properties-common tzdata unzip \
+    advancecomp gifsicle libjpeg-progs jhead jpegoptim optipng pngcrush pngquant \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,7 +24,7 @@ RUN apt-get update && apt-get install -y nodejs yarn && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install openstreetmap-cgimap requiriments
+# Install openstreetmap-cgimap requirements
 RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
   libboost-dev libboost-program-options-dev libfmt-dev \
   libmemcached-dev libcrypto++-dev libargon2-dev libyajl-dev \
@@ -46,7 +48,7 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=284909db296078187f0338149bc9e7667e5a01c9
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=000fc9ba6fbcb3b493d20ea1f2ed518db74e3d53
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
