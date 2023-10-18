@@ -131,7 +131,7 @@ osm-seed:
         maxReplicas: 10
         cpuUtilization: 80
       cgimap:
-        enabled: true
+        enabled: false
     # ====================================================================================================
     # Variables for memcached. Memcached is used to store session cookies
     # ====================================================================================================
