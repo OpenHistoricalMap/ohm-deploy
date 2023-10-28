@@ -84,12 +84,12 @@ oauth_key: "OAUTH_KEY"
 id_application: ""
 # Imagery to return in capabilities as blacklisted
 imagery_blacklist:
-  # Current Google imagery URLs have google or googleapis in the domain
-  - ".*\\.google(apis)?\\..*/.*"
-  # Blacklist VWorld
-  - "http://xdworld\\.vworld\\.kr:8080/.*"
-  # Blacklist here
-  - ".*\\.here\\.com[/:].*"
+# Current Google imagery URLs have google or googleapis in the domain
+- ".*\\.google(apis)?\\..*/.*"
+# Blacklist VWorld
+- "http://xdworld\\.vworld\\.kr:8080/.*"
+# Blacklist here
+- ".*\\.here\\.com[/:].*"
 # URL of Overpass instance to use for feature queries
 overpass_url: "https://overpass-api.de/api/interpreter"
 overpass_credentials: false
@@ -137,3 +137,9 @@ smtp_tls_verify_mode: "none"
 smtp_authentication: null
 smtp_user_name: null
 smtp_password: null
+
+# Rate limit for changeset comments
+min_changeset_comments_per_hour: 1
+initial_changeset_comments_per_hour: 6
+max_changeset_comments_per_hour: 60
+moderator_changeset_comments_per_hour: 36000
