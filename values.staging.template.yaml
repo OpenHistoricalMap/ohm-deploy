@@ -288,7 +288,7 @@ osm-seed:
           SET_DATE: true
           BACKUP_CLOUD_FOLDER: database/web-db
           BACKUP_CLOUD_FILE: osmseed-api-web-db
-          AWS_S3_BUCKET: s3://osmseed-staging
+          AWS_S3_BUCKET: osmseed-staging
         resources:
           enabled: false
           requests:
@@ -309,7 +309,7 @@ osm-seed:
           SET_DATE: false
           BACKUP_CLOUD_FOLDER: database/osmcha-db
           BACKUP_CLOUD_FILE: osmseed-osmcha-db
-          AWS_S3_BUCKET: s3://osmseed-staging
+          AWS_S3_BUCKET: osmseed-staging
         resources:
           enabled: false
           requests:
