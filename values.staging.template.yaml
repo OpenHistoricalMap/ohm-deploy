@@ -282,13 +282,15 @@ osm-seed:
       cronjobs:
       - name: web-db
         enabled: true
-        schedule: '0 */2 * * *'
+        schedule: '0 0 * * *'
         env:
           DB_ACTION: backup
           SET_DATE: true
-          BACKUP_CLOUD_FOLDER: database/web-db
+          BACKUP_CLOUD_FOLDER: database/web-api-db
           BACKUP_CLOUD_FILE: osmseed-api-web-db
           AWS_S3_BUCKET: osmseed-staging
+          CLEAN_BACKUPS: true
+          RETENTION_DAYS: '30'
         resources:
           enabled: false
           requests:
@@ -303,13 +305,15 @@ osm-seed:
           label_value: job
       - name: osmcha-db
         enabled: true
-        schedule: '0 */2 * * *'
+        schedule: '0 0 * * *'
         env:
           DB_ACTION: backup
           SET_DATE: false
           BACKUP_CLOUD_FOLDER: database/osmcha-db
           BACKUP_CLOUD_FILE: osmseed-osmcha-db
           AWS_S3_BUCKET: osmseed-staging
+          CLEAN_BACKUPS: true
+          RETENTION_DAYS: '30'
         resources:
           enabled: false
           requests:
