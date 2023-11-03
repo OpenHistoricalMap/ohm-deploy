@@ -284,12 +284,15 @@ osm-seed:
         enabled: true
         schedule: '0 0 * * *'
         env:
+          # backup/restore
           DB_ACTION: backup
-          SET_DATE: true
+          # Naming backup files
+          SET_DATE_AT_NAME: true
           BACKUP_CLOUD_FOLDER: database/web-api-db
-          BACKUP_CLOUD_FILE: osmseed-api-web-db
+          BACKUP_CLOUD_FILE: ohm-api-web-db
           AWS_S3_BUCKET: osmseed-staging
-          CLEAN_BACKUPS: true
+          # Clean up backups options
+          CLEANUP_BACKUPS: true
           RETENTION_DAYS: '30'
         resources:
           enabled: false
@@ -307,12 +310,15 @@ osm-seed:
         enabled: true
         schedule: '0 0 * * *'
         env:
+          # backup/restore
           DB_ACTION: backup
-          SET_DATE: false
+          # Naming backup files
+          SET_DATE_AT_NAME: 'true'
           BACKUP_CLOUD_FOLDER: database/osmcha-db
           BACKUP_CLOUD_FILE: osmseed-osmcha-db
           AWS_S3_BUCKET: osmseed-staging
-          CLEAN_BACKUPS: true
+          # Clean up backups options
+          CLEANUP_BACKUPS: true
           RETENTION_DAYS: '30'
         resources:
           enabled: false
