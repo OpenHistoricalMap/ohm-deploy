@@ -22,7 +22,7 @@ jobs:
 
     - name: Install Chartpress
       run: |
-        pip install -v chartpress && pip install six && pip install ruamel.yaml
+        pip install chartpress six ruamel.yaml==0.18.4
     - name: Run Chartpress
       run: chartpress --push
       env:
