@@ -24,6 +24,8 @@ RUN apk update && \
         proj-util \
         proj-dev
 
+RUN pip install --upgrade pip
+RUN pip install wheel
 RUN pip install -r requirements.txt
 RUN pip install apscheduler==3.7.0
 
