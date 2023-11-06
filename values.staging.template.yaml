@@ -278,28 +278,61 @@ osm-seed:
     # ====================================================================================================
     # Variables for restoring the DB
     # ====================================================================================================
-  
     dbBackupRestore:
-      enabled: true
-      schedule: '0 0 * * *'
-      nodeSelector:
+      cronjobs:
+      - name: web-db
         enabled: true
-        label_key: nodegroup_type
-        label_value: job
-      env:
-        RESTORE_URL_FILE: https://osmseed-production-db.s3.us-east-1.amazonaws.com/database/osmseed-db-220802_0000.sql.gz?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjECUaCXNhLWVhc3QtMSJIMEYCIQDaL%2BYJE0LIZ8dHisSghlpKYtIbqPM3r7OnlXYySl34FAIhAOYcyVdY7WxoWN9n3z%2Fkh6JkJkkHFV91PJ6qS4ZEloizKvsCCH4QAhoMNjE4MzgwMjQyMjQ3Igy6Fd%2BxFomzH%2F38Evwq2ALJG0LvPhoMjgxOeGv0uZQPjzMewvy0IzjExaMcMruXQkSxgCjLZzb2xJTmfPHqcT1iAN%2FYPcm87CuLMU6TZ7QdKQTbhPUIgIXsdQ1oscp8095EgaQr0pY%2F7gDfDlxrUjGnEN3FOUCYucFNn9ORlL%2BlNXCkOsaIIg0ByUyLHFfus7%2B8plA0GfAHwkXdJRyx4hmSXFzAhnDT0mqH0YjuiS5DevP0ykCLmF3hT3Xbwd81t%2FZ07mm8hwzAxLibIc5YqjrxxnLAuZR9AXHCH%2F4Q0HosKMVWpry%2BsjRuebUbNgKsb8M4e73xjN18b40feIFazI6Ypo2yTfsMhNM2t1swa%2FpMq%2B2qg5NlDM%2FP1KzwT2yvZ3cZnZ2o3wFTxCYRcVG0nz%2FYA6iirYwezO2JK37aaeqUaMzTSAwM46S9S2qtcyuz5qrP2%2FULcrILtxw8FHVk5uMbqcXpBOQxMDCkpKaXBjqyAsdeRIzom8r6pAwrr7yzldM3bEpDdpfah38i%2BVGoq4Vg1EfrTTrRJ1zM481yAK9VZ%2Bm8pH52NRXsf3KBvawHxfKWRS5RiY4lhU%2BcX0WxtgCicxSILzoD9xmU6PoiuCy4DUojES6CznkY1LXe10ccQn4URFYgSpx04JSvO6RW82BWXardXPtZXuaxw4bPD%2FNnp3UxXMpv8fTS9shlA98xaS4m7XYTbpNl5uere0HkGy4vi5IZYRY%2B%2B909WU9ALsvSHBE%2BZLiIND8r0V1y9zBL8jD9pgtZghVpc%2FyeQ4XPxxtxEDSvJi0m3Vr7IQC7kOxB%2BuHSafbTKH4oGCDD5con4b7GCImy7N0T5EbVEAkmmKvW9hAMDYhF0A3NOR8fEvNtPKZve0bEl0gmMJ07quqmOsd56A%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220802T223259Z&X-Amz-SignedHeaders=host&X-Amz-Expires=1200&X-Amz-Credential=ASIAY76SVVVDZNYKO7KN%2F20220802%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=2a60ec3375c1abffc83a9067732a76ee02be3611bbe0e3e297987dd37fc58365
-        DB_ACTION: backup
-        CLEAN_BACKUPS: false
-        AWS_S3_BUCKET: s3://osmseed-staging
-      resources:
-        enabled: false
-        requests:
-          memory: "10Gi"
-          cpu: "3"
-        limits:
-          memory: "10Gi"
-          cpu: "3"
-  
+        schedule: '0 0 * * *'
+        env:
+          # backup/restore
+          DB_ACTION: backup
+          # Naming backup files
+          SET_DATE_AT_NAME: true
+          BACKUP_CLOUD_FOLDER: database/web-api-db
+          BACKUP_CLOUD_FILE: ohm-api-web-db
+          AWS_S3_BUCKET: osmseed-staging
+          # Clean up backups options
+          CLEANUP_BACKUPS: true
+          RETENTION_DAYS: '30'
+        resources:
+          enabled: false
+          requests:
+            memory: '300Mi'
+            cpu: '0.5'
+          limits:
+            memory: '400Mi'
+            cpu: '0.6'
+        nodeSelector:
+          enabled: true
+          label_key: nodegroup_type
+          label_value: job
+      - name: osmcha-db
+        enabled: true
+        schedule: '0 0 * * *'
+        env:
+          # backup/restore
+          DB_ACTION: backup
+          # Naming backup files
+          SET_DATE_AT_NAME: 'true'
+          BACKUP_CLOUD_FOLDER: database/osmcha-db
+          BACKUP_CLOUD_FILE: osmseed-osmcha-db
+          AWS_S3_BUCKET: osmseed-staging
+          # Clean up backups options
+          CLEANUP_BACKUPS: true
+          RETENTION_DAYS: '30'
+        resources:
+          enabled: false
+          requests:
+            memory: '300Mi'
+            cpu: '0.5'
+          limits:
+            memory: '400Mi'
+            cpu: '0.6'
+        nodeSelector:
+          enabled: true
+          label_key: nodegroup_type
+          label_value: job
+
     # ====================================================================================================
     # Variables for tiler-db
     # ====================================================================================================
