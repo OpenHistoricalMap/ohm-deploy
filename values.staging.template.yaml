@@ -130,7 +130,7 @@ osm-seed:
         minReplicas: 2
         maxReplicas: 10
         cpuUtilization: 80
-      sharedMemorySize: 1Mi
+      sharedMemorySize: 128Mi
     # ====================================================================================================
     # Variables for memcached. Memcached is used to store session cookies
     # ====================================================================================================
