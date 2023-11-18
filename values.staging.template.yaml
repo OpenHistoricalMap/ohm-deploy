@@ -94,7 +94,7 @@ osm-seed:
     # Variables for osm-seed website
     # ====================================================================================================
     web:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
