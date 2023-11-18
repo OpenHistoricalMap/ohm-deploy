@@ -295,6 +295,7 @@ osm-seed:
           # Clean up backups options
           CLEANUP_BACKUPS: true
           RETENTION_DAYS: '30'
+          RESTORE_URL_FILE: https://osmseed.s3.amazonaws.com/test.sql.gz
         resources:
           enabled: false
           requests:
