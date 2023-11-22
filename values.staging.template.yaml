@@ -118,19 +118,19 @@ osm-seed:
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
       resources:
-        enabled: false
+        enabled: true
         requests:
           memory: "2Gi"
           cpu: "1"
         limits:
-          memory: "2Gi"
+          memory: "4Gi"
           cpu: "2"
       autoscaling:
-        enabled: true
+        enabled: false
         minReplicas: 2
         maxReplicas: 10
         cpuUtilization: 80
-      sharedMemorySize: 128Mi
+      sharedMemorySize: 16Mi
     # ====================================================================================================
     # Variables for memcached. Memcached is used to store session cookies
     # ====================================================================================================
@@ -295,6 +295,7 @@ osm-seed:
           # Clean up backups options
           CLEANUP_BACKUPS: true
           RETENTION_DAYS: '30'
+          RESTORE_URL_FILE: https://osmseed.s3.amazonaws.com/test.sql.gz
         resources:
           enabled: false
           requests:
