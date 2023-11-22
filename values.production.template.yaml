@@ -79,6 +79,7 @@ osm-seed:
       limits:
         memory: "10Gi"
         cpu: "5"
+    sharedMemorySize: 512Mi
 
   # ====================================================================================================
   # Variables for osm-seed website
