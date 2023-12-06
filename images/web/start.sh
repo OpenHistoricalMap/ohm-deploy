@@ -64,6 +64,7 @@ while "$flag" = true; do
   # Start lighttpd and cgimap
   /usr/local/bin/openstreetmap-cgimap \
     --port=8000 \
+    --daemon \
     --instances=30 \
     --dbname=$POSTGRES_DB \
     --host=$POSTGRES_HOST \
