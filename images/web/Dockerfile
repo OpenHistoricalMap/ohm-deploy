@@ -48,13 +48,13 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=81b23e55aa9572f8d209a390c8a4e759cfc6520e
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ed33dfeebb7460031d7339e3fe29e7f8fb2b3a18
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'update map style'
+RUN echo 'update mapstyle and translate wiki'
 RUN git fetch
 
 # Install Ruby packages
