@@ -733,72 +733,55 @@ osm-seed:
         enabled: false
 
 
-    # ====================================================================================================
-    # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
-    # ====================================================================================================
+# ====================================================================================================
+# Variables for osmcha web
+# ====================================================================================================
     osmchaWeb:
       enabled: true
+
+# ====================================================================================================
+# Variables for osmcha Api
+# ====================================================================================================
+    osmchaApi:
+      enabled: true
       env:
-        OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
-        DJANGO_CACHES: "{'default': {'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache', 'LOCATION': '127.0.0.1:11211'}}"
-        DJANGO_DEBUG: "False"
-        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}
-        DJANGO_SECURE_BROWSER_XSS_FILTER: "True"
-        DJANGO_SECURE_SSL_REDIRECT: "True"
-        DJANGO_SECURE_CONTENT_TYPE_NOSNIFF: "True"
-        DJANGO_SECURE_FRAME_DENY: "True"
-        DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS: "True"
-        DJANGO_SESSION_COOKIE_HTTPONLY: "True"
-        DJANGO_SESSION_COOKIE_SECURE: "True"
-        DJANGO_DEFAULT_FROM_EMAIL: "webmaster@openhistoricalmap.org"
-        DJANGO_SERVER_EMAIL: "server@openhistoricalmap.org"
-        DJANGO_EMAIL_SUBJECT_PREFIX: "osmcha"
-        DJANGO_CHANGESETS_FILTER: "{'some_filter_key': 'some_filter_value'}"
-        OAUTH_OSM_KEY: {{STAGING_OSMCHA_CONSUMER_KEY}}
-        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_CONSUMER_SECRET}}
-        DJANGO_ANON_USER_THROTTLE_RATE: "10/h"
-        DJANGO_COMMON_USER_THROTTLE_RATE: "100/h"
-        DJANGO_NON_STAFF_USER_THROTTLE_RATE: "50/h"
-        OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/oauth-landing.html
-        DJANGO_ENABLE_CHANGESET_COMMENTS: "True"
-        DJANGO_OSM_COMMENTS_API_KEY: "test"
+        DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-        DJANGO_ROOT: /app
-        DJANGO_SETTINGS_MODULE: config.settings.local
-        C_FORCE_ROOT: "False"
-        REACT_APP_OSM_URL: https://staging.openhistoricalmap.org
-        REACT_APP_OSM_API: https://staging.openhistoricalmap.org/api/0.6
-        REACT_APP_OVERPASS_BASE: https://overpass-api-staging.openhistoricalmap.org/api/interpreter
-        REACT_APP_NOMINATIM_URL: https://nominatim-api-staging.openhistoricalmap.org
+        DJANGO_SECRET_KEY: abc
+        OAUTH_OSM_KEY: abc
+        OAUTH_OSM_SECRET: abc
+        DJANGO_SECURE_SSL_REDIRECT: "False"
+        OSM_SERVER_URL: https://osmcha-staging.openhistoricalmap.org
         OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
+        OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/oauth-landing.html
       resources:
         enabled: false
         requests:
-          memory: '20Gi'
-          cpu: '8'
+          memory: "20Gi"
+          cpu: "8"
         limits:
-          memory: '24Gi'
-          cpu: '10'
+          memory: "24Gi"
+          cpu: "10"
       nodeSelector:
         enabled: false
 
-    # ====================================================================================================
-    # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
-    # ====================================================================================================
+# ====================================================================================================
+# Variables for osmcha DB
+# ====================================================================================================
     osmchaDb:
       enabled: true
       env:
-        POSTGRES_DB: {{STAGING_OSMCHA_PG_DATABASE}}
-        POSTGRES_USER: {{STAGING_OSMCHA_PG_USER}}
-        POSTGRES_PASSWORD: {{STAGING_OSMCHA_PG_PASSWORD}}
+        POSTGRES_DB: osmcha-db
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: "1234"
       resources:
         enabled: false
         requests:
-          memory: '20Gi'
-          cpu: '8'
+          memory: "20Gi"
+          cpu: "8"
         limits:
-          memory: '24Gi'
-          cpu: '10'
+          memory: "24Gi"
+          cpu: "10"
       persistenceDisk:
         enabled: false
         accessMode: ReadWriteOnce
@@ -807,10 +790,20 @@ osm-seed:
         localVolumeHostPath: /mnt/db-data/osmcha-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0462ddf32e5b456df
-        AWS_ElasticBlockStore_size: 100Gi
+        AWS_ElasticBlockStore_volumeID: vol-1234bcd
+        AWS_ElasticBlockStore_size: 50Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-osmcha-disk--v1
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: false
+# ====================================================================================================
+# Variables for osmcha redis
+# ====================================================================================================
+    osmchaRedis:
+      enabled: true
+      image:
+        name: "redis"
+        tag: "latest"
+      port: 6379
+      replicaCount: 1
