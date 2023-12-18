@@ -744,6 +744,9 @@ osm-seed:
 # ====================================================================================================
     osmchaApi:
       enabled: true
+      image:
+        name: "ghcr.io/willemarcel/osmcha-django"
+        tag: "b1f4e6afc90e08707cadc4d74580632ca3b93dd2"
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
