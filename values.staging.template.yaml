@@ -751,9 +751,9 @@ osm-seed:
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-        DJANGO_SECRET_KEY: {{ STAGING_OSMCHA_DJANGO_SECRET_KEY }}        
-        OAUTH_OSM_KEY: {{ STAGING_OSMCHA_API_CONSUMER_KEY }}
-        OAUTH_OSM_SECRET: {{ STAGING_OSMCHA_API_CONSUMER_SECRET }}
+        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}        
+        OAUTH_OSM_KEY: {{STAGING_OSMCHA_API_CONSUMER_KEY}}
+        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_API_CONSUMER_SECRET}}
         DJANGO_SECURE_SSL_REDIRECT: "False"
         OSM_SERVER_URL: https://www.openhistoricalmap.org
         OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
@@ -780,9 +780,9 @@ osm-seed:
         name: "developmentseed/osmseed-osmcha-db"
         tag: "0.1.0-n767.h0090e97"
       env:
-        POSTGRES_DB: {{ STAGING_OSMCHA_PG_DATABASE }}
-        POSTGRES_USER: {{ STAGING_OSMCHA_PG_USER }}
-        POSTGRES_PASSWORD: {{ STAGING_OSMCHA_PG_PASSWORD }}
+        POSTGRES_DB: {{STAGING_OSMCHA_PG_DATABASE}}
+        POSTGRES_USER: {{STAGING_OSMCHA_PG_USER}}
+        POSTGRES_PASSWORD: {{STAGING_OSMCHA_PG_PASSWORD}}
       resources:
         enabled: false
         requests:
