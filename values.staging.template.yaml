@@ -589,6 +589,7 @@ osm-seed:
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
         OSMSEED_WEB_API_DOMAIN: staging.openhistoricalmap.org
+        OSMSEED_OVERPASS_API_DOMAIN: overpass-api-staging.openhistoricalmap.org
       resources:
         enabled: false
         requests:
@@ -746,37 +747,42 @@ osm-seed:
       enabled: true
       image:
         name: "ghcr.io/willemarcel/osmcha-django"
-        tag: "b1f4e6afc90e08707cadc4d74580632ca3b93dd2"
+        tag: "10d7f6748d9e55d439339ed2c35509db15f782a6"
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-        DJANGO_SECRET_KEY: abc
-        OAUTH_OSM_KEY: abc
-        OAUTH_OSM_SECRET: abc
+        DJANGO_SECRET_KEY: {{ STAGING_OSMCHA_DJANGO_SECRET_KEY }}        
+        OAUTH_OSM_KEY: {{ STAGING_OSMCHA_API_CONSUMER_KEY }}
+        OAUTH_OSM_SECRET: {{ STAGING_OSMCHA_API_CONSUMER_SECRET }}
         DJANGO_SECURE_SSL_REDIRECT: "False"
-        OSM_SERVER_URL: https://osmcha-staging.openhistoricalmap.org
+        OSM_SERVER_URL: https://www.openhistoricalmap.org
         OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
-        OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/oauth-landing.html
+        OAUTH_REDIRECT_URI: https://osmcha-staging.openhistoricalmap.org/oauth-landing.html
+        OSM_PLANET_BASE_URL: https://planet.openhistoricalmap.org/
       resources:
         enabled: false
         requests:
-          memory: "20Gi"
-          cpu: "8"
+          memory: "512Mi"
+          cpu: "1"
         limits:
-          memory: "24Gi"
-          cpu: "10"
+          memory: "512Mi"
+          cpu: "1"
       nodeSelector:
         enabled: false
-
+        label_key: nodegroup_type
+        label_value: web
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
       enabled: true
+      image:
+        name: "developmentseed/osmseed-osmcha-db"
+        tag: "0.1.0-n767.h0090e97"
       env:
-        POSTGRES_DB: osmcha-db
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: "1234"
+        POSTGRES_DB: {{ STAGING_OSMCHA_PG_DATABASE }}
+        POSTGRES_USER: {{ STAGING_OSMCHA_PG_USER }}
+        POSTGRES_PASSWORD: {{ STAGING_OSMCHA_PG_PASSWORD }}
       resources:
         enabled: false
         requests:
