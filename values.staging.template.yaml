@@ -758,7 +758,7 @@ osm-seed:
         OSM_SERVER_URL: https://www.openhistoricalmap.org
         OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
         OAUTH_REDIRECT_URI: https://osmcha-staging.openhistoricalmap.org/oauth-landing.html
-        OSM_PLANET_BASE_URL: https://planet.openhistoricalmap.org/
+        OSM_PLANET_BASE_URL: https://planet.openhistoricalmap.org/?prefix=replication/changesets/
       resources:
         enabled: false
         requests:
