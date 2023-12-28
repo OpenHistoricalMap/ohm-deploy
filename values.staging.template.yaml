@@ -738,16 +738,15 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: true
-
+      enabled: false
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================
     osmchaApi:
-      enabled: true
+      enabled: false
       image:
         name: "ghcr.io/willemarcel/osmcha-django"
-        tag: "10d7f6748d9e55d439339ed2c35509db15f782a6"
+        tag: "2975f9242b7bf70a840120b3dae6778c9d12146b"
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
@@ -756,9 +755,16 @@ osm-seed:
         OAUTH_OSM_SECRET: {{STAGING_OSMCHA_API_CONSUMER_SECRET}}
         DJANGO_SECURE_SSL_REDIRECT: "False"
         OSM_SERVER_URL: https://www.openhistoricalmap.org
-        OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
         OAUTH_REDIRECT_URI: https://osmcha-staging.openhistoricalmap.org/oauth-landing.html
-        OSM_PLANET_BASE_URL: https://planet.openhistoricalmap.org/?prefix=replication/changesets/
+        OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
+        ## frontend
+        OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
+        OSMCHA_API_URL: www.openhistoricalmap.org
+        REACT_APP_OSM_URL: https://www.openhistoricalmap.org
+        REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
+        REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
+        REACT_APP_ENABLE_REAL_CHANGESETS: 0
+        REACT_APP_MAPBOX_ACCESS_TOKEN: {{REACT_APP_MAPBOX_ACCESS_TOKEN}}
       resources:
         enabled: false
         requests:
@@ -775,7 +781,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: true
+      enabled: false
       image:
         name: "developmentseed/osmseed-osmcha-db"
         tag: "0.1.0-n767.h0090e97"
@@ -810,7 +816,7 @@ osm-seed:
 # Variables for osmcha redis
 # ====================================================================================================
     osmchaRedis:
-      enabled: true
+      enabled: false
       image:
         name: "redis"
         tag: "latest"
