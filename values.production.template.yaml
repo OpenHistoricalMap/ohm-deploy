@@ -724,7 +724,7 @@ osm-seed:
       REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
       REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
       REACT_APP_ENABLE_REAL_CHANGESETS: 0
-      REACT_APP_MAPBOX_ACCESS_TOKEN: {{REACT_APP_MAPBOX_ACCESS_TOKEN}}
+      REACT_APP_MAPBOX_ACCESS_TOKEN: {{PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
     resources:
       enabled: false
       requests:
