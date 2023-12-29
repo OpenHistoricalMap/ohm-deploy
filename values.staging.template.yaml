@@ -607,7 +607,7 @@ osm-seed:
         localVolumeHostPath: /mnt/nominatim-db-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
+        AWS_ElasticBlockStore_volumeID: vol-0027487e80f9c6863
         AWS_ElasticBlockStore_size: 100Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
