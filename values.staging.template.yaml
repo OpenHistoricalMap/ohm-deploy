@@ -310,7 +310,7 @@ osm-seed:
           label_key: nodegroup_type
           label_value: job
       - name: osmcha-db
-        enabled: true
+        enabled: false
         schedule: '0 0 * * *'
         env:
           # backup/restore
@@ -371,7 +371,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : {{STAGING_TILER_DB_EBS}}
+        AWS_ElasticBlockStore_volumeID : vol-0371dc7f97b6f6232
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -396,14 +396,14 @@ osm-seed:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
         REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
-        SEQUENCE_NUMBER: "485000"
+        SEQUENCE_NUMBER: "641000"
         OVERWRITE_STATE: true
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_IMPOSM_EBS}}
+        AWS_ElasticBlockStore_volumeID: vol-06bbfd53ca9e92097
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -420,7 +420,7 @@ osm-seed:
     tilerServer:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       replicaCount: 1
@@ -621,7 +621,7 @@ osm-seed:
     overpassApi:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       serviceAnnotations:
@@ -633,7 +633,7 @@ osm-seed:
         OVERPASS_DIFF_URL: 'http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute'
         OVERPASS_RULES_LOAD: '10'
         OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
-        OVERPASS_REPLICATION_SEQUENCE_NUMBER: '485000'
+        OVERPASS_REPLICATION_SEQUENCE_NUMBER: '641000'
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
