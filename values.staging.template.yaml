@@ -374,13 +374,13 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID : vol-0371dc7f97b6f6232
         AWS_ElasticBlockStore_size: 100Gi
       resources:
-        enabled: false
+        enabled: true
         requests:
-          memory: "15Gi"
-          cpu: "5"
+          memory: '8Gi'
+          cpu: '2'
         limits:
-          memory: "15Gi"
-          cpu: "5"
+          memory: '8Gi'
+          cpu: '2'
   
     # ====================================================================================================
     # Variables for tiler-imposm
@@ -640,12 +640,12 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID: vol-06d4a4e437cc7b686
         AWS_ElasticBlockStore_size: 100Gi
       resources:
-        enabled: false
+        enabled: true
         requests:
-          memory: '1Gi'
+          memory: '8Gi'
           cpu: '2'
         limits:
-          memory: '2Gi'
+          memory: '8Gi'
           cpu: '2'
     
   # ====================================================================================================
