@@ -342,10 +342,6 @@ osm-seed:
   
     tilerDb:
       enabled: true
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: db
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
         POSTGRES_DB: {{STAGING_TILER_DB}}
@@ -374,14 +370,17 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID : vol-0371dc7f97b6f6232
         AWS_ElasticBlockStore_size: 100Gi
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: '8Gi'
-          cpu: '2'
+          cpu: '4'
         limits:
           memory: '8Gi'
           cpu: '2'
-  
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: db_v2
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -620,10 +619,6 @@ osm-seed:
   # ====================================================================================================
     overpassApi:
       enabled: true
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
@@ -640,14 +635,17 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID: vol-06d4a4e437cc7b686
         AWS_ElasticBlockStore_size: 100Gi
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: '8Gi'
           cpu: '2'
         limits:
           memory: '8Gi'
           cpu: '2'
-    
+      nodeSelector:
+        enabled: false
+        label_key: nodegroup_type
+        label_value: web_v2
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
