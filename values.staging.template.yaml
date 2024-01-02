@@ -632,7 +632,7 @@ osm-seed:
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        AWS_ElasticBlockStore_volumeID: vol-0f4bc5b76ee1cb2cd
+        AWS_ElasticBlockStore_volumeID: vol-0d9d9b7ae2ad1bae4
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
