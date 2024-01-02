@@ -622,9 +622,9 @@ osm-seed:
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       env:
-        OVERPASS_META: 'yes'
+        OVERPASS_META: 'attic'
         OVERPASS_MODE: 'init'
-        OVERPASS_PLANET_URL: 'http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220815_0000.osm.pbf'
+        OVERPASS_PLANET_URL: 'https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240102_0000.osm.pbf'
         OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
         OVERPASS_RULES_LOAD: '10'
         OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
@@ -632,7 +632,7 @@ osm-seed:
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        AWS_ElasticBlockStore_volumeID: vol-06d4a4e437cc7b686
+        AWS_ElasticBlockStore_volumeID: vol-0f4bc5b76ee1cb2cd
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
