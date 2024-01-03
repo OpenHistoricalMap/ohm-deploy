@@ -354,7 +354,6 @@ osm-seed:
         # POSTGRES_DB_WORK_MEM: 15MB
         # POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
         # POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
-  
         #for 15Gi
         POSTGRES_DB_MAX_CONNECTIONS: 500
         POSTGRES_DB_SHARED_BUFFERS: 3GB
@@ -378,7 +377,7 @@ osm-seed:
           memory: '8Gi'
           cpu: '2'
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: db
     # ====================================================================================================
