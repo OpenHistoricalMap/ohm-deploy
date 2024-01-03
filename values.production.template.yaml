@@ -710,7 +710,7 @@ osm-seed:
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-      DJANGO_SECRET_KEY: {{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}       
+      DJANGO_SECRET_KEY: {{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}
       OAUTH_OSM_KEY: {{PRODUCTION_OSMCHA_API_CONSUMER_KEY}}
       OAUTH_OSM_SECRET: {{PRODUCTION_OSMCHA_API_CONSUMER_SECRET}}
       DJANGO_SECURE_SSL_REDIRECT: "False"
@@ -761,7 +761,7 @@ osm-seed:
       enabled: false
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
-      AWS_ElasticBlockStore_volumeID: vol-1234bcd
-      AWS_ElasticBlockStore_size: 50Gi
+      AWS_ElasticBlockStore_volumeID: vol-065901d9a34a6fbf9
+      AWS_ElasticBlockStore_size: 100Gi
     nodeSelector:
       enabled: false
