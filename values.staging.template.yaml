@@ -729,18 +729,16 @@ osm-seed:
           cpu: '10'
       nodeSelector:
         enabled: false
-
-
 # ====================================================================================================
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
 # ====================================================================================================
-# Variables for osmcha Api
+# Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       image:
         name: "ghcr.io/willemarcel/osmcha-django"
         tag: "2975f9242b7bf70a840120b3dae6778c9d12146b"
@@ -778,7 +776,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       image:
         name: "developmentseed/osmseed-osmcha-db"
         tag: "0.1.0-n767.h0090e97"
@@ -809,13 +807,3 @@ osm-seed:
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: false
-# # ====================================================================================================
-# # Variables for osmcha redis
-# # ====================================================================================================
-#     osmchaRedis:
-#       enabled: false
-#       image:
-#         name: "redis"
-#         tag: "latest"
-#       port: 6379
-#       replicaCount: 1
