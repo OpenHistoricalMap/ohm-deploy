@@ -734,7 +734,7 @@ osm-seed:
         memory: "512Mi"
         cpu: "1"
     nodeSelector:
-      enabled: false
+      enabled: true
       label_key: nodegroup_type
       label_value: web
 # ====================================================================================================
@@ -764,4 +764,6 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: vol-065901d9a34a6fbf9
       AWS_ElasticBlockStore_size: 100Gi
     nodeSelector:
-      enabled: false
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
