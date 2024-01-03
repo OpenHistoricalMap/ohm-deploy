@@ -698,27 +698,27 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
   osmchaWeb:
-    enabled: false
+    enabled: true
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================
   osmchaApi:
-    enabled: false
+    enabled: true
     image:
       name: "ghcr.io/willemarcel/osmcha-django"
       tag: "2975f9242b7bf70a840120b3dae6778c9d12146b"
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-      DJANGO_SECRET_KEY: {{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}       
+      DJANGO_SECRET_KEY: {{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}
       OAUTH_OSM_KEY: {{PRODUCTION_OSMCHA_API_CONSUMER_KEY}}
       OAUTH_OSM_SECRET: {{PRODUCTION_OSMCHA_API_CONSUMER_SECRET}}
       DJANGO_SECURE_SSL_REDIRECT: "False"
       OSM_SERVER_URL: https://www.openhistoricalmap.org
-      OAUTH_REDIRECT_URI: https://osmcha-staging.openhistoricalmap.org/oauth-landing.html
+      OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/oauth-landing.html
       OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
       ## frontend
-      OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
+      OSMCHA_URL: https://osmcha.openhistoricalmap.org
       OSMCHA_API_URL: www.openhistoricalmap.org
       REACT_APP_OSM_URL: https://www.openhistoricalmap.org
       REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
@@ -734,14 +734,14 @@ osm-seed:
         memory: "512Mi"
         cpu: "1"
     nodeSelector:
-      enabled: false
+      enabled: true
       label_key: nodegroup_type
       label_value: web
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
   osmchaDb:
-    enabled: false
+    enabled: true
     image:
       name: "developmentseed/osmseed-osmcha-db"
       tag: "0.1.0-n767.h0090e97"
@@ -761,7 +761,9 @@ osm-seed:
       enabled: false
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
-      AWS_ElasticBlockStore_volumeID: vol-1234bcd
-      AWS_ElasticBlockStore_size: 50Gi
+      AWS_ElasticBlockStore_volumeID: vol-065901d9a34a6fbf9
+      AWS_ElasticBlockStore_size: 100Gi
     nodeSelector:
-      enabled: false
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
