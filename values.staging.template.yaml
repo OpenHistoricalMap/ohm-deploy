@@ -810,13 +810,13 @@ osm-seed:
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: false
-# ====================================================================================================
-# Variables for osmcha redis
-# ====================================================================================================
-    osmchaRedis:
-      enabled: false
-      image:
-        name: "redis"
-        tag: "latest"
-      port: 6379
-      replicaCount: 1
+# # ====================================================================================================
+# # Variables for osmcha redis
+# # ====================================================================================================
+#     osmchaRedis:
+#       enabled: false
+#       image:
+#         name: "redis"
+#         tag: "latest"
+#       port: 6379
+#       replicaCount: 1
