@@ -590,17 +590,17 @@ osm-seed:
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
-      OVERPASS_META: 'yes'
+      OVERPASS_META: 'attic'
       OVERPASS_MODE: 'init'
-      OVERPASS_PLANET_URL: 'http://planet.openhistoricalmap.org.s3.amazonaws.com/planet/planet-220815_0000.osm.pbf'
+      OVERPASS_PLANET_URL: 'https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240102_0000.osm.pbf'
       OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
       OVERPASS_RULES_LOAD: '10'
       OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
-      OVERPASS_REPLICATION_SEQUENCE_NUMBER: '810000'
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1258000'
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
-      AWS_ElasticBlockStore_volumeID: {{PRODUCTION_OVERPASS_API_DB_EBS}}
+      AWS_ElasticBlockStore_volumeID: vol-0d4e98fb1860d2298
       AWS_ElasticBlockStore_size: 100Gi
     resources:
       enabled: false
@@ -765,13 +765,3 @@ osm-seed:
       AWS_ElasticBlockStore_size: 50Gi
     nodeSelector:
       enabled: false
-# ====================================================================================================
-# Variables for osmcha redis
-# ====================================================================================================
-  osmchaRedis:
-    enabled: false
-    image:
-      name: "redis"
-      tag: "latest"
-    port: 6379
-    replicaCount: 1
