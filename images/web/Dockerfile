@@ -48,13 +48,13 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=00bd7fddee2bd214d0ad3cda81e8c294b0d4c48d
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=3f1566224aa8d6b67ee7edc10f3d69f97773b506
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'update gems, mapstyle, move to MapLibre, update iD'
+RUN echo 'update map embed'
 RUN git fetch
 
 # Install Ruby packages
