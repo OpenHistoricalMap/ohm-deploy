@@ -335,7 +335,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_DB_EBS}}
+      AWS_ElasticBlockStore_volumeID : vol-0f07f0353f03f05d4
       AWS_ElasticBlockStore_size: 1000Gi
     resources:
       enabled: true
