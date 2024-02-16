@@ -359,8 +359,9 @@ osm-seed:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240123_0000.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      OVERWRITE_STATE: false
       SEQUENCE_NUMBER: "1270000"
+      OVERWRITE_STATE: false
+      UPLOAD_EXPIRED_FILES: true
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
