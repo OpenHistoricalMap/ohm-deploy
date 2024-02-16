@@ -396,7 +396,7 @@ osm-seed:
         REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
         SEQUENCE_NUMBER: "641000"
         OVERWRITE_STATE: false
-        UPLOAD_EXPIRED_FILES: false
+        UPLOAD_EXPIRED_FILES: true
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
