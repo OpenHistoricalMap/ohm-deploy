@@ -366,7 +366,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-0371dc7f97b6f6232
+        AWS_ElasticBlockStore_volumeID : vol-04b9db9f3982e44a4
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -392,16 +392,17 @@ osm-seed:
         label_value: web
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
-        REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
-        SEQUENCE_NUMBER: "641000"
-        OVERWRITE_STATE: true
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240216_0000.osm.pbf
+        REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+        SEQUENCE_NUMBER: "1301000"
+        OVERWRITE_STATE: false
+        UPLOAD_EXPIRED_FILES: true
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-06bbfd53ca9e92097
+        AWS_ElasticBlockStore_volumeID: vol-0eebe4dd0e6b04f44
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -441,7 +442,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
+        AWS_ElasticBlockStore_volumeID: vol-0e8b605fe3b16bf08
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: true
