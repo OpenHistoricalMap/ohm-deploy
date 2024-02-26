@@ -147,3 +147,9 @@ initial_changeset_comments_per_hour: 6
 max_changeset_comments_per_hour: 60
 moderator_changeset_comments_per_hour: 36000
 embed_server_url: "https://embed.openhistoricalmap.org/"
+
+# Private key for signing id_tokens
+doorkeeper_signing_key: |
+  -----BEGIN PRIVATE KEY-----
+  PRIVATE_KEY
+  -----END PRIVATE KEY-----
