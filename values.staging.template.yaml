@@ -118,6 +118,7 @@ osm-seed:
         OVERPASS_URL: overpass-api-staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
+        ORGANIZATION_NAME: OpenHistoricalMap
       resources:
         enabled: true
         requests:
