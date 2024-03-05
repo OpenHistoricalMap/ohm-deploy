@@ -45,11 +45,11 @@ sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.yml
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
-# # Add DOORKEEPER_SIGNING_KEY
-# openssl genpkey -algorithm RSA -out private.pem
-# chmod 400 /var/www/private.pem
-# export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
-# sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
+# ADD DOORKEEPER_SIGNING_KEY
+openssl genpkey -algorithm RSA -out private.pem
+chmod 400 /var/www/private.pem
+export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
+sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
 
 #### CHECK IF DB IS ALREADY UP AND START THE APP
 flag=true
