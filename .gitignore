@@ -8,3 +8,5 @@ data/
 images/.env
 images/tiler.yml
 values.dev.yaml
+secrets
+tegola

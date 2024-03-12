@@ -1,48 +1,29 @@
-FROM golang:1.14.1-alpine3.11 AS build
-ENV VERSION="v0.8.1"
-RUN apk update
+FROM gospatial/tegola:v0.19.0
 
-RUN apk add musl-dev=1.1.24-r3 \
-	gcc=9.3.0-r0 \
-    bash \
-    git \
-    postgresql \
-    postgresql-contrib
-
-RUN mkdir -p /go/src/github.com/go-spatial/tegola
-RUN git clone https://github.com/go-spatial/tegola.git /go/src/github.com/go-spatial/tegola
-RUN cd /go/src/github.com/go-spatial/tegola && git checkout v0.13.0
-RUN cd /go/src/github.com/go-spatial/tegola/cmd/tegola \
-	&& go build -gcflags "-N -l" -o /opt/tegola \ 
-	&& chmod a+x /opt/tegola
-RUN ln -s /opt/tegola /usr/bin/tegola
-
-RUN apk add --update \
-    python \
-    py-pip \
-    py-cffi \
-    py-cryptography \
-  && pip install --upgrade pip \
-  && apk add --virtual build-deps \
+RUN apk --no-cache add \
     gcc \
     libffi-dev \
-    python-dev \
+    python3 \
+    py3-pip \
+    py3-cffi \
+    py3-cryptography \
     linux-headers \
     musl-dev \
-    openssl-dev
+    openssl-dev \
+    bash \
+    git \
+    postgresql-client \
+    coreutils \
+    jq
 
-# Install aws-cli
-RUN pip3 install awscli
+RUN pip install --upgrade pip && pip3 install awscli mercantile
 
-RUN pip3 install mercantile \
-    && apk del build-deps \
-    && rm -rf /var/cache/apk/* \
-    && apk --purge -v del py-pip
+# Cleanup to reduce image size
+RUN rm -rf /var/cache/apk/* \
+    && apk del py3-pip
 
-RUN apk add --update coreutils jq && rm -rf /var/cache/apk/*
+RUN ln -s /opt/tegola /usr/bin/tegola
 
-# Volumen
-VOLUME /mnt/data
 # Copy config and  exec files
 COPY ./config/config.toml  /opt/tegola_config/config.toml
 COPY ./tile2bounds.py .
@@ -52,4 +33,5 @@ COPY ./seed-by-diffs.sh .
 COPY ./tile_cache_downloader.sh .
 COPY ./cache_cleaner.sh .
 COPY ./rm_tegola_ps.sh .
-# CMD ./start.sh & ./tile_cache_downloader.sh & ./expire-watcher.sh
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ./start.sh & ./tile_cache_downloader.sh & ./expire-watcher.sh

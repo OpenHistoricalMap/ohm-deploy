@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  tiler:
+    image: ohm-tiler-server:v1
+    build:
+      context: ../images/tiler-server
+      dockerfile: Dockerfile
+    volumes:
+      - ../data/tiler-server-data:/mnt/data
+      - ../images/tiler-server:/app
+    ports:
+      - "9090:9090"
+    env_file:
+      - ../envs/.env.tiler.example
+    restart: always
