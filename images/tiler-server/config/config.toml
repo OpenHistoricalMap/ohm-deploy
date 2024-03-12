@@ -88,47 +88,63 @@ max_connections = 40
 	id_fieldname = "osm_id"
 	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ABS(osm_id) as osm_id, name, type, tags->'bridge' as bridge, tags->'surface' as surface, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_water_lines_gen1 WHERE type IN ('river', 'canal', 'stream', 'ditch', 'drain', 'dam', 'cliff') AND geometry && !BBOX!"
 
+	# Admin boundaries
+	# Zoom levels 0-2,Tolerance=500 => ~1000 meters
+	# Zoom levels 3-5,Tolerance=200=> ~500 meters
+	# Zoom levels 6-7,Tolerance=100=> ~200 meters
+	# Zoom levels 8-9,Tolerance=50=> ~100 meters
+	# Zoom levels 10-12,Tolerance=20=> ~50 meters
+	# Zoom levels 13-15,Tolerance=5=> ~20 meters
+	# Zoom levels 16-20,Tolerance=1=> ~5 meters
+	
 	[[providers.layers]]
 	name = "admin_boundaries_0-2"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2) AND geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(geometry, 500),!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2) AND geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "admin_boundaries_3-5"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4) AND geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(geometry, 200),!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4) AND geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "admin_boundaries_6-7"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6) AND geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(geometry, 100),!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6) AND geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "admin_boundaries_8-9"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8) AND geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(geometry, 50),!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9) AND geometry && !BBOX!"
 
 	[[providers.layers]]
-	name = "admin_boundaries_9-10"
+	name = "admin_boundaries_10-12"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9) AND geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(geometry, 20),!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10) AND geometry && !BBOX!"
 
 	[[providers.layers]]
-	name = "admin_boundaries_11-20"
+	name = "admin_boundaries_13-15"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10) AND geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(geometry, 5),!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10) AND geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "admin_boundaries_16-20"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "id"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(geometry, 1),!BBOX!) AS geometry, id, osm_id, admin_level, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_admin_areas WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10) AND geometry && !BBOX!"
 
 	# Land Use
 	[[providers.layers]]
@@ -347,14 +363,20 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_9-10"
-	min_zoom = 9
-	max_zoom = 10
+	provider_layer = "osm.admin_boundaries_10-12"
+	min_zoom = 10
+	max_zoom = 12
 
 	[[maps.layers]]
 	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_11-20"
-	min_zoom = 11
+	provider_layer = "osm.admin_boundaries_13-15"
+	min_zoom = 13
+	max_zoom = 15
+
+	[[maps.layers]]
+	name = "land_ohm"
+	provider_layer = "osm.admin_boundaries_16-20"
+	min_zoom = 16
 	max_zoom = 20
 
 	# [[maps.layers]]
