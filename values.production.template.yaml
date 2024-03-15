@@ -707,8 +707,8 @@ osm-seed:
   osmchaApi:
     enabled: true
     image:
-      name: "ghcr.io/osmcha/osmcha-django"
-      tag: "61a80e897b45fb9b1a177bf433fb79bfa7fda59d"
+      name: "ghcr.io/openhistoricalmap/osmcha-django"
+      tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
