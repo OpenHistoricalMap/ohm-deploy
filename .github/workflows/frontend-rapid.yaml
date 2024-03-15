@@ -1,0 +1,91 @@
+name: Build and Publish Rapid site
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+      - 'deploy/rapid'
+jobs:
+  rapid:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Set environment variables - Staging
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/deploy/rapid'
+        uses: allenevans/set-env@v2.0.0
+        with:
+          RAPID_BUCKET: rapid-staging.openhistoricalmap.org
+          CLOUDFRONT_DISTRIBUTION_ID: E12LU6N0NDXVAX
+          OHM_URL: https://staging.openhistoricalmap.org
+          OHM_API_URL: https://staging.openhistoricalmap.org
+          OHM_CLIENT_ID: vwLXYrZ29YiwxWR5LvAcsiG9paLwE7hBod27O-tl16Q
+          OHM_CLIENT_SECRET: ${{ secrets.STAGING_RAPID_CLIENT_SECRET }}
+      - name: Set environment variables - Production
+        if: github.ref == 'refs/heads/main'
+        uses: allenevans/set-env@v2.0.0
+        with:
+          RAPID_BUCKET: rapid.openhistoricalmap.org
+          CLOUDFRONT_DISTRIBUTION_ID: E3VOVJ6DH8HALM
+          OHM_URL: https://www.openhistoricalmap.org
+          OHM_API_URL: https://www.openhistoricalmap.org
+          OHM_CLIENT_ID: RIIz9U-oZmYzi_LXCKMHwHPgbJxALWAZRcgk9F8cppk
+          OHM_CLIENT_SECRET: ${{ secrets.PRODUCTION_RAPID_CLIENT_SECRET }}
+      - name: Checkout rapid repo
+        uses: actions/checkout@v2
+        with:
+          repository: OpenHistoricalMap/Rapid
+          ref: 042f2e27ab0b9a5192549fc17a1ee0f91acab67f
+      - name: Use Node.js 18
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install modules
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm install
+      - name: Build rapid frontend
+        run: |
+          export OSM_URL=https://www.openstreetmap.org
+          export OSM_API_URL=https://api.openstreetmap.org
+          export OSM_CLIENT_ID=O3g0mOUuA2WY5Fs826j5tP260qR3DDX7cIIE2R2WWSc
+          export OSM_CLIENT_SECRET=b4aeHD1cNeapPPQTrvpPoExqQRjybit6JBlNnxh62uE
+          files=("modules/services/OsmService.js" "dist/index.html" "dist/latest.html" "index.html")
+          for file in "${files[@]}"; do
+              sed -e "s|${OSM_URL}|${OHM_URL}|g" "$file" > tmpfile && mv tmpfile "$file"
+              sed -e "s|${OSM_API_URL}|${OHM_API_URL}|g" "$file" > tmpfile && mv tmpfile "$file"
+              sed -e "s|${OSM_CLIENT_ID}|${OHM_CLIENT_ID}|g" "$file" > tmpfile && mv tmpfile "$file"
+              sed -e "s|${OSM_CLIENT_SECRET}|${OHM_CLIENT_SECRET}|g" "$file" > tmpfile && mv tmpfile "$file"
+          done
+          npm run clean
+          npm run build
+          npm run dist
+          sed -e "s|i.client_id|i.client_id,client_secret:\"${OHM_CLIENT_SECRET}\"|g" dist/rapid.min.js > tmpfile && mv tmpfile dist/rapid.min.js
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install aws cli
+        run: |
+          python -m pip install --upgrade pip
+          pip install awscli
+      - name: Push data to s3 and clean cloudfront cache
+        if: ${{ success() }}
+        run: |
+          aws s3 sync dist/ s3://${RAPID_BUCKET}/
+          aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
