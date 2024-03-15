@@ -4,7 +4,6 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'deploy/rapid'
 jobs:
   rapid:
     runs-on: ubuntu-latest
@@ -14,7 +13,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
       - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/deploy/rapid'
+        if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
           RAPID_BUCKET: rapid-staging.openhistoricalmap.org
