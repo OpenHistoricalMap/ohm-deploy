@@ -84,7 +84,7 @@ jobs:
       - name: Push data to s3 and clean cloudfront cache
         if: ${{ success() }}
         run: |
-          aws s3 sync dist/ s3://${RAPID_BUCKET}/
+          aws s3 sync dist/ s3://${RAPID_BUCKET}/  --acl public-read
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
