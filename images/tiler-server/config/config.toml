@@ -36,35 +36,35 @@ max_connections = 40
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 750),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 500),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "land_3-5"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 300),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 200),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "land_6-7"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 150),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 70),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "land_8-9"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 75),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 30),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "land_10-12"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
 	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 30),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 10),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
 
 	[[providers.layers]]
 	name = "land_13-15"
