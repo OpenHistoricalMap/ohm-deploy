@@ -118,6 +118,7 @@ osm-seed:
         OVERPASS_URL: overpass-api-staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
+        ORGANIZATION_NAME: OpenHistoricalMap
       resources:
         enabled: true
         requests:
@@ -741,8 +742,8 @@ osm-seed:
     osmchaApi:
       enabled: true
       image:
-        name: "ghcr.io/willemarcel/osmcha-django"
-        tag: "2975f9242b7bf70a840120b3dae6778c9d12146b"
+        name: "ghcr.io/openhistoricalmap/osmcha-django"
+        tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
