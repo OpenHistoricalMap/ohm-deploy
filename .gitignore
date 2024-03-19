@@ -10,3 +10,5 @@ images/tiler.yml
 values.dev.yaml
 secrets
 tegola
+envs/.env.tiler
+envs/.env.web

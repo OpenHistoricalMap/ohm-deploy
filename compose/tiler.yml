@@ -11,5 +11,5 @@ services:
     ports:
       - "9090:9090"
     env_file:
-      - ../envs/.env.tiler.example
+      - ../envs/.env.tiler
     restart: always

@@ -344,9 +344,9 @@ osm-seed:
     tilerDb:
       enabled: true
       env:
-        POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: {{STAGING_TILER_DB}}
-        POSTGRES_USER: {{STAGING_TILER_DB_USER}}
+        POSTGRES_HOST: staging-tiler-db
+        POSTGRES_DB: tiler-osm
+        POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
         # for 20Gi
