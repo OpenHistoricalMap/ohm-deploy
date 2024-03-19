@@ -115,12 +115,12 @@ osm-seed:
         memory: "3Gi"
         cpu: "2"
       limits:
-        memory: "4Gi"
+        memory: "3Gi"
         cpu: "2"
     autoscaling:
       enabled: true
       minReplicas: 2
-      maxReplicas: 10
+      maxReplicas: 6
       cpuUtilization: 80
     sharedMemorySize: 512Mi
     livenessProbeExec: true
@@ -130,7 +130,7 @@ osm-seed:
   memcached:
     enabled: true
     nodeSelector:
-      enabled: false
+      enabled: true
       label_key: nodegroup_type
       label_value: web
     resources:
@@ -694,7 +694,9 @@ osm-seed:
         memory: '24Gi'
         cpu: '10'
     nodeSelector:
-      enabled: false
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
 
 # ====================================================================================================
 # Variables for osmcha web
