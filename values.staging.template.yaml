@@ -139,7 +139,7 @@ osm-seed:
     memcached:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
         label_value: web
       resources:
