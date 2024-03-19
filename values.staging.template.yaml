@@ -730,7 +730,9 @@ osm-seed:
           memory: '24Gi'
           cpu: '10'
       nodeSelector:
-        enabled: false
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
 # ====================================================================================================
 # Variables for osmcha web
 # ====================================================================================================
