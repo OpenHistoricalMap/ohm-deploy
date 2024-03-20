@@ -120,12 +120,12 @@ osm-seed:
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
         ORGANIZATION_NAME: OpenHistoricalMap
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
         limits:
-          memory: "4Gi"
+          memory: "2Gi"
           cpu: "2"
       autoscaling:
         enabled: false
@@ -446,7 +446,7 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID: vol-0e8b605fe3b16bf08
         AWS_ElasticBlockStore_size: 100Gi
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
@@ -470,7 +470,7 @@ osm-seed:
       replicaCount: 1
       command: './cache_cleaner.sh'
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
