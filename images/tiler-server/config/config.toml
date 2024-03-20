@@ -362,7 +362,7 @@ max_connections = 40
 
 	# Transport lines from relations
 	[[providers.layers]]
-	name = "transport_lines_6_10_relation"
+	name = "transport_lines_5_10_relation"
 	geometry_fieldname = "geometry"
 	geometry_type = "LineString"
 	id_fieldname = "id"
@@ -373,6 +373,7 @@ max_connections = 40
 		r.tags->'ref' AS ref,
 		r.tags->'class' AS class,
 		r.tags->'highway' AS type,
+		r.tags->'route' AS route,
 		r.tags->'tunnel' AS tunnel,
 		r.tags->'bridge' AS bridge,
 		r.tags->'usage' as usage,
@@ -648,8 +649,8 @@ center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part
 	# Transport Lines from relations
 	[[maps.layers]]
 	name = "transport_lines_relation"
-	provider_layer = "osm.transport_lines_6_10_relation"
-	min_zoom = 6
+	provider_layer = "osm.transport_lines_5_10_relation"
+	min_zoom = 5
 	max_zoom = 10
 
 	[[maps.layers]]
