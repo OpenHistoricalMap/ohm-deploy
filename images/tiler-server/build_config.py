@@ -23,7 +23,7 @@ with open(config_template_file, "r") as main_file:
 
 # Replace the content of main.toml with the content read from other TOML files
 for toml_file, new_config in new_configs.items():
-    print(toml_file)
+    print(f"Copy {toml_file} to config.toml")
     section_header = "[['{}']]".format(toml_file.replace("config/", ""))
     indentation_level = content.find(section_header)
     if indentation_level != -1:

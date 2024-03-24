@@ -29,14 +29,12 @@ database = "${POSTGRES_DB}"
 user = "${POSTGRES_USER}"
 password = "${POSTGRES_PASSWORD}"
 # srid = 3857
-max_connections = 40
+max_connections = 50
 	###### Land providers
 	[['providers/land.toml']]
 
-	###### Water areas providers
+	###### Water areas and lines
 	[['providers/water_areas.toml']]
-	
-	###### Water lines providers
 	[['providers/water_lines.toml']]
 
 	###### Admin boundaries providers
@@ -45,108 +43,39 @@ max_connections = 40
 	###### Land use areas
 	[['providers/landuse_areas.toml']]
 
-	###### Land use lines
+	###### Land use lines and points
 	[['providers/landuse_lines.toml']]
-
-	###### Land use lines
 	[['providers/landuse_points.toml']]
 
 	###### Transport lines from ways
 	[['providers/transport_lines.toml']]
-		
 
+	###### Amenities areas and points
+	[['providers/amenity_areas.toml']]
+	[['providers/amenity_points.toml']]
 
-	[[providers.layers]]
-	name = "transport_lines_14-20"
-	geometry_fieldname = "geometry"
-	geometry_type = "linestring"
-	id_fieldname = "id"
-	sql = """SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, ref, class, type, tunnel, bridge, access, service, ford, tags->'construction' as construction, tags->'usage' as usage, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
-			FROM osm_transport_lines 
-			WHERE geometry && !BBOX!"""
+	###### Place points and areas
+	[['providers/place_points.toml']]
+	[['providers/place_areas.toml']]
 
-	# Amenities
-	[[providers.layers]]
-	name = "amenity_areas"
-	geometry_fieldname = "geometry"
-	geometry_type = "multipolygon"
-	id_fieldname = "osm_id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_amenity_areas WHERE geometry && !BBOX!"
+	###### Other (Man Made, Historic, Military, Power, Barrier etc)
+	[['providers/other_points.toml']]
+	[['providers/other_lines.toml']]
+	[['providers/other_areas.toml']]
 
-	[[providers.layers]]
-	name = "amenity_points"
-	geometry_fieldname = "geometry"
-	geometry_type = "point"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_amenity_points WHERE geometry && !BBOX!"
+	###### Buildings
+	[['providers/buildings.toml']]
 
-	[[providers.layers]]
-	name = "place_points"
-	geometry_fieldname = "geometry"
-	geometry_type = "point"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, tags->'capital' as capital FROM osm_place_points WHERE geometry && !BBOX!"
-
-	[[providers.layers]]
-	name = "place_areas"
-	geometry_fieldname = "geometry"
-	geometry_type = "multipolygon"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, tags->'capital' as capital FROM osm_place_areas WHERE geometry && !BBOX!"
-
-	# Other (Man Made, Historic, Military, Power, Barrier etc)
-	[[providers.layers]]
-	name = "other_points"
-	geometry_fieldname = "geometry"
-	geometry_type = "point"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, class, type, tags->'artwork_type' as artwork_type, tags->'site_type' as site_type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_other_points WHERE geometry && !BBOX!"
-
-	[[providers.layers]]
-	name = "other_lines"
-	geometry_fieldname = "geometry"
-	geometry_type = "linestring"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, class, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_other_lines WHERE geometry && !BBOX!"
-
-	[[providers.layers]]
-	name = "other_areas"
-	geometry_fieldname = "geometry"
-	geometry_type = "multipolygon"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, class, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_other_areas WHERE geometry && !BBOX!"
-
-	[[providers.layers]]
-	name = "other_areas_filter"
-	geometry_fieldname = "geometry"
-	geometry_type = "multipolygon"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, class, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_other_areas WHERE area > 1000000 AND geometry && !BBOX!"
-
-	# Buildings
-	[[providers.layers]]
-	name = "buildings"
-	geometry_fieldname = "geometry"
-	geometry_type = "multipolygon"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, id, osm_id, name, nullif(as_numeric(height),-1) AS height, type, tags->'start_date' as start_date, tags->'end_date' as end_date, isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate FROM osm_buildings WHERE geometry && !BBOX!"
-
-	# transport_associated_streets
-	[[providers.layers]]
-	name = "transport_associated_streets"
-	geometry_fieldname = "geometry"
-	geometry_type = "LineString"
-	id_fieldname = "id"
-	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, r.id, m.member, r.osm_id, m.name, m.relname, m.index, r.type, r.tags->'start_date' as start_date, r.tags->'end_date' as end_date, isodatetodecimaldate(pad_date(r.tags->'start_date', 'start')) AS start_decdate, isodatetodecimaldate(pad_date(r.tags->'end_date', 'end')) AS end_decdate FROM osm_relations r, osm_relation_members m WHERE r.osm_id=m.osm_id and r.type='associatedStreet' and geometry && !BBOX!"
+	###### transport_associated_streets
+	[['providers/transport_associated_streets.toml']]
 
 	###### Transport lines from relations
 	[['providers/transport_lines_relation.toml']]
 	
-
 [[maps]]
 name = "osm"
-attribution = "OpenStreetMap" # map attribution
-center = [-74.275329586789, -12.153492567373, 8.0] # optional center value. part of the TileJSON spec
+attribution = "OpenHistoricalMap"
+center = [-74.275329586789, -12.153492567373, 8.0]
 
 	# Land
 	[[maps.layers]]

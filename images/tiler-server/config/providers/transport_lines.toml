@@ -173,3 +173,34 @@ WHERE
     AND geometry && !BBOX!
 """
 
+# Layer configuration for transport lines 14-20
+[[providers.layers]]
+name = "transport_lines_14-20"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    id, 
+    osm_id, 
+    name, 
+    ref, 
+    class, 
+    type, 
+    tunnel, 
+    bridge, 
+    access, 
+    service, 
+    ford, 
+    tags->'construction' AS construction, 
+    tags->'usage' AS usage, 
+    tags->'start_date' AS start_date, 
+    tags->'end_date' AS end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_transport_lines 
+WHERE 
+    geometry && !BBOX!
+"""
