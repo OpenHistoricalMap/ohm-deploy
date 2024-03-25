@@ -12,3 +12,4 @@ secrets
 tegola
 envs/.env.tiler
 envs/.env.web
+config.toml
