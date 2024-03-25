@@ -1,0 +1,25 @@
+# Layer configuration for other points
+[[providers.layers]]
+name = "other_points"
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    id, 
+    osm_id, 
+    name, 
+    class, 
+    type, 
+    tags->'artwork_type' AS artwork_type, 
+    tags->'site_type' AS site_type, 
+    tags->'start_date' AS start_date, 
+    tags->'end_date' AS end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_other_points 
+WHERE 
+    geometry && !BBOX!
+"""

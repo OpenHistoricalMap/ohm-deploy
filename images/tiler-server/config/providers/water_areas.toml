@@ -1,0 +1,95 @@
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+name = "water_areas_gen0_3-5"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen0 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') 
+    AND area > 500000000 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+name = "water_areas_gen0_6-9"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen0 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') 
+    AND area > 100000000 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+name = "water_areas_gen1_10-12"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen1 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') 
+    AND area > 1000 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "id"
+name = "water_areas_12-20"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    id, 
+    osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank', 'dock') 
+    AND geometry && !BBOX!
+"""

@@ -24,8 +24,16 @@ RUN rm -rf /var/cache/apk/* \
 
 RUN ln -s /opt/tegola /usr/bin/tegola
 
+COPY ./config  /opt/config/
+COPY build_config.py  /opt/
+RUN mkdir /opt/tegola_config
+RUN cd /opt/ && python build_config.py \
+    --template config/config.template.toml \
+    --providers config/providers \
+    --output /opt/tegola_config/config.toml
+
 # Copy config and  exec files
-COPY ./config/config.toml  /opt/tegola_config/config.toml
+# COPY ./config/config.toml  /opt/tegola_config/config.toml
 COPY ./tile2bounds.py .
 COPY ./start.sh .
 COPY ./expire-watcher.sh .
