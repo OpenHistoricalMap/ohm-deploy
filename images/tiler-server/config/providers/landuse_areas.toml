@@ -1,4 +1,4 @@
-# Layer configuration for landuse areas gen0
+# Layer 50,000,000
 [[providers.layers]]
 name = "landuse_areas_gen0_3-5"
 geometry_fieldname = "geometry"
@@ -6,7 +6,7 @@ geometry_type = "multipolygon"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 500), !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
     name, 
     class, 
@@ -20,11 +20,11 @@ FROM
     osm_landuse_areas_gen0 
 WHERE 
     type IN ('forest', 'wood', 'nature reserve', 'nature_reserve', 'military') 
-    AND area > 1000000000 
+    AND area > 50000000 
     AND geometry && !BBOX!
 """
 
-# Layer configuration for landuse areas gen0_6
+# Layer 1,000,000
 [[providers.layers]]
 name = "landuse_areas_gen0_6-9"
 geometry_fieldname = "geometry"
@@ -32,7 +32,7 @@ geometry_type = "multipolygon"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 100), !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
     name, 
     class, 
@@ -46,7 +46,7 @@ FROM
     osm_landuse_areas_gen0 
 WHERE 
     type IN ('forest', 'wood', 'nature reserve', 'nature_reserve', 'military') 
-    AND area > 100000000 
+    AND area > 1000000 
     AND geometry && !BBOX!
 """
 
