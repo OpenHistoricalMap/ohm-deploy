@@ -105,7 +105,7 @@ osm-seed:
       staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressDomain: osmcha.staging.openhistoricalmap.org
+      ingressDomain: www.staging.openhistoricalmap.org
       env:
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
         MAILER_DOMAIN: staging.openhistoricalmap.org
@@ -115,8 +115,8 @@ osm-seed:
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: no-reply@staging.openhistoricalmap.org
-        NOMINATIM_URL: nominatim-api-staging.openhistoricalmap.org
-        OVERPASS_URL: overpass-api-staging.openhistoricalmap.org	
+        NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
+        OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
         ORGANIZATION_NAME: OpenHistoricalMap
