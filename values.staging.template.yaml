@@ -656,7 +656,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
