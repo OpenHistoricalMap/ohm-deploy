@@ -37,7 +37,7 @@ osm-seed:
     # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
     # as the SSL certificate for your services. Else, you will need to configure
     # SSL separately. 
-    serviceType: clusterIP
+    serviceType: ClusterIP
   
     # Domain that is pointed to the clusterIP
     # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
