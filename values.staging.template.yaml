@@ -542,7 +542,7 @@ osm-seed:
         TM_ORG_PRIVACY_POLICY_URL: 'staging.openhistoricalmap.org/copyright'
         TM_ORG_GITHUB: 'github.com/openhistoricalmap'
         OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
-        OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api-staging.openhistoricalmap.org'
+        OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api.staging.openhistoricalmap.org'
         OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
         ID_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=id'
         POTLATCH2_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=potlatch2'
@@ -555,7 +555,7 @@ osm-seed:
         TM_SMTP_USER: {{MAILER_USERNAME}}
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
         TM_DEFAULT_LOCALE: 'en'
-        TM_APP_API_URL: 'https://staging-tm-api.openhistoricalmap.org'
+        TM_APP_API_URL: 'https://tm-api.staging.openhistoricalmap.org'
         TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
