@@ -636,7 +636,7 @@ osm-seed:
         OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
         OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1258000'
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         AWS_ElasticBlockStore_volumeID: vol-0da7d726731c27708
         AWS_ElasticBlockStore_size: 100Gi
