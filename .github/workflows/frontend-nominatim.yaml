@@ -17,7 +17,7 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
-          NOMINATIM_API: 'https://nominatim-api-staging.openhistoricalmap.org/'
+          NOMINATIM_API: 'https://nominatim-api.staging.openhistoricalmap.org/'
           NOMINATIM_BUCKET: 'nominatim-staging.openhistoricalmap.org'
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}
 
