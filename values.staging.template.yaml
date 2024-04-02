@@ -556,7 +556,7 @@ osm-seed:
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
         TM_DEFAULT_LOCALE: 'en'
         TM_APP_API_URL: 'https://tm-api.staging.openhistoricalmap.org'
-        TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
+        TM_APP_BASE_URL: 'https://tasks.staging.openhistoricalmap.org'
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
       resources:
@@ -593,7 +593,7 @@ osm-seed:
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
         OSMSEED_WEB_API_DOMAIN: staging.openhistoricalmap.org
-        OSMSEED_OVERPASS_API_DOMAIN: overpass-api-staging.openhistoricalmap.org
+        OSMSEED_OVERPASS_API_DOMAIN: overpass-api.staging.openhistoricalmap.org
       resources:
         enabled: false
         requests:
@@ -603,7 +603,7 @@ osm-seed:
           memory: '2Gi'
           cpu: '2'
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/14/main
         subPath: nominatim-pgdata
@@ -611,8 +611,8 @@ osm-seed:
         localVolumeHostPath: /mnt/nominatim-db-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0027487e80f9c6863
-        AWS_ElasticBlockStore_size: 100Gi
+        AWS_ElasticBlockStore_volumeID: vol-042cace32c4b5de70
+        AWS_ElasticBlockStore_size: 20Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
         GCP_gcePersistentDisk_size: 50Gi
@@ -656,7 +656,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
