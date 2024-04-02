@@ -54,7 +54,7 @@ osm-seed:
   
     # Admin Email address used when generating Lets Encrypt certificates.
     # You will be notified of expirations, etc. on this email address.
-    adminEmail: no-reply@openhistoricalmap.org
+    adminEmail: no-reply@staging.openhistoricalmap.org
     # ====================================================================================================
     # ====================================================================================================
     # ==================================Pods Configurations===============================================
@@ -572,7 +572,7 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: false
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: nominatim-api.staging.openhistoricalmap.org
