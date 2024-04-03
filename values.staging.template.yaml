@@ -595,9 +595,9 @@ osm-seed:
         OSMSEED_WEB_API_DOMAIN: staging.openhistoricalmap.org
         OSMSEED_OVERPASS_API_DOMAIN: overpass-api.staging.openhistoricalmap.org
       resources:
-        enabled: false
+        enabled: true
         requests:
-          memory: '1Gi'
+          memory: '2Gi'
           cpu: '2'
         limits:
           memory: '2Gi'
@@ -656,7 +656,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -675,9 +675,9 @@ osm-seed:
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
       resources:
-        enabled: false
+        enabled: true
         requests:
-          memory: '1Gi'
+          memory: '2Gi'
           cpu: '2'
         limits:
           memory: '2Gi'
