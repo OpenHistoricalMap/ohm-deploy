@@ -652,7 +652,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_xlarge
+        label_value: web
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
@@ -682,7 +682,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web-xlarge
+        label_value: web_xlarge
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
