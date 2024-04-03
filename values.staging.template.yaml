@@ -595,7 +595,7 @@ osm-seed:
         OSMSEED_WEB_API_DOMAIN: staging.openhistoricalmap.org
         OSMSEED_OVERPASS_API_DOMAIN: overpass-api.staging.openhistoricalmap.org
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: '1Gi'
           cpu: '2'
@@ -617,8 +617,9 @@ osm-seed:
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
-        enabled: false
-
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web_xlarge
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
@@ -649,18 +650,14 @@ osm-seed:
           memory: '8Gi'
           cpu: '2'
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
-        label_value: web_v2
+        label_value: web_xlarge
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
       enabled: true
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: taginfo.staging.openhistoricalmap.org
@@ -675,13 +672,17 @@ osm-seed:
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: '1Gi'
           cpu: '2'
         limits:
           memory: '2Gi'
           cpu: '2'
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web-xlarge
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
