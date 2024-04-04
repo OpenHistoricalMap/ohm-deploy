@@ -578,7 +578,7 @@ osm-seed:
       ingressDomain: nominatim-api.staging.openhistoricalmap.org
       replicaCount: 1
       env:
-        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240108_0000.osm.pbf
+        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240404_0003.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
@@ -592,7 +592,7 @@ osm-seed:
         PGDATA: /var/lib/postgresql/14/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
-        OSMSEED_WEB_API_DOMAIN: staging.openhistoricalmap.org
+        OSMSEED_WEB_API_DOMAIN: openhistoricalmap.org
         OSMSEED_OVERPASS_API_DOMAIN: overpass-api.staging.openhistoricalmap.org
       resources:
         enabled: false
@@ -611,8 +611,8 @@ osm-seed:
         localVolumeHostPath: /mnt/nominatim-db-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-042cace32c4b5de70
-        AWS_ElasticBlockStore_size: 20Gi
+        AWS_ElasticBlockStore_volumeID: vol-003347415afb02b8d
+        AWS_ElasticBlockStore_size: 30Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
         GCP_gcePersistentDisk_size: 50Gi
