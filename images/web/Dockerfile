@@ -48,13 +48,13 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=74e7c7a33ad7bc6af7312e6cca0284523eddcdbb
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=a6a4077c62d010b8b5fd78f33eae97da60918a8a
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'iD upstream update, batch of issues addressed after 2024-03-26 OHM Planning, latest translations'
+RUN echo 'style update, iD upstream update, batch of issues addressed after 2024-03-26 OHM Planning, latest translations'
 RUN git fetch
 
 # Install Ruby packages
