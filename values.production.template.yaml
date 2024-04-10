@@ -30,7 +30,7 @@ osm-seed:
   # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
   # as the SSL certificate for your services. Else, you will need to configure
   # SSL separately. 
-  serviceType: LoadBalancer
+  serviceType: ClusterIP
 
   # Domain that is pointed to the clusterIP
   # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
@@ -47,7 +47,7 @@ osm-seed:
 
   # Admin Email address used when generating Lets Encrypt certificates.
   # You will be notified of expirations, etc. on this email address.
-  adminEmail: ruben@developmentseed.org
+  adminEmail: no-reply@openhistoricalmap.org
 
   # ====================================================================================================
   # Variables for osm-seed database
@@ -91,6 +91,7 @@ osm-seed:
     staticIp: c
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: www.openhistoricalmap.org
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -392,6 +393,7 @@ osm-seed:
     commad: './start.sh'
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: vtiles.openhistoricalmap.org
     env:
       TILER_SERVER_PORT: 9090
       TILER_CACHE_TYPE: s3
@@ -489,6 +491,7 @@ osm-seed:
     staticIp: c
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: tm-api.openhistoricalmap.org
     env:
       POSTGRES_HOST: {{PRODUCTION_TM_API_DB_HOST}}
       POSTGRES_DB: {{PRODUCTION_TM_API_DB}}
@@ -536,6 +539,7 @@ osm-seed:
     enabled: true
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: nominatim-api.openhistoricalmap.org
     replicaCount: 1
     env:
       PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-230727_1030.osm.pbf
@@ -591,6 +595,7 @@ osm-seed:
       label_value: web
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: overpass-api.openhistoricalmap.org
     env:
       OVERPASS_META: 'attic'
       OVERPASS_MODE: 'init'
@@ -619,6 +624,7 @@ osm-seed:
     enabled: true
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: taginfo.openhistoricalmap.org
     env:
       URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
       URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
@@ -711,6 +717,7 @@ osm-seed:
     image:
       name: "ghcr.io/openhistoricalmap/osmcha-django"
       tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
+    ingressDomain: osmcha.openhistoricalmap.org
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
