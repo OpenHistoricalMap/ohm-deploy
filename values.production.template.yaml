@@ -113,8 +113,8 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "2Gi"
-        cpu: "1"
+        memory: "3Gi"
+        cpu: "2"
       limits:
         memory: "3Gi"
         cpu: "2"
