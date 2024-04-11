@@ -71,7 +71,7 @@ SELECT
 FROM 
     osm_transport_lines_gen0 
 WHERE 
-    type IN ('motorway', 'trunk', 'motorway_link', 'trunk_link', 'primary') 
+    type IN ('motorway', 'trunk', 'motorway_link', 'trunk_link', 'primary', 'service') 
     AND tunnel = 0 
     AND bridge = 0  
     AND geometry && !BBOX!
@@ -100,7 +100,13 @@ SELECT
 FROM 
     osm_transport_lines_gen1 
 WHERE 
-    type IN ('motorway', 'trunk', 'primary', 'primary_link', 'secondary', 'motorway_link', 'trunk_link', 'rail', 'subway', 'light_rail', 'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 'funicular', 'taxiway', 'runway', 'proposed', 'construction', 'disused', 'abandoned', 'razed', 'ferry') 
+    type IN (
+        'motorway', 'trunk', 'primary', 'primary_link', 'secondary', 
+        'motorway_link', 'trunk_link', 'rail', 'subway', 'light_rail', 
+        'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 
+        'funicular', 'taxiway', 'runway', 'proposed', 'construction', 
+        'disused', 'abandoned', 'razed', 'ferry', 'service'
+    ) 
     AND geometry && !BBOX!
 """
 
