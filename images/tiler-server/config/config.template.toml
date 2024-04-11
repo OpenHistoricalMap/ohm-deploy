@@ -47,8 +47,10 @@ max_connections = 50
 	[['providers/landuse_lines.toml']]
 	[['providers/landuse_points.toml']]
 
-	###### Transport lines from ways
+	###### Transport lines, points and areas from ways
+	[['providers/transport_points.toml']]
 	[['providers/transport_lines.toml']]
+	[['providers/transport_areas.toml']]
 
 	###### Amenities areas and points
 	[['providers/amenity_areas.toml']]
