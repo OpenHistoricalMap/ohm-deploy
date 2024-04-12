@@ -1,52 +1,3 @@
-# Layer configuration for transport points
-[[providers.layers]]
-name = "transport_points"
-geometry_fieldname = "geometry"
-geometry_type = "point"
-id_fieldname = "id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
-    osm_id, 
-    name, 
-    class, 
-    type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
-FROM 
-    osm_transport_points 
-WHERE 
-    geometry && !BBOX!
-"""
-
-# Layer configuration for transport areas
-[[providers.layers]]
-name = "transport_areas"
-geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
-id_fieldname = "id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
-    osm_id, 
-    name, 
-    class, 
-    type, 
-    area, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
-FROM 
-    osm_transport_areas 
-WHERE 
-    geometry && !BBOX!
-"""
-
 # Layer configuration for transport lines gen0
 [[providers.layers]]
 name = "transport_lines_gen0"
@@ -60,7 +11,8 @@ SELECT
     type, 
     tunnel, 
     bridge, 
-    ref, 
+    ref,
+    service,
     tags->'electrified' AS electrified, 
     tags->'highspeed' AS highspeed, 
     tags->'usage' AS usage, 
@@ -90,6 +42,7 @@ SELECT
     ref, 
     class, 
     type, 
+    service, 
     tags->'electrified' AS electrified, 
     tags->'highspeed' AS highspeed, 
     tags->'usage' AS usage, 
@@ -100,7 +53,13 @@ SELECT
 FROM 
     osm_transport_lines_gen1 
 WHERE 
-    type IN ('motorway', 'trunk', 'primary', 'primary_link', 'secondary', 'motorway_link', 'trunk_link', 'rail', 'subway', 'light_rail', 'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 'funicular', 'taxiway', 'runway', 'proposed', 'construction', 'disused', 'abandoned', 'razed', 'ferry') 
+    type IN (
+        'motorway', 'trunk', 'primary', 'primary_link', 'secondary', 
+        'motorway_link', 'trunk_link', 'rail', 'subway', 'light_rail', 
+        'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 
+        'funicular', 'taxiway', 'runway', 'proposed', 'construction', 
+        'disused', 'abandoned', 'razed', 'ferry'
+    ) 
     AND geometry && !BBOX!
 """
 
@@ -134,7 +93,14 @@ SELECT
 FROM 
     osm_transport_lines 
 WHERE 
-    type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 'funicular', 'taxiway', 'runway', 'proposed', 'construction', 'disused', 'abandoned', 'razed', 'apron', 'ferry')  
+    type IN (
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 
+        'primary', 'primary_link', 'secondary', 'secondary_link', 
+        'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 
+        'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 
+        'funicular', 'taxiway', 'runway', 'proposed', 'construction', 
+        'disused', 'abandoned', 'razed', 'apron', 'ferry'
+    )  
     AND geometry && !BBOX!
 """
 
@@ -169,7 +135,15 @@ SELECT
 FROM 
     osm_transport_lines 
 WHERE 
-    type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 'funicular', 'taxiway', 'runway', 'residential', 'taxiway', 'runway', 'proposed', 'construction', 'disused', 'abandoned', 'razed', 'apron', 'ferry')  
+    type IN (
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 
+        'primary', 'primary_link', 'secondary', 'secondary_link', 
+        'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 
+        'tram', 'narrow_gauge', 'monorail', 'preserved', 
+        'miniature', 'funicular', 'taxiway', 'runway', 'residential', 
+        'taxiway', 'runway', 'proposed', 'construction', 'disused', 
+        'abandoned', 'razed', 'apron', 'ferry'
+    )  
     AND geometry && !BBOX!
 """
 
