@@ -670,7 +670,7 @@ osm-seed:
         TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
-        ENVIRONMENT: development
+        ENVIRONMENT: staging
         AWS_S3_BUCKET: taginfo
         INTERVAL_DOWNLOAD_DATA: 3600
       resources:
@@ -685,10 +685,13 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
-      nodeSelectorJob:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: job
+      cronjob:
+        enabled: false
+        schedule: "0 0 * * *"
+        nodeSelector:
+          enabled: true
+          label_key: nodegroup_type
+          label_value: job_xlarge
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
