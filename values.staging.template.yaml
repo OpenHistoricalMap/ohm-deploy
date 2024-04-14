@@ -684,7 +684,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_xlarge
+        label_value: web
       nodeSelectorJob:
         enabled: true
         label_key: nodegroup_type
