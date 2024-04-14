@@ -687,7 +687,7 @@ osm-seed:
         label_value: web
       cronjob:
         enabled: false
-        schedule: "0 0 * * *"
+        schedule: "* * * * *"
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
