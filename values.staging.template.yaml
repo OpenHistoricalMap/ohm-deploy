@@ -670,6 +670,8 @@ osm-seed:
         TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
+        ENVIRONMENT: development
+        AWS_S3_BUCKET: taginfo
       resources:
         enabled: false
         requests:
