@@ -656,7 +656,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: false
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: taginfo.staging.openhistoricalmap.org
@@ -672,6 +672,7 @@ osm-seed:
         CREATE_DB: 'db projects chronology'
         ENVIRONMENT: development
         AWS_S3_BUCKET: taginfo
+        INTERVAL_DOWNLOAD_DATA: 3600
       resources:
         enabled: false
         requests:
@@ -684,6 +685,10 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web_xlarge
+      nodeSelectorJob:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: job
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
