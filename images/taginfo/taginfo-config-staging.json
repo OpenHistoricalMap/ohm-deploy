@@ -34,7 +34,7 @@
     },
     "turbo": {
         "max_auto": 1000,
-        "url_prefix": "https://overpass-turbo-staging.openhistoricalmap.org",
+        "url_prefix": "https://overpass-turbo-staging.openhistoricalmap.org?",
         "wizard_area": "global"
     },
     "level0": {
