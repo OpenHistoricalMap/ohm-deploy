@@ -672,7 +672,7 @@ osm-seed:
         CREATE_DB: 'db projects chronology'
         ENVIRONMENT: staging
         AWS_S3_BUCKET: taginfo
-        INTERVAL_DOWNLOAD_DATA: 3600
+        INTERVAL_DOWNLOAD_DATA: 86400
       resources:
         enabled: false
         requests:
@@ -687,7 +687,7 @@ osm-seed:
         label_value: web
       cronjob:
         enabled: true
-        schedule: "* * * * *"
+        schedule: "0 0 * * *" # every 1 days - testing
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
