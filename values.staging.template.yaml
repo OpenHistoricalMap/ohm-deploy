@@ -285,8 +285,8 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: false
-        schedule: '0 0 * * *'
+        enabled: true
+        schedule: '* * * * *'
         env:
           # backup/restore
           DB_ACTION: backup
