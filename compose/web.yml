@@ -11,16 +11,16 @@ services:
     volumes:
       - ./data/db-data:/var/lib/postgresql/data
     env_file:
-      - ./.env.web
-  web:
-    image: osmseed-web:v1
-    build:
-      context: ./../images/web
-      dockerfile: Dockerfile
-    ports:
-      - '80:80'
-    env_file:
-      - ./.env.web
+      - ./../envs/.env.web
+      # web:
+      #   image: osmseed-web:v1
+      #   build:
+      #     context: ./../images/web
+      #     dockerfile: Dockerfile
+      #   ports:
+      #     - '80:80'
+      #   env_file:
+      #     - ./../envs/.env.web
     ####### Enable for development mode
     # volumes:
     #   - ./../../ohm-website:/var/www
