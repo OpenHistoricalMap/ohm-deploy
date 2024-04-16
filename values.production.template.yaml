@@ -626,8 +626,8 @@ osm-seed:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: taginfo.openhistoricalmap.org
     env:
-      URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/state.txt
-      URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org.s3.amazonaws.com/planet/full-history/state.txt
+      URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
+      URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
       URL_PLANET_FILE: 'none'
       URL_HISTORY_PLANET_FILE: 'none'
       TIME_UPDATE_INTERVAL: 7d
@@ -635,6 +635,9 @@ osm-seed:
       TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
       DOWNLOAD_DB: 'languages wiki'
       CREATE_DB: 'db projects chronology'
+      ENVIRONMENT: staging
+      AWS_S3_BUCKET: taginfo
+      INTERVAL_DOWNLOAD_DATA: 86400
     resources:
       enabled: false
       requests:
@@ -647,6 +650,13 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: web
+    cronjob:
+      enabled: true
+      schedule: "0 3 */7 * *" # 3:00 AM every 7 days
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: job 
 # ====================================================================================================
 # Variables for osm-simple-metrics
 # ====================================================================================================
@@ -665,6 +675,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: job
+      
   # ====================================================================================================
   # Variables for replication nomitoring task
   # ====================================================================================================
