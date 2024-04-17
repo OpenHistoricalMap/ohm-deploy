@@ -54,7 +54,7 @@ osm-seed:
   
     # Admin Email address used when generating Lets Encrypt certificates.
     # You will be notified of expirations, etc. on this email address.
-    adminEmail: no-reply@staging.openhistoricalmap.org
+    adminEmail: ruben@geocompas.org
     # ====================================================================================================
     # ====================================================================================================
     # ==================================Pods Configurations===============================================
