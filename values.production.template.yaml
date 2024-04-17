@@ -47,7 +47,7 @@ osm-seed:
 
   # Admin Email address used when generating Lets Encrypt certificates.
   # You will be notified of expirations, etc. on this email address.
-  adminEmail: no-reply@openhistoricalmap.org
+  adminEmail: ohm-admins@googlegroups.com
 
   # ====================================================================================================
   # Variables for osm-seed database
