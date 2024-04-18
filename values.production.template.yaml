@@ -104,7 +104,7 @@ osm-seed:
       OSM_id_key: {{PRODUCTION_ID_APPLICATION}}
       OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
       OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
-      MAILER_FROM: no-reply@openhistoricalmap.org
+      MAILER_FROM: ohm-admins@googlegroups.com
       NOMINATIM_URL: nominatim-api.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
       NEW_RELIC_LICENSE_KEY: {{PRODUCTION_NEW_RELIC_LICENSE_KEY}}
@@ -511,7 +511,7 @@ osm-seed:
       TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
       TM_CONSUMER_KEY: {{PRODUCTION_TM_API_CONSUMER_KEY}}
       TM_CONSUMER_SECRET: {{PRODUCTION_TM_API_CONSUMER_SECRET}}
-      TM_EMAIL_FROM_ADDRESS: 'no-reply@openhistoricalmap.org'
+      TM_EMAIL_FROM_ADDRESS: 'ohm-admins@googlegroups.com'
       TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
       TM_SMTP_PORT: 25
       TM_SMTP_USER: {{MAILER_USERNAME}}
