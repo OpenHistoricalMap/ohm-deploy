@@ -54,7 +54,7 @@ osm-seed:
   
     # Admin Email address used when generating Lets Encrypt certificates.
     # You will be notified of expirations, etc. on this email address.
-    adminEmail: no-reply@staging.openhistoricalmap.org
+    adminEmail: ohm-admins@googlegroups.com
     # ====================================================================================================
     # ====================================================================================================
     # ==================================Pods Configurations===============================================
@@ -114,7 +114,7 @@ osm-seed:
         OSM_id_key: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
-        MAILER_FROM: no-reply@staging.openhistoricalmap.org
+        MAILER_FROM: ohm-admins@googlegroups.com
         NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
@@ -286,7 +286,7 @@ osm-seed:
       cronjobs:
       - name: web-db
         enabled: false
-        schedule: '0 0 * * *'
+        schedule: '* * * * *'
         env:
           # backup/restore
           DB_ACTION: backup
@@ -549,7 +549,7 @@ osm-seed:
         TM_SECRET: {{STAGING_TM_API_SECRET}}
         TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
         TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
-        TM_EMAIL_FROM_ADDRESS: 'no-reply@openhistoricalmap.org'
+        TM_EMAIL_FROM_ADDRESS: 'ohm-admins@googlegroups.com'
         TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
         TM_SMTP_PORT: 25
         TM_SMTP_USER: {{MAILER_USERNAME}}
