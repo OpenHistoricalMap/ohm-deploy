@@ -638,7 +638,7 @@ osm-seed:
       CREATE_DB: 'db projects chronology'
       ENVIRONMENT: staging
       AWS_S3_BUCKET: taginfo
-      INTERVAL_DOWNLOAD_DATA: 86400
+      INTERVAL_DOWNLOAD_DATA: 7d
     resources:
       enabled: false
       requests:
