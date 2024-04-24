@@ -71,9 +71,6 @@ max_connections = 50
 	###### transport_associated_streets
 	[['providers/transport_associated_streets.toml']]
 
-	###### Transport lines from relations
-	[['providers/transport_lines_relation.toml']]
-	
 [[maps]]
 name = "osm"
 attribution = "OpenHistoricalMap"
