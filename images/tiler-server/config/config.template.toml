@@ -70,9 +70,6 @@ max_connections = 50
 
 	###### transport_associated_streets
 	[['providers/transport_associated_streets.toml']]
-
-	###### Transport lines from relations
-	[['providers/transport_lines_relation.toml']]
 	
 [[maps]]
 name = "osm"
@@ -324,19 +321,6 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	name = "transport_lines"
 	provider_layer = "osm.transport_lines_14-20"
 	min_zoom = 14
-	max_zoom = 20
-
-	# Transport Lines from relations
-	[[maps.layers]]
-	name = "transport_lines_relation"
-	provider_layer = "osm.transport_lines_5_10_relation"
-	min_zoom = 5
-	max_zoom = 10
-
-	[[maps.layers]]
-	name = "transport_lines_relation"
-	provider_layer = "osm.transport_lines_11_20_relation"
-	min_zoom = 11
 	max_zoom = 20
 
 	# Transport Areas
