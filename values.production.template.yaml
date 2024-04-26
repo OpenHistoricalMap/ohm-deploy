@@ -63,7 +63,6 @@ osm-seed:
       POSTGRES_DB: {{PRODUCTION_DB}}
       POSTGRES_USER: {{PRODUCTION_DB_USER}}
       POSTGRES_PASSWORD: {{PRODUCTION_DB_PASSWORD}}
-      ENVIRONMENT: production
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce

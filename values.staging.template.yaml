@@ -73,7 +73,6 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
-        ENVIRONMENT: staging
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
