@@ -73,6 +73,7 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
+        ENVIRONMENT: staging
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
@@ -369,7 +370,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-0040b8dd143c850ba
+        AWS_ElasticBlockStore_volumeID : vol-04bd6221877d63c10
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
@@ -405,7 +406,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-00b9ffae1cef059bd
+        AWS_ElasticBlockStore_volumeID: vol-0fd7014bd185f260c
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false

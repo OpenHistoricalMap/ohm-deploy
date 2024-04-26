@@ -16,14 +16,7 @@ ADD lib/quad_tile/ lib/quad_tile/
 RUN make -C db/functions/
 RUN chown -R postgres lib/
 RUN chown -R postgres db/
+COPY start.sh /usr/local/bin/
+COPY config/postgresql.*.conf /etc/postgresql/
 
-## Validate postgresql.conf file 
-COPY config/postgresql.conf /etc/postgresql/postgresql.conf
-RUN mkdir /var/lib/postgresql/test_data
-RUN chown postgres:postgres /var/lib/postgresql/test_data
-USER postgres
-RUN initdb -D /var/lib/postgresql/test_data
-USER root
-
-# Set the default command to run PostgreSQL
-CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+CMD ["/usr/local/bin/start.sh"]
