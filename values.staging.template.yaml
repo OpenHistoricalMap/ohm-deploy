@@ -382,7 +382,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job_xlarge
+        label_value: db
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -390,9 +390,9 @@ osm-seed:
     tilerImposm:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
-        label_value: job_xlarge
+        label_value: db
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
@@ -459,7 +459,7 @@ osm-seed:
           memory: "10Gi"
           cpu: "2"
       autoscaling:
-        enabled: true
+        enabled: false
         minReplicas: 1
         maxReplicas: 2
         cpuUtilization: 60
@@ -692,7 +692,7 @@ osm-seed:
         enabled: true
         schedule: "0 0 * * 0" # every 7 days
         nodeSelector:
-          enabled: true
+          enabled: false
           label_key: nodegroup_type
           label_value: job_xlarge
   # ====================================================================================================
