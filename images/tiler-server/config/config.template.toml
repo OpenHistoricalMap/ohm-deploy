@@ -220,6 +220,12 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	# Water Areas
 	[[maps.layers]]
 	name = "water_areas"
+	provider_layer = "osm.water_areas_gen0_0-2"
+	min_zoom = 0
+	max_zoom = 2
+
+	[[maps.layers]]
+	name = "water_areas"
 	provider_layer = "osm.water_areas_gen0_3-5"
 	min_zoom = 3
 	max_zoom = 5
