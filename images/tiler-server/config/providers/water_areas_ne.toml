@@ -18,17 +18,3 @@ geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
 sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 100),!BBOX!) AS geometry, name, ogc_fid FROM ne_10m_lakes WHERE wkb_geometry && !BBOX!"
-
-[[providers.layers]]
-name = "ne_water_lakes_11-13"
-geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
-id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 5),!BBOX!) AS geometry, name, ogc_fid FROM ne_10m_lakes WHERE wkb_geometry && !BBOX!"
-
-[[providers.layers]]
-name = "ne_water_lakes_14-20"
-geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
-id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(wkb_geometry,!BBOX!) AS geometry, name, ogc_fid FROM ne_10m_lakes WHERE wkb_geometry && !BBOX!"

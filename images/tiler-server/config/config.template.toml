@@ -449,15 +449,3 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	provider_layer = "osm.ne_water_lakes_6-10"
 	min_zoom = 6
 	max_zoom = 10
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.ne_water_lakes_11-13"
-	min_zoom = 11
-	max_zoom = 13
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.ne_water_lakes_14-20"
-	min_zoom = 14
-	max_zoom = 20
