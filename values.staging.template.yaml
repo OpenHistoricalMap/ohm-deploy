@@ -692,7 +692,7 @@ osm-seed:
         enabled: true
         schedule: "0 0 * * 0" # every 7 days
         nodeSelector:
-          enabled: false
+          enabled: true
           label_key: nodegroup_type
           label_value: job_xlarge
   # ====================================================================================================
