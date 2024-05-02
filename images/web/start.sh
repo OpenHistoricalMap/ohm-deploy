@@ -18,7 +18,7 @@ sed -i -e 's/server_url: "openhistoricalmap.example.com"/server_url: "'$SERVER_U
 sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings-local.yml
 
 ### WEBSITE STATUS
-sed -i "s/online/$WEBSITE_STATUS/g" $workdir/config/settings-local.yml
+sed -i "s/online/$WEBSITE_STATUS/g" $workdir/config/settings.yml
 
 #### SETTING UP MAIL SENDER
 sed -i -e 's/smtp_address: "localhost"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings-local.yml
