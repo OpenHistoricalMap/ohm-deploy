@@ -87,7 +87,8 @@ RUN a2ensite production
 
 # Install Passenger + Apache module
 RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-RUN apt-get update && apt-get install -y libapache2-mod-passenger lighttpd
+RUN apt-get update
+RUN apt-get install -y libapache2-mod-passenger lighttpd
 
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
