@@ -1,7 +1,6 @@
 # The server protocol and host
 server_protocol: "http"
 server_url: "openhistoricalmap.example.com"
-status: "online"
 # OAuth application for the web site
 oauth_application: "OAUTH_CLIENT_ID"
 oauth_key: "OAUTH_KEY"
