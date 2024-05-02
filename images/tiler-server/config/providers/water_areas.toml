@@ -1,11 +1,27 @@
-# Simplification for geometries
-# Zoom levels 3-5,Tolerance=1000
-# Zoom levels 6-7,Tolerance=500
-# Zoom levels 8-9,Tolerance=200
-# Zoom levels 10-12,Tolerance=50
-# Zoom levels 13-15,Tolerance=5
-# Zoom levels 16-20,Tolerance=0
-# Water bodies > 50,000,000 sqm
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+name = "water_areas_gen0_0-2"
+sql = """
+SELECT 
+    ST_AsMVTGeom(ST_Simplify(geometry, 10000), !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen0 
+WHERE 
+    type IN ('water', 'riverbank') 
+    AND area > 100000000 
+    AND geometry && !BBOX!
+"""
+
 [[providers.layers]]
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"

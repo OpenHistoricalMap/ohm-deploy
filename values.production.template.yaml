@@ -69,8 +69,8 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-db
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID : {{PRODUCTION_DB_EBS}}
-      AWS_ElasticBlockStore_size: 500Gi
+      AWS_ElasticBlockStore_volumeID : vol-08e31c1930e00a478
+      AWS_ElasticBlockStore_size: 600Gi
     resources:
       enabled: false
       requests:
@@ -110,6 +110,7 @@ osm-seed:
       NEW_RELIC_LICENSE_KEY: {{PRODUCTION_NEW_RELIC_LICENSE_KEY}}
       NEW_RELIC_APP_NAME: {{PRODUCTION_NEW_RELIC_APP_NAME}}
       ORGANIZATION_NAME: OpenHistoricalMap
+      WEBSITE_STATUS: "online"
     resources:
       enabled: true
       requests:
@@ -637,7 +638,7 @@ osm-seed:
       CREATE_DB: 'db projects chronology'
       ENVIRONMENT: staging
       AWS_S3_BUCKET: taginfo
-      INTERVAL_DOWNLOAD_DATA: 86400
+      INTERVAL_DOWNLOAD_DATA: 7d
     resources:
       enabled: false
       requests:

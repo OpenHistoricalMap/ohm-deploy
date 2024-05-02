@@ -107,7 +107,7 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Add settings
-ADD config/settings.yml $workdir/config/
+ADD config/settings-local.yml $workdir/config/
 
 COPY start.sh $workdir/
 COPY liveness.sh $workdir/

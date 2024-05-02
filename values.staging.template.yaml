@@ -79,7 +79,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : {{STAGING_DB_EBS}}
+        AWS_ElasticBlockStore_volumeID : vol-09964172ef71bc8e8
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
@@ -120,6 +120,7 @@ osm-seed:
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
         ORGANIZATION_NAME: OpenHistoricalMap
+        WEBSITE_STATUS: "api_readonly"
       resources:
         enabled: false
         requests:
@@ -368,8 +369,8 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-0de0a9672fa9fa7e4
-        AWS_ElasticBlockStore_size: 40Gi
+        AWS_ElasticBlockStore_volumeID : vol-03294367f2687c585
+        AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
         requests:
@@ -379,7 +380,7 @@ osm-seed:
           memory: '8Gi'
           cpu: '2'
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
         label_value: db
     # ====================================================================================================
@@ -389,23 +390,25 @@ osm-seed:
     tilerImposm:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240404_0003.osm.pbf
-        REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-        SEQUENCE_NUMBER: "1351000"
-        OVERWRITE_STATE: false
+        TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
+        REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
+        SEQUENCE_NUMBER: "675000"
+        OVERWRITE_STATE: true
         UPLOAD_EXPIRED_FILES: true
+        IMPORT_NATURAL_EARTH: true
+        IMPORT_OSM_LAND: true
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-0af76080fb2dfc3c0
-        AWS_ElasticBlockStore_size: 40Gi
+        AWS_ElasticBlockStore_volumeID: vol-086f2e43e4fa71f00
+        AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
         requests:
@@ -456,7 +459,7 @@ osm-seed:
           memory: "10Gi"
           cpu: "2"
       autoscaling:
-        enabled: true
+        enabled: false
         minReplicas: 1
         maxReplicas: 2
         cpuUtilization: 60
@@ -672,7 +675,7 @@ osm-seed:
         CREATE_DB: 'db projects chronology'
         ENVIRONMENT: staging
         AWS_S3_BUCKET: taginfo
-        INTERVAL_DOWNLOAD_DATA: 86400
+        INTERVAL_DOWNLOAD_DATA: 7d
       resources:
         enabled: false
         requests:
@@ -687,7 +690,7 @@ osm-seed:
         label_value: web
       cronjob:
         enabled: true
-        schedule: "0 0 * * *" # every 1 days - testing
+        schedule: "0 0 * * 0" # every 7 days
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
@@ -753,12 +756,12 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: true
+      enabled: false
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: true
+      enabled: false
       image:
         name: "ghcr.io/openhistoricalmap/osmcha-django"
         tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
@@ -797,7 +800,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: true
+      enabled: false
       image:
         name: "developmentseed/osmseed-osmcha-db"
         tag: "0.1.0-n767.h0090e97"
