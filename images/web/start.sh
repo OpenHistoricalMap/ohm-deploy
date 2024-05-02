@@ -32,10 +32,13 @@ sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings
 
 #### SET UP ID KEY
 sed -i -e 's/id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings-local.yml
+sed -i -e 's/#id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
 
 ### SET UP OAUTH ID AND KEY
 sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings-local.yml
 sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings-local.yml
+sed -i -e 's/# oauth_application: "OAUTH_CLIENT_ID"/oauth_application: "'$OAUTH_CLIENT_ID'"/g' $workdir/config/settings.yml
+sed -i -e 's/# oauth_key: "OAUTH_CLIENT_ID"/oauth_key: "'$OAUTH_KEY'"/g' $workdir/config/settings.yml
 
 #### Setup env vars for memcached server
 sed -i -e 's/memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings-local.yml
