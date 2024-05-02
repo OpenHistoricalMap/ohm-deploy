@@ -120,7 +120,7 @@ osm-seed:
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
         ORGANIZATION_NAME: OpenHistoricalMap
-        WEBSITE_STATUS: "online"
+        WEBSITE_STATUS: "api_readonly"
       resources:
         enabled: false
         requests:
