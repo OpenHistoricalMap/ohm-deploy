@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ruby:3.3.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir /var/www
 
@@ -8,7 +8,7 @@ ENV RAILS_ENV=production
 # Install the openstreetmap-website dependencies
 RUN apt-get update \
     && apt-get install -y \
-    ruby ruby-dev ruby-bundler libmagickwand-dev libxml2-dev libxslt1-dev \
+    libmagickwand-dev libxml2-dev libxslt1-dev \
     apache2 apache2-dev build-essential git-core postgresql-client \
     libpq-dev libsasl2-dev imagemagick libffi-dev libgd-dev libarchive-dev libbz2-dev curl \
     default-jre-headless file gpg-agent libvips-dev locales software-properties-common tzdata unzip \
@@ -17,12 +17,26 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ## Install node
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update && apt-get install -y nodejs yarn && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install Passenger + Apache module
+RUN apt-get update && apt-get install -y \
+    cmake \
+    libgcrypt20 \
+    openssl \
+    rubygems \
+    s3cmd && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+RUN gem install passenger
+RUN passenger-install-apache2-module
+
+# RUN apt-get install -y libapache2-mod-passenger lighttpd
 
 # Install openstreetmap-cgimap requirements
 RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
@@ -85,10 +99,10 @@ RUN a2enmod setenvif
 RUN a2dissite 000-default
 RUN a2ensite production
 
-# Install Passenger + Apache module
-RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-RUN apt-get update
-RUN apt-get install -y libapache2-mod-passenger lighttpd
+# # Install Passenger + Apache module
+# RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
+# RUN apt-get update
+# RUN apt-get install -y libapache2-mod-passenger lighttpd
 
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
