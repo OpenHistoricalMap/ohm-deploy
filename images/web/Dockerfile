@@ -32,19 +32,19 @@ RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# # Install cgimap
-# ENV cgimap /tmp/openstreetmap-cgimap
-# ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
-# RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-# RUN cd $cgimap && git checkout $CGIMAP_GITSHA
-# RUN cd $cgimap && \
-#     ./autogen.sh && \
-#     ./configure && \
-#     make && \
-#     make install
+# Install cgimap
+ENV cgimap /tmp/openstreetmap-cgimap
+ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
+RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
+RUN cd $cgimap && git checkout $CGIMAP_GITSHA
+RUN cd $cgimap && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install
 
 # Install Passenger
-RUN gem install passenger
+RUN gem install passenger && passenger-install-apache2-module --auto
 
 # Install svgo required
 RUN npm install -g svgo
@@ -91,14 +91,11 @@ RUN a2ensite production
 # # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
 
-# Install Passenger
-RUN gem install passenger && passenger-install-apache2-module --auto
-
 # Config passenger module
 RUN echo "LoadModule passenger_module $(passenger-config --root)/buildout/apache2/mod_passenger.so" > /etc/apache2/mods-available/passenger.load
 RUN echo "<IfModule mod_passenger.c>\n\
     PassengerRoot $(passenger-config --root)\n\
-    PassengerRuby /usr/bin/ruby\n\
+    PassengerRuby /usr/local/bin/ruby\n\
 </IfModule>" > /etc/apache2/mods-available/passenger.conf
 
 RUN a2enmod passenger
