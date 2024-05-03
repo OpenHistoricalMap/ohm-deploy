@@ -1,6 +1,8 @@
-FROM phusion/passenger-ruby33
+FROM ruby:3.3.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir /var/www
+
+# Production OSM setup
 ENV RAILS_ENV=production
 
 # Install the openstreetmap-website dependencies
@@ -22,20 +24,6 @@ RUN apt-get update && apt-get install -y nodejs yarn && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# # Install Passenger + Apache module
-# RUN apt-get update && apt-get install -y \
-#     cmake \
-#     libgcrypt20 \
-#     openssl \
-#     rubygems \
-#     s3cmd && \
-#     apt-get clean && \
-#     rm -rf /var/lib/apt/lists/*
-# RUN gem install passenger
-# RUN passenger-install-apache2-module
-
-# RUN apt-get install -y libapache2-mod-passenger lighttpd
-
 # Install openstreetmap-cgimap requirements
 RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
   libboost-dev libboost-program-options-dev libfmt-dev \
@@ -44,16 +32,19 @@ RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# Install cgimap
-ENV cgimap /tmp/openstreetmap-cgimap
-ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
-RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-RUN cd $cgimap && git checkout $CGIMAP_GITSHA
-RUN cd $cgimap && \
-    ./autogen.sh && \
-    ./configure && \
-    make && \
-    make install
+# # Install cgimap
+# ENV cgimap /tmp/openstreetmap-cgimap
+# ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
+# RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
+# RUN cd $cgimap && git checkout $CGIMAP_GITSHA
+# RUN cd $cgimap && \
+#     ./autogen.sh && \
+#     ./configure && \
+#     make && \
+#     make install
+
+# Install Passenger
+RUN gem install passenger
 
 # Install svgo required
 RUN npm install -g svgo
@@ -97,23 +88,30 @@ RUN a2enmod setenvif
 RUN a2dissite 000-default
 RUN a2ensite production
 
-# Enable the Passenger Apache module and restart Apache
+# # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
 
-# # Install Passenger + Apache module
-RUN passenger-install-apache2-module
+# Install Passenger
+RUN gem install passenger && passenger-install-apache2-module --auto
 
-# RUN a2enmod passenger
+# Config passenger module
+RUN echo "LoadModule passenger_module $(passenger-config --root)/buildout/apache2/mod_passenger.so" > /etc/apache2/mods-available/passenger.load
+RUN echo "<IfModule mod_passenger.c>\n\
+    PassengerRoot $(passenger-config --root)\n\
+    PassengerRuby /usr/bin/ruby\n\
+</IfModule>" > /etc/apache2/mods-available/passenger.conf
 
-# Check installation
-RUN /usr/bin/passenger-config validate-install
-RUN /usr/sbin/passenger-memory-stats
+RUN a2enmod passenger
 
-# Enable required apache modules for the cgimap Apache service
+# # Check installation
+RUN /usr/local/bundle/bin/passenger-config validate-install
+RUN /usr/local/bundle/bin/passenger-memory-stats
+
+# # Enable required apache modules for the cgimap Apache service
 RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests proxy_fcgi
 
 # Config the virtual host apache2
-# RUN apache2ctl configtest
+RUN apache2ctl configtest
 
 # Set Permissions for www-data
 RUN chown -R www-data: $workdir
