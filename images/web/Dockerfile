@@ -1,8 +1,6 @@
-FROM ruby:3.3.0
+FROM phusion/passenger-ruby33
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir /var/www
-
-# Production OSM setup
 ENV RAILS_ENV=production
 
 # Install the openstreetmap-website dependencies
@@ -24,17 +22,17 @@ RUN apt-get update && apt-get install -y nodejs yarn && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Passenger + Apache module
-RUN apt-get update && apt-get install -y \
-    cmake \
-    libgcrypt20 \
-    openssl \
-    rubygems \
-    s3cmd && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-RUN gem install passenger
-RUN passenger-install-apache2-module
+# # Install Passenger + Apache module
+# RUN apt-get update && apt-get install -y \
+#     cmake \
+#     libgcrypt20 \
+#     openssl \
+#     rubygems \
+#     s3cmd && \
+#     apt-get clean && \
+#     rm -rf /var/lib/apt/lists/*
+# RUN gem install passenger
+# RUN passenger-install-apache2-module
 
 # RUN apt-get install -y libapache2-mod-passenger lighttpd
 
@@ -99,14 +97,13 @@ RUN a2enmod setenvif
 RUN a2dissite 000-default
 RUN a2ensite production
 
-# # Install Passenger + Apache module
-# RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-# RUN apt-get update
-# RUN apt-get install -y libapache2-mod-passenger lighttpd
-
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
-RUN a2enmod passenger
+
+# # Install Passenger + Apache module
+RUN passenger-install-apache2-module
+
+# RUN a2enmod passenger
 
 # Check installation
 RUN /usr/bin/passenger-config validate-install
@@ -116,7 +113,7 @@ RUN /usr/sbin/passenger-memory-stats
 RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests proxy_fcgi
 
 # Config the virtual host apache2
-RUN apache2ctl configtest
+# RUN apache2ctl configtest
 
 # Set Permissions for www-data
 RUN chown -R www-data: $workdir
