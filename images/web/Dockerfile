@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ruby:3.3.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir /var/www
 
@@ -8,7 +8,7 @@ ENV RAILS_ENV=production
 # Install the openstreetmap-website dependencies
 RUN apt-get update \
     && apt-get install -y \
-    ruby ruby-dev ruby-bundler libmagickwand-dev libxml2-dev libxslt1-dev \
+    libmagickwand-dev libxml2-dev libxslt1-dev \
     apache2 apache2-dev build-essential git-core postgresql-client \
     libpq-dev libsasl2-dev imagemagick libffi-dev libgd-dev libarchive-dev libbz2-dev curl \
     default-jre-headless file gpg-agent libvips-dev locales software-properties-common tzdata unzip \
@@ -17,7 +17,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ## Install node
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update && apt-get install -y nodejs yarn && \
@@ -42,6 +42,10 @@ RUN cd $cgimap && \
     ./configure && \
     make && \
     make install
+RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
+
+# Install Passenger
+RUN gem install passenger && passenger-install-apache2-module --auto
 
 # Install svgo required
 RUN npm install -g svgo
@@ -85,19 +89,23 @@ RUN a2enmod setenvif
 RUN a2dissite 000-default
 RUN a2ensite production
 
-# Install Passenger + Apache module
-RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-RUN apt-get update && apt-get install -y libapache2-mod-passenger lighttpd
-
-# Enable the Passenger Apache module and restart Apache
+# # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
+
+# Config passenger module
+RUN echo "LoadModule passenger_module $(passenger-config --root)/buildout/apache2/mod_passenger.so" > /etc/apache2/mods-available/passenger.load
+RUN echo "<IfModule mod_passenger.c>\n\
+    PassengerRoot $(passenger-config --root)\n\
+    PassengerRuby /usr/local/bin/ruby\n\
+</IfModule>" > /etc/apache2/mods-available/passenger.conf
+
 RUN a2enmod passenger
 
-# Check installation
-RUN /usr/bin/passenger-config validate-install
-RUN /usr/sbin/passenger-memory-stats
+# # Check installation
+RUN /usr/local/bundle/bin/passenger-config validate-install
+RUN /usr/local/bundle/bin/passenger-memory-stats
 
-# Enable required apache modules for the cgimap Apache service
+# # Enable required apache modules for the cgimap Apache service
 RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests proxy_fcgi
 
 # Config the virtual host apache2
@@ -107,7 +115,7 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Add settings
-ADD config/settings-local.yml $workdir/config/
+ADD config/settings.local.yml $workdir/config/
 
 COPY start.sh $workdir/
 COPY liveness.sh $workdir/
