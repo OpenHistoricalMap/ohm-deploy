@@ -42,6 +42,7 @@ RUN cd $cgimap && \
     ./configure && \
     make && \
     make install
+RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
 
 # Install Passenger
 RUN gem install passenger && passenger-install-apache2-module --auto
