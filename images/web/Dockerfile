@@ -52,13 +52,13 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=5e5b7468c97b5e71270f36b538f1f1960f31ecd3
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c2b62c698052bbfceffe31b6d8e513a27f4073d1
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'updates for issues about mastodon url (#621) and translating privacy page (#743), translations'
+RUN echo 'bring in latest style changes'
 RUN git fetch
 
 # Install Ruby packages
