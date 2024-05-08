@@ -4,168 +4,163 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'ghcr'
+      - 'tiler-imposm'
 jobs:
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 120
     steps:
-    - uses: actions/checkout@v1
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GHCR_GITHUB_TOKEN }}
-    - name: Setup python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.7'
-    - name: Setup git
-      run: git config --global user.email "noreply@developmentseed.org" && git config --global user.name "Github Action"
-    - name: Install Chartpress
-      run: |
-        pip install chartpress six ruamel.yaml
-    - name: Run Chartpress
-      run: chartpress --push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
-    - name: Staging - substitute secrets
-      if: github.ref == 'refs/heads/staging'
-      uses: bluwy/substitute-string-action@v1
-      with:
-        _input-file: 'values.staging.template.yaml'
-        _format-key: '{{key}}'
-        _output-file: 'values.staging.yaml'
-        AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
-        MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
-        MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
-        MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
-        MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
-        STAGING_DB: ${{ secrets.STAGING_DB }}
-        STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
-        STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-        STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
-        STAGING_DOMAIN_NAME: staging.openhistoricalmap.org
-        STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
-        STAGING_ID_APPLICATION: ${{ secrets.STAGING_ID_APPLICATION }}
-        STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
-        STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
-        STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
-        # STAGING_TILER_DB: ${{ secrets.STAGING_TILER_DB }}
-        # STAGING_TILER_DB_EBS: ${{ secrets.STAGING_TILER_DB_EBS }}
-        # STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
-        STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
-        # STAGING_TILER_DB_USER: ${{ secrets.STAGING_TILER_DB_USER }}
-        # STAGING_TILER_IMPOSM_EBS: ${{ secrets.STAGING_TILER_IMPOSM_EBS }}
-        STAGING_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.STAGING_TILER_IMPOSM_REPLICATION_URL }}
-        # STAGING_TILER_SERVER_EBS: ${{ secrets.STAGING_TILER_SERVER_EBS }}
-        STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
-        STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
-        STAGING_TM_API_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
-        STAGING_TM_API_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
-        STAGING_TM_API_DB: ${{ secrets.STAGING_TM_API_DB }}
-        STAGING_TM_API_DB_HOST: ${{ secrets.STAGING_TM_API_DB_HOST }}
-        STAGING_TM_API_DB_PASSWORD: ${{ secrets.STAGING_TM_API_DB_PASSWORD }}
-        STAGING_TM_API_DB_USER: ${{ secrets.STAGING_TM_API_DB_USER }}
-        STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
-        # STAGING_NOMINATIM_DB_EBS: ${{ secrets.STAGING_NOMINATIM_DB_EBS }}
-        # STAGING_NOMINATIM_PG_PORT: ${{ secrets.STAGING_NOMINATIM_PG_PORT }}
-        # STAGING_NOMINATIM_PG_USER: ${{ secrets.STAGING_NOMINATIM_PG_USER }}
-        STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }} 
-        # STAGING_NOMINATIM_PG_DATABASE: ${{ secrets.STAGING_NOMINATIM_PG_DATABASE }}
-        # STAGING_OVERPASS_API_DB_EBS: ${{ secrets.STAGING_OVERPASS_API_DB_EBS }}
-        STAGING_NEW_RELIC_LICENSE_KEY: ${{ secrets.STAGING_NEW_RELIC_LICENSE_KEY }}
-        STAGING_NEW_RELIC_APP_NAME: ${{ secrets.STAGING_NEW_RELIC_APP_NAME }}
-        STAGING_OSMCHA_PG_USER: ${{ secrets.STAGING_OSMCHA_PG_USER }}
-        STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
-        STAGING_OSMCHA_PG_DATABASE: ${{ secrets.STAGING_OSMCHA_PG_DATABASE }}
-        STAGING_OSMCHA_API_CONSUMER_KEY: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_KEY }}
-        STAGING_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_SECRET }}
-        STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
-        STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
-    - name: Production - substitute secrets
-      if: github.ref == 'refs/heads/main'
-      uses: bluwy/substitute-string-action@v1
-      with:
-        _input-file: 'values.production.template.yaml'
-        _format-key: '{{key}}'
-        _output-file: 'values.production.yaml'
-        AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
-        MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
-        MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
-        MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
-        MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
-        PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
-        PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
-        PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
-        PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
-        PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
-        PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
-        PRODUCTION_ID_APPLICATION: ${{ secrets.PRODUCTION_ID_APPLICATION }}
-        PRODUCTION_OAUTH_CLIENT_ID: ${{ secrets.PRODUCTION_OAUTH_CLIENT_ID }}
-        PRODUCTION_OAUTH_KEY: ${{ secrets.PRODUCTION_OAUTH_KEY }}
-        PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
-        PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
-        PRODUCTION_TILER_DB: ${{ secrets.PRODUCTION_TILER_DB }}
-        PRODUCTION_TILER_DB_EBS: ${{ secrets.PRODUCTION_TILER_DB_EBS }}
-        PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
-        PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
-        PRODUCTION_TILER_DB_USER: ${{ secrets.PRODUCTION_TILER_DB_USER }}
-        PRODUCTION_TILER_IMPOSM_EBS: ${{ secrets.PRODUCTION_TILER_IMPOSM_EBS }}
-        PRODUCTION_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.PRODUCTION_TILER_IMPOSM_REPLICATION_URL }}
-        PRODUCTION_TILER_SERVER_EBS: ${{ secrets.PRODUCTION_TILER_SERVER_EBS }}
-        PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
-        PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
-        PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
-        PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
-        PRODUCTION_TM_API_DB: ${{ secrets.PRODUCTION_TM_API_DB }}
-        PRODUCTION_TM_API_DB_HOST: ${{ secrets.PRODUCTION_TM_API_DB_HOST }}
-        PRODUCTION_TM_API_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_API_DB_PASSWORD }}
-        PRODUCTION_TM_API_DB_USER: ${{ secrets.PRODUCTION_TM_API_DB_USER }}
-        PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
-        PRODUCTION_NOMINATIM_DB_EBS: ${{ secrets.PRODUCTION_NOMINATIM_DB_EBS }}
-        PRODUCTION_NOMINATIM_PG_PORT: ${{ secrets.PRODUCTION_NOMINATIM_PG_PORT }}
-        PRODUCTION_NOMINATIM_PG_USER: ${{ secrets.PRODUCTION_NOMINATIM_PG_USER }}
-        PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
-        PRODUCTION_NOMINATIM_PG_DATABASE: ${{ secrets.PRODUCTION_NOMINATIM_PG_DATABASE }}
-        PRODUCTION_OVERPASS_API_DB_EBS: ${{ secrets.PRODUCTION_OVERPASS_API_DB_EBS }}
-        PRODUCTION_NEW_RELIC_LICENSE_KEY: ${{ secrets.PRODUCTION_NEW_RELIC_LICENSE_KEY }}
-        PRODUCTION_NEW_RELIC_APP_NAME: ${{ secrets.PRODUCTION_NEW_RELIC_APP_NAME }}
-        PRODUCTION_OSMCHA_PG_USER: ${{ secrets.PRODUCTION_OSMCHA_PG_USER }}
-        PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
-        PRODUCTION_OSMCHA_PG_DATABASE: ${{ secrets.PRODUCTION_OSMCHA_PG_DATABASE }}
-        PRODUCTION_OSMCHA_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_OSMCHA_API_CONSUMER_KEY }}
-        PRODUCTION_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_OSMCHA_API_CONSUMER_SECRET }}
-        PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
-        PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
-    - name: AWS Credentials
-      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Setup Kubectl and Helm Dependencies
-      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
-      run: "sudo pip install awscli --ignore-installed six\nsudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl\nsudo chmod +x /usr/bin/kubectl\nsudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator\nsudo chmod +x /usr/bin/aws-iam-authenticator\nwget https://get.helm.sh/helm-v3.5.0-linux-amd64.tar.gz -O helm.tar.gz\ntar -xvzf helm.tar.gz\nsudo mv linux-amd64/helm /usr/local/bin/ \nsudo chmod +x /usr/local/bin/helm\n #magic___^_^___line\n"
-    - name: Update kube-config staging
-      if: github.ref == 'refs/heads/staging'
-      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
-
-    - name: Update kube-config prod
-      if: github.ref == 'refs/heads/main'
-      run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
-
-    - name: Install helm dependencies for
-      if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
-      run: cd ohm && helm dep up
-
-    - name: Staging - helm deploy
-      if: github.ref == 'refs/heads/staging'
-      run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
-
-    - name: Production - helm deploy
-      if: github.ref == 'refs/heads/main'
-      run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
+      - uses: actions/checkout@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_GITHUB_TOKEN }}
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Setup git
+        run: git config --global user.email "noreply@developmentseed.org" && git config --global user.name "Github Action"
+      - name: Install Chartpress
+        run: |
+          pip install chartpress six ruamel.yaml
+      - name: Run Chartpress
+        run: chartpress --push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
+      - name: Staging - substitute secrets
+        if: github.ref == 'refs/heads/staging'
+        uses: bluwy/substitute-string-action@v1
+        with:
+          _input-file: 'values.staging.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.staging.yaml'
+          AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
+          MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
+          STAGING_DB: ${{ secrets.STAGING_DB }}
+          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
+          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
+          STAGING_DOMAIN_NAME: staging.openhistoricalmap.org
+          STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
+          STAGING_ID_APPLICATION: ${{ secrets.STAGING_ID_APPLICATION }}
+          STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
+          STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
+          STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+          # STAGING_TILER_DB: ${{ secrets.STAGING_TILER_DB }}
+          # STAGING_TILER_DB_EBS: ${{ secrets.STAGING_TILER_DB_EBS }}
+          # STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
+          STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
+          # STAGING_TILER_DB_USER: ${{ secrets.STAGING_TILER_DB_USER }}
+          # STAGING_TILER_IMPOSM_EBS: ${{ secrets.STAGING_TILER_IMPOSM_EBS }}
+          STAGING_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.STAGING_TILER_IMPOSM_REPLICATION_URL }}
+          # STAGING_TILER_SERVER_EBS: ${{ secrets.STAGING_TILER_SERVER_EBS }}
+          STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+          STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          STAGING_TM_API_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
+          STAGING_TM_API_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
+          STAGING_TM_API_DB: ${{ secrets.STAGING_TM_API_DB }}
+          STAGING_TM_API_DB_HOST: ${{ secrets.STAGING_TM_API_DB_HOST }}
+          STAGING_TM_API_DB_PASSWORD: ${{ secrets.STAGING_TM_API_DB_PASSWORD }}
+          STAGING_TM_API_DB_USER: ${{ secrets.STAGING_TM_API_DB_USER }}
+          STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
+          # STAGING_NOMINATIM_DB_EBS: ${{ secrets.STAGING_NOMINATIM_DB_EBS }}
+          # STAGING_NOMINATIM_PG_PORT: ${{ secrets.STAGING_NOMINATIM_PG_PORT }}
+          # STAGING_NOMINATIM_PG_USER: ${{ secrets.STAGING_NOMINATIM_PG_USER }}
+          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          # STAGING_NOMINATIM_PG_DATABASE: ${{ secrets.STAGING_NOMINATIM_PG_DATABASE }}
+          # STAGING_OVERPASS_API_DB_EBS: ${{ secrets.STAGING_OVERPASS_API_DB_EBS }}
+          STAGING_NEW_RELIC_LICENSE_KEY: ${{ secrets.STAGING_NEW_RELIC_LICENSE_KEY }}
+          STAGING_NEW_RELIC_APP_NAME: ${{ secrets.STAGING_NEW_RELIC_APP_NAME }}
+          STAGING_OSMCHA_PG_USER: ${{ secrets.STAGING_OSMCHA_PG_USER }}
+          STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
+          STAGING_OSMCHA_PG_DATABASE: ${{ secrets.STAGING_OSMCHA_PG_DATABASE }}
+          STAGING_OSMCHA_API_CONSUMER_KEY: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_KEY }}
+          STAGING_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_SECRET }}
+          STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
+          STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+      - name: Production - substitute secrets
+        if: github.ref == 'refs/heads/main'
+        uses: bluwy/substitute-string-action@v1
+        with:
+          _input-file: 'values.production.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.production.yaml'
+          AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+          MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+          PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
+          PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
+          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+          PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
+          PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
+          PRODUCTION_ID_APPLICATION: ${{ secrets.PRODUCTION_ID_APPLICATION }}
+          PRODUCTION_OAUTH_CLIENT_ID: ${{ secrets.PRODUCTION_OAUTH_CLIENT_ID }}
+          PRODUCTION_OAUTH_KEY: ${{ secrets.PRODUCTION_OAUTH_KEY }}
+          PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
+          PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
+          PRODUCTION_TILER_DB: ${{ secrets.PRODUCTION_TILER_DB }}
+          PRODUCTION_TILER_DB_EBS: ${{ secrets.PRODUCTION_TILER_DB_EBS }}
+          PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
+          PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
+          PRODUCTION_TILER_DB_USER: ${{ secrets.PRODUCTION_TILER_DB_USER }}
+          PRODUCTION_TILER_IMPOSM_EBS: ${{ secrets.PRODUCTION_TILER_IMPOSM_EBS }}
+          PRODUCTION_TILER_IMPOSM_REPLICATION_URL: ${{ secrets.PRODUCTION_TILER_IMPOSM_REPLICATION_URL }}
+          PRODUCTION_TILER_SERVER_EBS: ${{ secrets.PRODUCTION_TILER_SERVER_EBS }}
+          PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+          PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
+          PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
+          PRODUCTION_TM_API_DB: ${{ secrets.PRODUCTION_TM_API_DB }}
+          PRODUCTION_TM_API_DB_HOST: ${{ secrets.PRODUCTION_TM_API_DB_HOST }}
+          PRODUCTION_TM_API_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_API_DB_PASSWORD }}
+          PRODUCTION_TM_API_DB_USER: ${{ secrets.PRODUCTION_TM_API_DB_USER }}
+          PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
+          PRODUCTION_NOMINATIM_DB_EBS: ${{ secrets.PRODUCTION_NOMINATIM_DB_EBS }}
+          PRODUCTION_NOMINATIM_PG_PORT: ${{ secrets.PRODUCTION_NOMINATIM_PG_PORT }}
+          PRODUCTION_NOMINATIM_PG_USER: ${{ secrets.PRODUCTION_NOMINATIM_PG_USER }}
+          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_NOMINATIM_PG_DATABASE: ${{ secrets.PRODUCTION_NOMINATIM_PG_DATABASE }}
+          PRODUCTION_OVERPASS_API_DB_EBS: ${{ secrets.PRODUCTION_OVERPASS_API_DB_EBS }}
+          PRODUCTION_NEW_RELIC_LICENSE_KEY: ${{ secrets.PRODUCTION_NEW_RELIC_LICENSE_KEY }}
+          PRODUCTION_NEW_RELIC_APP_NAME: ${{ secrets.PRODUCTION_NEW_RELIC_APP_NAME }}
+          PRODUCTION_OSMCHA_PG_USER: ${{ secrets.PRODUCTION_OSMCHA_PG_USER }}
+          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_PG_DATABASE: ${{ secrets.PRODUCTION_OSMCHA_PG_DATABASE }}
+          PRODUCTION_OSMCHA_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_OSMCHA_API_CONSUMER_KEY }}
+          PRODUCTION_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_OSMCHA_API_CONSUMER_SECRET }}
+          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
+          PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+      - name: AWS Credentials
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Setup Kubectl and Helm Dependencies
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+        run: "sudo pip install awscli --ignore-installed six\nsudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl\nsudo chmod +x /usr/bin/kubectl\nsudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator\nsudo chmod +x /usr/bin/aws-iam-authenticator\nwget https://get.helm.sh/helm-v3.5.0-linux-amd64.tar.gz -O helm.tar.gz\ntar -xvzf helm.tar.gz\nsudo mv linux-amd64/helm /usr/local/bin/ \nsudo chmod +x /usr/local/bin/helm\n #magic___^_^___line\n"
+      - name: Update kube-config staging
+        if: github.ref == 'refs/heads/staging'
+        run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
+      - name: Update kube-config prod
+        if: github.ref == 'refs/heads/main'
+        run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
+      - name: Install helm dependencies for
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+        run: cd ohm && helm dep up
+      - name: Staging - helm deploy
+        if: github.ref == 'refs/heads/staging'
+        run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+      - name: Production - helm deploy
+        if: github.ref == 'refs/heads/main'
+        run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
