@@ -22,7 +22,7 @@ with open(config_template_file, "r") as main_file:
     content = main_file.read()
 
 # Replace the content of main.toml with the content read from other TOML files
-for toml_file, new_config in new_configs.items():
+for toml_file, toml_file_content in new_configs.items():
     print(f"Copy {toml_file} to config.toml")
     section_header = "[['{}']]".format(toml_file.replace("config/", ""))
     indentation_level = content.find(section_header)
@@ -30,7 +30,9 @@ for toml_file, new_config in new_configs.items():
         # Find the appropriate number of tabs or spaces for indentation
         preceding_newline = content.rfind('\n', 0, indentation_level)
         indentation = content[preceding_newline + 1:indentation_level]
-        content = content.replace(section_header, new_config.replace("\n", "\n" + indentation))
+        toml_file_content = f"###### From {toml_file} \n" + toml_file_content
+        new_values=toml_file_content.replace("\n", "\n" + indentation)
+        content = content.replace(section_header, new_values)
 
 with open(output_file_path, "w") as output_file:
     output_file.write(content)
