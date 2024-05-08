@@ -364,7 +364,7 @@ osm-seed:
         POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
         POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
@@ -403,7 +403,7 @@ osm-seed:
         IMPORT_NATURAL_EARTH: true
         IMPORT_OSM_LAND: true
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws

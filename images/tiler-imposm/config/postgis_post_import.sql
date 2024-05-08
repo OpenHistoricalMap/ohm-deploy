@@ -14,5 +14,3 @@ $$ LANGUAGE plpgsql;
 
 -- Execute the function
 SELECT update_admin_areas();
-
-
