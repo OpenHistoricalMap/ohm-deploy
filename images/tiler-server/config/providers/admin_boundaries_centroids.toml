@@ -20,7 +20,7 @@ FROM
     osm_admin_areas 
 WHERE 
     admin_level IN (1,2) 
-    AND has_label = FALSE 
+    AND has_label = 0 
     AND geometry && !BBOX!
 """
 
@@ -46,7 +46,7 @@ FROM
     osm_admin_areas 
 WHERE 
     admin_level IN (1,2,3,4)
-    AND has_label = FALSE  
+    AND has_label = F0 
     AND geometry && !BBOX!
 """
 
@@ -72,7 +72,7 @@ FROM
     osm_admin_areas 
 WHERE 
     admin_level IN (1,2,3,4,5,6)
-    AND has_label = FALSE  
+    AND has_label = F0 
     AND geometry && !BBOX!
 """
 
@@ -98,7 +98,7 @@ FROM
     osm_admin_areas 
 WHERE 
     admin_level IN (1,2,3,4,5,6,7,8,9) 
-    AND has_label = FALSE 
+    AND has_label = 0 
     AND geometry && !BBOX!
 """
 
@@ -124,6 +124,6 @@ FROM
     osm_admin_areas 
 WHERE 
     admin_level IN (1,2,3,4,5,6,7,8,9,10) 
-    AND has_label = FALSE 
+    AND has_label = 0 
     AND geometry && !BBOX!
 """
