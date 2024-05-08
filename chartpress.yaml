@@ -8,6 +8,8 @@ charts:
         valuesPath: osm-seed.db.image
       tiler-db:
         valuesPath: osm-seed.tilerDb.image
+      tiler-imposm:
+        valuesPath: osm-seed.tilerImposm.image
       tiler-server:
         valuesPath: osm-seed.tilerServer.image
       tasking-manager-api:
