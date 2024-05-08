@@ -1,7 +1,6 @@
 charts:
   - name: ohm
-    imagePrefix: openhistoricalmap/
-
+    imagePrefix: ghcr.io/openhistoricalmap/
     images:
       web:
         valuesPath: osm-seed.web.image
