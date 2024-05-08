@@ -403,11 +403,11 @@ osm-seed:
         IMPORT_NATURAL_EARTH: true
         IMPORT_OSM_LAND: true
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-0851f0e0b08bf84b9
+        AWS_ElasticBlockStore_volumeID: vol-036900ad3835a484f
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
