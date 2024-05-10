@@ -122,13 +122,13 @@ osm-seed:
         ORGANIZATION_NAME: OpenHistoricalMap
         WEBSITE_STATUS: "online"
       resources:
-        enabled: false
+        enabled: true
         requests:
           memory: "2Gi"
           cpu: "1"
         limits:
           memory: "2Gi"
-          cpu: "2"
+          cpu: "1"
       autoscaling:
         enabled: false
         minReplicas: 1
