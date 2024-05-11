@@ -121,6 +121,8 @@ osm-seed:
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
         ORGANIZATION_NAME: OpenHistoricalMap
         WEBSITE_STATUS: "online"
+        # API_TIMEOUT: 600
+        # WEB_TIMEOUT: 600
       resources:
         enabled: true
         requests:
