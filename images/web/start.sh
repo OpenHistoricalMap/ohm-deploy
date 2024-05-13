@@ -73,16 +73,9 @@ while "$flag" = true; do
 
   bundle exec rails db:migrate
 
-  # Start lighttpd and cgimap
-  /usr/local/bin/openstreetmap-cgimap \
-    --port=8000 \
-    --daemon \
-    --instances=10 \
-    --dbname=$POSTGRES_DB \
-    --host=$POSTGRES_HOST \
-    --username=$POSTGRES_USER \
-    --password=$POSTGRES_PASSWORD \
-    --logfile log/cgimap.log
+  # Start cgimap
+  ./cgimap.sh
+  
   # Start the delayed jobs queue worker and  Start the app
   bundle exec rake jobs:work &
   apachectl -k start -DFOREGROUND
