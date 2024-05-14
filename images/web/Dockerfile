@@ -25,23 +25,24 @@ RUN apt-get update && apt-get install -y nodejs yarn && \
     rm -rf /var/lib/apt/lists/*
 
 # Install openstreetmap-cgimap requirements
-RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
-  libboost-dev libboost-program-options-dev libfmt-dev \
-  libmemcached-dev libcrypto++-dev libargon2-dev libyajl-dev \
-  automake autoconf libtool && \
+RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev libbrotli-dev \
+  libboost-program-options-dev libfmt-dev libmemcached-dev libcrypto++-dev \
+  libargon2-dev libyajl-dev cmake && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
 # Install cgimap
 ENV cgimap /tmp/openstreetmap-cgimap
-ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
+ENV CGIMAP_GITSHA=24709f19da0ece205b8c9e8f2e9a556822236b67
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
 RUN cd $cgimap && git checkout $CGIMAP_GITSHA
 RUN cd $cgimap && \
-    ./autogen.sh && \
-    ./configure && \
-    make && \
-    make install
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    cmake --build .
+RUN cp $cgimap/build/openstreetmap-cgimap /usr/local/bin/ && rm -rf $cgimap
+
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
 
 # Install Passenger
@@ -79,8 +80,8 @@ RUN bundle exec rake yarn:install
 RUN bundle exec rake i18n:js:export
 RUN bundle exec rake assets:precompile
 
-# The rack interface requires a `tmp` directory to use openstreetmap-cgimap
-RUN ln -s /tmp /var/www/tmp
+# # The rack interface requires a `tmp` directory to use openstreetmap-cgimap
+# RUN ln -s /tmp /var/www/tmp
 
 # Add Apache configuration file
 ADD config/production.conf /etc/apache2/sites-available/production.conf
@@ -105,8 +106,15 @@ RUN a2enmod passenger
 RUN /usr/local/bundle/bin/passenger-config validate-install
 RUN /usr/local/bundle/bin/passenger-memory-stats
 
-# # Enable required apache modules for the cgimap Apache service
-RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests proxy_fcgi
+# Install necessary packages for building and enabling modules
+RUN apt-get update && apt-get install -y \
+    libapache2-mod-fcgid \
+    && apt-get clean
+
+# COPY config/cgimap.conf /etc/apache2/sites-available/cgimap.conf
+# RUN mkdir /var/www/api
+RUN a2enmod proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_byrequests 
+# RUN a2ensite cgimap
 
 # Config the virtual host apache2
 RUN apache2ctl configtest
