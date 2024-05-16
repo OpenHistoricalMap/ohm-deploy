@@ -7,8 +7,8 @@ RUN mkdir -p /docker-entrypoint-initdb.d
 COPY ./config/update_db.sh /docker-entrypoint-initdb.d
 COPY ./config/update_postgresql.sh /docker-entrypoint-initdb.d
 
-RUN git clone https://github.com/Open-Historical-Map-Labs/DateFunctions-plpgsql.git /usr/local/datefunctions
+RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git /usr/local/datefunctions
 WORKDIR /usr/local/datefunctions
-# deploy invalid datetime parsing fix
-RUN git checkout 02618f4a8c7ef75bab53fb9b1c75e7aff3d98a2c
+# deploy improvements to negative year handling
+RUN git checkout d9f06a4ac0674881247c38b29ba58ff1d167b7bb
 RUN cp datefunctions.sql /docker-entrypoint-initdb.d/datefunctions.sql
