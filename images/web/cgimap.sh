@@ -25,6 +25,5 @@ fi
 if [[ "$WEBSITE_STATUS" == "database_offline" || "$WEBSITE_STATUS" == "api_offline" ]]; then
     echo "Website is $WEBSITE_STATUS. No action required for cgimap service."
 else
-  openstreetmap-cgimap --port=8000 --daemon --instances=10
+  /usr/local/bin/openstreetmap-cgimap --port=8000 --daemon --instances=10
 fi
-# pkill -9 -f 'openstreetmap-cgimap'
