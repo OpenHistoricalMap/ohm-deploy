@@ -18,7 +18,7 @@ jobs:
         uses: allenevans/set-env@v2.0.0
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
-          TM_APP_API_URL: https://staging-tm-api.openhistoricalmap.org
+          TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
           TM_APP_API_VERSION: v2
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM

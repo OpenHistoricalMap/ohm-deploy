@@ -1,10 +1,13 @@
 .env-tiler
-tiler-db-data
-tiler-imposm-data-2
-tiler-imposm-data
-tiler-imposm
 images/data/
 data/
 images/.env
 images/tiler.yml
 values.dev.yaml
+secrets
+tegola
+envs/.env.tiler
+envs/.env.web
+config.toml
+.DS_Store
+*/.DS_Store

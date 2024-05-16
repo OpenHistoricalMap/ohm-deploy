@@ -14,36 +14,48 @@ production:
   encoding: utf8" >$workdir/config/database.yml
 
 #### SETTING UP SERVER_URL AND SERVER_PROTOCOL
-sed -i -e 's/server_url: "openhistoricalmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
-sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
+sed -i -e 's/server_url: "openhistoricalmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.local.yml
+
+### WEBSITE STATUS
+sed -i "s/online/$WEBSITE_STATUS/g" $workdir/config/settings.yml
 
 #### SETTING UP MAIL SENDER
-sed -i -e 's/smtp_address: "localhost"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings.yml
-sed -i -e 's/smtp_domain: "localhost"/smtp_domain: "'$MAILER_DOMAIN'"/g' $workdir/config/settings.yml
-sed -i -e 's/smtp_enable_starttls_auto: false/smtp_enable_starttls_auto: true/g' $workdir/config/settings.yml
-sed -i -e 's/smtp_authentication: null/smtp_authentication: "login"/g' $workdir/config/settings.yml
-sed -i -e 's/smtp_user_name: null/smtp_user_name: "'$MAILER_USERNAME'"/g' $workdir/config/settings.yml
-sed -i -e 's/smtp_password: null/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir/config/settings.yml
-sed -i -e 's/openstreetmap@example.com/'$MAILER_FROM'/g' $workdir/config/settings.yml
-sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_address: "localhost"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/smtp_domain: "localhost"/smtp_domain: "'$MAILER_DOMAIN'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/smtp_enable_starttls_auto: false/smtp_enable_starttls_auto: true/g' $workdir/config/settings.local.yml
+sed -i -e 's/smtp_authentication: null/smtp_authentication: "login"/g' $workdir/config/settings.local.yml
+sed -i -e 's/smtp_user_name: null/smtp_user_name: "'$MAILER_USERNAME'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/smtp_password: null/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/openstreetmap@example.com/'$MAILER_FROM'/g' $workdir/config/settings.local.yml
+sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.local.yml
 
 #### SET UP ID KEY
-sed -i -e 's/id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
+sed -i -e 's/id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/#id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
 
 ### SET UP OAUTH ID AND KEY
-sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.yml
-sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.yml
+sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.local.yml
+sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.local.yml
+sed -i -e 's/# oauth_application: "OAUTH_CLIENT_ID"/oauth_application: "'$OAUTH_CLIENT_ID'"/g' $workdir/config/settings.yml
+sed -i -e 's/# oauth_key: "OAUTH_CLIENT_ID"/oauth_key: "'$OAUTH_KEY'"/g' $workdir/config/settings.yml
 
 #### Setup env vars for memcached server
-sed -i -e 's/#memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.yml
+sed -i -e 's/memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.local.yml
 
 ## SET NOMINATIM URL
-sed -i -e 's/nominatim.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
+sed -i -e 's/nominatim.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.local.yml
 
 ## SET OVERPASS URL
-sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.yml
+sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.local.yml
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
+
+# ADD DOORKEEPER_SIGNING_KEY
+openssl genpkey -algorithm RSA -out private.pem
+chmod 400 /var/www/private.pem
+export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
+sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.local.yml
 
 #### CHECK IF DB IS ALREADY UP AND START THE APP
 flag=true
@@ -56,20 +68,14 @@ while "$flag" = true; do
     sleep 2
   done &
 
-  # Enable assets:precompile, to take lates changes for assets in $workdir/config/settings.yml.
+  # Enable assets:precompile, to take lates changes for assets in $workdir/config/settings.local.yml.
   time bundle exec rake i18n:js:export assets:precompile
 
   bundle exec rails db:migrate
 
-  # Start lighttpd and cgimap
-  /usr/local/bin/openstreetmap-cgimap \
-    --port=8000 \
-    --instances=30 \
-    --dbname=$POSTGRES_DB \
-    --host=$POSTGRES_HOST \
-    --username=$POSTGRES_USER \
-    --password=$POSTGRES_PASSWORD \
-    --logfile log/cgimap.log &
+  # Start cgimap
+  ./cgimap.sh
+  
   # Start the delayed jobs queue worker and  Start the app
   bundle exec rake jobs:work &
   apachectl -k start -DFOREGROUND

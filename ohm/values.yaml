@@ -11,6 +11,10 @@ osm-seed:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  tilerImposm:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
   tilerServer:
     image:
       name: chartpress_replace_me

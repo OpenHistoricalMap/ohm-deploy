@@ -1,26 +1,26 @@
-version: '3.4'
+version: '3.8'
 services:
   db:
     platform: linux/amd64
-    image: osmseed-db:v1
+    image: ohm-db:v2
     build:
-      context: ../images/db
+      context: ./../images/db
       dockerfile: Dockerfile
     ports:
       - '5432:5432'
     volumes:
       - ./data/db-data:/var/lib/postgresql/data
     env_file:
-      - ./.env.example
+      - ./../envs/.env.web
   web:
-    image: osmseed-web:v1
+    image: ohm-web:v1
     build:
-      context: ./web
+      context: ./../images/web
       dockerfile: Dockerfile
     ports:
       - '80:80'
     env_file:
-      - ./.env.example
-    ####### Enable for development mode
-    # volumes:
-    #   - ./../../ohm-website:/var/www
+      - ./../envs/.env.web
+####### Enable for development mode
+# volumes:
+#   - ./../../ohm-website:/var/www

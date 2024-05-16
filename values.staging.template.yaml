@@ -37,7 +37,7 @@ osm-seed:
     # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
     # as the SSL certificate for your services. Else, you will need to configure
     # SSL separately. 
-    serviceType: LoadBalancer
+    serviceType: ClusterIP
   
     # Domain that is pointed to the clusterIP
     # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
@@ -54,7 +54,7 @@ osm-seed:
   
     # Admin Email address used when generating Lets Encrypt certificates.
     # You will be notified of expirations, etc. on this email address.
-    adminEmail: ruben@developmentseed.org
+    adminEmail: ohm-admins@googlegroups.com
     # ====================================================================================================
     # ====================================================================================================
     # ==================================Pods Configurations===============================================
@@ -73,13 +73,14 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
+        LOG_STATEMENT: "mod"
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : {{STAGING_DB_EBS}}
+        AWS_ElasticBlockStore_volumeID : vol-09964172ef71bc8e8
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
@@ -89,7 +90,8 @@ osm-seed:
         limits:
           memory: "10Gi"
           cpu: "5"
-  
+      sharedMemorySize: 256Mi
+      livenessProbeExec: true
     # ====================================================================================================
     # Variables for osm-seed website
     # ====================================================================================================
@@ -104,6 +106,7 @@ osm-seed:
       staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      ingressDomain: www.staging.openhistoricalmap.org
       env:
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
         MAILER_DOMAIN: staging.openhistoricalmap.org
@@ -112,32 +115,36 @@ osm-seed:
         OSM_id_key: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
-        MAILER_FROM: no-reply@staging.openhistoricalmap.org
-        NOMINATIM_URL: nominatim-api-staging.openhistoricalmap.org
-        OVERPASS_URL: overpass-api-staging.openhistoricalmap.org	
+        MAILER_FROM: ohm-admins@googlegroups.com
+        NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
+        OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
+        ORGANIZATION_NAME: OpenHistoricalMap
+        WEBSITE_STATUS: "online"
+        # API_TIMEOUT: 600
+        # WEB_TIMEOUT: 600
       resources:
-        enabled: false
+        enabled: true
         requests:
           memory: "2Gi"
           cpu: "1"
         limits:
           memory: "2Gi"
-          cpu: "2"
+          cpu: "1"
       autoscaling:
-        enabled: true
-        minReplicas: 2
+        enabled: false
+        minReplicas: 1
         maxReplicas: 10
         cpuUtilization: 80
-      sharedMemorySize: 128Mi
+      sharedMemorySize: 16Mi
     # ====================================================================================================
     # Variables for memcached. Memcached is used to store session cookies
     # ====================================================================================================
     memcached:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
         label_value: web
       resources:
@@ -282,8 +289,8 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: true
-        schedule: '0 0 * * *'
+        enabled: false
+        schedule: '* * * * *'
         env:
           # backup/restore
           DB_ACTION: backup
@@ -295,6 +302,7 @@ osm-seed:
           # Clean up backups options
           CLEANUP_BACKUPS: true
           RETENTION_DAYS: '30'
+          RESTORE_URL_FILE: https://osmseed.s3.amazonaws.com/test.sql.gz
         resources:
           enabled: false
           requests:
@@ -308,7 +316,7 @@ osm-seed:
           label_key: nodegroup_type
           label_value: job
       - name: osmcha-db
-        enabled: true
+        enabled: false
         schedule: '0 0 * * *'
         env:
           # backup/restore
@@ -340,14 +348,10 @@ osm-seed:
   
     tilerDb:
       enabled: true
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: db
       env:
-        POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: {{STAGING_TILER_DB}}
-        POSTGRES_USER: {{STAGING_TILER_DB_USER}}
+        POSTGRES_HOST: staging-tiler-db
+        POSTGRES_DB: tiler-osm
+        POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
         # for 20Gi
@@ -356,7 +360,6 @@ osm-seed:
         # POSTGRES_DB_WORK_MEM: 15MB
         # POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
         # POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
-  
         #for 15Gi
         POSTGRES_DB_MAX_CONNECTIONS: 500
         POSTGRES_DB_SHARED_BUFFERS: 3GB
@@ -364,22 +367,25 @@ osm-seed:
         POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
         POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : {{STAGING_TILER_DB_EBS}}
-        AWS_ElasticBlockStore_size: 100Gi
+        AWS_ElasticBlockStore_volumeID : vol-08446263c77f14c78
+        AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
         requests:
-          memory: "15Gi"
-          cpu: "5"
+          memory: '8Gi'
+          cpu: '4'
         limits:
-          memory: "15Gi"
-          cpu: "5"
-  
+          memory: '8Gi'
+          cpu: '2'
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: db
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -387,21 +393,24 @@ osm-seed:
     tilerImposm:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
         REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
-        SEQUENCE_NUMBER: "485000"
+        SEQUENCE_NUMBER: "675000"
         OVERWRITE_STATE: true
+        UPLOAD_EXPIRED_FILES: true
+        IMPORT_NATURAL_EARTH: true
+        IMPORT_OSM_LAND: true
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_IMPOSM_EBS}}
+        AWS_ElasticBlockStore_volumeID: vol-036900ad3835a484f
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -418,13 +427,14 @@ osm-seed:
     tilerServer:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       replicaCount: 1
       commad: './start.sh'
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      ingressDomain: vtiles.staging.openhistoricalmap.org
       env:
         TILER_SERVER_PORT: 9090
         TILER_CACHE_TYPE: s3
@@ -441,10 +451,10 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: {{STAGING_TILER_SERVER_EBS}}
+        AWS_ElasticBlockStore_volumeID: vol-0e8b605fe3b16bf08
         AWS_ElasticBlockStore_size: 100Gi
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
@@ -452,7 +462,7 @@ osm-seed:
           memory: "10Gi"
           cpu: "2"
       autoscaling:
-        enabled: true
+        enabled: false
         minReplicas: 1
         maxReplicas: 2
         cpuUtilization: 60
@@ -468,7 +478,7 @@ osm-seed:
       replicaCount: 1
       command: './cache_cleaner.sh'
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
@@ -525,6 +535,7 @@ osm-seed:
       staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
         POSTGRES_HOST: {{STAGING_TM_API_DB_HOST}}
         POSTGRES_DB: {{STAGING_TM_API_DB}}
@@ -537,21 +548,21 @@ osm-seed:
         TM_ORG_PRIVACY_POLICY_URL: 'staging.openhistoricalmap.org/copyright'
         TM_ORG_GITHUB: 'github.com/openhistoricalmap'
         OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
-        OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api-staging.openhistoricalmap.org'
+        OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api.staging.openhistoricalmap.org'
         OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
         ID_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=id'
         POTLATCH2_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=potlatch2'
         TM_SECRET: {{STAGING_TM_API_SECRET}}
         TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
         TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
-        TM_EMAIL_FROM_ADDRESS: 'no-reply@openhistoricalmap.org'
+        TM_EMAIL_FROM_ADDRESS: 'ohm-admins@googlegroups.com'
         TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
         TM_SMTP_PORT: 25
         TM_SMTP_USER: {{MAILER_USERNAME}}
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
         TM_DEFAULT_LOCALE: 'en'
-        TM_APP_API_URL: 'https://staging-tm-api.openhistoricalmap.org'
-        TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
+        TM_APP_API_URL: 'https://tm-api.staging.openhistoricalmap.org'
+        TM_APP_BASE_URL: 'https://tasks.staging.openhistoricalmap.org'
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
       resources:
@@ -567,13 +578,14 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: true
+      enabled: false
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      ingressDomain: nominatim-api.staging.openhistoricalmap.org
       replicaCount: 1
       env:
-        PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
-        REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute
+        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240405_0003.osm.pbf
+        REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
         FREEZE: false
@@ -586,7 +598,7 @@ osm-seed:
         PGDATA: /var/lib/postgresql/14/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
-        OSMSEED_WEB_API_DOMAIN: staging.openhistoricalmap.org
+        OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
       resources:
         enabled: false
         requests:
@@ -604,61 +616,59 @@ osm-seed:
         localVolumeHostPath: /mnt/nominatim-db-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: {{STAGING_NOMINATIM_DB_EBS}}
-        AWS_ElasticBlockStore_size: 100Gi
+        AWS_ElasticBlockStore_volumeID: vol-0a9f1da7c7f6d587e
+        AWS_ElasticBlockStore_size: 30Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
-        enabled: false
-
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web_xlarge
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
     overpassApi:
-      enabled: true
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: web
+      enabled: false
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      ingressDomain: overpass-api.staging.openhistoricalmap.org
       env:
-        OVERPASS_META: 'yes'
+        OVERPASS_META: 'attic'
         OVERPASS_MODE: 'init'
-        OVERPASS_PLANET_URL: 'http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf'
-        OVERPASS_DIFF_URL: 'http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute'
+        OVERPASS_PLANET_URL: 'https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240102_0000.osm.pbf'
+        OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
         OVERPASS_RULES_LOAD: '10'
         OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
-        OVERPASS_REPLICATION_SEQUENCE_NUMBER: '485000'
+        OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1258000'
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        AWS_ElasticBlockStore_volumeID: {{STAGING_OVERPASS_API_DB_EBS}}
+        AWS_ElasticBlockStore_volumeID: vol-0da7d726731c27708
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
         requests:
-          memory: '1Gi'
+          memory: '8Gi'
           cpu: '2'
         limits:
-          memory: '2Gi'
+          memory: '8Gi'
           cpu: '2'
-    
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: false
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      ingressDomain: taginfo.staging.openhistoricalmap.org
       env:
-        URL_PLANET_FILE_STATE: https://osmseed-staging.s3.amazonaws.com/planet/state.txt
-        URL_HISTORY_PLANET_FILE_STATE: https://osmseed-staging.s3.amazonaws.com/planet/full-history/state.txt
+        URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
+        URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
         URL_PLANET_FILE: 'none'
         URL_HISTORY_PLANET_FILE: 'none'
         TIME_UPDATE_INTERVAL: 7d
@@ -666,6 +676,9 @@ osm-seed:
         TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
+        ENVIRONMENT: staging
+        AWS_S3_BUCKET: taginfo
+        INTERVAL_DOWNLOAD_DATA: 7d
       resources:
         enabled: false
         requests:
@@ -674,6 +687,17 @@ osm-seed:
         limits:
           memory: '2Gi'
           cpu: '2'
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      cronjob:
+        enabled: true
+        schedule: "0 0 * * 0" # every 7 days
+        nodeSelector:
+          enabled: true
+          label_key: nodegroup_type
+          label_value: job_xlarge
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
@@ -728,63 +752,61 @@ osm-seed:
           memory: '24Gi'
           cpu: '10'
       nodeSelector:
-        enabled: false
-
-
-    # ====================================================================================================
-    # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
-    # ====================================================================================================
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+# ====================================================================================================
+# Variables for osmcha web
+# ====================================================================================================
     osmchaWeb:
-      enabled: true
+      enabled: false
+# ====================================================================================================
+# Variables for osmcha Api, We hard code the container id.
+# ====================================================================================================
+    osmchaApi:
+      enabled: false
+      image:
+        name: "ghcr.io/openhistoricalmap/osmcha-django"
+        tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
+      ingressDomain: osmcha.staging.openhistoricalmap.org
       env:
-        OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
-        DJANGO_CACHES: "{'default': {'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache', 'LOCATION': '127.0.0.1:11211'}}"
-        DJANGO_DEBUG: "False"
-        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}
-        DJANGO_SECURE_BROWSER_XSS_FILTER: "True"
-        DJANGO_SECURE_SSL_REDIRECT: "True"
-        DJANGO_SECURE_CONTENT_TYPE_NOSNIFF: "True"
-        DJANGO_SECURE_FRAME_DENY: "True"
-        DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS: "True"
-        DJANGO_SESSION_COOKIE_HTTPONLY: "True"
-        DJANGO_SESSION_COOKIE_SECURE: "True"
-        DJANGO_DEFAULT_FROM_EMAIL: "webmaster@openhistoricalmap.org"
-        DJANGO_SERVER_EMAIL: "server@openhistoricalmap.org"
-        DJANGO_EMAIL_SUBJECT_PREFIX: "osmcha"
-        DJANGO_CHANGESETS_FILTER: "{'some_filter_key': 'some_filter_value'}"
-        OAUTH_OSM_KEY: {{STAGING_OSMCHA_CONSUMER_KEY}}
-        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_CONSUMER_SECRET}}
-        DJANGO_ANON_USER_THROTTLE_RATE: "10/h"
-        DJANGO_COMMON_USER_THROTTLE_RATE: "100/h"
-        DJANGO_NON_STAFF_USER_THROTTLE_RATE: "50/h"
-        OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/oauth-landing.html
-        DJANGO_ENABLE_CHANGESET_COMMENTS: "True"
-        DJANGO_OSM_COMMENTS_API_KEY: "test"
+        DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-        DJANGO_ROOT: /app
-        DJANGO_SETTINGS_MODULE: config.settings.local
-        C_FORCE_ROOT: "False"
-        REACT_APP_OSM_URL: https://staging.openhistoricalmap.org
-        REACT_APP_OSM_API: https://staging.openhistoricalmap.org/api/0.6
-        REACT_APP_OVERPASS_BASE: https://overpass-api-staging.openhistoricalmap.org/api/interpreter
-        REACT_APP_NOMINATIM_URL: https://nominatim-api-staging.openhistoricalmap.org
-        OSMCHA_URL: https://osmcha-staging.openhistoricalmap.org
+        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}        
+        OAUTH_OSM_KEY: {{STAGING_OSMCHA_API_CONSUMER_KEY}}
+        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_API_CONSUMER_SECRET}}
+        DJANGO_SECURE_SSL_REDIRECT: "False"
+        OSM_SERVER_URL: https://www.openhistoricalmap.org
+        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/oauth-landing.html
+        OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
+        ## frontend
+        OSMCHA_URL: https://osmcha.staging.openhistoricalmap.org
+        OSMCHA_API_URL: www.openhistoricalmap.org
+        REACT_APP_OSM_URL: https://www.openhistoricalmap.org
+        REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
+        REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
+        REACT_APP_ENABLE_REAL_CHANGESETS: 0
+        REACT_APP_MAPBOX_ACCESS_TOKEN: {{STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
       resources:
         enabled: false
         requests:
-          memory: '20Gi'
-          cpu: '8'
+          memory: "512Mi"
+          cpu: "1"
         limits:
-          memory: '24Gi'
-          cpu: '10'
+          memory: "512Mi"
+          cpu: "1"
       nodeSelector:
         enabled: false
-
-    # ====================================================================================================
-    # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
-    # ====================================================================================================
+        label_key: nodegroup_type
+        label_value: web
+# ====================================================================================================
+# Variables for osmcha DB
+# ====================================================================================================
     osmchaDb:
-      enabled: true
+      enabled: false
+      image:
+        name: "developmentseed/osmseed-osmcha-db"
+        tag: "0.1.0-n767.h0090e97"
       env:
         POSTGRES_DB: {{STAGING_OSMCHA_PG_DATABASE}}
         POSTGRES_USER: {{STAGING_OSMCHA_PG_USER}}
@@ -792,23 +814,29 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: '20Gi'
-          cpu: '8'
+          memory: "20Gi"
+          cpu: "8"
         limits:
-          memory: '24Gi'
-          cpu: '10'
+          memory: "24Gi"
+          cpu: "10"
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         # Minikube
         localVolumeHostPath: /mnt/db-data/osmcha-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0462ddf32e5b456df
-        AWS_ElasticBlockStore_size: 100Gi
+        AWS_ElasticBlockStore_volumeID: vol-06f981afe8def5915
+        AWS_ElasticBlockStore_size: 10Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-osmcha-disk--v1
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: false
+# ====================================================================================================
+# Planet files server
+# ====================================================================================================
+    planetFiles:
+      enabled: false
+      

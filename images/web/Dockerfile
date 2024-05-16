@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ruby:3.3.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir /var/www
 
@@ -8,7 +8,7 @@ ENV RAILS_ENV=production
 # Install the openstreetmap-website dependencies
 RUN apt-get update \
     && apt-get install -y \
-    ruby ruby-dev ruby-bundler libmagickwand-dev libxml2-dev libxslt1-dev \
+    libmagickwand-dev libxml2-dev libxslt1-dev \
     apache2 apache2-dev build-essential git-core postgresql-client \
     libpq-dev libsasl2-dev imagemagick libffi-dev libgd-dev libarchive-dev libbz2-dev curl \
     default-jre-headless file gpg-agent libvips-dev locales software-properties-common tzdata unzip \
@@ -16,8 +16,8 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-## Install node
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+# Install node
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update && apt-get install -y nodejs yarn && \
@@ -25,36 +25,41 @@ RUN apt-get update && apt-get install -y nodejs yarn && \
     rm -rf /var/lib/apt/lists/*
 
 # Install openstreetmap-cgimap requirements
-RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
-  libboost-dev libboost-program-options-dev libfmt-dev \
-  libmemcached-dev libcrypto++-dev libargon2-dev libyajl-dev \
-  automake autoconf libtool && \
+RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev libbrotli-dev \
+  libboost-program-options-dev libfmt-dev libmemcached-dev libcrypto++-dev \
+  libargon2-dev libyajl-dev cmake libapache2-mod-fcgid && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
 # Install cgimap
 ENV cgimap /tmp/openstreetmap-cgimap
-ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
+ENV CGIMAP_GITSHA=24709f19da0ece205b8c9e8f2e9a556822236b67
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
 RUN cd $cgimap && git checkout $CGIMAP_GITSHA
 RUN cd $cgimap && \
-    ./autogen.sh && \
-    ./configure && \
-    make && \
-    make install
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    cmake --build .
+RUN cp $cgimap/build/openstreetmap-cgimap /usr/local/bin/ && rm -rf $cgimap
+
+RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
+
+# Install Passenger
+RUN gem install passenger && passenger-install-apache2-module --auto
 
 # Install svgo required
 RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=a71a6b795dda0d9c908495cf8862fdb8e9bf02e3
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=af22cfbc2014846283ed0e2501276fec66467bc1
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
 RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'fix locale file for comment username'
+RUN echo 'bring in latest style changes'
 RUN git fetch
 
 # Install Ruby packages
@@ -80,25 +85,24 @@ RUN ln -s /tmp /var/www/tmp
 
 # Add Apache configuration file
 ADD config/production.conf /etc/apache2/sites-available/production.conf
-RUN a2enmod headers
-RUN a2enmod setenvif
+RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_byrequests
 RUN a2dissite 000-default
 RUN a2ensite production
 
-# Install Passenger + Apache module
-RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-RUN apt-get update && apt-get install -y libapache2-mod-passenger lighttpd
-
 # Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
+
+# Config passenger module
+RUN echo "LoadModule passenger_module $(passenger-config --root)/buildout/apache2/mod_passenger.so" > /etc/apache2/mods-available/passenger.load
+RUN echo "<IfModule mod_passenger.c>\n\
+    PassengerRoot $(passenger-config --root)\n\
+    PassengerRuby /usr/local/bin/ruby\n\
+</IfModule>" > /etc/apache2/mods-available/passenger.conf
 RUN a2enmod passenger
 
 # Check installation
-RUN /usr/bin/passenger-config validate-install
-RUN /usr/sbin/passenger-memory-stats
-
-# Enable required apache modules for the cgimap Apache service
-RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests proxy_fcgi
+RUN /usr/local/bundle/bin/passenger-config validate-install
+RUN /usr/local/bundle/bin/passenger-memory-stats
 
 # Config the virtual host apache2
 RUN apache2ctl configtest
@@ -107,8 +111,10 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Add settings
-ADD config/settings.yml $workdir/config/
+ADD config/settings.local.yml $workdir/config/
 
 COPY start.sh $workdir/
+COPY cgimap.sh $workdir/
+COPY liveness.sh $workdir/
 
 CMD $workdir/start.sh

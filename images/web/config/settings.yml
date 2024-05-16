@@ -9,10 +9,10 @@ copyright_owner: "OpenHistoricalMap and contributors"
 attribution_url: "http://www.openhistoricalmap.org/copyright"
 license_url: "http://opendatacommons.org/licenses/odbl/1-0/"
 # Support email address
-support_email: "openstreetmap@example.com"
+support_email: "ohm-admins@googlegroups.com"
 # Sender addresses for emails
-email_from: "OpenHistoricalMap <openstreetmap@example.com>"
-email_return_path: "openstreetmap@example.com"
+email_from: "OpenHistoricalMap <ohm-admins@googlegroups.com>"
+email_return_path: "ohm-admins@googlegroups.com"
 # API version
 api_version: "0.6"
 # Application status - possible values are:
@@ -22,7 +22,7 @@ api_version: "0.6"
 #   database_readonly - database and site in read-only mode
 #   database_offline - database offline with site in emergency mode
 #   gpx_offline - gpx storage offline
-status: "online"
+status: "api_readonly"
 # The maximum area you're allowed to request, in square degrees
 max_request_area: 0.25
 # Number of GPS trace/trackpoints returned per-page
@@ -41,9 +41,6 @@ postcode_zoom: 15
 api_timeout: 300
 # Timeout for web pages in seconds
 web_timeout: 30
-
-
-
 # Periods (in hours) which are allowed for user blocks
 user_block_periods: [0, 1, 3, 6, 12, 24, 48, 96, 168, 336, 731, 4383, 8766, 87660]
 # Rate limit for message sending
@@ -87,12 +84,12 @@ oauth_key: "OAUTH_KEY"
 id_application: ""
 # Imagery to return in capabilities as blacklisted
 imagery_blacklist:
-# Current Google imagery URLs have google or googleapis in the domain
-- ".*\\.google(apis)?\\..*/.*"
-# Blacklist VWorld
-- "http://xdworld\\.vworld\\.kr:8080/.*"
-# Blacklist here
-- ".*\\.here\\.com[/:].*"
+  # Current Google imagery URLs have google or googleapis in the domain
+  - ".*\\.google(apis)?\\..*/.*"
+  # Blacklist VWorld
+  - "http://xdworld\\.vworld\\.kr:8080/.*"
+  # Blacklist here
+  - ".*\\.here\\.com[/:].*"
 # URL of Overpass instance to use for feature queries
 overpass_url: "https://overpass-api.de/api/interpreter"
 overpass_credentials: false
@@ -116,6 +113,8 @@ fossgis_valhalla_url: "https://valhalla1.openstreetmap.de/route"
 #thunderforest_key: ""
 # Key for generating TOTP tokens
 #totp_key: ""
+# Mastodon url for verification
+mastodon_url: "https://mapstodon.space/@ohm"
 # Enforce Content-Security-Policy
 csp_enforce: false
 # URL for reporting Content-Security-Policy violations
@@ -140,9 +139,14 @@ smtp_tls_verify_mode: "none"
 smtp_authentication: null
 smtp_user_name: null
 smtp_password: null
-
 # Rate limit for changeset comments
 min_changeset_comments_per_hour: 1
 initial_changeset_comments_per_hour: 6
 max_changeset_comments_per_hour: 60
 moderator_changeset_comments_per_hour: 36000
+embed_server_url: "https://embed.openhistoricalmap.org/"
+# Private key for signing id_tokens
+doorkeeper_signing_key: |
+  -----BEGIN PRIVATE KEY-----
+  PRIVATE_KEY
+  -----END PRIVATE KEY-----
