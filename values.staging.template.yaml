@@ -693,7 +693,7 @@ osm-seed:
         label_value: web
       cronjob:
         enabled: true
-        schedule: "0 0 * * 0" # every 7 days
+        schedule: "0 2 * * *" # testing every day 2 am UTC
         nodeSelector:
           enabled: true
           label_key: nodegroup_type

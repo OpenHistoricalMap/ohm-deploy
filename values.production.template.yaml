@@ -637,7 +637,7 @@ osm-seed:
       TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
       DOWNLOAD_DB: 'languages wiki'
       CREATE_DB: 'db projects chronology'
-      ENVIRONMENT: staging
+      ENVIRONMENT: production
       AWS_S3_BUCKET: taginfo
       INTERVAL_DOWNLOAD_DATA: 7d
     resources:
@@ -653,7 +653,7 @@ osm-seed:
       label_key: nodegroup_type
       label_value: web
     cronjob:
-      enabled: true
+      enabled: false
       schedule: "0 3 */7 * *" # 3:00 AM every 7 days
       nodeSelector:
         enabled: true
