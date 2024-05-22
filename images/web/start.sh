@@ -57,6 +57,9 @@ chmod 400 /var/www/private.pem
 export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
 sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.local.yml
 
+# UPDATE MAP-STYLES
+python3 update_map_styles.py
+
 #### CHECK IF DB IS ALREADY UP AND START THE APP
 flag=true
 while "$flag" = true; do

@@ -114,6 +114,12 @@ RUN apache2ctl configtest
 # Set Permissions for www-data
 RUN chown -R www-data: $workdir
 
+# Clone Map-styles
+ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=c134f744ea32d346b833db6ff767785e07c1e807
+RUN git clone https://github.com/OpenHistoricalMap/map-styles.git $workdir/map-styles
+RUN cd $workdir/map-styles && git checkout $OPENHISTORICALMAP_MAP_STYLES_GITSHA
+COPY update_styles.py $workdir/
+
 # Add settings
 ADD config/settings.local.yml $workdir/config/
 
