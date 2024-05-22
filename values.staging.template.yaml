@@ -73,6 +73,7 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
+        LOG_STATEMENT: "mod"
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
@@ -121,17 +122,19 @@ osm-seed:
         NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
         ORGANIZATION_NAME: OpenHistoricalMap
         WEBSITE_STATUS: "online"
+        # API_TIMEOUT: 600
+        # WEB_TIMEOUT: 600
       resources:
-        enabled: false
+        enabled: true
         requests:
           memory: "2Gi"
           cpu: "1"
         limits:
           memory: "2Gi"
-          cpu: "2"
+          cpu: "1"
       autoscaling:
         enabled: false
-        minReplicas: 2
+        minReplicas: 1
         maxReplicas: 10
         cpuUtilization: 80
       sharedMemorySize: 16Mi
@@ -364,12 +367,12 @@ osm-seed:
         POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
         POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-03294367f2687c585
+        AWS_ElasticBlockStore_volumeID : vol-09cdaf10ef2035fe9
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
@@ -407,7 +410,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-086f2e43e4fa71f00
+        AWS_ElasticBlockStore_volumeID: vol-006192ca71312b375
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -690,7 +693,7 @@ osm-seed:
         label_value: web
       cronjob:
         enabled: true
-        schedule: "0 0 * * 0" # every 7 days
+        schedule: "0 2 * * *" # testing every day 2 am UTC
         nodeSelector:
           enabled: true
           label_key: nodegroup_type

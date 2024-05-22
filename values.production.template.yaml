@@ -63,6 +63,7 @@ osm-seed:
       POSTGRES_DB: {{PRODUCTION_DB}}
       POSTGRES_USER: {{PRODUCTION_DB_USER}}
       POSTGRES_PASSWORD: {{PRODUCTION_DB_PASSWORD}}
+      LOG_STATEMENT: "none"
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -338,7 +339,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID : vol-068a10ccb57607e31
+      AWS_ElasticBlockStore_volumeID : vol-030fa3fbf192bc1d1
       AWS_ElasticBlockStore_size: 400Gi
     resources:
       enabled: true
@@ -360,9 +361,9 @@ osm-seed:
       label_value: web
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240416_0002.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240522_0002.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1368000"
+      SEQUENCE_NUMBER: "1418000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
     persistenceDisk:
@@ -370,7 +371,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-06cd59aa1e7cc219b
+      AWS_ElasticBlockStore_volumeID: vol-06783593ccc8ea16d
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: false
@@ -636,7 +637,7 @@ osm-seed:
       TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
       DOWNLOAD_DB: 'languages wiki'
       CREATE_DB: 'db projects chronology'
-      ENVIRONMENT: staging
+      ENVIRONMENT: production
       AWS_S3_BUCKET: taginfo
       INTERVAL_DOWNLOAD_DATA: 7d
     resources:
@@ -653,11 +654,11 @@ osm-seed:
       label_value: web
     cronjob:
       enabled: true
-      schedule: "0 3 */7 * *" # 3:00 AM every 7 days
+      schedule: "0 2 */3 * *"
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job 
+        label_value: job_xlarge 
 # ====================================================================================================
 # Variables for osm-simple-metrics
 # ====================================================================================================

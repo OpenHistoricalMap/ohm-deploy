@@ -41,7 +41,9 @@ max_connections = 50
 	[['providers/water_areas_ne.toml']]
 
 	###### Admin boundaries providers
-	[['providers/admin_boundaries.toml']]
+	[['providers/admin_boundaries_areas.toml']]
+	[['providers/admin_boundaries_lines.toml']]
+	[['providers/admin_boundaries_centroids.toml']]
 
 	###### Land use areas
 	[['providers/landuse_areas.toml']]
@@ -92,257 +94,25 @@ max_connections = 50
 name = "osm"
 attribution = "OpenHistoricalMap"
 center = [-74.275329586789, -12.153492567373, 8.0]
-	# Land
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_0-2"
-	min_zoom = 0
-	max_zoom = 2
+	###### Land
+	[['providers/land.zoom.toml']]
 
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_3-5"
-	min_zoom = 3
-	max_zoom = 5
+	###### Admin boundaries display zooms
+	[['providers/admin_boundaries_areas.zoom.toml']]
+	[['providers/admin_boundaries_lines.zoom.toml']]
+	[['providers/admin_boundaries_centroids.zoom.toml']]
 
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_6-7"
-	min_zoom = 6
-	max_zoom = 7
+	###### Land Use
+	[['providers/landuse_areas.zoom.toml']]
+	[['providers/landuse_lines.zoom.toml']]
+	[['providers/landuse_points.zoom.toml']]
 
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_8-9"
-	min_zoom = 8
-	max_zoom = 9
-
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_10-12"
-	min_zoom = 10
-	max_zoom = 12
-
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_13-15"
-	min_zoom = 13
-	max_zoom = 15
-
-	[[maps.layers]]
-	name = "land"
-	provider_layer = "osm.land_16-20"
-	min_zoom = 16
-	max_zoom = 20
-
-	# Admin boundaries
-	[[maps.layers]]
-	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_0-2"
-	min_zoom = 0
-	max_zoom = 2
-
-	[[maps.layers]]
-	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_3-5"
-	min_zoom = 3
-	max_zoom = 5
-
-	[[maps.layers]]
-	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_6-7"
-	min_zoom = 6
-	max_zoom = 7
-
-	[[maps.layers]]
-	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_8-9"
-	min_zoom = 8
-	max_zoom = 9
-
-	[[maps.layers]]
-	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_10-12"
-	min_zoom = 10
-	max_zoom = 12
-
-	[[maps.layers]]
-	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_13-15"
-	min_zoom = 13
-	max_zoom = 15
-
-	[[maps.layers]]
-	name = "land_ohm"
-	provider_layer = "osm.admin_boundaries_16-20"
-	min_zoom = 16
-	max_zoom = 20
-
-	# [[maps.layers]]
-	# name = "admin_lines"
-	# provider_layer = "osm.admin_boundaries_8-12"
-	# min_zoom = 8
-	# max_zoom = 12
-
-	# [[maps.layers]]
-	# name = "admin_lines"
-	# provider_layer = "osm.admin_boundaries_13-20"
-	# min_zoom = 13
-	# max_zoom = 20
-
-	# [[maps.layers]]
-	# name = "state_label_points"
-	# provider_layer = "ne.ne_10m_admin_1_label_points"
-	# min_zoom = 3
-	# max_zoom = 20
-
-	# Land Use
-	[[maps.layers]]
-	name = "landuse_areas"
-	provider_layer = "osm.landuse_areas_gen0_3-5"
-	min_zoom = 3
-	max_zoom = 5
-
-	[[maps.layers]]
-	name = "landuse_areas"
-	provider_layer = "osm.landuse_areas_gen0_6-9"
-	min_zoom = 6
-	max_zoom = 9
-
-	[[maps.layers]]
-	name = "landuse_areas"
-	provider_layer = "osm.landuse_areas_gen1_10-12"
-	min_zoom = 10
-	max_zoom = 12
-
-	[[maps.layers]]
-	name = "landuse_areas"
-	provider_layer = "osm.landuse_areas_13-20"
-	min_zoom = 13
-	max_zoom = 20
-
-	[[maps.layers]]
-	name = "landuse_lines"
-	provider_layer = "osm.landuse_lines"
-	min_zoom = 14
-	max_zoom = 20
-
-	[[maps.layers]]
-	name = "landuse_points"
-	provider_layer = "osm.landuse_points"
-	min_zoom = 6
-	max_zoom = 20
-
-	# Water Areas
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.water_areas_gen0_0-2"
-	min_zoom = 0
-	max_zoom = 2
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.water_areas_gen0_3-5"
-	min_zoom = 3
-	max_zoom = 5
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.water_areas_gen0_6-7"
-	min_zoom = 6
-	max_zoom = 7
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.water_areas_gen0_8-9"
-	min_zoom = 8
-	max_zoom = 9
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.water_areas_gen1_10-12"
-	min_zoom = 10
-	max_zoom = 12
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.water_areas_13-15"
-	min_zoom = 13
-	max_zoom = 15
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "osm.water_areas_16-20"
-	min_zoom = 16
-	max_zoom = 20
-
-	# Water Lines
-	[[maps.layers]]
-	name = "water_lines"
-	provider_layer = "osm.water_lines_gen0_6-6"
-	min_zoom = 6
-	max_zoom = 6
-
-	[[maps.layers]]
-	name = "water_lines"
-	provider_layer = "osm.water_lines_gen0_7-7"
-	min_zoom = 7
-	max_zoom = 7
-
-	[[maps.layers]]
-	name = "water_lines"
-	provider_layer = "osm.water_lines_gen0_8-8"
-	min_zoom = 8
-	max_zoom = 8
-
-	[[maps.layers]]
-	name = "water_lines"
-	provider_layer = "osm.water_lines_gen0_9-9"
-	min_zoom = 9
-	max_zoom = 9
-
-	[[maps.layers]]
-	name = "water_lines"
-	provider_layer = "osm.water_lines_gen1_10-11"
-	min_zoom = 10
-	max_zoom = 11
-
-	[[maps.layers]]
-	name = "water_lines"
-	provider_layer = "osm.water_lines"
-	min_zoom = 12
-	max_zoom = 20
+	###### Water areas/lines
+	[['providers/water_areas.zoom.toml']]
+	[['providers/water_lines.zoom.toml']]
 
 	# Transport Lines (Roads, Rail, Aviation)
-	[[maps.layers]]
-	name = "transport_lines"
-	provider_layer = "osm.transport_lines_gen0"
-	min_zoom = 3
-	max_zoom = 5
-
-	[[maps.layers]]
-	name = "transport_lines"
-	provider_layer = "osm.transport_lines_gen1"
-	min_zoom = 6
-	max_zoom = 10
-
-	[[maps.layers]]
-	name = "transport_lines"
-	provider_layer = "osm.transport_lines_11-12"
-	min_zoom = 11
-	max_zoom = 12
-
-	[[maps.layers]]
-	name = "transport_lines"
-	provider_layer = "osm.transport_lines_13"
-	min_zoom = 13
-	max_zoom = 13
-
-	[[maps.layers]]
-	name = "transport_lines"
-	provider_layer = "osm.transport_lines_14-20"
-	min_zoom = 14
-	max_zoom = 20
+	[['providers/transport_lines.zoom.toml']]
 
 	# Transport Areas
 	[[maps.layers]]
