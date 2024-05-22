@@ -1,4 +1,4 @@
-FROM postgis/postgis:12-3.1
+FROM postgis/postgis:14-3.4
 RUN apt-get update
 RUN apt-get install -y git ca-certificates
 
