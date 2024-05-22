@@ -23,11 +23,6 @@ type = "prometheus"
 [[providers]]
 name = "osm"
 type = "mvt_postgis"
-host = "${POSTGRES_HOST}"
-port = "${POSTGRES_PORT}"
-database = "${POSTGRES_DB}"
-user = "${POSTGRES_USER}"
-password = "${POSTGRES_PASSWORD}"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 # srid = 3857
 max_connections = 200
@@ -77,15 +72,10 @@ max_connections = 200
 	###### transport_associated_streets
 	[['providers/transport_associated_streets.toml']]
 
-# Natural Earth (me)
+# Natural Earth (ne)
 [[providers]]
 name = "ne"
 type = "mvt_postgis"
-host = "${POSTGRES_HOST}"
-port = "${POSTGRES_PORT}"
-database = "${POSTGRES_DB}"
-user = "${POSTGRES_USER}"
-password = "${POSTGRES_PASSWORD}"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 
 # srid = 3857
