@@ -41,7 +41,7 @@ max_connections = 50
 	[['providers/water_areas_ne.toml']]
 
 	###### Admin boundaries providers
-	[['providers/admin_boundaries_areas.toml']]
+	# [['providers/admin_boundaries_areas.toml']]
 	[['providers/admin_boundaries_lines.toml']]
 	[['providers/admin_boundaries_centroids.toml']]
 
@@ -98,7 +98,7 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	[['providers/land.zoom.toml']]
 
 	###### Admin boundaries display zooms
-	[['providers/admin_boundaries_areas.zoom.toml']]
+	# [['providers/admin_boundaries_areas.zoom.toml']]
 	[['providers/admin_boundaries_lines.zoom.toml']]
 	[['providers/admin_boundaries_centroids.zoom.toml']]
 
