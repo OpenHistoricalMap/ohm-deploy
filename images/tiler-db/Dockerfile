@@ -4,7 +4,7 @@ RUN apt-get install -y git ca-certificates
 
 COPY ./scripts/docker-entrypoint.sh /usr/local/bin/
 RUN mkdir -p /docker-entrypoint-initdb.d
-COPY ./scripts/update_db.sh /docker-entrypoint-initdb.d
+# COPY ./scripts/update_db.sh /docker-entrypoint-initdb.d
 COPY ./scripts/update_postgresql.sh /docker-entrypoint-initdb.d
 
 RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git /usr/local/datefunctions
