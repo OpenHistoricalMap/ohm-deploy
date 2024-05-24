@@ -18,6 +18,6 @@ COPY start.sh /usr/local/bin/
 COPY config/postgresql.*.conf /etc/postgresql/
 RUN chown postgres:postgres /etc/postgresql/postgresql.*.conf
 RUN chmod 644 /etc/postgresql/postgresql.*.conf
-# RUN chown -R postgres:postgres /var/lib/postgresql 
+# RUN chown -R postgres:postgres /var/lib/postgresql
 
 CMD ["/usr/local/bin/start.sh"]
