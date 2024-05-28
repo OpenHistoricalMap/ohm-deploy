@@ -538,6 +538,9 @@ osm-seed:
         POSTGRES_USER: postgres
       persistenceDisk:
         enabled: true
+        accessMode: ReadWriteOnce
+        mountPath: /var/lib/postgresql/data
+        subPath: postgresql-d
         AWS_ElasticBlockStore_volumeID: vol-0d8ed1ada88248e40
         AWS_ElasticBlockStore_size: 100Gi
       resources:
