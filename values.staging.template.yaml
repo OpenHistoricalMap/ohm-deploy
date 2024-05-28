@@ -556,7 +556,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
