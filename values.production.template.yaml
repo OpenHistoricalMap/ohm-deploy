@@ -361,9 +361,9 @@ osm-seed:
       label_value: web
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240527_0003.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240528_0003.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1419000"
+      SEQUENCE_NUMBER: "1420000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
     persistenceDisk:
@@ -371,7 +371,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0ce35f98c721fd903
+      AWS_ElasticBlockStore_volumeID: vol-08ad19c779b1d5850
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: false
