@@ -527,7 +527,7 @@ osm-seed:
       enabled: true
       image:
         name: "postgres"
-        tag: "11"
+        tag: "12"
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -537,7 +537,7 @@ osm-seed:
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
         POSTGRES_USER: postgres
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
