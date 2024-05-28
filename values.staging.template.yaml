@@ -520,7 +520,30 @@ osm-seed:
           memory: "2Gi"
           cpu: "2"
   
-  
+    # ====================================================================================================
+    # Variables for Tasking Manager DB
+    # ====================================================================================================
+    tmDb:
+    enabled: true
+    image:
+      name: "postgres"
+      tag: "11"
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web
+    env:
+      POSTGRES_DB: tm
+      POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
+      POSTGRES_USER: postgres
+    resources:
+      enabled: false
+      requests:
+        memory: "1Gi"
+        cpu: "2"
+      limits:
+        memory: "2Gi"
+        cpu: "2"
     # ====================================================================================================
     # Variables for Tasking Manager API
     # ====================================================================================================
