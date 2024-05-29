@@ -290,7 +290,7 @@ osm-seed:
       cronjobs:
       - name: web-db
         enabled: false
-        schedule: '* * * * *'
+        schedule: '0 1 * * *'
         env:
           # backup/restore
           DB_ACTION: backup
@@ -315,9 +315,32 @@ osm-seed:
           enabled: true
           label_key: nodegroup_type
           label_value: job
+      - name: tm-db
+        enabled: true
+        schedule: '0 1 * * *'
+        env:
+          # backup/restore
+          DB_ACTION: backup
+          # Naming backup files
+          SET_DATE_AT_NAME: true
+          BACKUP_CLOUD_FOLDER: database/tm-db
+          BACKUP_CLOUD_FILE: ohm-tm-db
+          AWS_S3_BUCKET: osmseed-staging
+        resources:
+          enabled: false
+          requests:
+            memory: '300Mi'
+            cpu: '0.5'
+          limits:
+            memory: '400Mi'
+            cpu: '0.6'
+        nodeSelector:
+          enabled: true
+          label_key: nodegroup_type
+          label_value: job
       - name: osmcha-db
         enabled: false
-        schedule: '0 0 * * *'
+        schedule: '0 1 * * *'
         env:
           # backup/restore
           DB_ACTION: backup
