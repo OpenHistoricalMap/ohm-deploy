@@ -412,8 +412,8 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_SERVER_EBS}}
-      AWS_ElasticBlockStore_size: 100Gi
+      # AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_SERVER_EBS}}
+      # AWS_ElasticBlockStore_size: 100Gi
     resources:
       enabled: true
       requests:
