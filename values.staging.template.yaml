@@ -38,7 +38,7 @@ osm-seed:
     # as the SSL certificate for your services. Else, you will need to configure
     # SSL separately. 
     serviceType: ClusterIP
-  
+    createClusterIssuer: true
     # Domain that is pointed to the clusterIP
     # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
     # Then, the cluster configuration will setup services at their respective subdomains:
@@ -159,7 +159,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -290,7 +290,7 @@ osm-seed:
       cronjobs:
       - name: web-db
         enabled: false
-        schedule: '* * * * *'
+        schedule: '0 1 * * *'
         env:
           # backup/restore
           DB_ACTION: backup
@@ -315,9 +315,32 @@ osm-seed:
           enabled: true
           label_key: nodegroup_type
           label_value: job
+      - name: tm-db
+        enabled: true
+        schedule: '0 1 * * *'
+        env:
+          # backup/restore
+          DB_ACTION: backup
+          # Naming backup files
+          SET_DATE_AT_NAME: true
+          BACKUP_CLOUD_FOLDER: database/tm-db
+          BACKUP_CLOUD_FILE: ohm-tm-db
+          AWS_S3_BUCKET: osmseed-staging
+        resources:
+          enabled: false
+          requests:
+            memory: '300Mi'
+            cpu: '0.5'
+          limits:
+            memory: '400Mi'
+            cpu: '0.6'
+        nodeSelector:
+          enabled: true
+          label_key: nodegroup_type
+          label_value: job
       - name: osmcha-db
         enabled: false
-        schedule: '0 0 * * *'
+        schedule: '0 1 * * *'
         env:
           # backup/restore
           DB_ACTION: backup
@@ -520,7 +543,37 @@ osm-seed:
           memory: "2Gi"
           cpu: "2"
   
-  
+    # ====================================================================================================
+    # Variables for Tasking Manager DB
+    # ====================================================================================================
+    tmDb:
+      enabled: true
+      image:
+        name: "postgis/postgis"
+        tag: "11-2.5"
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web
+      env:
+        POSTGRES_DB: tm
+        POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
+        POSTGRES_USER: postgres
+      persistenceDisk:
+        enabled: true
+        accessMode: ReadWriteOnce
+        mountPath: /var/lib/postgresql/data
+        subPath: postgresql-d
+        AWS_ElasticBlockStore_volumeID: vol-05a364a565aea360c
+        AWS_ElasticBlockStore_size: 50Gi
+      resources:
+        enabled: false
+        requests:
+          memory: "1Gi"
+          cpu: "2"
+        limits:
+          memory: "2Gi"
+          cpu: "2"
     # ====================================================================================================
     # Variables for Tasking Manager API
     # ====================================================================================================
