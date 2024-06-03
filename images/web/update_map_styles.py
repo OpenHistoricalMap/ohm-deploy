@@ -6,9 +6,9 @@ SERVER_URL = os.getenv("SERVER_URL", "www.openhistoricalmap.org")
 environment = "staging" if "staging" in SERVER_URL else "production"
 files = {
     "ohmVectorStyles.Original = ": {
-        "map-styles": "map-styles/ohm_timeslider_tegola/tegola-ohm-production.json",
+        "map-styles": "map-styles/main/main.json",
         "ohm-website": "app/assets/javascripts/ohm.style.original.js",
-        "spritesheet_dir": "map-styles/ohm_timeslider_tegola",
+        "spritesheet_dir": "map-styles/main",
     },
     "ohmVectorStyles.Railway = ": {
         "map-styles": "map-styles/rail/rail.json",
