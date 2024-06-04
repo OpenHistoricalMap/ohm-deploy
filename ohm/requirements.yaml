@@ -1,4 +1,4 @@
 dependencies:
   - name: osm-seed
-    version: '0.1.0-n799.h14404dd'
+    version: '0.1.0-n790.h426098b'
     repository: https://devseed.com/osm-seed-chart/
