@@ -122,6 +122,11 @@
                     "name": "admin_level",
                     "key": "admin_level"
                 },
+                {
+                    "type": "string",
+                    "name": "maritime",
+                    "key": "maritime"
+                },
 		        {
                     "type": "hstore_tags",
                     "name": "tags",
