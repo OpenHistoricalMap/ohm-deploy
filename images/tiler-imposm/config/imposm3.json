@@ -95,6 +95,51 @@
                 ]
             }
         },
+        "admin_lines": {
+            "fields": [
+                {
+                    "type": "id",
+                    "name": "osm_id",
+                    "key": null
+                },
+                {
+                    "type": "geometry",
+                    "name": "geometry",
+                    "key": null
+                },
+                {
+                    "type": "string",
+                    "name": "name",
+                    "key": "name"
+                },
+                {
+                    "type": "mapping_value",
+                    "name": "type",
+                    "key": null
+                },
+                {
+                    "type": "integer",
+                    "name": "admin_level",
+                    "key": "admin_level"
+                },
+		        {
+                    "type": "hstore_tags",
+                    "name": "tags",
+                    "key": null
+                },
+                {
+                    "type": "boolint",
+                    "name": "has_label",
+                    "key": false
+                }
+            ],
+            "type": "linestring",
+            "mapping": {
+                "boundary": [
+                    "administrative"
+                ]
+            }
+        },
         "place_points": {
             "fields": [
                 {
