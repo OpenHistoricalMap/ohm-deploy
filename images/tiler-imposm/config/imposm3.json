@@ -1178,7 +1178,104 @@
               "__any__": [
                 "__any__"
               ]
+            },
+            "filters": {
+              "exclude_tags": [
+                  ["boundary", "administrative"]
+              ]
             }
+        },
+        "relations_boundaries": {
+          "type": "relation",
+          "fields": [
+            {
+              "type": "id",
+              "name": "osm_id",
+              "key": null
+            },
+            {
+              "type": "string",
+              "name": "name",
+              "key": "name"
+            },
+            {
+              "type": "mapping_value",
+              "name": "type",
+              "key": null
+            },
+            {
+              "type": "integer",
+              "name": "admin_level",
+              "key": "admin_level"
+            },
+            {
+              "type": "hstore_tags",
+              "name": "tags",
+              "key": null
+            },
+            {
+              "type": "boolint",
+              "name": "has_label",
+              "key": false
+            }
+          ],
+          "mapping": {
+            "boundary": ["administrative"]
+          }
+        },
+        "relation_members_boundaries": {
+          "type": "relation_member",
+          "fields": [
+            {
+              "name": "osm_id",
+              "type": "id"
+            },
+            {
+              "name": "member",
+              "type": "member_id"
+            },
+            {
+              "name": "index",
+              "type": "member_index"
+            },
+            {
+              "name": "role",
+              "type": "member_role"
+            },
+            {
+              "name": "type",
+              "type": "member_type"
+            },
+            {
+              "name": "geometry",
+              "type": "geometry"
+            },
+            {
+              "name": "relname",
+              "key": "name",
+              "type": "string"
+            },
+            {
+              "type": "string",
+              "name": "maritime",
+              "key": "maritime",
+              "from_member": true
+            },
+            {
+              "type": "hstore_tags",
+              "name": "tags",
+              "from_member": true
+            },
+            {
+              "name": "name",
+              "key": "name",
+              "type": "string",
+              "from_member": true
+            }
+          ],
+          "mapping": {
+            "boundary": ["administrative"]
+          }
         }
     }
 }
