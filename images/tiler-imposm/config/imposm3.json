@@ -89,54 +89,6 @@
         "boundary": ["administrative"]
       }
     },
-    "admin_lines": {
-      "fields": [
-        {
-          "type": "id",
-          "name": "osm_id",
-          "key": null
-        },
-        {
-          "type": "geometry",
-          "name": "geometry",
-          "key": null
-        },
-        {
-          "type": "string",
-          "name": "name",
-          "key": "name"
-        },
-        {
-          "type": "mapping_value",
-          "name": "type",
-          "key": null
-        },
-        {
-          "type": "integer",
-          "name": "admin_level",
-          "key": "admin_level"
-        },
-        {
-          "type": "string",
-          "name": "maritime",
-          "key": "maritime"
-        },
-        {
-          "type": "hstore_tags",
-          "name": "tags",
-          "key": null
-        },
-        {
-          "type": "boolint",
-          "name": "has_label",
-          "key": false
-        }
-      ],
-      "type": "linestring",
-      "mapping": {
-        "boundary": ["administrative"]
-      }
-    },
     "place_points": {
       "fields": [
         {
@@ -1110,32 +1062,47 @@
       "fields": [
         {
           "type": "id",
-          "name": "re_id",
+          "name": "osm_id",
           "key": null
         },
         {
           "type": "string",
-          "name": "re_name",
+          "name": "name",
           "key": "name"
         },
         {
           "type": "mapping_value",
-          "name": "re_type",
+          "name": "type",
           "key": null
         },
         {
           "type": "integer",
-          "name": "re_admin_level",
+          "name": "admin_level",
           "key": "admin_level"
         },
         {
+          "type": "integer",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "integer",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
           "type": "hstore_tags",
-          "name": "re_tags",
+          "name": "tags",
           "key": null
         },
         {
           "name": "geometry",
           "type": "geometry"
+        },
+
+        {
+          "name": "member",
+          "type": "member_id"
         },
         {
           "name": "me_maritime",

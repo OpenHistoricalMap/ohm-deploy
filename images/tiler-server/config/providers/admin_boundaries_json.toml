@@ -1,0 +1,18 @@
+[[providers.layers]]
+name = "admin_boundaries_json"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    id, 
+    osm_id, 
+    name, 
+    maritime, 
+    cast(relations as text) as relations
+FROM 
+    osm_relations_boundaries_json 
+WHERE 
+    geometry && !BBOX!
+"""

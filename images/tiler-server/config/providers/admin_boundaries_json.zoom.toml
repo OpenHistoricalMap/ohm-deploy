@@ -1,0 +1,5 @@
+[[maps.layers]]
+name = "admin_boundaries_json"
+provider_layer = "osm.admin_boundaries_json"
+min_zoom = 0
+max_zoom = 20
