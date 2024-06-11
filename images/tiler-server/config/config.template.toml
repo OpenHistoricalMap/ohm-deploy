@@ -43,6 +43,7 @@ max_connections = 200
 
 	###### Land use areas
 	[['providers/landuse_areas.toml']]
+	[['providers/landuse_areas.centroids.toml']]
 
 	###### Land use lines and points
 	[['providers/landuse_lines.toml']]
@@ -100,6 +101,8 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 
 	###### Land Use
 	[['providers/landuse_areas.zoom.toml']]
+	[['providers/landuse_areas.centroids.zoom.toml']]
+	
 	[['providers/landuse_lines.zoom.toml']]
 	[['providers/landuse_points.zoom.toml']]
 

@@ -21,6 +21,8 @@ FROM
 WHERE 
     admin_level IN (1,2) 
     AND has_label = 0 
+    AND name IS NOT NULL 
+    AND name <> '' 
     AND geometry && !BBOX!
 """
 
@@ -47,6 +49,8 @@ FROM
 WHERE 
     admin_level IN (1,2,3,4)
     AND has_label = 0 
+    AND name IS NOT NULL 
+    AND name <> '' 
     AND geometry && !BBOX!
 """
 
@@ -73,6 +77,8 @@ FROM
 WHERE 
     admin_level IN (1,2,3,4,5,6)
     AND has_label = 0 
+    AND name IS NOT NULL 
+    AND name <> '' 
     AND geometry && !BBOX!
 """
 
@@ -99,6 +105,8 @@ FROM
 WHERE 
     admin_level IN (1,2,3,4,5,6,7,8,9) 
     AND has_label = 0 
+    AND name IS NOT NULL 
+    AND name <> '' 
     AND geometry && !BBOX!
 """
 
@@ -125,5 +133,7 @@ FROM
 WHERE 
     admin_level IN (1,2,3,4,5,6,7,8,9,10) 
     AND has_label = 0 
+    AND name IS NOT NULL 
+    AND name <> '' 
     AND geometry && !BBOX!
 """
