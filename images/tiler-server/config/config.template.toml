@@ -31,6 +31,8 @@ max_connections = 200
 
 	###### Water areas and lines
 	[['providers/water_areas.toml']]
+	[['providers/water_areas.centroids.toml']]
+
 	[['providers/water_lines.toml']]
 
 	###### Water areas NE
@@ -108,6 +110,8 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 
 	###### Water areas/lines
 	[['providers/water_areas.zoom.toml']]
+	[['providers/water_areas.centroids.zoom.toml']]
+
 	[['providers/water_lines.zoom.toml']]
 
 	# Transport Lines (Roads, Rail, Aviation)

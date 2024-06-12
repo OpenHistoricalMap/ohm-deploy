@@ -1,4 +1,3 @@
-# Layer 50,000,000
 [[providers.layers]]
 name = "landuse_areas_gen0_centroids_3-5"
 geometry_fieldname = "geometry"
