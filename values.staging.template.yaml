@@ -669,7 +669,7 @@ osm-seed:
         localVolumeHostPath: /mnt/nominatim-db-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0d46fc3b0db9293b0
+        AWS_ElasticBlockStore_volumeID: vol-0a530cc12fd745545
         AWS_ElasticBlockStore_size: 100Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
@@ -677,7 +677,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: job_xlarge
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
@@ -697,7 +697,7 @@ osm-seed:
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        AWS_ElasticBlockStore_volumeID: vol-0e5da5fd0a3b39601
+        AWS_ElasticBlockStore_volumeID: vol-000676289c153e301
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -710,7 +710,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: job_xlarge
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
