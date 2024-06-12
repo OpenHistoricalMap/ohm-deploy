@@ -661,7 +661,7 @@ osm-seed:
           memory: '2Gi'
           cpu: '2'
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/14/main
         subPath: nominatim-pgdata
@@ -669,15 +669,15 @@ osm-seed:
         localVolumeHostPath: /mnt/nominatim-db-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0a9f1da7c7f6d587e
-        AWS_ElasticBlockStore_size: 30Gi
+        AWS_ElasticBlockStore_volumeID: vol-0d46fc3b0db9293b0
+        AWS_ElasticBlockStore_size: 100Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_xlarge
+        label_value: web_large
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
@@ -695,9 +695,9 @@ osm-seed:
         OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
         OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1258000'
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
-        AWS_ElasticBlockStore_volumeID: vol-0da7d726731c27708
+        AWS_ElasticBlockStore_volumeID: vol-0e5da5fd0a3b39601
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
