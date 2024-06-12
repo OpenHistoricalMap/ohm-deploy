@@ -71,7 +71,8 @@ max_connections = 200
 
 	###### Buildings
 	[['providers/buildings.toml']]
-
+	[['providers/buildings.centroids.toml']]
+	
 	###### transport_associated_streets
 	[['providers/transport_associated_streets.toml']]
 
@@ -193,6 +194,12 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	[[maps.layers]]
 	name = "buildings"
 	provider_layer = "osm.buildings"
+	min_zoom = 14
+	max_zoom = 20
+
+	[[maps.layers]]
+	name = "buildings_centroids"
+	provider_layer = "osm.buildings_centroids"
 	min_zoom = 14
 	max_zoom = 20
 
