@@ -631,13 +631,13 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: false
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: nominatim-api.staging.openhistoricalmap.org
       replicaCount: 1
       env:
-        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240405_0003.osm.pbf
+        PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
@@ -661,7 +661,7 @@ osm-seed:
           memory: '2Gi'
           cpu: '2'
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/14/main
         subPath: nominatim-pgdata
@@ -682,20 +682,20 @@ osm-seed:
   # Variables for overpass-api
   # ====================================================================================================
     overpassApi:
-      enabled: false
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: overpass-api.staging.openhistoricalmap.org
       env:
         OVERPASS_META: 'attic'
         OVERPASS_MODE: 'init'
-        OVERPASS_PLANET_URL: 'https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240102_0000.osm.pbf'
-        OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
+        OVERPASS_PLANET_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
+        OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
         OVERPASS_RULES_LOAD: '10'
         OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
         OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1258000'
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         AWS_ElasticBlockStore_volumeID: vol-0da7d726731c27708
         AWS_ElasticBlockStore_size: 100Gi
