@@ -90,5 +90,5 @@ SELECT
 FROM 
     osm_other_areas 
 WHERE 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
