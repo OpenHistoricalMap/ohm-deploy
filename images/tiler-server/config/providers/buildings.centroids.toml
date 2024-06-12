@@ -20,6 +20,8 @@ FROM
     osm_buildings 
 WHERE 
     ST_Area(geometry) > 1200
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
@@ -44,6 +46,8 @@ FROM
     osm_buildings 
 WHERE 
     ST_Area(geometry) > 1000
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
@@ -68,6 +72,8 @@ FROM
     osm_buildings 
 WHERE 
     ST_Area(geometry) > 800
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
@@ -92,6 +98,8 @@ FROM
     osm_buildings 
 WHERE 
     ST_Area(geometry) > 600
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
@@ -117,6 +125,8 @@ FROM
     osm_buildings 
 WHERE 
     ST_Area(geometry) > 500
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
@@ -141,6 +151,8 @@ FROM
     osm_buildings 
 WHERE 
     ST_Area(geometry) > 400
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
@@ -164,5 +176,7 @@ SELECT
 FROM 
     osm_buildings 
 WHERE 
-    geometry && !BBOX!
+    name IS NOT NULL
+    AND name <> ''
+    AND geometry && !BBOX!
 """
