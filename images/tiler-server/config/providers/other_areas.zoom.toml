@@ -22,4 +22,3 @@ name = "other_areas"
 provider_layer = "osm.other_areas_15-20"
 min_zoom = 15
 max_zoom = 20
-

@@ -58,6 +58,8 @@ max_connections = 200
 
 	###### Amenities areas and points
 	[['providers/amenity_areas.toml']]
+	[['providers/amenity_areas.centroids.toml']]
+
 	[['providers/amenity_points.toml']]
 
 	###### Place points and areas
@@ -142,6 +144,9 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	provider_layer = "osm.amenity_areas"
 	min_zoom = 14
 	max_zoom = 20
+
+	[['providers/amenity_areas.centroids.zoom.toml']]
+
 
 	# Amenity Points
 	[[maps.layers]]
