@@ -68,6 +68,7 @@ max_connections = 200
 	[['providers/other_points.toml']]
 	[['providers/other_lines.toml']]
 	[['providers/other_areas.toml']]
+	[['providers/other_areas.centroids.toml']]
 
 	###### Buildings
 	[['providers/buildings.toml']]
@@ -178,17 +179,8 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	max_zoom = 20
 
 	# Other Areas
-	[[maps.layers]]
-	name = "other_areas"
-	provider_layer = "osm.other_areas_filter"
-	min_zoom = 6
-	max_zoom = 8
-
-	[[maps.layers]]
-	name = "other_areas"
-	provider_layer = "osm.other_areas"
-	min_zoom = 9
-	max_zoom = 20
+	[['providers/other_areas.zoom.toml']]
+	[['providers/other_areas.centroids.zoom.toml']]
 
 	# Buildings
 	[[maps.layers]]

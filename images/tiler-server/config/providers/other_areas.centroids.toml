@@ -1,11 +1,12 @@
+# Layer configuration for other areas with a filter
 [[providers.layers]]
-name = "other_areas_6-8"
+name = "other_areas_centroids_6-8"
 geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
+geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
@@ -19,17 +20,20 @@ FROM
     osm_other_areas 
 WHERE 
     area > 1000000
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
+# Layer configuration for other areas
 [[providers.layers]]
-name = "other_areas_9-11"
+name = "other_areas_centroids_9-11"
 geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
+geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
@@ -43,17 +47,21 @@ FROM
     osm_other_areas 
 WHERE 
     area > 100000
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
+
+# Layer configuration for other areas
 [[providers.layers]]
-name = "other_areas_12-14"
+name = "other_areas_centroids_12-14"
 geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
+geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,  
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
@@ -67,17 +75,21 @@ FROM
     osm_other_areas 
 WHERE 
     area > 10000
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
 
+
+# Layer configuration for other areas
 [[providers.layers]]
-name = "other_areas_15-20"
+name = "other_areas_centroids_15-20"
 geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
+geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
@@ -90,5 +102,7 @@ SELECT
 FROM 
     osm_other_areas 
 WHERE 
+    AND name IS NOT NULL
+    AND name <> ''
     AND geometry && !BBOX!
 """
