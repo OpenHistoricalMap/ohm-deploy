@@ -102,7 +102,7 @@ SELECT
 FROM 
     osm_other_areas 
 WHERE 
-    AND name IS NOT NULL
+    name IS NOT NULL
     AND name <> ''
     AND geometry && !BBOX!
 """

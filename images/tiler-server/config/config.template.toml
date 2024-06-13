@@ -64,7 +64,7 @@ max_connections = 200
 
 	###### Place points and areas
 	[['providers/place_points.toml']]
-	[['providers/place_areas.toml']]
+	# [['providers/place_areas.toml']]
 
 	###### Other (Man Made, Historic, Military, Power, Barrier etc)
 	[['providers/other_points.toml']]
@@ -162,12 +162,12 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	min_zoom = 1
 	max_zoom = 20
 
-	# Place areas
-	[[maps.layers]]
-	name = "place_areas"
-	provider_layer = "osm.place_areas"
-	min_zoom = 14
-	max_zoom = 20
+	# # Place areas
+	# [[maps.layers]]
+	# name = "place_areas"
+	# provider_layer = "osm.place_areas"
+	# min_zoom = 14
+	# max_zoom = 20
 
 	# Other Points
 	[[maps.layers]]
