@@ -34,10 +34,10 @@ def read_json_file(file_path):
 
 
 # Write json data to ohm-website
-def write_json_file(js_file_path, key, json_data):
+def write_json_file(js_file_path, str_data):
     try:
         with open(js_file_path, "w") as file:
-            file.write(f"{key}{json.dumps(json_data, indent=4)};")
+            file.write(str_data)
     except Exception as e:
         print(f"Error updating {js_file_path}: {e}")
 
@@ -71,6 +71,12 @@ for key, value in files.items():
             json_data = json.loads(json_str)
 
             ohm_website_path = value["ohm-website"]
-            # Overwrite style file
-            write_json_file(ohm_website_path, key, json_data)
-            print(f"Updated map-style: {ohm_website_path}")
+            ohm_map_style_path = value["map-styles"]
+
+            # Overwrite style file in ohm-website
+            write_json_file(ohm_website_path, f"{key}{json.dumps(json_data, indent=4)};")
+            print(f"Updated ohm-website: {ohm_website_path}\n")
+
+            # Overwrite style file in map-styles
+            write_json_file(ohm_map_style_path, json.dumps(json_data, indent=4))
+            print(f"Updated map-styles: {ohm_map_style_path}\n")
