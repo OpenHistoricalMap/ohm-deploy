@@ -35,7 +35,7 @@ RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zl
 ENV cgimap /tmp/openstreetmap-cgimap
 ENV CGIMAP_GITSHA=e465c3ff9ebb07a9c808d7c821236041d63434b5
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-RUN cd $cgimap && git checkout $CGIMAP_GITSHA && rm -rf .git
+RUN cd $cgimap && git checkout $CGIMAP_GITSHA
 RUN cd $cgimap && \
     mkdir build && \
     cd build && \
@@ -56,7 +56,7 @@ RUN rm -rf $workdir/html
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=554ecad1f56a0880f67af3b1255a9ffb39f6d41a
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
-RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && rm -rf .git
+RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'bring in latest style changes'
