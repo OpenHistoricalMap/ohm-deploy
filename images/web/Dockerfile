@@ -16,7 +16,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-## Install node
+# Install node
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
@@ -25,23 +25,24 @@ RUN apt-get update && apt-get install -y nodejs yarn && \
     rm -rf /var/lib/apt/lists/*
 
 # Install openstreetmap-cgimap requirements
-RUN apt-get update &&  apt-get -y install libpqxx-dev libfcgi-dev zlib1g-dev \
-  libboost-dev libboost-program-options-dev libfmt-dev \
-  libmemcached-dev libcrypto++-dev libargon2-dev libyajl-dev \
-  automake autoconf libtool && \
+RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev libbrotli-dev \
+  libboost-program-options-dev libfmt-dev libmemcached-dev libcrypto++-dev \
+  libargon2-dev libyajl-dev cmake libapache2-mod-fcgid && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
 # Install cgimap
 ENV cgimap /tmp/openstreetmap-cgimap
-ENV CGIMAP_GITSHA=5cd3d21bebe9d205828608be4c65bbda8b464308
+ENV CGIMAP_GITSHA=e465c3ff9ebb07a9c808d7c821236041d63434b5
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-RUN cd $cgimap && git checkout $CGIMAP_GITSHA
+RUN cd $cgimap && git checkout $CGIMAP_GITSHA && rm -rf .git
 RUN cd $cgimap && \
-    ./autogen.sh && \
-    ./configure && \
-    make && \
-    make install
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    cmake --build .
+RUN cp $cgimap/build/openstreetmap-cgimap /usr/local/bin/ && rm -rf $cgimap
+
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
 
 # Install Passenger
@@ -55,7 +56,7 @@ RUN rm -rf $workdir/html
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=554ecad1f56a0880f67af3b1255a9ffb39f6d41a
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
 WORKDIR $workdir
-RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
+RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && rm -rf .git
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'bring in latest style changes'
@@ -84,12 +85,11 @@ RUN ln -s /tmp /var/www/tmp
 
 # Add Apache configuration file
 ADD config/production.conf /etc/apache2/sites-available/production.conf
-RUN a2enmod headers
-RUN a2enmod setenvif
+RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_byrequests
 RUN a2dissite 000-default
 RUN a2ensite production
 
-# # Enable the Passenger Apache module and restart Apache
+# Enable the Passenger Apache module and restart Apache
 RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
 
 # Config passenger module
@@ -98,15 +98,11 @@ RUN echo "<IfModule mod_passenger.c>\n\
     PassengerRoot $(passenger-config --root)\n\
     PassengerRuby /usr/local/bin/ruby\n\
 </IfModule>" > /etc/apache2/mods-available/passenger.conf
-
 RUN a2enmod passenger
 
-# # Check installation
+# Check installation
 RUN /usr/local/bundle/bin/passenger-config validate-install
 RUN /usr/local/bundle/bin/passenger-memory-stats
-
-# # Enable required apache modules for the cgimap Apache service
-RUN a2enmod proxy proxy_http rewrite lbmethod_byrequests proxy_fcgi
 
 # Config the virtual host apache2
 RUN apache2ctl configtest
