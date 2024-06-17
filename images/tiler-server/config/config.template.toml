@@ -31,6 +31,8 @@ max_connections = 200
 
 	###### Water areas and lines
 	[['providers/water_areas.toml']]
+	[['providers/water_areas.centroids.toml']]
+
 	[['providers/water_lines.toml']]
 
 	###### Water areas NE
@@ -43,6 +45,7 @@ max_connections = 200
 
 	###### Land use areas
 	[['providers/landuse_areas.toml']]
+	[['providers/landuse_areas.centroids.toml']]
 
 	###### Land use lines and points
 	[['providers/landuse_lines.toml']]
@@ -55,22 +58,29 @@ max_connections = 200
 
 	###### Amenities areas and points
 	[['providers/amenity_areas.toml']]
+	[['providers/amenity_areas.centroids.toml']]
+
 	[['providers/amenity_points.toml']]
 
 	###### Place points and areas
 	[['providers/place_points.toml']]
-	[['providers/place_areas.toml']]
+	# [['providers/place_areas.toml']]
 
 	###### Other (Man Made, Historic, Military, Power, Barrier etc)
 	[['providers/other_points.toml']]
 	[['providers/other_lines.toml']]
 	[['providers/other_areas.toml']]
+	[['providers/other_areas.centroids.toml']]
 
 	###### Buildings
 	[['providers/buildings.toml']]
+	[['providers/buildings.centroids.toml']]
 
 	###### transport_associated_streets
 	[['providers/transport_associated_streets.toml']]
+
+	###### admin_boundaries_maritime
+	[['providers/admin_boundaries_maritime.toml']]
 
 # Natural Earth (ne)
 [[providers]]
@@ -90,22 +100,29 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	###### Land
 	[['providers/land.zoom.toml']]
 
-	###### Admin boundaries display zooms
+	##### Admin boundaries display zooms
 	# [['providers/admin_boundaries_areas.zoom.toml']]
 	[['providers/admin_boundaries_lines.zoom.toml']]
 	[['providers/admin_boundaries_centroids.zoom.toml']]
 
 	###### Land Use
 	[['providers/landuse_areas.zoom.toml']]
+	[['providers/landuse_areas.centroids.zoom.toml']]
+	
 	[['providers/landuse_lines.zoom.toml']]
 	[['providers/landuse_points.zoom.toml']]
 
 	###### Water areas/lines
 	[['providers/water_areas.zoom.toml']]
+	[['providers/water_areas.centroids.zoom.toml']]
+
 	[['providers/water_lines.zoom.toml']]
 
 	# Transport Lines (Roads, Rail, Aviation)
 	[['providers/transport_lines.zoom.toml']]
+
+	###### admin_boundaries_maritime
+	[['providers/admin_boundaries_maritime.zoom.toml']]
 
 	# Transport Areas
 	[[maps.layers]]
@@ -128,6 +145,9 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	min_zoom = 14
 	max_zoom = 20
 
+	[['providers/amenity_areas.centroids.zoom.toml']]
+
+
 	# Amenity Points
 	[[maps.layers]]
 	name = "amenity_points"
@@ -142,12 +162,12 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	min_zoom = 1
 	max_zoom = 20
 
-	# Place areas
-	[[maps.layers]]
-	name = "place_areas"
-	provider_layer = "osm.place_areas"
-	min_zoom = 14
-	max_zoom = 20
+	# # Place areas
+	# [[maps.layers]]
+	# name = "place_areas"
+	# provider_layer = "osm.place_areas"
+	# min_zoom = 14
+	# max_zoom = 20
 
 	# Other Points
 	[[maps.layers]]
@@ -164,17 +184,8 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	max_zoom = 20
 
 	# Other Areas
-	[[maps.layers]]
-	name = "other_areas"
-	provider_layer = "osm.other_areas_filter"
-	min_zoom = 6
-	max_zoom = 8
-
-	[[maps.layers]]
-	name = "other_areas"
-	provider_layer = "osm.other_areas"
-	min_zoom = 9
-	max_zoom = 20
+	[['providers/other_areas.zoom.toml']]
+	[['providers/other_areas.centroids.zoom.toml']]
 
 	# Buildings
 	[[maps.layers]]
@@ -182,6 +193,8 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	provider_layer = "osm.buildings"
 	min_zoom = 14
 	max_zoom = 20
+	
+	[['providers/buildings.centroids.zoom.toml']]
 
 	[[maps.layers]]
 	name = "transport_associated_streets"

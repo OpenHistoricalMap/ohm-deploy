@@ -17,7 +17,7 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
-          OVERPASS_API: overpass-api.staging.openhistoricalmap.org
+          OVERPASS_API: overpass-api.openhistoricalmap.org
           OVERPASS_BUCKET: overpass-turbo-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_OVERPASS_CLOUDFRONT_ID }}
 
@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: c9defd0a9b32baf3af6599c3cb4a0dbad96b85e8
+          ref: 698b20b8a34b851c4317006f947b047399da5621
           # token: ${{env.DEV_GITHUB_TOKEN}}
 
       - name: Use Node.js 16
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build frontend
         run: |
-          sed -i -e 's/overpass-api.openhistoricalmap.org/'${OVERPASS_API}'/g' js/configs.js
+          sed -i -e 's/overpass-api.openhistoricalmap.org/'${OVERPASS_API}'/g' js/configs.ts
           yarn build
       
       - uses: actions/setup-python@v2
@@ -64,7 +64,7 @@ jobs:
       - name: Push data to s3 and clean cloudfront cache
         if: ${{ success() }}
         run: |
-          aws s3 sync build/ s3://${OVERPASS_BUCKET}/
+          aws s3 sync dist/ s3://${OVERPASS_BUCKET}/
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

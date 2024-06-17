@@ -1,139 +1,125 @@
-## Boundaries centroids from admin_level=1,2 and zoom 0-2
 [[providers.layers]]
-name = "admin_boundaries_centroids_0-2"
+name = "admin_boundaries_maritime_0-2"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry,  
+    ST_AsMVTGeom(ST_Simplify(geometry, 500), !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
+    maritime, 
     tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
+    tags->'end_date' AS end_date,
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 FROM 
-    osm_admin_areas 
+    osm_admin_lines 
 WHERE 
-    admin_level IN (1,2) 
-    AND has_label = 0 
-    AND name IS NOT NULL 
-    AND name <> '' 
+    maritime='yes'
     AND geometry && !BBOX!
 """
 
-## Boundaries centroids from admin_level=1,2,3,4 and zoom=3-5
+## Boundaries lines from admin_level=1,2,3,4, zoom 3-5 and geometry simplification=200
 [[providers.layers]]
-name = "admin_boundaries_centroids_3-5"
+name = "admin_boundaries_maritime_3-5"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 200), !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
+    maritime, 
     tags->'start_date' AS start_date, 
     tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 FROM 
-    osm_admin_areas 
+    osm_admin_lines 
 WHERE 
-    admin_level IN (1,2,3,4)
-    AND has_label = 0 
-    AND name IS NOT NULL 
-    AND name <> '' 
+    maritime='yes' 
     AND geometry && !BBOX!
 """
 
-## Boundaries centroids from admin_level=1,2,3,4,5,6 and zoom=6-7
 [[providers.layers]]
-name = "admin_boundaries_centroids_6-7"
+name = "admin_boundaries_maritime_6-7"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 100), !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
+    maritime, 
     tags->'start_date' AS start_date, 
     tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 FROM 
-    osm_admin_areas 
+    osm_admin_lines 
 WHERE 
-    admin_level IN (1,2,3,4,5,6)
-    AND has_label = 0 
-    AND name IS NOT NULL 
-    AND name <> '' 
+    maritime='yes' 
     AND geometry && !BBOX!
 """
 
-## Boundaries centroids from admin_level=1,2,3,4,5,6,7,8,9 and zoom=8-9
 [[providers.layers]]
-name = "admin_boundaries_centroids_8-9"
+name = "admin_boundaries_maritime_8-9"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 50), !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
+    maritime, 
     tags->'start_date' AS start_date, 
     tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 FROM 
-    osm_admin_areas 
+    osm_admin_lines 
 WHERE 
-    admin_level IN (1,2,3,4,5,6,7,8,9) 
-    AND has_label = 0 
-    AND name IS NOT NULL 
-    AND name <> '' 
+    maritime='yes' 
     AND geometry && !BBOX!
 """
 
-## Boundaries centroids from admin_level=1,2,3,4,5,6,7,8,9,10 and zoom=10-20
 [[providers.layers]]
-name = "admin_boundaries_centroids_10-20"
+name = "admin_boundaries_maritime_10-20"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 1), !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
+    maritime, 
     tags->'start_date' AS start_date, 
     tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
 FROM 
-    osm_admin_areas 
+    osm_admin_lines 
 WHERE 
-    admin_level IN (1,2,3,4,5,6,7,8,9,10) 
-    AND has_label = 0 
-    AND name IS NOT NULL 
-    AND name <> '' 
+    maritime='yes' 
     AND geometry && !BBOX!
 """

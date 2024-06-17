@@ -73,7 +73,7 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
-        LOG_STATEMENT: "mod"
+        LOG_STATEMENT: "all"
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
@@ -637,7 +637,7 @@ osm-seed:
       ingressDomain: nominatim-api.staging.openhistoricalmap.org
       replicaCount: 1
       env:
-        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240405_0003.osm.pbf
+        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240612_0002.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
@@ -669,15 +669,15 @@ osm-seed:
         localVolumeHostPath: /mnt/nominatim-db-data
         localVolumeSize: 10Gi
         # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0a9f1da7c7f6d587e
-        AWS_ElasticBlockStore_size: 30Gi
+        AWS_ElasticBlockStore_volumeID: vol-0a530cc12fd745545
+        AWS_ElasticBlockStore_size: 100Gi
         # GCP
         GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_xlarge
+        label_value: job_xlarge
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
@@ -689,15 +689,16 @@ osm-seed:
       env:
         OVERPASS_META: 'attic'
         OVERPASS_MODE: 'init'
-        OVERPASS_PLANET_URL: 'https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240102_0000.osm.pbf'
-        OVERPASS_DIFF_URL: 'http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute'
+        OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240612_0002.osm.pbf
+        OVERPASS_DIFF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
         OVERPASS_RULES_LOAD: '10'
         OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
         OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1258000'
+        OVERPASS_ALLOW_DUPLICATE_QUERIES: 'yes'
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        AWS_ElasticBlockStore_volumeID: vol-0da7d726731c27708
+        AWS_ElasticBlockStore_volumeID: vol-000676289c153e301
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -710,7 +711,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: job_xlarge
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================

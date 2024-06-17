@@ -1,0 +1,182 @@
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_gen0_centroids_0-2"
+sql = """
+SELECT 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen0 
+WHERE 
+    type IN ('water', 'riverbank') 
+    AND area > 100000000 
+    AND name IS NOT NULL
+    AND name <> ''
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_gen0_centroids_3-5"
+sql = """
+SELECT 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen0 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') 
+    AND area > 50000000 
+    AND name IS NOT NULL 
+    AND name <> '' 
+    AND geometry && !BBOX!
+"""
+
+# Water bodies > 1,000,000 sqm
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_gen0_centroids_6-7"
+sql = """
+SELECT 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen0 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') 
+    AND area > 1000000 
+    AND name IS NOT NULL 
+    AND name <> '' 
+    AND geometry && !BBOX!
+"""
+
+# Water bodies > 10,000 sqm
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_gen0_centroids_8-9"
+sql = """
+SELECT 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen0 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') 
+    AND area > 10000 
+    AND name IS NOT NULL 
+    AND name <> '' 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_gen1_centroids_10-12"
+sql = """
+SELECT 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ABS(osm_id) as osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas_gen1 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') 
+    AND name IS NOT NULL 
+    AND name <> '' 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "id"
+name = "water_areas_centroids_13-15"
+sql = """
+SELECT 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    id, 
+    osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank', 'dock') 
+    AND name IS NOT NULL 
+    AND name <> '' 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "id"
+name = "water_areas_centroids_16-20"
+sql = """
+SELECT 
+    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    id, 
+    osm_id, 
+    name, 
+    type, 
+    area, 
+    tags->'start_date' as start_date, 
+    tags->'end_date' as end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+FROM 
+    osm_water_areas 
+WHERE 
+    type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank', 'dock') 
+    AND name IS NOT NULL 
+    AND name <> '' 
+    AND geometry && !BBOX!
+"""
