@@ -756,7 +756,7 @@ osm-seed:
   # Variables for osm-simple-metrics
   # ====================================================================================================
     osmSimpleMetrics:
-      enabled: true
+      enabled: false
       schedule: '0 2 * * *'
       resources:
         enabled: false
