@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: 698b20b8a34b851c4317006f947b047399da5621
+          ref: f4f5a0342b3d767a535febffcf9b9a1184c19ea5
           # token: ${{env.DEV_GITHUB_TOKEN}}
 
       - name: Use Node.js 16
