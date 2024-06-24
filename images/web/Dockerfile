@@ -58,13 +58,12 @@ RUN rm -rf $workdir/html
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=554ecad1f56a0880f67af3b1255a9ffb39f6d41a
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
-    && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA \
-    && rm -rf .git
+    && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'bring in latest style changes'
-RUN git fetch
+RUN git fetch && rm -rf .git
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
