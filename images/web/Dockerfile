@@ -34,13 +34,15 @@ RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zl
 # Install cgimap
 ENV cgimap /tmp/openstreetmap-cgimap
 ENV CGIMAP_GITSHA=26cd7fa10affe5dbd13dbe16de34421059f53f18
-RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap
-RUN cd $cgimap && git checkout $CGIMAP_GITSHA
-RUN cd $cgimap && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    cmake --build .
+RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap \
+    && cd $cgimap \
+    && git checkout $CGIMAP_GITSHA \
+    && rm -rf .git \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && cmake --build .
+
 RUN cp $cgimap/build/openstreetmap-cgimap /usr/local/bin/ && rm -rf $cgimap
 
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
@@ -54,9 +56,11 @@ RUN npm install -g svgo
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=554ecad1f56a0880f67af3b1255a9ffb39f6d41a
-RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir
+RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
+    && cd $workdir \
+    && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA \
+    && rm -rf .git
 WORKDIR $workdir
-RUN git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'bring in latest style changes'
