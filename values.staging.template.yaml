@@ -421,9 +421,9 @@ osm-seed:
         label_value: db
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
-        REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
-        SEQUENCE_NUMBER: "675000"
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240616_0002.osm.pbf
+        REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+        SEQUENCE_NUMBER: "1447000"
         OVERWRITE_STATE: true
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
