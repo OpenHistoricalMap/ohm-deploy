@@ -316,7 +316,7 @@ osm-seed:
           label_key: nodegroup_type
           label_value: job
       - name: tm-db
-        enabled: true
+        enabled: false
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -390,7 +390,7 @@ osm-seed:
         POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
         POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
@@ -421,9 +421,9 @@ osm-seed:
         label_value: db
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240616_0002.osm.pbf
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240628_0002.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-        SEQUENCE_NUMBER: "1447000"
+        SEQUENCE_NUMBER: "1463000"
         OVERWRITE_STATE: true
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
