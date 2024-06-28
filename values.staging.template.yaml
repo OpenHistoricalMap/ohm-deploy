@@ -390,12 +390,12 @@ osm-seed:
         POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
         POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-03a25f6ed5ddc3513
+        AWS_ElasticBlockStore_volumeID : vol-0586415b162ddf978
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
@@ -433,8 +433,8 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-05eeb57b8e67b3cd5
-        AWS_ElasticBlockStore_size: 200Gi
+        AWS_ElasticBlockStore_volumeID: vol-015da3cd4a70e718a
+        AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
         requests:
