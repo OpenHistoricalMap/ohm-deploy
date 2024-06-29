@@ -39,3 +39,14 @@ CREATE TRIGGER trigger_update_has_label
 BEFORE INSERT OR UPDATE ON osm_admin_areas
 FOR EACH ROW
 EXECUTE FUNCTION update_has_label_row();
+
+-- Create a function to validate dates
+
+CREATE OR REPLACE FUNCTION is_date_valid(date_text text) RETURNS boolean AS $$
+BEGIN
+    PERFORM date_text::date;
+    RETURN TRUE;
+EXCEPTION WHEN others THEN
+    RETURN FALSE;
+END;
+$$ LANGUAGE plpgsql;

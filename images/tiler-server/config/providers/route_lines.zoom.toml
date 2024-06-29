@@ -1,0 +1,17 @@
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_5_9"
+min_zoom = 5
+max_zoom = 9
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_10_15"
+min_zoom = 10
+max_zoom = 15
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_16_20"
+min_zoom = 16
+max_zoom = 20
