@@ -2,15 +2,25 @@
 name = "route_lines_5_20"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry,!BBOX!) AS geometry,
-    r.id,
-    r.name,
+    ABS(r.osm_id) AS osm_id,
     r.type,
+    r.tags->'route' AS route,
+    r.name,
     r.tags->'ref' AS ref,
     r.tags->'network' AS network,
+    r.tags->'direction' AS direction,
+    r.tags->'operator' AS operator,
+    r.tags->'state' AS state,
+    r.tags->'symbol' AS symbol,
+    r.tags->'distance' AS distance,
+    r.tags->'roundtrip' AS roundtrip,
+    r.tags->'interval' AS interval,
+    r.tags->'duration' AS duration,
+    r.tags->'tourism' AS tourism,
     r.start_date,
     r.end_date,
     CASE 
