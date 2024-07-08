@@ -58,7 +58,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: db
+      label_value: api_db
     env:
       POSTGRES_DB: {{PRODUCTION_DB}}
       POSTGRES_USER: {{PRODUCTION_DB_USER}}
@@ -73,14 +73,14 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID : vol-08e31c1930e00a478
       AWS_ElasticBlockStore_size: 600Gi
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "10Gi"
-        cpu: "5"
+        memory: "30Gi"
+        cpu: "8"
       limits:
-        memory: "10Gi"
-        cpu: "5"
-    sharedMemorySize: 512Mi
+        memory: "32Gi"
+        cpu: "8"
+    sharedMemorySize: 2Gi
 
   # ====================================================================================================
   # Variables for osm-seed website
