@@ -343,7 +343,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: db
+      label_value: tiler_db
     env:
       POSTGRES_HOST: production-tiler-db
       POSTGRES_DB: tiler-osm
