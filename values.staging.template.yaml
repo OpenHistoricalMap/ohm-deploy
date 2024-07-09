@@ -85,11 +85,11 @@ osm-seed:
       resources:
         enabled: true
         requests:
-          memory: "7Gi"
-          cpu: "1800m"
+          memory: "4Gi"
+          cpu: "1500m"
         limits:
-          memory: "8Gi"
-          cpu: "2000m"
+          memory: "6Gi"
+          cpu: "1800m"
       sharedMemorySize: 256Mi
       livenessProbeExec: true
     # ====================================================================================================
