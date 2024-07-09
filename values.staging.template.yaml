@@ -85,11 +85,11 @@ osm-seed:
       resources:
         enabled: true
         requests:
-          memory: "3Gi"
-          cpu: "1"
+          memory: "7Gi"
+          cpu: "1800m"
         limits:
-          memory: "5Gi"
-          cpu: "1"
+          memory: "8Gi"
+          cpu: "2000m"
       sharedMemorySize: 256Mi
       livenessProbeExec: true
     # ====================================================================================================
@@ -408,7 +408,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: web
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -418,7 +418,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: web
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240628_0002.osm.pbf
@@ -450,7 +450,7 @@ osm-seed:
     tilerServer:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
         label_value: web
       replicaCount: 1
