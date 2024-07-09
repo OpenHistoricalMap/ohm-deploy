@@ -128,10 +128,10 @@ osm-seed:
         enabled: true
         requests:
           memory: "3Gi"
-          cpu: "2"
+          cpu: "1000m"
         limits:
-          memory: "3Gi"
-          cpu: "2"
+          memory: "4Gi"
+          cpu: "1500m"
       autoscaling:
         enabled: false
         minReplicas: 1
