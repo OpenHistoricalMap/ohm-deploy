@@ -365,7 +365,7 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: vol-038f080b3d129c907
       AWS_ElasticBlockStore_size: 400Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "20Gi"
         cpu: "4"
