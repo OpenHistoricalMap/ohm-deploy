@@ -80,7 +80,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-09964172ef71bc8e8
+        AWS_ElasticBlockStore_volumeID : vol-0adee2fecc3281b81
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: true
@@ -127,11 +127,11 @@ osm-seed:
       resources:
         enabled: true
         requests:
-          memory: "2Gi"
-          cpu: "1"
+          memory: "3Gi"
+          cpu: "2"
         limits:
-          memory: "2Gi"
-          cpu: "1"
+          memory: "3Gi"
+          cpu: "2"
       autoscaling:
         enabled: false
         minReplicas: 1
