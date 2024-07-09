@@ -58,7 +58,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: db
+      label_value: api_db
     env:
       POSTGRES_DB: {{PRODUCTION_DB}}
       POSTGRES_USER: {{PRODUCTION_DB_USER}}
@@ -75,12 +75,12 @@ osm-seed:
     resources:
       enabled: false
       requests:
-        memory: "10Gi"
-        cpu: "5"
+        memory: "30Gi"
+        cpu: "8"
       limits:
-        memory: "10Gi"
-        cpu: "5"
-    sharedMemorySize: 512Mi
+        memory: "32Gi"
+        cpu: "8"
+    sharedMemorySize: 2Gi
 
   # ====================================================================================================
   # Variables for osm-seed website
@@ -343,7 +343,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: db
+      label_value: tiler_db
     env:
       POSTGRES_HOST: production-tiler-db
       POSTGRES_DB: tiler-osm
@@ -365,7 +365,7 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: vol-038f080b3d129c907
       AWS_ElasticBlockStore_size: 400Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "20Gi"
         cpu: "4"
