@@ -14,7 +14,8 @@ RUN apk --no-cache add \
     git \
     postgresql-client \
     coreutils \
-    jq
+    jq \
+    procps
 
 RUN pip install --upgrade pip && pip3 install awscli mercantile
 
@@ -24,21 +25,22 @@ RUN rm -rf /var/cache/apk/* \
 
 RUN ln -s /opt/tegola /usr/bin/tegola
 
-COPY ./config  /opt/config/
-COPY build_config.py  /opt/
+COPY ./config /opt/config/
+COPY build_config.py /opt/
 RUN mkdir /opt/tegola_config
 RUN cd /opt/ && python build_config.py \
     --template config/config.template.toml \
     --providers config/providers \
     --output /opt/tegola_config/config.toml
 
-# Copy config and  exec files
+# Copy config and exec files
 COPY ./tile2bounds.py .
 COPY ./start.sh .
 COPY ./expire-watcher.sh .
 COPY ./seed-by-diffs.sh .
 COPY ./tile_cache_downloader.sh .
 COPY ./cache_cleaner.sh .
-COPY ./rm_ps.sh .
+COPY ./rm_tegola_ps.sh .
+
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ./start.sh & ./tile_cache_downloader.sh & ./expire-watcher.sh
