@@ -84,11 +84,11 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: "10Gi"
-          cpu: "5"
+          memory: "6Gi"
+          cpu: "1500m"
         limits:
-          memory: "10Gi"
-          cpu: "5"
+          memory: "6Gi"
+          cpu: "1700m"
       sharedMemorySize: 256Mi
       livenessProbeExec: true
       postgresqlConfig:
@@ -436,7 +436,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: web
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -446,7 +446,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: web
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
