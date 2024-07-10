@@ -81,7 +81,29 @@ osm-seed:
         memory: "32Gi"
         cpu: "8"
     sharedMemorySize: 2Gi
-
+    postgresqlConfig:
+      enabled: true
+      values: |
+        listen_addresses = '*'
+        max_connections = 200
+        shared_buffers = 8GB
+        temp_buffers = 512MB
+        work_mem = 64MB
+        maintenance_work_mem = 2GB
+        dynamic_shared_memory_type = posix
+        effective_io_concurrency = 200
+        max_wal_size = 2GB
+        min_wal_size = 1GB
+        random_page_cost = 1.1
+        effective_cache_size = 24GB
+        log_timezone = 'Etc/UTC'
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        lc_messages = 'en_US.utf8'
+        lc_monetary = 'en_US.utf8'
+        lc_numeric = 'en_US.utf8'
+        lc_time = 'en_US.utf8'
+        default_text_search_config = 'pg_catalog.english'
   # ====================================================================================================
   # Variables for osm-seed website
   # ====================================================================================================
