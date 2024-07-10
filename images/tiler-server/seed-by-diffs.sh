@@ -30,7 +30,7 @@ fi
 
 for f in $imp_list; do
     # echo "Purge tiles from...$f"
-    ( set -x ; tegola cache purge tile-list $f \
+    ( set -x ; time tegola cache purge tile-list $f \
         --config=/opt/tegola_config/config.toml \
         --format="/zxy" \
         --min-zoom=0 \
