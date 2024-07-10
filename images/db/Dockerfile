@@ -16,7 +16,3 @@ ADD lib/quad_tile/ lib/quad_tile/
 RUN make -C db/functions/
 RUN chown -R postgres lib/
 RUN chown -R postgres db/
-COPY start.sh /usr/local/bin/
-COPY config/postgresql.*.conf /etc/postgresql/
-
-CMD ["/usr/local/bin/start.sh"]

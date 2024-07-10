@@ -73,25 +73,53 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
-        LOG_STATEMENT: "all"
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-0adee2fecc3281b81
+        AWS_ElasticBlockStore_volumeID : vol-09964172ef71bc8e8
         AWS_ElasticBlockStore_size: 200Gi
       resources:
-        enabled: true
+        enabled: false
         requests:
-          memory: "4Gi"
-          cpu: "1500m"
+          memory: "10Gi"
+          cpu: "5"
         limits:
-          memory: "6Gi"
-          cpu: "1800m"
+          memory: "10Gi"
+          cpu: "5"
       sharedMemorySize: 256Mi
       livenessProbeExec: true
+      postgresqlConfig:
+        enabled: true
+        values: |
+          listen_addresses = '*'
+          max_connections = 100
+          shared_buffers = 2GB
+          work_mem = 20MB
+          maintenance_work_mem = 512MB
+          dynamic_shared_memory_type = posix
+          effective_io_concurrency = 200
+          max_wal_size = 1GB
+          min_wal_size = 80MB
+          random_page_cost = 1.1
+          effective_cache_size = 6GB
+          log_min_duration_statement = 1000
+          log_connections = on
+          log_disconnections = on
+          log_duration = on
+          log_lock_waits = on
+          log_statement = 'all'
+          log_timezone = 'Etc/UTC'
+          datestyle = 'iso, mdy'
+          timezone = 'Etc/UTC'
+          lc_messages = 'en_US.utf8'
+          lc_monetary = 'en_US.utf8'
+          lc_numeric = 'en_US.utf8'
+          lc_time = 'en_US.utf8'
+          default_text_search_config = 'pg_catalog.english'
+
     # ====================================================================================================
     # Variables for osm-seed website
     # ====================================================================================================
@@ -127,11 +155,11 @@ osm-seed:
       resources:
         enabled: true
         requests:
-          memory: "3Gi"
-          cpu: "1000m"
+          memory: "2Gi"
+          cpu: "1"
         limits:
-          memory: "4Gi"
-          cpu: "1500m"
+          memory: "2Gi"
+          cpu: "1"
       autoscaling:
         enabled: false
         minReplicas: 1
@@ -316,7 +344,7 @@ osm-seed:
           label_key: nodegroup_type
           label_value: job
       - name: tm-db
-        enabled: false
+        enabled: true
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -390,12 +418,12 @@ osm-seed:
         POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
         POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-04dc431c3e69a7319
+        AWS_ElasticBlockStore_volumeID : vol-03a25f6ed5ddc3513
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
@@ -408,7 +436,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -418,23 +446,23 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240628_0002.osm.pbf
-        REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-        SEQUENCE_NUMBER: "1463000"
+        TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
+        REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
+        SEQUENCE_NUMBER: "675000"
         OVERWRITE_STATE: true
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
         IMPORT_OSM_LAND: true
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-044c1b3cee878e651
-        AWS_ElasticBlockStore_size: 100Gi
+        AWS_ElasticBlockStore_volumeID: vol-05eeb57b8e67b3cd5
+        AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
         requests:
@@ -450,7 +478,7 @@ osm-seed:
     tilerServer:
       enabled: true
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
       replicaCount: 1
