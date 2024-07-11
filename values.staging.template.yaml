@@ -119,7 +119,14 @@ osm-seed:
           lc_numeric = 'en_US.utf8'
           lc_time = 'en_US.utf8'
           default_text_search_config = 'pg_catalog.english'
-
+          # Parallelism settings
+          max_parallel_workers_per_gather = 2
+          max_parallel_workers = 4
+          max_worker_processes = 4
+          parallel_tuple_cost = 0.1
+          parallel_setup_cost = 1000
+          min_parallel_table_scan_size = 8MB
+          min_parallel_index_scan_size = 512kB
     # ====================================================================================================
     # Variables for osm-seed website
     # ====================================================================================================
