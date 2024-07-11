@@ -105,7 +105,7 @@ osm-seed:
           min_wal_size = 80MB
           random_page_cost = 1.1
           effective_cache_size = 6GB
-          log_min_duration_statement = 1000
+          log_min_duration_statement = 10000
           log_connections = on
           log_disconnections = on
           log_duration = on

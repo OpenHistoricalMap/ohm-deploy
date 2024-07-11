@@ -70,7 +70,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-db
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID : vol-08e31c1930e00a478
+      AWS_ElasticBlockStore_volumeID : vol-08b85b3e370f2d690
       AWS_ElasticBlockStore_size: 600Gi
     resources:
       enabled: true
@@ -85,17 +85,22 @@ osm-seed:
       enabled: true
       values: |
         listen_addresses = '*'
-        max_connections = 200
-        shared_buffers = 8GB
-        temp_buffers = 512MB
-        work_mem = 64MB
-        maintenance_work_mem = 2GB
+        max_connections = 100
+        shared_buffers = 7GB
+        work_mem = 50MB
+        maintenance_work_mem = 1GB
         dynamic_shared_memory_type = posix
         effective_io_concurrency = 200
         max_wal_size = 2GB
-        min_wal_size = 1GB
+        min_wal_size = 512MB
         random_page_cost = 1.1
-        effective_cache_size = 24GB
+        effective_cache_size = 20GB
+        log_min_duration_statement = 10000
+        log_connections = on
+        log_disconnections = on
+        log_duration = on
+        log_lock_waits = on
+        log_statement = 'all'
         log_timezone = 'Etc/UTC'
         datestyle = 'iso, mdy'
         timezone = 'Etc/UTC'
@@ -104,6 +109,14 @@ osm-seed:
         lc_numeric = 'en_US.utf8'
         lc_time = 'en_US.utf8'
         default_text_search_config = 'pg_catalog.english'
+        # Parallelism settings
+        max_parallel_workers_per_gather = 4
+        max_parallel_workers = 8
+        max_worker_processes = 8
+        parallel_tuple_cost = 0.1
+        parallel_setup_cost = 1000
+        min_parallel_table_scan_size = 4MB
+        min_parallel_index_scan_size = 512kB
   # ====================================================================================================
   # Variables for osm-seed website
   # ====================================================================================================
@@ -133,7 +146,7 @@ osm-seed:
       NEW_RELIC_LICENSE_KEY: {{PRODUCTION_NEW_RELIC_LICENSE_KEY}}
       NEW_RELIC_APP_NAME: {{PRODUCTION_NEW_RELIC_APP_NAME}}
       ORGANIZATION_NAME: OpenHistoricalMap
-      WEBSITE_STATUS: "api_readonly"
+      WEBSITE_STATUS: "online"
     resources:
       enabled: true
       requests:
