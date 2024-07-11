@@ -54,6 +54,8 @@ max_connections = 200
 	###### Transport lines, points and areas from ways
 	[['providers/transport_points.toml']]
 	[['providers/transport_lines.toml']]
+	[['providers/route_lines.toml']]
+
 	[['providers/transport_areas.toml']]
 
 	###### Amenities areas and points
@@ -120,6 +122,7 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 
 	# Transport Lines (Roads, Rail, Aviation)
 	[['providers/transport_lines.zoom.toml']]
+	[['providers/route_lines.zoom.toml']]
 
 	###### admin_boundaries_maritime
 	[['providers/admin_boundaries_maritime.zoom.toml']]

@@ -73,25 +73,60 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
-        LOG_STATEMENT: "all"
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-09964172ef71bc8e8
+        AWS_ElasticBlockStore_volumeID : vol-06464c17e2c8f9895
         AWS_ElasticBlockStore_size: 200Gi
       resources:
-        enabled: false
+        enabled: true
         requests:
-          memory: "10Gi"
-          cpu: "5"
+          memory: "6Gi"
+          cpu: "1500m"
         limits:
-          memory: "10Gi"
-          cpu: "5"
+          memory: "6Gi"
+          cpu: "1700m"
       sharedMemorySize: 256Mi
       livenessProbeExec: true
+      postgresqlConfig:
+        enabled: true
+        values: |
+          listen_addresses = '*'
+          max_connections = 100
+          shared_buffers = 2GB
+          work_mem = 20MB
+          maintenance_work_mem = 512MB
+          dynamic_shared_memory_type = posix
+          effective_io_concurrency = 200
+          max_wal_size = 1GB
+          min_wal_size = 80MB
+          random_page_cost = 1.1
+          effective_cache_size = 6GB
+          log_min_duration_statement = 1000
+          log_connections = on
+          log_disconnections = on
+          log_duration = on
+          log_lock_waits = on
+          log_statement = 'all'
+          log_timezone = 'Etc/UTC'
+          datestyle = 'iso, mdy'
+          timezone = 'Etc/UTC'
+          lc_messages = 'en_US.utf8'
+          lc_monetary = 'en_US.utf8'
+          lc_numeric = 'en_US.utf8'
+          lc_time = 'en_US.utf8'
+          default_text_search_config = 'pg_catalog.english'
+          # Parallelism settings
+          max_parallel_workers_per_gather = 2
+          max_parallel_workers = 4
+          max_worker_processes = 4
+          parallel_tuple_cost = 0.1
+          parallel_setup_cost = 1000
+          min_parallel_table_scan_size = 8MB
+          min_parallel_index_scan_size = 512kB
     # ====================================================================================================
     # Variables for osm-seed website
     # ====================================================================================================
@@ -408,7 +443,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: web
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -418,7 +453,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: web
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
@@ -501,13 +536,13 @@ osm-seed:
       replicaCount: 1
       command: './cache_cleaner.sh'
       resources:
-        enabled: false
+        enabled: true
         requests:
           memory: "2Gi"
-          cpu: "1"
+          cpu: "500m"
         limits:
-          memory: "10Gi"
-          cpu: "2"
+          memory: "2Gi"
+          cpu: "800m"
       env:
         KILL_PROCESS: manually
         MAX_NUM_PS: 4

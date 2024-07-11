@@ -73,15 +73,37 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID : vol-08e31c1930e00a478
       AWS_ElasticBlockStore_size: 600Gi
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "30Gi"
-        cpu: "8"
+        memory: "28Gi"
+        cpu: "6800m"
       limits:
-        memory: "32Gi"
-        cpu: "8"
+        memory: "29Gi"
+        cpu: "7800m"
     sharedMemorySize: 2Gi
-
+    postgresqlConfig:
+      enabled: true
+      values: |
+        listen_addresses = '*'
+        max_connections = 200
+        shared_buffers = 8GB
+        temp_buffers = 512MB
+        work_mem = 64MB
+        maintenance_work_mem = 2GB
+        dynamic_shared_memory_type = posix
+        effective_io_concurrency = 200
+        max_wal_size = 2GB
+        min_wal_size = 1GB
+        random_page_cost = 1.1
+        effective_cache_size = 24GB
+        log_timezone = 'Etc/UTC'
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        lc_messages = 'en_US.utf8'
+        lc_monetary = 'en_US.utf8'
+        lc_numeric = 'en_US.utf8'
+        lc_time = 'en_US.utf8'
+        default_text_search_config = 'pg_catalog.english'
   # ====================================================================================================
   # Variables for osm-seed website
   # ====================================================================================================
@@ -362,16 +384,16 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-038f080b3d129c907
-      AWS_ElasticBlockStore_size: 400Gi
+      AWS_ElasticBlockStore_volumeID: vol-0bfead7a5a9141150
+      AWS_ElasticBlockStore_size: 200Gi
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "20Gi"
-        cpu: "4"
+        memory: "13Gi"
+        cpu: "3500m"
       limits:
-        memory: "20Gi"
-        cpu: "4"
+        memory: "13Gi"
+        cpu: "3700m"
   # ====================================================================================================
   # Variables for tiler-imposm
   # ====================================================================================================
@@ -384,9 +406,9 @@ osm-seed:
       label_value: web
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240616_0002.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240711_0003.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1447000"
+      SEQUENCE_NUMBER: "1479000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
     persistenceDisk:
@@ -394,8 +416,8 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0ef20d25abd0fa2e1
-      AWS_ElasticBlockStore_size: 200Gi
+      AWS_ElasticBlockStore_volumeID: vol-0094ea728f8b061b2
+      AWS_ElasticBlockStore_size: 100Gi
     resources:
       enabled: false
       requests:
