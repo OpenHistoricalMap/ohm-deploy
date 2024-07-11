@@ -384,8 +384,8 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-038f080b3d129c907
-      AWS_ElasticBlockStore_size: 400Gi
+      AWS_ElasticBlockStore_volumeID: vol-0bfead7a5a9141150
+      AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: false
       requests:
@@ -406,9 +406,9 @@ osm-seed:
       label_value: web
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240616_0002.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240711_0003.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1447000"
+      SEQUENCE_NUMBER: "1479000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
     persistenceDisk:
@@ -416,8 +416,8 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0ef20d25abd0fa2e1
-      AWS_ElasticBlockStore_size: 200Gi
+      AWS_ElasticBlockStore_volumeID: vol-0094ea728f8b061b2
+      AWS_ElasticBlockStore_size: 100Gi
     resources:
       enabled: false
       requests:
