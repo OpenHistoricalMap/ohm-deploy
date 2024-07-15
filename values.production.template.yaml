@@ -690,16 +690,16 @@ osm-seed:
     env:
       OVERPASS_META: 'attic'
       OVERPASS_MODE: 'init'
-      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240616_0002.osm.pbf
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240715_0003.osm.pbf
       OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
       OVERPASS_RULES_LOAD: '10'
       OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
-      OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1447000'
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1484000'
       OVERPASS_ALLOW_DUPLICATE_QUERIES: 'yes'
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
-      AWS_ElasticBlockStore_volumeID: vol-04120a6d4866b853e
+      AWS_ElasticBlockStore_volumeID: vol-01d9060df5d14a903
       AWS_ElasticBlockStore_size: 100Gi
     resources:
       enabled: false
