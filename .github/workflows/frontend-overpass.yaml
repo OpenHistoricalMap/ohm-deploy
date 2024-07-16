@@ -1,15 +1,18 @@
 name: Build and Publish overpass-turbo site
+
 on:
   push:
     branches:
       - 'main'
       - 'staging'
+
 jobs:
   overpass-turbo:
     runs-on: ubuntu-latest
+
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.12.0
         with:
           access_token: ${{ github.token }}
 
@@ -30,22 +33,25 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_OVERPASS_CLOUDFRONT_ID }}
 
       - name: Checkout overpass-turbo repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: 1893cef4c0ab4ce96ad0451103526c18ebabf8f6
-          # token: ${{env.DEV_GITHUB_TOKEN}}
+          ref: f4f5a0342b3d767a535febffcf9b9a1184c19ea5
 
-      - name: Use Node.js 16
-        uses: actions/setup-node@v1
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Prepare Yarn 4.3.1
+        run: corepack prepare yarn@4.3.1 --activate
 
       - name: Install modules
         run: |
-          rm -rf node_modules
-          npm cache clean --force
-          yarn install --no-progress --frozen-lockfile
+          yarn install
 
       - name: Build frontend
         run: |
@@ -64,9 +70,8 @@ jobs:
       - name: Push data to s3 and clean cloudfront cache
         if: ${{ success() }}
         run: |
-          aws s3 sync dist/ s3://${OVERPASS_BUCKET}/
+          aws s3 sync dist/ s3://${OVERPASS_BUCKET}/ --acl public-read
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
