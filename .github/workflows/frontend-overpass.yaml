@@ -1,12 +1,15 @@
 name: Build and Publish overpass-turbo site
+
 on:
   push:
     branches:
       - 'main'
       - 'staging'
+
 jobs:
   overpass-turbo:
     runs-on: ubuntu-latest
+
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.8.0
@@ -34,12 +37,17 @@ jobs:
         with:
           repository: OpenHistoricalMap/overpass-turbo
           ref: f4f5a0342b3d767a535febffcf9b9a1184c19ea5
-          # token: ${{env.DEV_GITHUB_TOKEN}}
 
       - name: Use Node.js 16
         uses: actions/setup-node@v1
         with:
           node-version: 16
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Prepare Yarn 4.3.1
+        run: corepack prepare yarn@4.3.1 --activate
 
       - name: Install modules
         run: |
@@ -51,7 +59,7 @@ jobs:
         run: |
           sed -i -e 's/overpass-api.openhistoricalmap.org/'${OVERPASS_API}'/g' js/configs.ts
           yarn build
-      
+
       - uses: actions/setup-python@v2
         with:
           python-version: '3.10'
