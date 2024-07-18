@@ -150,11 +150,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "3Gi"
-        cpu: "2"
+        memory: "2Gi"
+        cpu: "1"
       limits:
-        memory: "3Gi"
-        cpu: "2"
+        memory: "2Gi"
+        cpu: "1"
     autoscaling:
       enabled: true
       minReplicas: 2
