@@ -20,7 +20,6 @@ export CGIMAP_MAX_RELATION_MEMBERS="32000"
 # export CGIMAP_MODERATOR_MAXDEBT="1280"
 # export CGIMAP_PIDFILE="/var/www/cgimap.pid"
 
-# Verificar el estado del sitio web
 if [[ "$WEBSITE_STATUS" == "database_readonly" || "$WEBSITE_STATUS" == "api_readonly" ]]; then
   export CGIMAP_DISABLE_API_WRITE="true"
 fi
