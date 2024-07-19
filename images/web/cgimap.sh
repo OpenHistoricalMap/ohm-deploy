@@ -27,7 +27,7 @@ fi
 if [[ "$WEBSITE_STATUS" == "database_offline" || "$WEBSITE_STATUS" == "api_offline" ]]; then
   echo "Website is $WEBSITE_STATUS. No action required for cgimap service."
 else
-  export PGOPTIONS="-c enable_mergejoin=off -c enable_hashjoin=off"
+  export PGOPTIONS="-c enable_mergejoin=false -c enable_hashjoin=false"
   psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SHOW enable_mergejoin;"
   psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SHOW enable_hashjoin;"
   /usr/local/bin/openstreetmap-cgimap --port=8000 --daemon --instances=10
