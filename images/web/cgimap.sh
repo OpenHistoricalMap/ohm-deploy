@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+# Run SQL commands
+psql -h $POSTGRES_HOST -d $POSTGRES_DB -U $POSTGRES_USER -c "SET enable_mergejoin = false;"
+psql -h $POSTGRES_HOST -d $POSTGRES_DB -U $POSTGRES_USER -c "SET enable_hashjoin = false;"
+psql -h $POSTGRES_HOST -d $POSTGRES_DB -U $POSTGRES_USER -c "SELECT pg_reload_conf();"
+
+# Export environment variables
 export CGIMAP_HOST=$POSTGRES_HOST
 export CGIMAP_DBNAME=$POSTGRES_DB
 export CGIMAP_USERNAME=$POSTGRES_USER
@@ -22,8 +29,9 @@ export CGIMAP_MAX_RELATION_MEMBERS="32000"
 if [[ "$WEBSITE_STATUS" == "database_readonly" || "$WEBSITE_STATUS" == "api_readonly" ]]; then
   export CGIMAP_DISABLE_API_WRITE="true"
 fi
+
 if [[ "$WEBSITE_STATUS" == "database_offline" || "$WEBSITE_STATUS" == "api_offline" ]]; then
-    echo "Website is $WEBSITE_STATUS. No action required for cgimap service."
+  echo "Website is $WEBSITE_STATUS. No action required for cgimap service."
 else
   /usr/local/bin/openstreetmap-cgimap --port=8000 --daemon --instances=10
 fi
