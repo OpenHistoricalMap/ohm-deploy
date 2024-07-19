@@ -11,3 +11,4 @@ envs/.env.web
 config.toml
 .DS_Store
 */.DS_Store
+.env
