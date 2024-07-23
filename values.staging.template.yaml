@@ -105,12 +105,12 @@ osm-seed:
           min_wal_size = 80MB
           random_page_cost = 1.1
           effective_cache_size = 6GB
-          log_min_duration_statement = 10000
+          log_min_duration_statement = 3000
           log_connections = on
           log_disconnections = on
-          log_duration = on
+          log_duration = off
           log_lock_waits = on
-          log_statement = 'all'
+          log_statement = 'none'
           log_timezone = 'Etc/UTC'
           datestyle = 'iso, mdy'
           timezone = 'Etc/UTC'
