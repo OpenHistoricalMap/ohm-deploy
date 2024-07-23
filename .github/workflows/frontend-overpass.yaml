@@ -1,13 +1,19 @@
 name: Build and Publish overpass-turbo site
+
 on:
   push:
     branches:
-      - 'main'
-      - 'staging'
+      - "main"
+      - "staging"
+
 jobs:
-  overpass-turbo:
+  build:
+    permissions:
+      pages: write
+      contents: write
     runs-on: ubuntu-latest
     steps:
+
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.8.0
         with:
@@ -29,39 +35,44 @@ jobs:
           OVERPASS_BUCKET: overpass-turbo.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_OVERPASS_CLOUDFRONT_ID }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
       - name: Checkout overpass-turbo repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: f4f5a0342b3d767a535febffcf9b9a1184c19ea5
-          # token: ${{env.DEV_GITHUB_TOKEN}}
+          ref: 1893cef4c0ab4ce96ad0451103526c18ebabf8f6
+          path: overpass-turbo
 
-      - name: Use Node.js 16
-        uses: actions/setup-node@v1
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Check directory
+        run: ls -la
+        working-directory: overpass-turbo
+
+      - name: Install dependencies
+        run: yarn install
+        working-directory: overpass-turbo
+
+      - name: Build project
+        run: yarn build
+        working-directory: overpass-turbo
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
         with:
-          node-version: 16
+          python-version: "3.10"
 
-      - name: Install modules
-        run: |
-          rm -rf node_modules
-          npm cache clean --force
-          yarn install --no-progress --frozen-lockfile
-
-      - name: Build frontend
-        run: |
-          sed -i -e 's/overpass-api.openhistoricalmap.org/'${OVERPASS_API}'/g' js/configs.ts
-          yarn build
-      
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
-
-      - name: Install aws cli
+      - name: Install AWS CLI
         run: |
           python -m pip install --upgrade pip
           pip install awscli
 
-      - name: Push data to s3 and clean cloudfront cache
+      - name: Push data to S3 and clean CloudFront cache
         if: ${{ success() }}
         run: |
           aws s3 sync dist/ s3://${OVERPASS_BUCKET}/
@@ -69,4 +80,4 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          
+        working-directory: overpass-turbo

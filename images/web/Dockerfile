@@ -55,14 +55,14 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=554ecad1f56a0880f67af3b1255a9ffb39f6d41a
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=6c7a9152a9164100b59ecc8f06233685f9938ee6
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'bring in latest style changes'
+RUN echo 'Brings in a build of iD and a variety of small fixes to ohm-website'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages
@@ -114,7 +114,7 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Clone Map-styles
-ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=3a74377fbd1a2e2cb9e74db911643f98c436c080
+ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=22f4a89229db58170dfc269e0649b180031f070d
 RUN git clone --branch staging --depth 1 https://github.com/OpenHistoricalMap/map-styles.git $workdir/public/map-styles
 RUN cd $workdir/public/map-styles && git fetch --depth 1 origin $OPENHISTORICALMAP_MAP_STYLES_GITSHA && git checkout $OPENHISTORICALMAP_MAP_STYLES_GITSHA
 RUN rm -rf $workdir/public/map-styles/.git
