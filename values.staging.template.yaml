@@ -415,13 +415,13 @@ osm-seed:
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-03a25f6ed5ddc3513
-        AWS_ElasticBlockStore_size: 200Gi
+        AWS_ElasticBlockStore_volumeID : vol-0070eeaad843ed475
+        AWS_ElasticBlockStore_size: 100Gi
       resources:
           enabled: true
           requests:
@@ -435,7 +435,7 @@ osm-seed:
         label_key: nodegroup_type
         label_value: db
       postgresqlConfig:
-        enabled: true
+        enabled: false
         values: |
           listen_addresses = '*'
           max_connections = 100
@@ -484,9 +484,9 @@ osm-seed:
         label_value: web
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-latest.osm.pbf
-        REPLICATION_URL: http://planet-staging.openhistoricalmap.org.s3.amazonaws.com/replication/minute/
-        SEQUENCE_NUMBER: "675000"
+        TILER_IMPORT_PBF_URL: https://planet-staging.openhistoricalmap.org.s3.amazonaws.com/planet/planet-240726_0003.osm.pbf
+        REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+        SEQUENCE_NUMBER: "1499000"
         OVERWRITE_STATE: true
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
