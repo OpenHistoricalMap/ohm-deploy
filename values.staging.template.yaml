@@ -82,7 +82,7 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID : vol-06464c17e2c8f9895
         AWS_ElasticBlockStore_size: 200Gi
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "6Gi"
           cpu: "1500m"
@@ -414,18 +414,6 @@ osm-seed:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
-        # for 20Gi
-        # POSTGRES_DB_MAX_CONNECTIONS: 500
-        # POSTGRES_DB_SHARED_BUFFERS: 5GB
-        # POSTGRES_DB_WORK_MEM: 15MB
-        # POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
-        # POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
-        #for 15Gi
-        POSTGRES_DB_MAX_CONNECTIONS: 500
-        POSTGRES_DB_SHARED_BUFFERS: 3GB
-        POSTGRES_DB_WORK_MEM: 7MB
-        POSTGRES_DB_MAINTENANCE_WORK_MEM: 750MB
-        POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 7GB
       persistenceDisk:
         enabled: false
         accessMode: ReadWriteOnce
@@ -435,17 +423,55 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID : vol-03a25f6ed5ddc3513
         AWS_ElasticBlockStore_size: 200Gi
       resources:
-        enabled: false
-        requests:
-          memory: '8Gi'
-          cpu: '4'
-        limits:
-          memory: '8Gi'
-          cpu: '2'
+          enabled: true
+          requests:
+            memory: "6Gi"
+            cpu: "1500m"
+          limits:
+            memory: "6Gi"
+            cpu: "1700m"
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db
+      postgresqlConfig:
+        enabled: true
+        values: |
+          listen_addresses = '*'
+          max_connections = 100
+          shared_buffers = 2GB
+          work_mem = 20MB
+          maintenance_work_mem = 512MB
+          dynamic_shared_memory_type = posix
+          effective_io_concurrency = 200
+          max_wal_size = 1GB
+          min_wal_size = 80MB
+          random_page_cost = 1.1
+          effective_cache_size = 6GB
+          log_min_duration_statement = 3000
+          log_connections = on
+          log_disconnections = on
+          log_duration = off
+          log_lock_waits = on
+          log_statement = 'none'
+          log_timezone = 'Etc/UTC'
+          datestyle = 'iso, mdy'
+          timezone = 'Etc/UTC'
+          lc_messages = 'en_US.utf8'
+          lc_monetary = 'en_US.utf8'
+          lc_numeric = 'en_US.utf8'
+          lc_time = 'en_US.utf8'
+          default_text_search_config = 'pg_catalog.english'
+          # Parallelism settings
+          max_parallel_workers_per_gather = 2
+          max_parallel_workers = 4
+          max_worker_processes = 4
+          parallel_tuple_cost = 0.1
+          parallel_setup_cost = 1000
+          min_parallel_table_scan_size = 8MB
+          min_parallel_index_scan_size = 512kB
+          session_preload_libraries = 'auto_explain'
+          auto_explain.log_min_duration = '3s'
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
