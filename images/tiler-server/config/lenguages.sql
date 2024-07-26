@@ -355,4 +355,5 @@ tags -> 'name:zea' AS name_zea,
 tags -> 'name:zgh' AS name_zgh,
 tags -> 'name:zh' AS name_zh,
 tags -> 'name:zu' AS name_zu,
-tags -> 'name:zza' AS name_zza
+tags -> 'name:zza' AS name_zza,
+tags -> 'name:nds_nl' AS name_nds_nl
