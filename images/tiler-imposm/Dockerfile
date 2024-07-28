@@ -22,7 +22,7 @@ RUN apt-get install -y \
     software-properties-common && \
     rm -rf /var/lib/apt/lists/*
 
-# # Install python
+# Install python
 RUN add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y build-essential python3.6 python3.6-dev python3-pip && \
@@ -34,22 +34,28 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
 RUN apt-get update && apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
-# Install go
-RUN wget -c https://dl.google.com/go/go1.10.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
+# Install Go
+RUN wget -c https://dl.google.com/go/go1.21.0.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
 ENV PATH $PATH:/usr/local/go/bin
 
 WORKDIR /go
 ENV GOPATH /go
-RUN go get github.com/omniscale/imposm3
+
+# Clone the repository directly
+RUN git clone https://github.com/omniscale/imposm3.git $GOPATH/src/github.com/omniscale/imposm3
+
 WORKDIR $GOPATH/src/github.com/omniscale/imposm3
-RUN git checkout v0.11.1
+RUN git checkout v0.14.0
+
+# Fix cache package conflict
+RUN sed -i '/setMaxFileSize/d' cache/ldb_pre_121.go
+
 RUN go install github.com/omniscale/imposm3/cmd/imposm
 ENV PATH $PATH:$GOPATH/bin
 
-# Install awscli  and gsutil  to get the pbf file
+# Install awscli and gsutil to get the pbf file
 RUN pip3 install -U setuptools
 RUN pip3 install awscli
-RUN pip3 install gsutil
 
 ENV IMPOSMDATA /mnt/data
 RUN mkdir -p $IMPOSMDATA && chmod 777 -R $IMPOSMDATA
