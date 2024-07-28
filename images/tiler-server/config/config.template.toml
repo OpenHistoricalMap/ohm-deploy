@@ -1,5 +1,6 @@
 [webserver]
 port = ":${TILER_SERVER_PORT}"
+version = "v0.20.0"
 
 	[webserver.headers]
 	Access-Control-Allow-Origin = "*"
