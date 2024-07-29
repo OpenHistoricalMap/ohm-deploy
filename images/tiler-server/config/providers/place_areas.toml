@@ -19,6 +19,7 @@ SELECT
     {{LENGUAGES}}
 FROM 
     osm_place_areas 
+    AND type IN ('square') 
 WHERE 
     geometry && !BBOX!
 """
