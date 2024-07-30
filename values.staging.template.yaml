@@ -435,7 +435,7 @@ osm-seed:
         label_key: nodegroup_type
         label_value: db
       postgresqlConfig:
-        enabled: false
+        enabled: true
         values: |
           listen_addresses = '*'
           max_connections = 100
