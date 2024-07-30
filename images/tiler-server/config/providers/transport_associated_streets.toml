@@ -18,7 +18,7 @@ SELECT
     r.tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(r.tags->'start_date', 'start')) AS start_decdate, 
     isodatetodecimaldate(pad_date(r.tags->'end_date', 'end')) AS end_decdate,
-    {{LENGUAGES}}
+    {{LENGUAGES_RELATION}}
 FROM 
     osm_relations r, 
     osm_relation_members m 
