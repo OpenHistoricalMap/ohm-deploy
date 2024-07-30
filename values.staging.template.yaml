@@ -448,7 +448,7 @@ osm-seed:
           min_wal_size = 80MB
           random_page_cost = 1.1
           effective_cache_size = 6GB
-          log_min_duration_statement = 3000
+          log_min_duration_statement = 10000
           log_connections = on
           log_disconnections = on
           log_duration = off
@@ -471,7 +471,11 @@ osm-seed:
           min_parallel_table_scan_size = 8MB
           min_parallel_index_scan_size = 512kB
           session_preload_libraries = 'auto_explain'
-          auto_explain.log_min_duration = '3s'
+          auto_explain.log_min_duration = '10s'
+          # Timeout settings
+          tcp_keepalives_idle = 300
+          tcp_keepalives_interval = 60
+          tcp_keepalives_count = 10
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
