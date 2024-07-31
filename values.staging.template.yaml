@@ -842,7 +842,7 @@ osm-seed:
   # Variables for replication nomitoring task
   # ====================================================================================================
     monitoringReplication:
-      enabled: true
+      enabled: false
       schedule: '*/30 * * * *'
       env:
         CREATE_MISSING_FILES: "empty"
