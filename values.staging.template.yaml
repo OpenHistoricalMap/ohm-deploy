@@ -438,17 +438,17 @@ osm-seed:
         enabled: true
         values: |
           listen_addresses = '*'
-          max_connections = 100
-          shared_buffers = 2GB
-          work_mem = 20MB
-          maintenance_work_mem = 512MB
+          max_connections = 50
+          shared_buffers = 1GB
+          work_mem = 15MB
+          maintenance_work_mem = 256MB
           dynamic_shared_memory_type = posix
           effective_io_concurrency = 200
           max_wal_size = 1GB
           min_wal_size = 80MB
           random_page_cost = 1.1
-          effective_cache_size = 6GB
-          log_min_duration_statement = 10000
+          effective_cache_size = 4GB
+          log_min_duration_statement = 15000
           log_connections = on
           log_disconnections = on
           log_duration = off
@@ -471,11 +471,12 @@ osm-seed:
           min_parallel_table_scan_size = 8MB
           min_parallel_index_scan_size = 512kB
           session_preload_libraries = 'auto_explain'
-          auto_explain.log_min_duration = '10s'
+          auto_explain.log_min_duration = '15s'
           # Timeout settings
           tcp_keepalives_idle = 300
           tcp_keepalives_interval = 60
           tcp_keepalives_count = 10
+  
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================

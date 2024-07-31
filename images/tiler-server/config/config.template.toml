@@ -26,7 +26,7 @@ name = "osm"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 # srid = 3857
-max_connections = 200
+max_connections = 50
 	###### Land providers
 	[['providers/land.toml']]
 
@@ -91,7 +91,7 @@ type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 
 # srid = 3857
-max_connections = 200
+max_connections = 50
 	###### Water lands ne
 	[['providers/water_areas_ne.toml']]
 
