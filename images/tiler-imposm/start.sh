@@ -154,15 +154,20 @@ function importData() {
     updateData
 }
 
+function countTables() {
+    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" | xargs
+}
+
 echo "Connecting to $POSTGRES_HOST DB"
 flag=true
-while "$flag" = true; do
+while $flag; do
     pg_isready -h $POSTGRES_HOST -p 5432 >/dev/null 2>&2 || continue
-    # Change flag to false to stop ping the DB
+    # Change flag to false to stop pinging the DB
     flag=false
+    echo "Check number of tables in the database"
+    table_count=$(countTables)
     echo "Check if $INIT_FILE exists"
-    if ([[ -f $INIT_FILE ]]); then
-        echo "Update the DB with osm data"
+    if [[ -f $INIT_FILE || "$table_count" -gt 30 ]]; then
         updateData
     else
         echo "Import PBF data to DB"
