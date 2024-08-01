@@ -476,6 +476,9 @@ osm-seed:
           tcp_keepalives_idle = 300
           tcp_keepalives_interval = 60
           tcp_keepalives_count = 10
+          # disable join options for routes
+          enable_mergejoin = false
+          enable_hashjoin = false
   
     # ====================================================================================================
     # Variables for tiler-imposm
