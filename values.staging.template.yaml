@@ -815,11 +815,19 @@ osm-seed:
         label_value: web
       cronjob:
         enabled: true
-        schedule: "0 2 * * *" # testing every day 2 am UTC
+        schedule: "0 2 */3 * *"
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
           label_value: job_xlarge
+        resources:
+          enabled: true
+          requests:
+            memory: "13Gi"
+            cpu: "3600m"
+          limits:
+            memory: "14Gi"
+            cpu: "3800m"
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
