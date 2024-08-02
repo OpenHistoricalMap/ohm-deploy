@@ -94,19 +94,18 @@ osm-seed:
       postgresqlConfig:
         enabled: true
         values: |
-          # PostgreSQL configuration
           listen_addresses = '*'
           max_connections = 100
-          shared_buffers = 4GB
-          work_mem = 128MB
-          maintenance_work_mem = 1GB
+          shared_buffers = 2GB
+          work_mem = 20MB
+          maintenance_work_mem = 512MB
           dynamic_shared_memory_type = posix
           effective_io_concurrency = 200
-          max_wal_size = 2GB
-          min_wal_size = 256MB
+          max_wal_size = 1GB
+          min_wal_size = 80MB
           random_page_cost = 1.1
-          effective_cache_size = 12GB
-          log_min_duration_statement = 15000
+          effective_cache_size = 6GB
+          log_min_duration_statement = 3000
           log_connections = on
           log_disconnections = on
           log_duration = off
@@ -121,29 +120,15 @@ osm-seed:
           lc_time = 'en_US.utf8'
           default_text_search_config = 'pg_catalog.english'
           # Parallelism settings
-          max_parallel_workers_per_gather = 4
-          max_parallel_workers = 8
-          max_worker_processes = 8
+          max_parallel_workers_per_gather = 2
+          max_parallel_workers = 4
+          max_worker_processes = 4
           parallel_tuple_cost = 0.1
           parallel_setup_cost = 1000
           min_parallel_table_scan_size = 8MB
           min_parallel_index_scan_size = 512kB
-          session_preload_libraries = 'auto_explain,pg_stat_statements'
-          auto_explain.log_min_duration = '15s'
-          # Timeout settings
-          tcp_keepalives_idle = 300
-          tcp_keepalives_interval = 60
-          tcp_keepalives_count = 10
-          # Disable join options for routes
-          enable_mergejoin = false
-          enable_hashjoin = false
-          # Complete large queries statements
-          statement_timeout = '600s'
-          lock_timeout = '60s'
-          idle_in_transaction_session_timeout = '600s'
-          # pg_stat_statements settings
-          pg_stat_statements.max = 10000
-          pg_stat_statements.track = all
+          session_preload_libraries = 'auto_explain'
+          auto_explain.log_min_duration = '3s'
     # ====================================================================================================
     # Variables for osm-seed website
     # ====================================================================================================
