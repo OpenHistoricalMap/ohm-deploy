@@ -484,6 +484,10 @@ osm-seed:
           enable_mergejoin = false
           enable_hashjoin = false
 
+          # Complete large queries statements
+          statement_timeout = '60s'
+          lock_timeout = '5s'
+          idle_in_transaction_session_timeout = '10s'
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
