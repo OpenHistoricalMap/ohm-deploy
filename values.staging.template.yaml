@@ -435,7 +435,7 @@ osm-seed:
         label_key: nodegroup_type
         label_value: db
       postgresqlConfig:
-        enabled: true
+        enabled: false
         values: |
           # PostgreSQL configuration
           listen_addresses = '*'
