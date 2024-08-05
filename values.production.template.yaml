@@ -406,17 +406,18 @@ osm-seed:
     postgresqlConfig:
       enabled: false
       values: |
+        # PostgreSQL configuration
         listen_addresses = '*'
-        max_connections = 50
-        shared_buffers = 2GB
-        work_mem = 32MB
-        maintenance_work_mem = 512MB
+        max_connections = 100
+        shared_buffers = 4GB
+        work_mem = 128MB
+        maintenance_work_mem = 1GB
         dynamic_shared_memory_type = posix
         effective_io_concurrency = 200
-        max_wal_size = 1GB
-        min_wal_size = 80MB
+        max_wal_size = 2GB
+        min_wal_size = 256MB
         random_page_cost = 1.1
-        effective_cache_size = 4GB
+        effective_cache_size = 12GB
         log_min_duration_statement = 15000
         log_connections = on
         log_disconnections = on
@@ -432,19 +433,29 @@ osm-seed:
         lc_time = 'en_US.utf8'
         default_text_search_config = 'pg_catalog.english'
         # Parallelism settings
-        max_parallel_workers_per_gather = 2
-        max_parallel_workers = 4
-        max_worker_processes = 4
+        max_parallel_workers_per_gather = 4
+        max_parallel_workers = 8
+        max_worker_processes = 8
         parallel_tuple_cost = 0.1
         parallel_setup_cost = 1000
         min_parallel_table_scan_size = 8MB
         min_parallel_index_scan_size = 512kB
-        session_preload_libraries = 'auto_explain'
+        session_preload_libraries = 'auto_explain,pg_stat_statements'
         auto_explain.log_min_duration = '15s'
         # Timeout settings
         tcp_keepalives_idle = 300
         tcp_keepalives_interval = 60
         tcp_keepalives_count = 10
+        # Disable join options for routes
+        enable_mergejoin = false
+        enable_hashjoin = false
+        # Complete large queries statements
+        statement_timeout = '600s'
+        lock_timeout = '60s'
+        idle_in_transaction_session_timeout = '600s'
+        # pg_stat_statements settings
+        pg_stat_statements.max = 10000
+        pg_stat_statements.track = all
 
   # ====================================================================================================
   # Variables for tiler-imposm
@@ -458,9 +469,9 @@ osm-seed:
       label_value: web
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240801_0003.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240804_0003.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1509000"
+      SEQUENCE_NUMBER: "1513000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
       IMPORT_NATURAL_EARTH: true
