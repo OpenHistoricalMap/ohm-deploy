@@ -404,7 +404,7 @@ osm-seed:
         memory: "13Gi"
         cpu: "3700m"
     postgresqlConfig:
-      enabled: false
+      enabled: true
       values: |
         # PostgreSQL configuration
         listen_addresses = '*'
