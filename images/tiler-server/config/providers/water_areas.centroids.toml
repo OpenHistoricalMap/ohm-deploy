@@ -13,7 +13,8 @@ SELECT
     tags->'start_date' as start_date, 
     tags->'end_date' as end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
 FROM 
     osm_water_areas_gen0 
 WHERE 
@@ -39,7 +40,8 @@ SELECT
     tags->'start_date' as start_date, 
     tags->'end_date' as end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
 FROM 
     osm_water_areas_gen0 
 WHERE 
@@ -66,7 +68,8 @@ SELECT
     tags->'start_date' as start_date, 
     tags->'end_date' as end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
 FROM 
     osm_water_areas_gen0 
 WHERE 
@@ -93,7 +96,8 @@ SELECT
     tags->'start_date' as start_date, 
     tags->'end_date' as end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
 FROM 
     osm_water_areas_gen0 
 WHERE 
@@ -119,7 +123,8 @@ SELECT
     tags->'start_date' as start_date, 
     tags->'end_date' as end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
 FROM 
     osm_water_areas_gen1 
 WHERE 
@@ -145,7 +150,8 @@ SELECT
     tags->'start_date' as start_date, 
     tags->'end_date' as end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
 FROM 
     osm_water_areas 
 WHERE 
@@ -171,7 +177,8 @@ SELECT
     tags->'start_date' as start_date, 
     tags->'end_date' as end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
 FROM 
     osm_water_areas 
 WHERE 

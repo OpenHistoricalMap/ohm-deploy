@@ -387,19 +387,13 @@ osm-seed:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
-      # for 20GB
-      POSTGRES_DB_MAX_CONNECTIONS: 500
-      POSTGRES_DB_SHARED_BUFFERS: 5GB
-      POSTGRES_DB_WORK_MEM: 15MB
-      POSTGRES_DB_MAINTENANCE_WORK_MEM: 1GB
-      POSTGRES_DB_EFFECTIVE_CACHE_SIZE: 10GB
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0bfead7a5a9141150
+      AWS_ElasticBlockStore_volumeID: vol-0cb7b8d450400d3fd
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: true
@@ -409,6 +403,60 @@ osm-seed:
       limits:
         memory: "13Gi"
         cpu: "3700m"
+    postgresqlConfig:
+      enabled: false
+      values: |
+        # PostgreSQL configuration
+        listen_addresses = '*'
+        max_connections = 100
+        shared_buffers = 4GB
+        work_mem = 128MB
+        maintenance_work_mem = 1GB
+        dynamic_shared_memory_type = posix
+        effective_io_concurrency = 200
+        max_wal_size = 2GB
+        min_wal_size = 256MB
+        random_page_cost = 1.1
+        effective_cache_size = 12GB
+        log_min_duration_statement = 15000
+        log_connections = on
+        log_disconnections = on
+        log_duration = off
+        log_lock_waits = on
+        log_statement = 'none'
+        log_timezone = 'Etc/UTC'
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        lc_messages = 'en_US.utf8'
+        lc_monetary = 'en_US.utf8'
+        lc_numeric = 'en_US.utf8'
+        lc_time = 'en_US.utf8'
+        default_text_search_config = 'pg_catalog.english'
+        # Parallelism settings
+        max_parallel_workers_per_gather = 4
+        max_parallel_workers = 8
+        max_worker_processes = 8
+        parallel_tuple_cost = 0.1
+        parallel_setup_cost = 1000
+        min_parallel_table_scan_size = 8MB
+        min_parallel_index_scan_size = 512kB
+        session_preload_libraries = 'auto_explain,pg_stat_statements'
+        auto_explain.log_min_duration = '15s'
+        # Timeout settings
+        tcp_keepalives_idle = 300
+        tcp_keepalives_interval = 60
+        tcp_keepalives_count = 10
+        # Disable join options for routes
+        enable_mergejoin = false
+        enable_hashjoin = false
+        # Complete large queries statements
+        statement_timeout = '600s'
+        lock_timeout = '60s'
+        idle_in_transaction_session_timeout = '600s'
+        # pg_stat_statements settings
+        pg_stat_statements.max = 10000
+        pg_stat_statements.track = all
+
   # ====================================================================================================
   # Variables for tiler-imposm
   # ====================================================================================================
@@ -421,17 +469,19 @@ osm-seed:
       label_value: web
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240711_0003.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240804_0003.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1479000"
+      SEQUENCE_NUMBER: "1513000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
+      IMPORT_NATURAL_EARTH: true
+      IMPORT_OSM_LAND: true
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0094ea728f8b061b2
+      AWS_ElasticBlockStore_volumeID: vol-05eeb57b8e67b3cd5
       AWS_ElasticBlockStore_size: 100Gi
     resources:
       enabled: false
@@ -750,7 +800,15 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job_xlarge 
+        label_value: job_xlarge
+      resources:
+        enabled: true
+        requests:
+          memory: "13Gi"
+          cpu: "3600m"
+        limits:
+          memory: "14Gi"
+          cpu: "3800m"
 # ====================================================================================================
 # Variables for osm-simple-metrics
 # ====================================================================================================

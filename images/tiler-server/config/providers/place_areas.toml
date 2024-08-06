@@ -15,9 +15,11 @@ SELECT
     tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, 
-    tags->'capital' AS capital 
+    tags->'capital' AS capital,
+    {{LENGUAGES}}
 FROM 
     osm_place_areas 
 WHERE 
-    geometry && !BBOX!
+    type IN ('square') 
+    AND geometry && !BBOX!
 """

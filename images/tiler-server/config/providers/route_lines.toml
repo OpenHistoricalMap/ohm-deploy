@@ -30,7 +30,8 @@ SELECT
     CASE 
         WHEN is_date_valid(r.end_date) THEN isodatetodecimaldate(pad_date(r.end_date, 'end')) 
         ELSE NULL 
-    END AS end_decdate
+    END AS end_decdate,
+    {{LENGUAGES_RELATION}}
 FROM osm_relations r
 JOIN osm_relation_members m ON r.osm_id = m.osm_id
 WHERE r.type = 'route'
