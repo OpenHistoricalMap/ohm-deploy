@@ -68,10 +68,10 @@ jobs:
           ref: 3902d566d9d2d8d5a9c37bf61894ed649b581ee5
           # token: ${{ env.DEV_GITHUB_TOKEN }}
 
-      - name: Use Node.js 12
-        uses: actions/setup-node@v1
+      - name: Use Node.js 16
+        uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '16'
 
       - name: npm Install
         run: |
