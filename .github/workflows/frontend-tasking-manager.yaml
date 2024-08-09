@@ -36,8 +36,6 @@ jobs:
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TM_CLOUDFRONT_DISTRIBUTION_ID }}
-          TM_SENTRY_BACKEND_DSN: https://xxx.ingest.sentry.io/1234567
-          TM_SENTRY_FRONTEND_DSN: https://xxx.ingest.sentry.io/8901234
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v2.0.0
@@ -61,8 +59,6 @@ jobs:
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
-          TM_SENTRY_BACKEND_DSN: https://xxx.ingest.sentry.io/1234567
-          TM_SENTRY_FRONTEND_DSN: https://xxx.ingest.sentry.io/8901234
       - name: Checkout tasking-manager repo
         uses: actions/checkout@v4
         with:
@@ -80,7 +76,7 @@ jobs:
 
       - name: npm Install
         run: |
-          cd tasking-manager/frontend && npm install  && npm run build
+          cd tasking-manager/frontend && npm install  && GENERATE_SOURCEMAP=false npm run build
 
       - name: Setup Python
         uses: actions/setup-python@v2
