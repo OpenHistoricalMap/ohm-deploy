@@ -62,11 +62,14 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
 
       - name: Checkout tasking-manager repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: 3902d566d9d2d8d5a9c37bf61894ed649b581ee5
-          # token: ${{ env.DEV_GITHUB_TOKEN }}
+          ref: 3eaeaf8605663258d83b291a3238d527cc22f84b
+          path: tasking-manager
+
+      - name: Debug Checkout
+        run: ls -la tasking-manager
 
       - name: Use Node.js 16
         uses: actions/setup-node@v2
@@ -75,8 +78,12 @@ jobs:
 
       - name: npm Install
         run: |
-          npm install && npm run build
-        working-directory: frontend
+          cd tasking-manager/frontend && npm install  && npm run build
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
       - uses: actions/setup-python@v2
         with:
@@ -90,7 +97,7 @@ jobs:
       - name: Sync to S3 and clean cache in cloudfront
         if: ${{ success() }}
         run: |
-          aws s3 sync frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
+          aws s3 sync tasking-manager/frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
