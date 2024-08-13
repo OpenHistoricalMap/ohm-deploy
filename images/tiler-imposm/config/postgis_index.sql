@@ -15,4 +15,6 @@ BEGIN;
 	CREATE INDEX ON osm_water_areas_gen0 (type);	
 	CREATE INDEX ON osm_water_areas_gen1 (type);
 	CREATE INDEX ON osm_relation_members (osm_id);
+	CREATE INDEX ON osm_place_areas (type);
+	CREATE INDEX ON osm_place_points (type);
 COMMIT;
