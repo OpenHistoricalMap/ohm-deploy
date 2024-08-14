@@ -16,7 +16,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/staging'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/tm/v4'
         uses: allenevans/set-env@v2.0.0
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
