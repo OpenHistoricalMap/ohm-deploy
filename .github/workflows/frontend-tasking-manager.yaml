@@ -38,6 +38,12 @@ jobs:
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TM_CLOUDFRONT_DISTRIBUTION_ID }}
+          TM_CLIENT_ID: ${{secrets.STAGING_TM_CLIENT_ID}}
+          TM_CLIENT_SECRET: ${{secrets.STAGING_TM_CLIENT_SECRET}}
+          TM_DEFAULT_CHANGESET_COMMENT:  "staging"
+          TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+          TM_SCOPE: 'read_prefs write_api'
+
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v2.0.0
