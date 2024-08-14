@@ -4,7 +4,7 @@ on:
     branches:
       - 'main'
       - 'staging'
-
+      - 'tm/v4'
 
 jobs:
   tm:
