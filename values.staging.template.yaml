@@ -629,7 +629,7 @@ osm-seed:
       enabled: true
       image:
         name: "postgis/postgis"
-        tag: "114-3.3"
+        tag: "14-3.3"
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
