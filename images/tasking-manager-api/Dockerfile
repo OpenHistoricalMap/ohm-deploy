@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.7-slim
 
 RUN apt update && \
     apt install -y git
@@ -6,7 +6,8 @@ RUN apt update && \
 ENV workdir /usr/src/app
 
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git $workdir
-RUN cd $workdir && git checkout -f c2e85feed9660eb66dfcd2009bec2b049dfe0260
+# Commits on 27 April, 2022
+RUN cd $workdir && git checkout -f f0df07174f4014365220af09187b5f941f9770b0
 WORKDIR $workdir
 
 # Setup backend dependencies
