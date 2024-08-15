@@ -466,7 +466,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: tiler_db
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240804_0003.osm.pbf
@@ -500,7 +500,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: tiler_db
     replicaCount: 2
     commad: './start.sh'
     serviceAnnotations:
@@ -545,7 +545,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: tiler_db
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
