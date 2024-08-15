@@ -158,11 +158,7 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	max_zoom = 20
 
 	# Place Points
-	[[maps.layers]]
-	name = "place_points"
-	provider_layer = "osm.place_points"
-	min_zoom = 1
-	max_zoom = 20
+	[['providers/place_points.zoom.toml']]
 
 	# # Place areas
 	[[maps.layers]]

@@ -114,7 +114,7 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Clone Map-styles
-ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=22f4a89229db58170dfc269e0649b180031f070d
+ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=1ad7f22a04465c32ce82ffaac3aaee0df119648b
 RUN git clone --branch staging --depth 1 https://github.com/OpenHistoricalMap/map-styles.git $workdir/public/map-styles
 RUN cd $workdir/public/map-styles && git fetch --depth 1 origin $OPENHISTORICALMAP_MAP_STYLES_GITSHA && git checkout $OPENHISTORICALMAP_MAP_STYLES_GITSHA
 RUN rm -rf $workdir/public/map-styles/.git

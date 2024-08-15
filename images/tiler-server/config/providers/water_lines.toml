@@ -1,58 +1,8 @@
-# Simplification for geometries
-
 [[providers.layers]]
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
-name = "water_lines_gen0_6-6"
-sql = """
-SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 1500), !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
-    type, 
-    tags->'bridge' AS bridge, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}} 
-FROM 
-    osm_water_lines_gen0 
-WHERE 
-    type IN ('river', 'canal') 
-    AND geometry && !BBOX!
-"""
-
-[[providers.layers]]
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-name = "water_lines_gen0_7-7"
-sql = """
-SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 1000), !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
-    type, 
-    tags->'bridge' AS bridge, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}} 
-FROM 
-    osm_water_lines_gen0 
-WHERE 
-    type IN ('river', 'canal') 
-    AND geometry && !BBOX!
-"""
-
-[[providers.layers]]
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-name = "water_lines_gen0_8-8"
+name = "water_lines_gen0_8-10"
 sql = """
 SELECT 
     ST_AsMVTGeom(ST_Simplify(geometry, 500), !BBOX!) AS geometry, 
@@ -76,7 +26,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
-name = "water_lines_gen0_9-9"
+name = "water_lines_gen0_11"
 sql = """
 SELECT 
     ST_AsMVTGeom(ST_Simplify(geometry, 100), !BBOX!) AS geometry, 
@@ -92,58 +42,54 @@ SELECT
 FROM 
     osm_water_lines_gen0 
 WHERE 
-    type IN ('river', 'canal') 
+    type IN ('river', 'canal', 'cliff', 'dam') 
     AND geometry && !BBOX!
 """
-
 
 [[providers.layers]]
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
-name = "water_lines_gen1_10-11"
+name = "water_lines_gen0_12-14"
 sql = """
 SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 20), !BBOX!) AS geometry, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 100), !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
     name, 
     type, 
     tags->'bridge' AS bridge, 
-    tags->'surface' AS surface, 
     tags->'start_date' AS start_date, 
     tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_water_lines_gen1 
+    osm_water_lines_gen0 
 WHERE 
-    type IN ('river', 'canal', 'stream', 'ditch', 'drain', 'dam', 'cliff') 
+    type IN ('river', 'canal', 'cliff', 'dam', 'stream') 
     AND geometry && !BBOX!
 """
 
 [[providers.layers]]
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "id"
-name = "water_lines"
+id_fieldname = "osm_id"
+name = "water_lines_gen0_15-24"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
-    osm_id, 
+    ST_AsMVTGeom(ST_Simplify(geometry, 100), !BBOX!) AS geometry, 
+    ABS(osm_id) AS osm_id, 
     name, 
     type, 
     tags->'bridge' AS bridge, 
-    tags->'surface' AS surface, 
     tags->'start_date' AS start_date, 
     tags->'end_date' AS end_date, 
     isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_water_lines 
+    osm_water_lines_gen0 
 WHERE 
-    type IN ('river', 'canal', 'stream', 'ditch', 'drain', 'dam', 'cliff') 
+    type IN ('river', 'canal', 'cliff', 'dam', 'stream', 'ditch', 'drain') 
     AND geometry && !BBOX!
 """

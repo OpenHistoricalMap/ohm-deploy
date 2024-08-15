@@ -1,6 +1,5 @@
-# Layer configuration for transport lines gen0
 [[providers.layers]]
-name = "transport_lines_gen0"
+name = "transport_lines_gen_5"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -24,15 +23,14 @@ SELECT
 FROM 
     osm_transport_lines_gen0 
 WHERE 
-    type IN ('motorway', 'trunk', 'motorway_link', 'trunk_link', 'primary') 
+    type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction') 
     AND tunnel = 0 
     AND bridge = 0  
     AND geometry && !BBOX!
 """
 
-# Layer configuration for transport lines gen1
 [[providers.layers]]
-name = "transport_lines_gen1"
+name = "transport_lines_gen_6"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -56,18 +54,14 @@ FROM
     osm_transport_lines_gen1 
 WHERE 
     type IN (
-        'motorway', 'trunk', 'primary', 'primary_link', 'secondary', 
-        'motorway_link', 'trunk_link', 'rail', 'subway', 'light_rail', 
-        'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 
-        'funicular', 'taxiway', 'runway', 'proposed', 'construction', 
-        'disused', 'abandoned', 'razed', 'ferry'
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 
+        'primary', 'primary_link', 'secondary', 'secondary_link','tertiary', 'tertiary_link'
     ) 
     AND geometry && !BBOX!
 """
 
-# Layer configuration for transport lines 11-12
 [[providers.layers]]
-name = "transport_lines_11-12"
+name = "transport_lines_gen_7"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -75,16 +69,10 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     osm_id, 
-    name, 
     ref, 
     class, 
     type, 
-    tunnel, 
-    bridge, 
-    access, 
     service, 
-    ford, 
-    tags->'construction' AS construction, 
     tags->'electrified' AS electrified, 
     tags->'highspeed' AS highspeed, 
     tags->'usage' AS usage, 
@@ -94,40 +82,29 @@ SELECT
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines 
+    osm_transport_lines_gen1 
 WHERE 
     type IN (
-        'motorway', 'motorway_link', 'trunk', 'trunk_link', 
-        'primary', 'primary_link', 'secondary', 'secondary_link', 
-        'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 
-        'tram', 'narrow_gauge', 'monorail', 'preserved', 'miniature', 
-        'funicular', 'taxiway', 'runway', 'proposed', 'construction', 
-        'disused', 'abandoned', 'razed', 'apron', 'ferry'
-    )  
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 
+        'primary', 'primary_link', 'secondary', 'secondary_link','tertiary', 'tertiary_link',
+        'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed'
+    ) 
     AND geometry && !BBOX!
 """
 
-# Layer configuration for transport lines 13
 [[providers.layers]]
-name = "transport_lines_13"
+name = "transport_lines_gen_8-10"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
     osm_id, 
-    name, 
     ref, 
     class, 
     type, 
-    tunnel, 
-    bridge, 
-    access, 
     service, 
-    ford, 
-    tags->'construction' AS construction, 
     tags->'electrified' AS electrified, 
     tags->'highspeed' AS highspeed, 
     tags->'usage' AS usage, 
@@ -137,41 +114,32 @@ SELECT
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines 
+    osm_transport_lines_gen1 
 WHERE 
     type IN (
-        'motorway', 'motorway_link', 'trunk', 'trunk_link', 
-        'primary', 'primary_link', 'secondary', 'secondary_link', 
-        'tertiary', 'tertiary_link', 'rail', 'subway', 'light_rail', 
-        'tram', 'narrow_gauge', 'monorail', 'preserved', 
-        'miniature', 'funicular', 'taxiway', 'runway', 'residential', 
-        'taxiway', 'runway', 'proposed', 'construction', 'disused', 
-        'abandoned', 'razed', 'apron', 'ferry'
-    )  
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 
+        'primary', 'primary_link', 'secondary', 'secondary_link','tertiary', 'tertiary_link',
+        'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed'
+
+    ) 
     AND geometry && !BBOX!
 """
 
-# Layer configuration for transport lines 14-20
 [[providers.layers]]
-name = "transport_lines_14-20"
+name = "transport_lines_gen_11"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
     osm_id, 
-    name, 
     ref, 
     class, 
     type, 
-    tunnel, 
-    bridge, 
-    access, 
     service, 
-    ford, 
-    tags->'construction' AS construction, 
+    tags->'electrified' AS electrified, 
+    tags->'highspeed' AS highspeed, 
     tags->'usage' AS usage, 
     tags->'start_date' AS start_date, 
     tags->'end_date' AS end_date, 
@@ -179,7 +147,82 @@ SELECT
     isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines 
+    osm_transport_lines_gen1 
 WHERE 
-    geometry && !BBOX!
+    type IN (
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 
+        'primary', 'primary_link', 'secondary', 'secondary_link','tertiary', 'tertiary_link',
+        'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed',
+        'type', 'tram', 'funicular', 'monorail'
+    ) 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "transport_lines_gen_12-13"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    ref, 
+    class, 
+    type, 
+    service, 
+    tags->'electrified' AS electrified, 
+    tags->'highspeed' AS highspeed, 
+    tags->'usage' AS usage, 
+    tags->'start_date' AS start_date, 
+    tags->'end_date' AS end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}}
+FROM 
+    osm_transport_lines_gen1 
+WHERE 
+    type IN (
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 
+        'primary', 'primary_link', 'secondary', 'secondary_link','tertiary', 'tertiary_link',
+        'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed',
+        'type', 'tram', 'funicular', 'monorail',
+        'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified'
+    ) 
+    AND geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "transport_lines_gen_14-24"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    ref, 
+    class, 
+    type, 
+    service, 
+    tags->'electrified' AS electrified, 
+    tags->'highspeed' AS highspeed, 
+    tags->'usage' AS usage, 
+    tags->'start_date' AS start_date, 
+    tags->'end_date' AS end_date, 
+    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}}
+FROM 
+    osm_transport_lines_gen1 
+WHERE 
+    type IN (
+        'motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 
+        'primary', 'primary_link', 'secondary', 'secondary_link','tertiary', 'tertiary_link',
+        'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed',
+        'type', 'tram', 'funicular', 'monorail',
+        'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified',
+        'subway','track','living_street','footway', 'cycleway', 'path', 'pier','steps','pedestrian','ferry'
+    ) 
+    AND geometry && !BBOX!
 """

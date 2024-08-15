@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: 1893cef4c0ab4ce96ad0451103526c18ebabf8f6
+          ref: ea275266e9ca107f2e5f351bcf522904b7fcfbb8
           path: overpass-turbo
 
       - name: Enable Corepack
