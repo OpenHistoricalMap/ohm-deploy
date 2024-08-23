@@ -4,6 +4,8 @@ on:
     branches:
       - 'main'
       - 'staging'
+      - 'tm/v4'
+
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -14,7 +16,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/staging'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/tm/v4'
         uses: allenevans/set-env@v2.0.0
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
@@ -36,6 +38,11 @@ jobs:
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TM_CLOUDFRONT_DISTRIBUTION_ID }}
+          TM_CLIENT_ID: ${{secrets.STAGING_TM_CLIENT_ID}}
+          TM_CLIENT_SECRET: ${{secrets.STAGING_TM_CLIENT_SECRET}}
+          TM_DEFAULT_CHANGESET_COMMENT:  "staging"
+          TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+          TM_SCOPE: 'read_prefs write_api'
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
@@ -60,23 +67,29 @@ jobs:
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
-
       - name: Checkout tasking-manager repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: 3902d566d9d2d8d5a9c37bf61894ed649b581ee5
-          # token: ${{ env.DEV_GITHUB_TOKEN }}
+          ref: 4ae06b32ac48e1df70a17bb8c380aef79c291304
+          path: tasking-manager
 
-      - name: Use Node.js 12
-        uses: actions/setup-node@v1
+      - name: Debug Checkout
+        run: ls -la tasking-manager
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '16'
 
       - name: npm Install
         run: |
-          npm install && npm run build
-        working-directory: frontend
+          cd tasking-manager/frontend && npm install  && CI=true GENERATE_SOURCEMAP=false npm run build
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
       - uses: actions/setup-python@v2
         with:
@@ -90,7 +103,7 @@ jobs:
       - name: Sync to S3 and clean cache in cloudfront
         if: ${{ success() }}
         run: |
-          aws s3 sync frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
+          aws s3 sync tasking-manager/frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

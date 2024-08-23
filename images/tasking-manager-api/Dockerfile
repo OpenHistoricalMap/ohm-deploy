@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM python:3.8-slim
 
 RUN apt update && \
     apt install -y git
@@ -6,8 +6,7 @@ RUN apt update && \
 ENV workdir /usr/src/app
 
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git $workdir
-# Commits on 27 April, 2022
-RUN cd $workdir && git checkout -f f0df07174f4014365220af09187b5f941f9770b0
+RUN cd $workdir && git checkout -f 4ae06b32ac48e1df70a17bb8c380aef79c291304
 WORKDIR $workdir
 
 # Setup backend dependencies
@@ -18,6 +17,7 @@ RUN apt update && apt install -y \
     libffi-dev \
     python3-dev \
     libpq-dev \
+    postgresql-client \
     proj-bin && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*

@@ -500,7 +500,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: tiler_db
     replicaCount: 2
     commad: './start.sh'
     serviceAnnotations:
@@ -545,7 +545,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: tiler_db
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
@@ -636,11 +636,11 @@ osm-seed:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: tm-api.openhistoricalmap.org
     env:
-      POSTGRES_HOST: {{PRODUCTION_TM_API_DB_HOST}}
-      POSTGRES_DB: {{PRODUCTION_TM_API_DB}}
-      POSTGRES_PASSWORD: {{PRODUCTION_TM_API_DB_PASSWORD}}
-      POSTGRES_USER: {{PRODUCTION_TM_API_DB_USER}}
-      POSTGRES_PORT: 5432
+      # POSTGRES_HOST: {{PRODUCTION_TM_API_DB_HOST}}
+      # POSTGRES_DB: {{PRODUCTION_TM_API_DB}}
+      # POSTGRES_PASSWORD: {{PRODUCTION_TM_API_DB_PASSWORD}}
+      # POSTGRES_USER: {{PRODUCTION_TM_API_DB_USER}}
+      # POSTGRES_PORT: 5432
       TM_ORG_NAME: 'OpenHistoricalMap'
       TM_ORG_CODE: 'OHM'
       TM_ORG_URL: 'www.openhistoricalmap.org'
@@ -664,6 +664,11 @@ osm-seed:
       TM_APP_BASE_URL: 'https://tasks.openhistoricalmap.org'
       TM_IMPORT_MAX_FILESIZE: 3000000
       TM_MAX_AOI_AREA: 15000
+      TM_CLIENT_ID: ${{PRODUCTION_TM_CLIENT_ID}}
+      TM_CLIENT_SECRET: ${{PRODUCTION_TM_CLIENT_SECRET}}
+      TM_DEFAULT_CHANGESET_COMMENT:  "staging"
+      TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+      TM_SCOPE: 'read_prefs write_api'
     resources:
       enabled: false
       requests:
