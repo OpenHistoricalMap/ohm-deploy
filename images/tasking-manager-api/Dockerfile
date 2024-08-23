@@ -6,7 +6,7 @@ RUN apt update && \
 ENV workdir /usr/src/app
 
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git $workdir
-RUN cd $workdir && git checkout -f c2e85feed9660eb66dfcd2009bec2b049dfe0260
+RUN cd $workdir && git checkout -f 4ae06b32ac48e1df70a17bb8c380aef79c291304
 WORKDIR $workdir
 
 # Setup backend dependencies
@@ -17,6 +17,7 @@ RUN apt update && apt install -y \
     libffi-dev \
     python3-dev \
     libpq-dev \
+    postgresql-client \
     proj-bin && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*

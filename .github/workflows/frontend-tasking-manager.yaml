@@ -71,7 +71,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: c2e85feed9660eb66dfcd2009bec2b049dfe0260
+          ref: 4ae06b32ac48e1df70a17bb8c380aef79c291304
           path: tasking-manager
 
       - name: Debug Checkout
