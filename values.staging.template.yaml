@@ -658,7 +658,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -669,8 +669,6 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
-
-
         # POSTGRES_HOST: {{STAGING_TM_API_DB_HOST}}
         # POSTGRES_DB: {{STAGING_TM_API_DB}}
         # POSTGRES_PASSWORD: {{STAGING_TM_API_DB_PASSWORD}}
