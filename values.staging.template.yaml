@@ -697,8 +697,8 @@ osm-seed:
         TM_APP_BASE_URL: 'https://tasks.staging.openhistoricalmap.org'
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
-        TM_CLIENT_ID: ${{STAGING_TM_CLIENT_ID}}
-        TM_CLIENT_SECRET: ${{STAGING_TM_CLIENT_SECRET}}
+        TM_CLIENT_ID: {{STAGING_TM_CLIENT_ID}}
+        TM_CLIENT_SECRET: {{STAGING_TM_CLIENT_SECRET}}
         TM_DEFAULT_CHANGESET_COMMENT:  "staging"
         TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
