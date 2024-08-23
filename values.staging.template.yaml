@@ -702,6 +702,7 @@ osm-seed:
         TM_DEFAULT_CHANGESET_COMMENT:  "staging"
         TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
+        TM_APP_API_VERSION: v4
       resources:
         enabled: false
         requests:
