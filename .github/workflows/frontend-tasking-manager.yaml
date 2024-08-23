@@ -16,12 +16,11 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/tm/v4'
+        if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
           TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
-          TM_APP_API_VERSION: v2
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
           TM_ORG_URL: openhistoricalmap.org
@@ -41,8 +40,9 @@ jobs:
           TM_CLIENT_ID: ${{secrets.STAGING_TM_CLIENT_ID}}
           TM_CLIENT_SECRET: ${{secrets.STAGING_TM_CLIENT_SECRET}}
           TM_DEFAULT_CHANGESET_COMMENT:  "staging"
-          TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+          TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
           TM_SCOPE: 'read_prefs write_api'
+          TM_APP_API_VERSION: v4
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
