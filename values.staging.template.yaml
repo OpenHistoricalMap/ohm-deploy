@@ -889,7 +889,7 @@ osm-seed:
 # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
 # ====================================================================================================
     changesetReplicationJob:
-      enabled: true
+      enabled: false
       resources:
         enabled: false
         requests:
