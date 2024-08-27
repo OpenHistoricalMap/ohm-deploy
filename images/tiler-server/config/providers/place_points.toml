@@ -1,4 +1,3 @@
-# Layer configuration for place points
 [[providers.layers]]
 name = "place_points_0_2"
 geometry_fieldname = "geometry"
@@ -20,11 +19,19 @@ SELECT
 FROM 
     osm_place_points
 WHERE 
-    type IN ('country') 
+    --type IN ('country') 
+    type IN (
+    'ocean',
+    'sea',
+    'archipelago',
+    'country',
+    'territory',
+    'unorganized territory'
+    ) 
     AND geometry && !BBOX!
 """
 
-# Layer configuration for place points
+    
 [[providers.layers]]
 name = "place_points_3_5"
 geometry_fieldname = "geometry"
@@ -46,9 +53,21 @@ SELECT
 FROM 
     osm_place_points
 WHERE 
-    type IN ('country', 'state', 'territory') 
+    --type IN ('country', 'state', 'territory') 
+    type IN (
+    'ocean',
+    'sea',
+    'archipelago',
+    'country',
+    'territory',
+    'unorganized territory',
+    'state',
+    'province',
+    'region'
+    ) 
     AND geometry && !BBOX!
 """
+
 
 [[providers.layers]]
 name = "place_points_6_10"
@@ -71,7 +90,22 @@ SELECT
 FROM 
     osm_place_points
 WHERE 
-    type IN ('country', 'state', 'territory', 'city', 'town') 
+    --type IN ('country', 'state', 'territory', 'city', 'town') 
+    type IN (
+    'ocean',
+    'sea',
+    'archipelago',
+    'country',
+    'territory',
+    'unorganized territory',
+    'state',
+    'province',
+    'region',
+    'county',
+    'municipality',
+    'city',
+    'town'
+    ) 
     AND geometry && !BBOX!
 """
 
@@ -97,6 +131,6 @@ SELECT
 FROM 
     osm_place_points
 WHERE 
-    type IN ('country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighborhood') 
-    AND geometry && !BBOX!
+    --type IN ('country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood') 
+    geometry && !BBOX!
 """
