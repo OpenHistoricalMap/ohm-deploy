@@ -21,6 +21,7 @@ jobs:
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
           TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
+          TM_HOMEPAGE_STATS_API_URL: https://tm-api.staging.openhistoricalmap.org/api/v4/system/statistics/
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
           TM_ORG_URL: openhistoricalmap.org
