@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
-        uses: allenevans/set-env@v2.0.0
+        uses: allenevans/set-env@v4.0.0
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
           TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
@@ -47,7 +47,7 @@ jobs:
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
-        uses: allenevans/set-env@v2.0.0
+        uses: allenevans/set-env@v4.0.0
         with:
           TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
           TM_APP_API_URL: https://tm-api.openhistoricalmap.org
@@ -79,7 +79,7 @@ jobs:
         run: ls -la tasking-manager
 
       - name: Use Node.js 16
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '16'
 
@@ -88,11 +88,11 @@ jobs:
           cd tasking-manager/frontend && npm install  && CI=true GENERATE_SOURCEMAP=false npm run build
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
