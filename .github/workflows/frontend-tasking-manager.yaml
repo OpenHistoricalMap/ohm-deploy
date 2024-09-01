@@ -17,7 +17,7 @@ jobs:
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
-        uses: allenevans/set-env@v4.0.0
+        uses: allenevans/set-env@v4
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
           TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
@@ -47,7 +47,7 @@ jobs:
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
-        uses: allenevans/set-env@v4.0.0
+        uses: allenevans/set-env@v4
         with:
           TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
           TM_APP_API_URL: https://tm-api.openhistoricalmap.org
@@ -72,7 +72,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: 4ae06b32ac48e1df70a17bb8c380aef79c291304
+          ref: 9aa101067701e27d7a85406559328957b57daded
           path: tasking-manager
 
       - name: Debug Checkout
