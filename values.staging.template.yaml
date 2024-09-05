@@ -643,7 +643,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
-        AWS_ElasticBlockStore_volumeID: vol-04b6042d7c0ad2bf2
+        AWS_ElasticBlockStore_volumeID: vol-0c470f0ea2e7456ea
         AWS_ElasticBlockStore_size: 20Gi
       resources:
         enabled: false
@@ -658,7 +658,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -676,7 +676,7 @@ osm-seed:
         # POSTGRES_PORT: 5432
         TM_ORG_NAME: 'OpenHistoricalMap'
         TM_ORG_CODE: 'OHM'
-        TM_ORG_URL: 'openhistoricalmap.org'
+        TM_ORG_URL: 'staging.openhistoricalmap.org'
         TM_ORG_PRIVACY_POLICY_URL: 'staging.openhistoricalmap.org/copyright'
         TM_ORG_GITHUB: 'github.com/openhistoricalmap'
         OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
