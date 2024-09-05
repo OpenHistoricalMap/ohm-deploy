@@ -4,8 +4,6 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'tm/v4'
-
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -44,8 +42,7 @@ jobs:
           TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
           TM_SCOPE: 'read_prefs write_api'
           TM_APP_API_VERSION: v4
-          REACT_APP_OSM_SERVER_URL: https://staging.openhistoricalmap.org
-
+          
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v4.0.0
