@@ -76,6 +76,7 @@ RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git /usr/src/
 USER appuser:appuser
 
 RUN cd /usr/src/app && git checkout -f 321a9c19e07576a3c3c2eff3df14ba48c7325837
+RUN sed -i 's/Welcome to the API//g' /usr/src/app/backend/models/postgis/banner.py
 
 FROM runtime as debug
 RUN pip install --user --no-warn-script-location \
