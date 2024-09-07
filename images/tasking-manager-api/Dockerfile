@@ -69,13 +69,13 @@ USER appuser:appuser
 
 # Clone the repository as root to avoid permission issues
 USER root
-RUN git clone https://github.com/Rub21/tasking-manager.git /usr/src/app && \
+RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git /usr/src/app && \
     chown -R appuser:appuser /usr/src/app
 
 # Switch back to non-root user
 USER appuser:appuser
 
-RUN cd /usr/src/app && git checkout -f 244b243de1b103872d5f170992525e3de4bffced
+RUN cd /usr/src/app && git checkout -f 321a9c19e07576a3c3c2eff3df14ba48c7325837
 
 FROM runtime as debug
 RUN pip install --user --no-warn-script-location \
