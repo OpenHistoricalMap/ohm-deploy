@@ -9,3 +9,12 @@ services:
     env_file:
       - ../envs/.env.tiler
     restart: always
+  tm-web:
+    image: node:16
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../envs/.env.tm
+    restart: always
+    volumes:
+      - ./../../tasking-manager/frontend:/frontend

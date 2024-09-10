@@ -679,8 +679,8 @@ osm-seed:
         ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
         POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
         TM_SECRET: {{STAGING_TM_API_SECRET}}
-        TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
-        TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
+        # TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
+        # TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
         TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
         TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
         TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
@@ -694,17 +694,17 @@ osm-seed:
         TM_MAX_AOI_AREA: 15000
         TM_CLIENT_ID: {{STAGING_TM_CLIENT_ID}}
         TM_CLIENT_SECRET: {{STAGING_TM_CLIENT_SECRET}}
-        TM_DEFAULT_CHANGESET_COMMENT:  staging
+        TM_DEFAULT_CHANGESET_COMMENT: staging
         TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         TM_APP_API_VERSION: v4
       resources:
         enabled: false
         requests:
-          memory: '1Gi'
+          memory: 1Gi
           cpu: '2'
         limits:
-          memory: '2Gi'
+          memory: 2Gi
           cpu: '2'
   
   # ====================================================================================================
