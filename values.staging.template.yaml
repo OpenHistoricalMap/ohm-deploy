@@ -664,53 +664,48 @@ osm-seed:
         label_key: nodegroup_type
         label_value: web
       replicaCount: 1
-      staticIp: c
       serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
       ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
-        # POSTGRES_HOST: {{STAGING_TM_API_DB_HOST}}
-        # POSTGRES_DB: {{STAGING_TM_API_DB}}
-        # POSTGRES_PASSWORD: {{STAGING_TM_API_DB_PASSWORD}}
-        # POSTGRES_USER: {{STAGING_TM_API_DB_USER}}
-        # POSTGRES_PORT: 5432
-        TM_ORG_NAME: 'OpenHistoricalMap'
-        TM_ORG_CODE: 'OHM'
-        TM_ORG_URL: 'staging.openhistoricalmap.org'
-        TM_ORG_PRIVACY_POLICY_URL: 'staging.openhistoricalmap.org/copyright'
-        TM_ORG_GITHUB: 'github.com/openhistoricalmap'
-        OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
-        OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api.staging.openhistoricalmap.org'
-        OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
-        ID_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=id'
-        POTLATCH2_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=potlatch2'
+        TM_ORG_NAME: OpenHistoricalMap
+        TM_ORG_CODE: OHM
+        TM_ORG_URL: staging.openhistoricalmap.org
+        TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+        TM_ORG_GITHUB: github.com/openhistoricalmap
+        OSM_SERVER_URL: https://staging.openhistoricalmap.org
+        OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
+        OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
+        ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
+        POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
         TM_SECRET: {{STAGING_TM_API_SECRET}}
         TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
         TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
-        TM_EMAIL_FROM_ADDRESS: 'ohm-admins@googlegroups.com'
-        TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
+        TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+        TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+        TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
         TM_SMTP_PORT: 25
         TM_SMTP_USER: {{MAILER_USERNAME}}
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
-        TM_DEFAULT_LOCALE: 'en'
-        TM_APP_API_URL: 'https://tm-api.staging.openhistoricalmap.org'
-        TM_APP_BASE_URL: 'https://tasks.staging.openhistoricalmap.org'
+        TM_DEFAULT_LOCALE: en
+        TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
+        TM_APP_BASE_URL: https://tasks.staging.openhistoricalmap.org
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
         TM_CLIENT_ID: {{STAGING_TM_CLIENT_ID}}
         TM_CLIENT_SECRET: {{STAGING_TM_CLIENT_SECRET}}
-        TM_DEFAULT_CHANGESET_COMMENT:  "staging"
+        TM_DEFAULT_CHANGESET_COMMENT:  staging
         TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         TM_APP_API_VERSION: v4
       resources:
         enabled: false
         requests:
-          memory: "1Gi"
-          cpu: "2"
+          memory: '1Gi'
+          cpu: '2'
         limits:
-          memory: "2Gi"
-          cpu: "2"
+          memory: '2Gi'
+          cpu: '2'
   
   # ====================================================================================================
   # Variables for nominatim api
