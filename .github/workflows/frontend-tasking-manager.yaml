@@ -70,16 +70,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: 321a9c19e07576a3c3c2eff3df14ba48c7325837
+          ref: f0a08932b0a7be079ddf17b09bea96f769f22f22
           path: tasking-manager
 
       - name: Debug Checkout
         run: ls -la tasking-manager
 
-      - name: Use Node.js 16
+      - name: Use Node.js 18.19.1
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18.19.1'
 
       - name: npm Install
         run: |
