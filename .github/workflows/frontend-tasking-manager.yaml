@@ -18,12 +18,12 @@ jobs:
         uses: allenevans/set-env@v4.0.0
         with:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
-          TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
+          TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org/api
           TM_HOMEPAGE_STATS_API_URL: https://tm-api.staging.openhistoricalmap.org/api/v4/system/statistics/
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
-          TM_ORG_URL: openhistoricalmap.org
-          TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+          TM_ORG_URL: https://openhistoricalmap.org
+          TM_ORG_PRIVACY_POLICY_URL: https://staging.openhistoricalmap.org/privacy-policy
           TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
           TM_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
@@ -31,14 +31,13 @@ jobs:
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
-          POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
           TM_MAX_AOI_AREA: 15000
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TM_CLOUDFRONT_DISTRIBUTION_ID }}
           TM_CLIENT_ID: ${{secrets.STAGING_TM_CLIENT_ID}}
           TM_CLIENT_SECRET: ${{secrets.STAGING_TM_CLIENT_SECRET}}
-          TM_DEFAULT_CHANGESET_COMMENT:  "staging"
+          TM_DEFAULT_CHANGESET_COMMENT: "staging"
           TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
           TM_SCOPE: 'read_prefs write_api'
           TM_APP_API_VERSION: v4
@@ -48,20 +47,19 @@ jobs:
         uses: allenevans/set-env@v4.0.0
         with:
           TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
-          TM_APP_API_URL: https://tm-api.openhistoricalmap.org
-          TM_APP_API_VERSION: v2
+          TM_APP_API_URL: https://tm-api.openhistoricalmap.org/api
+          TM_APP_API_VERSION: v4
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
-          TM_ORG_URL: www.openhistoricalmap.org
-          TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
-          TM_ORG_TWITTER: http://twitter.com/OpenHistMap
-          TM_ORG_GITHUB: github.com/openhistoricalmap
+          TM_ORG_URL: https://www.openhistoricalmap.org
+          TM_ORG_PRIVACY_POLICY_URL: https://www.openhistoricalmap.org/privacy-policy
+          TM_ORG_TWITTER: https://twitter.com/OpenHistMap
+          TM_ORG_GITHUB: https://github.com/openhistoricalmap
           TM_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
           TM_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
           OSM_SERVER_URL: https://www.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
-          POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
           TM_MAX_AOI_AREA: 15000
           TM_IMPORT_MAX_FILESIZE: 3e+06
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
