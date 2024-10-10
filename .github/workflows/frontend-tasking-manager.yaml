@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: 3902d566d9d2d8d5a9c37bf61894ed649b581ee5
+          ref: e2212473534e50199602065ea864953364d297af
           # token: ${{ env.DEV_GITHUB_TOKEN }}
 
       - name: Use Node.js 12
