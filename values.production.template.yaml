@@ -659,8 +659,10 @@ osm-seed:
       TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
       TM_IMPORT_MAX_FILESIZE: 3000000
       TM_MAX_AOI_AREA: 15000
-      TM_CLIENT_ID: ${{PRODUCTION_TM_CLIENT_ID}}
-      TM_CLIENT_SECRET: ${{PRODUCTION_TM_CLIENT_SECRET}}
+      TM_APP_API_VERSION: v2
+      # The following environment variables are for future versions of TM
+      TM_CLIENT_ID: {{PRODUCTION_TM_CLIENT_ID}}
+      TM_CLIENT_SECRET: {{PRODUCTION_TM_CLIENT_SECRET}}
       TM_DEFAULT_CHANGESET_COMMENT: production
       TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
       TM_SCOPE: 'read_prefs write_api'
