@@ -79,12 +79,11 @@ jobs:
           npm install && npm run build
         working-directory: frontend
 
-      - name: Debug Checkout
+      - name: Debug current directory
         run: |
-          ls -la tasking-manager
-          ls -la tasking-manager/frontend
           pwd
-
+          ls -la
+          
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
