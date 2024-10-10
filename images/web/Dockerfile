@@ -55,14 +55,14 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=17f7bfd284a63ea1e4de93195e2d1d131e525e12
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c60ef3c1774468212b6c7a286276245e9e0ad5b1
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'Hotfix for inability to create new user (issue 853)'
+RUN echo 'Releasing delayed, feature-rich version of iD.'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages

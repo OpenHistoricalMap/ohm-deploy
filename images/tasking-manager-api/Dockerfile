@@ -31,3 +31,4 @@ RUN pip install --upgrade markdown
 EXPOSE 5000
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "--worker-class", "gevent", "--workers", "3", \
     "--threads", "3", "--timeout", "179", "manage:application", "&"]
+    

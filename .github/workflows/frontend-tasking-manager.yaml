@@ -4,6 +4,7 @@ on:
     branches:
       - 'main'
       - 'staging'
+      - 'tm-fix-version'
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -26,8 +27,8 @@ jobs:
           TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
           TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
-          TM_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
-          TM_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
+          TM_CONSUMER_KEY: CGWeUmRTFb6o0OQy4AyXb8bnl5fuSdCPODknveW7
+          TM_CONSUMER_SECRET: lIVcx44V97QqgTSbXeJw5EKAdIBZrJ2N5negJsF4
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
@@ -75,7 +76,11 @@ jobs:
 
       - name: npm Install
         run: |
-          npm install && npm run build
+          cat package.json
+          npm install
+          npm install @openhistoricalmap/id@2.18.5
+          npm install @babel/core@^7.16.0 --save-dev
+          npm run build
         working-directory: frontend
 
       - uses: actions/setup-python@v2

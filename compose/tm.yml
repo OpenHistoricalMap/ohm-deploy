@@ -1,0 +1,20 @@
+services:
+  tm-api:
+    image: ohm/ohm-tm-api:v3
+    build:
+      context: ../images/tasking-manager-api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../envs/.env.tiler
+    restart: always
+  tm-web:
+    image: node:16
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../envs/.env.tm
+    restart: always
+    volumes:
+      - ./../../tasking-manager/frontend:/frontend

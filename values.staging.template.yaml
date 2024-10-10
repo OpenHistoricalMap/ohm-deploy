@@ -79,7 +79,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-06464c17e2c8f9895
+        AWS_ElasticBlockStore_volumeID : vol-0d644eb9ea4e8fccf
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: false
@@ -629,7 +629,7 @@ osm-seed:
       enabled: true
       image:
         name: "postgis/postgis"
-        tag: "14-3.3"
+        tag: "11-2.5"
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -643,8 +643,8 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
-        AWS_ElasticBlockStore_volumeID: vol-0a53dfc0f4621b89d
-        AWS_ElasticBlockStore_size: 20Gi
+        AWS_ElasticBlockStore_volumeID: vol-077f1a9f62a1951e8
+        AWS_ElasticBlockStore_size: 50Gi
       resources:
         enabled: false
         requests:
@@ -669,11 +669,6 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
-        POSTGRES_HOST: {{STAGING_TM_API_DB_HOST}}
-        POSTGRES_DB: {{STAGING_TM_API_DB}}
-        POSTGRES_PASSWORD: {{STAGING_TM_API_DB_PASSWORD}}
-        POSTGRES_USER: {{STAGING_TM_API_DB_USER}}
-        POSTGRES_PORT: 5432
         TM_ORG_NAME: 'OpenHistoricalMap'
         TM_ORG_CODE: 'OHM'
         TM_ORG_URL: 'openhistoricalmap.org'
@@ -694,9 +689,16 @@ osm-seed:
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
         TM_DEFAULT_LOCALE: 'en'
         TM_APP_API_URL: 'https://tm-api.staging.openhistoricalmap.org'
-        TM_APP_BASE_URL: 'https://tasks.staging.openhistoricalmap.org'
+        TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
+        TM_APP_API_VERSION: v2
+        # The following environment variables are for future versions of TM
+        TM_CLIENT_ID: {{STAGING_TM_CLIENT_ID}}
+        TM_CLIENT_SECRET: {{STAGING_TM_CLIENT_SECRET}}
+        TM_DEFAULT_CHANGESET_COMMENT: STAGING
+        TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+        TM_SCOPE: 'read_prefs write_api'
       resources:
         enabled: false
         requests:
@@ -883,7 +885,7 @@ osm-seed:
 # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
 # ====================================================================================================
     changesetReplicationJob:
-      enabled: true
+      enabled: false
       resources:
         enabled: false
         requests:

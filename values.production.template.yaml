@@ -500,7 +500,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: tiler_db
     replicaCount: 2
     commad: './start.sh'
     serviceAnnotations:
@@ -545,7 +545,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: tiler_db
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
@@ -610,7 +610,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
-      AWS_ElasticBlockStore_volumeID: vol-03a2f95687a51a531
+      AWS_ElasticBlockStore_volumeID: vol-0b5145c81517b1209
       AWS_ElasticBlockStore_size: 20Gi
     resources:
       enabled: false
@@ -631,50 +631,50 @@ osm-seed:
       label_key: nodegroup_type
       label_value: web
     replicaCount: 2
-    staticIp: c
     serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
     ingressDomain: tm-api.openhistoricalmap.org
     env:
-      POSTGRES_HOST: {{PRODUCTION_TM_API_DB_HOST}}
-      POSTGRES_DB: {{PRODUCTION_TM_API_DB}}
-      POSTGRES_PASSWORD: {{PRODUCTION_TM_API_DB_PASSWORD}}
-      POSTGRES_USER: {{PRODUCTION_TM_API_DB_USER}}
-      POSTGRES_PORT: 5432
-      TM_ORG_NAME: 'OpenHistoricalMap'
-      TM_ORG_CODE: 'OHM'
-      TM_ORG_URL: 'www.openhistoricalmap.org'
-      TM_ORG_PRIVACY_POLICY_URL: 'www.openhistoricalmap.org/copyright'
-      TM_ORG_GITHUB: 'github.com/openhistoricalmap'
-      OSM_SERVER_URL: 'https://www.openhistoricalmap.org'
-      OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api.openhistoricalmap.org'
-      OSM_REGISTER_URL: 'https://www.openhistoricalmap.org/user/new'
-      ID_EDITOR_URL: 'https://www.openhistoricalmap.org/edit?editor=id'
-      POTLATCH2_EDITOR_URL: 'https://www.openhistoricalmap.org/edit?editor=potlatch2'
+      TM_ORG_NAME: OpenHistoricalMap
+      TM_ORG_CODE: OHM
+      TM_ORG_URL: www.openhistoricalmap.org
+      TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
+      TM_ORG_GITHUB: github.com/openhistoricalmap
+      OSM_SERVER_URL: https://www.openhistoricalmap.org
+      OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
+      OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
+      ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
+      POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
       TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
       TM_CONSUMER_KEY: {{PRODUCTION_TM_API_CONSUMER_KEY}}
       TM_CONSUMER_SECRET: {{PRODUCTION_TM_API_CONSUMER_SECRET}}
-      TM_EMAIL_FROM_ADDRESS: 'ohm-admins@googlegroups.com'
-      TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
+      TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+      TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+      TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
       TM_SMTP_PORT: 25
       TM_SMTP_USER: {{MAILER_USERNAME}}
       TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
-      TM_DEFAULT_LOCALE: 'en'
-      TM_APP_API_URL: 'https://tm-api.openhistoricalmap.org'
-      TM_APP_BASE_URL: 'https://tasks.openhistoricalmap.org'
+      TM_DEFAULT_LOCALE: en
+      TM_APP_API_URL: https://tm-api.openhistoricalmap.org
+      TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
       TM_IMPORT_MAX_FILESIZE: 3000000
       TM_MAX_AOI_AREA: 15000
+      TM_APP_API_VERSION: v2
+      # The following environment variables are for future versions of TM
+      TM_CLIENT_ID: {{PRODUCTION_TM_CLIENT_ID}}
+      TM_CLIENT_SECRET: {{PRODUCTION_TM_CLIENT_SECRET}}
+      TM_DEFAULT_CHANGESET_COMMENT: production
+      TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+      TM_SCOPE: 'read_prefs write_api'
     resources:
       enabled: false
       requests:
-        memory: "1Gi"
-        cpu: "2"
+        memory: 1Gi
+        cpu: '2'
       limits:
-        memory: "2Gi"
-        cpu: "2"
+        memory: 2Gi
+        cpu: '2'
 
-
-  
   # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
