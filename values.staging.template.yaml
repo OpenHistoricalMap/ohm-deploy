@@ -669,11 +669,6 @@ osm-seed:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
-        POSTGRES_HOST: {{STAGING_TM_API_DB_HOST}}
-        POSTGRES_DB: {{STAGING_TM_API_DB}}
-        POSTGRES_PASSWORD: {{STAGING_TM_API_DB_PASSWORD}}
-        POSTGRES_USER: {{STAGING_TM_API_DB_USER}}
-        POSTGRES_PORT: 5432
         TM_ORG_NAME: 'OpenHistoricalMap'
         TM_ORG_CODE: 'OHM'
         TM_ORG_URL: 'openhistoricalmap.org'
