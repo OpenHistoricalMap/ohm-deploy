@@ -4,6 +4,7 @@ on:
     branches:
       - 'main'
       - 'staging'
+      - 'tm-fix-version'
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -78,6 +79,12 @@ jobs:
           npm install && npm run build
         working-directory: frontend
 
+      - name: Debug Checkout
+        run: |
+          ls -la tasking-manager
+          ls -la tasking-manager/frontend
+          pwd
+
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
@@ -90,7 +97,7 @@ jobs:
       - name: Sync to S3 and clean cache in cloudfront
         if: ${{ success() }}
         run: |
-          aws s3 sync frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
+          aws s3 sync tasking-manager/frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
