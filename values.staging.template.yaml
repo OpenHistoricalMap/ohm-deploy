@@ -629,7 +629,7 @@ osm-seed:
       enabled: true
       image:
         name: "postgis/postgis"
-        tag: "14-3.3"
+        tag: "11-2.5"
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -643,7 +643,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
-        AWS_ElasticBlockStore_volumeID: vol-0c470f0ea2e7456ea
+        AWS_ElasticBlockStore_volumeID: vol-077f1a9f62a1951e8
         AWS_ElasticBlockStore_size: 20Gi
       resources:
         enabled: false
@@ -679,8 +679,8 @@ osm-seed:
         ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
         POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
         TM_SECRET: {{STAGING_TM_API_SECRET}}
-        # TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
-        # TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
+        TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
+        TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
         TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
         TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
         TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
