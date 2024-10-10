@@ -66,13 +66,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: e2212473534e50199602065ea864953364d297af
+          ref: 835b66baff98b1de16030512851eb451703685a9
           # token: ${{ env.DEV_GITHUB_TOKEN }}
 
       - name: Use Node.js 12
         uses: actions/setup-node@v1
         with:
-          node-version: '12'
+          node-version: '16'
 
       - name: npm Install
         run: |
