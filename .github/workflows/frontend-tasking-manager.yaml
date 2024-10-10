@@ -76,7 +76,9 @@ jobs:
 
       - name: npm Install
         run: |
-          npm install && npm run build
+          mpm install
+          npm install @babel/core@^7.16.0 --save-dev
+          npm run build
         working-directory: frontend
 
       - uses: actions/setup-python@v2
