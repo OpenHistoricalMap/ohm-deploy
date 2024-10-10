@@ -27,8 +27,8 @@ jobs:
           TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
           TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
-          TM_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
-          TM_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
+          TM_CONSUMER_KEY: CGWeUmRTFb6o0OQy4AyXb8bnl5fuSdCPODknveW7
+          TM_CONSUMER_SECRET: lIVcx44V97QqgTSbXeJw5EKAdIBZrJ2N5negJsF4
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
