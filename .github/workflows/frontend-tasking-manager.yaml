@@ -83,7 +83,6 @@ jobs:
         run: |
           pwd
           ls -la
-          
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
@@ -96,7 +95,9 @@ jobs:
       - name: Sync to S3 and clean cache in cloudfront
         if: ${{ success() }}
         run: |
-          aws s3 sync tasking-manager/frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
+          ls -la frontend
+          ls -la frontend/build
+          aws s3 sync frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
