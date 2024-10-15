@@ -162,7 +162,7 @@ osm-seed:
         # API_TIMEOUT: 600
         # WEB_TIMEOUT: 600
       resources:
-        enabled: true
+        enabled: false
         requests:
           memory: "2Gi"
           cpu: "1"
