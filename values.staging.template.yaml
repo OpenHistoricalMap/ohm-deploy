@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: db_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: web_large
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -183,7 +183,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: web_large
       resources:
         enabled: false
         requests:
@@ -269,7 +269,7 @@ osm-seed:
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
-        label_value: web
+        label_value: web_large
       resources:
         enabled: false
         requests:
@@ -374,7 +374,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: job
+          label_value: job_large
       - name: osmcha-db
         enabled: false
         schedule: '0 1 * * *'
@@ -433,7 +433,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db
+        label_value: db_large
       postgresqlConfig:
         enabled: true
         values: |
@@ -497,7 +497,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db_large
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240726_0003.osm.pbf
@@ -531,7 +531,7 @@ osm-seed:
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
-        label_value: web
+        label_value: db_large
       replicaCount: 1
       commad: './start.sh'
       serviceAnnotations:
@@ -576,7 +576,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: web_large
       replicaCount: 1
       command: './cache_cleaner.sh'
       resources:
@@ -633,7 +633,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db_large
       env:
         POSTGRES_DB: tm
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
@@ -662,7 +662,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: db_large
       replicaCount: 1
       staticIp: c
       serviceAnnotations:
@@ -825,7 +825,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web
+        label_value: web_large
       cronjob:
         enabled: false
         schedule: "0 2 */3 * *"
