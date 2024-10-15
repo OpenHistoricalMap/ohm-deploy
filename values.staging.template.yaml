@@ -633,7 +633,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_medium
+        label_value: db_large
       env:
         POSTGRES_DB: tm
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
