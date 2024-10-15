@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_medium
+        label_value: db_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -433,7 +433,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_medium
+        label_value: db_large
       postgresqlConfig:
         enabled: true
         values: |
