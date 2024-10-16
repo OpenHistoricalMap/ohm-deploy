@@ -162,13 +162,13 @@ osm-seed:
         # API_TIMEOUT: 600
         # WEB_TIMEOUT: 600
       resources:
-        enabled: false
+        enabled: true
         requests:
           memory: "2Gi"
-          cpu: "1"
+          cpu: "500m"
         limits:
           memory: "2Gi"
-          cpu: "1"
+          cpu: "600m"
       autoscaling:
         enabled: false
         minReplicas: 1
@@ -582,11 +582,11 @@ osm-seed:
       resources:
         enabled: true
         requests:
-          memory: "2Gi"
+          memory: "1Gi"
           cpu: "500m"
         limits:
-          memory: "2Gi"
-          cpu: "800m"
+          memory: "1Gi"
+          cpu: "600m"
       env:
         KILL_PROCESS: manually
         MAX_NUM_PS: 4
