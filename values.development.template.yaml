@@ -67,7 +67,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: { { STAGING_TM_DB_PASSWORD } }
@@ -96,11 +96,11 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: tm-api.staging.openhistoricalmap.org
+    ingressDomain: tm-api.development.staging.openhistoricalmap.org
     env:
       TM_ORG_NAME: OpenHistoricalMap
       TM_ORG_CODE: OHM
@@ -122,14 +122,14 @@ osm-seed:
       TM_SMTP_USER: { { MAILER_USERNAME } }
       TM_SMTP_PASSWORD: { { MAILER_PASSWORD } }
       TM_DEFAULT_LOCALE: en
-      TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
-      TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
+      TM_APP_API_URL: https://tm-api.development.staging.openhistoricalmap.org
+      TM_APP_BASE_URL: https://tasks.development.staging.openhistoricalmap.org
       TM_IMPORT_MAX_FILESIZE: 3000000
       TM_MAX_AOI_AREA: 15000
-      TM_CLIENT_ID: { { STAGING_TM_CLIENT_ID } }
-      TM_CLIENT_SECRET: { { STAGING_TM_CLIENT_SECRET } }
+      TM_CLIENT_ID: XjMqsHvGxQa7iN0NHLBsq8aqztbV7K6YYZKCpWCqMko
+      TM_CLIENT_SECRET: bDvQOTjSBNtuQFn3iIN7qU1suY7iTTHLyISRZIFPGpQ
       TM_DEFAULT_CHANGESET_COMMENT: staging
-      TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+      TM_REDIRECT_URI: https://tasks.development.staging.openhistoricalmap.org/authorized
       TM_SCOPE: "read_prefs write_api"
       TM_APP_API_VERSION: v4
     resources:
