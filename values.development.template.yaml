@@ -146,7 +146,7 @@ osm-seed:
   overpassApi:
     enabled: false
   taginfo:
-    enabled: true
+    enabled: false
   osmSimpleMetrics:
     enabled: false
   monitoringReplication:
