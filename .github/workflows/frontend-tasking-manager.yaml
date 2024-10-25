@@ -42,7 +42,7 @@ jobs:
           TM_SCOPE: "read_prefs write_api"
           TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks.development.staging.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: E229AE29NQDXIJ
+          CLOUDFRONT_DISTRIBUTION_ID: EZIPGFJYNA7K9
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
