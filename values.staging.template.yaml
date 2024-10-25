@@ -155,8 +155,8 @@ osm-seed:
         MAILER_FROM: ohm-admins@googlegroups.com
         NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
-        NEW_RELIC_LICENSE_KEY: {{STAGING_NEW_RELIC_LICENSE_KEY}}
-        NEW_RELIC_APP_NAME: {{STAGING_NEW_RELIC_APP_NAME}}
+        NEW_RELIC_LICENSE_KEY: "none"
+        NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
         WEBSITE_STATUS: "online"
         # API_TIMEOUT: 600
