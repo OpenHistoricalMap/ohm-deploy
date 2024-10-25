@@ -920,8 +920,8 @@ osm-seed:
       name: "developmentseed/osmseed-osmcha-db"
       tag: "0.1.0-n767.h0090e97"
     env:
-      POSTGRES_DB: {{PRODUCTION_OSMCHA_PG_DATABASE}}
-      POSTGRES_USER: {{PRODUCTION_OSMCHA_PG_USER}}
+      POSTGRES_DB: osmcha
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: {{PRODUCTION_OSMCHA_PG_PASSWORD}}
     resources:
       enabled: false
