@@ -70,7 +70,7 @@ osm-seed:
       label_value: web_large
     env:
       POSTGRES_DB: tm
-      POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
+      POSTGRES_PASSWORD: {{DEVELOPMENT_TM_DB_PASSWORD}}
       POSTGRES_USER: postgres
     persistenceDisk:
       enabled: true
@@ -112,7 +112,7 @@ osm-seed:
       OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
       ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
-      TM_SECRET: {{STAGING_TM_API_SECRET}}
+      TM_SECRET: {{DEVELOPMENT_TM_API_SECRET}}
       # TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
       # TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
       TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
