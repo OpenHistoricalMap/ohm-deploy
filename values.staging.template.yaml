@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -183,7 +183,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       resources:
         enabled: false
         requests:
@@ -196,11 +196,11 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job
+        label_value: job_large
       schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
@@ -221,7 +221,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job
+        label_value: job_large
       schedule: '0 0 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -242,7 +242,7 @@ osm-seed:
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       resources:
         enabled: false
         requests:
@@ -299,7 +299,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: false
+        enabled: true
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -324,7 +324,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: job
+          label_value: job_large
       - name: tm-db
         enabled: true
         schedule: '0 1 * * *'
@@ -470,7 +470,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240726_0003.osm.pbf
@@ -504,7 +504,7 @@ osm-seed:
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       replicaCount: 1
       commad: './start.sh'
       serviceAnnotations:
@@ -549,7 +549,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       replicaCount: 1
       command: './cache_cleaner.sh'
       resources:
@@ -610,7 +610,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       replicaCount: 1
       staticIp: c
       serviceAnnotations:
@@ -773,7 +773,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       cronjob:
         enabled: false
         schedule: "0 2 */3 * *"
