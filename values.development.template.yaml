@@ -43,7 +43,7 @@ osm-seed:
         enabled: false
 
   tilerDb:
-    enabled: true
+    enabled: false
 
   tilerImposm:
     enabled: false
