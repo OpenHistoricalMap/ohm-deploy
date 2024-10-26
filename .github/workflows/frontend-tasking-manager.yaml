@@ -32,13 +32,13 @@ jobs:
           TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
           TM_DEFAULT_LOCALE: en
           TM_APP_API_URL: https://tm-api.development.staging.openhistoricalmap.org
-          TM_APP_BASE_URL: https://tasks.development.staging.openhistoricalmap.org
+          TM_APP_BASE_URL: https://tasks-development.openhistoricalmap.org
           TM_IMPORT_MAX_FILESIZE: 3000000
           TM_MAX_AOI_AREA: 15000
           TM_CLIENT_ID: XjMqsHvGxQa7iN0NHLBsq8aqztbV7K6YYZKCpWCqMko
           TM_CLIENT_SECRET: bDvQOTjSBNtuQFn3iIN7qU1suY7iTTHLyISRZIFPGpQ
           TM_DEFAULT_CHANGESET_COMMENT: staging
-          TM_REDIRECT_URI: https://tasks.development.staging.openhistoricalmap.org/authorized
+          TM_REDIRECT_URI: https://tasks-development.openhistoricalmap.org/authorized
           TM_SCOPE: "read_prefs write_api"
           TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks.development.staging.openhistoricalmap.org
