@@ -126,8 +126,8 @@ osm-seed:
       TM_APP_BASE_URL: https://tasks-development.openhistoricalmap.org
       TM_IMPORT_MAX_FILESIZE: 3000000
       TM_MAX_AOI_AREA: 15000
-      TM_CLIENT_ID: XjMqsHvGxQa7iN0NHLBsq8aqztbV7K6YYZKCpWCqMko
-      TM_CLIENT_SECRET: bDvQOTjSBNtuQFn3iIN7qU1suY7iTTHLyISRZIFPGpQ
+      TM_CLIENT_ID: fcskO6_EJa_Je4wBBzM59kJexhOtVbzMxNgmcVOUH-c
+      TM_CLIENT_SECRET: 6qy8iNojubeY1wc3QEmUpLwLKcMOORjRy17za4x3f8g
       TM_DEFAULT_CHANGESET_COMMENT: staging
       TM_REDIRECT_URI: https://tasks-development.openhistoricalmap.org/authorized
       TM_SCOPE: "read_prefs write_api"
