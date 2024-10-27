@@ -93,27 +93,30 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
 
       - name: Checkout tasking-manager repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
           ref: 506bae7b5fecc2b0b6038d21c137ff6eb1bf5e5e
-          # token: ${{ env.DEV_GITHUB_TOKEN }}
+          path: tasking-manager
 
-      - name: Use Node.js 12
-        uses: actions/setup-node@v1
+      - name: Debug Checkout
+        run: ls -la tasking-manager
+
+      - name: Use Node.js 18.19.1
+        uses: actions/setup-node@v4
         with:
-          node-version: '12'
+          node-version: '18.19.1'
 
       - name: npm Install
         run: |
-          cat package.json
-          npm install
-          npm install @openhistoricalmap/id@2.18.5
-          npm install @babel/core@^7.16.0 --save-dev
-          npm run build
-        working-directory: frontend
+          cd tasking-manager/frontend && npm install  && CI=false GENERATE_SOURCEMAP=false npm run build
 
-      - uses: actions/setup-python@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
@@ -125,7 +128,7 @@ jobs:
       - name: Sync to S3 and clean cache in cloudfront
         if: ${{ success() }}
         run: |
-          aws s3 sync frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
+          aws s3 sync tasking-manager/frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
