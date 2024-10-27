@@ -7,7 +7,7 @@ ENV workdir /usr/src/app
 
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git $workdir
 # Commits on 27 April, 2022
-RUN cd $workdir && git checkout -f f0df07174f4014365220af09187b5f941f9770b0
+RUN cd $workdir && git checkout -f 506bae7b5fecc2b0b6038d21c137ff6eb1bf5e5e
 WORKDIR $workdir
 
 # Setup backend dependencies
