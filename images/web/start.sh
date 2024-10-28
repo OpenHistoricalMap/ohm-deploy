@@ -80,6 +80,6 @@ while "$flag" = true; do
   ./cgimap.sh
   
   # Start the delayed jobs queue worker and  Start the app
-  bundle exec rake jobs:work &
+  bundle exec rake jobs:work --trace &
   apachectl -k start -DFOREGROUND
 done
