@@ -200,7 +200,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job_large
+        label_value: web_large
       schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
@@ -221,7 +221,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job_large
+        label_value: web_large
       schedule: '0 0 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -324,7 +324,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: job_large
+          label_value: web_large
       - name: tm-db
         enabled: true
         schedule: '0 1 * * *'
@@ -347,7 +347,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: job_large
+          label_value: web_large
       - name: osmcha-db
         enabled: false
         schedule: '0 1 * * *'
