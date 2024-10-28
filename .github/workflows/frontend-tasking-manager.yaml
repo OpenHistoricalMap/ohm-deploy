@@ -111,6 +111,11 @@ jobs:
         run: |
           cd tasking-manager/frontend && npm install  && CI=false GENERATE_SOURCEMAP=false npm run build
 
+      - name: Replace API URL for Development
+        if: github.ref == 'refs/heads/development'
+        run: |
+          find tasking-manager/frontend/build -type f -exec sed -i 's/tm-api.staging.openhistoricalmap.org/tm-api.development.staging.openhistoricalmap.org/g' {} \;
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
