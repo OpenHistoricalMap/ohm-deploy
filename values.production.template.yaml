@@ -85,7 +85,7 @@ osm-seed:
       enabled: true
       values: |
         listen_addresses = '*'
-        max_connections = 100
+        max_connections = 200
         shared_buffers = 7GB
         work_mem = 50MB
         maintenance_work_mem = 1GB
