@@ -850,12 +850,12 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       image:
         name: "ghcr.io/openhistoricalmap/osmcha-django"
         tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
@@ -894,7 +894,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       image:
         name: "developmentseed/osmseed-osmcha-db"
         tag: "0.1.0-n767.h0090e97"
