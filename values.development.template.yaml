@@ -126,6 +126,11 @@ osm-seed:
       TM_REDIRECT_URI: https://tasks-development.openhistoricalmap.org/authorized
       TM_SCOPE: "read_prefs write_api"
       TM_APP_API_VERSION: v4
+      # Add extra info
+      TM_ORG_FB: openhistoricalmap
+      TM_ORG_INSTAGRAM: openhistoricalmap
+      TM_ORG_TWITTER: openhistoricalmap
+      TM_ORG_YOUTUBE: openhistoricalmap
     resources:
       enabled: false
       requests:
