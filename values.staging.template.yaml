@@ -911,7 +911,7 @@ osm-seed:
           memory: "24Gi"
           cpu: "10"
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         # Minikube
