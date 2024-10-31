@@ -196,11 +196,11 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job
+        label_value: web_large
       schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
@@ -221,7 +221,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job
+        label_value: web_large
       schedule: '0 0 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -299,7 +299,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: false
+        enabled: true
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -324,7 +324,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: job
+          label_value: web_large
       - name: tm-db
         enabled: true
         schedule: '0 1 * * *'
@@ -347,7 +347,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: job_large
+          label_value: web_large
       - name: osmcha-db
         enabled: false
         schedule: '0 1 * * *'
@@ -911,7 +911,7 @@ osm-seed:
           memory: "24Gi"
           cpu: "10"
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         # Minikube

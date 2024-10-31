@@ -79,7 +79,11 @@ while "$flag" = true; do
   # Start cgimap
   ./cgimap.sh
   
-  # Start the delayed jobs queue worker and  Start the app
-  bundle exec rake jobs:work &
-  apachectl -k start -DFOREGROUND
+  apachectl -k start -DFOREGROUND &
+  # Loop to restart rake job every hour
+  while true; do
+    pkill -f "rake jobs:work"
+    bundle exec rake jobs:work --trace >> $workdir/log/jobs_work.log 2>&1 &
+    sleep 1h
+  done
 done
