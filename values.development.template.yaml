@@ -127,10 +127,10 @@ osm-seed:
       TM_SCOPE: "read_prefs write_api"
       TM_APP_API_VERSION: v4
       # Add extra info
-      TM_ORG_FB: openhistoricalmap
-      TM_ORG_INSTAGRAM: openhistoricalmap
-      TM_ORG_TWITTER: openhistoricalmap
-      TM_ORG_YOUTUBE: openhistoricalmap
+      TM_ORG_FB: https://www.facebook.com//OpenHistoricalMap
+      TM_ORG_INSTAGRAM: https://www.instagram.com/OpenHistoricalMap
+      TM_ORG_TWITTER: http://twitter.com/OpenHistoricalMap
+      TM_ORG_YOUTUBE: https://www.youtube.com/OpenHistoricalMap
     resources:
       enabled: false
       requests:
