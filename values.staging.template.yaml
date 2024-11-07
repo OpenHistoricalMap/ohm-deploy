@@ -647,6 +647,12 @@ osm-seed:
         TM_DEFAULT_CHANGESET_COMMENT: STAGING
         TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
+        # Add extra info
+        TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+        TM_ORG_FB: openhistoricalmap
+        TM_ORG_INSTAGRAM: openhistoricalmap
+        TM_ORG_TWITTER: openhistoricalmap
+        TM_ORG_YOUTUBE: openhistoricalmap
       resources:
         enabled: false
         requests:
