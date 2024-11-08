@@ -235,7 +235,7 @@ osm-seed:
       label_value: web
     env:
       ENABLE_SEND_SLACK_MESSAGE: "true"
-      SLACK_WEBHOOK_URL: {{ OHM_SLACK_WEBHOOK_URL}}
+      SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
     resources:
       enabled: false
       requests:
