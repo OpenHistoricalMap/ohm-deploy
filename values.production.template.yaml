@@ -233,6 +233,9 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: web
+    env:
+      ENABLE_SEND_SLACK_MESSAGE: "true"
+      SLACK_WEBHOOK_URL: {{ OHM_SLACK_WEBHOOK_URL}}
     resources:
       enabled: false
       requests:

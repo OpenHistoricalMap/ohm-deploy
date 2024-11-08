@@ -71,6 +71,7 @@ jobs:
           DEVELOPMENT_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_SECRET }}
           DEVELOPMENT_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           DEVELOPMENT_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
       ################ Staging secrets ################ 
       - name: Staging - substitute secrets
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/development'
@@ -114,6 +115,8 @@ jobs:
           STAGING_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_SECRET }}
           STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+
       ################ Production secrets ################ 
       - name: Production - substitute secrets
         if: github.ref == 'refs/heads/main'
@@ -158,6 +161,7 @@ jobs:
           PRODUCTION_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_OSMCHA_API_CONSUMER_SECRET }}
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
 
       - name: AWS Credentials
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
