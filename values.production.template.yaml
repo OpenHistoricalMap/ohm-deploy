@@ -375,10 +375,10 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "30Gi"
-        cpu: "7000m"
+        memory: "29Gi"
+        cpu: "7500m"
       limits:
-        memory: "31Gi"
+        memory: "29Gi"
         cpu: "7600m"
     postgresqlConfig:
       enabled: true
