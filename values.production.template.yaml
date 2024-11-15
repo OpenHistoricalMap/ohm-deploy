@@ -484,7 +484,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: web
-    replicaCount: 3
+    replicaCount: 1
     commad: './start.sh'
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -517,8 +517,8 @@ osm-seed:
         cpu: "2"
     autoscaling:
       enabled: true
-      minReplicas: 3
-      maxReplicas: 5
+      minReplicas: 1
+      maxReplicas: 3
       cpuUtilization: 60  
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
