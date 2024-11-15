@@ -33,8 +33,8 @@ for f in $imp_list; do
     ( set -x ; tegola cache purge tile-list $f \
         --config=/opt/tegola_config/config.toml \
         --format="/zxy" \
-        --min-zoom=0 \
-        --max-zoom=20 \
+        --min-zoom=8 \
+        --max-zoom=16 \
         --overwrite=true 1> /dev/null & )
     sleep 10
     echo "$f" >>$completed_jobs
