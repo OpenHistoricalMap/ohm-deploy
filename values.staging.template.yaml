@@ -390,6 +390,7 @@ osm-seed:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
+      sharedMemorySize: 128Mi
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
