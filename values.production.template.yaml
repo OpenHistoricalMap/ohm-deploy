@@ -449,7 +449,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: tiler_db
+      label_value: api_db
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240804_0003.osm.pbf
@@ -490,7 +490,7 @@ osm-seed:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: vtiles.openhistoricalmap.org
     env:
-      TILER_SERVER_PORT: 9090
+      TILER_SERVER_PORT: 8080
       TILER_CACHE_TYPE: s3
       TILER_CACHE_BASEPATH: /mnt/data
       TILER_CACHE_MAX_ZOOM: 22
