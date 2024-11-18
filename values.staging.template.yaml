@@ -448,7 +448,7 @@ osm-seed:
           parallel_setup_cost = 1000
           min_parallel_table_scan_size = 8MB
           min_parallel_index_scan_size = 512kB
-          session_preload_libraries = 'auto_explain,pg_stat_statements'
+          shared_preload_libraries = 'auto_explain,pg_stat_statements'
           auto_explain.log_min_duration = '15s'
           # Timeout settings
           tcp_keepalives_idle = 300
@@ -464,6 +464,7 @@ osm-seed:
           # pg_stat_statements settings
           pg_stat_statements.max = 10000
           pg_stat_statements.track = all
+
 
     # ====================================================================================================
     # Variables for tiler-imposm
