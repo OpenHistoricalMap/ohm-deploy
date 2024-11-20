@@ -420,7 +420,7 @@ osm-seed:
         min_parallel_index_scan_size = 512kB
 
         # Enable auto_explain and pg_stat_statements
-        session_preload_libraries = 'auto_explain,pg_stat_statements'
+        shared_preload_libraries = 'auto_explain,pg_stat_statements'
         auto_explain.log_min_duration = '10s'
 
         # Timeout settings

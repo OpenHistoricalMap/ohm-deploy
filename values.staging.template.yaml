@@ -426,13 +426,17 @@ osm-seed:
           min_wal_size = 256MB
           random_page_cost = 1.1
           effective_cache_size = 12GB
-          log_min_duration_statement = 15000
-          log_connections = on
-          log_disconnections = on
-          log_duration = off
-          log_lock_waits = on
-          log_statement = 'none'
+
+          # Logging Settings
+          log_min_duration_statement = 15000  # Log queries that take more than 15 seconds
+          log_connections = on               # Log database connections
+          log_disconnections = on            # Log database disconnections
+          log_duration = off                 # Do not log the duration of all queries
+          log_lock_waits = on                # Log when queries are waiting for locks
+          log_statement = 'none'             # Avoid logging all queries by default
           log_timezone = 'Etc/UTC'
+
+          # Locale Settings
           datestyle = 'iso, mdy'
           timezone = 'Etc/UTC'
           lc_messages = 'en_US.utf8'
@@ -440,7 +444,8 @@ osm-seed:
           lc_numeric = 'en_US.utf8'
           lc_time = 'en_US.utf8'
           default_text_search_config = 'pg_catalog.english'
-          # Parallelism settings
+
+          # Parallelism Settings
           max_parallel_workers_per_gather = 4
           max_parallel_workers = 8
           max_worker_processes = 8
@@ -448,22 +453,25 @@ osm-seed:
           parallel_setup_cost = 1000
           min_parallel_table_scan_size = 8MB
           min_parallel_index_scan_size = 512kB
-          session_preload_libraries = 'auto_explain,pg_stat_statements'
-          auto_explain.log_min_duration = '15s'
-          # Timeout settings
+
+          # Shared Libraries for Monitoring and Optimization
+          shared_preload_libraries = 'auto_explain,pg_stat_statements'
+          auto_explain.log_min_duration = '15s'  # Log queries explained by auto_explain that take more than 15 seconds
+
+          # Timeout Settings
           tcp_keepalives_idle = 300
           tcp_keepalives_interval = 60
           tcp_keepalives_count = 10
-          # Disable join options for routes
-          enable_mergejoin = false
-          enable_hashjoin = false
-          # Complete large queries statements
-          statement_timeout = '600s'
-          lock_timeout = '60s'
-          idle_in_transaction_session_timeout = '600s'
-          # pg_stat_statements settings
-          pg_stat_statements.max = 10000
-          pg_stat_statements.track = all
+          enable_mergejoin = false  # Disable merge joins for specific query patterns
+          enable_hashjoin = false   # Disable hash joins for specific query patterns
+          statement_timeout = '600s'  # Maximum time allowed for a query to complete (10 minutes)
+          lock_timeout = '60s'        # Maximum time to wait for a lock (60 seconds)
+          idle_in_transaction_session_timeout = '600s'  # Terminate idle transactions after 10 minutes
+
+          # pg_stat_statements Settings
+          pg_stat_statements.max = 10000  # Maximum number of queries tracked in pg_stat_statements
+          pg_stat_statements.track = all  # Track all queries (DDL, DML, etc.)
+
 
     # ====================================================================================================
     # Variables for tiler-imposm
