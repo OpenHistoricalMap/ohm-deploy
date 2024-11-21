@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 # directories to keep the imposm's cache for updating the db
 WORKDIR=/mnt/data
@@ -10,11 +10,15 @@ IMPOSM3_EXPIRE_DIR=$WORKDIR/imposm3_expire_dir
 PBFFILE="${WORKDIR}/osm.pbf"
 STATEFILE="state.txt"
 LIMITFILE="limitFile.geojson"
-# # Setting directory
-# settingDir=/osm
+
 # Folder to store the imposm expider files in s3 or gs
 BUCKET_IMPOSM_FOLDER=imposm
 INIT_FILE=/mnt/data/init_done
+
+# tracking file
+TRACKING_FILE="$WORKDIR/uploaded_files.log"
+[ -f "$TRACKING_FILE" ] || touch "$TRACKING_FILE"
+
 
 mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
@@ -55,22 +59,40 @@ getFormattedDate() {
 }
 
 function uploadExpiredFiles() {
+    echo "Checking for expired files to upload... $(date +%F_%H-%M-%S)"
+
     # Upload the expired files to the cloud provider
     for file in $(find "$IMPOSM3_EXPIRE_DIR" -type f -cmin -1); do
         bucketFile=${file#*"$WORKDIR"}
         getFormattedDate "$file"
-        # UPLOAD_EXPIRED_FILES=true to upload the expired to cloud provider
+
+        # Check if the file has already been uploaded
+        if grep -Fxq "$file" "$TRACKING_FILE"; then
+            echo "File ${file} has already been uploaded. Skipping..."
+            continue
+        fi
+
+        # UPLOAD_EXPIRED_FILES=true to upload the expired files to cloud provider
         if [ "$UPLOAD_EXPIRED_FILES" == "true" ]; then
-            echo "Uploading expired file ${file} to ${AWS_S3_BUCKET}"
-            
+            echo "Uploading expired file ${file} to ${AWS_S3_BUCKET}..."
+
+            upload_success=false
+
             # AWS
             if [ "$CLOUDPROVIDER" == "aws" ]; then
-                aws s3 cp "$file" "${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}${bucketFile}" --acl public-read
+                aws s3 cp "$file" "${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}${bucketFile}" --acl public-read && upload_success=true
             fi
 
             # Google Storage
             if [ "$CLOUDPROVIDER" == "gcp" ]; then
-                gsutil cp -a public-read "$file" "${GCP_STORAGE_BUCKET}${BUCKET_IMPOSM_FOLDER}${bucketFile}"
+                gsutil cp -a public-read "$file" "${GCP_STORAGE_BUCKET}${BUCKET_IMPOSM_FOLDER}${bucketFile}" && upload_success=true
+            fi
+
+            if [ "$upload_success" = true ]; then
+                echo "$file" >> "$TRACKING_FILE"
+                echo "File ${file} uploaded successfully and recorded."
+            else
+                echo "Failed to upload file ${file}. Will retry in the next run."
             fi
         else
             echo "Expired files were not uploaded because UPLOAD_EXPIRED_FILES=${UPLOAD_EXPIRED_FILES}"
