@@ -34,7 +34,7 @@ RUN cd /opt/ && python build_config.py \
     --output /opt/tegola_config/config.toml
 
 COPY ./tile2bounds.py .
-COPY ./*.sh /opt/scripts/
+COPY ./*.sh .
 
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD /opt/scripts/start.sh
+CMD ./start.sh
