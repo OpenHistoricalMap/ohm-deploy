@@ -196,7 +196,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -487,18 +487,18 @@ osm-seed:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240726_0003.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-        SEQUENCE_NUMBER: "1497000"
+        SEQUENCE_NUMBER: "1664000"
         OVERWRITE_STATE: false
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
         IMPORT_OSM_LAND: true
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-05eeb57b8e67b3cd5
-        AWS_ElasticBlockStore_size: 200Gi
+        AWS_ElasticBlockStore_volumeID: vol-025d4388929d44b56
+        AWS_ElasticBlockStore_size: 20Gi
       resources:
         enabled: false
         requests:
@@ -563,7 +563,7 @@ osm-seed:
         label_key: nodegroup_type
         label_value: web_large
       replicaCount: 1
-      command: './cache_cleaner.sh'
+      command: './cache_cleaner.sh' 
       resources:
         enabled: true
         requests:

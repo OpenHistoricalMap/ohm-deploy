@@ -19,10 +19,10 @@ RUN apk --no-cache add \
 
 RUN pip install --upgrade pip && pip3 install awscli mercantile
 
-# Cleanup to reduce image size
 RUN rm -rf /var/cache/apk/* \
     && apk del py3-pip
 
+# Symlink tegola binary for easier access
 RUN ln -s /opt/tegola /usr/bin/tegola
 
 COPY ./config /opt/config/
@@ -33,14 +33,8 @@ RUN cd /opt/ && python build_config.py \
     --providers config/providers \
     --output /opt/tegola_config/config.toml
 
-# Copy config and exec files
 COPY ./tile2bounds.py .
-COPY ./start.sh .
-COPY ./expire-watcher.sh .
-COPY ./seed-by-diffs.sh .
-COPY ./tile_cache_downloader.sh .
-COPY ./cache_cleaner.sh .
-COPY ./rm_tegola_ps.sh .
+COPY ./*.sh .
 
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ./start.sh & ./tile_cache_downloader.sh & ./expire-watcher.sh
+CMD ./start.sh
