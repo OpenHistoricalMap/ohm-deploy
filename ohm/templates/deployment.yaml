@@ -1,0 +1,47 @@
+{{- if .Values.ohm.tilerCacheSqs.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-tiler-cache-sqs
+  labels:
+    app: {{ template "osm-seed.name" . }}
+    component: tiler-cache-sqs-deployment
+    environment: {{ .Values.environment }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "osm-seed.name" . }}
+      release: {{ .Release.Name }}
+      run: {{ .Release.Name }}-tiler-cache-sqs
+  template:
+    metadata:
+      labels:
+        app: {{ template "osm-seed.name" . }}
+        release: {{ .Release.Name }}
+        run: {{ .Release.Name }}-tiler-cache-sqs
+    spec:
+      serviceAccountName: job-service-account
+      containers:
+        - name: {{ .Chart.Name }}tiler-cache-sqs
+          image: "{{ .Values.ohm.tilerCacheSqs.image.name }}:{{ .Values.ohm.tilerCacheSqs.image.tag }}"
+          env:
+            - name: SQS_QUEUE_URL
+              value: {{ quote .Values.ohm.tilerCacheSqs.env.SQS_QUEUE_URL }}
+            - name: REGION_NAME
+              value: {{ quote .Values.ohm.tilerCacheSqs.env.REGION_NAME }}
+          {{- if .Values.ohm.tilerCacheSqs.resources.enabled }}
+          resources:
+            requests:
+              memory: {{ .Values.ohm.tilerCacheSqs.resources.requests.memory }}
+              cpu: {{ .Values.ohm.tilerCacheSqs.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.ohm.tilerCacheSqs.resources.limits.memory }}
+              cpu: {{ .Values.ohm.tilerCacheSqs.resources.limits.cpu }}
+          {{- end }}
+      {{- if .Values.ohm.tilerCacheSqs.nodeSelector.enabled }}
+      nodeSelector:
+        {{ .Values.ohm.tilerCacheSqs.nodeSelector.label_key }} : {{ .Values.ohm.tilerCacheSqs.nodeSelector.label_value }}
+      {{- end }}
+{{- end }}
