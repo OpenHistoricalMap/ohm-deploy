@@ -5,6 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
+      - 'charts'
 jobs:
   build:
     runs-on: ubuntu-20.04
