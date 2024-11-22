@@ -196,7 +196,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -563,7 +563,7 @@ osm-seed:
         label_key: nodegroup_type
         label_value: web_large
       replicaCount: 1
-      command: './cache_cleaner.sh'
+      command: './cache_cleaner.sh' 
       resources:
         enabled: true
         requests:
