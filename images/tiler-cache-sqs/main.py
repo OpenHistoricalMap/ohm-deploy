@@ -6,14 +6,13 @@ import json
 from datetime import datetime, timezone, timedelta
 import logging
 
-# Configure logging
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
 
 # Environment variables
-ENVIRONMENT = os.getenv("ENVIRONMENT", "staging")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 NAMESPACE = os.getenv("NAMESPACE", "default")
 SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
 REGION_NAME = os.getenv("REGION_NAME", "us-east-1")
@@ -21,7 +20,6 @@ DOCKER_IMAGE = os.getenv("DOCKER_IMAGE", "ghcr.io/openhistoricalmap/tiler-server
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
 DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400))
-
 MIN_ZOOM = os.getenv("MIN_ZOOM", 8)
 MAX_ZOOM = os.getenv("MAX_ZOOM", 16)
 

@@ -27,10 +27,24 @@ spec:
         - name: {{ .Chart.Name }}tiler-cache-sqs
           image: "{{ .Values.ohm.tilerCacheSqs.image.name }}:{{ .Values.ohm.tilerCacheSqs.image.tag }}"
           env:
-            - name: SQS_QUEUE_URL
-              value: {{  .Values.ohm.tilerCacheSqs.env.SQS_QUEUE_URL | quote }}
             - name: REGION_NAME
               value: {{ .Values.ohm.tilerCacheSqs.env.REGION_NAME | quote }}
+            - name: ENVIRONMENT
+              value: {{ .Values.environment | quote }}
+            - name: SQS_QUEUE_URL
+              value: {{  .Values.ohm.tilerCacheSqs.env.SQS_QUEUE_URL | quote }}
+
+            - name: NODEGROUP_TYPE
+              value: {{ .Values.ohm.tilerCacheSqs.env.NODEGROUP_TYPE | quote }}
+            - name: MAX_ACTIVE_JOBS
+              value: {{ .Values.ohm.tilerCacheSqs.env.MAX_ACTIVE_JOBS | quote }}
+            - name: DELETE_OLD_JOBS_AGE
+              value: {{ .Values.ohm.tilerCacheSqs.env.DELETE_OLD_JOBS_AGE | quote }}
+            - name: MIN_ZOOM
+              value: {{ .Values.ohm.tilerCacheSqs.env.MIN_ZOOM | quote }}
+            - name: MAX_ZOOM
+              value: {{ .Values.ohm.tilerCacheSqs.env.MAX_ZOOM | quote }}
+              
           {{- if .Values.ohm.tilerCacheSqs.resources.enabled }}
           resources:
             requests:
