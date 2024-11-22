@@ -31,6 +31,8 @@ jobs:
         run: chartpress --push
         env:
           GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
+      - name: Check values.yaml
+        run: cat ohm/values.yaml
       ################ Development secrets ################ 
       - name: Staging - substitute secrets
         if: github.ref == 'refs/heads/development'

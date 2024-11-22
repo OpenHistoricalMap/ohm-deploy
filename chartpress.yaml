@@ -1,5 +1,5 @@
 charts:
-  - name: ohm
+  - name: osm-seed
     imagePrefix: ghcr.io/openhistoricalmap/
     images:
       web:
@@ -16,4 +16,9 @@ charts:
         valuesPath: osm-seed.tmApi.image
       tiler-cache-sqs:
         contextPath: ./images/tiler-cache-sqs
+        valuesPath: ohm.tilerCacheSqs.image
+  - name: ohm
+    imagePrefix: ghcr.io/openhistoricalmap/
+    images:
+      tilerCacheSqs:
         valuesPath: ohm.tilerCacheSqs.image
