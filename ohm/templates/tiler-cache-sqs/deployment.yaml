@@ -28,9 +28,9 @@ spec:
           image: "{{ .Values.ohm.tilerCacheSqs.image.name }}:{{ .Values.ohm.tilerCacheSqs.image.tag }}"
           env:
             - name: SQS_QUEUE_URL
-              value: {{ quote .Values.ohm.tilerCacheSqs.env.SQS_QUEUE_URL }}
+              value: {{  .Values.ohm.tilerCacheSqs.env.SQS_QUEUE_URL | quote }}
             - name: REGION_NAME
-              value: {{ quote .Values.ohm.tilerCacheSqs.env.REGION_NAME }}
+              value: {{ .Values.ohm.tilerCacheSqs.env.REGION_NAME | quote }}
           {{- if .Values.ohm.tilerCacheSqs.resources.enabled }}
           resources:
             requests:
