@@ -557,7 +557,7 @@ osm-seed:
     # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
     # ====================================================================================================
     tilerServerCacheCleaner:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -763,7 +763,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: taginfo.staging.openhistoricalmap.org
@@ -948,4 +948,33 @@ osm-seed:
 # ====================================================================================================
     planetFiles:
       enabled: false
-      
+
+# ====================================================================================================
+# Tiles cache SQS processor
+# ====================================================================================================
+ohm:
+  tilerCacheSqs:
+    enabled: true
+    env:
+      ENVIRONMENT: staging
+      REGION_NAME: "us-east-1"
+      NAMESPACE: "default" # Namespace to run the job
+      DOCKER_IMAGE: "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1741.h7dadda7" # TODO, this should be automatically updated from tiler server image
+      SQS_QUEUE_URL: "https://sqs.us-east-1.amazonaws.com/618380242247/tiler-imposm3-expired-files-staging"
+      NODEGROUP_TYPE: "job_large" # Nodegroup type to run the job
+      MAX_ACTIVE_JOBS: 2 # Maximum number of active jobs in high concurrency queue
+      DELETE_OLD_JOBS_AGE: 600 # Age in seconds to delete old jobs
+      MIN_ZOOM: 8 # Minimum zoom level to clean and seed cache
+      MAX_ZOOM: 16 # Maximum zoom level to clean and seed cache
+    resources:
+      enabled: false
+      requests:
+        memory: "20Gi"
+        cpu: "8"
+      limits:
+        memory: "24Gi"
+        cpu: "10"
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web_large
