@@ -913,3 +913,32 @@ osm-seed:
   planetFiles:
     enabled: false
     
+# ====================================================================================================
+# Tiles cache SQS processor
+# ====================================================================================================
+ohm:
+  tilerCacheSqs:
+    enabled: false
+    env:
+      ENVIRONMENT: production
+      REGION_NAME: "us-east-1"
+      NAMESPACE: "default"
+      DOCKER_IMAGE: "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1741.h7dadda7" # TODO, this should be automatically updated from tiler server image
+      SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
+      NODEGROUP_TYPE: "api_db" # Nodegroup type to run the job
+      MAX_ACTIVE_JOBS: 10 # 1o changesets to process at the same time
+      DELETE_OLD_JOBS_AGE: 1200 # 10 min
+      MIN_ZOOM: 8 # Minimum zoom level to clean and seed cache
+      MAX_ZOOM: 16 # Maximum zoom level to clean and seed cache
+    resources:
+      enabled: false
+      requests:
+        memory: "20Gi"
+        cpu: "8"
+      limits:
+        memory: "24Gi"
+        cpu: "10"
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web
