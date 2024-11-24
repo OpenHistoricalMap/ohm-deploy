@@ -1,0 +1,67 @@
+{{- if .Values.ohm.tilerCachePurge.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-tiler-cache-sqs
+  labels:
+    app: {{ template "osm-seed.name" . }}
+    component: tiler-cache-sqs-deployment
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "osm-seed.name" . }}
+      release: {{ .Release.Name }}
+      run: {{ .Release.Name }}-tiler-cache-sqs
+  template:
+    metadata:
+      labels:
+        app: {{ template "osm-seed.name" . }}
+        release: {{ .Release.Name }}
+        run: {{ .Release.Name }}-tiler-cache-sqs
+    spec:
+      serviceAccountName: job-service-account
+      containers:
+        - name: {{ .Chart.Name }}tiler-cache-sqs
+          image: "{{ .Values.ohm.tilerCache.image.name }}:{{ .Values.ohm.tilerCache.image.tag }}"
+          command:
+            - sh
+            - -c
+            - |
+              set -x
+              python /app/tiler-purge/main.py
+          env:
+            - name: REGION_NAME
+              value: {{ .Values.ohm.tilerCachePurge.env.REGION_NAME | quote }}
+            - name: ENVIRONMENT
+              value: {{ .Values.ohm.tilerCachePurge.env.ENVIRONMENT | quote }}
+            - name: SQS_QUEUE_URL
+              value: {{  .Values.ohm.tilerCachePurge.env.SQS_QUEUE_URL | quote }}
+            - name: DOCKER_IMAGE
+              value: {{ .Values.ohm.tilerCachePurge.env.DOCKER_IMAGE | quote }}
+            - name: NODEGROUP_TYPE
+              value: {{ .Values.ohm.tilerCachePurge.env.NODEGROUP_TYPE | quote }}
+            - name: MAX_ACTIVE_JOBS
+              value: {{ .Values.ohm.tilerCachePurge.env.MAX_ACTIVE_JOBS | quote }}
+            - name: DELETE_OLD_JOBS_AGE
+              value: {{ .Values.ohm.tilerCachePurge.env.DELETE_OLD_JOBS_AGE | quote }}
+            - name: MIN_ZOOM
+              value: {{ .Values.ohm.tilerCachePurge.env.MIN_ZOOM | quote }}
+            - name: MAX_ZOOM
+              value: {{ .Values.ohm.tilerCachePurge.env.MAX_ZOOM | quote }}
+              
+          {{- if .Values.ohm.tilerCachePurge.resources.enabled }}
+          resources:
+            requests:
+              memory: {{ .Values.ohm.tilerCachePurge.resources.requests.memory }}
+              cpu: {{ .Values.ohm.tilerCachePurge.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.ohm.tilerCachePurge.resources.limits.memory }}
+              cpu: {{ .Values.ohm.tilerCachePurge.resources.limits.cpu }}
+          {{- end }}
+      {{- if .Values.ohm.tilerCachePurge.nodeSelector.enabled }}
+      nodeSelector:
+        {{ .Values.ohm.tilerCachePurge.nodeSelector.label_key }} : {{ .Values.ohm.tilerCachePurge.nodeSelector.label_value }}
+      {{- end }}
+{{- end }}

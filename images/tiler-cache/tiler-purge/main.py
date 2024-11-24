@@ -19,7 +19,7 @@ SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
 REGION_NAME = os.getenv("REGION_NAME", "us-east-1")
 DOCKER_IMAGE = os.getenv(
     "DOCKER_IMAGE",
-    "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1735.h825f665",
+    "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1734.h5b4d15d",
 )
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
@@ -46,9 +46,7 @@ def get_active_jobs_count():
             continue
 
         label_selector = f"job-name={job.metadata.name}"
-        pods = core_v1.list_namespaced_pod(
-            namespace=NAMESPACE, label_selector=label_selector
-        )
+        pods = core_v1.list_namespaced_pod(namespace=NAMESPACE, label_selector=label_selector)
 
         for pod in pods.items:
             if pod.status.phase in [
@@ -57,9 +55,7 @@ def get_active_jobs_count():
                 "ContainerCreating",
                 "Running",
             ]:
-                logging.debug(
-                    f"Job '{job.metadata.name}' has a pod in {pod.status.phase} state."
-                )
+                logging.debug(f"Job '{job.metadata.name}' has a pod in {pod.status.phase} state.")
                 active_jobs_count += 1
                 break
 
@@ -161,7 +157,7 @@ def process_sqs_messages():
 
             except Exception as e:
                 logging.error(f"Error processing message: {e}")
-        # Wait briefly before fetching more messages
+
         time.sleep(10)
 
 

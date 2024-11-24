@@ -14,5 +14,5 @@ charts:
         valuesPath: osm-seed.tilerServer.image
       tasking-manager-api:
         valuesPath: osm-seed.tmApi.image
-      tiler-cache-sqs:
-        valuesPath: ohm.tilerCacheSqs.image
+      tiler-cache:
+        valuesPath: ohm.tilerCache.image
