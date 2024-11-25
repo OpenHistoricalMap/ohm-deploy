@@ -5,9 +5,7 @@ import os
 import json
 from datetime import datetime, timezone, timedelta
 import logging
-from utils import (
-    check_tiler_db_postgres_status
-)
+from utils import check_tiler_db_postgres_status
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -25,7 +23,7 @@ DOCKER_IMAGE = os.getenv(
 )
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
-DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400)) # default 1 day
+DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400))  # default 1 day
 MIN_ZOOM = os.getenv("MIN_ZOOM", 8)
 MAX_ZOOM = os.getenv("MAX_ZOOM", 16)
 JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge-seed"

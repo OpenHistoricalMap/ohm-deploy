@@ -9,6 +9,7 @@ from utils import (
     read_geojson_boundary,
     boundary_to_tiles,
     check_tiler_db_postgres_status,
+    process_geojson_to_feature_tiles,
 )
 
 logging.basicConfig(
@@ -74,15 +75,9 @@ def main(geojson_url, feature_type, zoom_levels, concurrency, log_file, s3_bucke
     max_zoom = max(zoom_levels)
     logging.info(f"Zoom levels parsed: Min Zoom: {min_zoom}, Max Zoom: {max_zoom}")
 
-    # Read boundary geometry from GeoJSON
-    boundary_geometry = read_geojson_boundary(geojson_url, feature_type)
-    if not boundary_geometry:
-        logging.error("No valid boundary geometry found.")
-        return
-
-    # Generate tiles based on boundary geometry and zoom levels
-    tiles = boundary_to_tiles(boundary_geometry, min_zoom, max_zoom)
-    logging.info(f"Generated {len(tiles)} tiles for seeding.")
+    features, tiles = process_geojson_to_feature_tiles(geojson_url, min_zoom)
+    geojson_file = f"{base_name}_tiles.geojson"
+    save_geojson_boundary(features, geojson_file)
 
     # Use base name for skipped tiles and log files
     skipped_tiles_file = f"{base_name}_skipped_tiles.tiles"
@@ -98,6 +93,7 @@ def main(geojson_url, feature_type, zoom_levels, concurrency, log_file, s3_bucke
     # Upload log files to S3
     upload_to_s3(log_file, s3_bucket, f"tiler/logs/{log_file}")
     upload_to_s3(skipped_tiles_file, s3_bucket, f"tiler/logs/{skipped_tiles_file}")
+    upload_to_s3(skipped_tiles_file, s3_bucket, f"tiler/logs/{geojson_file}")
     logging.info("Log files uploaded to S3.")
 
 

@@ -38,3 +38,12 @@ services:
     env_file:
       - ../envs/.env.tiler
     restart: always
+  tilercache:
+    image: ohm-tiler-cache:v1
+    build:
+      context: ../images/tiler-cache
+      dockerfile: Dockerfile
+    volumes:
+      # - ../data/tiler-cache-data:/mnt/data
+      - ../images/tiler-cache:/app
+      

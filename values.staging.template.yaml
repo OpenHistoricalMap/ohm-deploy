@@ -987,9 +987,9 @@ ohm:
     enabled: true
     schedule: '0 * * * *' # testing every hour
     env:
-      GEOJSON_URL: https://gist.githubusercontent.com/Rub21/9aaf349d74d974c0393700af8eeeb43d/raw/9f8fa0dde911705208141a4ff941e2e5b51e245b/eu.geojson
+      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/world.geojson
       FEATURE_TYPE: Polygon
-      ZOOM_LEVELS: '6,7,8,9'
+      ZOOM_LEVELS: '7,8,9'
       CONCURRENCY: 32
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
