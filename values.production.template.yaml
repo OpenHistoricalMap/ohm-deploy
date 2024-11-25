@@ -923,7 +923,6 @@ ohm:
   tilerCachePurge:
     enabled: true
     env:
-      ENVIRONMENT: staging
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
       DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1741.h7dadda7 # TODO, this should be automatically updated from tiler server image

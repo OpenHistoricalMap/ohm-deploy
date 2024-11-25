@@ -35,7 +35,7 @@ spec:
             - name: REGION_NAME
               value: {{ .Values.ohm.tilerCachePurge.env.REGION_NAME | quote }}
             - name: ENVIRONMENT
-              value: {{ .Values.ohm.tilerCachePurge.env.ENVIRONMENT | quote }}
+              value: {{ .Release.Name | quote }}
             - name: SQS_QUEUE_URL
               value: {{  .Values.ohm.tilerCachePurge.env.SQS_QUEUE_URL | quote }}
             - name: DOCKER_IMAGE
