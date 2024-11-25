@@ -6,8 +6,6 @@ from utils import (
     upload_to_s3,
     seed_tiles,
     save_geojson_boundary,
-    read_geojson_boundary,
-    boundary_to_tiles,
     check_tiler_db_postgres_status,
     process_geojson_to_feature_tiles,
 )
@@ -23,12 +21,6 @@ logging.basicConfig(
     "--geojson-url",
     required=True,
     help="URL to the GeoJSON file defining the area of interest.",
-)
-@click.option(
-    "--feature-type",
-    required=True,
-    help="Type of objects in the GeoJSON file",
-    default="Polygon",
 )
 @click.option(
     "--zoom-levels",
@@ -51,7 +43,7 @@ logging.basicConfig(
     help="CSV file to save the logs results",
     default="log_file.csv",
 )
-def main(geojson_url, feature_type, zoom_levels, concurrency, log_file, s3_bucket):
+def main(geojson_url, zoom_levels, concurrency, log_file, s3_bucket):
     """
     Main function to process and seed tiles
     """

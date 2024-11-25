@@ -60,8 +60,6 @@ spec:
               env:
                 - name: GEOJSON_URL
                   value: {{ .Values.ohm.tilerCacheSeed.env.GEOJSON_URL | quote }}
-                - name: FEATURE_TYPE
-                  value: {{ .Values.ohm.tilerCacheSeed.env.FEATURE_TYPE | quote }}
                 - name: ZOOM_LEVELS
                   value: {{ .Values.ohm.tilerCacheSeed.env.ZOOM_LEVELS | quote }}
                 - name: CONCURRENCY
