@@ -30,7 +30,7 @@ spec:
             - -c
             - |
               set -x
-              python /app/tiler-purge/main.py
+              python purge.py
           env:
             - name: REGION_NAME
               value: {{ .Values.ohm.tilerCachePurge.env.REGION_NAME | quote }}
@@ -50,7 +50,9 @@ spec:
               value: {{ .Values.ohm.tilerCachePurge.env.MIN_ZOOM | quote }}
             - name: MAX_ZOOM
               value: {{ .Values.ohm.tilerCachePurge.env.MAX_ZOOM | quote }}
-              
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-tiler-server-cm
           {{- if .Values.ohm.tilerCachePurge.resources.enabled }}
           resources:
             requests:

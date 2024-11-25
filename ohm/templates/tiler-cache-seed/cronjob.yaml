@@ -29,8 +29,19 @@ spec:
                 - -c
                 - |
                   set -x
-                  cd /app/tiler-seed && \
-                  python main.py --geojson-url "$GEOJSON_URL" \
+                  
+                  echo "Seeding tiler from 0 to 4 zoom levels"
+                  tegola cache seed \
+                    --config=/opt/tegola_config/config.toml \
+                    --map=osm \
+                    --min-zoom=0 \
+                    --max-zoom=4 \
+                    --bounds=-180,-85.05112878,180,85.05112878 \
+                    --concurrency=4 \
+                    --overwrite=true 
+
+                  echo "Seeding tiler for $ZOOM_LEVELS  zoom levels"
+                  python seed.py --geojson-url "$GEOJSON_URL" \
                                 --feature-type "$FEATURE_TYPE" \
                                 --zoom-levels "$ZOOM_LEVELS" \
                                 --concurrency "$CONCURRENCY" \

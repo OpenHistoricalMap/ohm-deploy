@@ -11,3 +11,4 @@ geopandas
 pyproj
 boto3
 kubernetes
+psycopg2-binary

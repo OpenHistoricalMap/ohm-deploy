@@ -5,7 +5,9 @@ import os
 import json
 from datetime import datetime, timezone, timedelta
 import logging
-
+from utils import (
+    check_tiler_db_postgres_status
+)
 # Configure logging
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -27,6 +29,11 @@ DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400))
 MIN_ZOOM = os.getenv("MIN_ZOOM", 8)
 MAX_ZOOM = os.getenv("MAX_ZOOM", 16)
 JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge-seed"
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
+POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
+POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
 
 # Initialize Kubernetes and AWS clients
 sqs = boto3.client("sqs", region_name=REGION_NAME)
@@ -54,6 +61,7 @@ def get_active_jobs_count():
                 "PodInitializing",
                 "ContainerCreating",
                 "Running",
+                "Error",
             ]:
                 logging.debug(f"Job '{job.metadata.name}' has a pod in {pod.status.phase} state.")
                 active_jobs_count += 1
@@ -122,6 +130,12 @@ def process_sqs_messages():
 
         for message in messages:
             try:
+                # Check PostgreSQL status
+                if not check_tiler_db_postgres_status():
+                    logging.error("PostgreSQL database is down. Retrying in 1 minute...")
+                    time.sleep(60)
+                    continue
+
                 # Check active job count before processing
                 while get_active_jobs_count() >= MAX_ACTIVE_JOBS:
                     logging.warning(

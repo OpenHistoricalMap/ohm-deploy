@@ -8,8 +8,33 @@ import os
 import subprocess
 import json
 from smart_open import open as s3_open
+import psycopg2
+from psycopg2 import OperationalError
 
-
+def check_tiler_db_postgres_status():
+    """Check if the PostgreSQL database is running."""
+    logging.info("Checking PostgreSQL database status...")
+    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+    POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
+    POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
+    POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
+    try:
+        connection = psycopg2.connect(
+            host=POSTGRES_HOST,
+            port=POSTGRES_PORT,
+            database=POSTGRES_DB,
+            user=POSTGRES_USER,
+            password=POSTGRES_PASSWORD,
+            connect_timeout=5,  # Timeout in seconds
+        )
+        connection.close()
+        logging.info("PostgreSQL database is running and reachable.")
+        return True
+    except OperationalError as e:
+        logging.error(f"PostgreSQL database is not reachable: {e}")
+        return False
+    
 def read_geojson_boundary(geojson_url, feature_type, buffer_distance_km=0.01):
     """Fetches and processes GeoJSON boundary data."""
     try:

@@ -8,9 +8,9 @@ from utils import (
     save_geojson_boundary,
     read_geojson_boundary,
     boundary_to_tiles,
+    check_tiler_db_postgres_status,
 )
 
-# Configure logging
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO,
@@ -27,7 +27,7 @@ logging.basicConfig(
     "--feature-type",
     required=True,
     help="Type of objects in the GeoJSON file",
-    default="polygon",
+    default="Polygon",
 )
 @click.option(
     "--zoom-levels",
@@ -52,9 +52,16 @@ logging.basicConfig(
 )
 def main(geojson_url, feature_type, zoom_levels, concurrency, log_file, s3_bucket):
     """
-    Main function to process and seed tiles, with results uploaded to S3.
+    Main function to process and seed tiles
     """
     logging.info("Starting the tile seeding process.")
+
+    # Check PostgreSQL status
+    logging.info("Checking PostgreSQL database status...")
+    if not check_tiler_db_postgres_status():
+        logging.error("PostgreSQL database is not running or unreachable. Exiting.")
+        return
+    logging.info("PostgreSQL database is running and reachable.")
 
     # Extract base name from the GeoJSON URL
     parsed_url = urlparse(geojson_url)
@@ -73,14 +80,8 @@ def main(geojson_url, feature_type, zoom_levels, concurrency, log_file, s3_bucke
         logging.error("No valid boundary geometry found.")
         return
 
-    # # Save the boundary geometry to a GeoJSON file with the base name
-    # geojson_file = f"{base_name}_boundary.geojson"
-    # save_geojson_boundary(boundary_geometry, geojson_file)
-    # upload_to_s3(geojson_file, s3_bucket, f"tiler/logs/{geojson_file}")
-    # logging.info(f"Boundary GeoJSON saved and uploaded as {geojson_file}")
-
     # Generate tiles based on boundary geometry and zoom levels
-    tiles = boundary_to_tiles(boundary_geometry, min_zoom)
+    tiles = boundary_to_tiles(boundary_geometry, min_zoom, max_zoom)
     logging.info(f"Generated {len(tiles)} tiles for seeding.")
 
     # Use base name for skipped tiles and log files
