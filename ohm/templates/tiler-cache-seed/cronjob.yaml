@@ -32,7 +32,6 @@ spec:
                   
                   echo "Seeding tiler for $ZOOM_LEVELS  zoom levels"
                   python seed.py --geojson-url "$GEOJSON_URL" \
-                                --feature-type "$FEATURE_TYPE" \
                                 --zoom-levels "$ZOOM_LEVELS" \
                                 --concurrency "$CONCURRENCY" \
                                 --s3-bucket "$S3_BUCKET" \
