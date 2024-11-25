@@ -8,7 +8,7 @@ import logging
 from utils import (
     check_tiler_db_postgres_status
 )
-# Configure logging
+
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO,
@@ -25,7 +25,7 @@ DOCKER_IMAGE = os.getenv(
 )
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
-DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400))
+DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400)) # default 1 day
 MIN_ZOOM = os.getenv("MIN_ZOOM", 8)
 MAX_ZOOM = os.getenv("MAX_ZOOM", 16)
 JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge-seed"
@@ -100,7 +100,7 @@ def create_kubernetes_job(file_url, file_name):
                     "restartPolicy": "Never",
                 }
             },
-            "backoffLimit": 1,
+            "backoffLimit": 0,
         },
     }
 
