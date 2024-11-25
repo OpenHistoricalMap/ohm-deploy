@@ -450,7 +450,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: api_db
+      label_value: web
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240804_0003.osm.pbf
@@ -525,7 +525,7 @@ osm-seed:
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -943,7 +943,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: tiler_large
+      label_value: tiler_medium
 
   # Tiler seed by default is giong to seet tiles from 0-6 zoom level
   tilerCacheSeed:
@@ -966,4 +966,4 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: tiler_large
+      label_value: tiler_medium
