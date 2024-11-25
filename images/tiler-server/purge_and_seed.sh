@@ -28,7 +28,7 @@ tegola cache seed tile-list "$file_name" \
     --map=osm \
     --min-zoom=$MIN_ZOOM \
     --max-zoom=$MAX_ZOOM \
-    --overwrite=false \
+    --overwrite=true \
     --concurrency=16
 set +x
 
