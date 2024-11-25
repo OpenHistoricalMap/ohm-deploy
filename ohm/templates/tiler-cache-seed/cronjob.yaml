@@ -1,0 +1,75 @@
+{{- if .Values.ohm.tilerCacheSeed.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-tiler-cache-seed-job
+  labels:
+    app: {{ template "osm-seed.name" . }}
+    component: tiler-cache-seed-job
+    release: {{ .Release.Name }}
+spec:
+  schedule: {{ quote .Values.ohm.tilerCacheSeed.schedule }}
+  startingDeadlineSeconds: 100
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- if .Values.ohm.tilerCacheSeed.nodeSelector.enabled }}
+          nodeSelector:
+            {{ .Values.ohm.tilerCacheSeed.nodeSelector.label_key }}: {{ .Values.ohm.tilerCacheSeed.nodeSelector.label_value }}
+          {{- end }}
+          containers:
+            - name: {{ .Release.Name }}-tiler-cache-seed-job
+              image: {{ .Values.ohm.tilerCache.image.name }}:{{ .Values.ohm.tilerCache.image.tag }}
+              command:
+                - sh
+                - -c
+                - |
+                  set -x
+                  
+                  echo "Seeding tiler for $ZOOM_LEVELS  zoom levels"
+                  python seed.py --geojson-url "$GEOJSON_URL" \
+                                --zoom-levels "$ZOOM_LEVELS" \
+                                --concurrency "$CONCURRENCY" \
+                                --s3-bucket "$S3_BUCKET" \
+                                --log-file "$OUTPUT_FILE"
+
+                  echo "Seeding tiler from 0 to 6 zoom levels"
+                  tegola cache seed \
+                    --config=/opt/tegola_config/config.toml \
+                    --map=osm \
+                    --min-zoom=0 \
+                    --max-zoom=6 \
+                    --bounds=-180,-85.05112878,180,85.05112878 \
+                    --concurrency=32 \
+                    --overwrite=true 
+
+              {{- if .Values.ohm.tilerCacheSeed.resources.enabled }}
+              resources:
+                requests:
+                  memory: {{ .Values.ohm.tilerCacheSeed.resources.requests.memory }}
+                  cpu: {{ .Values.ohm.tilerCacheSeed.resources.requests.cpu }}
+                limits:
+                  memory: {{ .Values.ohm.tilerCacheSeed.resources.limits.memory }}
+                  cpu: {{ .Values.ohm.tilerCacheSeed.resources.limits.cpu }}
+              {{- end }}
+              env:
+                - name: GEOJSON_URL
+                  value: {{ .Values.ohm.tilerCacheSeed.env.GEOJSON_URL | quote }}
+                - name: ZOOM_LEVELS
+                  value: {{ .Values.ohm.tilerCacheSeed.env.ZOOM_LEVELS | quote }}
+                - name: CONCURRENCY
+                  value: {{ .Values.ohm.tilerCacheSeed.env.CONCURRENCY | quote }}
+                - name: S3_BUCKET
+                  value: {{ .Values.ohm.tilerCacheSeed.env.S3_BUCKET | quote }}
+                - name: OUTPUT_FILE
+                  value: {{ .Values.ohm.tilerCacheSeed.env.OUTPUT_FILE | quote }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-tiler-server-cm
+          restartPolicy: OnFailure
+      backoffLimit: 3
+{{- end }}

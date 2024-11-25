@@ -1,0 +1,14 @@
+requests
+smart_open
+joblib
+tqdm
+click
+mercantile
+aiohttp
+boto3
+shapely
+geopandas
+pyproj
+boto3
+kubernetes
+psycopg2-binary
