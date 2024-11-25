@@ -32,7 +32,7 @@ logging.basicConfig(
 @click.option(
     "--zoom-levels",
     help="Comma-separated list of zoom levels",
-    default="8,9,10",
+    default="6,7,8,9",
 )
 @click.option(
     "--concurrency",
