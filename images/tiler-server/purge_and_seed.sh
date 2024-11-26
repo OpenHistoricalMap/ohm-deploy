@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
-MIN_ZOOM=${MIN_ZOOM:-9}
-MAX_ZOOM=${MAX_ZOOM:-16}
+PURGE_MIN_ZOOM=${PURGE_MIN_ZOOM:-8}
+PURGE_MAX_ZOOM=${PURGE_MAX_ZOOM:-20}
+SEED_MIN_ZOOM=${SEED_MIN_ZOOM:-8}
+SEED_MAX_ZOOM=${SEED_MAX_ZOOM:-14}
 
 file_name=$(basename "$IMPOSM_EXPIRED_FILE")
 aws s3 cp "$IMPOSM_EXPIRED_FILE" "$file_name"
@@ -16,8 +18,8 @@ set -x
 tegola cache purge tile-list "$file_name" \
     --config=/opt/tegola_config/config.toml \
     --format="/zxy" \
-    --min-zoom=$MIN_ZOOM \
-    --max-zoom=$MAX_ZOOM \
+    --min-zoom=$PURGE_MIN_ZOOM \
+    --max-zoom=$PURGE_MAX_ZOOM \
     --map=osm \
     --overwrite=false \
     --concurrency=16
@@ -26,8 +28,8 @@ tegola cache purge tile-list "$file_name" \
 tegola cache seed tile-list "$file_name" \
     --config=/opt/tegola_config/config.toml \
     --map=osm \
-    --min-zoom=$MIN_ZOOM \
-    --max-zoom=$MAX_ZOOM \
+    --min-zoom=$SEED_MIN_ZOOM \
+    --max-zoom=$SEED_MAX_ZOOM \
     --overwrite=true \
     --concurrency=16
 set +x
