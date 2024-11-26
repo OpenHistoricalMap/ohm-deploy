@@ -19,13 +19,16 @@ SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
 REGION_NAME = os.getenv("REGION_NAME", "us-east-1")
 DOCKER_IMAGE = os.getenv(
     "DOCKER_IMAGE",
-    "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1734.h5b4d15d",
+    "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1780.h62561a8",
 )
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
 DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400))  # default 1 day
-MIN_ZOOM = os.getenv("MIN_ZOOM", 8)
-MAX_ZOOM = os.getenv("MAX_ZOOM", 16)
+PURGE_MIN_ZOOM = os.getenv("PURGE_MIN_ZOOM", 8)
+PURGE_MAX_ZOOM = os.getenv("PURGE_MAX_ZOOM", 20)
+SEED_MIN_ZOOM = os.getenv("SEED_MIN_ZOOM", 8)
+SEED_MAX_ZOOM = os.getenv("SEED_MAX_ZOOM", 14)
+
 JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge-seed"
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
@@ -90,8 +93,10 @@ def create_kubernetes_job(file_url, file_name):
                             "envFrom": [{"configMapRef": {"name": config_map_name}}],
                             "env": [
                                 {"name": "IMPOSM_EXPIRED_FILE", "value": file_url},
-                                {"name": "MIN_ZOOM", "value": str(MIN_ZOOM)},
-                                {"name": "MAX_ZOOM", "value": str(MAX_ZOOM)},
+                                {"name": "PURGE_MIN_ZOOM", "value": str(PURGE_MIN_ZOOM)},
+                                {"name": "PURGE_MAX_ZOOM", "value": str(PURGE_MAX_ZOOM)},
+                                {"name": "SEED_MIN_ZOOM", "value": str(SEED_MIN_ZOOM)},
+                                {"name": "SEED_MAX_ZOOM", "value": str(SEED_MAX_ZOOM)},
                             ],
                         }
                     ],
