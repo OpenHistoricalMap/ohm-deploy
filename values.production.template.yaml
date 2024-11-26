@@ -931,7 +931,7 @@ ohm:
       MAX_ACTIVE_JOBS: 5 # Maximum number of active jobs in high concurrency queue
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
       PURGE_MIN_ZOOM: 8
-      PURGE_MAX_ZOOM: 20
+      PURGE_MAX_ZOOM: 18 # Purging zoom 19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       SEED_MIN_ZOOM: 8
       SEED_MAX_ZOOM: 14
     resources:
