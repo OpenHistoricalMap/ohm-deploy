@@ -931,7 +931,7 @@ ohm:
       MAX_ACTIVE_JOBS: 10 # Maximum number of active jobs in high concurrency queue
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
       EXECUTE_PURGE: 'true'
-      EXECUTE_SEED: 'false'
+      EXECUTE_SEED: 'true'
       PURGE_CONCURRENCY: 16
       SEED_CONCURRENCY: 16
       PURGE_MIN_ZOOM: 8
