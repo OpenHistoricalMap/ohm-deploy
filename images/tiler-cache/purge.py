@@ -98,7 +98,7 @@ def create_kubernetes_job(file_url, file_name):
                     "restartPolicy": "Never",
                 }
             },
-            "backoffLimit": 0,
+            "backoffLimit": 3,
         },
     }
 
