@@ -963,13 +963,17 @@ ohm:
       NAMESPACE: default # Namespace to run the job
       DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1791.h27fbedb # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: job_large # Nodegroup type to run the job
+      NODEGROUP_TYPE: web_large # Nodegroup type to run the job
       MAX_ACTIVE_JOBS: 2 # Maximum number of active jobs in high concurrency queue
       DELETE_OLD_JOBS_AGE: 3600 # Age in seconds to delete old jobs
+      EXECUTE_PURGE: 'true'
+      EXECUTE_SEED: 'true'
+      PURGE_CONCURRENCY: 8
+      SEED_CONCURRENCY: 8
       PURGE_MIN_ZOOM: 8
-      PURGE_MAX_ZOOM: 20
+      PURGE_MAX_ZOOM: 14
       SEED_MIN_ZOOM: 8
-      SEED_MAX_ZOOM: 14
+      SEED_MAX_ZOOM: 9
     resources:
       enabled: false
       requests:
@@ -986,11 +990,11 @@ ohm:
   # Tiler seed by default is giong to seet tiles from 0-5 zoom level
   tilerCacheSeed:
     enabled: true
-    schedule: '0 * * * *' # testing every hour
+    schedule: '0 */24 * * *' # testing every hour
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
       ZOOM_LEVELS: '7,8'
-      CONCURRENCY: 32
+      CONCURRENCY: 16
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
     resources:
