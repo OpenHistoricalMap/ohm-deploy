@@ -393,7 +393,7 @@ osm-seed:
         effective_io_concurrency = 300
         max_wal_size = 4GB
         min_wal_size = 512MB
-        random_page_cost = 1.1
+        random_page_cost = 1.0
         effective_cache_size = 24GB
         log_min_duration_statement = 15000
         log_connections = on
@@ -414,8 +414,8 @@ osm-seed:
         max_parallel_workers_per_gather = 8
         max_parallel_workers = 16
         max_worker_processes = 16
-        parallel_tuple_cost = 0.1
-        parallel_setup_cost = 1000
+        parallel_tuple_cost = 0.05
+        parallel_setup_cost = 500
         min_parallel_table_scan_size = 8MB
         min_parallel_index_scan_size = 512kB
 
