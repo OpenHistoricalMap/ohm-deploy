@@ -925,7 +925,7 @@ ohm:
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
-      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1780.h62561a8 # TODO, this should be automatically updated from tiler server image
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1791.h27fbedb # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_large # Nodegroup type to run the job
       MAX_ACTIVE_JOBS: 10 # Maximum number of active jobs in high concurrency queue
