@@ -24,10 +24,18 @@ DOCKER_IMAGE = os.getenv(
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
 DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400))  # default 1 day
+
+# Tiler cache purge and seed settings
+EXECUTE_PURGE = os.getenv("EXECUTE_PURGE", "true")
+EXECUTE_SEED = os.getenv("EXECUTE_SEED", "true")
+# zoom
 PURGE_MIN_ZOOM = os.getenv("PURGE_MIN_ZOOM", 8)
 PURGE_MAX_ZOOM = os.getenv("PURGE_MAX_ZOOM", 20)
 SEED_MIN_ZOOM = os.getenv("SEED_MIN_ZOOM", 8)
 SEED_MAX_ZOOM = os.getenv("SEED_MAX_ZOOM", 14)
+## concurrency
+SEED_CONCURRENCY = os.getenv("SEED_CONCURRENCY", 16)
+PURGE_CONCURRENCY = os.getenv("PURGE_CONCURRENCY", 16)
 
 JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge-seed"
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
@@ -93,10 +101,14 @@ def create_kubernetes_job(file_url, file_name):
                             "envFrom": [{"configMapRef": {"name": config_map_name}}],
                             "env": [
                                 {"name": "IMPOSM_EXPIRED_FILE", "value": file_url},
+                                {"name": "EXECUTE_PURGE", "value": str(EXECUTE_PURGE)},
+                                {"name": "EXECUTE_SEED", "value": str(EXECUTE_SEED)},
                                 {"name": "PURGE_MIN_ZOOM", "value": str(PURGE_MIN_ZOOM)},
                                 {"name": "PURGE_MAX_ZOOM", "value": str(PURGE_MAX_ZOOM)},
                                 {"name": "SEED_MIN_ZOOM", "value": str(SEED_MIN_ZOOM)},
                                 {"name": "SEED_MAX_ZOOM", "value": str(SEED_MAX_ZOOM)},
+                                {"name": "SEED_CONCURRENCY", "value": str(SEED_CONCURRENCY)},
+                                {"name": "PURGE_CONCURRENCY", "value": str(PURGE_CONCURRENCY)},
                             ],
                         }
                     ],

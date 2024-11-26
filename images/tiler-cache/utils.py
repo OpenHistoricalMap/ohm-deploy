@@ -196,6 +196,7 @@ def seed_tiles(tiles, concurrency, min_zoom, max_zoom, log_file, skipped_tiles_f
                 --map=osm \
                 --min-zoom={min_zoom} \
                 --max-zoom={max_zoom} \
+                --overwrite=true \
                 --concurrency={concurrency}
             """
             process = subprocess.Popen(

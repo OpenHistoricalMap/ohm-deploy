@@ -46,6 +46,12 @@ spec:
               value: {{ .Values.ohm.tilerCachePurge.env.MAX_ACTIVE_JOBS | quote }}
             - name: DELETE_OLD_JOBS_AGE
               value: {{ .Values.ohm.tilerCachePurge.env.DELETE_OLD_JOBS_AGE | quote }}
+            # execution parameters
+            - name: EXECUTE_PURGE
+              value: {{ .Values.ohm.tilerCachePurge.env.EXECUTE_PURGE | quote }}
+            - name: EXECUTE_SEED
+              value: {{ .Values.ohm.tilerCachePurge.env.EXECUTE_SEED | quote }}
+            # zoom
             - name: PURGE_MIN_ZOOM
               value: {{ .Values.ohm.tilerCachePurge.env.PURGE_MIN_ZOOM | quote }}
             - name: PURGE_MAX_ZOOM
@@ -54,6 +60,11 @@ spec:
               value: {{ .Values.ohm.tilerCachePurge.env.SEED_MIN_ZOOM | quote }}
             - name: SEED_MAX_ZOOM
               value: {{ .Values.ohm.tilerCachePurge.env.SEED_MAX_ZOOM | quote }}
+            # concurrency
+            - name: SEED_CONCURRENCY
+              value: {{ .Values.ohm.tilerCachePurge.env.SEED_CONCURRENCY | quote }}
+            - name: PURGE_CONCURRENCY
+              value: {{ .Values.ohm.tilerCachePurge.env.PURGE_CONCURRENCY | quote }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tiler-server-cm
