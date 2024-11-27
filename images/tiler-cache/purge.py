@@ -6,6 +6,7 @@ import json
 from datetime import datetime, timezone, timedelta
 import logging
 from utils import check_tiler_db_postgres_status
+from s3_cleanup import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -23,7 +24,7 @@ DOCKER_IMAGE = os.getenv(
 )
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
-DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 86400))  # default 1 day
+DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))  # default 1 hour
 
 # Tiler cache purge and seed settings
 EXECUTE_PURGE = os.getenv("EXECUTE_PURGE", "true")
@@ -43,6 +44,10 @@ POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
 POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
+
+ZOOM_LEVELS_TO_DELETE = list(map(int, os.getenv("ZOOM_LEVELS_TO_DELETE", "18,19,20").split(",")))
+S3_BUCKET_CACHE_TILER = os.getenv("S3_BUCKET_CACHE_TILER", "tiler-cache-staging")
+S3_BUCKET_PATH_FILES = os.getenv("S3_BUCKET_PATH_FILES", "mnt/data/osm")
 
 # Initialize Kubernetes and AWS clients
 sqs = boto3.client("sqs", region_name=REGION_NAME)
@@ -126,6 +131,37 @@ def create_kubernetes_job(file_url, file_name):
         logging.error(f"Failed to create Kubernetes Job '{job_name}': {e}")
 
 
+
+def cleanup_zoom_levels(s3_path, zoom_levels, bucket_name, path_file):
+    """
+    Executes the S3 cleanup process for specific zoom levels.
+    
+    Args:
+        s3_path (str): Path to the S3 tiles file.
+        zoom_levels (list): List of zoom levels to process.
+        bucket_name (str): Name of the S3 bucket for deletion.
+
+    Returns:
+        None
+    """
+    try:
+        logging.info(f"Starting cleanup for S3 path: {s3_path}, zoom levels: {zoom_levels}, bucket: {bucket_name}")
+
+        # Compute child tiles
+        tiles = compute_children_tiles(s3_path, zoom_levels)
+
+        # Generate patterns for deletion
+        patterns = generate_tile_patterns(tiles)
+        logging.info(f"Generated tile patterns for deletion: {patterns}")
+
+        # Delete folders based on patterns
+        delete_folders_by_pattern(bucket_name, patterns, path_file)
+        logging.info("S3 cleanup completed successfully.")
+
+    except Exception as e:
+        logging.error(f"Error during cleanup: {e}")
+        raise
+
 def process_sqs_messages():
     """Process messages from the SQS queue and create Kubernetes Jobs for each file."""
     while True:
@@ -173,6 +209,9 @@ def process_sqs_messages():
 
                     # Create a Kubernetes job
                     create_kubernetes_job(file_url, file_name)
+
+                    # Remove zoom levels 18,19,20
+                    cleanup_zoom_levels(file_url, ZOOM_LEVELS_TO_DELETE, S3_BUCKET_CACHE_TILER, S3_BUCKET_PATH_FILES)
 
                 elif "Event" in body and body["Event"] == "s3:TestEvent":
                     logging.info("Test event detected. Ignoring...")

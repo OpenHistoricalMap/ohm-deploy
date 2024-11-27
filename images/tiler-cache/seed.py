@@ -15,38 +15,23 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+# Fetch environment variables
+GEOJSON_URL = os.getenv("GEOJSON_URL", None)
+ZOOM_LEVELS = os.getenv("ZOOM_LEVELS", "6,7")
+CONCURRENCY = int(os.getenv("CONCURRENCY", 32))
+S3_BUCKET = os.getenv("S3_BUCKET", "osmseed-dev")
+OUTPUT_FILE = os.getenv("OUTPUT_FILE", "log_file.csv")
 
 @click.command(short_help="Script to request or seed tiles from a Tiler API.")
-@click.option(
-    "--geojson-url",
-    required=True,
-    help="URL to the GeoJSON file defining the area of interest.",
-)
-@click.option(
-    "--zoom-levels",
-    help="Comma-separated list of zoom levels",
-    default="6,7",
-)
-@click.option(
-    "--concurrency",
-    help="Number of concurrent processes for seeding",
-    default=32,
-    type=int,
-)
-@click.option(
-    "--s3-bucket",
-    help="S3 bucket to upload the result CSV file",
-    default="osmseed-dev",
-)
-@click.option(
-    "--log-file",
-    help="CSV file to save the logs results",
-    default="log_file.csv",
-)
-def main(geojson_url, zoom_levels, concurrency, log_file, s3_bucket):
+def main():
     """
     Main function to process and seed tiles
     """
+
+    if not GEOJSON_URL:
+        logging.error("Environment variable GEOJSON_URL is required but not set. Exiting.")
+        return
+
     logging.info("Starting the tile seeding process.")
 
     # Check PostgreSQL status
@@ -57,37 +42,37 @@ def main(geojson_url, zoom_levels, concurrency, log_file, s3_bucket):
     logging.info("PostgreSQL database is running and reachable.")
 
     # Extract base name from the GeoJSON URL
-    parsed_url = urlparse(geojson_url)
+    parsed_url = urlparse(GEOJSON_URL)
     base_name = os.path.splitext(os.path.basename(parsed_url.path))[0]
     logging.info(f"Base name extracted from GeoJSON URL: {base_name}")
 
     # Parse zoom levels
-    zoom_levels = list(map(int, zoom_levels.split(",")))
+    zoom_levels = list(map(int, ZOOM_LEVELS.split(",")))
     min_zoom = min(zoom_levels)
     max_zoom = max(zoom_levels)
     logging.info(f"Zoom levels parsed: Min Zoom: {min_zoom}, Max Zoom: {max_zoom}")
 
-    features, tiles = process_geojson_to_feature_tiles(geojson_url, min_zoom)
+    # Process GeoJSON and compute tiles
+    features, tiles = process_geojson_to_feature_tiles(GEOJSON_URL, min_zoom)
     geojson_file = f"{base_name}_tiles.geojson"
     save_geojson_boundary(features, geojson_file)
 
     # Use base name for skipped tiles and log files
     skipped_tiles_file = f"{base_name}_skipped_tiles.tiles"
-    log_file = f"{base_name}_seeding_log.csv"
+    OUTPUT_FILE = f"{base_name}_seeding_log.csv"
 
     # Seed the tiles
     logging.info("Starting the seeding process...")
-    seed_tiles(tiles, concurrency, min_zoom, max_zoom, log_file, skipped_tiles_file)
+    seed_tiles(tiles, CONCURRENCY, min_zoom, max_zoom, OUTPUT_FILE, skipped_tiles_file)
     logging.info("Tile seeding complete.")
     logging.info(f"Skipped tiles saved to: {skipped_tiles_file}")
-    logging.info(f"Log of seeding performance saved to: {log_file}")
+    logging.info(f"Log of seeding performance saved to: {OUTPUT_FILE}")
 
     # Upload log files to S3
-    upload_to_s3(log_file, s3_bucket, f"tiler/logs/{log_file}")
-    upload_to_s3(skipped_tiles_file, s3_bucket, f"tiler/logs/{skipped_tiles_file}")
-    upload_to_s3(skipped_tiles_file, s3_bucket, f"tiler/logs/{geojson_file}")
+    upload_to_s3(OUTPUT_FILE, S3_BUCKET, f"tiler/logs/{OUTPUT_FILE}")
+    upload_to_s3(skipped_tiles_file, S3_BUCKET, f"tiler/logs/{skipped_tiles_file}")
+    upload_to_s3(geojson_file, S3_BUCKET, f"tiler/logs/{geojson_file}")
     logging.info("Log files uploaded to S3.")
-
 
 if __name__ == "__main__":
     main()

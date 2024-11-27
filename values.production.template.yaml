@@ -938,6 +938,7 @@ ohm:
       PURGE_MAX_ZOOM: 17 # Purging zoom 18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       SEED_MIN_ZOOM: 8
       SEED_MAX_ZOOM: 14
+      TILER_CACHE_S3_BUCKET: tiler-cache-production
     resources:
       enabled: false
       requests:
@@ -954,7 +955,7 @@ ohm:
   # Tiler seed by default is giong to seet tiles from 0-6 zoom level
   tilerCacheSeed:
     enabled: true
-    schedule: '0 */24 * * *' # Every 24 hours
+    schedule: '0 */6 * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
       ZOOM_LEVELS: '7,8'

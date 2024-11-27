@@ -65,6 +65,8 @@ spec:
               value: {{ .Values.ohm.tilerCachePurge.env.SEED_CONCURRENCY | quote }}
             - name: PURGE_CONCURRENCY
               value: {{ .Values.ohm.tilerCachePurge.env.PURGE_CONCURRENCY | quote }}
+            - name: TILER_CACHE_S3_BUCKET
+              value: {{ .Values.ohm.tilerCachePurge.env.TILER_CACHE_S3_BUCKET | quote }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tiler-server-cm
