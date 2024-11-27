@@ -2,7 +2,7 @@
 
 This is a container that includes scripts to perform purge and seed operations. Each script must run on a different instance.
 
-## Seeding Tiles
+# Seeding Tiles
 
 This script is designed to minimize latency when users interact with OHM tiles by efficiently generating and seeding tiles across specified zoom levels. Running the entire world dataset may take a significant amount of time to generate the tile cache due to the large volume of data. so that the reson we prioritize certain areas. 
 
@@ -21,8 +21,12 @@ export OUTPUT_FILE: /logs/tiler_benchmark.log #The path to a CSV file for loggin
 python seed.py
 ```
 
+### Tiler Seed CronJob
 
-## Purging Tiles
+Chart `ohm/templates/tiler-cache-seed/cronjob.yaml` CronJob is designed to execute scheduled tasks for seeding cache. It runs the script `seed.py`, primarily targeting zoom levels 7 to 10. Additionally, the job seeds tiles for zoom levels 0 to 6 every 24 hours to ensure that lower zoom levels remain updated, minimizing latency for users navigating the map.
+
+
+# Purging Tiles
 
 This script processes an AWS SQS queue and launches a container to handle the purging and seeding of the tiler cache for specific imposm expired files. The script efficiently purges cache tiles within zoom levels 8 to 17. Due to the significant time required to purge higher zoom levels (18, 19, and 20), the script includes a separate section to directly delete these tiles from S3. By following specific patterns, this method is far more efficient than using the tiler purge process for zoom levels 18, 19, and 20.
 
@@ -66,4 +70,45 @@ S3_BUCKET_PATH_FILES = "mnt/data/osm"  # Path within the S3 bucket for tiles to 
 
 python purge.py
 
+```
+
+
+### Tiler Purge Deployment
+
+Deployment ``ohm/templates/tiler-cache-purge/deployment.yaml` is responsible for running the script `purge.py`, which handles purging tiles across different zoom levels. To execute this deployment, it is necessary to create a service account and attach it to the deployment. For example:
+
+```yaml
+# Create a ServiceAccount for managing Jobs and associated Pods
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: job-service-account
+  namespace: default
+---
+# Create a ClusterRole with permissions for Jobs and Pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: job-manager-role
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["create", "list", "delete"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list", "get"]
+---
+# Bind the ClusterRole to the ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: job-manager-role-binding
+subjects:
+- kind: ServiceAccount
+  name: job-service-account
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: job-manager-role
+  apiGroup: rbac.authorization.k8s.io
 ```
