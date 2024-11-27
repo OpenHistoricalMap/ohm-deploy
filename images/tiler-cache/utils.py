@@ -1,6 +1,5 @@
 import logging
 import requests
-import mercantile
 from shapely.geometry import shape, Point, mapping, Polygon
 from shapely.ops import unary_union
 import csv
@@ -28,7 +27,7 @@ def check_tiler_db_postgres_status():
             database=POSTGRES_DB,
             user=POSTGRES_USER,
             password=POSTGRES_PASSWORD,
-            connect_timeout=5,  # Timeout in seconds
+            connect_timeout=5,
         )
         connection.close()
         logging.info("PostgreSQL database is running and reachable.")
@@ -102,58 +101,11 @@ def process_geojson_to_feature_tiles(geojson_url, min_zoom):
         logging.error(f"Error processing GeoJSON to tiles: {e}")
         return [], []
 
-
-def read_geojson_boundary(geojson_url, feature_type, buffer_distance_km=0.01):
-    """Fetches and processes GeoJSON boundary data."""
-    try:
-        logging.info(f"Fetching GeoJSON from {geojson_url}...")
-        response = requests.get(geojson_url)
-        response.raise_for_status()
-        geojson_data = response.json()
-        geometries = [shape(feature["geometry"]) for feature in geojson_data["features"]]
-
-        if not geometries:
-            logging.warning("No geometry found in GeoJSON.")
-            return None
-
-        if feature_type == "Polygon":
-            return unary_union(geometries)
-        elif feature_type == "Point":
-            buffered_geometries = [
-                geom.buffer(buffer_distance_km) for geom in geometries if isinstance(geom, Point)
-            ]
-            return unary_union(buffered_geometries) if buffered_geometries else None
-        else:
-            raise ValueError(f"Unsupported feature type: {feature_type}.")
-    except Exception as e:
-        logging.error(f"Error reading GeoJSON boundary: {e}")
-        return None
-
-
 def save_geojson_boundary(features, file_path):
     featureCollection = {"type": "FeatureCollection", "features": features}
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(featureCollection, file, ensure_ascii=False, indent=4)
     logging.info(f"GeoJSON saved successfully to {file_path}.")
-
-
-def boundary_to_tiles(boundary_geometry, min_zoom, max_zoom):
-    """Generates a list of tiles from boundary geometry."""
-    if not boundary_geometry:
-        logging.warning("No valid geometry provided.")
-        return []
-
-    logging.info(f"Generating tiles for zoom levels {min_zoom} to {max_zoom}...")
-    tile_list = []
-    minx, miny, maxx, maxy = boundary_geometry.bounds
-    for z in range(min_zoom, max_zoom + 1):
-        for tile in mercantile.tiles(minx, miny, maxx, maxy, z):
-            tile_geom = shape(mercantile.feature(tile)["geometry"])
-            if boundary_geometry.intersects(tile_geom):
-                tile_list.append(f"{z}/{tile.x}/{tile.y}")
-    logging.info(f"Generated {len(tile_list)} tiles.")
-    return tile_list
-
 
 def seed_tiles(tiles, concurrency, min_zoom, max_zoom, log_file, skipped_tiles_file):
     """Seeds tiles using Tegola and logs the process."""
@@ -196,7 +148,7 @@ def seed_tiles(tiles, concurrency, min_zoom, max_zoom, log_file, skipped_tiles_f
                 --map=osm \
                 --min-zoom={min_zoom} \
                 --max-zoom={max_zoom} \
-                --overwrite=true \
+                --overwrite=false \
                 --concurrency={concurrency}
             """
             process = subprocess.Popen(
@@ -237,7 +189,6 @@ def seed_tiles(tiles, concurrency, min_zoom, max_zoom, log_file, skipped_tiles_f
     if failed_tiles:
         logging.error(f"Failed tiles: {failed_tiles}")
     return failed_tiles
-
 
 def upload_to_s3(local_file, s3_bucket, s3_key):
     """Uploads a local file to an S3 bucket."""

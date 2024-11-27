@@ -30,13 +30,6 @@ spec:
                 - |
                   set -x
                   
-                  echo "Seeding tiler for $ZOOM_LEVELS  zoom levels"
-                  python seed.py --geojson-url "$GEOJSON_URL" \
-                                --zoom-levels "$ZOOM_LEVELS" \
-                                --concurrency "$CONCURRENCY" \
-                                --s3-bucket "$S3_BUCKET" \
-                                --log-file "$OUTPUT_FILE"
-
                   echo "Seeding tiler from 0 to 6 zoom levels"
                   tegola cache seed \
                     --config=/opt/tegola_config/config.toml \
@@ -44,8 +37,11 @@ spec:
                     --min-zoom=0 \
                     --max-zoom=6 \
                     --bounds=-180,-85.05112878,180,85.05112878 \
-                    --concurrency=32 \
-                    --overwrite=true 
+                    --concurrency=128 \
+                    --overwrite=true
+
+                  echo "Seeding tiler for $ZOOM_LEVELS  zoom levels"
+                  python seed.py
 
               {{- if .Values.ohm.tilerCacheSeed.resources.enabled }}
               resources:

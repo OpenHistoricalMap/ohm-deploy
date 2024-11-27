@@ -240,9 +240,9 @@ osm-seed:
     replicationJob:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -514,7 +514,7 @@ osm-seed:
     tilerServer:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
         label_value: web_large
       replicaCount: 1
@@ -974,6 +974,7 @@ ohm:
       PURGE_MAX_ZOOM: 14
       SEED_MIN_ZOOM: 8
       SEED_MAX_ZOOM: 9
+      TILER_CACHE_S3_BUCKET: tiler-cache-staging
     resources:
       enabled: false
       requests:
@@ -990,7 +991,7 @@ ohm:
   # Tiler seed by default is giong to seet tiles from 0-5 zoom level
   tilerCacheSeed:
     enabled: true
-    schedule: '0 */24 * * *' # testing every hour
+    schedule: '0 */6 * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
       ZOOM_LEVELS: '7,8'
