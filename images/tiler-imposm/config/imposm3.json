@@ -25,14 +25,19 @@
       "tolerance": 50.0
     },
     "water_lines_gen0": {
-      "source": "water_lines_gen1",
+      "source": "water_lines",
       "sql_filter": null,
-      "tolerance": 200
+      "tolerance": 10000 
     },
     "water_lines_gen1": {
       "source": "water_lines",
-      "sql_filter": null,
-      "tolerance": 50.0
+      "sql_filter": "ST_Length(geometry) > 500",
+      "tolerance": 200
+    },
+    "water_lines_gen2": {
+      "source": "water_lines",
+      "sql_filter": "ST_Length(geometry) > 100",
+      "tolerance": 50
     },
     "landuse_areas_gen1": {
       "source": "landuse_areas",
