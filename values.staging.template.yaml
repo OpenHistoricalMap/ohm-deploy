@@ -974,7 +974,9 @@ ohm:
       PURGE_MAX_ZOOM: 14
       SEED_MIN_ZOOM: 8
       SEED_MAX_ZOOM: 9
-      TILER_CACHE_S3_BUCKET: tiler-cache-staging
+      ZOOM_LEVELS_TO_DELETE: 18,19,20
+      S3_BUCKET_CACHE_TILER: tiler-cache-staging
+      S3_BUCKET_PATH_FILES: mnt/data/osm
     resources:
       enabled: false
       requests:

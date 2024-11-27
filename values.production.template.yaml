@@ -938,7 +938,9 @@ ohm:
       PURGE_MAX_ZOOM: 17 # Purging zoom 18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       SEED_MIN_ZOOM: 8
       SEED_MAX_ZOOM: 14
-      TILER_CACHE_S3_BUCKET: tiler-cache-production
+      ZOOM_LEVELS_TO_DELETE: 18,19,20
+      S3_BUCKET_CACHE_TILER: tiler-cache-production
+      S3_BUCKET_PATH_FILES: mnt/data/osm
     resources:
       enabled: false
       requests:
