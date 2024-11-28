@@ -8,20 +8,25 @@
     ]
   },
   "generalized_tables": {
-    "water_lines_gen0": {
+    "water_lines_zoom_8_9": {
       "source": "water_lines",
-      "sql_filter": null,
-      "tolerance": 200
+      "sql_filter": "type IN ('river', 'canal')",
+      "tolerance": 1000
     },
-    "water_lines_gen1": {
+    "water_lines_zoom_10_11": {
       "source": "water_lines",
-      "sql_filter": "ST_Length(geometry) > 500",
-      "tolerance": 200
+      "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam')",
+      "tolerance": 100
     },
-    "water_lines_gen2": {
+    "water_lines_zoom_12_14": {
       "source": "water_lines",
-      "sql_filter": "ST_Length(geometry) > 100",
-      "tolerance": 50
+      "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam', 'stream')",
+      "tolerance": 10
+    },
+    "water_lines_zoom_15_20": {
+      "source": "water_lines",
+      "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam', 'stream', 'ditch', 'drain')",
+      "tolerance": 0
     }
   },
   "tables": {
@@ -51,19 +56,38 @@
           "type": "hstore_tags",
           "name": "tags",
           "key": null
+        },
+        {
+          "type": "string",
+          "name": "bridge",
+          "key": "tags->'bridge'"
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "tags->'start_date'"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "tags->'end_date'"
+        },
+        {
+          "type": "float",
+          "name": "start_decdate",
+          "key": "isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE)"
+        },
+        {
+          "type": "float",
+          "name": "end_decdate",
+          "key": "isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE)"
         }
       ],
       "type": "linestring",
       "mapping": {
-        "waterway": [
-          "__any__"
-        ],
-        "barrier": [
-          "ditch"
-        ],
-        "natural": [
-          "cliff"
-        ]
+        "waterway": ["__any__"],
+        "barrier": ["ditch"],
+        "natural": ["cliff"]
       }
     }
   }
