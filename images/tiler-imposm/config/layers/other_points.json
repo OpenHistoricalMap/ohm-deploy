@@ -7,20 +7,9 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {
-    "landuse_areas_gen1": {
-      "source": "landuse_areas",
-      "sql_filter": "ST_Area(geometry)>50000.000000",
-      "tolerance": 50.0
-    },
-    "landuse_areas_gen0": {
-      "source": "landuse_areas_gen1",
-      "sql_filter": "ST_Area(geometry)>500000.000000",
-      "tolerance": 200.0
-    }
-  },
+  "generalized_tables": {},
   "tables": {
-    "landuse_areas": {
+    "other_points": {
       "fields": [
         {
           "type": "id",
@@ -43,11 +32,6 @@
           "key": null
         },
         {
-          "type": "pseudoarea",
-          "name": "area",
-          "key": null
-        },
-        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null
@@ -58,25 +42,60 @@
           "key": null
         }
       ],
-      "type": "polygon",
+      "type": "point",
       "mappings": {
-        "landuse": {
+        "barrier": {
           "mapping": {
-            "landuse": [
+            "barrier": [
               "__any__"
             ]
           }
         },
-        "leisure": {
+        "historic": {
           "mapping": {
-            "leisure": [
+            "historic": [
               "__any__"
             ]
           }
         },
-        "natural": {
+        "man_made": {
           "mapping": {
-            "natural": [
+            "man_made": [
+              "__any__"
+            ]
+          }
+        },
+        "power": {
+          "mapping": {
+            "power": [
+              "__any__"
+            ]
+          }
+        },
+        "military": {
+          "mapping": {
+            "military": [
+              "__any__"
+            ]
+          }
+        },
+        "tourism": {
+          "mapping": {
+            "tourism": [
+              "__any__"
+            ]
+          }
+        },
+        "shop": {
+          "mapping": {
+            "shop": [
+              "__any__"
+            ]
+          }
+        },
+        "craft": {
+          "mapping": {
+            "craft": [
               "__any__"
             ]
           }

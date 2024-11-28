@@ -75,19 +75,25 @@
         {
           "type": "float",
           "name": "start_decdate",
-          "key": "isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE)"
+          "key": null
         },
         {
           "type": "float",
           "name": "end_decdate",
-          "key": "isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE)"
+          "key": null
         }
       ],
       "type": "linestring",
       "mapping": {
-        "waterway": ["__any__"],
-        "barrier": ["ditch"],
-        "natural": ["cliff"]
+        "waterway": [
+          "__any__"
+        ],
+        "barrier": [
+          "ditch"
+        ],
+        "natural": [
+          "cliff"
+        ]
       }
     }
   }

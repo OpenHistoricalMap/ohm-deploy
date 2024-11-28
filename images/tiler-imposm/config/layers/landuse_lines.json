@@ -7,20 +7,9 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {
-    "landuse_areas_gen1": {
-      "source": "landuse_areas",
-      "sql_filter": "ST_Area(geometry)>50000.000000",
-      "tolerance": 50.0
-    },
-    "landuse_areas_gen0": {
-      "source": "landuse_areas_gen1",
-      "sql_filter": "ST_Area(geometry)>500000.000000",
-      "tolerance": 200.0
-    }
-  },
+  "generalized_tables": {},
   "tables": {
-    "landuse_areas": {
+    "landuse_lines": {
       "fields": [
         {
           "type": "id",
@@ -43,11 +32,6 @@
           "key": null
         },
         {
-          "type": "pseudoarea",
-          "name": "area",
-          "key": null
-        },
-        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null
@@ -58,7 +42,23 @@
           "key": null
         }
       ],
-      "type": "polygon",
+      "type": "linestring",
+      "filters": {
+        "exclude_tags": [
+          [
+            "area",
+            "yes"
+          ],
+          [
+            "natural",
+            "coastline"
+          ],
+          [
+            "boundary",
+            "administrative"
+          ]
+        ]
+      },
       "mappings": {
         "landuse": {
           "mapping": {

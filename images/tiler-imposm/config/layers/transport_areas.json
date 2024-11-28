@@ -7,20 +7,9 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {
-    "landuse_areas_gen1": {
-      "source": "landuse_areas",
-      "sql_filter": "ST_Area(geometry)>50000.000000",
-      "tolerance": 50.0
-    },
-    "landuse_areas_gen0": {
-      "source": "landuse_areas_gen1",
-      "sql_filter": "ST_Area(geometry)>500000.000000",
-      "tolerance": 200.0
-    }
-  },
+  "generalized_tables": {},
   "tables": {
-    "landuse_areas": {
+    "transport_areas": {
       "fields": [
         {
           "type": "id",
@@ -38,13 +27,13 @@
           "key": "name"
         },
         {
-          "type": "mapping_value",
-          "name": "type",
-          "key": null
+          "type": "string",
+          "name": "area",
+          "key": "area"
         },
         {
-          "type": "pseudoarea",
-          "name": "area",
+          "type": "mapping_value",
+          "name": "type",
           "key": null
         },
         {
@@ -60,23 +49,30 @@
       ],
       "type": "polygon",
       "mappings": {
-        "landuse": {
+        "rail": {
           "mapping": {
-            "landuse": [
+            "railway": [
               "__any__"
             ]
           }
         },
-        "leisure": {
+        "highway": {
           "mapping": {
-            "leisure": [
+            "highway": [
               "__any__"
             ]
           }
         },
-        "natural": {
+        "aeroway": {
           "mapping": {
-            "natural": [
+            "aeroway": [
+              "__any__"
+            ]
+          }
+        },
+        "route": {
+          "mapping": {
+            "route": [
               "__any__"
             ]
           }
