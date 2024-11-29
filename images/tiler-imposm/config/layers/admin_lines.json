@@ -32,6 +32,15 @@
       "source": "admin_lines",
       "sql_filter": "maritime='yes'",
       "tolerance": 100
+    },
+    "admin_lines_zoom_13_15": {
+      "source": "admin_lines",
+      "sql_filter": "maritime='yes'",
+      "tolerance": 10
+    },
+    "admin_lines_zoom_16_20": {
+      "source": "admin_lines",
+      "sql_filter": "maritime='yes'"
     }
   },
   "tables": {
