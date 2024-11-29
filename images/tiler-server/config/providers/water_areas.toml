@@ -6,7 +6,7 @@ name = "water_areas_zoom_0_2"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) as osm_id, 
+    ABS(osm_id) AS osm_id, 
     name, 
     type, 
     area, 
@@ -29,7 +29,7 @@ name = "water_areas_zoom_3_5"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) as osm_id, 
+    ABS(osm_id) AS osm_id, 
     name, 
     type, 
     area, 
@@ -53,7 +53,7 @@ name = "water_areas_zoom_6_7"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) as osm_id, 
+    ABS(osm_id) AS osm_id, 
     name, 
     type, 
     area, 
@@ -76,7 +76,7 @@ name = "water_areas_zoom_8_9"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) as osm_id, 
+    ABS(osm_id) AS osm_id, 
     name, 
     type, 
     area, 
@@ -99,7 +99,7 @@ name = "water_areas_zoom_10_12"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) as osm_id, 
+    ABS(osm_id) AS osm_id, 
     name, 
     type, 
     area, 
@@ -117,13 +117,12 @@ WHERE
 [[providers.layers]]
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 name = "water_areas_zoom_13_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) as osm_id, 
-    osm_id, 
+    ABS(osm_id) AS osm_id, 
     name, 
     type, 
     area, 
@@ -141,13 +140,12 @@ WHERE
 [[providers.layers]]
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 name = "water_areas_16_20"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
-    osm_id, 
+    ABS(osm_id) AS osm_id,
     name, 
     type, 
     area, 

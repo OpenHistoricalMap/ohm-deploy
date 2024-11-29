@@ -1,41 +1,41 @@
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_gen0_centroids_0-2"
+provider_layer = "osm.water_areas_zoom_0_2_centroid"
 min_zoom = 0
 max_zoom = 2
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_gen0_centroids_3-5"
+provider_layer = "osm.water_areas_zoom_3_5_centroid"
 min_zoom = 3
 max_zoom = 5
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_gen0_centroids_6-7"
+provider_layer = "osm.water_areas_zoom_6_7_centroid"
 min_zoom = 6
 max_zoom = 7
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_gen0_centroids_8-9"
+provider_layer = "osm.water_areas_zoom_8_9_centroid"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_gen1_centroids_10-12"
+provider_layer = "osm.water_areas_zoom_10_12_centroid"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroids_13-15"
+provider_layer = "osm.water_areas_zoom_13_15_centroid"
 min_zoom = 13
 max_zoom = 15
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroids_16-20"
+provider_layer = "osm.water_areas_16_20_centroid"
 min_zoom = 16
 max_zoom = 20
