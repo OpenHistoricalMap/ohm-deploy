@@ -1,0 +1,141 @@
+
+environment: dev
+cloudProvider: aws
+AWS_S3_BUCKET: osmseed-dev
+AWS_SSL_ARN: none
+serviceType: ClusterIP
+createClusterIssuer: false
+domain: staging.openhistoricalmap.org
+adminEmail: ohm-admins@googlegroups.com
+db:
+  enabled: false
+web:
+  enabled: false
+memcached:
+  enabled: false
+planetDump:
+  enabled: false
+fullHistory:
+  enabled: false
+idEditor:
+  enabled: false
+replicationJob:
+  enabled: false
+populateApidb:
+  enabled: false
+osmProcessor:
+  enabled: false
+dbBackupRestore:
+  cronjobs:
+    - name: web-db
+      enabled: false
+      
+tilerDb:
+  enabled: true
+  image:
+    name: "ghcr.io/openhistoricalmap/tiler-db"
+    tag: "0.0.1-0.dev.git.1737.h9b9ef9b"
+  nodeSelector:
+    enabled: true
+    label_key: nodegroup_type
+    label_value: job_large
+  env:
+    POSTGRES_HOST: production-tiler-db
+    POSTGRES_DB: tiler-osm
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: dsadjkhkdjsah65ghsg
+    POSTGRES_PORT: 5432
+  sharedMemorySize: 2Gi
+  persistenceDisk:
+    enabled: false
+    accessMode: ReadWriteOnce
+    mountPath: /var/lib/postgresql/data
+    subPath: postgresql-d
+    # In case cloudProvider: aws
+    AWS_ElasticBlockStore_volumeID: vol-0cd9cb363447fbed8
+    AWS_ElasticBlockStore_size: 200Gi
+  resources:
+    enabled: false
+    requests:
+      memory: "29Gi"
+      cpu: "7500m"
+    limits:
+      memory: "29Gi"
+      cpu: "7600m"
+  postgresqlConfig:
+    enabled: false
+# ====================================================================================================
+# Variables for tiler-imposm
+# ====================================================================================================
+tilerImposm:
+  enabled: true
+  image:
+    name: "ghcr.io/openhistoricalmap/tiler-imposm"
+    tag: "0.0.1-0.dev.git.1817.h051649e"
+  nodeSelector:
+    enabled: false
+    label_key: nodegroup_type
+    label_value: web_large
+  env:
+    TILER_IMPORT_FROM: osm
+    TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241129_0001.osm.pbf
+    REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+    SEQUENCE_NUMBER: "1666000"
+    # TILER_IMPORT_PBF_URL=https://osmseed-dev.s3.us-east-1.amazonaws.com/replication/osm-sadbox-admin.osm.pbf
+    # REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+    # SEQUENCE_NUMBER: "1"
+    OVERWRITE_STATE: false
+    UPLOAD_EXPIRED_FILES: true
+    IMPORT_NATURAL_EARTH: true
+    IMPORT_OSM_LAND: true
+    IMPOSM3_IMPORT_LAYERS: "all"
+  persistenceDisk:
+    enabled: true
+    accessMode: ReadWriteOnce
+    mountPath: /mnt/data
+    # In case cloudProvider: aws
+    AWS_ElasticBlockStore_volumeID: vol-0eb34fde42a67fe81
+    AWS_ElasticBlockStore_size: 100Gi
+  resources:
+    enabled: false
+    requests:
+      memory: "16Gi"
+      cpu: "2"
+    limits:
+      memory: "24Gi"
+      cpu: "3"
+
+tilerServer:
+  enabled: false
+tilerServerCacheCleaner:
+  enabled: false
+tilerVisor:
+  enabled: false
+# ====================================================================================================
+# Variables for Tasking Manager DB
+# ====================================================================================================
+tmDb:
+  enabled: false
+tmApi:
+  enabled: false
+nominatimApi:
+  enabled: false
+overpassApi:
+  enabled: false
+taginfo:
+  enabled: false
+osmSimpleMetrics:
+  enabled: false
+monitoringReplication:
+  enabled: false
+changesetReplicationJob:
+  enabled: false
+osmchaWeb:
+  enabled: false
+osmchaApi:
+  enabled: false
+  image:
+osmchaDb:
+  enabled: false
+planetFiles:
+  enabled: false
