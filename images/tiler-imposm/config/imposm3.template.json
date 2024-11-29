@@ -1,0 +1,12 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {}
+}

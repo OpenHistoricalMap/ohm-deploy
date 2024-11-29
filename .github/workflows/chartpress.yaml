@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'tiler-cache'
+      - 'imposm/tables'
 jobs:
   build:
     runs-on: ubuntu-20.04

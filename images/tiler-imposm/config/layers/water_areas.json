@@ -1,0 +1,96 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {
+    "water_areas_zoom_0_2": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'riverbank') AND area > 100000000",
+      "tolerance": 250000
+    },
+    "water_areas_zoom_3_5": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 50000000",
+      "tolerance": 25000
+    },
+    "water_areas_zoom_6_7": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 1000000",
+      "tolerance": 5000
+    },
+    "water_areas_zoom_8_9": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 10000",
+      "tolerance": 1000
+    },
+    "water_areas_zoom_10_12": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank')",
+      "tolerance": 100
+    },
+    "water_areas_zoom_13_15": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank', 'dock')",
+      "tolerance": 10
+    }
+  },
+  "tables": {
+    "water_areas": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "pseudoarea",
+          "name": "area",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        }
+      ],
+      "type": "polygon",
+      "mapping": {
+        "waterway": [
+          "__any__"
+        ],
+        "landuse": [
+          "basin",
+          "reservoir"
+        ],
+        "natural": [
+          "water"
+        ]
+      }
+    }
+  }
+}

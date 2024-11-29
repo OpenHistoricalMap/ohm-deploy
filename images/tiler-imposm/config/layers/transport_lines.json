@@ -1,0 +1,137 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {
+    "transport_lines_gen0": {
+      "source": "transport_lines_gen1",
+      "sql_filter": null,
+      "tolerance": 200.0
+    },
+    "transport_lines_gen1": {
+      "source": "transport_lines",
+      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link') OR class IN('railway', 'route')",
+      "tolerance": 50.0
+    }
+  },
+  "tables": {
+    "transport_lines": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "boolint",
+          "name": "tunnel",
+          "key": "tunnel"
+        },
+        {
+          "type": "boolint",
+          "name": "bridge",
+          "key": "bridge"
+        },
+        {
+          "type": "direction",
+          "name": "oneway",
+          "key": "oneway"
+        },
+        {
+          "type": "string",
+          "name": "ref",
+          "key": "ref"
+        },
+        {
+          "type": "wayzorder",
+          "name": "z_order",
+          "key": "layer"
+        },
+        {
+          "type": "string",
+          "name": "access",
+          "key": "access"
+        },
+        {
+          "type": "string",
+          "name": "service",
+          "key": "service"
+        },
+        {
+          "type": "string",
+          "name": "ford",
+          "key": "ford"
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "linestring",
+      "filters": {
+        "exclude_tags": [
+          [
+            "area",
+            "yes"
+          ]
+        ]
+      },
+      "mappings": {
+        "railway": {
+          "mapping": {
+            "railway": [
+              "__any__"
+            ]
+          }
+        },
+        "highway": {
+          "mapping": {
+            "highway": [
+              "__any__"
+            ]
+          }
+        },
+        "aeroway": {
+          "mapping": {
+            "aeroway": [
+              "__any__"
+            ]
+          }
+        },
+        "route": {
+          "mapping": {
+            "route": [
+              "__any__"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

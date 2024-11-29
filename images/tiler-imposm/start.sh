@@ -22,6 +22,9 @@ TRACKING_FILE="$WORKDIR/uploaded_files.log"
 
 mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
+# Create config map for imposm
+python build_imposm3_config.py
+
 # Create config file to set variables for imposm
 {
     echo "{"
