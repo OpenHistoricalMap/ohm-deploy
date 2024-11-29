@@ -1,130 +1,124 @@
 [[providers.layers]]
-name = "admin_boundaries_maritime_0-2"
+name = "admin_lines_zoom_0_2"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 500), !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
-    admin_level, 
+    admin_level,
     name, 
     type, 
     maritime, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date,
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date,
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines 
+    osm_admin_lines_zoom_0_2
 WHERE 
-    maritime='yes'
-    AND geometry && !BBOX!
-"""
-
-## Boundaries lines from admin_level=1,2,3,4, zoom 3-5 and geometry simplification=200
-[[providers.layers]]
-name = "admin_boundaries_maritime_3-5"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 200), !BBOX!) AS geometry, 
-    id, 
-    osm_id, 
-    admin_level, 
-    name, 
-    type, 
-    maritime, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    osm_admin_lines 
-WHERE 
-    maritime='yes' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "admin_boundaries_maritime_6-7"
+name = "admin_lines_zoom_3_5"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 100), !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
     maritime, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines 
+    osm_admin_lines_zoom_3_5 
 WHERE 
-    maritime='yes' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "admin_boundaries_maritime_8-9"
+name = "admin_lines_zoom_6_7"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 50), !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
     maritime, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines 
+    osm_admin_lines_zoom_6_7
 WHERE 
-    maritime='yes' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "admin_boundaries_maritime_10-20"
+name = "admin_lines_zoom_8_9"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(ST_Simplify(geometry, 1), !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     admin_level, 
     name, 
     type, 
     maritime, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines 
+    osm_admin_lines_zoom_8_9
 WHERE 
-    maritime='yes' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "admin_lines_zoom_10_12"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    id, 
+    osm_id, 
+    admin_level, 
+    name, 
+    type, 
+    maritime, 
+    start_date, 
+    end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}}
+FROM 
+    osm_admin_lines_zoom_10_12
+WHERE 
+    geometry && !BBOX!
 """
