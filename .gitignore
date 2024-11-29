@@ -12,3 +12,4 @@ config.toml
 .DS_Store
 */.DS_Store
 .env
+values.dev.*

@@ -397,8 +397,8 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-00137f4bee6eae41b
-        AWS_ElasticBlockStore_size: 100Gi
+        AWS_ElasticBlockStore_volumeID : vol-0cd9cb363447fbed8
+        AWS_ElasticBlockStore_size: 200Gi
       resources:
           enabled: false
           requests:
@@ -492,13 +492,13 @@ osm-seed:
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
         IMPORT_OSM_LAND: true
-        IMPOSM3_IMPORT_LAYERS: "water_line,water_area"
+        IMPOSM3_IMPORT_LAYERS: "all"
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-01a443ed5f895fb50
+        AWS_ElasticBlockStore_volumeID: vol-0eb34fde42a67fe81
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
@@ -958,7 +958,7 @@ ohm:
     enabled: true
     
   tilerCachePurge:
-    enabled: true
+    enabled: false
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
@@ -993,7 +993,7 @@ ohm:
 
   # Tiler seed by default is giong to seet tiles from 0-5 zoom level
   tilerCacheSeed:
-    enabled: true
+    enabled: false
     schedule: '0 */6 * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
