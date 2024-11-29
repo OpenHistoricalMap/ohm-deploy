@@ -60,27 +60,17 @@
         {
           "type": "string",
           "name": "bridge",
-          "key": "tags->'bridge'"
+          "key": "bridge"
         },
         {
           "type": "string",
           "name": "start_date",
-          "key": "tags->'start_date'"
+          "key": "start_date"
         },
         {
           "type": "string",
           "name": "end_date",
-          "key": "tags->'end_date'"
-        },
-        {
-          "type": "float",
-          "name": "start_decdate",
-          "key": null
-        },
-        {
-          "type": "float",
-          "name": "end_decdate",
-          "key": null
+          "key": "end_date"
         }
       ],
       "type": "linestring",

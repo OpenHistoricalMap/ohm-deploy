@@ -63,37 +63,22 @@
           "key": null
         },
         {
-          "type": "float",
+          "type": "pseudoarea",
           "name": "area",
-          "key": "ST_Area(geometry)"
+          "key": null
         },
         {
           "type": "string",
           "name": "start_date",
-          "key": "tags->'start_date'"
+          "key": "start_date"
         },
         {
           "type": "string",
           "name": "end_date",
-          "key": "tags->'end_date'"
-        },
-        {
-          "type": "float",
-          "name": "start_decdate",
-          "key": null
-        },
-        {
-          "type": "float",
-          "name": "end_decdate",
-          "key": null
-        },
-        {
-          "type": "hstore_tags",
-          "name": "tags",
-          "key": null
+          "key": "end_date"
         }
       ],
-      "type": "multipolygon",
+      "type": "polygon",
       "mapping": {
         "waterway": [
           "__any__"
@@ -104,14 +89,6 @@
         ],
         "natural": [
           "water"
-        ],
-        "type": [
-          "pond",
-          "basin",
-          "canal",
-          "mill_pond",
-          "riverbank",
-          "dock"
         ]
       }
     }
