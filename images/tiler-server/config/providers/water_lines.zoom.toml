@@ -1,23 +1,23 @@
 [[maps.layers]]
 name = "water_lines"
-provider_layer = "osm.water_lines_zoom_8_9"
+provider_layer = "osm.water_lines_z8_9"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
 name = "water_lines"
-provider_layer = "osm.water_lines_zoom_10_11"
+provider_layer = "osm.water_lines_z10_11"
 min_zoom = 10
 max_zoom = 11
 
 [[maps.layers]]
 name = "water_lines"
-provider_layer = "osm.water_lines_zoom_12_14"
+provider_layer = "osm.water_lines_z12_14"
 min_zoom = 12
 max_zoom = 14
 
 [[maps.layers]]
 name = "water_lines"
-provider_layer = "osm.water_lines_zoom_15_20"
+provider_layer = "osm.water_lines_z15_20"
 min_zoom = 15
 max_zoom = 20

@@ -2,7 +2,7 @@
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
-name = "water_areas_zoom_0_2"
+name = "water_areas_z0_2"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -16,7 +16,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_water_areas_zoom_0_2
+    osm_water_areas_z0_2
 WHERE 
     geometry && !BBOX!
 """
@@ -25,7 +25,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
-name = "water_areas_zoom_3_5"
+name = "water_areas_z3_5"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -39,7 +39,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-   osm_water_areas_zoom_3_5 
+   osm_water_areas_z3_5 
 WHERE 
     geometry && !BBOX!
 """
@@ -49,7 +49,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
-name = "water_areas_zoom_6_7"
+name = "water_areas_z6_7"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -63,7 +63,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_water_areas_zoom_6_7
+    osm_water_areas_z6_7
 WHERE 
     geometry && !BBOX!
 """
@@ -72,7 +72,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
-name = "water_areas_zoom_8_9"
+name = "water_areas_z8_9"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -86,7 +86,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_water_areas_zoom_8_9
+    osm_water_areas_z8_9
 WHERE 
     geometry && !BBOX!
 """
@@ -95,7 +95,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
-name = "water_areas_zoom_10_12"
+name = "water_areas_z10_12"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -109,7 +109,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_water_areas_zoom_10_12
+    osm_water_areas_z10_12
 WHERE 
     geometry && !BBOX!
 """
@@ -118,7 +118,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
-name = "water_areas_zoom_13_15"
+name = "water_areas_z13_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -132,7 +132,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_water_areas_zoom_13_15 
+    osm_water_areas_z13_15 
 WHERE 
     geometry && !BBOX!
 """
