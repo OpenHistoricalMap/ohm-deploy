@@ -38,31 +38,17 @@ WORKDIR /go
 ENV GOPATH /go
 RUN git clone https://github.com/omniscale/imposm3.git $GOPATH/src/github.com/omniscale/imposm3
 
-# Switch to the stable version of Imposm3
 WORKDIR $GOPATH/src/github.com/omniscale/imposm3
 RUN git checkout v0.14.0
 
 # Apply fixes or patches (if necessary)
 RUN sed -i '/setMaxFileSize/d' cache/ldb_pre_121.go
-
-# Build Imposm3
 RUN go install github.com/omniscale/imposm3/cmd/imposm
 ENV PATH $PATH:$GOPATH/bin
 
 # Install AWS CLI for downloading files
-RUN pip3 install -U setuptools awscli
-
-# Set up data volume
-# ENV IMPOSMDATA /mnt/data
-# RUN mkdir -p $IMPOSMDATA && chmod 777 -R $IMPOSMDATA
-# VOLUME $IMPOSMDATA
-
-# Set working directory
+RUN pip3 install -U setuptools awscli psycopg2
 WORKDIR /osm
 COPY . .
-
-# Ensure start.sh is executable
 RUN chmod +x ./start.sh
-
-# Default command
 CMD ["./start.sh"]
