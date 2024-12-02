@@ -59,7 +59,6 @@
     },
     "admin_boundaries_centroid_z8_9": {
       "source": "admin_areas",
-      "tolerance": 200,
       "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9) AND name IS NOT NULL AND name <> ''"
@@ -73,7 +72,6 @@
     },
     "admin_boundaries_centroid_z10_12": {
       "source": "admin_areas",
-      "tolerance": 100,
       "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10) AND name IS NOT NULL AND name <> ''"
@@ -87,21 +85,18 @@
     },
     "admin_boundaries_centroid_z13_15": {
       "source": "admin_areas",
-      "tolerance": 50,
       "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10) AND name IS NOT NULL AND name <> ''"
     },
     "admin_boundaries_lines_z16_20": {
       "source": "admin_areas",
-      "tolerance": 5,
       "geometry_transform": "ST_Boundary(geometry)",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)"
     },
     "admin_boundaries_centroid_z16_20": {
       "source": "admin_areas",
-      "tolerance": 5,
       "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10) AND name IS NOT NULL AND name <> ''"
