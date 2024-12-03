@@ -410,7 +410,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: job_xlarge
       postgresqlConfig:
         enabled: true
         values: |
