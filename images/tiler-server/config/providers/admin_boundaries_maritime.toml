@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "admin_lines_zoom_0_2"
+name = "admin_lines_z0_2"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -17,13 +17,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_zoom_0_2
+    osm_admin_lines_z0_2
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "admin_lines_zoom_3_5"
+name = "admin_lines_z3_5"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -41,13 +41,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_zoom_3_5 
+    osm_admin_lines_z3_5 
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "admin_lines_zoom_6_7"
+name = "admin_lines_z6_7"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -65,13 +65,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_zoom_6_7
+    osm_admin_lines_z6_7
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "admin_lines_zoom_8_9"
+name = "admin_lines_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -89,13 +89,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_zoom_8_9
+    osm_admin_lines_z8_9
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "admin_lines_zoom_10_12"
+name = "admin_lines_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -113,7 +113,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_zoom_10_12
+    osm_admin_lines_z10_12
 WHERE 
     geometry && !BBOX!
 """

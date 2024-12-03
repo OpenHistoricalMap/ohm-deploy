@@ -175,7 +175,10 @@ function importData() {
 
     touch $INIT_FILE
 
-    # Update the DB
+    # Update tables
+    python update_tables.py
+    
+    # Updata data with minute replication
     updateData
 }
 

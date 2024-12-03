@@ -1,36 +1,36 @@
 [[maps.layers]]
 name = "water_areas"
-provider_layer = "osm.water_areas_zoom_0_2"
+provider_layer = "osm.water_areas_z0_2"
 min_zoom = 0
 max_zoom = 2
 
 [[maps.layers]]
 name = "water_areas"
-provider_layer = "osm.water_areas_zoom_3_5"
+provider_layer = "osm.water_areas_z3_5"
 min_zoom = 3
 max_zoom = 5
 
 [[maps.layers]]
 name = "water_areas"
-provider_layer = "osm.water_areas_zoom_6_7"
+provider_layer = "osm.water_areas_z6_7"
 min_zoom = 6
 max_zoom = 7
 
 [[maps.layers]]
 name = "water_areas"
-provider_layer = "osm.water_areas_zoom_8_9"
+provider_layer = "osm.water_areas_z8_9"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
 name = "water_areas"
-provider_layer = "osm.water_areas_zoom_10_12"
+provider_layer = "osm.water_areas_z10_12"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "water_areas"
-provider_layer = "osm.water_areas_zoom_13_15"
+provider_layer = "osm.water_areas_z13_15"
 min_zoom = 13
 max_zoom = 15
 

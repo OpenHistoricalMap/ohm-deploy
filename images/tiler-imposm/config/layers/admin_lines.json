@@ -8,37 +8,37 @@
     ]
   },
   "generalized_tables": {
-    "admin_lines_zoom_0_2": {
+    "admin_lines_z0_2": {
       "source": "admin_lines",
       "sql_filter": "maritime='yes'",
       "tolerance": 5000
     },
-    "admin_lines_zoom_3_5": {
+    "admin_lines_z3_5": {
       "source": "admin_lines",
       "sql_filter": "maritime='yes'",
       "tolerance": 2000
     },
-    "admin_lines_zoom_6_7": {
+    "admin_lines_z6_7": {
       "source": "admin_lines",
       "sql_filter": "maritime='yes'",
       "tolerance": 1000
     },
-    "admin_lines_zoom_8_9": {
+    "admin_lines_z8_9": {
       "source": "admin_lines",
       "sql_filter": "maritime='yes'",
       "tolerance": 500
     },
-    "admin_lines_zoom_10_12": {
+    "admin_lines_z10_12": {
       "source": "admin_lines",
       "sql_filter": "maritime='yes'",
       "tolerance": 100
     },
-    "admin_lines_zoom_13_15": {
+    "admin_lines_z13_15": {
       "source": "admin_lines",
       "sql_filter": "maritime='yes'",
       "tolerance": 10
     },
-    "admin_lines_zoom_16_20": {
+    "admin_lines_z16_20": {
       "source": "admin_lines",
       "sql_filter": "maritime='yes'"
     }

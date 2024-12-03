@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'imposm/tables'
+      - 'imposm3'
 jobs:
   build:
     runs-on: ubuntu-20.04

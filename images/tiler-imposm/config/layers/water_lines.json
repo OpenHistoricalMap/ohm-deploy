@@ -8,22 +8,22 @@
     ]
   },
   "generalized_tables": {
-    "water_lines_zoom_8_9": {
+    "water_lines_z8_9": {
       "source": "water_lines",
       "sql_filter": "type IN ('river', 'canal')",
       "tolerance": 1000
     },
-    "water_lines_zoom_10_11": {
+    "water_lines_z10_11": {
       "source": "water_lines",
       "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam')",
       "tolerance": 100
     },
-    "water_lines_zoom_12_14": {
+    "water_lines_z12_14": {
       "source": "water_lines",
       "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam', 'stream')",
       "tolerance": 10
     },
-    "water_lines_zoom_15_20": {
+    "water_lines_z15_20": {
       "source": "water_lines",
       "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam', 'stream', 'ditch', 'drain')",
       "tolerance": 0
