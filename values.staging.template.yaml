@@ -397,7 +397,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-036a6d4461508fcf8
+        AWS_ElasticBlockStore_volumeID : vol-05aa0df896ba49c01
         AWS_ElasticBlockStore_size: 200Gi
       resources:
           enabled: false
@@ -412,7 +412,7 @@ osm-seed:
         label_key: nodegroup_type
         label_value: db_large
       postgresqlConfig:
-        enabled: true
+        enabled: false
         values: |
           # PostgreSQL configuration
           listen_addresses = '*'
@@ -1015,3 +1015,4 @@ ohm:
       enabled: true
       label_key: nodegroup_type
       label_value: web_large
+      
