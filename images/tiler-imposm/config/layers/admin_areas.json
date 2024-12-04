@@ -146,6 +146,16 @@
           "type": "string",
           "name": "end_date",
           "key": "end_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "boolint",
+          "name": "has_label",
+          "key": false
         }
       ],
       "type": "polygon",

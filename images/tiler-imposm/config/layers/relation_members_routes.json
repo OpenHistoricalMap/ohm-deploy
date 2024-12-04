@@ -7,13 +7,7 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {
-    "relation_members_routes_merged": {
-      "source": "relation_members_routes",
-      "sql_filter": "type = 'none'",
-      "merge_geometry": "ST_Union(geometry)"
-    }
-  },
+  "generalized_tables": {},
   "tables": {
     "relation_members_routes": {
       "type": "relation_member",
@@ -107,6 +101,26 @@
           "type": "hstore_tags",
           "name": "tags",
           "key": null
+        },
+        {
+          "name": "geometry",
+          "type": "geometry",
+          "key": null
+        },
+        {
+          "name": "member",
+          "type": "member_id"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
+        },
+        {
+          "name": "me_name",
+          "key": "name",
+          "type": "string",
+          "from_member": true
         }
       ],
       "mapping": {

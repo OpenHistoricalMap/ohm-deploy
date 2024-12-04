@@ -136,7 +136,7 @@ function updateData() {
 function importData() {
     ### Import the PBF  and Natural Earth files to the DB
     echo "Execute the missing functions"
-    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -a -f config/postgis_helpers.sql
+    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/postgis_helpers.sql
 
     if [ "$IMPORT_NATURAL_EARTH" = "true" ]; then
         echo "Importing Natural Earth..."
@@ -170,14 +170,19 @@ function importData() {
         -deployproduction
 
     # These index will help speed up tegola tile generation
-    # psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -a -f config/postgis_index.sql
-    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -a -f config/postgis_post_import.sql
+    # psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/postgis_index.sql
+    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/postgis_post_import.sql
 
     touch $INIT_FILE
 
     # Update tables
     python update_tables.py
     
+    echo "Create Table/Tigger for osm_relation_menbers_routes_merged"
+    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/osm_relation_menbers_routes_table.sql
+    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/osm_relation_menbers_routes_trigger.sql
+
+
     # Updata data with minute replication
     updateData
 }
