@@ -181,7 +181,7 @@ function importData() {
     echo "Create Table/Tigger for osm_relation_menbers_routes_merged"
     psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/osm_relation_menbers_routes_table.sql
     psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/osm_relation_menbers_routes_trigger.sql
-
+    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/admin_boundaries_centroids.sql
 
     # Updata data with minute replication
     updateData
@@ -210,4 +210,6 @@ while $flag; do
             importData
         fi
     fi
+    # getData
+    # importData
 done
