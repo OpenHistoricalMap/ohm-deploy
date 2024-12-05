@@ -101,7 +101,7 @@ def create_triggers(generalized_tables):
             logger.warning(f"Skipping trigger creation for {fixed_table_name}.")
             continue
 
-        # Verificar si el trigger ya existe
+        # Check if the trigger already exists
         check_trigger_query = f"""
         SELECT 1
         FROM pg_trigger
@@ -116,14 +116,12 @@ def create_triggers(generalized_tables):
             logger.info(f"Trigger {fixed_table_name}_before_insert_update already exists. Skipping.")
             continue
 
-        # Crear el trigger si no existe
+        # Create the trigger if it does not exist
         trigger_function = f"""
         CREATE OR REPLACE FUNCTION {fixed_table_name}_transform_trigger()
         RETURNS TRIGGER AS $$
         BEGIN
-            IF {geometry_transform_types} THEN
-                NEW.geometry = {geometry_transform};
-            END IF;
+            NEW.geometry = {geometry_transform.replace('geometry', 'NEW.geometry')};
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
