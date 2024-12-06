@@ -17,7 +17,6 @@
     },
     "admin_boundaries_centroid_z0_2": {
       "source": "admin_areas",
-      "tolerance": 5000,
       "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2) AND name IS NOT NULL AND name <> ''"
@@ -31,7 +30,6 @@
     },
     "admin_boundaries_centroid_z3_5": {
       "source": "admin_areas",
-      "tolerance": 1000,
       "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2,3,4) AND name IS NOT NULL AND name <> ''"
@@ -45,7 +43,6 @@
     },
     "admin_boundaries_centroid_z6_7": {
       "source": "admin_areas",
-      "tolerance": 500,
       "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
       "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
       "sql_filter": "admin_level IN (1,2,3,4,5,6) AND name IS NOT NULL AND name <> ''"

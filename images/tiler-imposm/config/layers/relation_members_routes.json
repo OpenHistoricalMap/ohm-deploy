@@ -7,27 +7,7 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {
-    "route_lines_z5_7": {
-      "source": "relation_members_routes",
-      "sql_filter": "type IS NOT NULL AND route IS NOT NULL",
-      "tolerance": 500
-    },
-    "route_lines_z8_9": {
-      "source": "relation_members_routes",
-      "sql_filter": "type IS NOT NULL AND route IS NOT NULL",
-      "tolerance": 200
-    },
-    "route_lines_z10_12": {
-      "source": "relation_members_routes",
-      "sql_filter": "type IS NOT NULL AND route IS NOT NULL",
-      "tolerance": 100
-    },
-    "route_lines_z12_20": {
-      "source": "relation_members_routes",
-      "sql_filter": "type IS NOT NULL AND route IS NOT NULL"
-    }
-  },
+  "generalized_tables": {},
   "tables": {
     "relation_members_routes": {
       "type": "relation_member",
@@ -46,11 +26,6 @@
           "type": "mapping_value",
           "name": "type",
           "key": null
-        },
-        {
-          "type": "integer",
-          "name": "admin_level",
-          "key": "admin_level"
         },
         {
           "key": "route",
@@ -135,12 +110,6 @@
         {
           "name": "member",
           "type": "member_id"
-        },
-        {
-          "name": "me_maritime",
-          "type": "string",
-          "key": "maritime",
-          "from_member": true
         },
         {
           "type": "hstore_tags",

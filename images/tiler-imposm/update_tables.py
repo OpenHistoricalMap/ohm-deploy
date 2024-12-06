@@ -39,7 +39,7 @@ def load_imposm_config(filepath):
 def execute_psql_query(query):
     """Execute a query using psql and print the output."""
     try:
-        logger.info(f"Executing query:\t{query}")
+        # logger.info(f"Executing query:\t{query}")
         result = subprocess.run(
             ["psql", PSQL_CONN, "-c", query],
             text=True,
@@ -97,37 +97,42 @@ def create_triggers(generalized_tables):
         geometry_transform = table_info.get("geometry_transform")
         geometry_transform_types = table_info.get("geometry_transform_types")
 
-        # Skip if transform or types are not defined
         if not geometry_transform or not geometry_transform_types:
-            logger.warning(
-                f"Skipping trigger creation for {fixed_table_name}: "
-                "'geometry_transform' or 'geometry_transform_types' not defined."
-            )
+            logger.warning(f"Skipping trigger creation for {fixed_table_name}.")
             continue
 
-        # Create the trigger function SQL
+        # Check if the trigger already exists
+        check_trigger_query = f"""
+        SELECT 1
+        FROM pg_trigger
+        WHERE tgname = '{fixed_table_name}_before_insert_update';
+        """
+        result = subprocess.run(
+            ["psql", PSQL_CONN, "-c", check_trigger_query],
+            text=True,
+            capture_output=True
+        )
+        if "1" in result.stdout:
+            logger.info(f"Trigger {fixed_table_name}_before_insert_update already exists. Skipping.")
+            continue
+
+        # Create the trigger if it does not exist
         trigger_function = f"""
         CREATE OR REPLACE FUNCTION {fixed_table_name}_transform_trigger()
         RETURNS TRIGGER AS $$
         BEGIN
-            IF {geometry_transform_types} THEN
-                NEW.geometry = {geometry_transform};
-            END IF;
+            NEW.geometry = {geometry_transform.replace('geometry', 'NEW.geometry')};
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
-        """
-        execute_psql_query(trigger_function)
 
-        # Create the trigger SQL
-        trigger = f"""
         CREATE TRIGGER {fixed_table_name}_before_insert_update
         BEFORE INSERT OR UPDATE ON {fixed_table_name}
         FOR EACH ROW
         EXECUTE FUNCTION {fixed_table_name}_transform_trigger();
         """
-        execute_psql_query(trigger)
-
+        execute_psql_query(trigger_function)
+        
 def main(imposm3_config_path):
     """Main execution flow."""
     try:
