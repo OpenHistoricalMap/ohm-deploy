@@ -384,9 +384,11 @@ osm-seed:
   
     tilerDb:
       enabled: true
+      useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
+        enabled: true
       env:
-        POSTGRES_HOST: staging-tiler-db
-        POSTGRES_DB: tiler-osm
+        POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
+        POSTGRES_DB: tiler_osm_staging
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -498,8 +500,8 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-088adc6b334905d19
-        AWS_ElasticBlockStore_size: 50Gi
+        AWS_ElasticBlockStore_volumeID: vol-01ae847c1263755b0
+        AWS_ElasticBlockStore_size: 30Gi
       resources:
         enabled: false
         requests:
