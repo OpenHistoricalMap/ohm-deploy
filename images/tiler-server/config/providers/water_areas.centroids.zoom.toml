@@ -32,10 +32,10 @@ max_zoom = 12
 name = "water_areas_centroids"
 provider_layer = "osm.water_areas_centroid_z13_15"
 min_zoom = 13
-max_zoom = 15
-
-[[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z16_20"
-min_zoom = 16
 max_zoom = 20
+
+# [[maps.layers]]
+# name = "water_areas_centroids"
+# provider_layer = "osm.water_areas_centroid_z16_20"
+# min_zoom = 16
+# max_zoom = 20
