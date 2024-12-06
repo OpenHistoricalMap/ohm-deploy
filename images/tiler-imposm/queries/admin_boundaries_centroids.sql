@@ -1,4 +1,4 @@
--- Create a function that updates the osm_admin_boundaries_centroid_* if relations has labels or not
+-- Create a function that updates the osm_admin_boundaries_centroid_* if relations have labels or not
 CREATE OR REPLACE FUNCTION update_admin_boundaries_centroids()
 RETURNS void AS $$
 DECLARE
@@ -6,9 +6,9 @@ DECLARE
 BEGIN
     -- Loop through all table names that match the pattern
     FOR table_name IN
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_name LIKE 'osm_admin_boundaries_centroid%'
+        SELECT t.table_name
+        FROM information_schema.tables AS t
+        WHERE t.table_name LIKE 'osm_admin_boundaries_centroid%'
     LOOP
         -- Dynamically execute the update query for each table
         BEGIN
@@ -21,19 +21,16 @@ BEGIN
                     WHERE role = ''label''
                 );', table_name);
         EXCEPTION WHEN OTHERS THEN
-            -- Log an error if the update fails for a specific table
-            RAISE NOTICE 'Error updating table %: %', table_name, SQLERRM;
+            RAISE NOTICE ''Error updating table %: %'', table_name, SQLERRM;
         END;
     END LOOP;
 
     -- Log completion
-    RAISE NOTICE 'Update completed for all matching tables.';
+    RAISE NOTICE ''Update completed for all matching tables.'';
 END;
 $$ LANGUAGE plpgsql;
 
-
--- Create a function and trigger that will update every time a new admin area is inserted or updated in  osm_admin_areas table
-
+-- Create a function that updates the osm_admin_boundaries_centroid_* if relations have labels or not
 CREATE OR REPLACE FUNCTION create_update_has_label_triggers(pattern text)
 RETURNS void AS $$
 DECLARE
@@ -41,14 +38,14 @@ DECLARE
 BEGIN
     -- Loop through all tables matching the provided pattern
     FOR table_name IN
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_name LIKE pattern
+        SELECT t.table_name
+        FROM information_schema.tables AS t
+        WHERE t.table_name LIKE pattern
     LOOP
         -- Create a dynamic function for each table
         EXECUTE format(
             'CREATE OR REPLACE FUNCTION %I_update_has_label_row()
-             RETURNS TRIGGER AS $$
+             RETURNS TRIGGER AS $trigger_body$
              BEGIN
                  IF EXISTS (
                      SELECT 1
@@ -61,7 +58,7 @@ BEGIN
                  END IF;
                  RETURN NEW;
              END;
-             $$ LANGUAGE plpgsql;',
+             $trigger_body$ LANGUAGE plpgsql;',
             table_name
         );
 
@@ -82,8 +79,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- Execute update_admin_boundaries_centroids  when the import is done
+-- Execute the update function when the import is done
 SELECT update_admin_boundaries_centroids();
 
--- Execute  for tiger creattinog  when new data is added or updated
+-- Execute the function to create triggers for tables matching the pattern
 SELECT create_update_has_label_triggers('osm_admin_boundaries_centroid%');

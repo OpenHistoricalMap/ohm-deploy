@@ -18,7 +18,8 @@ SELECT
 FROM 
     osm_admin_boundaries_centroid_z0_2
 WHERE 
-    geometry && !BBOX!
+    has_label = 0 
+    AND geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -41,7 +42,8 @@ SELECT
 FROM 
     osm_admin_boundaries_centroid_z3_5
 WHERE 
-    geometry && !BBOX!
+    has_label = 0 
+    AND geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -64,10 +66,7 @@ SELECT
 FROM 
     osm_admin_boundaries_centroid_z6_7
 WHERE 
-    admin_level IN (1,2,3,4,5,6)
-    AND has_label = 0 
-    AND name IS NOT NULL 
-    AND name <> '' 
+    has_label = 0 
     AND geometry && !BBOX!
 """
 
@@ -91,7 +90,8 @@ SELECT
 FROM 
     osm_admin_boundaries_centroid_z8_9
 WHERE 
-    geometry && !BBOX!
+    has_label = 0 
+    AND geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -114,7 +114,8 @@ SELECT
 FROM 
     osm_admin_boundaries_centroid_z10_12
 WHERE 
-    geometry && !BBOX!
+    has_label = 0 
+    AND geometry && !BBOX!
 """
 
 
@@ -138,7 +139,8 @@ SELECT
 FROM 
     osm_admin_boundaries_centroid_z13_15
 WHERE 
-    geometry && !BBOX!
+    has_label = 0 
+    AND geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -161,5 +163,6 @@ SELECT
 FROM 
     osm_admin_boundaries_centroid_z16_20
 WHERE 
-    geometry && !BBOX!
+    has_label = 0 
+    AND geometry && !BBOX!
 """
