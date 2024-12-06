@@ -62,8 +62,10 @@ spec:
                 - name: OUTPUT_FILE
                   value: {{ .Values.ohm.tilerCacheSeed.env.OUTPUT_FILE | quote }}
               envFrom:
-                - configMapRef:
-                    name: {{ .Release.Name }}-tiler-server-cm
+              - configMapRef:
+                  name: {{ .Release.Name }}-tiler-server-cm
+              - configMapRef:
+                  name: {{ .Release.Name }}-tiler-db-cm
           restartPolicy: OnFailure
       backoffLimit: 3
 {{- end }}

@@ -385,7 +385,7 @@ osm-seed:
     tilerDb:
       enabled: true
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-        enabled: true
+        enabled: false
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
         POSTGRES_DB: tiler_osm_staging
@@ -412,7 +412,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job_xlarge
+        label_value: db_large
       postgresqlConfig:
         enabled: true
         values: |
@@ -481,10 +481,6 @@ osm-seed:
   
     tilerImposm:
       enabled: true
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: web_large
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241202_0001.osm.pbf
@@ -510,6 +506,10 @@ osm-seed:
         limits:
           memory: "24Gi"
           cpu: "10"
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web_large
     # ====================================================================================================
     # Variables for tiler-server
     # ====================================================================================================
@@ -962,11 +962,11 @@ ohm:
     enabled: true
     
   tilerCachePurge:
-    enabled: false
+    enabled: true
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
-      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1791.h27fbedb # TODO, this should be automatically updated from tiler server image
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1859.h75499f5 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_large # Nodegroup type to run the job
       MAX_ACTIVE_JOBS: 2 # Maximum number of active jobs in high concurrency queue
@@ -1001,7 +1001,7 @@ ohm:
     schedule: '* * * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
-      ZOOM_LEVELS: '7,8,9,10'
+      ZOOM_LEVELS: '7'
       CONCURRENCY: 64
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
