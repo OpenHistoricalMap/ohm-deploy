@@ -47,7 +47,7 @@
     "water_areas_z10_12": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank')",
-      "tolerance": 100
+      "tolerance": 10 
     },
     "water_areas_centroid_z10_12": {
       "source": "water_areas",
@@ -58,7 +58,7 @@
     "water_areas_z13_15": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank', 'dock')",
-      "tolerance": 50
+      "tolerance": 1
     },
     "water_areas_centroid_z13_15": {
       "source": "water_areas",
