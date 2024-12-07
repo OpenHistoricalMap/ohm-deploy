@@ -15,6 +15,8 @@ LIMITFILE="limitFile.geojson"
 BUCKET_IMPOSM_FOLDER=imposm
 INIT_FILE=/mnt/data/init_done
 
+PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB"
+
 # tracking file
 TRACKING_FILE="$WORKDIR/uploaded_files.log"
 [ -f "$TRACKING_FILE" ] || touch "$TRACKING_FILE"
@@ -136,7 +138,7 @@ function updateData() {
 function importData() {
     ### Import the PBF  and Natural Earth files to the DB
     echo "Execute the missing functions"
-    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/postgis_helpers.sql
+    psql $PG_CONNECTION -f queries/postgis_helpers.sql
 
     if [ "$IMPORT_NATURAL_EARTH" = "true" ]; then
         echo "Importing Natural Earth..."
@@ -170,8 +172,8 @@ function importData() {
         -deployproduction
 
     # These index will help speed up tegola tile generation
-    # psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/postgis_index.sql
-    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/postgis_post_import.sql
+    # psql $PG_CONNECTION -f queries/postgis_index.sql
+    psql $PG_CONNECTION -f queries/postgis_post_import.sql
 
     touch $INIT_FILE
 
@@ -179,16 +181,16 @@ function importData() {
     python update_tables.py
     
     echo "Create Table/Tigger for osm_relation_menbers_routes_merged"
-    # psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/osm_relation_menbers_routes_table.sql
-    # psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/osm_relation_menbers_routes_trigger.sql
-    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -f queries/admin_boundaries_centroids.sql
+    # psql $PG_CONNECTION -f queries/osm_relation_menbers_routes_table.sql
+    # psql $PG_CONNECTION -f queries/osm_relation_menbers_routes_trigger.sql
+    psql $PG_CONNECTION -f queries/admin_boundaries_centroids.sql
 
     # Updata data with minute replication
     updateData
 }
 
 function countTables() {
-    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" | xargs
+    psql $PG_CONNECTION -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" | xargs
 }
 
 echo "Connecting to $POSTGRES_HOST DB"
@@ -197,6 +199,8 @@ while $flag; do
     pg_isready -h $POSTGRES_HOST -p $POSTGRES_PORT >/dev/null 2>&2 || continue
     # Change flag to false to stop pinging the DB
     flag=false
+    echo "Run date functions"
+    psql $PG_CONNECTION -f /usr/local/datefunctions/datefunctions.sql
     echo "Check number of tables in the database"
     table_count=$(countTables)
     echo "Check if $INIT_FILE exists"

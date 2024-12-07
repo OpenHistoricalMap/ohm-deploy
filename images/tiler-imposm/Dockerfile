@@ -41,6 +41,9 @@ RUN git clone https://github.com/omniscale/imposm3.git $GOPATH/src/github.com/om
 WORKDIR $GOPATH/src/github.com/omniscale/imposm3
 RUN git checkout v0.14.0
 
+RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git /usr/local/datefunctions
+WORKDIR /usr/local/datefunctions
+
 # Apply fixes or patches (if necessary)
 RUN sed -i '/setMaxFileSize/d' cache/ldb_pre_121.go
 RUN go install github.com/omniscale/imposm3/cmd/imposm
