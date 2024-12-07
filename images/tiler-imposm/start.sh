@@ -194,7 +194,7 @@ function countTables() {
 echo "Connecting to $POSTGRES_HOST DB"
 flag=true
 while $flag; do
-    pg_isready -h $POSTGRES_HOST -p 5432 >/dev/null 2>&2 || continue
+    pg_isready -h $POSTGRES_HOST -p $POSTGRES_PORT >/dev/null 2>&2 || continue
     # Change flag to false to stop pinging the DB
     flag=false
     echo "Check number of tables in the database"
