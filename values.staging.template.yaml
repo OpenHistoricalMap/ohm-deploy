@@ -385,10 +385,10 @@ osm-seed:
     tilerDb:
       enabled: true
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-        enabled: false
+        enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler-osm # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_staging # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -993,7 +993,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: job_large
 
   # Tiler seed by default is giong to seet tiles from 0-5 zoom level
   tilerCacheSeed:
@@ -1001,7 +1001,7 @@ ohm:
     schedule: '* * * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
-      ZOOM_LEVELS: '7'
+      ZOOM_LEVELS: '7,8,9'
       CONCURRENCY: 64
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
@@ -1016,4 +1016,4 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: job_large
