@@ -515,7 +515,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: false
+      enabled: true
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
