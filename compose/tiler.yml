@@ -7,7 +7,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ../data/tiler-db-data:/var/lib/postgresql/data
+      - ../data/tiler-db-data2:/var/lib/postgresql/data
     env_file:
       - ../envs/.env.tiler
     restart: always
@@ -17,12 +17,12 @@ services:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
     volumes:
-      - ../data/tiler-imposm-data:/mnt/data
+      - ../data/tiler-imposm-data2:/mnt/data
       - ../images/tiler-imposm:/app
     command:
       - sh
       - -c
-      - "sleep 60 && ./start.sh"
+      - "sleep 20 && ./start.sh"
     env_file:
       - ../envs/.env.tiler
   tiler:
@@ -38,12 +38,4 @@ services:
     env_file:
       - ../envs/.env.tiler
     restart: always
-  tilercache:
-    image: ohm-tiler-cache:v1
-    build:
-      context: ../images/tiler-cache
-      dockerfile: Dockerfile
-    volumes:
-      - ../data/tiler-cache-data:/mnt/data
-      - ../images/tiler-cache:/app
-      
+ 
