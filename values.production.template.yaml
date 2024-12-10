@@ -458,7 +458,7 @@ osm-seed:
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241210_0000.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       SEQUENCE_NUMBER: "1673798"
-      OVERWRITE_STATE: false
+      OVERWRITE_STATE: true
       UPLOAD_EXPIRED_FILES: true
       IMPORT_NATURAL_EARTH: true
       IMPORT_OSM_LAND: true
@@ -467,8 +467,8 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-07868924d18654c8f
-      AWS_ElasticBlockStore_size: 100Gi
+      AWS_ElasticBlockStore_volumeID: vol-0000b3892d5975652
+      AWS_ElasticBlockStore_size: 50Gi
     resources:
       enabled: false
       requests:
