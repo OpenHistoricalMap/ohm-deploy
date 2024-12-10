@@ -492,7 +492,7 @@ osm-seed:
         IMPORT_OSM_LAND: true
         IMPOSM3_IMPORT_LAYERS: "all"
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
@@ -536,8 +536,8 @@ osm-seed:
         TILER_CACHE_AWS_ACCESS_KEY_ID: {{STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID}}
         TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
         # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
-        EXECUTE_REINDEX: true
-        EXECUTE_VACUUM_ANALYZE: true
+        EXECUTE_REINDEX: false
+        EXECUTE_VACUUM_ANALYZE: false
       persistenceDisk:
         enabled: false
         accessMode: ReadWriteOnce
