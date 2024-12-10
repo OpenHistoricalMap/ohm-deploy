@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'tiler-cache'
+      - 'transport_lines'
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -56,6 +56,8 @@ jobs:
           DEVELOPMENT_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
           DEVELOPMENT_S3_BUCKET: osmseed-dev
           ## tiler
+          
+          DEVELOPMENT_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           DEVELOPMENT_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
           DEVELOPMENT_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           DEVELOPMENT_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
@@ -99,6 +101,7 @@ jobs:
           STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
           STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
           ## tiler
+          STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
           STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
@@ -146,6 +149,7 @@ jobs:
           PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
           PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
           ## tiler
+          PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
           PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}

@@ -1,0 +1,133 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "relation_members_routes": {
+      "type": "relation_member",
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "key": "route",
+          "name": "route",
+          "type": "string"
+        },
+        {
+          "key": "ref",
+          "name": "ref",
+          "type": "string"
+        },
+        {
+          "key": "network",
+          "name": "network",
+          "type": "string"
+        },
+        {
+          "key": "direction",
+          "name": "direction",
+          "type": "string"
+        },
+        {
+          "key": "operator",
+          "name": "operator",
+          "type": "string"
+        },
+        {
+          "key": "state",
+          "name": "state",
+          "type": "string"
+        },
+        {
+          "key": "symbol",
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "key": "distance",
+          "name": "distance",
+          "type": "string"
+        },
+        {
+          "key": "roundtrip",
+          "name": "roundtrip",
+          "type": "string"
+        },
+        {
+          "key": "interval",
+          "name": "interval",
+          "type": "string"
+        },
+        {
+          "key": "duration",
+          "name": "duration",
+          "type": "string"
+        },
+        {
+          "key": "tourism",
+          "name": "tourism",
+          "type": "string"
+        },
+        {
+          "key": "start_date",
+          "name": "start_date",
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "name": "end_date",
+          "type": "string"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "name": "geometry",
+          "type": "geometry",
+          "key": null
+        },
+        {
+          "name": "member",
+          "type": "member_id"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
+        },
+        {
+          "name": "me_name",
+          "key": "name",
+          "type": "string",
+          "from_member": true
+        }
+      ],
+      "mapping": {
+        "route": [
+          "__any__"
+        ]
+      }
+    }
+  }
+}

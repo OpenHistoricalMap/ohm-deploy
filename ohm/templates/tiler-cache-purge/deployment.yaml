@@ -72,8 +72,10 @@ spec:
             - name: S3_BUCKET_PATH_FILES
               value: {{ .Values.ohm.tilerCachePurge.env.S3_BUCKET_PATH_FILES | quote }}
           envFrom:
-            - configMapRef:
-                name: {{ .Release.Name }}-tiler-server-cm
+          - configMapRef:
+              name: {{ .Release.Name }}-tiler-server-cm
+          - configMapRef:
+              name: {{ .Release.Name }}-tiler-db-cm
           {{- if .Values.ohm.tilerCachePurge.resources.enabled }}
           resources:
             requests:

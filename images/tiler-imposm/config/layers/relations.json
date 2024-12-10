@@ -1,0 +1,59 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "relations": {
+      "type": "relation",
+      "fields": [
+        {
+          "name": "osm_id",
+          "type": "id"
+        },
+        {
+          "key": "type",
+          "name": "type",
+          "type": "string"
+        },
+        {
+          "key": "name",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "key": "start_date",
+          "name": "start_date",
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "name": "end_date",
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "type": "hstore_tags"
+        }
+      ],
+      "mapping": {
+        "__any__": [
+          "__any__"
+        ]
+      },
+      "filters": {
+        "exclude_tags": [
+          [
+            "boundary",
+            "administrative"
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -87,7 +87,9 @@ def get_active_jobs_count():
 
 def create_kubernetes_job(file_url, file_name):
     """Create a Kubernetes Job to process a file."""
-    config_map_name = f"{ENVIRONMENT}-tiler-server-cm"
+    configmap_tiler_server = f"{ENVIRONMENT}-tiler-server-cm"
+    configmap_tiler_db = f"{ENVIRONMENT}-tiler-db-cm"
+
     job_name = f"{JOB_NAME_PREFIX}-{file_name}"
     job_manifest = {
         "apiVersion": "batch/v1",
@@ -103,7 +105,7 @@ def create_kubernetes_job(file_url, file_name):
                             "name": "tiler-purge-seed",
                             "image": DOCKER_IMAGE,
                             "command": ["sh", "./purge_and_seed.sh"],
-                            "envFrom": [{"configMapRef": {"name": config_map_name}}],
+                            "envFrom": [{"configMapRef": {"name": configmap_tiler_server}},{"configMapRef": {"name": configmap_tiler_db}}],
                             "env": [
                                 {"name": "IMPOSM_EXPIRED_FILE", "value": file_url},
                                 {"name": "EXECUTE_PURGE", "value": str(EXECUTE_PURGE)},
