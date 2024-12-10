@@ -388,7 +388,7 @@ osm-seed:
         enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_prod # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -496,7 +496,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-0494f85522e9eedb1
+        AWS_ElasticBlockStore_volumeID: vol-081cd24f507bd0647
         AWS_ElasticBlockStore_size: 50Gi
       resources:
         enabled: false
