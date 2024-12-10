@@ -388,7 +388,7 @@ osm-seed:
         enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_prod # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -483,7 +483,7 @@ osm-seed:
       enabled: true
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241205_0002.osm.pbf
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241210_0000.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
         SEQUENCE_NUMBER: "1671000"
         OVERWRITE_STATE: false
@@ -496,7 +496,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-08f7652f6ea25bc36
+        AWS_ElasticBlockStore_volumeID: vol-0494f85522e9eedb1
         AWS_ElasticBlockStore_size: 50Gi
       resources:
         enabled: false
@@ -515,7 +515,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
