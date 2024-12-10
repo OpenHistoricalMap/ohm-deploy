@@ -21,12 +21,12 @@ BEGIN
                     WHERE role = ''label''
                 );', table_name);
         EXCEPTION WHEN OTHERS THEN
-            RAISE NOTICE ''Error updating table %: %'', table_name, SQLERRM;
+            RAISE NOTICE 'Error updating table %: %', table_name, SQLERRM;
         END;
     END LOOP;
 
     -- Log completion
-    RAISE NOTICE ''Update completed for all matching tables.'';
+    RAISE NOTICE 'Update completed for all matching tables.';
 END;
 $$ LANGUAGE plpgsql;
 
