@@ -480,7 +480,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: true
+      enabled: false
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241210_0000.osm.pbf
