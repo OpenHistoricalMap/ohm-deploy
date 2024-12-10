@@ -108,7 +108,7 @@ function uploadExpiredFiles() {
 function updateData() {
     ### Update the DB with the new data form minute replication
     if [ "$OVERWRITE_STATE" = "true" ]; then
-        rm $DIFF_DIR/last.state.txt
+        rm -f $DIFF_DIR/last.state.txt
     fi
 
     # Check if last.state.txt exists
