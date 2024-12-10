@@ -925,7 +925,7 @@ ohm:
     enabled: true
     
   tilerCachePurge:
-    enabled: true
+    enabled: false
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
@@ -960,7 +960,7 @@ ohm:
 
   # Tiler seed by default is giong to seet tiles from 0-6 zoom level
   tilerCacheSeed:
-    enabled: true
+    enabled: false
     schedule: '0 */6 * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
