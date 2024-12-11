@@ -120,18 +120,18 @@ RUN cd $workdir/public/map-styles && git fetch --depth 1 origin $OPENHISTORICALM
 RUN rm -rf $workdir/public/map-styles/.git
 COPY update_map_styles.py $workdir/
 
-
 # Clone leaflet-ohm-timeslider-v2
 ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
-RUN git clone  https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git $workdir/public/leaflet-ohm-timeslider-v2 \
+RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git $workdir/public/leaflet-ohm-timeslider-v2 \
     && cd $workdir/public/leaflet-ohm-timeslider-v2 \
-    && git checkout $LEAFLET_OHM_TIMESLIDER_V2 \
+    && git checkout dd0acbdc9432fae6a4d09a17a4848c391e5064f0 \
     && rm -rf .git \
+    && chmod 777 -R assets/ \
     && cp decimaldate.* $workdir/app/assets/javascripts/ \
     && cp leaflet-ohm-timeslider.* $workdir/app/assets/javascripts/ \
     && cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ \
-    && assets/* $workdir/app/assets/images/ \
-    && cd ..\
+    && cp assets/* $workdir/app/assets/images/ \
+    && cd .. \
     && rm -rf $workdir/public/leaflet-ohm-timeslider-v2
 
 # Add settings
