@@ -502,8 +502,8 @@ osm-seed:
       TILER_CACHE_BUCKET: tiler-cache-production
       TILER_CACHE_AWS_ACCESS_KEY_ID: {{PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID}}
       TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
-      EXECUTE_REINDEX: true
-      EXECUTE_VACUUM_ANALYZE: true
+      EXECUTE_REINDEX: false
+      EXECUTE_VACUUM_ANALYZE: false
     # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
     persistenceDisk:
       enabled: false
