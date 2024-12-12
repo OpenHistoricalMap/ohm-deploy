@@ -76,7 +76,7 @@ while "$flag" = true; do
   time bundle exec rake i18n:js:export assets:precompile
 
   # Since leaflet-ohm-timeslider.css points directly to the svg files, they need to be copied to the public/assets directory.
-  cp $workdir/public/leaflet-ohm-timeslider-v2/assets/* $$workdir/public/assets/
+  cp $workdir/public/leaflet-ohm-timeslider-v2/assets/* $workdir/public/assets/
 
   bundle exec rails db:migrate
 
