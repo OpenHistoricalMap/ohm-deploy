@@ -513,7 +513,7 @@ osm-seed:
       # AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_SERVER_EBS}}
       # AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "2Gi"
         cpu: "1"
@@ -967,9 +967,9 @@ ohm:
     enabled: true
     schedule: '0 */6 * * *'
     env:
-      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
+      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/usa-eu-lat-afr.geojson
       ZOOM_LEVELS: '7,8,9,10'
-      CONCURRENCY: 32
+      CONCURRENCY: 128
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
     resources:
