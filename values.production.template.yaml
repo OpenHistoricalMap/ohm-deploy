@@ -513,7 +513,7 @@ osm-seed:
       # AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_SERVER_EBS}}
       # AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "2Gi"
         cpu: "1"
