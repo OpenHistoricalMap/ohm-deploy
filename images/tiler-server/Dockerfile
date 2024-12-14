@@ -1,4 +1,4 @@
-FROM gospatial/tegola:v0.20.0
+FROM gospatial/tegola:v0.19.0
 
 RUN apk --no-cache add \
     gcc \
