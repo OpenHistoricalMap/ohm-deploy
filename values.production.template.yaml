@@ -934,7 +934,7 @@ ohm:
       NODEGROUP_TYPE: web_large # Nodegroup type to run the job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
-      DELETE_OLD_JOBS_AGE: 60 # 1 hours
+      DELETE_OLD_JOBS_AGE: 7200 # 2 hours
       ## Execute purging
       EXECUTE_PURGE: true
       PURGE_CONCURRENCY: 64
