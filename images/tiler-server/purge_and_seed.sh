@@ -47,7 +47,7 @@ if [ "$EXECUTE_SEED" = "true" ]; then
         --map=osm \
         --min-zoom=$SEED_MIN_ZOOM \
         --max-zoom=$SEED_MAX_ZOOM \
-        --overwrite=false \
+        --overwrite=true \
         --concurrency=$SEED_CONCURRENCY
     set +x
 else

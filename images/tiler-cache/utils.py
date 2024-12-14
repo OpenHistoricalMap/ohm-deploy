@@ -201,3 +201,4 @@ def upload_to_s3(local_file, s3_bucket, s3_key):
         logging.info(f"Uploaded {local_file} to {s3_url}.")
     except Exception as e:
         logging.error(f"Error uploading to S3: {e}")
+
