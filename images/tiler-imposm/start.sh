@@ -17,12 +17,12 @@ INIT_FILE=/mnt/data/init_done
 
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB"
 
+mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
+
 # tracking file
-TRACKING_FILE="$WORKDIR/uploaded_files.log"
+TRACKING_FILE="$WORKDIR/uploaded_files.log" 
 [ -f "$TRACKING_FILE" ] || touch "$TRACKING_FILE"
 
-
-mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
 # Create config map for imposm
 python build_imposm3_config.py
@@ -33,7 +33,7 @@ python build_imposm3_config.py
     echo "\"cachedir\": \"$CACHE_DIR\","
     echo "\"diffdir\": \"$DIFF_DIR\","
     echo "\"connection\": \"postgis://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB\","
-    echo "\"mapping\": \"config/imposm3.json\","
+    echo "\"mapping\": \"/osm/config/imposm3.json\","
     echo "\"replication_url\": \"$REPLICATION_URL\""
     echo "}"
 } >"$WORKDIR/config.json"
@@ -123,7 +123,7 @@ function updateData() {
 
     # Check if the limit file exists
     if [ -z "$TILER_IMPORT_LIMIT" ]; then
-        imposm run -config "$WORKDIR/config.json" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" &
+        imposm run -config "$WORKDIR/config.json" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" -httpprofile ":6060" &
     else
         imposm run -config "$WORKDIR/config.json" -limitto "$WORKDIR/$LIMITFILE" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" &
     fi

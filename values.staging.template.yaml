@@ -388,7 +388,7 @@ osm-seed:
         enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_prod # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -404,11 +404,11 @@ osm-seed:
       resources:
           enabled: false
           requests:
-            memory: "6Gi"
-            cpu: "1500m"
+            memory: 6Gi
+            cpu: 1500m
           limits:
-            memory: "6Gi"
-            cpu: "1700m"
+            memory: 6Gi
+            cpu: 1700m
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -483,29 +483,29 @@ osm-seed:
       enabled: false
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241210_0000.osm.pbf
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241214_1202.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-        SEQUENCE_NUMBER: "1673798"
+        SEQUENCE_NUMBER: '1675330'
         OVERWRITE_STATE: false
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
         IMPORT_OSM_LAND: true
-        IMPOSM3_IMPORT_LAYERS: "all"
+        IMPOSM3_IMPORT_LAYERS: all
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-081cd24f507bd0647
+        AWS_ElasticBlockStore_volumeID: vol-0debb846502c98aee
         AWS_ElasticBlockStore_size: 50Gi
       resources:
         enabled: false
         requests:
-          memory: "20Gi"
-          cpu: "8"
+          memory: 20Gi
+          cpu: '8'
         limits:
-          memory: "24Gi"
-          cpu: "10"
+          memory: 24Gi
+          cpu: '10'
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -548,11 +548,11 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: "2Gi"
-          cpu: "1"
+          memory: 2Gi
+          cpu: '1'
         limits:
-          memory: "10Gi"
-          cpu: "2"
+          memory: 10Gi
+          cpu: '2'
       autoscaling:
         enabled: false
         minReplicas: 1
@@ -572,11 +572,11 @@ osm-seed:
       resources:
         enabled: true
         requests:
-          memory: "1Gi"
-          cpu: "500m"
+          memory: 1Gi
+          cpu: '500m'
         limits:
-          memory: "1Gi"
-          cpu: "600m"
+          memory: 1Gi
+          cpu: '600m'
       env:
         KILL_PROCESS: manually
         MAX_NUM_PS: 4
@@ -985,10 +985,10 @@ ohm:
     resources:
       enabled: false
       requests:
-        memory: '20Gi'
+        memory: 20Gi
         cpu: '8'
       limits:
-        memory: '24Gi'
+        memory: 24Gi
         cpu: '10'
     nodeSelector:
       enabled: true
@@ -1001,17 +1001,17 @@ ohm:
     schedule: '* * * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
-      ZOOM_LEVELS: '7,8,9'
+      ZOOM_LEVELS: 7,8,9
       CONCURRENCY: 64
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
     resources:
       enabled: false
       requests:
-        memory: '20Gi'
+        memory: 20Gi
         cpu: '8'
       limits:
-        memory: '24Gi'
+        memory: 24Gi
         cpu: '10'
     nodeSelector:
       enabled: true

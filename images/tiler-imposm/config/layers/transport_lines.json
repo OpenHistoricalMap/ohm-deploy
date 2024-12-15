@@ -8,54 +8,30 @@
     ]
   },
   "generalized_tables": {
-    "transport_lines_z5": {
-      "source": "transport_lines_z6",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction') AND tunnel = 0 AND bridge = 0",
-      "tolerance": 1000
-    },
-    "transport_lines_z6": {
-      "source": "transport_lines_z7",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link')",
-      "tolerance": 200
-    },
-    "transport_lines_z7": {
-      "source": "transport_lines_z8",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed')",
+    "transport_lines_z5_7": {
+      "source": "transport_lines_z8_9",
+      "sql_filter": null,
       "tolerance": 150
     },
-    "transport_lines_z8": {
-      "source": "transport_lines_z9",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed')",
-      "tolerance": 100
-    },
-    "transport_lines_z9": {
-      "source": "transport_lines_z10",
+    "transport_lines_z8_9": {
+      "source": "transport_lines_z10_11",
       "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed')",
       "tolerance": 50
     },
-    "transport_lines_z10": {
-      "source": "transport_lines_z11",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed')",
-      "tolerance": 20
-    },
-    "transport_lines_z11": {
-      "source": "transport_lines_z12",
+    "transport_lines_z10_11": {
+      "source": "transport_lines_z12_13",
       "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'type', 'tram', 'funicular', 'monorail')",
       "tolerance": 15
     },
-    "transport_lines_z12": {
-      "source": "transport_lines_z13_15",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified')",
-      "tolerance": 10
-    },
-    "transport_lines_z13_15": {
-      "source": "transport_lines_z16_20",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified')",
+    "transport_lines_z12_13": {
+      "source": "transport_lines_z14_20",
+      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified')  OR class IN ('railway', 'route')",
       "tolerance": 5
     },
-    "transport_lines_z16_20": {
+    "transport_lines_z14_20": {
       "source": "transport_lines",
-      "sql_filter": "(type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified', 'subway', 'track', 'living_street', 'footway', 'cycleway', 'path', 'pier', 'steps', 'pedestrian', 'ferry') OR class IN ('railway', 'route'))"
+      "sql_filter": null,
+      "tolerance": 0
     }
   },
   "tables": {
