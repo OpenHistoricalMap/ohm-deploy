@@ -8,15 +8,30 @@
     ]
   },
   "generalized_tables": {
-    "transport_lines_gen0": {
-      "source": "transport_lines_gen1",
+    "transport_lines_z6_7": {
+      "source": "transport_lines_z8_9",
       "sql_filter": null,
-      "tolerance": 200.0
+      "tolerance": 150
     },
-    "transport_lines_gen1": {
+    "transport_lines_z8_9": {
+      "source": "transport_lines_z10_11",
+      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed')",
+      "tolerance": 50
+    },
+    "transport_lines_z10_11": {
+      "source": "transport_lines_z12_13",
+      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'type', 'tram', 'funicular', 'monorail')",
+      "tolerance": 15
+    },
+    "transport_lines_z12_13": {
+      "source": "transport_lines_z14_20",
+      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified')  OR class IN ('railway', 'route')",
+      "tolerance": 5
+    },
+    "transport_lines_z14_20": {
       "source": "transport_lines",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link') OR class IN('railway', 'route')",
-      "tolerance": 50.0
+      "sql_filter": null,
+      "tolerance": 0
     }
   },
   "tables": {

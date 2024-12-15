@@ -17,12 +17,12 @@ INIT_FILE=/mnt/data/init_done
 
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB"
 
+mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
+
 # tracking file
-TRACKING_FILE="$WORKDIR/uploaded_files.log"
+TRACKING_FILE="$WORKDIR/uploaded_files.log" 
 [ -f "$TRACKING_FILE" ] || touch "$TRACKING_FILE"
 
-
-mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
 # Create config map for imposm
 python build_imposm3_config.py
