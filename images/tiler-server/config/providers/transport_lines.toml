@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "transport_lines_z5"
+name = "transport_lines_z5_7"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -22,13 +22,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z5
+    osm_transport_lines_z5_7
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "transport_lines_z6"
+name = "transport_lines_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -50,13 +50,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z6
+    osm_transport_lines_z8_9
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "transport_lines_z7"
+name = "transport_lines_z10_11"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -78,13 +78,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z7
+    osm_transport_lines_z10_11
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "transport_lines_z8"
+name = "transport_lines_z12_13"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -106,13 +106,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z8
+    osm_transport_lines_z12_13
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "transport_lines_z9"
+name = "transport_lines_z14_20"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -134,164 +134,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z9
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "transport_lines_z10"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,  
-    ref, 
-    class, 
-    type, 
-    service, 
-    name,
-    electrified, 
-    highspeed, 
-    usage, 
-    start_date, 
-    end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    osm_transport_lines_z10
-WHERE 
-    geometry && !BBOX!
-"""
-
-
-[[providers.layers]]
-name = "transport_lines_z11"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,  
-    name, 
-    ref, 
-    class, 
-    type, 
-    tunnel, 
-    bridge, 
-    access, 
-    service, 
-    ford, 
-    electrified, 
-    highspeed, 
-    usage, 
-    start_date, 
-    end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    osm_transport_lines_z11
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "transport_lines_z12"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
-    ref, 
-    class, 
-    type, 
-    tunnel, 
-    bridge, 
-    access, 
-    service, 
-    ford, 
-    electrified, 
-    highspeed, 
-    usage, 
-    start_date, 
-    end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    osm_transport_lines_z12
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "transport_lines_z13_15"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
-    ref, 
-    class, 
-    type, 
-    tunnel, 
-    bridge, 
-    access, 
-    service, 
-    ford, 
-    electrified, 
-    highspeed, 
-    usage, 
-    start_date, 
-    end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    osm_transport_lines_z13_15
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "transport_lines_z16_20"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,  
-    name, 
-    ref, 
-    class, 
-    type, 
-    tunnel, 
-    bridge, 
-    access, 
-    service, 
-    ford,
-    electrified, 
-    highspeed, 
-    usage, 
-    start_date, 
-    end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    osm_transport_lines_z16_20
+    osm_transport_lines_z14_20
 WHERE 
     geometry && !BBOX!
 """
