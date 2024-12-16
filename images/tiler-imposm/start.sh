@@ -178,12 +178,12 @@ function importData() {
     touch $INIT_FILE
 
     # Update tables
-    python update_tables.py
+    # python update_tables.py
     
-    echo "Create Table/Tigger for osm_relation_menbers_routes_merged"
+    # echo "Create Table/Tigger for osm_relation_menbers_routes_merged"
     # psql $PG_CONNECTION -f queries/osm_relation_menbers_routes_table.sql
     # psql $PG_CONNECTION -f queries/osm_relation_menbers_routes_trigger.sql
-    psql $PG_CONNECTION -f queries/admin_boundaries_centroids.sql
+    # psql $PG_CONNECTION -f queries/admin_boundaries_centroids.sql
 
     # Updata data with minute replication
     updateData
