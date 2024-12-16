@@ -931,7 +931,7 @@ ohm:
       NAMESPACE: default # Namespace to run the job
       DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1920.h4abe268 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: job # Nodegroup type to run the job
+      NODEGROUP_TYPE: job_large_tiler # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 7200 # 2 hours
