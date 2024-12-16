@@ -362,7 +362,7 @@ osm-seed:
       label_value: api_db
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
-      POSTGRES_DB: tiler_osm_prod
+      POSTGRES_DB: tiler_osm_prod_v2
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
@@ -467,16 +467,16 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0debb846502c98aee
+      AWS_ElasticBlockStore_volumeID: vol-0027ab7b9d50a5e90
       AWS_ElasticBlockStore_size: 50Gi
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "16Gi"
-        cpu: "2"
+        memory: "2Gi"
+        cpu: "1"
       limits:
-        memory: "24Gi"
-        cpu: "3"
+        memory: "2Gi"
+        cpu: "1"
   # ====================================================================================================
   # Variables for tiler-server
   # ====================================================================================================
