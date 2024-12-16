@@ -929,9 +929,9 @@ ohm:
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
-      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1913.ha63e895 # TODO, this should be automatically updated from tiler server image
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1920.h4abe268 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: web_large # Nodegroup type to run the job
+      NODEGROUP_TYPE: job # Nodegroup type to run the job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 7200 # 2 hours
@@ -939,14 +939,14 @@ ohm:
       EXECUTE_PURGE: true
       PURGE_CONCURRENCY: 64
       PURGE_MIN_ZOOM: 7
-      PURGE_MAX_ZOOM: 17 # Purging zoom 18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
+      PURGE_MAX_ZOOM: 15 # Purging zoom 16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       ## Execute seeding
       EXECUTE_SEED: true
       SEED_CONCURRENCY: 64
-      SEED_MIN_ZOOM: 3
+      SEED_MIN_ZOOM: 0
       SEED_MAX_ZOOM: 14
       ## Remove tiles from s3 for zoom levels
-      ZOOM_LEVELS_TO_DELETE: 18,19,20
+      ZOOM_LEVELS_TO_DELETE: 16,17,18,19,20
       S3_BUCKET_CACHE_TILER: tiler-cache-production
       S3_BUCKET_PATH_FILES: mnt/data/osm
     resources:
@@ -967,8 +967,8 @@ ohm:
     enabled: true
     schedule: '0 */3 * * *'
     env:
-      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/eu-lat.geojson
-      ZOOM_LEVELS: '8'
+      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/usa-eu.geojson
+      ZOOM_LEVELS: '8,9,10'
       CONCURRENCY: 200
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
