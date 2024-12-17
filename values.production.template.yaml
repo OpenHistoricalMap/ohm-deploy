@@ -939,14 +939,14 @@ ohm:
       EXECUTE_PURGE: true
       PURGE_CONCURRENCY: 64
       PURGE_MIN_ZOOM: 7
-      PURGE_MAX_ZOOM: 15 # Purging zoom 16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
+      PURGE_MAX_ZOOM: 10 # Purging zoom 16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       ## Execute seeding
       EXECUTE_SEED: true
       SEED_CONCURRENCY: 64
       SEED_MIN_ZOOM: 0
-      SEED_MAX_ZOOM: 14
+      SEED_MAX_ZOOM: 10
       ## Remove tiles from s3 for zoom levels
-      ZOOM_LEVELS_TO_DELETE: 16,17,18,19,20
+      ZOOM_LEVELS_TO_DELETE: 11,12,13,14,15,16,17,18,19,20
       S3_BUCKET_CACHE_TILER: tiler-cache-production
       S3_BUCKET_PATH_FILES: mnt/data/osm
     resources:
