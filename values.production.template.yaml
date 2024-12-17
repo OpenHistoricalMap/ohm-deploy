@@ -355,7 +355,7 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: true
+      enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -373,7 +373,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0f115833b63d73efe
+      AWS_ElasticBlockStore_volumeID: vol-07b5a7a8e85a6caee
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: true
@@ -467,7 +467,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0027ab7b9d50a5e90
+      AWS_ElasticBlockStore_volumeID: vol-05d06ac388569461f
       AWS_ElasticBlockStore_size: 50Gi
     resources:
       enabled: true
