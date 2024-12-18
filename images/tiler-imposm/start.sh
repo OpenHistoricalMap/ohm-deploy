@@ -140,7 +140,7 @@ function uploadLastState() {
 
 function updateData() {
 
-    local s3_last_state_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}${DIFF_DIR}/last.state.txt"
+    local s3_last_state_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"
     local local_last_state_path="$DIFF_DIR/last.state.txt"
     echo "Checking if $s3_last_state_path exists in S3..."
     if aws s3 ls "$s3_last_state_path" > /dev/null 2>&1; then
