@@ -123,9 +123,25 @@ function updateData() {
 
     # Check if the limit file exists
     if [ -z "$TILER_IMPORT_LIMIT" ]; then
-        imposm run -config "$WORKDIR/config.json" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" -httpprofile ":6060" &
+        # imposm run -config "$WORKDIR/config.json" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" -httpprofile ":6060" &
+        imposm run \
+        -config "${WORKDIR}/config.json" \
+        -cachedir "${CACHE_DIR}" \
+        -diffdir "${DIFF_DIR}" \
+        -commit-latest \
+        -replication-interval 1m \
+        -expiretiles-dir "${EXPIRE_DIR}" \
+        -quiet &
     else
-        imposm run -config "$WORKDIR/config.json" -limitto "$WORKDIR/$LIMITFILE" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" &
+        imposm run \
+        -config "${WORKDIR}/config.json" \
+        -cachedir "${CACHE_DIR}" \
+        -diffdir "${DIFF_DIR}" \
+        -commit-latest \
+        -replication-interval 1m \
+        -limitto "${WORKDIR}/${LIMITFILE}" \
+        -expiretiles-dir "${EXPIRE_DIR}" \
+        -quiet &
     fi
 
     while true; do
@@ -172,9 +188,9 @@ function importData() {
         -deployproduction
 
     # These index will help speed up tegola tile generation
-    # psql $PG_CONNECTION -f queries/postgis_index.sql
     psql $PG_CONNECTION -f queries/postgis_post_import.sql
 
+    # To not import again
     touch $INIT_FILE
 
     # Update tables

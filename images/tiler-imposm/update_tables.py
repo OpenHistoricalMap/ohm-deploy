@@ -120,8 +120,25 @@ def create_triggers(generalized_tables):
         trigger_function = f"""
         CREATE OR REPLACE FUNCTION {fixed_table_name}_transform_trigger()
         RETURNS TRIGGER AS $$
+        DECLARE
+            start_time TIMESTAMP;
+            end_time TIMESTAMP;
+            elapsed_time INTERVAL;
         BEGIN
+            -- Record the start time
+            start_time := clock_timestamp();
+
+            -- Perform the transformation
             NEW.geometry = {geometry_transform.replace('geometry', 'NEW.geometry')};
+
+            -- Record the end time
+            end_time := clock_timestamp();
+            elapsed_time := end_time - start_time;
+
+            -- Log the time taken and the object being updated
+            RAISE NOTICE 'Table: %, ID: %, Time Taken: % ms',
+                TG_TABLE_NAME, NEW.id, EXTRACT(MILLISECOND FROM elapsed_time);
+
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
