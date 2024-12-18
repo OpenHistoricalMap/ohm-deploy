@@ -131,7 +131,7 @@ function uploadLastState() {
 
     # Attempt to upload the file to S3
     echo "Uploading $state_file to S3 at $s3_path..."
-    if aws s3 cp "$state_file" "s3://${s3_path}" --acl private; then
+    if aws s3 cp "$state_file" "${s3_path}" --acl private; then
         # Update the checksum file after a successful upload
         echo "$current_checksum" > "$checksum_file"
         echo "Successfully uploaded $state_file to S3."
@@ -140,7 +140,7 @@ function uploadLastState() {
 
 function updateData() {
 
-    local s3_last_state_path="s3://${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}${DIFF_DIR}/last.state.txt"
+    local s3_last_state_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}${DIFF_DIR}/last.state.txt"
     local local_last_state_path="$DIFF_DIR/last.state.txt"
     echo "Checking if $s3_last_state_path exists in S3..."
     if aws s3 ls "$s3_last_state_path" > /dev/null 2>&1; then
