@@ -164,7 +164,7 @@ function updateData() {
         -diffdir "${DIFF_DIR}" \
         -commit-latest \
         -replication-interval 1m \
-        -expiretiles-dir "${EXPIRE_DIR}" \
+        -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
         -quiet &
     else
         imposm run \
@@ -174,7 +174,7 @@ function updateData() {
         -commit-latest \
         -replication-interval 1m \
         -limitto "${WORKDIR}/${LIMITFILE}" \
-        -expiretiles-dir "${EXPIRE_DIR}" \
+        -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
         -quiet &
     fi
 
