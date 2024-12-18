@@ -355,14 +355,14 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: false
+      enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: api_db
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
-      POSTGRES_DB: tiler_osm_prod
+      POSTGRES_DB: tiler_osm_prod_v2
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
@@ -457,13 +457,13 @@ osm-seed:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241214_1202.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1675330"
-      OVERWRITE_STATE: false
+      SEQUENCE_NUMBER: "1677612"
+      OVERWRITE_STATE: true
       UPLOAD_EXPIRED_FILES: true
       IMPORT_NATURAL_EARTH: true
       IMPORT_OSM_LAND: true
     persistenceDisk:
-      enabled: true
+      enabled: false
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
@@ -931,7 +931,7 @@ ohm:
       NAMESPACE: default # Namespace to run the job
       DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1920.h4abe268 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: job_large_tiler # Nodegroup type to run the purge and seed job
+      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 7200 # 2 hours

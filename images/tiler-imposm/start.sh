@@ -105,33 +105,85 @@ function uploadExpiredFiles() {
     done
 }
 
+function uploadLastState() {
+    # Path to the last.state.txt file
+    local state_file="$DIFF_DIR/last.state.txt"
+    local s3_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"
+    local checksum_file="$DIFF_DIR/last.state.md5"
+
+    # Check if the last.state.txt file exists
+    if [ ! -f "$state_file" ]; then
+        echo "No last.state.txt file found at $state_file. Skipping upload."
+        return
+    fi
+
+    # Calculate the current checksum of the file
+    local current_checksum=$(md5sum "$state_file" | awk '{ print $1 }')
+
+    # Compare with the previous checksum
+    if [ -f "$checksum_file" ]; then
+        local previous_checksum=$(cat "$checksum_file")
+        if [ "$current_checksum" == "$previous_checksum" ]; then
+            echo "No changes in last.state.txt. Skipping upload."
+            return
+        fi
+    fi
+
+    # Attempt to upload the file to S3
+    echo "Uploading $state_file to S3 at $s3_path..."
+    if aws s3 cp "$state_file" "${s3_path}" --acl private; then
+        # Update the checksum file after a successful upload
+        echo "$current_checksum" > "$checksum_file"
+        echo "Successfully uploaded $state_file to S3."
+    fi
+}
+
 function updateData() {
-    ### Update the DB with the new data form minute replication
+
+    local s3_last_state_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"
+    local local_last_state_path="$DIFF_DIR/last.state.txt"
+    echo "Checking if $s3_last_state_path exists in S3..."
+    if aws s3 ls "$s3_last_state_path" > /dev/null 2>&1; then
+        echo "Found $s3_last_state_path. Downloading..."
+        aws s3 cp "$s3_last_state_path" "$local_last_state_path"
+    fi
+
+    ### Update the DB with the new data from minute replication
     if [ "$OVERWRITE_STATE" = "true" ]; then
-        rm -f $DIFF_DIR/last.state.txt
-    fi
-
-    # Check if last.state.txt exists
-    if [ -f "$DIFF_DIR/last.state.txt" ]; then
-        echo "Exist... $DIFF_DIR/last.state.txt"
-    else
-        # Create last.state.txt file with REPLICATION_URL and SEQUENCE_NUMBER from env vars
+        echo "Overwriting last.state.txt..."
         echo "timestamp=0001-01-01T00\:00\:00Z 
-        sequenceNumber=$SEQUENCE_NUMBER
-        replicationUrl=$REPLICATION_URL" >$DIFF_DIR/last.state.txt
+        sequenceNumber=${SEQUENCE_NUMBER:-0}
+        replicationUrl=${REPLICATION_URL}" > "$local_last_state_path"
     fi
 
-    # Check if the limit file exists
+    # Run the Imposm update process
     if [ -z "$TILER_IMPORT_LIMIT" ]; then
-        imposm run -config "$WORKDIR/config.json" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" -httpprofile ":6060" &
+        imposm run \
+        -config "${WORKDIR}/config.json" \
+        -cachedir "${CACHE_DIR}" \
+        -diffdir "${DIFF_DIR}" \
+        -commit-latest \
+        -replication-interval 1m \
+        -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
+        -quiet &
     else
-        imposm run -config "$WORKDIR/config.json" -limitto "$WORKDIR/$LIMITFILE" -expiretiles-dir "$IMPOSM3_EXPIRE_DIR" &
+        imposm run \
+        -config "${WORKDIR}/config.json" \
+        -cachedir "${CACHE_DIR}" \
+        -diffdir "${DIFF_DIR}" \
+        -commit-latest \
+        -replication-interval 1m \
+        -limitto "${WORKDIR}/${LIMITFILE}" \
+        -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
+        -quiet &
     fi
 
+    # Continuously upload expired files and last state
     while true; do
         echo "Upload expired files... $(date +%F_%H-%M-%S)"
         uploadExpiredFiles
-        sleep 1m
+        uploadLastState
+        sleep 30s
     done
 }
 
@@ -172,9 +224,9 @@ function importData() {
         -deployproduction
 
     # These index will help speed up tegola tile generation
-    # psql $PG_CONNECTION -f queries/postgis_index.sql
     psql $PG_CONNECTION -f queries/postgis_post_import.sql
 
+    # To not import again
     touch $INIT_FILE
 
     # Update tables
