@@ -4,9 +4,14 @@ import logging
 import subprocess
 import time
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# Configuración del logger
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
+# Cargar configuración DB desde variables de entorno
 DB_CONFIG = {
     "dbname": os.getenv("POSTGRES_DB"),
     "user": os.getenv("POSTGRES_USER"),
@@ -15,166 +20,274 @@ DB_CONFIG = {
     "port": int(os.getenv("POSTGRES_PORT", 5432))
 }
 
-PSQL_CONN = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
-
 REQUIRED_ENV_VARS = ["POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST"]
 for var in REQUIRED_ENV_VARS:
     if not os.getenv(var):
-        logger.error(f"Environment variable {var} is not defined. Exiting.")
-        raise EnvironmentError(f"Environment variable {var} is not defined.")
+        logger.error(f"La variable de entorno {var} no está definida. Saliendo.")
+        raise EnvironmentError(f"La variable de entorno {var} no está definida.")
 
-def load_imposm_config(filepath):
-    """Load the imposm3.json configuration file."""
-    logger.info(f"Loading configuration from {filepath}")
-    try:
-        with open(filepath, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        logger.error(f"Configuration file {filepath} not found.")
-        raise
-    except json.JSONDecodeError:
-        logger.error(f"Error parsing JSON from {filepath}.")
-        raise
+PSQL_CONN = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
 
-def execute_psql_query(query):
-    """Execute a query using psql and print the output."""
+def load_imposm_config(filepath: str) -> dict:
+    """
+    Carga la configuración desde un archivo JSON.
+    """
+    logger.info(f"Cargando configuración desde {filepath}")
+    with open(filepath, "r") as f:
+        return json.load(f)
+
+def execute_psql_query(query: str):
+    """
+    Ejecuta una consulta SQL usando psql.
+    """
     try:
-        # logger.info(f"Executing query:\t{query}")
         result = subprocess.run(
             ["psql", PSQL_CONN, "-c", query],
             text=True,
             capture_output=True
         )
         if result.returncode != 0:
-            logger.error(f"Error executing query: {result.stderr}")
+            logger.error(f"Error al ejecutar la consulta: {result.stderr.strip()}")
         else:
-            logger.info(f"Query executed successfully:\n{result.stdout}")
+            logger.info(f"Consulta ejecutada con éxito:\n{result.stdout.strip()}")
     except Exception as e:
-        logger.error(f"Error while executing query with psql: {e}")
+        logger.error(f"Error ejecutando la consulta con psql: {e}")
 
-def delete_existing_triggers(generalized_tables):
-    """Delete existing triggers before applying transformations."""
-    logger.info("Deleting existing triggers...")
-    for table_name in generalized_tables.keys():
-        fixed_table_name = f"osm_{table_name}"
-        trigger_name = f"{fixed_table_name}_before_insert_update"
-
-        drop_trigger_query = f"""
-        DROP TRIGGER IF EXISTS {trigger_name} ON {fixed_table_name};
-        DROP FUNCTION IF EXISTS {fixed_table_name}_transform_trigger();
-        """
-        execute_psql_query(drop_trigger_query)
-
-def apply_geometry_transformations(generalized_tables):
-    """Apply geometry transformations using psql."""
-    logger.info("Starting geometry transformations...")
+def delete_sub_tables(generalized_tables: dict):
+    """
+    Deletes all sub-tables defined in the configuration.
+    """
+    logger.info("Starting deletion of sub-tables...")
     for table_name, table_info in generalized_tables.items():
         fixed_table_name = f"osm_{table_name}"
-        geometry_transform = table_info.get("geometry_transform")
-        geometry_transform_types = table_info.get("geometry_transform_types")
+        sub_tables = table_info.get("sub_tables")
 
-        # Skip if transform or types are not defined
-        if not geometry_transform or not geometry_transform_types:
-            logger.warning(
-                f"Skipping transformations for {fixed_table_name}: "
-                "'geometry_transform' or 'geometry_transform_types' not defined."
-            )
+        # If no sub-tables are defined, skip
+        if not sub_tables:
+            logger.info(f"No sub-tables defined for {fixed_table_name}. Skipping.")
             continue
 
-        # Build the SQL query
-        sql_query = f"""UPDATE {fixed_table_name} SET geometry = {geometry_transform} WHERE {geometry_transform_types};"""
-        start_time = time.time()
-        execute_psql_query(sql_query)
-        elapsed_time = time.time() - start_time
+        for sub_table in sub_tables:
+            sub_table_name = sub_table.get("table")
+            if not sub_table_name:
+                logger.warning(
+                    f"Sub-table for {fixed_table_name} does not have a defined name. Skipping."
+                )
+                continue
 
-        logger.info(f"Transformation for table {fixed_table_name} completed in {elapsed_time:.2f} seconds.")
+            sub_fixed_table_name = f"osm_{sub_table_name}"
 
-def create_triggers(generalized_tables):
-    """Create triggers for future updates using psql."""
-    logger.info("Creating triggers for future geometry transformations...")
-    for table_name, table_info in generalized_tables.items():
-        fixed_table_name = f"osm_{table_name}"
-        geometry_transform = table_info.get("geometry_transform")
-        geometry_transform_types = table_info.get("geometry_transform_types")
+            # Check if the table exists before attempting to delete it
+            if table_exists(sub_fixed_table_name):
+                logger.info(f"Deleting sub-table {sub_fixed_table_name}...")
+                drop_table_query = f"DROP TABLE IF EXISTS {sub_fixed_table_name} CASCADE;"
+                execute_psql_query(drop_table_query)
+            else:
+                logger.info(f"Sub-table {sub_fixed_table_name} does not exist. Skipping.")
 
-        if not geometry_transform or not geometry_transform_types:
-            logger.warning(f"Skipping trigger creation for {fixed_table_name}.")
-            continue
+    logger.info("Sub-table deletion process completed.")
 
-        # Check if the trigger already exists
-        check_trigger_query = f"""
-        SELECT 1
-        FROM pg_trigger
-        WHERE tgname = '{fixed_table_name}_before_insert_update';
-        """
-        result = subprocess.run(
-            ["psql", PSQL_CONN, "-c", check_trigger_query],
-            text=True,
-            capture_output=True
-        )
-        if "1" in result.stdout:
-            logger.info(f"Trigger {fixed_table_name}_before_insert_update already exists. Skipping.")
-            continue
 
-        # Create the trigger if it does not exist
-        trigger_function = f"""
-        CREATE OR REPLACE FUNCTION {fixed_table_name}_transform_trigger()
-        RETURNS TRIGGER AS $$
-        DECLARE
-            start_time TIMESTAMP;
-            end_time TIMESTAMP;
-            elapsed_time INTERVAL;
-        BEGIN
-            -- Record the start time
-            start_time := clock_timestamp();
+def table_exists(table_name: str) -> bool:
+    """
+    Verifica si una tabla existe en la base de datos.
+    """
+    query = f"SELECT to_regclass('public.{table_name}');"
+    result = subprocess.run(
+        ["psql", PSQL_CONN, "-t", "-c", query],
+        text=True,
+        capture_output=True
+    )
+    output = result.stdout.strip()
+    return output != "" and output != "-"
 
-            -- Perform the transformation
-            NEW.geometry = {geometry_transform.replace('geometry', 'NEW.geometry')};
 
-            -- Record the end time
-            end_time := clock_timestamp();
-            elapsed_time := end_time - start_time;
+def create_trigger_for_sub_table(sub_table_name: str, geometry_transform: str, sql_filter: str = None):
+    """
+    Creates triggers for a sub-table, applying the geometric transformation
+    and optionally a SQL filter for future INSERT/UPDATE operations.
+    Handles row deletions.
+    If triggers already exist, they are dropped and recreated.
+    """
+    fixed_table_name = f"osm_{sub_table_name}"
+    insert_update_trigger_name = f"{fixed_table_name}_before_insert_update"
+    delete_trigger_name = f"{fixed_table_name}_before_delete"
 
-            -- Log the time taken and the object being updated
-            RAISE NOTICE 'Table: %, ID: %, Time Taken: % ms',
-                TG_TABLE_NAME, NEW.id, EXTRACT(MILLISECOND FROM elapsed_time);
+    # Drop existing triggers if they exist
+    drop_trigger_query = f"""
+    DO $$
+    BEGIN
+        IF EXISTS (
+            SELECT 1
+            FROM pg_trigger
+            WHERE tgname = '{insert_update_trigger_name}'
+        ) THEN
+            EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I;', '{insert_update_trigger_name}', '{fixed_table_name}');
+        END IF;
 
+        IF EXISTS (
+            SELECT 1
+            FROM pg_trigger
+            WHERE tgname = '{delete_trigger_name}'
+        ) THEN
+            EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I;', '{delete_trigger_name}', '{fixed_table_name}');
+        END IF;
+    END $$;
+    """
+    execute_psql_query(drop_trigger_query)
+    logger.info(f"Existing triggers removed on table {fixed_table_name} (if they existed).")
+
+    # Prepare the SQL filter clause if provided
+    sql_filter_clause = f"({sql_filter})" if sql_filter else "TRUE"
+
+    # Create the trigger for INSERT and UPDATE
+    transform_for_trigger = geometry_transform.replace('geometry', 'NEW.geometry')
+
+    insert_update_trigger_function = f"""
+    CREATE OR REPLACE FUNCTION {fixed_table_name}_transform_trigger()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        -- Apply geometric transformation
+        NEW.geometry = {transform_for_trigger};
+
+        -- Apply optional SQL filter
+        IF {sql_filter_clause} THEN
             RETURN NEW;
-        END;
-        $$ LANGUAGE plpgsql;
+        ELSE
+            RETURN NULL; -- Ignore the row if it doesn't match the filter
+        END IF;
+    END;
+    $$ LANGUAGE plpgsql;
 
-        CREATE TRIGGER {fixed_table_name}_before_insert_update
-        BEFORE INSERT OR UPDATE ON {fixed_table_name}
-        FOR EACH ROW
-        EXECUTE FUNCTION {fixed_table_name}_transform_trigger();
-        """
-        execute_psql_query(trigger_function)
-        
-def main(imposm3_config_path):
-    """Main execution flow."""
+    CREATE TRIGGER {insert_update_trigger_name}
+    BEFORE INSERT OR UPDATE ON {fixed_table_name}
+    FOR EACH ROW
+    EXECUTE FUNCTION {fixed_table_name}_transform_trigger();
+    """
+    execute_psql_query(insert_update_trigger_function)
+    logger.info(f"Trigger {insert_update_trigger_name} created for INSERT/UPDATE on table {fixed_table_name}.")
+
+    # Create the trigger for DELETE
+    delete_trigger_function = f"""
+    CREATE OR REPLACE FUNCTION {fixed_table_name}_delete_trigger()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        -- Log information about the deleted row
+        RAISE NOTICE 'Row deleted from table % with osm_id: %', TG_TABLE_NAME, OLD.osm_id;
+        RETURN OLD;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER {delete_trigger_name}
+    BEFORE DELETE ON {fixed_table_name}
+    FOR EACH ROW
+    EXECUTE FUNCTION {fixed_table_name}_delete_trigger();
+    """
+    execute_psql_query(delete_trigger_function)
+    logger.info(f"Trigger {delete_trigger_name} created for DELETE on table {fixed_table_name}.")
+    
+
+def apply_geometry_transformations(generalized_tables: dict):
+    """
+    Applies initial geometric transformations to generalized tables
+    and creates sub-tables with their transformations and triggers.
+    """
+    logger.info("Starting initial geometric transformations...")
+    for table_name, table_info in generalized_tables.items():
+        fixed_table_name = f"osm_{table_name}"
+        sub_tables = table_info.get("sub_tables")
+
+        # Skip if no sub-tables are defined
+        if not sub_tables:
+            logger.info(f"No sub_tables defined for {fixed_table_name}. Skipping.")
+            continue
+
+        for sub_table in sub_tables:
+            sub_table_name = sub_table.get("table")
+            if not sub_table_name:
+                logger.warning(f"Sub-table for {fixed_table_name} has no defined name. Skipping.")
+                continue
+
+            sub_table_fixed_name = f"osm_{sub_table_name}"
+            sub_geometry_transform = sub_table["geometry_transform"]
+            sub_sql_filter = sub_table.get("sql_filter", None)
+
+            # Retrieve the list of columns from the main table
+            get_columns_query = f"""
+            SELECT column_name 
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = '{fixed_table_name}'
+            ORDER BY ordinal_position;
+            """
+            result = subprocess.run(
+                ["psql", PSQL_CONN, "-t", "-c", get_columns_query],
+                text=True,
+                capture_output=True
+            )
+            if result.returncode != 0:
+                logger.error(f"Error retrieving columns for {fixed_table_name}: {result.stderr.strip()}")
+                continue
+
+            # Clean and retrieve the list of columns
+            retrieved_columns = [col.strip() for col in result.stdout.strip().split('\n') if col.strip()]
+
+            if not retrieved_columns:
+                logger.warning(f"No columns found for {fixed_table_name}. Skipping.")
+                continue
+
+            # Create the sub-table if it doesn't exist
+            if not table_exists(sub_table_fixed_name):
+                logger.info(f"Creating sub-table {sub_table_fixed_name} based on {fixed_table_name}...")
+                create_table_query = f"""
+                CREATE TABLE {sub_table_fixed_name} (LIKE {fixed_table_name} INCLUDING ALL);
+                """
+                execute_psql_query(create_table_query)
+
+                # Build the column list for SELECT, replacing geometry with geometry_transform
+                selected_columns = []
+                for col in retrieved_columns:
+                    if col == 'geometry':
+                        selected_columns.append(f"{sub_geometry_transform} AS geometry")
+                    else:
+                        selected_columns.append(col)
+
+                # Generate the INSERT query with optional SQL filter
+                where_clause = f"WHERE {sub_sql_filter}" if sub_sql_filter else ""
+                insert_query = f"""
+                INSERT INTO {sub_table_fixed_name} ({", ".join(retrieved_columns)})
+                SELECT {", ".join(selected_columns)}
+                FROM {fixed_table_name}
+                {where_clause};
+                """
+                execute_psql_query(insert_query)
+            else:
+                logger.info(f"Sub-table {sub_table_fixed_name} already exists. Skipping creation.")
+
+            # Create triggers for the sub-table
+            create_trigger_for_sub_table(sub_table_name, sub_geometry_transform, sub_sql_filter)
+
+def main(imposm3_config_path: str):
+    """
+    Flujo principal:
+    1. Carga la configuración.
+    2. Aplica transformaciones geométricas iniciales y crea tablas derivadas con sus triggers.
+    """
     try:
-        # Load the imposm3.json configuration
         config = load_imposm_config(imposm3_config_path)
         generalized_tables = config.get("generalized_tables", {})
 
-        # Delete existing triggers
-        logger.info("Deleting existing triggers...")
-        delete_existing_triggers(generalized_tables)
+        ## Delete tables
+        delete_sub_tables(generalized_tables)
 
-        # Apply initial geometry transformations
-        logger.info("Starting initial geometry transformations...")
+        # Aplicar transformaciones iniciales y crear tablas derivadas
         apply_geometry_transformations(generalized_tables)
 
-        # Recreate triggers for future transformations
-        logger.info("Recreating triggers for future updates...")
-        create_triggers(generalized_tables)
-
-        logger.info("All transformations and triggers completed successfully.")
+        logger.info("Proceso completado con éxito.")
     except Exception as e:
-        logger.error(f"An error occurred during execution: {e}")
+        logger.error(f"Ocurrió un error durante la ejecución: {e}")
         raise
 
 if __name__ == "__main__":
     imposm3_config_path = "config/imposm3.json"
     main(imposm3_config_path)
-    
