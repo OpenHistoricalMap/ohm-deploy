@@ -492,7 +492,7 @@ osm-seed:
         IMPORT_OSM_LAND: true
         IMPOSM3_IMPORT_LAYERS: all
       persistenceDisk:
-        enabled: true
+        enabled: false
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
