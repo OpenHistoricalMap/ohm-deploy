@@ -931,10 +931,10 @@ ohm:
       NAMESPACE: default # Namespace to run the job
       DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1920.h4abe268 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: job_large_tiler # Nodegroup type to run the purge and seed job
+      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
-      DELETE_OLD_JOBS_AGE: 7200 # 2 hours
+      DELETE_OLD_JOBS_AGE: 3600 # 1 hours
       ## Execute purging
       EXECUTE_PURGE: true
       PURGE_CONCURRENCY: 64
@@ -968,7 +968,7 @@ ohm:
     schedule: '0 */3 * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/usa-eu.geojson
-      ZOOM_LEVELS: '8,9,10'
+      ZOOM_LEVELS: '8,9'
       CONCURRENCY: 100
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
