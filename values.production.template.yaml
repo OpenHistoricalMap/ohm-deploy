@@ -934,17 +934,17 @@ ohm:
       NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
-      DELETE_OLD_JOBS_AGE: 7200 # 2 hours
+      DELETE_OLD_JOBS_AGE: 3600 # 1 hours
       ## Execute purging
       EXECUTE_PURGE: true
       PURGE_CONCURRENCY: 128
-      PURGE_MIN_ZOOM: 7
+      PURGE_MIN_ZOOM: 3
       PURGE_MAX_ZOOM: 12 # Purging zoom 13,14,15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       ## Execute seeding
       EXECUTE_SEED: true
       SEED_CONCURRENCY: 128
       SEED_MIN_ZOOM: 0
-      SEED_MAX_ZOOM: 14
+      SEED_MAX_ZOOM: 12
       ## Remove tiles from s3 for zoom levels
       ZOOM_LEVELS_TO_DELETE: 13,14,15,16,17,18,19,20
       S3_BUCKET_CACHE_TILER: tiler-cache-production
@@ -968,8 +968,13 @@ ohm:
     schedule: '0 */3 * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/usa-eu.geojson
+<<<<<<< HEAD
       ZOOM_LEVELS: '8,9,10'
       CONCURRENCY: 256
+=======
+      ZOOM_LEVELS: '8,9'
+      CONCURRENCY: 100
+>>>>>>> main
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
     resources:
