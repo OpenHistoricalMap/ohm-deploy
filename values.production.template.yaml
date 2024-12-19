@@ -968,13 +968,8 @@ ohm:
     schedule: '0 */3 * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/usa-eu.geojson
-<<<<<<< HEAD
-      ZOOM_LEVELS: '8,9,10'
-      CONCURRENCY: 256
-=======
       ZOOM_LEVELS: '8,9'
-      CONCURRENCY: 100
->>>>>>> main
+      CONCURRENCY: 256
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
     resources:
