@@ -4,14 +4,14 @@ import logging
 import subprocess
 import time
 
-# Configuración del logger
+# Logger configuration
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-# Cargar configuración DB desde variables de entorno
+# Load DB configuration from environment variables
 DB_CONFIG = {
     "dbname": os.getenv("POSTGRES_DB"),
     "user": os.getenv("POSTGRES_USER"),
@@ -23,22 +23,22 @@ DB_CONFIG = {
 REQUIRED_ENV_VARS = ["POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST"]
 for var in REQUIRED_ENV_VARS:
     if not os.getenv(var):
-        logger.error(f"La variable de entorno {var} no está definida. Saliendo.")
-        raise EnvironmentError(f"La variable de entorno {var} no está definida.")
+        logger.error(f"The environment variable {var} is not defined. Exiting.")
+        raise EnvironmentError(f"The environment variable {var} is not defined.")
 
 PSQL_CONN = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
 
 def load_imposm_config(filepath: str) -> dict:
     """
-    Carga la configuración desde un archivo JSON.
+    Load the configuration from a JSON file.
     """
-    logger.info(f"Cargando configuración desde {filepath}")
+    logger.info(f"Loading configuration from {filepath}")
     with open(filepath, "r") as f:
         return json.load(f)
 
 def execute_psql_query(query: str):
     """
-    Ejecuta una consulta SQL usando psql.
+    Execute an SQL query using psql.
     """
     try:
         result = subprocess.run(
@@ -47,11 +47,11 @@ def execute_psql_query(query: str):
             capture_output=True
         )
         if result.returncode != 0:
-            logger.error(f"Error al ejecutar la consulta: {result.stderr.strip()}")
+            logger.error(f"Error executing the query: {result.stderr.strip()}")
         else:
-            logger.info(f"Consulta ejecutada con éxito:\n{result.stdout.strip()}")
+            logger.info(f"Query executed successfully:\n{result.stdout.strip()}")
     except Exception as e:
-        logger.error(f"Error ejecutando la consulta con psql: {e}")
+        logger.error(f"Error executing the query with psql: {e}")
 
 def delete_sub_tables(generalized_tables: dict):
     """
@@ -90,7 +90,7 @@ def delete_sub_tables(generalized_tables: dict):
 
 def table_exists(table_name: str) -> bool:
     """
-    Verifica si una tabla existe en la base de datos.
+    Checks if a table exists in the database.
     """
     query = f"SELECT to_regclass('public.{table_name}');"
     result = subprocess.run(
@@ -269,9 +269,9 @@ def apply_geometry_transformations(generalized_tables: dict):
 
 def main(imposm3_config_path: str):
     """
-    Flujo principal:
-    1. Carga la configuración.
-    2. Aplica transformaciones geométricas iniciales y crea tablas derivadas con sus triggers.
+    Main flow:
+    1. Load the configuration.
+    2. Apply initial geometric transformations and create derived tables with their triggers.
     """
     try:
         config = load_imposm_config(imposm3_config_path)
@@ -280,12 +280,12 @@ def main(imposm3_config_path: str):
         ## Delete tables
         delete_sub_tables(generalized_tables)
 
-        # Aplicar transformaciones iniciales y crear tablas derivadas
+        # Apply initial transformations and create derived tables
         apply_geometry_transformations(generalized_tables)
 
-        logger.info("Proceso completado con éxito.")
+        logger.info("Process completed successfully.")
     except Exception as e:
-        logger.error(f"Ocurrió un error durante la ejecución: {e}")
+        logger.error(f"An error occurred during execution: {e}")
         raise
 
 if __name__ == "__main__":
