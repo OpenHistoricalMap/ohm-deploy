@@ -98,7 +98,7 @@ max_connections = 50
 [[maps]]
 name = "osm"
 attribution = "OpenHistoricalMap"
-center = [-74.275329586789, -12.153492567373, 8.0]
+center = [-74.275329586789, -12.153492567373, 1.0]
 	###### Land
 	[['providers/land.zoom.toml']]
 
