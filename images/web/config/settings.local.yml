@@ -8,6 +8,7 @@ email_from: "OpenHistoricalMap <ohm-admins@googlegroups.com>"
 email_return_path: "ohm-admins@googlegroups.com"
 api_timeout: 600
 web_timeout: 600
+#memcache_servers: []
 nominatim_url: "https://nominatim.openhistoricalmap.org/"
 # OAuth application for the website
 oauth_application: ""
