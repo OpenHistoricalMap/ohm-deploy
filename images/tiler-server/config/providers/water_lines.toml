@@ -10,8 +10,8 @@ SELECT
     name, 
     type, 
     bridge, 
-    start_date, 
-    end_date, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -33,8 +33,8 @@ SELECT
     name, 
     type, 
     bridge, 
-    start_date, 
-    end_date, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -56,8 +56,8 @@ SELECT
     name, 
     type, 
     bridge, 
-    start_date, 
-    end_date, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -79,8 +79,8 @@ SELECT
     name, 
     type, 
     bridge, 
-    start_date, 
-    end_date, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 

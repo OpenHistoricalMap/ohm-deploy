@@ -480,7 +480,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: true
+      enabled: false
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241214_1202.osm.pbf
@@ -966,7 +966,7 @@ ohm:
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
-      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1913.ha63e895 # TODO, this should be automatically updated from tiler server image
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1964.h8703c77 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_large # Nodegroup type to run the job
       MAX_ACTIVE_JOBS: 2 # Maximum number of active jobs in high concurrency queue
