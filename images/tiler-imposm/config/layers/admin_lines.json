@@ -1,0 +1,93 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {
+    "admin_lines_z0_5": {
+      "source": "admin_lines_z6_9",
+      "sql_filter": "maritime='yes'",
+      "tolerance": 2000
+    },
+    "admin_lines_z6_9": {
+      "source": "admin_lines_z10_15",
+      "sql_filter": "maritime='yes'",
+      "tolerance": 500
+    },
+    "admin_lines_z10_15": {
+      "source": "admin_lines_z16_20",
+      "sql_filter": "maritime='yes'",
+      "tolerance": 10
+    },
+    "admin_lines_z16_20": {
+      "source": "admin_lines",
+      "sql_filter": "maritime='yes'"
+    }
+  },
+  "tables": {
+    "admin_lines": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "integer",
+          "name": "admin_level",
+          "key": "admin_level"
+        },
+        {
+          "type": "string",
+          "name": "maritime",
+          "key": "maritime"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "type": "boolint",
+          "name": "has_label",
+          "key": false
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        }
+      ],
+      "type": "linestring",
+      "mapping": {
+        "boundary": [
+          "administrative"
+        ]
+      }
+    }
+  }
+}

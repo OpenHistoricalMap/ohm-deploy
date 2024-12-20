@@ -78,7 +78,7 @@ max_connections = 50
 	[['providers/buildings.toml']]
 	[['providers/buildings.centroids.toml']]
 
-	###### transport_associated_streets
+	##### transport_associated_streets
 	[['providers/transport_associated_streets.toml']]
 
 	###### admin_boundaries_maritime
@@ -98,7 +98,7 @@ max_connections = 50
 [[maps]]
 name = "osm"
 attribution = "OpenHistoricalMap"
-center = [-74.275329586789, -12.153492567373, 8.0]
+center = [-74.275329586789, -12.153492567373, 1.0]
 	###### Land
 	[['providers/land.zoom.toml']]
 

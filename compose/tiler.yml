@@ -1,40 +1,52 @@
 services:
-  db:
-    image: ohm-tiler-db:v1
-    build:
-      context: ../images/tiler-db
-      dockerfile: Dockerfile
-    ports:
-      - "5432:5432"
-    # volumes:
-    #   - ../data/tiler-db-data:/var/lib/postgresql/data
-    env_file:
-      - ../envs/.env.tiler
-    restart: always
-  imposm:
-    image: ohm-tiler-imposm:v1
-    build:
-      context: ../images/tiler-imposm
-      dockerfile: Dockerfile
-    # volumes:
-      # - ../data/tiler-imposm-data:/mnt/data
-      # - ../images/tiler-imposm:/app
-    # command:
-    #   - sh
-    #   - -c
-    #   - "sleep 60 && ./start.sh"
-    env_file:
-      - ../envs/.env.tiler
+  # db:
+  #   image: ohm-tiler-db:v1
+  #   build:
+  #     context: ../images/tiler-db
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "5432:5432"
+  #   # volumes:
+  #   #   - ../data/tiler-db-data2:/var/lib/postgresql/data
+  #   env_file:
+  #     - ../envs/.env.tiler
+  #   restart: always
+  #   networks:
+  #     - tiler_network
+
+  # imposm:
+  #   image: rub21/tiler-imposm:v16
+  #   build:
+  #     context: ../images/tiler-imposm
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #   #   - ../data/tiler-imposm-data2:/mnt/data
+  #     - ../images/tiler-imposm:/osm
+  #   command:
+  #     - sh
+  #     - -c
+  #     - "./start.sh"
+  #   env_file:
+  #     - ../envs/.env.tiler
+  #   networks:
+  #     - tiler_network
+
   tiler:
     image: ohm-tiler-server:v1
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile
     volumes:
-      # - ../data/tiler-server-data:/mnt/data
+      - ../data/tiler-server-data:/mnt/data
       - ../images/tiler-server:/app
     ports:
       - "9090:9090"
     env_file:
       - ../envs/.env.tiler
     restart: always
+    networks:
+      - tiler_network
+
+networks:
+  tiler_network:
+    driver: bridge

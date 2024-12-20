@@ -1,39 +1,31 @@
 [[providers.layers]]
-name = "route_lines_5_20"
+name = "routes_lines"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
-    ST_AsMVTGeom(geometry,!BBOX!) AS geometry,
-    ABS(r.osm_id) AS osm_id,
-    r.type,
-    r.tags->'route' AS route,
-    r.name,
-    r.tags->'ref' AS ref,
-    r.tags->'network' AS network,
-    r.tags->'direction' AS direction,
-    r.tags->'operator' AS operator,
-    r.tags->'state' AS state,
-    r.tags->'symbol' AS symbol,
-    r.tags->'distance' AS distance,
-    r.tags->'roundtrip' AS roundtrip,
-    r.tags->'interval' AS interval,
-    r.tags->'duration' AS duration,
-    r.tags->'tourism' AS tourism,
-    r.start_date,
-    r.end_date,
-    CASE 
-        WHEN is_date_valid(r.start_date) THEN isodatetodecimaldate(pad_date(r.start_date, 'start')) 
-        ELSE NULL 
-    END AS start_decdate,
-    CASE 
-        WHEN is_date_valid(r.end_date) THEN isodatetodecimaldate(pad_date(r.end_date, 'end')) 
-        ELSE NULL 
-    END AS end_decdate,
-    {{LENGUAGES_RELATION}}
-FROM osm_relations r
-JOIN osm_relation_members m ON r.osm_id = m.osm_id
-WHERE r.type = 'route'
-AND geometry && !BBOX!
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    ABS(osm_id) AS osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    distance,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}}
+FROM osm_relation_members_routes
+WHERE geometry && !BBOX!
 """

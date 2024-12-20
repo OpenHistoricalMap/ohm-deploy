@@ -93,7 +93,7 @@ osm-seed:
         effective_io_concurrency = 200
         max_wal_size = 1GB
         min_wal_size = 256MB
-        random_page_cost = 1.1
+        random_page_cost = 1.0
         effective_cache_size = 8GB
         log_min_duration_statement = 3000
         log_connections = on
@@ -113,8 +113,8 @@ osm-seed:
         max_parallel_workers_per_gather = 2
         max_parallel_workers = 4
         max_worker_processes = 4
-        parallel_tuple_cost = 0.1
-        parallel_setup_cost = 1000
+        parallel_tuple_cost = 0.05
+        parallel_setup_cost = 500
         min_parallel_table_scan_size = 2MB
         min_parallel_index_scan_size = 256kB
         session_preload_libraries = 'auto_explain'
@@ -133,7 +133,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: openhistoricalmap.org
@@ -172,7 +172,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     resources:
       enabled: false
       requests:
@@ -232,7 +232,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     env:
       ENABLE_SEND_SLACK_MESSAGE: "true"
       SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -354,13 +354,15 @@ osm-seed:
 
   tilerDb:
     enabled: true
+    useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
+      enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: api_db
     env:
-      POSTGRES_HOST: production-tiler-db
-      POSTGRES_DB: tiler-osm
+      POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
+      POSTGRES_DB: tiler_osm_prod_v4
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
@@ -371,7 +373,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0cb7b8d450400d3fd
+      AWS_ElasticBlockStore_volumeID: vol-07b5a7a8e85a6caee
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: true
@@ -386,14 +388,14 @@ osm-seed:
       values: |
         listen_addresses = '*'
         max_connections = 100
-        shared_buffers = 8GB
+        shared_buffers = 10GB
         work_mem = 256MB
         maintenance_work_mem = 2GB
         dynamic_shared_memory_type = posix
         effective_io_concurrency = 300
         max_wal_size = 4GB
         min_wal_size = 512MB
-        random_page_cost = 1.1
+        random_page_cost = 1.0
         effective_cache_size = 24GB
         log_min_duration_statement = 15000
         log_connections = on
@@ -411,16 +413,16 @@ osm-seed:
         default_text_search_config = 'pg_catalog.english'
 
         # Parallelism settings
-        max_parallel_workers_per_gather = 4
-        max_parallel_workers = 8
-        max_worker_processes = 8
-        parallel_tuple_cost = 0.1
-        parallel_setup_cost = 1000
+        max_parallel_workers_per_gather = 8
+        max_parallel_workers = 16
+        max_worker_processes = 16
+        parallel_tuple_cost = 0.05
+        parallel_setup_cost = 500
         min_parallel_table_scan_size = 8MB
         min_parallel_index_scan_size = 512kB
 
         # Enable auto_explain and pg_stat_statements
-        shared_preload_libraries = 'auto_explain,pg_stat_statements'
+        shared_preload_libraries = 'auto_explain'
         auto_explain.log_min_duration = '10s'
 
         # Timeout settings
@@ -429,17 +431,17 @@ osm-seed:
         tcp_keepalives_count = 10
 
         # Disable join options for routes
-        enable_mergejoin = false
-        enable_hashjoin = false
+        enable_mergejoin = true
+        enable_hashjoin = true
 
         # Timeout settings for queries
         statement_timeout = '600s'
         lock_timeout = '60s'
-        idle_in_transaction_session_timeout = '600s'
+        idle_in_transaction_session_timeout = '300s'
 
         # pg_stat_statements settings
         pg_stat_statements.max = 15000
-        pg_stat_statements.track = all
+        pg_stat_statements.track = none
         
   # ====================================================================================================
   # Variables for tiler-imposm
@@ -450,31 +452,31 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: api_db
+      label_value: web_large
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240804_0003.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241214_1202.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1513000"
+      SEQUENCE_NUMBER: '1677612'
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
       IMPORT_NATURAL_EARTH: true
       IMPORT_OSM_LAND: true
     persistenceDisk:
-      enabled: true
+      enabled: false
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0797ea723874e6e63
-      AWS_ElasticBlockStore_size: 100Gi
+      AWS_ElasticBlockStore_volumeID: vol-05d06ac388569461f
+      AWS_ElasticBlockStore_size: 50Gi
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "16Gi"
-        cpu: "2"
+        memory: "2Gi"
+        cpu: "1"
       limits:
-        memory: "24Gi"
-        cpu: "3"
+        memory: "2Gi"
+        cpu: "1"
   # ====================================================================================================
   # Variables for tiler-server
   # ====================================================================================================
@@ -484,7 +486,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     replicaCount: 1
     commad: './start.sh'
     serviceAnnotations:
@@ -500,6 +502,8 @@ osm-seed:
       TILER_CACHE_BUCKET: tiler-cache-production
       TILER_CACHE_AWS_ACCESS_KEY_ID: {{PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID}}
       TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
+      EXECUTE_REINDEX: false
+      EXECUTE_VACUUM_ANALYZE: false
     # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
     persistenceDisk:
       enabled: false
@@ -509,7 +513,7 @@ osm-seed:
       # AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_SERVER_EBS}}
       # AWS_ElasticBlockStore_size: 100Gi
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "2Gi"
         cpu: "1"
@@ -525,7 +529,7 @@ osm-seed:
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -561,7 +565,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: {{PRODUCTION_TM_DB_PASSWORD}}
@@ -590,7 +594,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     replicaCount: 2
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -691,7 +695,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
 
 # ====================================================================================================
 # Variables for overpass-api
@@ -701,7 +705,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: overpass-api.openhistoricalmap.org
@@ -759,7 +763,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
@@ -792,7 +796,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: job
+      label_value: web_large
       
   # ====================================================================================================
   # Variables for replication nomitoring task
@@ -814,7 +818,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
   # ====================================================================================================
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
@@ -831,7 +835,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
 
 # ====================================================================================================
 # Variables for osmcha web
@@ -876,7 +880,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
@@ -906,10 +910,82 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_large
 # ====================================================================================================
 # Planet files server
 # ====================================================================================================
   planetFiles:
     enabled: false
+
+# ====================================================================================================
+# Tiles cache SQS processor
+# ====================================================================================================
+ohm:
+  tilerCache:
+    enabled: true
     
+  tilerCachePurge:
+    enabled: true
+    env:
+      REGION_NAME: us-east-1
+      NAMESPACE: default # Namespace to run the job
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1951.hc772955 # TODO, this should be automatically updated from tiler server image
+      SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
+      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
+      # Maximum number of active jobs in high concurrency queue
+      MAX_ACTIVE_JOBS: 10 
+      DELETE_OLD_JOBS_AGE: 3600 # 1 hours
+      ## Execute purging
+      EXECUTE_PURGE: true
+      PURGE_CONCURRENCY: 128
+      PURGE_MIN_ZOOM: 3
+      PURGE_MAX_ZOOM: 12 # Purging zoom 13,14,15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
+      ## Execute seeding
+      EXECUTE_SEED: true
+      SEED_CONCURRENCY: 128
+      SEED_MIN_ZOOM: 0
+      SEED_MAX_ZOOM: 12
+      ## Remove tiles from s3 for zoom levels
+      ZOOM_LEVELS_TO_DELETE: 13,14,15,16,17,18,19,20
+      S3_BUCKET_CACHE_TILER: tiler-cache-production
+      S3_BUCKET_PATH_FILES: mnt/data/osm
+    resources:
+      enabled: false
+      requests:
+        memory: '20Gi'
+        cpu: '8'
+      limits:
+        memory: '24Gi'
+        cpu: '10'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web_large
+
+  # Tiler seed by default is giong to seet tiles from 0-6 zoom level
+  tilerCacheSeed:
+    enabled: true
+    schedule: '0 */3 * * *'
+    env:
+      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/usa-eu.geojson
+<<<<<<< HEAD
+      ZOOM_LEVELS: '8,9,10'
+      CONCURRENCY: 256
+=======
+      ZOOM_LEVELS: '8,9'
+      CONCURRENCY: 100
+>>>>>>> main
+      S3_BUCKET: osmseed-dev
+      OUTPUT_FILE: /logs/tiler_benchmark.log
+    resources:
+      enabled: false
+      requests:
+        memory: '20Gi'
+        cpu: '8'
+      limits:
+        memory: '24Gi'
+        cpu: '10'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web_large

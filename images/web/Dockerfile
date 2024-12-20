@@ -1,6 +1,6 @@
 FROM ruby:3.3.0
 ENV DEBIAN_FRONTEND=noninteractive
-ENV workdir /var/www
+ENV workdir=/var/www
 
 # Production OSM setup
 ENV RAILS_ENV=production
@@ -32,7 +32,7 @@ RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zl
   rm -rf /var/lib/apt/lists/*
 
 # Install cgimap
-ENV cgimap /tmp/openstreetmap-cgimap
+ENV cgimap=/tmp/openstreetmap-cgimap
 ENV CGIMAP_GITSHA=26cd7fa10affe5dbd13dbe16de34421059f53f18
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap \
     && cd $cgimap \
@@ -55,7 +55,7 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c60ef3c1774468212b6c7a286276245e9e0ad5b1
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=43b6c1bf455a92eb1b4969c18ffd83c2d63f95ba
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
@@ -119,6 +119,18 @@ RUN git clone --branch staging --depth 1 https://github.com/OpenHistoricalMap/ma
 RUN cd $workdir/public/map-styles && git fetch --depth 1 origin $OPENHISTORICALMAP_MAP_STYLES_GITSHA && git checkout $OPENHISTORICALMAP_MAP_STYLES_GITSHA
 RUN rm -rf $workdir/public/map-styles/.git
 COPY update_map_styles.py $workdir/
+
+# Clone leaflet-ohm-timeslider-v2
+ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
+RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git $workdir/public/leaflet-ohm-timeslider-v2 \
+    && cd $workdir/public/leaflet-ohm-timeslider-v2 \
+    && git checkout dd0acbdc9432fae6a4d09a17a4848c391e5064f0 \
+    && rm -rf .git \
+    && chmod 777 -R assets/ \
+    && cp decimaldate.* $workdir/app/assets/javascripts/ \
+    && cp leaflet-ohm-timeslider.* $workdir/app/assets/javascripts/ \
+    && cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ \
+    && cp assets/* $workdir/app/assets/images/
 
 # Add settings
 ADD config/settings.local.yml $workdir/config/

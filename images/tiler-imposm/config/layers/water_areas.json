@@ -1,0 +1,135 @@
+{
+  "generalized_tables": {
+    "water_areas_z0_2": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'riverbank') AND area > 100000000",
+      "tolerance": 5000,
+      "sub_tables": [
+        {
+          "table": "water_areas_centroid_z0_2",
+          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
+          "sql_filter": "name IS NOT NULL AND name <> ''"
+        }
+      ]
+    },
+    "water_areas_z3_5": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 50000000",
+      "tolerance": 1000,
+      "sub_tables": [
+        {
+          "table": "water_areas_centroid_z3_5",
+          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
+          "sql_filter": "name IS NOT NULL AND name <> ''"
+        }
+      ]
+    },
+    "water_areas_z6_7": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 1000000",
+      "tolerance": 200,
+      "sub_tables": [
+        {
+          "table": "water_areas_centroid_z6_7",
+          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
+          "sql_filter": "name IS NOT NULL AND name <> ''"
+        }
+      ]
+    },
+    "water_areas_z8_9": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 10000",
+      "tolerance": 100,
+      "sub_tables": [
+        {
+          "table": "water_areas_centroid_z8_9",
+          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
+          "sql_filter": "name IS NOT NULL AND name <> ''"
+        }
+      ]
+    },
+    "water_areas_z10_12": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank')",
+      "tolerance": 20,
+      "sub_tables": [
+        {
+          "table": "water_areas_centroid_z10_12",
+          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
+          "sql_filter": "name IS NOT NULL AND name <> ''"
+        }
+      ]
+    },
+    "water_areas_z13_15": {
+      "source": "water_areas",
+      "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank', 'dock')",
+      "tolerance": 5,
+      "sub_tables": [
+        {
+          "table": "water_areas_centroid_z13_15",
+          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
+          "sql_filter": "name IS NOT NULL AND name <> ''"
+        }
+      ]
+    }
+  },
+  "tables": {
+    "water_areas": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "pseudoarea",
+          "name": "area",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "polygon",
+      "mapping": {
+        "waterway": [
+          "__any__"
+        ],
+        "landuse": [
+          "basin",
+          "reservoir"
+        ],
+        "natural": [
+          "water"
+        ]
+      }
+    }
+  }
+}
