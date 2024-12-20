@@ -10,10 +10,10 @@ api_timeout: 600
 web_timeout: 600
 nominatim_url: "https://nominatim.openhistoricalmap.org/"
 # OAuth application for the website
-oauth_application: "uU265QvqfXr-p8AZRVMHth0dR2a7ojLSc2cV_5varxQ"
-oauth_key: "aVgisXmGKGTRJxcvNXEGO741EBq5VuznPxhMxNpgigA"
+oauth_application: ""
+oauth_key: ""
 # OAuth consumer key for iD
-id_application: "M3Vi8H-EOJCxXgftY04dd4UXyREClCx9vkYiUfZMIv8"
+id_application: ""
 imagery_blacklist:
   # Current Google imagery URLs have google or googleapis in the domain
   - ".*\\.google(apis)?\\..*/.*"
