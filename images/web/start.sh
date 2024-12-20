@@ -14,40 +14,35 @@ production:
   encoding: utf8" >$workdir/config/database.yml
 
 #### Setting up server_url and server_protocol
-sed -i -e 's/server_url: "openhistoricalmap.example.com"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.local.yml
-sed -i -e 's/server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/^server_protocol: "http"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
+sed -i -e 's/^server_url: ".*"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.local.yml
 
 ### Setting up website status
 sed -i "s/online/$WEBSITE_STATUS/g" $workdir/config/settings.yml
 
 #### Setting up mail sender
-sed -i -e 's/smtp_address: "localhost"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings.local.yml
-sed -i -e 's/smtp_domain: "localhost"/smtp_domain: "'$MAILER_DOMAIN'"/g' $workdir/config/settings.local.yml
-sed -i -e 's/smtp_enable_starttls_auto: false/smtp_enable_starttls_auto: true/g' $workdir/config/settings.local.yml
-sed -i -e 's/smtp_authentication: null/smtp_authentication: "login"/g' $workdir/config/settings.local.yml
-sed -i -e 's/smtp_user_name: null/smtp_user_name: "'$MAILER_USERNAME'"/g' $workdir/config/settings.local.yml
-sed -i -e 's/smtp_password: null/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir/config/settings.local.yml
-sed -i -e 's/openstreetmap@example.com/'$MAILER_FROM'/g' $workdir/config/settings.local.yml
-sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.local.yml
+sed -i -e 's/smtp_address: "localhost"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_port: 25/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_domain: "localhost"/smtp_domain: "'$MAILER_DOMAIN'"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_authentication: null/smtp_authentication: "login"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_user_name: null/smtp_user_name: "'$MAILER_USERNAME'"/g' $workdir/config/settings.yml
+sed -i -e 's/smtp_password: null/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir/config/settings.yml
 
-#### Setting up id key fro the website
-sed -i -e 's/id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.local.yml
-sed -i -e 's/#id_application: ""/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
+### Setting up oauth id and key for iD editor
+sed -i -e 's/^oauth_application: ".*"/oauth_application: "'$OAUTH_CLIENT_ID'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/^oauth_key: ".*"/oauth_key: "'$OAUTH_KEY'"/g' $workdir/config/settings.local.yml
 
-#### Setting up oauth id and key for iD editor
-sed -i -e 's/OAUTH_CLIENT_ID/'$OAUTH_CLIENT_ID'/g' $workdir/config/settings.local.yml
-sed -i -e 's/OAUTH_KEY/'$OAUTH_KEY'/g' $workdir/config/settings.local.yml
-sed -i -e 's/# oauth_application: "OAUTH_CLIENT_ID"/oauth_application: "'$OAUTH_CLIENT_ID'"/g' $workdir/config/settings.yml
-sed -i -e 's/# oauth_key: "OAUTH_CLIENT_ID"/oauth_key: "'$OAUTH_KEY'"/g' $workdir/config/settings.yml
+#### Setting up id key for the website
+sed -i -e 's/^id_application: ".*"/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.local.yml
 
 #### Setup env vars for memcached server
-sed -i -e 's/memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.local.yml
+sed -i -e 's/#memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.local.yml
 
 #### Setting up nominatim url
 sed -i -e 's/nominatim.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.local.yml
 
-#### Setting up overpass url
-sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/config/settings.local.yml
+## Setting up overpass url
+sed -i -e 's/overpass-api.openhistoricalmap.org/'$OVERPASS_URL'/g' $workdir/config/settings.local.yml
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
