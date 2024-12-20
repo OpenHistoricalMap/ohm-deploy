@@ -1,39 +1,27 @@
-# The server protocol and host
-server_protocol: "http"
-server_url: "openhistoricalmap.example.com"
-# Publisher
-#publisher_url: ""
-# The generator
+server_url: "0.0.0.0:3000"
+embed_server_url: "https://embed.openhistoricalmap.org/"
 generator: "OpenHistoricalMap server"
 copyright_owner: "OpenHistoricalMap and contributors"
 attribution_url: "http://www.openhistoricalmap.org/copyright"
-license_url: "http://opendatacommons.org/licenses/odbl/1-0/"
-# Support email address
 support_email: "ohm-admins@googlegroups.com"
-# Sender addresses for emails
 email_from: "OpenHistoricalMap <ohm-admins@googlegroups.com>"
 email_return_path: "ohm-admins@googlegroups.com"
-# OAuth application for the web site
-oauth_application: "OAUTH_CLIENT_ID"
-oauth_key: "OAUTH_KEY"
+api_timeout: 600
+web_timeout: 600
+#memcache_servers: []
+nominatim_url: "https://nominatim.openhistoricalmap.org/"
+# OAuth application for the website
+oauth_application: ""
+oauth_key: ""
 # OAuth consumer key for iD
 id_application: ""
-# List of memcache servers to use for caching
-memcache_servers: []
-# URL of Nominatim instance to use for geocoding
-nominatim_url: "https://nominatim.openhistoricalmap.org/"
-# URL of Overpass instance to use for feature queries
-overpass_url: "https://overpass-api.de/api/interpreter"
-# SMTP settings for outbound mail
-smtp_address: "localhost"
-smtp_port: 25
-smtp_domain: "localhost"
-smtp_enable_starttls_auto: true
-smtp_tls_verify_mode: "none"
-smtp_authentication: null
-smtp_user_name: null
-smtp_password: null
-doorkeeper_signing_key: |
-  -----BEGIN PRIVATE KEY-----
-  PRIVATE_KEY
-  -----END PRIVATE KEY-----
+imagery_blacklist:
+  # Current Google imagery URLs have google or googleapis in the domain
+  - ".*\\.google(apis)?\\..*/.*"
+  # Blacklist VWorld
+  - "http://xdworld\\.vworld\\.kr:8080/.*"
+  # Blacklist here
+  - ".*\\.here\\.com[/:].*"
+overpass_url: "https://overpass-api.openhistoricalmap.org/api/interpreter"
+# Mastodon url for verification
+mastodon_url: "https://mapstodon.space/@ohm"
