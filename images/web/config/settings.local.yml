@@ -22,8 +22,6 @@ imagery_blacklist:
   - "http://xdworld\\.vworld\\.kr:8080/.*"
   # Blacklist here
   - ".*\\.here\\.com[/:].*"
+overpass_url: "https://overpass-api.openhistoricalmap.org/api/interpreter"
 # Mastodon url for verification
 mastodon_url: "https://mapstodon.space/@ohm"
-smtp_authentication: null
-smtp_user_name: null
-smtp_password: null
