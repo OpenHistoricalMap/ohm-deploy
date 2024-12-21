@@ -55,14 +55,14 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=bb0b34deda11010614dfaf12e0565ee362cf9d97
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c059a39babe13cc90b7ac83a6a63219de5c77bbe
 RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'Upstream merge Nov/Dec 2024.'
+RUN echo 'Upstream merge Nov/Dec 2024, now with Rails credentials.'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages
