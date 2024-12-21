@@ -74,6 +74,7 @@ RUN touch $workdir/config/settings.local.yml
 RUN cp $workdir/config/example.storage.yml $workdir/config/storage.yml
 # Protect sensitive information
 RUN chmod 600 $workdir/config/database.yml
+RUN rails credentials:edit $RAILS_MASTER_KEY
 
 RUN yarn install
 RUN bundle exec rake yarn:install
