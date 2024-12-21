@@ -68,15 +68,12 @@ RUN git fetch && rm -rf .git
 # Install Ruby packages
 RUN gem install bundler && bundle install
 
-# Configure database.yml and secrets.yml
+# Configure database.yml
 RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
 RUN touch $workdir/config/settings.local.yml
 RUN cp $workdir/config/example.storage.yml $workdir/config/storage.yml
-RUN echo "#session key \n\
-production: \n\
-  secret_key_base: $(bundle exec rake secret)" > $workdir/config/secrets.yml
 # Protect sensitive information
-RUN chmod 600 $workdir/config/database.yml $workdir/config/secrets.yml
+RUN chmod 600 $workdir/config/database.yml
 
 RUN yarn install
 RUN bundle exec rake yarn:install
