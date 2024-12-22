@@ -87,7 +87,6 @@ def delete_sub_tables(generalized_tables: dict):
 
     logger.info("Sub-table deletion process completed.")
 
-
 def table_exists(table_name: str) -> bool:
     """
     Checks if a table exists in the database.
@@ -101,91 +100,129 @@ def table_exists(table_name: str) -> bool:
     output = result.stdout.strip()
     return output != "" and output != "-"
 
-
-def create_trigger_for_sub_table(sub_table_name: str, geometry_transform: str, sql_filter: str = None):
+def create_trigger_for_imposm_table(
+    imposm_fixed_table_name: str,
+    sub_table_name: str,
+    retrieved_columns: list,
+    geometry_transform: str,
+    sql_filter: str = None
+):
     """
-    Creates triggers for a sub-table, applying the geometric transformation
-    and optionally a SQL filter for future INSERT/UPDATE operations.
-    Handles row deletions.
-    If triggers already exist, they are dropped and recreated.
+    Creates a single trigger (AFTER INSERT OR UPDATE OR DELETE) on the main table
+    (imposm_fixed_table_name) so that any insertion, update, or deletion on the main table
+    is automatically replicated to the sub-table (osm_sub_table_name), applying the geometric
+    transformation (geometry_transform), the SQL filter (sql_filter), and replicating the columns
+    specified in retrieved_columns.
     """
-    fixed_table_name = f"osm_{sub_table_name}"
-    insert_update_trigger_name = f"{fixed_table_name}_before_insert_update"
-    delete_trigger_name = f"{fixed_table_name}_before_delete"
 
-    # Drop existing triggers if they exist
+    # Actual name of the sub-table in your schema
+    osm_sub_table_name = f"osm_{sub_table_name}"
+
+    # Names for the function and the trigger
+    function_name = f"{imposm_fixed_table_name}_replicate_{sub_table_name}_fn"
+    trigger_name = f"{imposm_fixed_table_name}_replicate_{sub_table_name}_trigger"
+
+    # 1) Remove the trigger if it exists
     drop_trigger_query = f"""
     DO $$
     BEGIN
         IF EXISTS (
             SELECT 1
             FROM pg_trigger
-            WHERE tgname = '{insert_update_trigger_name}'
+            WHERE tgname = '{trigger_name}'
         ) THEN
-            EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I;', '{insert_update_trigger_name}', '{fixed_table_name}');
-        END IF;
-
-        IF EXISTS (
-            SELECT 1
-            FROM pg_trigger
-            WHERE tgname = '{delete_trigger_name}'
-        ) THEN
-            EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I;', '{delete_trigger_name}', '{fixed_table_name}');
+            EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I;', '{trigger_name}', '{imposm_fixed_table_name}');
         END IF;
     END $$;
     """
+    # Optionally execute or comment out if you don't want to always drop the existing trigger
     execute_psql_query(drop_trigger_query)
-    logger.info(f"Existing triggers removed on table {fixed_table_name} (if they existed).")
+    logger.info(f"Trigger {trigger_name} removed from {imposm_fixed_table_name} (if it existed).")
 
-    # Prepare the SQL filter clause if provided
-    sql_filter_clause = f"({sql_filter})" if sql_filter else "TRUE"
+    # 2) Build the list of columns and the SELECT part for the INSERT into the sub-table
+    transformed_columns = []
+    upsert_update_assignments = []
 
-    # Create the trigger for INSERT and UPDATE
-    transform_for_trigger = geometry_transform.replace('geometry', 'NEW.geometry')
+    for col in retrieved_columns:
+        if col == "geometry":
+            # Transformation during INSERT
+            geom_expr_insert = geometry_transform.replace("geometry", "NEW.geometry")
+            # Transformation during UPDATE (EXCLUDED is the row that caused the conflict)
+            geom_expr_update = geometry_transform.replace("geometry", "EXCLUDED.geometry")
 
-    insert_update_trigger_function = f"""
-    CREATE OR REPLACE FUNCTION {fixed_table_name}_transform_trigger()
+            transformed_columns.append(f"{geom_expr_insert} AS {col}")
+            upsert_update_assignments.append(f"{col} = {geom_expr_update}")
+        else:
+            transformed_columns.append(f"NEW.{col}")
+            upsert_update_assignments.append(f"{col} = EXCLUDED.{col}")
+
+    columns_str = ", ".join(retrieved_columns)
+    values_str = ", ".join(transformed_columns)
+    on_conflict_update_str = ", ".join(upsert_update_assignments)
+
+    # 3) Prepare the filter clause; if it does not exist, it will simply be TRUE
+    if sql_filter is not None:
+        # Replace "name" with "NEW.name" (or other columns, if needed)
+        modified_sql_filter = sql_filter.replace("name", "NEW.name")
+        # You can also handle multiple columns or do more replacements if required
+        sql_filter_clause = f"({modified_sql_filter})"
+    else:
+        # If no filter is provided, default to a condition that always passes
+        sql_filter_clause = "TRUE"
+
+    # 4) Create the plpgsql function with additional logging via RAISE
+    replicate_function = f"""
+    CREATE OR REPLACE FUNCTION {function_name}()
     RETURNS TRIGGER AS $$
     BEGIN
-        -- Apply geometric transformation
-        NEW.geometry = {transform_for_trigger};
+        -- Log basic info whenever the trigger function is invoked
+        RAISE NOTICE 'Trigger function invoked on table % for operation %', TG_RELNAME, TG_OP;
 
-        -- Apply optional SQL filter
-        IF {sql_filter_clause} THEN
+        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+            -- Log osm_id (if it exists) before filter check
+            RAISE NOTICE 'Processing row with osm_id: %', NEW.osm_id;
+
+            IF {sql_filter_clause} THEN
+                RAISE NOTICE 'Row meets filter condition. Performing UPSERT for osm_id: %', NEW.osm_id;
+
+                INSERT INTO {osm_sub_table_name} ({columns_str})
+                SELECT {values_str}
+                ON CONFLICT (osm_id)
+                DO UPDATE
+                    SET {on_conflict_update_str};
+            END IF;
+
             RETURN NEW;
-        ELSE
-            RETURN NULL; -- Ignore the row if it doesn't match the filter
+
+        ELSIF (TG_OP = 'DELETE') THEN
+            RAISE NOTICE 'Deleting row osm_id: % from sub-table.', OLD.osm_id;
+
+            DELETE FROM {osm_sub_table_name}
+            WHERE osm_id = OLD.osm_id;
+
+            RETURN OLD;
         END IF;
+
+        RETURN NULL;  -- Safety return
     END;
     $$ LANGUAGE plpgsql;
-
-    CREATE TRIGGER {insert_update_trigger_name}
-    BEFORE INSERT OR UPDATE ON {fixed_table_name}
-    FOR EACH ROW
-    EXECUTE FUNCTION {fixed_table_name}_transform_trigger();
     """
-    execute_psql_query(insert_update_trigger_function)
-    logger.info(f"Trigger {insert_update_trigger_name} created for INSERT/UPDATE on table {fixed_table_name}.")
+    # Create the function
+    # print(replicate_function)
+    execute_psql_query(replicate_function)
+    logger.info(f"Function {function_name} created to replicate data from {imposm_fixed_table_name} to {osm_sub_table_name}.")
 
-    # Create the trigger for DELETE
-    delete_trigger_function = f"""
-    CREATE OR REPLACE FUNCTION {fixed_table_name}_delete_trigger()
-    RETURNS TRIGGER AS $$
-    BEGIN
-        -- Log information about the deleted row
-        RAISE NOTICE 'Row deleted from table % with osm_id: %', TG_TABLE_NAME, OLD.osm_id;
-        RETURN OLD;
-    END;
-    $$ LANGUAGE plpgsql;
-
-    CREATE TRIGGER {delete_trigger_name}
-    BEFORE DELETE ON {fixed_table_name}
+    # 5) Create the trigger that calls this function AFTER INSERT, UPDATE, DELETE
+    replicate_trigger = f"""
+    CREATE TRIGGER {trigger_name}
+    AFTER INSERT OR UPDATE OR DELETE
+    ON {imposm_fixed_table_name}
     FOR EACH ROW
-    EXECUTE FUNCTION {fixed_table_name}_delete_trigger();
+    EXECUTE FUNCTION {function_name}();
     """
-    execute_psql_query(delete_trigger_function)
-    logger.info(f"Trigger {delete_trigger_name} created for DELETE on table {fixed_table_name}.")
-    
+    # Create the trigger
+    execute_psql_query(replicate_trigger)
+    logger.info(f"Trigger {trigger_name} created on {imposm_fixed_table_name} to replicate to {osm_sub_table_name}.")
 
 def apply_geometry_transformations(generalized_tables: dict):
     """
@@ -194,18 +231,18 @@ def apply_geometry_transformations(generalized_tables: dict):
     """
     logger.info("Starting initial geometric transformations...")
     for table_name, table_info in generalized_tables.items():
-        fixed_table_name = f"osm_{table_name}"
+        imposm_fixed_table_name = f"osm_{table_name}"
         sub_tables = table_info.get("sub_tables")
 
         # Skip if no sub-tables are defined
         if not sub_tables:
-            logger.info(f"No sub_tables defined for {fixed_table_name}. Skipping.")
+            logger.info(f"No sub_tables defined for {imposm_fixed_table_name}. Skipping.")
             continue
 
         for sub_table in sub_tables:
             sub_table_name = sub_table.get("table")
             if not sub_table_name:
-                logger.warning(f"Sub-table for {fixed_table_name} has no defined name. Skipping.")
+                logger.warning(f"Sub-table for {imposm_fixed_table_name} has no defined name. Skipping.")
                 continue
 
             sub_table_fixed_name = f"osm_{sub_table_name}"
@@ -217,7 +254,7 @@ def apply_geometry_transformations(generalized_tables: dict):
             SELECT column_name 
             FROM information_schema.columns
             WHERE table_schema = 'public'
-            AND table_name = '{fixed_table_name}'
+            AND table_name = '{imposm_fixed_table_name}'
             ORDER BY ordinal_position;
             """
             result = subprocess.run(
@@ -226,21 +263,21 @@ def apply_geometry_transformations(generalized_tables: dict):
                 capture_output=True
             )
             if result.returncode != 0:
-                logger.error(f"Error retrieving columns for {fixed_table_name}: {result.stderr.strip()}")
+                logger.error(f"Error retrieving columns for {imposm_fixed_table_name}: {result.stderr.strip()}")
                 continue
 
             # Clean and retrieve the list of columns
             retrieved_columns = [col.strip() for col in result.stdout.strip().split('\n') if col.strip()]
 
             if not retrieved_columns:
-                logger.warning(f"No columns found for {fixed_table_name}. Skipping.")
+                logger.warning(f"No columns found for {imposm_fixed_table_name}. Skipping.")
                 continue
 
             # Create the sub-table if it doesn't exist
             if not table_exists(sub_table_fixed_name):
-                logger.info(f"Creating sub-table {sub_table_fixed_name} based on {fixed_table_name}...")
+                logger.info(f"Creating sub-table {sub_table_fixed_name} based on {imposm_fixed_table_name}...")
                 create_table_query = f"""
-                CREATE TABLE {sub_table_fixed_name} (LIKE {fixed_table_name} INCLUDING ALL);
+                CREATE TABLE {sub_table_fixed_name} (LIKE {imposm_fixed_table_name} INCLUDING ALL);
                 """
                 execute_psql_query(create_table_query)
 
@@ -257,7 +294,7 @@ def apply_geometry_transformations(generalized_tables: dict):
                 insert_query = f"""
                 INSERT INTO {sub_table_fixed_name} ({", ".join(retrieved_columns)})
                 SELECT {", ".join(selected_columns)}
-                FROM {fixed_table_name}
+                FROM {imposm_fixed_table_name}
                 {where_clause};
                 """
                 execute_psql_query(insert_query)
@@ -265,7 +302,13 @@ def apply_geometry_transformations(generalized_tables: dict):
                 logger.info(f"Sub-table {sub_table_fixed_name} already exists. Skipping creation.")
 
             # Create triggers for the sub-table
-            create_trigger_for_sub_table(sub_table_name, sub_geometry_transform, sub_sql_filter)
+            create_trigger_for_imposm_table(
+                imposm_fixed_table_name,
+                sub_table_name,
+                retrieved_columns,
+                sub_geometry_transform,
+                sub_sql_filter
+            )
 
 def main(imposm3_config_path: str):
     """
@@ -277,7 +320,7 @@ def main(imposm3_config_path: str):
         config = load_imposm_config(imposm3_config_path)
         generalized_tables = config.get("generalized_tables", {})
 
-        ## Delete tables
+        # Uncomment below if you want to delete existing sub-tables first
         delete_sub_tables(generalized_tables)
 
         # Apply initial transformations and create derived tables
