@@ -140,6 +140,10 @@ function uploadLastState() {
 
 function updateData() {
 
+    # create views 
+    echo "Create views"
+    python materialized_views.py &
+
     local s3_last_state_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"
     local local_last_state_path="$DIFF_DIR/last.state.txt"
     echo "Checking if $s3_last_state_path exists in S3..."
@@ -229,14 +233,10 @@ function importData() {
     # To not import again
     touch $INIT_FILE
 
-    # Update tables
-    python update_tables.py
-    
-    echo "Create Table/Tigger for admin_boundaries_centroids"
+    # echo "Create Table/Tigger for admin_boundaries_centroids"
     # psql $PG_CONNECTION -f queries/osm_relation_menbers_routes_table.sql
     # psql $PG_CONNECTION -f queries/osm_relation_menbers_routes_trigger.sql
-    psql $PG_CONNECTION -f queries/admin_boundaries_centroids.sql
-
+    # psql $PG_CONNECTION -f queries/admin_boundaries_centroids.sql
     # Updata data with minute replication
     updateData
 }
