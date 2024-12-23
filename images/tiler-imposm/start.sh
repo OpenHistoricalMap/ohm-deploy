@@ -230,7 +230,7 @@ function importData() {
     touch $INIT_FILE
 
     # Update tables
-    python materialized_views.py
+    python materialized_views.py &
     
     # echo "Create Table/Tigger for admin_boundaries_centroids"
     # psql $PG_CONNECTION -f queries/osm_relation_menbers_routes_table.sql
