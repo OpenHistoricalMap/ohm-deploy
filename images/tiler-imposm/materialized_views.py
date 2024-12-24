@@ -201,12 +201,9 @@ def refresh_all_materialized_views(config_dict: dict):
                 continue
             mview_name = "osm_" + mt_view.get("view")
             if object_exists(mview_name):
-                logger.info("-"*40)
                 logger.info(f"Refreshing materialized view: {mview_name}")
                 query = f"REFRESH MATERIALIZED VIEW {mview_name};"
-                logger.info(query)
                 execute_psql_query(query)
-                logger.info(f"Refresh completed for {mview_name}")
             else:
                 logger.warning(f"Materialized view {mview_name} not found. Skipping refresh.")
 
@@ -231,7 +228,7 @@ def main():
         logger.info("Refreshing all materialized views...")
         refresh_all_materialized_views(config_dict)
         logger.info("All materialized views refreshed. Sleeping 60 seconds...")
-        time.sleep(30)
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
