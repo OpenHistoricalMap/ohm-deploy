@@ -2,8 +2,10 @@ FROM ruby:3.3.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir=/var/www
 
-# Production OSM setup
+# Environment Variables
 ENV RAILS_ENV=production
+ARG RAILS_MASTER_KEY
+ENV RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
 
 # Install the openstreetmap-website dependencies
 RUN apt-get update \

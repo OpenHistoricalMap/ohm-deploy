@@ -30,7 +30,7 @@ jobs:
         run: |
           pip install chartpress six ruamel.yaml
       - name: Run Chartpress
-        run: chartpress --push
+        run: chartpress --push --build-args RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
       ################ Development secrets ################
