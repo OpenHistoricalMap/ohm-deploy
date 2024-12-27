@@ -10,6 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 120
+    env:
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
       - uses: actions/checkout@v1
       - name: Login to GitHub Container Registry
@@ -31,7 +33,6 @@ jobs:
         run: chartpress --push
         env:
           GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       ################ Development secrets ################
       - name: Staging - substitute secrets
         if: github.ref == 'refs/heads/development'
