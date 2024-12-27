@@ -86,6 +86,7 @@ jobs:
           _output-file: 'values.staging.yaml'
           AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
           ## web
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
           MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
@@ -133,6 +134,7 @@ jobs:
           _output-file: 'values.production.yaml'
           AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
           ## web
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
           MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
