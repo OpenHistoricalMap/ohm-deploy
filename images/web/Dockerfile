@@ -2,10 +2,8 @@ FROM ruby:3.3.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir=/var/www
 
-# Environment Variables
+# Production OSM setup
 ENV RAILS_ENV=production
-ARG RAILS_MASTER_KEY
-ENV RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
 
 # Install the openstreetmap-website dependencies
 RUN apt-get update \
@@ -58,7 +56,10 @@ RUN npm install -g svgo
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c789a18961e46b9ad8f0851849ef1c81c10d0a86
-RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
+ARG RAILS_MASTER_KEY
+ENV RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+
+RUN git clone --depth 1 https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
@@ -79,6 +80,7 @@ RUN chmod 600 $workdir/config/database.yml
 
 RUN yarn install
 RUN bundle exec rake yarn:install
+RUN echo $RAILS_MASTER_KEY > /var/www/config/master.key
 RUN bundle exec rake i18n:js:export
 RUN bundle exec rake assets:precompile
 
