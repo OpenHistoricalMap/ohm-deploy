@@ -144,13 +144,13 @@ function updateData() {
     echo "Create views"
     python materialized_views.py &
 
-    local s3_last_state_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"
+    # local s3_last_state_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"
     local local_last_state_path="$DIFF_DIR/last.state.txt"
-    echo "Checking if $s3_last_state_path exists in S3..."
-    if aws s3 ls "$s3_last_state_path" > /dev/null 2>&1; then
-        echo "Found $s3_last_state_path. Downloading..."
-        aws s3 cp "$s3_last_state_path" "$local_last_state_path"
-    fi
+    # echo "Checking if $s3_last_state_path exists in S3..."
+    # if aws s3 ls "$s3_last_state_path" > /dev/null 2>&1; then
+    #     echo "Found $s3_last_state_path. Downloading..."
+    #     aws s3 cp "$s3_last_state_path" "$local_last_state_path"
+    # fi
 
     ### Update the DB with the new data from minute replication
     if [ "$OVERWRITE_STATE" = "true" ]; then
