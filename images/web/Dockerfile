@@ -62,6 +62,23 @@ RUN git clone --depth 1 https://github.com/OpenHistoricalMap/ohm-website.git $wo
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
+# change the echo here with a reason for changing the commithash
+RUN echo 'Upstream merge Nov/Dec 2024, now with Rails credentials.'
+RUN git fetch && rm -rf .git
+
+# Install Ruby packages
+RUN gem install bundler && bundle install
+
+# Configure database.yml
+RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
+RUN touch $workdir/config/settings.local.yml
+RUN cp $workdir/config/example.storage.yml $workdir/config/storage.yml
+# Protect sensitive information
+RUN chmod 600 $workdir/config/database.yml
+
+RUN yarn install
+RUN bundle exec rake yarn:install
+
 # Generate RAILS_MASTER_KEY and SECRET_KEY_BASE during build
 RUN rm -f config/credentials.yml.enc
 RUN export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
@@ -82,23 +99,6 @@ RUN export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
         credentials = { secret_key_base: '${SECRET_KEY_BASE}' }; \
         creds.write(credentials.to_yaml); \
         puts 'Credentials configured correctly.'"
-
-# change the echo here with a reason for changing the commithash
-RUN echo 'Upstream merge Nov/Dec 2024, now with Rails credentials.'
-RUN git fetch && rm -rf .git
-
-# Install Ruby packages
-RUN gem install bundler && bundle install
-
-# Configure database.yml
-RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
-RUN touch $workdir/config/settings.local.yml
-RUN cp $workdir/config/example.storage.yml $workdir/config/storage.yml
-# Protect sensitive information
-RUN chmod 600 $workdir/config/database.yml
-
-RUN yarn install
-RUN bundle exec rake yarn:install
 RUN bundle exec rake i18n:js:export --trace
 RUN bundle exec rake assets:precompile
 
