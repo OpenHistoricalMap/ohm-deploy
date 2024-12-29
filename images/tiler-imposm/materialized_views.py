@@ -23,7 +23,7 @@ for var in REQUIRED_ENV_VARS:
 
 PSQL_CONN = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
 
-
+REFRESH_MATERIALIZED_VIEWS_TIME= int(os.getenv("REFRESH_MATERIALIZED_VIEWS_TIME", 300))
 # ------------------------------------------------------------------------------
 #  HELPER FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -231,7 +231,7 @@ def main():
         logger.info("Refreshing all materialized views...")
         refresh_all_materialized_views(config_dict)
         logger.info("All materialized views refreshed. Sleeping 60 seconds...")
-        time.sleep(60)
+        time.sleep(REFRESH_MATERIALIZED_VIEWS_TIME)
 
 
 if __name__ == "__main__":
