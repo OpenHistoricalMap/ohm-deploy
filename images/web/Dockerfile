@@ -56,13 +56,32 @@ RUN npm install -g svgo
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c789a18961e46b9ad8f0851849ef1c81c10d0a86
-ARG RAILS_MASTER_KEY
-ENV RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
 
 RUN git clone --depth 1 https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
+
+# Generate RAILS_MASTER_KEY and SECRET_KEY_BASE during build
+RUN rm -f config/credentials.yml.enc
+RUN export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
+    export SECRET_KEY_BASE=$(rails secret) && \
+    echo $RAILS_MASTER_KEY > config/master.key && \
+    if [ ! -f config/credentials.yml.enc ]; then \
+        EDITOR="echo" RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails credentials:edit; \
+    fi && \
+    RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails runner " \
+        require 'active_support/encrypted_configuration'; \
+        require 'yaml'; \
+        creds = ActiveSupport::EncryptedConfiguration.new( \
+          config_path: 'config/credentials.yml.enc', \
+          key_path: 'config/master.key', \
+          env_key: 'RAILS_MASTER_KEY', \
+          raise_if_missing_key: true \
+        ); \
+        credentials = { secret_key_base: '${SECRET_KEY_BASE}' }; \
+        creds.write(credentials.to_yaml); \
+        puts 'Credentials configured correctly.'"
 
 # change the echo here with a reason for changing the commithash
 RUN echo 'Upstream merge Nov/Dec 2024, now with Rails credentials.'
@@ -80,8 +99,7 @@ RUN chmod 600 $workdir/config/database.yml
 
 RUN yarn install
 RUN bundle exec rake yarn:install
-RUN echo $RAILS_MASTER_KEY > /var/www/config/master.key
-RUN bundle exec rake i18n:js:export
+RUN bundle exec rake i18n:js:export --trace
 RUN bundle exec rake assets:precompile
 
 # The rack interface requires a `tmp` directory to use openstreetmap-cgimap
