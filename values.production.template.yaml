@@ -355,14 +355,14 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: true
+      enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: api_db
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
-      POSTGRES_DB: tiler_osm_prod_v4
+      POSTGRES_DB: tiler_osm_prod_v6
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
@@ -373,7 +373,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-07b5a7a8e85a6caee
+      AWS_ElasticBlockStore_volumeID: vol-07773a4c5de68397f
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: true
@@ -455,19 +455,19 @@ osm-seed:
       label_value: web_large
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241214_1202.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241228_1119.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: '1677612'
+      SEQUENCE_NUMBER: "1682000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
       IMPORT_NATURAL_EARTH: true
       IMPORT_OSM_LAND: true
     persistenceDisk:
-      enabled: false
+      enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-05d06ac388569461f
+      AWS_ElasticBlockStore_volumeID: vol-0f13ca01ffd4a14d2
       AWS_ElasticBlockStore_size: 50Gi
     resources:
       enabled: true
@@ -929,7 +929,7 @@ ohm:
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
-      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1964.h8703c77 # TODO, this should be automatically updated from tiler server image
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1967.h8492956 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
@@ -937,12 +937,12 @@ ohm:
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
       ## Execute purging
       EXECUTE_PURGE: true
-      PURGE_CONCURRENCY: 128
+      PURGE_CONCURRENCY: 64
       PURGE_MIN_ZOOM: 3
-      PURGE_MAX_ZOOM: 12 # Purging zoom 13,14,15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
+      PURGE_MAX_ZOOM: 12 # Purging zoom 15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       ## Execute seeding
       EXECUTE_SEED: true
-      SEED_CONCURRENCY: 128
+      SEED_CONCURRENCY: 64
       SEED_MIN_ZOOM: 0
       SEED_MAX_ZOOM: 12
       ## Remove tiles from s3 for zoom levels
@@ -969,7 +969,7 @@ ohm:
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/usa-eu.geojson
       ZOOM_LEVELS: '8,9,10'
-      CONCURRENCY: 256
+      CONCURRENCY: 64
       S3_BUCKET: osmseed-dev
       OUTPUT_FILE: /logs/tiler_benchmark.log
     resources:
