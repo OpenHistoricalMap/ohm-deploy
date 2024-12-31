@@ -46,6 +46,11 @@ sed -i -e 's/overpass-api.openhistoricalmap.org/'$OVERPASS_URL'/g' $workdir/conf
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
+## Setting up required credentials 
+echo $RAILS_CREDENTIALS_YML_ENC > config/credentials.yml.enc
+echo $RAILS_MASTER_KEY > config/master.key 
+chmod 600 config/credentials.yml.enc config/master.key
+
 #### Adding doorkeeper_signing_key
 openssl genpkey -algorithm RSA -out private.pem
 chmod 400 /var/www/private.pem
