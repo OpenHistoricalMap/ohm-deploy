@@ -941,10 +941,10 @@ ohm:
       PURGE_MIN_ZOOM: 3
       PURGE_MAX_ZOOM: 12 # Purging zoom 15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       ## Execute seeding
-      EXECUTE_SEED: false
+      EXECUTE_SEED: true
       SEED_CONCURRENCY: 64
       SEED_MIN_ZOOM: 0
-      SEED_MAX_ZOOM: 12
+      SEED_MAX_ZOOM: 8
       ## Remove tiles from s3 for zoom levels
       ZOOM_LEVELS_TO_DELETE: 13,14,15,16,17,18,19,20
       S3_BUCKET_CACHE_TILER: tiler-cache-production
