@@ -390,7 +390,7 @@ osm-seed:
         enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_staging # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_prod # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
