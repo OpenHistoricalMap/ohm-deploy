@@ -390,7 +390,7 @@ osm-seed:
         enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_prod # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -482,7 +482,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: true
+      enabled: false
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250103_0001.osm.pbf
