@@ -355,14 +355,14 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: false
+      enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: api_db
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
-      POSTGRES_DB: tiler_osm_prod_v6
+      POSTGRES_DB: tiler_osm_production
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
       POSTGRES_PORT: 5432
@@ -448,7 +448,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerImposm:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -941,7 +941,7 @@ ohm:
       PURGE_MIN_ZOOM: 3
       PURGE_MAX_ZOOM: 12 # Purging zoom 15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
       ## Execute seeding
-      EXECUTE_SEED: true
+      EXECUTE_SEED: false
       SEED_CONCURRENCY: 64
       SEED_MIN_ZOOM: 0
       SEED_MAX_ZOOM: 12
