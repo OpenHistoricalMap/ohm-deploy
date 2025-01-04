@@ -57,7 +57,7 @@ RUN npm install -g svgo
 RUN rm -rf $workdir/html
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c789a18961e46b9ad8f0851849ef1c81c10d0a86
 
-RUN git clone --depth 1 https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
+RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
