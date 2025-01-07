@@ -1,8 +1,10 @@
 # Tiler DB and Imposm Deployed in Hetzner
 
-This is a basic manual deployment using Docker Compose to deploy `tiler-db` and `tiler-imposm` on a Hetzner server. The Compose files allocate resources for each environment deployment.
+This is a basic manual deployment using Docker Compose to deploy `tiler-db` and `tiler-imposm` on a Hetzner server. The Compose files allocate resources for  only production enviroment
 
-*Note*: Eventually, this approach should be improved by adding the Hetzner server as a node to EKS.
+*Note 1*: This server is used only for production. Testing the instance for staging slows down the data import process the whole machine.
+
+*Note 2*: Eventually, this approach should be improved by adding the Hetzner server as a node to EKS.
 
 ## Deploy Production
 
@@ -17,13 +19,4 @@ https://github.com/orgs/OpenHistoricalMap/packages/container/tiler-imposm/versio
 
 ```sh
 docker compose -f hetzner/tiler.production.yml up -d
-```
-
-## Deploy Staging
-
-For staging, it can be built from the source image, as staging is used for testing newly added objects or layers in the vector tiles.
-
-```sh
-docker compose -f hetzner/tiler.staging.yml build
-docker compose -f hetzner/tiler.staging.yml up
 ```

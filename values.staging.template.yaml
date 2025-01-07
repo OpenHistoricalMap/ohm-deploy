@@ -387,10 +387,10 @@ osm-seed:
     tilerDb:
       enabled: true
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-        enabled: true
+        enabled: false
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_staging # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -401,8 +401,8 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-070a59c4b4d7c0b32
-        AWS_ElasticBlockStore_size: 200Gi
+        AWS_ElasticBlockStore_volumeID : vol-02466aa7e803af132
+        AWS_ElasticBlockStore_size: 100Gi
       resources:
           enabled: false
           requests:
@@ -485,7 +485,7 @@ osm-seed:
       enabled: false
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250103_0001.osm.pbf
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250106_0001.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
         SEQUENCE_NUMBER: '1683500'
         OVERWRITE_STATE: false
@@ -494,12 +494,12 @@ osm-seed:
         IMPORT_OSM_LAND: true
         IMPOSM3_IMPORT_LAYERS: all
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-0b7624ded1ed38af9
-        AWS_ElasticBlockStore_size: 20Gi
+        AWS_ElasticBlockStore_volumeID: vol-0aa18bfb1af1108fb
+        AWS_ElasticBlockStore_size: 50Gi
       resources:
         enabled: false
         requests:
