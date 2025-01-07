@@ -1,12 +1,12 @@
 services:
-  db:
+  db_production:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.1737.h9b9ef9b
     ports:
       - "5432:5432"
     volumes:
-      - ../data/tiler_osm_production_v2:/var/lib/postgresql/data
+      - ../data/tiler_osm_production:/var/lib/postgresql/data
     env_file:
-      - ../envs/.env.tiler
+      - .env.production
     restart: always
     networks:
       - tiler_network
@@ -15,14 +15,13 @@ services:
         limits:
           cpus: '28.0'
           memory: 55G
-  
-  imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:v1
+  imposm_production:
+    image: ghcr.io/openhistoricalmap/tiler-imposm-production:v1
     build:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
     volumes:
-      - ../data/tiler_imposm_production_v2:/mnt/data
+      - ../data/tiler_imposm_production:/mnt/data
     command:
       - sh
       - -c
@@ -33,7 +32,7 @@ services:
         done &
         ./start.sh
     env_file:
-      - ../envs/.env.tiler
+      - .env.production
     restart: always
     deploy:
       resources:

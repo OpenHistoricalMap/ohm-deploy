@@ -1,0 +1,35 @@
+services:
+  db:
+    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.1737.h9b9ef9b
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env.staging
+    restart: always
+    networks:
+      - tiler_network_staging
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+  imposm:
+    image: ghcr.io/openhistoricalmap/tiler-imposm-staging:v1
+    build:
+      context: ../images/tiler-imposm
+      dockerfile: Dockerfile
+    volumes:
+      - data/tiler_imposm_staging:/mnt/data
+    command:
+      - sh
+      - -c
+      - |
+        ./start.sh
+    env_file:
+      - .env.staging
+    restart: always
+    networks:
+      - tiler_network_staging
+networks:
+  tiler_network_staging:
+    driver: bridge
