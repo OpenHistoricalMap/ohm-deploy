@@ -16,10 +16,7 @@ services:
           cpus: '28.0'
           memory: 55G
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm-production:v1
-    build:
-      context: ../images/tiler-imposm
-      dockerfile: Dockerfile
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2027.ha8c0709
     volumes:
       - ../data/tiler_imposm_production:/mnt/data
     command:
