@@ -1,6 +1,8 @@
 services:
   db:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.1737.h9b9ef9b
+    volumes:
+          - /data/tiler_staging_db:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     env_file:
@@ -19,7 +21,7 @@ services:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
     volumes:
-      - data/tiler_imposm_staging:/mnt/data
+      - /data/tiler_staging_imposm:/mnt/data
     command:
       - sh
       - -c
