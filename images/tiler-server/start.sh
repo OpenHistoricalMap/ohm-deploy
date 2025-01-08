@@ -9,12 +9,15 @@ python build_config.py \
 admin_boundaries_lines,\
 admin_boundaries.centroids,\
 admin_boundaries_maritime,\
+place_areas,\
+place_points,\
 water_areas,\
 water_areas.centroids,\
 water_line,\
 transport_areas,\
 transport_associated_streets,\
 transport_lines,\
+transport_multilines,\
 transport_points,\
 route_lines,\
 amenity_areas,\
@@ -30,9 +33,7 @@ landuse_points,\
 other_areas,\
 other_areas.centroids,\
 other_lines,\
-other_points,\
-place_areas,\
-place_points
+other_points
 "
 
 flag=true
