@@ -22,3 +22,9 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
+#######Maps
+[[maps.layers]]
+name = "buildings"
+provider_layer = "osm.buildings"
+min_zoom = 14
+max_zoom = 20

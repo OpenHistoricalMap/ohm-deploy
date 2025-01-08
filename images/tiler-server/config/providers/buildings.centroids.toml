@@ -187,3 +187,46 @@ WHERE
     AND name <> ''
     AND geometry && !BBOX!
 """
+#######Maps
+# Buildings
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_14"
+min_zoom = 14
+max_zoom = 14
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_15"
+min_zoom = 15
+max_zoom = 15
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_16"
+min_zoom = 16
+max_zoom = 16
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_17"
+min_zoom = 17
+max_zoom = 17
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_18"
+min_zoom = 18
+max_zoom = 18
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_19"
+min_zoom = 19
+max_zoom = 19
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_20"
+min_zoom = 20
+max_zoom = 20

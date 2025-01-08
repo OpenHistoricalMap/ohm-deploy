@@ -22,3 +22,9 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
+#######Maps
+[[maps.layers]]
+name = "transport_points"
+provider_layer = "osm.transport_points"
+min_zoom = 14
+max_zoom = 20

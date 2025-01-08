@@ -110,3 +110,27 @@ WHERE
     AND name <> ''
     AND geometry && !BBOX!
 """
+#######Maps
+[[maps.layers]]
+name = "other_areas_centroids"
+provider_layer = "osm.other_areas_centroids_6-8"
+min_zoom = 6
+max_zoom = 8
+
+[[maps.layers]]
+name = "other_areas_centroids"
+provider_layer = "osm.other_areas_centroids_9-11"
+min_zoom = 9
+max_zoom = 11
+
+[[maps.layers]]
+name = "other_areas_centroids"
+provider_layer = "osm.other_areas_centroids_12-14"
+min_zoom = 12
+max_zoom = 14
+
+[[maps.layers]]
+name = "other_areas_centroids"
+provider_layer = "osm.other_areas_centroids_15-20"
+min_zoom = 15
+max_zoom = 20
