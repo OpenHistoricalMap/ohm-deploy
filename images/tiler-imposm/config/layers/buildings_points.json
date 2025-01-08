@@ -7,7 +7,13 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {},
+  "generalized_tables": {
+    "osm_buildings_points_named": {
+      "source": "buildings_points",
+      "tolerance": null,
+      "sql_filter": "name IS NOT NULL AND name <> ''"
+    }
+  },
   "tables": {
     "buildings_points": {
       "fields": [
