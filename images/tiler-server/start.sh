@@ -35,9 +35,6 @@ place_areas,\
 place_points
 "
 
-
-
-
 flag=true
 while [ "$flag" = true ]; do
   # Wait until PostgreSQL is ready

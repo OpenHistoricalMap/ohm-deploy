@@ -134,7 +134,7 @@ WHERE
     --type IN ('country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood') 
     geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "place_points"
 provider_layer = "osm.place_points_0_2"

@@ -47,7 +47,7 @@ geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
 sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 1),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
 
----
+#######Maps
 
 [[maps.layers]]
 name = "land"

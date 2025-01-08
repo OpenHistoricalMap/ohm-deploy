@@ -187,7 +187,7 @@ WHERE
     AND name <> ''
     AND geometry && !BBOX!
 """
----
+#######Maps
 # Buildings
 [[maps.layers]]
 name = "buildings_centroids"

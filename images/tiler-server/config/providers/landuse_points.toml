@@ -22,7 +22,7 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "landuse_points"
 provider_layer = "osm.landuse_points"

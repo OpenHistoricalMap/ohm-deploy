@@ -159,7 +159,7 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "water_areas"
 provider_layer = "osm.water_areas_z0_2"

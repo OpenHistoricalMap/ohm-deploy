@@ -23,7 +23,7 @@ WHERE
     type IN ('square') 
     AND geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "place_areas"
 provider_layer = "osm.place_areas"

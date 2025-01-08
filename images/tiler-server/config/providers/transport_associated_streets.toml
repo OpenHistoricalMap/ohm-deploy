@@ -27,7 +27,7 @@ WHERE
     AND r.type = 'associatedStreet' 
     AND geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "transport_associated_streets"
 provider_layer = "osm.transport_associated_streets"

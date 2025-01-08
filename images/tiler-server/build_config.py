@@ -80,9 +80,9 @@ if __name__ == "__main__":
             replaced_lines = "r." + languages_content.replace("\n", " r.")
             raw_content = raw_content.replace('{{LENGUAGES_RELATION}}', replaced_lines)
 
-        # Split on '---' (if present) to separate provider vs maps content
-        if '---' in raw_content:
-            provider_part, maps_part = raw_content.split('---', 1)
+        # Split on '#######Maps' (if present) to separate provider vs maps content
+        if '#######Maps' in raw_content:
+            provider_part, maps_part = raw_content.split('#######Maps', 1)
         else:
             provider_part, maps_part = raw_content, ""
 

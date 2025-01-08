@@ -110,7 +110,7 @@ WHERE
     AND name <> ''
     AND geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "other_areas_centroids"
 provider_layer = "osm.other_areas_centroids_6-8"

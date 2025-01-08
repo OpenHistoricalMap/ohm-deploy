@@ -165,7 +165,7 @@ WHERE
     has_label = 0 
     AND geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "land_ohm_centroids"
 provider_layer = "osm.admin_boundaries_centroid_z0_2"

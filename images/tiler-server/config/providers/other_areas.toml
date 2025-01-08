@@ -96,7 +96,7 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
----
+#######Maps
 [[maps.layers]]
 name = "other_areas"
 provider_layer = "osm.other_areas_6-8"
