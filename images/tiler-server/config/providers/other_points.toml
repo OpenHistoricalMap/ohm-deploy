@@ -24,3 +24,9 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
+---
+[[maps.layers]]
+name = "other_points"
+provider_layer = "osm.other_points"
+min_zoom = 14
+max_zoom = 20

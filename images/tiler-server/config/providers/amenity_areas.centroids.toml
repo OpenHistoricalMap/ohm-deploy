@@ -180,3 +180,45 @@ WHERE
     AND name <> ''
     AND geometry && !BBOX!
 """
+---
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_14"
+min_zoom = 14
+max_zoom = 14
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_15"
+min_zoom = 15
+max_zoom = 15
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_16"
+min_zoom = 16
+max_zoom = 16
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_17"
+min_zoom = 17
+max_zoom = 17
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_18"
+min_zoom = 18
+max_zoom = 18
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_19"
+min_zoom = 19
+max_zoom = 19
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_20"
+min_zoom = 20
+max_zoom = 20

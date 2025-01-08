@@ -29,3 +29,9 @@ SELECT
 FROM osm_relation_members_routes
 WHERE geometry && !BBOX!
 """
+---
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.routes_lines"
+min_zoom = 5
+max_zoom = 20

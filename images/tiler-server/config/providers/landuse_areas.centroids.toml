@@ -109,3 +109,27 @@ WHERE
     AND name <> '' 
     AND geometry && !BBOX!
 """
+---
+[[maps.layers]]
+name = "landuse_areas_centroids"
+provider_layer = "osm.landuse_areas_gen0_centroids_3-5"
+min_zoom = 3
+max_zoom = 5
+
+[[maps.layers]]
+name = "landuse_areas_centroids"
+provider_layer = "osm.landuse_areas_gen0_centroids_6-9"
+min_zoom = 6
+max_zoom = 9
+
+[[maps.layers]]
+name = "landuse_areas_centroids"
+provider_layer = "osm.landuse_areas_gen1_centroids_10-12"
+min_zoom = 10
+max_zoom = 12
+
+[[maps.layers]]
+name = "landuse_areas_centroids"
+provider_layer = "osm.landuse_areas_centroids_13-20"
+min_zoom = 13
+max_zoom = 20

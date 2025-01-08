@@ -134,3 +134,27 @@ WHERE
     --type IN ('country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood') 
     geometry && !BBOX!
 """
+---
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_0_2"
+min_zoom = 0
+max_zoom = 2
+
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_3_5"
+min_zoom = 3
+max_zoom = 5
+
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_6_10"
+min_zoom = 6
+max_zoom = 10
+
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_11_20"
+min_zoom = 11
+max_zoom = 20

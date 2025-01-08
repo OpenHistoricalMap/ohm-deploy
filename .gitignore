@@ -9,6 +9,10 @@ tegola
 envs/.env.tiler
 envs/.env.web
 config.toml
+!config.general.toml
+!config.osm.template.toml
+config.osm.toml
+
 .DS_Store
 */.DS_Store
 .env

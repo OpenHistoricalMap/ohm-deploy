@@ -8,7 +8,7 @@
     ]
   },
   "generalized_tables": {
-    "osm_buildings_points_named": {
+    "buildings_points_named": {
       "source": "buildings_points",
       "tolerance": null,
       "sql_filter": "name IS NOT NULL AND name <> ''"
@@ -36,11 +36,6 @@
           "type": "mapping_value",
           "name": "type",
           "key": null
-        },
-        {
-          "type": "string",
-          "name": "height",
-          "key": "height"
         },
         {
           "type": "string",
