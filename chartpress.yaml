@@ -16,3 +16,5 @@ charts:
         valuesPath: osm-seed.tmApi.image
       tiler-cache:
         valuesPath: ohm.tilerCache.image
+      cgimap:
+        valuesPath: ohm.cgimap.image
