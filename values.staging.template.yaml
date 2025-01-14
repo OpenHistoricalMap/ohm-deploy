@@ -161,6 +161,7 @@ osm-seed:
         WEBSITE_STATUS: "online"
         RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
         RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
+        RAILS_ENV: production
         # API_TIMEOUT: 600
         # WEB_TIMEOUT: 600
       resources:
