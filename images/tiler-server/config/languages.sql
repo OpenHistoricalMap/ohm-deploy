@@ -90,4 +90,4 @@ tags -> 'name:zh' AS name_zh,
 tags -> 'name:zu' AS name_zu,
 tags -> 'name:sr-Latn' AS name_sr_latn,
 tags -> 'name:vi-Hani' AS name_vi_hani,
-tags -> 'name:mkh-x-mvi' AS name_mkh_x_mvi,
+tags -> 'name:mkh-x-mvi' AS name_mkh_x_mvi
