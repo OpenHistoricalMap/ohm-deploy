@@ -149,6 +149,7 @@ osm-seed:
       NEW_RELIC_APP_NAME: 'none'
       ORGANIZATION_NAME: OpenHistoricalMap
       WEBSITE_STATUS: 'online'
+      RAILS_ENV: production
     resources:
       enabled: true
       requests:
