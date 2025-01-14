@@ -8,19 +8,43 @@ services:
       dockerfile: Dockerfile
     ports:
       - '5432:5432'
-    volumes:
-      - ./data/db-data:/var/lib/postgresql/data
     env_file:
       - ./../envs/.env.web
+    restart: always
+    networks:
+      - web_network
+    # volumes:
+    #   - ./data/db-data:/var/lib/postgresql/data
+
   web:
     image: ohm-web:v1
     build:
       context: ./../images/web
       dockerfile: Dockerfile
+    volumes:
+      - ./../../ohm-website/:/var/www/
+      - ./../images/web/config/settings.yml:/var/www/config/settings.yml
+      - ./../images/web/config/settings.local.yml:/var/www/config/settings.local.yml
+      - ./../images/web/start.sh:/var/www/start.sh
     ports:
       - '80:80'
+      - '3000:3000'
     env_file:
       - ./../envs/.env.web
-####### Enable for development mode
-# volumes:
-#   - ./../../ohm-website:/var/www
+    networks:
+      - web_network
+    depends_on:
+      - db
+      - memcached
+
+  memcached:
+    image: memcached:latest
+    ports:
+      - '11211:11211'
+    # command: memcached -m 64 -o modern
+    networks:
+      - web_network
+
+networks:
+  web_network:
+    driver: bridge
