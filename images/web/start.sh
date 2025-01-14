@@ -66,9 +66,8 @@ setup_env_vars() {
 if [ "$ENVIRONMENT" = "development" ]; then
   # Restore db
   export PGPASSWORD=$POSTGRES_PASSWORD
-  curl -o $workdir/backup.sql $BACKUP_FILE_URL
-  sed -i 's/osm-sandbox.org/'"$SERVER_URL"'/g' $workdir/backup.sql
-  psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f $workdir/backup.sql
+  curl -o backup.sql $BACKUP_FILE_URL
+  psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f backup.sql
 
   # Copy example storage configuration for development mode
   cp $workdir/config/example.storage.yml $workdir/config/storage.yml
