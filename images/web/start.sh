@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 workdir="/var/www"
-export RAILS_ENV=production
+# export RAILS_ENV=production
 #### Because we can not set up many env variable in build process, we are going to process here!
 
 #### Setting up the production database
 echo " # Production DB
-production:
+$RAILS_ENV:
   adapter: postgresql
   host: ${POSTGRES_HOST}
   database: ${POSTGRES_DB}
@@ -41,7 +41,7 @@ sed -i -e 's/#memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache
 #### Setting up nominatim url
 sed -i -e 's/nominatim.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.local.yml
 
-## Setting up overpass url
+#### Setting up overpass url
 sed -i -e 's/overpass-api.openhistoricalmap.org/'$OVERPASS_URL'/g' $workdir/config/settings.local.yml
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
@@ -57,37 +57,45 @@ chmod 400 /var/www/private.pem
 export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
 sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.local.yml
 
-#### Updating map-styles
-python3 update_map_styles.py
+#### Setting up developing mode
+if [ "$ENVIRONMENT" = "development" ]; then
+  cp $workdir/config/example.storage.yml $workdir/config/storage.yml
+  gem install bundler && bundle install
+  bundle exec bin/yarn install
+  bundle exec rake i18n:js:export assets:precompile
+  rails server
+else
+  #### Updating map-styles
+  python3 update_map_styles.py
 
+  #### Checking if db is already up and start the app
+  flag=true
+  while "$flag" = true; do
+    pg_isready -h $POSTGRES_HOST -p 5432 >/dev/null 2>&2 || continue
+    flag=false
+    # Print the log while compiling the assets
+    until $(curl -sf -o /dev/null $SERVER_URL); do
+      echo "Waiting to start rails ports server..."
+      sleep 2
+    done &
 
-#### Checking if db is already up and start the app
-flag=true
-while "$flag" = true; do
-  pg_isready -h $POSTGRES_HOST -p 5432 >/dev/null 2>&2 || continue
-  flag=false
-  # Print the log while compiling the assets
-  until $(curl -sf -o /dev/null $SERVER_URL); do
-    echo "Waiting to start rails ports server..."
-    sleep 2
-  done &
+    # Enable assets:precompile, to take lates changes for assets in $workdir/config/settings.local.yml.
+    time bundle exec rake i18n:js:export assets:precompile
 
-  # Enable assets:precompile, to take lates changes for assets in $workdir/config/settings.local.yml.
-  time bundle exec rake i18n:js:export assets:precompile
+    # Since leaflet-ohm-timeslider.css points directly to the svg files, they need to be copied to the public/assets directory.
+    cp $workdir/public/leaflet-ohm-timeslider-v2/assets/* $workdir/public/assets/
 
-  # Since leaflet-ohm-timeslider.css points directly to the svg files, they need to be copied to the public/assets directory.
-  cp $workdir/public/leaflet-ohm-timeslider-v2/assets/* $workdir/public/assets/
+    bundle exec rails db:migrate
 
-  bundle exec rails db:migrate
-
-  # Start cgimap
-  ./cgimap.sh
-  
-  apachectl -k start -DFOREGROUND &
-  # Loop to restart rake job every hour
-  while true; do
-    pkill -f "rake jobs:work"
-    bundle exec rake jobs:work --trace >> $workdir/log/jobs_work.log 2>&1 &
-    sleep 1h
+    # Start cgimap
+    ./cgimap.sh
+    
+    apachectl -k start -DFOREGROUND &
+    # Loop to restart rake job every hour
+    while true; do
+      pkill -f "rake jobs:work"
+      bundle exec rake jobs:work --trace >> $workdir/log/jobs_work.log 2>&1 &
+      sleep 1h
+    done
   done
-done
+fi
