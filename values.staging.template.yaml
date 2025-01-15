@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -245,7 +245,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web_large
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
