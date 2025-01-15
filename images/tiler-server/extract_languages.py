@@ -13,7 +13,7 @@ QUERY_PARAMS = {
 KEY_REGEX = (
     r"^name:[a-z]{2,3}(-[A-Z][a-z]{3})?([-_](x-)?[a-z]{2,})?(-([A-Z]{2}|\d{3}))?$"
 )
-MIN_NUM_OBJECTS = 10
+MIN_NUM_OBJECTS = 50
 
 
 def fetch_and_process_data():
