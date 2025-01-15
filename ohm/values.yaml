@@ -28,3 +28,7 @@ ohm:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  cgimap:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
