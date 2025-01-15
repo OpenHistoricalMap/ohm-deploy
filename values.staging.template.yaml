@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -186,7 +186,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       resources:
         enabled: false
         requests:
@@ -203,7 +203,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
@@ -224,7 +224,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       schedule: '0 0 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -245,7 +245,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -330,7 +330,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: db_large
+          label_value: web_medium
       - name: tm-db
         enabled: false
         schedule: '0 1 * * *'
@@ -353,7 +353,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: db_large
+          label_value: web_medium
       - name: osmcha-db
         enabled: false
         schedule: '0 1 * * *'
@@ -415,7 +415,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       postgresqlConfig:
         enabled: false
         values: |
@@ -512,7 +512,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
     # ====================================================================================================
     # Variables for tiler-server
     # ====================================================================================================
@@ -522,7 +522,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       replicaCount: 1
       commad: './start.sh'
       serviceAnnotations:
@@ -569,7 +569,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
       command: './cache_cleaner.sh' 
       resources:
@@ -601,7 +601,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       env:
         POSTGRES_DB: tm
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
@@ -630,7 +630,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
       staticIp: c
       serviceAnnotations:
@@ -799,7 +799,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       cronjob:
         enabled: false
         schedule: "0 2 */3 * *"
@@ -971,7 +971,7 @@ ohm:
       NAMESPACE: default # Namespace to run the job
       DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1967.h8492956 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
+      NODEGROUP_TYPE: web_medium # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
@@ -1000,7 +1000,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium
 
   # Tiler seed by default is giong to seet tiles from 0-5 zoom level
   tilerCacheSeed:
@@ -1023,4 +1023,4 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium
