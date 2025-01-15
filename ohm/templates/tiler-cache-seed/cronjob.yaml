@@ -36,10 +36,8 @@ spec:
                     --map=osm \
                     --min-zoom=0 \
                     --max-zoom=7 \
-                    --concurrency=128 \
+                    --concurrency=64 \
                     --overwrite=true
-                  echo "Seeding tiler for $ZOOM_LEVELS  zoom levels"
-                  python seed.py
 
               {{- if .Values.ohm.tilerCacheSeed.resources.enabled }}
               resources:
