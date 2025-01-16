@@ -1,3 +1,6 @@
+"""
+This script lists all valid languages from Taginfo to enable rendering those languages in the vector tiles (vtile).
+"""
 import requests
 import re
 BASE_URL = "https://taginfo.openhistoricalmap.org/api/4/keys/all"
@@ -11,7 +14,7 @@ QUERY_PARAMS = {
 }
 
 KEY_REGEX = (
-    r"^name:[a-z]{2,3}(-[A-Z][a-z]{3})?([-_](x-)?[a-z]{2,})?(-([A-Z]{2}|\d{3}))?$"
+    r"^name:[a-z]{2,3}(-[A-Z][a-z]{3})?((-[a-z]{2,}|x-[a-z]{2,})(-[a-z]{2,})?)?(-([A-Z]{2}|\d{3}))?$"
 )
 MIN_NUM_OBJECTS = 50
 
