@@ -3,49 +3,49 @@ name = "land_0-2"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 500),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_0_2 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_3-5"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 200),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_3_5 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_6-7"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 70),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_6_7 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_8-9"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 30),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_8_9 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_10-12"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 10),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_10_12 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_13-15"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 5),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_13_15 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_16-20"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 1),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_16_20 WHERE geometry && !BBOX!"
 
 #######Maps
 

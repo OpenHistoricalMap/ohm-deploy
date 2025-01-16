@@ -217,6 +217,8 @@ function importData() {
 
     # These index will help speed up tegola tile generation
     psql $PG_CONNECTION -f queries/postgis_post_import.sql
+    psql $PG_CONNECTION -f queries/land_mviews.sql
+    # psql $PG_CONNECTION -f queries/postgis_helpers.sql
 
     # To not import again
     touch $INIT_FILE

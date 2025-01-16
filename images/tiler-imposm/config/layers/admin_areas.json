@@ -156,11 +156,6 @@
           "key": "admin_level"
         },
         {
-          "type": "hstore_tags",
-          "name": "tags",
-          "key": null
-        },
-        {
           "type": "boolint",
           "name": "has_label",
           "key": false
@@ -174,6 +169,11 @@
           "type": "string",
           "name": "end_date",
           "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
         }
       ],
       "type": "polygon",
