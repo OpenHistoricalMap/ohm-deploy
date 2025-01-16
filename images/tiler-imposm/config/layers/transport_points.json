@@ -45,6 +45,16 @@
           "type": "mapping_key",
           "name": "class",
           "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
         }
       ],
       "type": "point",
