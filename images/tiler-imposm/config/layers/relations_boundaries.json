@@ -43,14 +43,14 @@
           "type": "string"
         },
         {
-          "type": "hstore_tags",
-          "name": "tags",
-          "key": null
-        },
-        {
           "type": "boolint",
           "name": "has_label",
           "key": false
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
         }
       ],
       "mapping": {
