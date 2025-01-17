@@ -14,11 +14,11 @@
       "sql_filter": "admin_level IN (1,2)",
       "materialized_views": [
         {
-          "view": "admin_boundaries_lines_z0_2",
+          "view": "mview_admin_boundaries_lines_z0_2",
           "geometry_transform": "ST_Boundary(geometry)"
         },
         {
-          "view": "admin_boundaries_centroid_z0_2",
+          "view": "mview_admin_boundaries_centroid_z0_2",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
         }
@@ -31,11 +31,11 @@
       "sql_filter": "admin_level IN (1,2,3,4)",
       "materialized_views": [
         {
-          "view": "admin_boundaries_lines_z3_5",
+          "view": "mview_admin_boundaries_lines_z3_5",
           "geometry_transform": "ST_Boundary(geometry)"
         },
         {
-          "view": "admin_boundaries_centroid_z3_5",
+          "view": "mview_admin_boundaries_centroid_z3_5",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
         }
@@ -48,11 +48,11 @@
       "sql_filter": "admin_level IN (1,2,3,4,5,6)",
       "materialized_views": [
         {
-          "view": "admin_boundaries_lines_z6_7",
+          "view": "mview_admin_boundaries_lines_z6_7",
           "geometry_transform": "ST_Boundary(geometry)"
         },
         {
-          "view": "admin_boundaries_centroid_z6_7",
+          "view": "mview_admin_boundaries_centroid_z6_7",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
         }
@@ -65,11 +65,11 @@
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9)",
       "materialized_views": [
         {
-          "view": "admin_boundaries_lines_z8_9",
+          "view": "mview_admin_boundaries_lines_z8_9",
           "geometry_transform": "ST_Boundary(geometry)"
         },
         {
-          "view": "admin_boundaries_centroid_z8_9",
+          "view": "mview_admin_boundaries_centroid_z8_9",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
         }
@@ -82,11 +82,11 @@
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)",
       "materialized_views": [
         {
-          "view": "admin_boundaries_lines_z10_12",
+          "view": "mview_admin_boundaries_lines_z10_12",
           "geometry_transform": "ST_Boundary(geometry)"
         },
         {
-          "view": "admin_boundaries_centroid_z10_12",
+          "view": "mview_admin_boundaries_centroid_z10_12",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
         }
@@ -99,11 +99,11 @@
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)",
       "materialized_views": [
         {
-          "view": "admin_boundaries_lines_z13_15",
+          "view": "mview_admin_boundaries_lines_z13_15",
           "geometry_transform": "ST_Boundary(geometry)"
         },
         {
-          "view": "admin_boundaries_centroid_z13_15",
+          "view": "mview_admin_boundaries_centroid_z13_15",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
         }
@@ -116,11 +116,11 @@
       "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)",
       "materialized_views": [
         {
-          "view": "admin_boundaries_lines_z16_20",
+          "view": "mview_admin_boundaries_lines_z16_20",
           "geometry_transform": "ST_Boundary(geometry)"
         },
         {
-          "view": "admin_boundaries_centroid_z16_20",
+          "view": "mview_admin_boundaries_centroid_z16_20",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
         }
