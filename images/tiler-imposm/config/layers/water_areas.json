@@ -6,7 +6,7 @@
       "tolerance": 5000,
       "materialized_views": [
         {
-          "view": "water_areas_centroid_z0_2",
+          "view": "mview_water_areas_centroid_z0_2",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> ''"
         }
@@ -18,7 +18,7 @@
       "tolerance": 1000,
       "materialized_views": [
         {
-          "view": "water_areas_centroid_z3_5",
+          "view": "mview_water_areas_centroid_z3_5",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> ''"
         }
@@ -30,7 +30,7 @@
       "tolerance": 200,
       "materialized_views": [
         {
-          "view": "water_areas_centroid_z6_7",
+          "view": "mview_water_areas_centroid_z6_7",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> ''"
         }
@@ -42,7 +42,7 @@
       "tolerance": 100,
       "materialized_views": [
         {
-          "view": "water_areas_centroid_z8_9",
+          "view": "mview_water_areas_centroid_z8_9",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> ''"
         }
@@ -54,7 +54,7 @@
       "tolerance": 20,
       "materialized_views": [
         {
-          "view": "water_areas_centroid_z10_12",
+          "view": "mview_water_areas_centroid_z10_12",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> ''"
         }
@@ -66,7 +66,7 @@
       "tolerance": 5,
       "materialized_views": [
         {
-          "view": "water_areas_centroid_z13_15",
+          "view": "mview_water_areas_centroid_z13_15",
           "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
           "sql_filter": "name IS NOT NULL AND name <> ''"
         }
