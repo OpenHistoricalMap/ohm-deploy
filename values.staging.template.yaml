@@ -524,7 +524,6 @@ osm-seed:
         label_key: nodegroup_type
         label_value: web_medium
       replicaCount: 1
-      commad: './start.sh'
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: vtiles.staging.openhistoricalmap.org
