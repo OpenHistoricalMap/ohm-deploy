@@ -21,7 +21,7 @@ sed -i -e 's/^server_protocol: ".*"/server_protocol: "'$SERVER_PROTOCOL'"/g' $wo
 sed -i -e 's/^server_url: ".*"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
 
 ### Setting up website status
-sed -i -e 's/^status: "online"/status: "'$WEBSITE_STATUS'"/g' $workdir/config/settings.yml
+sed -i -e 's/^status: ".*"/status: "'$WEBSITE_STATUS'"/g' $workdir/config/settings.yml
 
 #### Setting up mail sender
 sed -i -e 's/smtp_address: ".*"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings.yml
