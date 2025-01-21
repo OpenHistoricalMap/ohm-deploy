@@ -13,8 +13,8 @@ production:
   password: ${POSTGRES_PASSWORD}
   encoding: utf8" >$workdir/config/database.yml
 
-#### Remove $workdir/config/settings.local.yml, that commes from development 
-rm -rf $workdir/config/settings.local.yml
+#### Initializing an empty $workdir/config/settings.local.yml file, typically used for development settings
+echo "" > $workdir/config/settings.local.yml
 
 #### Setting up server_url and server_protocol
 sed -i -e 's/^server_protocol: ".*"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
@@ -42,10 +42,10 @@ sed -i -e 's/^id_application: ".*"/id_application: "'$OPENSTREETMAP_id_key'"/g' 
 sed -i -e 's/memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.yml
 
 #### Setting up nominatim url
-sed -i -e 's|^nominatim_url: ".*"|nominatim_url: "'$NOMINATIM_URL'"|g' $workdir/config/settings.yml
+sed -i -e 's/nominatim-api.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
 
 ## Setting up overpass url
-sed -i -e 's|^overpass_url: ".*"|overpass_url: "'$OVERPASS_URL'"|g' $workdir/config/settings.yml
+sed -i -e 's/overpass-api.openhistoricalmap.org/'$OVERPASS_URL'/g' $workdir/config/settings.yml
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
 sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
@@ -58,7 +58,7 @@ chmod 600 config/credentials.yml.enc config/master.key
 openssl genpkey -algorithm RSA -out private.pem
 chmod 400 /var/www/private.pem
 export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
-sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yaml
+sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
 
 #### Updating map-styles
 python3 update_map_styles.py

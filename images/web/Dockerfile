@@ -152,7 +152,7 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
     && cp assets/* $workdir/app/assets/images/
 
 # Add settings
-# ADD config/settings.local.yml $workdir/config/
+ADD config/settings.yml $workdir/config/
 
 COPY start.sh $workdir/
 COPY cgimap.sh $workdir/
