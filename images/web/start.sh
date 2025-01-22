@@ -4,64 +4,64 @@ export RAILS_ENV=production
 
 setup_env_vars() {
   echo "Setting up environment variables..."
-
-  #### Production Database Configuration
+  #### Setting up the production database
   echo " # Production DB
-  $RAILS_ENV:
+  production:
     adapter: postgresql
     host: ${POSTGRES_HOST}
     database: ${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
-    encoding: utf8" > $workdir/config/database.yml
-  echo "Database configuration written to $workdir/config/database.yml"
+    encoding: utf8" >$workdir/config/database.yml
 
-  #### Server Protocol and URL
-  sed -i -e "s/^server_protocol: .*/server_protocol: \"$SERVER_PROTOCOL\"/g" $workdir/config/settings.yml
-  sed -i -e "s/^server_url: .*/server_url: \"$SERVER_URL\"/g" $workdir/config/settings.local.yml
+  #### Initializing an empty $workdir/config/settings.local.yml file, typically used for development settings
+  echo "" > $workdir/config/settings.local.yml
 
-  #### Website Status
-  sed -i "s/online/$WEBSITE_STATUS/g" $workdir/config/settings.yml
+  #### Setting up server_url and server_protocol
+  sed -i -e 's/^server_protocol: ".*"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
+  sed -i -e 's/^server_url: ".*"/server_url: "'$SERVER_URL'"/g' $workdir/config/settings.yml
 
-  #### Mail Sender Configuration
-  sed -i -e "s/smtp_address: .*/smtp_address: \"$MAILER_ADDRESS\"/g" $workdir/config/settings.yml
-  sed -i -e "s/smtp_port: .*/smtp_port: $MAILER_PORT/g" $workdir/config/settings.yml
-  sed -i -e "s/smtp_domain: .*/smtp_domain: \"$MAILER_DOMAIN\"/g" $workdir/config/settings.yml
-  sed -i -e "s/smtp_authentication: .*/smtp_authentication: \"login\"/g" $workdir/config/settings.yml
-  sed -i -e "s/smtp_user_name: .*/smtp_user_name: \"$MAILER_USERNAME\"/g" $workdir/config/settings.yml
-  sed -i -e "s/smtp_password: .*/smtp_password: \"$MAILER_PASSWORD\"/g" $workdir/config/settings.yml
+  ### Setting up website status
+  sed -i -e 's/^status: ".*"/status: "'$WEBSITE_STATUS'"/g' $workdir/config/settings.yml
 
-  #### OAuth Configuration
-  sed -i -e "s/^oauth_application: .*/oauth_application: \"$OAUTH_CLIENT_ID\"/g" $workdir/config/settings.local.yml
-  sed -i -e "s/^oauth_key: .*/oauth_key: \"$OAUTH_KEY\"/g" $workdir/config/settings.local.yml
+  #### Setting up mail sender
+  sed -i -e 's/smtp_address: ".*"/smtp_address: "'$MAILER_ADDRESS'"/g' $workdir/config/settings.yml
+  sed -i -e 's/smtp_port: .*/smtp_port: '$MAILER_PORT'/g' $workdir/config/settings.yml
+  sed -i -e 's/smtp_domain: ".*"/smtp_domain: "'$MAILER_DOMAIN'"/g' $workdir/config/settings.yml
+  sed -i -e 's/smtp_authentication: .*/smtp_authentication: "login"/g' $workdir/config/settings.yml
+  sed -i -e 's/smtp_user_name: .*/smtp_user_name: "'$MAILER_USERNAME'"/g' $workdir/config/settings.yml
+  sed -i -e 's/smtp_password: .*/smtp_password: "'$MAILER_PASSWORD'"/g' $workdir/config/settings.yml
 
-  #### ID Key for Website
-  sed -i -e "s/^id_application: .*/id_application: \"$OPENSTREETMAP_id_key\"/g" $workdir/config/settings.local.yml
+  ### Setting up oauth id and key for iD editor
+  sed -i -e 's/^oauth_application: ".*"/oauth_application: "'$OAUTH_CLIENT_ID'"/g' $workdir/config/settings.yml
+  sed -i -e 's/^oauth_key: ".*"/oauth_key: "'$OAUTH_KEY'"/g' $workdir/config/settings.yml
 
-  #### Memcached Configuration
-  sed -i -e "s/#memcache_servers: \[\]/memcache_servers: \"$OPENSTREETMAP_memcache_servers\"/g" $workdir/config/settings.local.yml
+  #### Setting up id key for the website
+  sed -i -e 's/^id_application: ".*"/id_application: "'$OPENSTREETMAP_id_key'"/g' $workdir/config/settings.yml
 
-  #### Nominatim URL
-  sed -i -e "s#nominatim.openhistoricalmap.org#$NOMINATIM_URL#g" $workdir/config/settings.local.yml
+  #### Setup env vars for memcached server
+  sed -i -e 's/memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.yml
 
-  #### Overpass URL
-  sed -i -e "s#overpass-api.openhistoricalmap.org#$OVERPASS_URL#g" $workdir/config/settings.local.yml
-  sed -i -e "s#overpass-api.de#$OVERPASS_URL#g" $workdir/app/views/site/export.html.erb
-  sed -i -e "s#overpass-api.de#$OVERPASS_URL#g" $workdir/app/assets/javascripts/index/export.js
+  #### Setting up nominatim url
+  sed -i -e 's/nominatim-api.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
 
-  #### Credentials Configuration
-  echo "$RAILS_CREDENTIALS_YML_ENC" > $workdir/config/credentials.yml.enc
-  echo "$RAILS_MASTER_KEY" > $workdir/config/master.key
-  chmod 600 $workdir/config/credentials.yml.enc $workdir/config/master.key
-  echo "Rails credentials and master key set up."
+  ## Setting up overpass url
+  sed -i -e 's/overpass-api.openhistoricalmap.org/'$OVERPASS_URL'/g' $workdir/config/settings.yml
+  sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
+  sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
-  #### Doorkeeper Signing Key
-  openssl genpkey -algorithm RSA -out /var/www/private.pem
+  ## Setting up required credentials 
+  echo $RAILS_CREDENTIALS_YML_ENC > config/credentials.yml.enc
+  echo $RAILS_MASTER_KEY > config/master.key 
+  chmod 600 config/credentials.yml.enc config/master.key
+
+  #### Adding doorkeeper_signing_key
+  openssl genpkey -algorithm RSA -out private.pem
   chmod 400 /var/www/private.pem
-  export DOORKEEPER_SIGNING_KEY=$(sed -e '1d;$d' /var/www/private.pem | tr -d '\n')
-  sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#g" $workdir/config/settings.local.yml
-  echo "Doorkeeper signing key generated and set."
+  export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
+  sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
 }
+
 ####################### Setting up development mode #######################
 if [ "$ENVIRONMENT" = "development" ]; then
   # Restore db

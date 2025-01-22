@@ -11,10 +11,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
     tags->'capital' AS capital,
     {{LENGUAGES}}
 FROM 

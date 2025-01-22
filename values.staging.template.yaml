@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -153,8 +153,8 @@ osm-seed:
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: ohm-admins@googlegroups.com
-        NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
-        OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
+        NOMINATIM_URL: nominatim-api.openhistoricalmap.org
+        OVERPASS_URL: overpass-api.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
@@ -162,6 +162,7 @@ osm-seed:
         RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
         RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
         RAILS_ENV: production
+        RAILS_LOG_LEVEL: debug
         # API_TIMEOUT: 600
         # WEB_TIMEOUT: 600
       resources:
@@ -186,7 +187,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       resources:
         enabled: false
         requests:
@@ -203,7 +204,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
@@ -224,7 +225,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       schedule: '0 0 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -245,7 +246,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_large
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -330,7 +331,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: db_large
+          label_value: web_medium
       - name: tm-db
         enabled: false
         schedule: '0 1 * * *'
@@ -353,7 +354,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: db_large
+          label_value: web_medium
       - name: osmcha-db
         enabled: false
         schedule: '0 1 * * *'
@@ -402,7 +403,7 @@ osm-seed:
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-03a627286f5e927a9
+        AWS_ElasticBlockStore_volumeID : vol-099bf0d82fed03c8b
         AWS_ElasticBlockStore_size: 100Gi
       resources:
           enabled: false
@@ -415,7 +416,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       postgresqlConfig:
         enabled: false
         values: |
@@ -486,9 +487,9 @@ osm-seed:
       enabled: true
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250106_0001.osm.pbf
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-        SEQUENCE_NUMBER: '1683500'
+        SEQUENCE_NUMBER: '1690000'
         OVERWRITE_STATE: false
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
@@ -499,7 +500,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-088003ac97b36879d
+        AWS_ElasticBlockStore_volumeID: vol-0b77b2c5e00d8f452
         AWS_ElasticBlockStore_size: 50Gi
       resources:
         enabled: false
@@ -512,7 +513,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
     # ====================================================================================================
     # Variables for tiler-server
     # ====================================================================================================
@@ -522,9 +523,8 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       replicaCount: 1
-      commad: './start.sh'
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: vtiles.staging.openhistoricalmap.org
@@ -569,7 +569,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
       command: './cache_cleaner.sh' 
       resources:
@@ -601,7 +601,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       env:
         POSTGRES_DB: tm
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
@@ -630,7 +630,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
       staticIp: c
       serviceAnnotations:
@@ -799,7 +799,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       cronjob:
         enabled: false
         schedule: "0 2 */3 * *"
@@ -965,13 +965,13 @@ ohm:
     enabled: true
     
   tilerCachePurge:
-    enabled: true
+    enabled: false
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
       DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1967.h8492956 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
+      NODEGROUP_TYPE: web_medium # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
@@ -1000,11 +1000,11 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium
 
   # Tiler seed by default is giong to seet tiles from 0-5 zoom level
   tilerCacheSeed:
-    enabled: true
+    enabled: false
     schedule: '* * * * *'
     env:
       GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
@@ -1023,4 +1023,4 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium

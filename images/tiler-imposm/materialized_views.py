@@ -169,7 +169,7 @@ def apply_materialized_views(config_dict: dict, force_recreate: bool = True):
             continue
 
         for mt_view in materialized_views:
-            mview_name = "osm_" + mt_view.get("view")
+            mview_name = mt_view.get("view")
             geometry_transform = mt_view.get("geometry_transform", "geometry")
             sql_filter = mt_view.get("sql_filter", "")
             logger.info("-" * 40)
@@ -201,7 +201,7 @@ def refresh_all_materialized_views(config_dict: dict):
         for mt_view in materialized_views:
             if not mt_view:
                 continue
-            mview_name = "osm_" + mt_view.get("view")
+            mview_name = mt_view.get("view")
             if object_exists(mview_name):
                 logger.info(f"Refreshing materialized view: {mview_name}")
                 query = f"REFRESH MATERIALIZED VIEW {mview_name};"

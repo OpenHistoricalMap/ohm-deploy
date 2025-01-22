@@ -17,3 +17,4 @@ config.osm.toml
 */.DS_Store
 .env
 values.dev.staging.yaml
+images/tiler-server/utils/exec.sh

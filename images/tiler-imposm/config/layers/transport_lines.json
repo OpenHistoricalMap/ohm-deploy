@@ -103,21 +103,6 @@
           "key": null
         },
         {
-          "type": "hstore_tags",
-          "name": "tags",
-          "key": null
-        },
-        {
-          "type": "string",
-          "name": "start_date",
-          "key": "start_date"
-        },
-        {
-          "type": "string",
-          "name": "end_date",
-          "key": "end_date"
-        },
-        {
           "type": "string",
           "name": "electrified",
           "key": "electrified"
@@ -151,6 +136,21 @@
           "type": "string",
           "name": "route",
           "key": "route"
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
         }
       ],
       "type": "linestring",
