@@ -13,12 +13,6 @@ production:
   password: ${POSTGRES_PASSWORD}
   encoding: utf8" >$workdir/config/database.yml
 
-
-
-export RAILS_STORAGE_SERVICE=s3
-export RAILS_STORAGE_REGION=us-east-1
-export RAILS_STORAGE_BUCKET=ohm-website-staging
-
 #### Setting up S3 storage
 if [ "$RAILS_STORAGE_SERVICE" == "s3" ]; then
   if [ -z "$RAILS_STORAGE_REGION" ] || [ -z "$RAILS_STORAGE_BUCKET" ]; then
@@ -41,8 +35,6 @@ if [ "$RAILS_STORAGE_SERVICE" == "s3" ]; then
 else
   echo "RAILS_STORAGE_SERVICE is not set to 's3', skipping configuration."
 fi
-
-
 
 #### Initializing an empty $workdir/config/settings.local.yml file, typically used for development settings
 echo "" > $workdir/config/settings.local.yml
