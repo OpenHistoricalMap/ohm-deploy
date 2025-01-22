@@ -151,11 +151,6 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
     && cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ \
     && cp assets/* $workdir/app/assets/images/
 
-#### storage directory with correct permissions
-RUN mkdir -p /var/www/storage
-RUN chown -R www-data:www-data /var/www/storage
-RUN chmod -R 755 /var/www/storage
-
 # Add settings
 ADD config/settings.yml $workdir/config/
 

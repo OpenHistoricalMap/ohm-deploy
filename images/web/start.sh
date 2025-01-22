@@ -13,6 +13,37 @@ production:
   password: ${POSTGRES_PASSWORD}
   encoding: utf8" >$workdir/config/database.yml
 
+
+
+export RAILS_STORAGE_SERVICE=s3
+export RAILS_STORAGE_REGION=us-east-1
+export RAILS_STORAGE_BUCKET=ohm-website-staging
+
+#### Setting up S3 storage
+if [ "$RAILS_STORAGE_SERVICE" == "s3" ]; then
+  if [ -z "$RAILS_STORAGE_REGION" ] || [ -z "$RAILS_STORAGE_BUCKET" ]; then
+    echo "Error: Missing RAILS_STORAGE_REGION or RAILS_STORAGE_BUCKET environment variable."
+    exit 1
+  fi
+
+  echo "
+  s3:
+    service: S3
+    region: '$RAILS_STORAGE_REGION'
+    bucket: '$RAILS_STORAGE_BUCKET'" >> $workdir/config/storage.yml
+
+  sed -i -e 's/^avatar_storage: ".*"/avatar_storage: "'$RAILS_STORAGE_SERVICE'"/g' $workdir/config/settings.yml
+  sed -i -e 's/^trace_file_storage: ".*"/trace_file_storage: "'$RAILS_STORAGE_SERVICE'"/g' $workdir/config/settings.yml
+  sed -i -e 's/^trace_image_storage: ".*"/trace_image_storage: "'$RAILS_STORAGE_SERVICE'"/g' $workdir/config/settings.yml
+  sed -i -e 's/^trace_icon_storage: ".*"/trace_icon_storage: "'$RAILS_STORAGE_SERVICE'"/g' $workdir/config/settings.yml
+  sed -i "s/config.active_storage.service = :local/config.active_storage.service = :${RAILS_STORAGE_SERVICE}/g" $workdir/config/environments/production.rb
+
+else
+  echo "RAILS_STORAGE_SERVICE is not set to 's3', skipping configuration."
+fi
+
+
+
 #### Initializing an empty $workdir/config/settings.local.yml file, typically used for development settings
 echo "" > $workdir/config/settings.local.yml
 

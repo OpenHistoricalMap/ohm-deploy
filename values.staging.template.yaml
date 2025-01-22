@@ -163,6 +163,9 @@ osm-seed:
         RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
         RAILS_ENV: production
         RAILS_LOG_LEVEL: debug
+        RAILS_STORAGE_SERVICE: s3
+        RAILS_STORAGE_REGION: us-east-1
+        RAILS_STORAGE_BUCKET: ohm-website-staging
         # API_TIMEOUT: 600
         # WEB_TIMEOUT: 600
       resources:
