@@ -21,10 +21,10 @@ if [ "$RAILS_STORAGE_SERVICE" == "s3" ]; then
   fi
 
   echo "
-  s3:
-    service: S3
-    region: '$RAILS_STORAGE_REGION'
-    bucket: '$RAILS_STORAGE_BUCKET'" >> $workdir/config/storage.yml
+s3:
+  service: S3
+  region: '$RAILS_STORAGE_REGION'
+  bucket: '$RAILS_STORAGE_BUCKET'" >> $workdir/config/storage.yml
 
   sed -i -e 's/^avatar_storage: ".*"/avatar_storage: "'$RAILS_STORAGE_SERVICE'"/g' $workdir/config/settings.yml
   sed -i -e 's/^trace_file_storage: ".*"/trace_file_storage: "'$RAILS_STORAGE_SERVICE'"/g' $workdir/config/settings.yml
