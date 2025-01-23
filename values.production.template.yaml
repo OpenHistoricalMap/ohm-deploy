@@ -362,7 +362,7 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: true
+      enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -380,7 +380,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-07773a4c5de68397f
+      AWS_ElasticBlockStore_volumeID: vol-0e4d738f35f5361fe
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: true
@@ -455,26 +455,27 @@ osm-seed:
   # ====================================================================================================
 
   tilerImposm:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_medium
+      label_value: api_db
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241228_1119.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1682000"
+      SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
       IMPORT_NATURAL_EARTH: true
       IMPORT_OSM_LAND: true
+      IMPOSM3_IMPORT_LAYERS: "all"
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0f13ca01ffd4a14d2
+      AWS_ElasticBlockStore_volumeID: vol-02dfd0aac5821f25b
       AWS_ElasticBlockStore_size: 50Gi
     resources:
       enabled: true
