@@ -8,34 +8,29 @@
     ]
   },
   "generalized_tables": {
-    "transport_lines_z5_7": {
-      "source": "transport_lines_z8_9",
+    "transport_multilines_z5_7": {
+      "source": "transport_multilines_z8_9",
       "sql_filter": null,
       "tolerance": 150
     },
-    "transport_lines_z8_9": {
-      "source": "transport_lines_z10_11",
+    "transport_multilines_z8_9": {
+      "source": "transport_multilines_z10_11",
       "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed')",
       "tolerance": 50
     },
-    "transport_lines_z10_11": {
-      "source": "transport_lines_z12_13",
+    "transport_multilines_z10_11": {
+      "source": "transport_multilines_z12_13",
       "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'type', 'tram', 'funicular', 'monorail')",
       "tolerance": 15
     },
-    "transport_lines_z12_13": {
-      "source": "transport_lines_z14_20",
+    "transport_multilines_z12_13": {
+      "source": "transport_multilines",
       "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'rail', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified')  OR class IN ('railway', 'route')",
       "tolerance": 5
-    },
-    "transport_lines_z14_20": {
-      "source": "transport_lines",
-      "sql_filter": null,
-      "tolerance": 0
     }
   },
   "tables": {
-    "transport_lines": {
+    "transport_multilines": {
       "fields": [
         {
           "type": "id",
@@ -103,6 +98,21 @@
           "key": null
         },
         {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
           "type": "string",
           "name": "electrified",
           "key": "electrified"
@@ -138,22 +148,21 @@
           "key": "route"
         },
         {
-          "type": "string",
-          "name": "start_date",
-          "key": "start_date"
+          "key": "type",
+          "name": "relation_type",
+          "type": "string"
         },
         {
-          "type": "string",
-          "name": "end_date",
-          "key": "end_date"
+          "name": "member",
+          "type": "member_id"
         },
         {
           "type": "hstore_tags",
-          "name": "tags",
-          "key": null
+          "name": "me_tags",
+          "from_member": true
         }
       ],
-      "type": "linestring",
+      "type": "relation_member",
       "filters": {
         "exclude_tags": [
           [
@@ -173,20 +182,6 @@
         "highway": {
           "mapping": {
             "highway": [
-              "__any__"
-            ]
-          }
-        },
-        "aeroway": {
-          "mapping": {
-            "aeroway": [
-              "__any__"
-            ]
-          }
-        },
-        "route": {
-          "mapping": {
-            "route": [
               "__any__"
             ]
           }

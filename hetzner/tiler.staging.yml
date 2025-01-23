@@ -1,0 +1,34 @@
+services:
+  db:
+    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.1737.h9b9ef9b
+    volumes:
+          - /data/tiler_production_db_v3:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env.staging
+    restart: always
+    networks:
+      - tiler_network_staging
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+  imposm:
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2087.h94d548c
+    volumes:
+      - /data/tiler_production_imposm_v3:/mnt/data
+    command:
+      - sh
+      - -c
+      - |
+        ./start.sh
+    env_file:
+      - .env.staging
+    restart: always
+    networks:
+      - tiler_network_staging
+networks:
+  tiler_network_staging:
+    driver: bridge

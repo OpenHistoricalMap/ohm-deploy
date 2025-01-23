@@ -10,6 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 120
+    env:
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
       - uses: actions/checkout@v1
       - name: Login to GitHub Container Registry
@@ -28,10 +30,11 @@ jobs:
         run: |
           pip install chartpress six ruamel.yaml
       - name: Run Chartpress
-        run: chartpress --push
+        run: chartpress --push 
         env:
           GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
-      ################ Development secrets ################ 
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      ################ Development secrets ################
       - name: Staging - substitute secrets
         if: github.ref == 'refs/heads/development'
         uses: bluwy/substitute-string-action@v1
@@ -100,6 +103,8 @@ jobs:
           STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
           STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
           STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
+          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
           ## tiler
           STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
@@ -148,6 +153,9 @@ jobs:
           PRODUCTION_OAUTH_KEY: ${{ secrets.PRODUCTION_OAUTH_KEY }}
           PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
           PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
+          PRODUCTION_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.PRODUCTION_RAILS_CREDENTIALS_YML_ENC }}
+          PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
+
           ## tiler
           PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}

@@ -7,9 +7,15 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {},
+  "generalized_tables": {
+    "buildings_points_named": {
+      "source": "buildings_points",
+      "tolerance": null,
+      "sql_filter": "name IS NOT NULL AND name <> ''"
+    }
+  },
   "tables": {
-    "place_points": {
+    "buildings_points": {
       "fields": [
         {
           "type": "id",
@@ -32,11 +38,6 @@
           "key": null
         },
         {
-          "type": "integer",
-          "name": "population",
-          "key": "population"
-        },
-        {
           "type": "string",
           "name": "start_date",
           "key": "start_date"
@@ -54,7 +55,7 @@
       ],
       "type": "point",
       "mapping": {
-        "place": [
+        "building": [
           "__any__"
         ]
       }

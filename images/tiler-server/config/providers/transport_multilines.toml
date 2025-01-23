@@ -1,177 +1,178 @@
 [[providers.layers]]
+name = "transport_multilines_z5_7"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z0_2"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
-    name, 
     type, 
-    area, 
+    tunnel, 
+    bridge, 
+    ref,
+    service,
+    name,
+    electrified, 
+    highspeed, 
+    usage, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z0_2
+    osm_transport_multilines_z5_7
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "transport_multilines_z8_9"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z3_5"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
+    ABS(osm_id) AS osm_id,
+    ref, 
+    class, 
     type, 
-    area, 
+    tunnel, 
+    bridge, 
+    service,
+    name,
+    electrified, 
+    highspeed, 
+    usage, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z3_5 
-WHERE 
-    geometry && !BBOX!
-"""
-
-# Water bodies > 1,000,000 sqm
-[[providers.layers]]
-geometry_fieldname = "geometry"
-geometry_type = "point"
-id_fieldname = "osm_id"
-name = "water_areas_centroid_z6_7"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
-    type, 
-    area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    mview_water_areas_centroid_z6_7
-WHERE 
-    geometry && !BBOX!
-"""
-
-# Water bodies > 10,000 sqm
-[[providers.layers]]
-geometry_fieldname = "geometry"
-geometry_type = "point"
-id_fieldname = "osm_id"
-name = "water_areas_centroid_z8_9"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
-    type, 
-    area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    mview_water_areas_centroid_z8_9 
+    osm_transport_multilines_z8_9
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "transport_multilines_z10_11"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z10_12"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
-    name, 
+    ref, 
+    class, 
     type, 
-    area, 
+    tunnel, 
+    bridge, 
+    service, 
+    name,
+    electrified, 
+    highspeed, 
+    usage, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z10_12
+    osm_transport_multilines_z10_11
 WHERE 
-    name IS NOT NULL 
-    AND name <> '' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "transport_multilines_z12_13"
 geometry_fieldname = "geometry"
-geometry_type = "point"
+geometry_type = "linestring"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z13_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
-    name, 
+    ref, 
+    class, 
+    tunnel, 
+    bridge, 
     type, 
-    area, 
+    service, 
+    name,
+    electrified, 
+    highspeed, 
+    usage, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z13_15 
+    osm_transport_multilines_z12_13
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "transport_multilines_z14_20"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ABS(osm_id) AS osm_id,  
+    ref, 
+    class, 
+    type, 
+    tunnel, 
+    bridge, 
+    service, 
+    name,
+    electrified, 
+    highspeed, 
+    usage, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}}
+FROM 
+    osm_transport_multilines
 WHERE 
     geometry && !BBOX!
 """
 #######Maps
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z0_2"
-min_zoom = 0
-max_zoom = 2
-
-[[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z3_5"
-min_zoom = 3
-max_zoom = 5
-
-[[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z6_7"
-min_zoom = 6
+name = "transport_multilines"
+provider_layer = "osm.transport_multilines_z5_7"
+min_zoom = 5
 max_zoom = 7
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z8_9"
+name = "transport_multilines"
+provider_layer = "osm.transport_multilines_z8_9"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z10_12"
+name = "transport_multilines"
+provider_layer = "osm.transport_multilines_z10_11"
 min_zoom = 10
-max_zoom = 12
+max_zoom = 11
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z13_15"
-min_zoom = 13
+name = "transport_multilines"
+provider_layer = "osm.transport_multilines_z12_13"
+min_zoom = 12
+max_zoom = 13
+
+[[maps.layers]]
+name = "transport_multilines"
+provider_layer = "osm.transport_multilines_z14_20"
+min_zoom = 14
 max_zoom = 20

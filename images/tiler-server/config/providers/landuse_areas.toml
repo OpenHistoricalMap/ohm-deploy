@@ -12,10 +12,10 @@ SELECT
     class, 
     type, 
     area, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
     osm_landuse_areas_gen0 
@@ -39,10 +39,10 @@ SELECT
     class, 
     type, 
     area, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
     osm_landuse_areas_gen0 
@@ -66,10 +66,10 @@ SELECT
     class, 
     type, 
     area, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
     osm_landuse_areas_gen1 
@@ -92,13 +92,37 @@ SELECT
     type, 
     tags->'wetland' AS wetland, 
     area, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
     osm_landuse_areas 
 WHERE 
     geometry && !BBOX!
 """
+#######Maps
+[[maps.layers]]
+name = "landuse_areas"
+provider_layer = "osm.landuse_areas_gen0_3-5"
+min_zoom = 3
+max_zoom = 5
+
+[[maps.layers]]
+name = "landuse_areas"
+provider_layer = "osm.landuse_areas_gen0_6-9"
+min_zoom = 6
+max_zoom = 9
+
+[[maps.layers]]
+name = "landuse_areas"
+provider_layer = "osm.landuse_areas_gen1_10-12"
+min_zoom = 10
+max_zoom = 12
+
+[[maps.layers]]
+name = "landuse_areas"
+provider_layer = "osm.landuse_areas_13-20"
+min_zoom = 13
+max_zoom = 20

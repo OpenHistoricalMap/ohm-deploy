@@ -149,6 +149,13 @@ osm-seed:
       NEW_RELIC_APP_NAME: 'none'
       ORGANIZATION_NAME: OpenHistoricalMap
       WEBSITE_STATUS: 'online'
+      RAILS_CREDENTIALS_YML_ENC: {{PRODUCTION_RAILS_CREDENTIALS_YML_ENC}}
+      RAILS_MASTER_KEY: {{PRODUCTION_RAILS_MASTER_KEY}}
+      RAILS_ENV: production
+      RAILS_LOG_LEVEL: info
+      RAILS_STORAGE_SERVICE: s3
+      RAILS_STORAGE_REGION: us-east-1
+      RAILS_STORAGE_BUCKET: ohm-website-production
     resources:
       enabled: true
       requests:
@@ -355,7 +362,7 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: true
+      enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -373,7 +380,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-07773a4c5de68397f
+      AWS_ElasticBlockStore_volumeID: vol-0e4d738f35f5361fe
       AWS_ElasticBlockStore_size: 200Gi
     resources:
       enabled: true
@@ -448,26 +455,27 @@ osm-seed:
   # ====================================================================================================
 
   tilerImposm:
-    enabled: false
+    enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: web_large
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-241228_1119.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1682000"
+      SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
       IMPORT_NATURAL_EARTH: true
       IMPORT_OSM_LAND: true
+      IMPOSM3_IMPORT_LAYERS: "all"
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       # In case cloudProvider: aws
-      AWS_ElasticBlockStore_volumeID: vol-0f13ca01ffd4a14d2
+      AWS_ElasticBlockStore_volumeID: vol-02dfd0aac5821f25b
       AWS_ElasticBlockStore_size: 50Gi
     resources:
       enabled: true
@@ -488,7 +496,6 @@ osm-seed:
       label_key: nodegroup_type
       label_value: web_large
     replicaCount: 1
-    commad: './start.sh'
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: vtiles.openhistoricalmap.org
@@ -929,7 +936,7 @@ ohm:
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
-      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1967.h8492956 # TODO, this should be automatically updated from tiler server image
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2068.h5bc1e36 # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue

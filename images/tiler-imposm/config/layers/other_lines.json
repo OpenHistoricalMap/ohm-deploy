@@ -32,13 +32,23 @@
           "key": null
         },
         {
-          "type": "hstore_tags",
-          "name": "tags",
+          "type": "mapping_key",
+          "name": "class",
           "key": null
         },
         {
-          "type": "mapping_key",
-          "name": "class",
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
           "key": null
         }
       ],

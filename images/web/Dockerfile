@@ -31,9 +31,9 @@ RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zl
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# Install cgimap
+# Install cgimap v2.0.1
 ENV cgimap=/tmp/openstreetmap-cgimap
-ENV CGIMAP_GITSHA=26cd7fa10affe5dbd13dbe16de34421059f53f18
+ENV CGIMAP_GITSHA=8ea707e10aeab5698e6859856111816d75354592
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap \
     && cd $cgimap \
     && git checkout $CGIMAP_GITSHA \
@@ -55,32 +55,51 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=43b6c1bf455a92eb1b4969c18ffd83c2d63f95ba
-RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c789a18961e46b9ad8f0851849ef1c81c10d0a86
+
+RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'Releasing delayed, feature-rich version of iD.'
+RUN echo 'Upstream merge Nov/Dec 2024, now with Rails credentials.'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
 
-# Configure database.yml and secrets.yml
+# Configure database.yml
 RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
 RUN touch $workdir/config/settings.local.yml
 RUN cp $workdir/config/example.storage.yml $workdir/config/storage.yml
-RUN echo "#session key \n\
-production: \n\
-  secret_key_base: $(bundle exec rake secret)" > $workdir/config/secrets.yml
 # Protect sensitive information
-RUN chmod 600 $workdir/config/database.yml $workdir/config/secrets.yml
+RUN chmod 600 $workdir/config/database.yml
 
 RUN yarn install
 RUN bundle exec rake yarn:install
-RUN bundle exec rake i18n:js:export
+
+# Generate RAILS_MASTER_KEY and SECRET_KEY_BASE during build
+RUN rm -f config/credentials.yml.enc
+RUN export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
+    export SECRET_KEY_BASE=$(rails secret) && \
+    echo $RAILS_MASTER_KEY > config/master.key && \
+    if [ ! -f config/credentials.yml.enc ]; then \
+        EDITOR="echo" RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails credentials:edit; \
+    fi && \
+    RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails runner " \
+        require 'active_support/encrypted_configuration'; \
+        require 'yaml'; \
+        creds = ActiveSupport::EncryptedConfiguration.new( \
+          config_path: 'config/credentials.yml.enc', \
+          key_path: 'config/master.key', \
+          env_key: 'RAILS_MASTER_KEY', \
+          raise_if_missing_key: true \
+        ); \
+        credentials = { secret_key_base: '${SECRET_KEY_BASE}' }; \
+        creds.write(credentials.to_yaml); \
+        puts 'Credentials configured correctly.'"
+RUN bundle exec rake i18n:js:export --trace
 RUN bundle exec rake assets:precompile
 
 # The rack interface requires a `tmp` directory to use openstreetmap-cgimap
@@ -133,7 +152,7 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
     && cp assets/* $workdir/app/assets/images/
 
 # Add settings
-ADD config/settings.local.yml $workdir/config/
+ADD config/settings.yml $workdir/config/
 
 COPY start.sh $workdir/
 COPY cgimap.sh $workdir/
