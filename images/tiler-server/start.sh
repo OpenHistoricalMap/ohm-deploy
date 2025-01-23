@@ -1,41 +1,6 @@
 #!/usr/bin/env bash
 export PGPASSWORD=$POSTGRES_PASSWORD
 
-## Merge providers files
-python build_config.py \
-  --output=/opt/tegola_config/config.toml \
-  --provider_names \
-"land,\
-admin_boundaries_lines,\
-admin_boundaries.centroids,\
-admin_boundaries_maritime,\
-place_areas,\
-place_points,\
-water_areas,\
-water_areas.centroids,\
-water_line,\
-transport_areas,\
-transport_associated_streets,\
-transport_lines,\
-transport_multilines,\
-transport_points,\
-route_lines,\
-amenity_areas,\
-amenity_areas.centroids,\
-amenity_points,\
-buildings,\
-buildings.centroids,\
-buildings_points,\
-landuse_areas,\
-landuse_areas.centroids,\
-landuse_lines,\
-landuse_points,\
-other_areas,\
-other_areas.centroids,\
-other_lines,\
-other_points
-"
-
 flag=true
 while [ "$flag" = true ]; do
   # Wait until PostgreSQL is ready

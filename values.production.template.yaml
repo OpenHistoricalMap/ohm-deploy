@@ -362,7 +362,7 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: false
+      enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -455,7 +455,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerImposm:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -509,7 +509,7 @@ osm-seed:
       TILER_CACHE_BUCKET: tiler-cache-production
       TILER_CACHE_AWS_ACCESS_KEY_ID: {{PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID}}
       TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
-      EXECUTE_REINDEX: false
+      EXECUTE_REINDEX: true
       EXECUTE_VACUUM_ANALYZE: false
     # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
     persistenceDisk:
