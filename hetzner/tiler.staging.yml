@@ -2,7 +2,7 @@ services:
   db:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.1737.h9b9ef9b
     volumes:
-          - /data/tiler_staging_db:/var/lib/postgresql/data
+      - /data/tiler_production_db_v3:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     env_file:
@@ -16,12 +16,9 @@ services:
           cpus: '4'
           memory: 4G
   imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm-staging:v1
-    build:
-      context: ../images/tiler-imposm
-      dockerfile: Dockerfile
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2087.h94d548c
     volumes:
-      - /data/tiler_staging_imposm:/mnt/data
+      - /data/tiler_production_imposm_v3:/mnt/data
     command:
       - sh
       - -c

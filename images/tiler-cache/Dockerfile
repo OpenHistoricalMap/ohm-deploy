@@ -1,4 +1,4 @@
-FROM ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1967.h8492956
+FROM ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2091.h774c4ed
 
 RUN apk update && apk add --no-cache \
     proj \

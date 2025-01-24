@@ -163,6 +163,9 @@ osm-seed:
         RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
         RAILS_ENV: production
         RAILS_LOG_LEVEL: debug
+        RAILS_STORAGE_SERVICE: s3
+        RAILS_STORAGE_REGION: us-east-1
+        RAILS_STORAGE_BUCKET: ohm-website-staging
         # API_TIMEOUT: 600
         # WEB_TIMEOUT: 600
       resources:
@@ -389,10 +392,10 @@ osm-seed:
     tilerDb:
       enabled: true
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-        enabled: false
+        enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_staging # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -484,7 +487,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: true
+      enabled: false
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
@@ -969,7 +972,7 @@ ohm:
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
-      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1967.h8492956 # TODO, this should be automatically updated from tiler server image
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2091.h774c4ed # TODO, this should be automatically updated from tiler server image
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_medium # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue

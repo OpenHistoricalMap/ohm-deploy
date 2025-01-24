@@ -3,16 +3,32 @@ workdir="/var/www"
 export RAILS_ENV=production
 
 setup_env_vars() {
-  echo "Setting up environment variables..."
   #### Setting up the production database
-  echo " # Production DB
-  production:
-    adapter: postgresql
-    host: ${POSTGRES_HOST}
-    database: ${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-    encoding: utf8" >$workdir/config/database.yml
+  cat <<EOF > "$workdir/config/database.yml"
+production:
+  adapter: postgresql
+  host: ${POSTGRES_HOST}
+  database: ${POSTGRES_DB}
+  username: ${POSTGRES_USER}
+  password: ${POSTGRES_PASSWORD}
+  encoding: utf8
+EOF
+
+  ##### Setting up S3 storage
+  if [ "$RAILS_STORAGE_SERVICE" == "s3" ]; then
+    [[ -z "$RAILS_STORAGE_REGION" || -z "$RAILS_STORAGE_BUCKET" ]] && {
+      echo "Error: RAILS_STORAGE_REGION or RAILS_STORAGE_BUCKET not set."
+      exit 1
+    }
+
+    cat <<EOF >> "$workdir/config/storage.yml"
+s3:
+  service: S3
+  region: '$RAILS_STORAGE_REGION'
+  bucket: '$RAILS_STORAGE_BUCKET'
+EOF
+    echo "S3 storage configuration set successfully."
+  fi
 
   #### Initializing an empty $workdir/config/settings.local.yml file, typically used for development settings
   echo "" > $workdir/config/settings.local.yml
@@ -62,66 +78,72 @@ setup_env_vars() {
   sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
 }
 
-####################### Setting up development mode #######################
-if [ "$ENVIRONMENT" = "development" ]; then
-  # Restore db
-  export PGPASSWORD=$POSTGRES_PASSWORD
-  curl -o backup.sql $BACKUP_FILE_URL
-  psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f backup.sql
 
-  # Copy example storage configuration for development mode
-  cp $workdir/config/example.storage.yml $workdir/config/storage.yml
-  cp /tmp/settings.yml $workdir/config/settings.yml
-  cp /tmp/settings.local.yml $workdir/config/settings.local.yml
 
-  # Set up environment variables
+restore_db() {
+  export PGPASSWORD="$POSTGRES_PASSWORD"
+  curl -s -o backup.sql "$BACKUP_FILE_URL" || {
+    echo "Error: Failed to download backup file."
+    exit 1
+  }
+
+  psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f backup.sql && \
+    echo "Database restored successfully." || \
+    { echo "Database restore failed."; exit 1; }
+}
+
+start_background_jobs() {
+  while true; do
+    pkill -f "rake jobs:work"
+    bundle exec rake jobs:work --trace >> "$workdir/log/jobs_work.log" 2>&1 &
+    echo "Restarted rake jobs at $(date)"
+    sleep 1h
+  done
+}
+
+setup_production() {
+  setup_env_vars
+
+  python3 update_map_styles.py
+
+  echo "Waiting for PostgreSQL to be ready..."
+  until pg_isready -h "$POSTGRES_HOST" -p 5432; do
+    sleep 2
+  done
+
+  echo "Running asset precompilation..."
+  time bundle exec rake i18n:js:export assets:precompile
+
+  echo "Copying static assets..."
+  cp "$workdir/public/leaflet-ohm-timeslider-v2/assets/"* "$workdir/public/assets/"
+
+  echo "Running database migrations..."
+  time bundle exec rails db:migrate
+
+  echo "Running cgimap..."
+  ./cgimap.sh
+
+  echo "Starting Apache server..."
+  apachectl -k start -DFOREGROUND &
+
+  start_background_jobs
+}
+
+
+setup_development() {
+  restore_db
+  cp "$workdir/config/example.storage.yml" "$workdir/config/storage.yml"
+  cp /tmp/settings.yml "$workdir/config/settings.yml"
   setup_env_vars
   bundle exec bin/yarn install
   bundle exec rails db:migrate --trace
   bundle exec rake jobs:work &
   rails server --log-to-stdout
+}
+
+####################### Setting up development or Production mode #######################
+if [ "$ENVIRONMENT" = "development" ]; then
+  setup_development
 else
-####################### Setting up production mode #######################
-  # Set up environment variables for production
-  setup_env_vars
-  
-  #### Run a script to update map styles dynamically
-  python3 update_map_styles.py
-  
-  #### Check database readiness and start the application
-  flag=true
-  while "$flag" = true; do
-    # Wait until the database is ready
-    pg_isready -h $POSTGRES_HOST -p 5432 >/dev/null 2>&2 || continue
-    flag=false
-
-    # Wait for the server to be available, logging progress
-    until $(curl -sf -o /dev/null $SERVER_URL); do
-      echo "Waiting to start Rails server..."
-      sleep 2
-    done &
-
-    #### Compile JavaScript and CSS assets to reflect changes in configuration files
-    time bundle exec rake i18n:js:export assets:precompile
-
-    #### Copy required assets for Leaflet OHM TimeSlider
-    cp $workdir/public/leaflet-ohm-timeslider-v2/assets/* $workdir/public/assets/
-
-    # Run database migrations
-    bundle exec rails db:migrate
-
-    # Start the cgimap service to handle API requests
-    ./cgimap.sh
-    
-    #### Start Apache server in the foreground
-    apachectl -k start -DFOREGROUND &
-
-    #### Background job processing loop
-    # Restart the `rake jobs:work` process every hour to ensure smooth job execution
-    while true; do
-      pkill -f "rake jobs:work"
-      bundle exec rake jobs:work --trace >> $workdir/log/jobs_work.log 2>&1 &
-      sleep 1h
-    done
-  done
+  setup_production
 fi

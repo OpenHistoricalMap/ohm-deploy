@@ -4,7 +4,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ../data/tiler_osm_production_v2:/var/lib/postgresql/data
+      - /data/tiler_production_db_20250123:/var/lib/postgresql/data
     env_file:
       - .env.production
     restart: always
@@ -16,9 +16,9 @@ services:
           cpus: '28.0'
           memory: 55G
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2027.ha8c0709
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2087.h94d548c
     volumes:
-      - ../data/tiler_imposm_production_v2:/mnt/data
+      - /data/tiler_production_imposm:/mnt/data
     command:
       - sh
       - -c
@@ -38,6 +38,20 @@ services:
           memory: 3G
     networks:
       - tiler_network
+  node_exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    networks:
+      - tiler_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 networks:
   tiler_network:
     driver: bridge
+    

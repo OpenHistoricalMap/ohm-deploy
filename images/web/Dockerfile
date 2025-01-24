@@ -1,4 +1,5 @@
-FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2049.hf15259a
+FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2087.h94d548c
+
 # Install Passenger
 RUN gem install passenger && passenger-install-apache2-module --auto
 
@@ -7,7 +8,7 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c789a18961e46b9ad8f0851849ef1c81c10d0a86
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=9e14cd6b6ca7677c874515cf6495e238c80547fe
 
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
@@ -102,11 +103,6 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
     && cp leaflet-ohm-timeslider.* $workdir/app/assets/javascripts/ \
     && cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ \
     && cp assets/* $workdir/app/assets/images/
-
-#### storage directory with correct permissions
-RUN mkdir -p /var/www/storage
-RUN chown -R www-data:www-data /var/www/storage
-RUN chmod -R 755 /var/www/storage
 
 # Add settings
 ADD config/settings.yml $workdir/config/
