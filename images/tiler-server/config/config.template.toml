@@ -1,7 +1,5 @@
 [webserver]
 port = ":${TILER_SERVER_PORT}"
-version = "v0.20.0"
-
 	[webserver.headers]
 	Access-Control-Allow-Origin = "*"
 
@@ -27,7 +25,7 @@ type = "prometheus"
 name = "osm"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 100
+max_connections = 150
 	###### PROVIDERS
 
 ####################################
@@ -37,7 +35,7 @@ max_connections = 100
 name = "ne"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 100
+max_connections = 25
 	###### Water lands ne
 	[[providers.layers]]
 	name = "ne_water_lakes_0-2"

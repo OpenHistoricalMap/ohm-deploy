@@ -362,7 +362,7 @@ osm-seed:
   tilerDb:
     enabled: true
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: false
+      enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -455,7 +455,7 @@ osm-seed:
   # ====================================================================================================
 
   tilerImposm:
-    enabled: true
+    enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
