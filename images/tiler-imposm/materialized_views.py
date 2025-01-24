@@ -70,24 +70,23 @@ def get_columns_of_table(table_name: str) -> list:
     columns = [col.strip() for col in result.stdout.strip().split("\n") if col.strip()]
     return columns
 
-
 def create_indexes_for_mview(mview_name: str, columns: list):
     """
-    Creates indexes for 'osm_id' (B-Tree) and 'geometry' (GiST) in the specified materialized view,
-    only if those columns exist.
+    Creates indexes for the 'osm_id' (B-Tree) and 'geometry' (GiST) columns.
     """
-    # Check if the columns exist
+
+    # Ensure 'osm_id' exists in the columns list
     if "osm_id" in columns:
-        create_idx_osm = f"CREATE INDEX idx_{mview_name}_osm_id ON {mview_name} (osm_id);"
-        logger.info(f"Creating index for osm_id in {mview_name}")
-        execute_psql_query(create_idx_osm)
+        create_unique_idx = f"CREATE UNIQUE INDEX IF NOT EXISTS idx_{mview_name}_osm_id ON {mview_name} (osm_id);"
+        logger.info(f"Creating unique index for osm_id in {mview_name}")
+        execute_psql_query(create_unique_idx)
+    else:
+        logger.warning(f"'osm_id' column not found in {mview_name}, skipping unique index creation.")
 
     if "geometry" in columns:
-        create_idx_geom = (
-            f"CREATE INDEX idx_{mview_name}_geom ON {mview_name} USING GIST (geometry);"
-        )
-        logger.info(f"Creating index for geometry in {mview_name}")
-        execute_psql_query(create_idx_geom)
+        create_geom_idx = f"CREATE INDEX IF NOT EXISTS idx_{mview_name}_geom ON {mview_name} USING GIST (geometry);"
+        logger.info(f"Creating GiST index for geometry in {mview_name}")
+        execute_psql_query(create_geom_idx)
 
 
 def create_materialized_view(
@@ -204,11 +203,10 @@ def refresh_all_materialized_views(config_dict: dict):
             mview_name = mt_view.get("view")
             if object_exists(mview_name):
                 logger.info(f"Refreshing materialized view: {mview_name}")
-                query = f"REFRESH MATERIALIZED VIEW {mview_name};"
+                query = f"REFRESH MATERIALIZED VIEW CONCURRENTLY {mview_name};"
                 execute_psql_query(query)
             else:
                 logger.warning(f"Materialized view {mview_name} not found. Skipping refresh.")
-
 
 # ------------------------------------------------------------------------------
 #  MAIN: LOADS CONFIG ONCE, CREATES/UPDATES VIEWS, THEN REFRESHES THEM IN A LOOP
