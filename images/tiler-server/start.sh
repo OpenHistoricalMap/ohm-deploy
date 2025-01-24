@@ -64,5 +64,5 @@ while [ "$flag" = true ]; do
   fi
 
   # Start Tegola server
-  TEGOLA_SQL_DEBUG=LAYER_SQL:EXECUTE_SQL tegola serve --config=/opt/tegola_config/config.toml
+  tegola serve --config=/opt/tegola_config/config.toml
 done

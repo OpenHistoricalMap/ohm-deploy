@@ -392,10 +392,10 @@ osm-seed:
     tilerDb:
       enabled: true
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-        enabled: false
+        enabled: true
       env:
         POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
-        POSTGRES_DB: tiler_osm_staging # Kuberntes existing db called,  tiler-osm
+        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
@@ -487,7 +487,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerImposm:
-      enabled: true
+      enabled: false
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
