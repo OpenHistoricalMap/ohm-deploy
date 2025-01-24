@@ -31,13 +31,72 @@ max_connections = 100
 	###### PROVIDERS
 
 ####################################
+## OpenHistoricalMap providers
+####################################
+[[providers]]
+name = "osm_land"
+type = "mvt_postgis"
+uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+max_connections = 50
+	###### PROVIDERS
+	[[providers.layers]]
+	name = "land_0-2"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "ogc_fid"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_0_2 WHERE geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "land_3-5"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "ogc_fid"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_3_5 WHERE geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "land_6-7"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "ogc_fid"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_6_7 WHERE geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "land_8-9"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "ogc_fid"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_8_9 WHERE geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "land_10-12"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "ogc_fid"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_10_12 WHERE geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "land_13-15"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "ogc_fid"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_13_15 WHERE geometry && !BBOX!"
+
+	[[providers.layers]]
+	name = "land_16-20"
+	geometry_fieldname = "geometry"
+	geometry_type = "multipolygon"
+	id_fieldname = "ogc_fid"
+	sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_16_20 WHERE geometry && !BBOX!"
+
+
+####################################
 ## Natural Earth (ne) providers
 ####################################
 [[providers]]
 name = "ne"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 100
+max_connections = 50
 	###### Water lands ne
 	[[providers.layers]]
 	name = "ne_water_lakes_0-2"
@@ -68,6 +127,56 @@ name = "osm"
 attribution = "OpenHistoricalMap"
 center = [-74.275329586789, -12.153492567373, 1.0]
 	###### MAPS
+
+
+####################################
+## OSM Land maps
+####################################
+[[maps]]
+name = "osm_land"
+attribution = "OSM Land"
+center = [-74.275329586789, -12.153492567373, 8.0]
+	[[maps.layers]]
+	name = "land"
+	provider_layer = "osm_land.land_0-2"
+	min_zoom = 0
+	max_zoom = 2
+
+	[[maps.layers]]
+	name = "land"
+	provider_layer = "osm_land.land_3-5"
+	min_zoom = 3
+	max_zoom = 5
+
+	[[maps.layers]]
+	name = "land"
+	provider_layer = "osm_land.land_6-7"
+	min_zoom = 6
+	max_zoom = 7
+
+	[[maps.layers]]
+	name = "land"
+	provider_layer = "osm_land.land_8-9"
+	min_zoom = 8
+	max_zoom = 9
+
+	[[maps.layers]]
+	name = "land"
+	provider_layer = "osm_land.land_10-12"
+	min_zoom = 10
+	max_zoom = 12
+
+	[[maps.layers]]
+	name = "land"
+	provider_layer = "osm_land.land_13-15"
+	min_zoom = 13
+	max_zoom = 15
+
+	[[maps.layers]]
+	name = "land"
+	provider_layer = "osm_land.land_16-20"
+	min_zoom = 16
+	max_zoom = 20
 
 ####################################
 ## Natural Earth maps
