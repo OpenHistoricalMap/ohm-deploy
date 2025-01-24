@@ -16,7 +16,7 @@ services:
           cpus: '28.0'
           memory: 55G
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2087.h94d548c
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2111.he285805
     volumes:
       - /data/tiler_production_imposm:/mnt/data
     command:
