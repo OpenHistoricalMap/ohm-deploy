@@ -141,7 +141,7 @@ setup_development() {
   rails server --log-to-stdout
 }
 
-####################### Setting up development or Production mode #######################
+####################### Setting up Development or Production mode #######################
 if [ "$ENVIRONMENT" = "development" ]; then
   setup_development
 else
