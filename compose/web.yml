@@ -21,7 +21,6 @@ services:
     volumes:
       - ./../../ohm-website/:/var/www/
       - ./../images/web/config/settings.yml:/tmp/settings.yml:rw
-      - ./../images/web/config/settings.local.yml:/tmp/settings.local.yml:rw
       - ./../images/web/start.sh:/var/www/start.sh
     env_file:
       - ./../envs/.env.web
@@ -43,7 +42,3 @@ services:
 networks:
   web_network:
     driver: bridge
-
-volumes:
-  caddy_data:
-  caddy_config:
