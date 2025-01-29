@@ -907,8 +907,8 @@ osm-seed:
         REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
         REACT_APP_ENABLE_REAL_CHANGESETS: 0
         REACT_APP_MAPBOX_ACCESS_TOKEN: {{STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
-        SOCIAL_AUTH_OPENSTREETMAP_OAUTH2_KEY: "none"
-        SOCIAL_AUTH_OPENSTREETMAP_OAUTH2_SECRET: "none"
+        OAUTH2_OSM_KEY: VOTXm17r87qyHCu9oNK8sOrHkDUDynOZzpX_pcOhMVI
+        OAUTH2_OSM_SECRET: j86R1GGNaeFp62dPcMtrbGp3StZk-b5Zg6qsC_ZpzW8
       resources:
         enabled: false
         requests:
