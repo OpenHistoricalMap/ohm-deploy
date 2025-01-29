@@ -879,15 +879,15 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       image:
         name: "ghcr.io/openhistoricalmap/osmcha-django"
-        tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
+        tag: "upstream_main"
       ingressDomain: osmcha.staging.openhistoricalmap.org
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
@@ -907,6 +907,8 @@ osm-seed:
         REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
         REACT_APP_ENABLE_REAL_CHANGESETS: 0
         REACT_APP_MAPBOX_ACCESS_TOKEN: {{STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
+        SOCIAL_AUTH_OPENSTREETMAP_OAUTH2_KEY: "none"
+        SOCIAL_AUTH_OPENSTREETMAP_OAUTH2_SECRET: "none"
       resources:
         enabled: false
         requests:
@@ -923,7 +925,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       image:
         name: "developmentseed/osmseed-osmcha-db"
         tag: "0.1.0-n767.h0090e97"
