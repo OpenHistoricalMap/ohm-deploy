@@ -897,7 +897,7 @@ osm-seed:
         OAUTH_OSM_SECRET: {{STAGING_OSMCHA_API_CONSUMER_SECRET}}
         DJANGO_SECURE_SSL_REDIRECT: "False"
         OSM_SERVER_URL: https://www.openhistoricalmap.org
-        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/oauth-landing.html
+        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/authorized
         OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
         ## frontend
         OSMCHA_URL: https://osmcha.staging.openhistoricalmap.org
@@ -907,8 +907,8 @@ osm-seed:
         REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
         REACT_APP_ENABLE_REAL_CHANGESETS: 0
         REACT_APP_MAPBOX_ACCESS_TOKEN: {{STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
-        OAUTH2_OSM_KEY: VOTXm17r87qyHCu9oNK8sOrHkDUDynOZzpX_pcOhMVI
-        OAUTH2_OSM_SECRET: j86R1GGNaeFp62dPcMtrbGp3StZk-b5Zg6qsC_ZpzW8
+        OAUTH2_OSM_KEY: tEJ_Mlae0a_uxYmG2VEOuz92zSzbCZ3rVn_1r6ZPg70
+        OAUTH2_OSM_SECRET: rhYlGb3vEFxqw4FjGSPjQiSHP2X-9no0FrTecOHHHos
       resources:
         enabled: false
         requests:
