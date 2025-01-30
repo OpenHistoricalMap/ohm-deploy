@@ -19,4 +19,4 @@ charts:
       cgimap:
         valuesPath: ohm.cgimap.image
       osmcha-frontend:
-        valuesPath: ohm.osmchaWeb.image
+        valuesPath: osm-seed.osmchaWeb.image
