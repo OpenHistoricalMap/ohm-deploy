@@ -2,14 +2,14 @@ FROM node:22-alpine as builder
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG GITSHA=e5d7de531016c3e4cb9aef684c2e8c3bff20e602
 ARG BUILD_ENV=prod
 
 WORKDIR /app
 
 ## Clone osmcha repo
+ENV GITSHA=e5d7de531016c3e4cb9aef684c2e8c3bff20e602
 RUN apk add --no-cache git \
-    && git clone https://github.com/OpenHistoricalMap/osmcha-frontend.git/app \
+    && git clone https://github.com/OpenHistoricalMap/osmcha-frontend.git /app \
     && cd /app \
     && git checkout $GITSHA
 
