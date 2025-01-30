@@ -18,3 +18,5 @@ charts:
         valuesPath: ohm.tilerCache.image
       cgimap:
         valuesPath: ohm.cgimap.image
+      osmcha-frontend:
+        valuesPath: ohm.osmchaWeb.image
