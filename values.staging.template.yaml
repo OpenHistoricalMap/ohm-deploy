@@ -881,16 +881,16 @@ osm-seed:
     osmchaWeb:
       enabled: true
       image:
-        name: "ghcr.io/openhistoricalmap/osmcha-frontend"
-        tag: "d004a05"
+        name: ghcr.io/openhistoricalmap/osmcha-frontend
+        tag: d004a05
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
       enabled: true
       image:
-        name: "ghcr.io/openhistoricalmap/osmcha-django"
-        tag: "upstream_main"
+        name: ghcr.io/openhistoricalmap/osmcha-django
+        tag: 1e9d9dd
       ingressDomain: osmcha.staging.openhistoricalmap.org
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
@@ -908,23 +908,25 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: "512Mi"
-          cpu: "1"
+          memory: '512Mi'
+          cpu: '1'
         limits:
-          memory: "512Mi"
-          cpu: "1"
+          memory: '512Mi'
+          cpu: '1'
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
         label_value: web
+      fetch_changesets_cronjob: '*/2 * * * *'
+      process_changesets_cronjob: '0 * * * *'
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
       enabled: true
       image:
-        name: "developmentseed/osmseed-osmcha-db"
-        tag: "0.1.0-n767.h0090e97"
+        name: developmentseed/osmseed-osmcha-db
+        tag: 0.1.0-n767.h0090e97
       env:
         POSTGRES_DB: osmcha
         POSTGRES_USER: postgres
@@ -932,11 +934,11 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: "20Gi"
-          cpu: "8"
+          memory: '20Gi'
+          cpu: '8'
         limits:
-          memory: "24Gi"
-          cpu: "10"
+          memory: '24Gi'
+          cpu: '10'
       persistenceDisk:
         enabled: false
         accessMode: ReadWriteOnce
