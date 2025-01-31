@@ -880,6 +880,9 @@ osm-seed:
 # ====================================================================================================
     osmchaWeb:
       enabled: true
+      image:
+        name: "ghcr.io/openhistoricalmap/osmcha-frontend"
+        tag: "d004a05"
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
@@ -892,9 +895,7 @@ osm-seed:
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}        
-        OAUTH_OSM_KEY: {{STAGING_OSMCHA_API_CONSUMER_KEY}}
-        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_API_CONSUMER_SECRET}}
+        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}
         DJANGO_SECURE_SSL_REDIRECT: "False"
         OSM_SERVER_URL: https://www.openhistoricalmap.org
         OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/authorized
@@ -902,13 +903,8 @@ osm-seed:
         ## frontend
         OSMCHA_URL: https://osmcha.staging.openhistoricalmap.org
         OSMCHA_API_URL: www.openhistoricalmap.org
-        REACT_APP_OSM_URL: https://www.openhistoricalmap.org
-        REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
-        REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
-        REACT_APP_ENABLE_REAL_CHANGESETS: 0
-        REACT_APP_MAPBOX_ACCESS_TOKEN: {{STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
-        OAUTH2_OSM_KEY: tEJ_Mlae0a_uxYmG2VEOuz92zSzbCZ3rVn_1r6ZPg70
-        OAUTH2_OSM_SECRET: rhYlGb3vEFxqw4FjGSPjQiSHP2X-9no0FrTecOHHHos
+        OAUTH2_OSM_KEY: tHRgc_GVLsUj2tuVQSg05nn5f8Tnda8mF-ZfEbI3ItA
+        OAUTH2_OSM_SECRET: s9blyq71UditeidYeiQc_J40-DffUh3EVlDCGVcskQI
       resources:
         enabled: false
         requests:
@@ -960,25 +956,10 @@ osm-seed:
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
     adiffService:
-      enabled: true
+      enabled: false
       image:
         name: ghcr.io/openhistoricalmap/osm-adiff-service
         tag: a343422497bb2ad4735ca7eada921b60eeb19e20
-      env:
-        ## Token for testing
-        OSMCHAADMINTOKEN: 35f2a6b5cd2a8cd7ee215a4bf7f2f09d90ddd6b5
-        WORKER_COUNT: 2
-        NODE_OPTIONS: --max-old-space-size=2048
-      resources:
-        enabled: false
-        requests:
-          memory: "20Gi"
-          cpu: "8"
-        limits:
-          memory: "24Gi"
-          cpu: "10"
-      nodeSelector:
-        enabled: false
 # ====================================================================================================
 # Planet files server
 # ====================================================================================================
