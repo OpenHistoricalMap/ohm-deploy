@@ -162,3 +162,12 @@ osm-seed:
     enabled: false
   planetFiles:
     enabled: false
+  adiffService:
+    enabled: false
+ohm:
+  tilerCache:
+    enabled: false
+  tilerCachePurge:
+    enabled: false
+  tilerCacheSeed:
+    enabled: false
