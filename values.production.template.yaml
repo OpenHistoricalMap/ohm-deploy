@@ -858,8 +858,8 @@ osm-seed:
   osmchaApi:
     enabled: true
     image:
-      name: "ghcr.io/openhistoricalmap/osmcha-django"
-      tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
+      name: ghcr.io/openhistoricalmap/osmcha-django
+      tag: 1e9d9dd
     ingressDomain: osmcha.openhistoricalmap.org
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"

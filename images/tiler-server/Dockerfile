@@ -39,7 +39,7 @@ RUN cd /opt/ && python build_config.py \
     place_points,\
     water_areas,\
     water_areas.centroids,\
-    water_line,\
+    water_lines,\
     transport_areas,\
     transport_associated_streets,\
     transport_lines,\
