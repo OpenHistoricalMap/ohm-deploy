@@ -924,9 +924,9 @@ osm-seed:
 # ====================================================================================================
     osmchaDb:
       enabled: true
-      image:
-        name: developmentseed/osmseed-osmcha-db
-        tag: 0.1.0-n767.h0090e97
+      # image:
+      #   name: developmentseed/osmseed-osmcha-db
+      #   tag: 0.1.0-n767.h0090e97
       env:
         POSTGRES_DB: osmcha
         POSTGRES_USER: postgres

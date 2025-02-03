@@ -4,6 +4,7 @@ data/
 images/.env
 images/tiler.yml
 values.dev.yaml
+values.osmcha.yaml
 secrets
 tegola
 envs/.env.tiler
