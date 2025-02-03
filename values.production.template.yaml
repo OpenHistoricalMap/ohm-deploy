@@ -849,6 +849,9 @@ osm-seed:
 # ====================================================================================================
   osmchaWeb:
     enabled: true
+    image:
+      name: ghcr.io/openhistoricalmap/osmcha-frontend
+      tag: 80eb324
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================
@@ -862,20 +865,15 @@ osm-seed:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
       DJANGO_SECRET_KEY: {{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}
-      OAUTH_OSM_KEY: {{PRODUCTION_OSMCHA_API_CONSUMER_KEY}}
-      OAUTH_OSM_SECRET: {{PRODUCTION_OSMCHA_API_CONSUMER_SECRET}}
       DJANGO_SECURE_SSL_REDIRECT: "False"
       OSM_SERVER_URL: https://www.openhistoricalmap.org
-      OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/oauth-landing.html
+      OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/authorized
       OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
       ## frontend
       OSMCHA_URL: https://osmcha.openhistoricalmap.org
       OSMCHA_API_URL: www.openhistoricalmap.org
-      REACT_APP_OSM_URL: https://www.openhistoricalmap.org
-      REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
-      REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
-      REACT_APP_ENABLE_REAL_CHANGESETS: 0
-      REACT_APP_MAPBOX_ACCESS_TOKEN: {{PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
+      OAUTH2_OSM_KEY: 0KWrkIIQtFBc4k_Blb2WuIi108w10GYXFwW30qvk-W8
+      OAUTH2_OSM_SECRET: UAnkzA3FqCP6ZYhqN1NEyQRdG36ALv46XGI7UtHJ0_o
     resources:
       enabled: false
       requests:
@@ -888,6 +886,14 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: web_large
+# ====================================================================================================
+# Variables for osmcha osm-adiff-service
+# ====================================================================================================
+    adiffService:
+      enabled: false
+      image:
+        name: ghcr.io/openhistoricalmap/osm-adiff-service
+        tag: a343422497bb2ad4735ca7eada921b60eeb19e20
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
@@ -909,11 +915,11 @@ osm-seed:
         memory: "24Gi"
         cpu: "10"
     persistenceDisk:
-      enabled: false
+      enabled: true
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
-      AWS_ElasticBlockStore_volumeID: vol-065901d9a34a6fbf9
-      AWS_ElasticBlockStore_size: 100Gi
+      AWS_ElasticBlockStore_volumeID: vol-03f47ec4b4532e93d
+      AWS_ElasticBlockStore_size: 20Gi
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
