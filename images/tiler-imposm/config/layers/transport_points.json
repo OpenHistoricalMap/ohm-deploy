@@ -1,0 +1,93 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "transport_points": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "ref",
+          "key": "ref"
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "point",
+      "mappings": {
+        "railway": {
+          "mapping": {
+            "railway": [
+              "__any__"
+            ]
+          }
+        },
+        "highway": {
+          "mapping": {
+            "highway": [
+              "__any__"
+            ]
+          }
+        },
+        "aeroway": {
+          "mapping": {
+            "aeroway": [
+              "__any__"
+            ]
+          }
+        },
+        "route": {
+          "mapping": {
+            "route": [
+              "__any__"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

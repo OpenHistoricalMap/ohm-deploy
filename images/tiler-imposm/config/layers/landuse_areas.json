@@ -1,0 +1,97 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {
+    "landuse_areas_gen1": {
+      "source": "landuse_areas",
+      "sql_filter": "ST_Area(geometry)>50000.000000",
+      "tolerance": 50.0
+    },
+    "landuse_areas_gen0": {
+      "source": "landuse_areas_gen1",
+      "sql_filter": "ST_Area(geometry)>500000.000000",
+      "tolerance": 200.0
+    }
+  },
+  "tables": {
+    "landuse_areas": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "pseudoarea",
+          "name": "area",
+          "key": null
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "polygon",
+      "mappings": {
+        "landuse": {
+          "mapping": {
+            "landuse": [
+              "__any__"
+            ]
+          }
+        },
+        "leisure": {
+          "mapping": {
+            "leisure": [
+              "__any__"
+            ]
+          }
+        },
+        "natural": {
+          "mapping": {
+            "natural": [
+              "__any__"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

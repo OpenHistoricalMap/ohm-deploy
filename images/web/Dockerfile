@@ -1,51 +1,4 @@
-FROM ruby:3.3.0
-ENV DEBIAN_FRONTEND=noninteractive
-ENV workdir /var/www
-
-# Production OSM setup
-ENV RAILS_ENV=production
-
-# Install the openstreetmap-website dependencies
-RUN apt-get update \
-    && apt-get install -y \
-    libmagickwand-dev libxml2-dev libxslt1-dev \
-    apache2 apache2-dev build-essential git-core postgresql-client \
-    libpq-dev libsasl2-dev imagemagick libffi-dev libgd-dev libarchive-dev libbz2-dev curl \
-    default-jre-headless file gpg-agent libvips-dev locales software-properties-common tzdata unzip \
-    advancecomp gifsicle libjpeg-progs jhead jpegoptim optipng pngcrush pngquant \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install node
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install -y nodejs yarn && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install openstreetmap-cgimap requirements
-RUN apt-get update &&  apt-get -y install libxml2-dev libpqxx-dev libfcgi-dev zlib1g-dev libbrotli-dev \
-  libboost-program-options-dev libfmt-dev libmemcached-dev libcrypto++-dev \
-  libargon2-dev libyajl-dev cmake libapache2-mod-fcgid && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
-
-# Install cgimap
-ENV cgimap /tmp/openstreetmap-cgimap
-ENV CGIMAP_GITSHA=26cd7fa10affe5dbd13dbe16de34421059f53f18
-RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap \
-    && cd $cgimap \
-    && git checkout $CGIMAP_GITSHA \
-    && rm -rf .git \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && cmake --build .
-
-RUN cp $cgimap/build/openstreetmap-cgimap /usr/local/bin/ && rm -rf $cgimap
-
-RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
+FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2087.h94d548c
 
 # Install Passenger
 RUN gem install passenger && passenger-install-apache2-module --auto
@@ -55,32 +8,51 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c60ef3c1774468212b6c7a286276245e9e0ad5b1
-RUN git clone -b staging https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=9e14cd6b6ca7677c874515cf6495e238c80547fe
+
+RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
     && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'Releasing delayed, feature-rich version of iD.'
+RUN echo 'Upstream merge Nov/Dec 2024, now with Rails credentials.'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages
 RUN gem install bundler && bundle install
 
-# Configure database.yml and secrets.yml
+# Configure database.yml
 RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
 RUN touch $workdir/config/settings.local.yml
 RUN cp $workdir/config/example.storage.yml $workdir/config/storage.yml
-RUN echo "#session key \n\
-production: \n\
-  secret_key_base: $(bundle exec rake secret)" > $workdir/config/secrets.yml
 # Protect sensitive information
-RUN chmod 600 $workdir/config/database.yml $workdir/config/secrets.yml
+RUN chmod 600 $workdir/config/database.yml
 
 RUN yarn install
 RUN bundle exec rake yarn:install
-RUN bundle exec rake i18n:js:export
+
+# Generate RAILS_MASTER_KEY and SECRET_KEY_BASE during build
+RUN rm -f config/credentials.yml.enc
+RUN export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
+    export SECRET_KEY_BASE=$(rails secret) && \
+    echo $RAILS_MASTER_KEY > config/master.key && \
+    if [ ! -f config/credentials.yml.enc ]; then \
+        EDITOR="echo" RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails credentials:edit; \
+    fi && \
+    RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails runner " \
+        require 'active_support/encrypted_configuration'; \
+        require 'yaml'; \
+        creds = ActiveSupport::EncryptedConfiguration.new( \
+          config_path: 'config/credentials.yml.enc', \
+          key_path: 'config/master.key', \
+          env_key: 'RAILS_MASTER_KEY', \
+          raise_if_missing_key: true \
+        ); \
+        credentials = { secret_key_base: '${SECRET_KEY_BASE}' }; \
+        creds.write(credentials.to_yaml); \
+        puts 'Credentials configured correctly.'"
+RUN bundle exec rake i18n:js:export --trace
 RUN bundle exec rake assets:precompile
 
 # The rack interface requires a `tmp` directory to use openstreetmap-cgimap
@@ -114,14 +86,26 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Clone Map-styles
-ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=1ad7f22a04465c32ce82ffaac3aaee0df119648b
+ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=6de6e329569ab6561d1fa6ab2cebb42df7fd17c7
 RUN git clone --branch staging --depth 1 https://github.com/OpenHistoricalMap/map-styles.git $workdir/public/map-styles
 RUN cd $workdir/public/map-styles && git fetch --depth 1 origin $OPENHISTORICALMAP_MAP_STYLES_GITSHA && git checkout $OPENHISTORICALMAP_MAP_STYLES_GITSHA
 RUN rm -rf $workdir/public/map-styles/.git
 COPY update_map_styles.py $workdir/
 
+# Clone leaflet-ohm-timeslider-v2
+ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
+RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git $workdir/public/leaflet-ohm-timeslider-v2 \
+    && cd $workdir/public/leaflet-ohm-timeslider-v2 \
+    && git checkout dd0acbdc9432fae6a4d09a17a4848c391e5064f0 \
+    && rm -rf .git \
+    && chmod 777 -R assets/ \
+    && cp decimaldate.* $workdir/app/assets/javascripts/ \
+    && cp leaflet-ohm-timeslider.* $workdir/app/assets/javascripts/ \
+    && cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ \
+    && cp assets/* $workdir/app/assets/images/
+
 # Add settings
-ADD config/settings.local.yml $workdir/config/
+ADD config/settings.yml $workdir/config/
 
 COPY start.sh $workdir/
 COPY cgimap.sh $workdir/

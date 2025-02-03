@@ -1,57 +1,92 @@
-# Simplification for geometries
-# Zoom levels 0-2,Tolerance=500 => ~1000 meters
-# Zoom levels 3-5,Tolerance=200=> ~500 meters
-# Zoom levels 6-7,Tolerance=100=> ~200 meters
-# Zoom levels 8-9,Tolerance=50=> ~100 meters
-# Zoom levels 10-12,Tolerance=20=> ~50 meters
-# Zoom levels 13-15,Tolerance=5=> ~20 meters
-# Zoom levels 16-20,Tolerance=1=> ~5 meters
-
 [[providers.layers]]
 name = "land_0-2"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 500),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_0_2 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_3-5"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 200),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_3_5 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_6-7"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 70),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_6_7 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_8-9"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 30),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_8_9 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_10-12"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 10),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_10_12 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_13-15"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 5),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_13_15 WHERE geometry && !BBOX!"
 
 [[providers.layers]]
 name = "land_16-20"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "ogc_fid"
-sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 1),!BBOX!) AS geometry, ogc_fid FROM land_polygons WHERE wkb_geometry && !BBOX!"
+sql = "SELECT ST_AsMVTGeom(geometry,!BBOX!) AS geometry, ogc_fid FROM mview_land_16_20 WHERE geometry && !BBOX!"
+
+#######Maps
+
+[[maps.layers]]
+name = "land"
+provider_layer = "osm.land_0-2"
+min_zoom = 0
+max_zoom = 2
+
+[[maps.layers]]
+name = "land"
+provider_layer = "osm.land_3-5"
+min_zoom = 3
+max_zoom = 5
+
+[[maps.layers]]
+name = "land"
+provider_layer = "osm.land_6-7"
+min_zoom = 6
+max_zoom = 7
+
+[[maps.layers]]
+name = "land"
+provider_layer = "osm.land_8-9"
+min_zoom = 8
+max_zoom = 9
+
+[[maps.layers]]
+name = "land"
+provider_layer = "osm.land_10-12"
+min_zoom = 10
+max_zoom = 12
+
+[[maps.layers]]
+name = "land"
+provider_layer = "osm.land_13-15"
+min_zoom = 13
+max_zoom = 15
+
+[[maps.layers]]
+name = "land"
+provider_layer = "osm.land_16-20"
+min_zoom = 16
+max_zoom = 20

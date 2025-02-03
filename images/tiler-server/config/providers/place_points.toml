@@ -10,10 +10,10 @@ SELECT
     osm_id, 
     name,
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
     tags->'capital' AS capital,
     {{LENGUAGES}}
 FROM 
@@ -44,10 +44,10 @@ SELECT
     osm_id, 
     name,
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
     tags->'capital' AS capital,
     {{LENGUAGES}}
 FROM 
@@ -81,10 +81,10 @@ SELECT
     osm_id, 
     name,
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
     tags->'capital' AS capital,
     {{LENGUAGES}}
 FROM 
@@ -122,10 +122,10 @@ SELECT
     osm_id, 
     name,
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
     tags->'capital' AS capital,
     {{LENGUAGES}}
 FROM 
@@ -134,3 +134,27 @@ WHERE
     --type IN ('country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood') 
     geometry && !BBOX!
 """
+#######Maps
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_0_2"
+min_zoom = 0
+max_zoom = 2
+
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_3_5"
+min_zoom = 3
+max_zoom = 5
+
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_6_10"
+min_zoom = 6
+max_zoom = 10
+
+[[maps.layers]]
+name = "place_points"
+provider_layer = "osm.place_points_11_20"
+min_zoom = 11
+max_zoom = 20

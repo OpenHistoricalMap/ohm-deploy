@@ -12,10 +12,10 @@ SELECT
     name, 
     nullif(as_numeric(height), -1) AS height, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_buildings 
@@ -39,10 +39,10 @@ SELECT
     name, 
     nullif(as_numeric(height), -1) AS height, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_buildings 
@@ -66,10 +66,10 @@ SELECT
     name, 
     nullif(as_numeric(height), -1) AS height, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_buildings 
@@ -93,10 +93,10 @@ SELECT
     name, 
     nullif(as_numeric(height), -1) AS height, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_buildings 
@@ -121,10 +121,10 @@ SELECT
     name, 
     nullif(as_numeric(height), -1) AS height, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_buildings 
@@ -148,10 +148,10 @@ SELECT
     name, 
     nullif(as_numeric(height), -1) AS height, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_buildings 
@@ -175,10 +175,10 @@ SELECT
     name, 
     nullif(as_numeric(height), -1) AS height, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_buildings 
@@ -187,3 +187,46 @@ WHERE
     AND name <> ''
     AND geometry && !BBOX!
 """
+#######Maps
+# Buildings
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_14"
+min_zoom = 14
+max_zoom = 14
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_15"
+min_zoom = 15
+max_zoom = 15
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_16"
+min_zoom = 16
+max_zoom = 16
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_17"
+min_zoom = 17
+max_zoom = 17
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_18"
+min_zoom = 18
+max_zoom = 18
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_19"
+min_zoom = 19
+max_zoom = 19
+
+[[maps.layers]]
+name = "buildings_centroids"
+provider_layer = "osm.buildings_20"
+min_zoom = 20
+max_zoom = 20

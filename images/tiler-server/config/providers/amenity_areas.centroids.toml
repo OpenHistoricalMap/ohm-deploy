@@ -11,10 +11,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_amenity_areas 
@@ -37,10 +37,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_amenity_areas 
@@ -63,10 +63,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_amenity_areas 
@@ -89,10 +89,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_amenity_areas 
@@ -116,10 +116,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_amenity_areas 
@@ -142,10 +142,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_amenity_areas 
@@ -168,10 +168,10 @@ SELECT
     osm_id, 
     name, 
     type, 
-    tags->'start_date' AS start_date, 
-    tags->'end_date' AS end_date, 
-    isodatetodecimaldate(pad_date(tags->'start_date', 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(tags->'end_date', 'end'), FALSE) AS end_decdate,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
     osm_amenity_areas 
@@ -180,3 +180,45 @@ WHERE
     AND name <> ''
     AND geometry && !BBOX!
 """
+#######Maps
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_14"
+min_zoom = 14
+max_zoom = 14
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_15"
+min_zoom = 15
+max_zoom = 15
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_16"
+min_zoom = 16
+max_zoom = 16
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_17"
+min_zoom = 17
+max_zoom = 17
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_18"
+min_zoom = 18
+max_zoom = 18
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_19"
+min_zoom = 19
+max_zoom = 19
+
+[[maps.layers]]
+name = "amenity_areas_centroids"
+provider_layer = "osm.amenity_areas_centroids_20"
+min_zoom = 20
+max_zoom = 20

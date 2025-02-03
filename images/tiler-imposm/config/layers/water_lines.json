@@ -1,0 +1,89 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {
+    "water_lines_z8_9": {
+      "source": "water_lines",
+      "sql_filter": "type IN ('river', 'canal')",
+      "tolerance": 100
+    },
+    "water_lines_z10_12": {
+      "source": "water_lines",
+      "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam')",
+      "tolerance": 20
+    },
+    "water_lines_z13_15": {
+      "source": "water_lines",
+      "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam', 'stream')",
+      "tolerance": 5
+    },
+    "water_lines_z16_20": {
+      "source": "water_lines",
+      "sql_filter": "type IN ('river', 'canal', 'cliff', 'dam', 'stream', 'ditch', 'drain')"
+    }
+  },
+  "tables": {
+    "water_lines": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "bridge",
+          "key": "bridge"
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "linestring",
+      "mapping": {
+        "waterway": [
+          "__any__"
+        ],
+        "barrier": [
+          "ditch"
+        ],
+        "natural": [
+          "cliff"
+        ]
+      }
+    }
+  }
+}

@@ -5,10 +5,13 @@ on:
       - 'main'
       - 'staging'
       - 'development'
+      - 'refactor/web_docker'
 jobs:
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 120
+    env:
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
       - uses: actions/checkout@v1
       - name: Login to GitHub Container Registry
@@ -27,10 +30,11 @@ jobs:
         run: |
           pip install chartpress six ruamel.yaml
       - name: Run Chartpress
-        run: chartpress --push
+        run: chartpress --push 
         env:
           GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
-      ################ Development secrets ################ 
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      ################ Development secrets ################
       - name: Staging - substitute secrets
         if: github.ref == 'refs/heads/development'
         uses: bluwy/substitute-string-action@v1
@@ -55,9 +59,12 @@ jobs:
           DEVELOPMENT_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
           DEVELOPMENT_S3_BUCKET: osmseed-dev
           ## tiler
+          
+          DEVELOPMENT_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           DEVELOPMENT_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
           DEVELOPMENT_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           DEVELOPMENT_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          DEVELOPMENT_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
           ## tm
           DEVELOPMENT_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
           DEVELOPMENT_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
@@ -67,10 +74,9 @@ jobs:
           DEVELOPMENT_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
           ## osmcha
           DEVELOPMENT_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
-          DEVELOPMENT_OSMCHA_API_CONSUMER_KEY: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_KEY }}
-          DEVELOPMENT_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_SECRET }}
           DEVELOPMENT_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           DEVELOPMENT_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
       ################ Staging secrets ################ 
       - name: Staging - substitute secrets
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/development'
@@ -95,10 +101,14 @@ jobs:
           STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
           STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
           STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
+          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
           ## tiler
+          STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
           STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
           ## tm
           STAGING_TM_API_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
           STAGING_TM_API_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
@@ -110,10 +120,10 @@ jobs:
           STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
           ## osmcha
           STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
-          STAGING_OSMCHA_API_CONSUMER_KEY: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_KEY }}
-          STAGING_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.STAGING_OSMCHA_API_CONSUMER_SECRET }}
           STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+
       ################ Production secrets ################ 
       - name: Production - substitute secrets
         if: github.ref == 'refs/heads/main'
@@ -139,9 +149,14 @@ jobs:
           PRODUCTION_OAUTH_KEY: ${{ secrets.PRODUCTION_OAUTH_KEY }}
           PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
           PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
+          PRODUCTION_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.PRODUCTION_RAILS_CREDENTIALS_YML_ENC }}
+          PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
+
           ## tiler
+          PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
           PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
           ## tm
           PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
           PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
@@ -154,10 +169,9 @@ jobs:
           PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
           ## osmcha
           PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
-          PRODUCTION_OSMCHA_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_OSMCHA_API_CONSUMER_KEY }}
-          PRODUCTION_OSMCHA_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_OSMCHA_API_CONSUMER_SECRET }}
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
 
       - name: AWS Credentials
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'

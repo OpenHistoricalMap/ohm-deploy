@@ -1,5 +1,0 @@
-[[maps.layers]]
-name = "route_lines"
-provider_layer = "osm.route_lines_5_20"
-min_zoom = 5
-max_zoom = 20

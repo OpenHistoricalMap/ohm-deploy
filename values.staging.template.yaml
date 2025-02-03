@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -153,12 +153,19 @@ osm-seed:
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: ohm-admins@googlegroups.com
-        NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
-        OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
+        NOMINATIM_URL: nominatim-api.openhistoricalmap.org
+        OVERPASS_URL: overpass-api.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
         WEBSITE_STATUS: "online"
+        RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
+        RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
+        RAILS_ENV: production
+        RAILS_LOG_LEVEL: debug
+        RAILS_STORAGE_SERVICE: s3
+        RAILS_STORAGE_REGION: us-east-1
+        RAILS_STORAGE_BUCKET: ohm-website-staging
         # API_TIMEOUT: 600
         # WEB_TIMEOUT: 600
       resources:
@@ -183,7 +190,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       resources:
         enabled: false
         requests:
@@ -196,11 +203,11 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
@@ -221,7 +228,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       schedule: '0 0 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -240,9 +247,12 @@ osm-seed:
     replicationJob:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
         label_value: web_large
+      env:
+        ENABLE_SEND_SLACK_MESSAGE: "true"
+        SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
       resources:
         enabled: false
         requests:
@@ -299,7 +309,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: true
+        enabled: false
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -324,9 +334,9 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: web_large
+          label_value: web_medium
       - name: tm-db
-        enabled: true
+        enabled: false
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -347,7 +357,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: web_large
+          label_value: web_medium
       - name: osmcha-db
         enabled: false
         schedule: '0 1 * * *'
@@ -381,34 +391,37 @@ osm-seed:
   
     tilerDb:
       enabled: true
+      useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
+        enabled: true
       env:
-        POSTGRES_HOST: staging-tiler-db
-        POSTGRES_DB: tiler-osm
+        POSTGRES_HOST: {{STAGING_TILER_DB_HOST}}
+        POSTGRES_DB: tiler_osm_production # Kuberntes existing db called,  tiler-osm
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: {{STAGING_TILER_DB_PASSWORD}}
         POSTGRES_PORT: 5432
+      sharedMemorySize: 128Mi
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID : vol-03e53a4625f0a5c63
+        AWS_ElasticBlockStore_volumeID : vol-099bf0d82fed03c8b
         AWS_ElasticBlockStore_size: 100Gi
       resources:
           enabled: false
           requests:
-            memory: "6Gi"
-            cpu: "1500m"
+            memory: 6Gi
+            cpu: 1500m
           limits:
-            memory: "6Gi"
-            cpu: "1700m"
+            memory: 6Gi
+            cpu: 1700m
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       postgresqlConfig:
-        enabled: true
+        enabled: false
         values: |
           # PostgreSQL configuration
           listen_addresses = '*'
@@ -422,13 +435,17 @@ osm-seed:
           min_wal_size = 256MB
           random_page_cost = 1.1
           effective_cache_size = 12GB
-          log_min_duration_statement = 15000
-          log_connections = on
-          log_disconnections = on
-          log_duration = off
-          log_lock_waits = on
-          log_statement = 'none'
+
+          # Logging Settings
+          log_min_duration_statement = 15000  # Log queries that take more than 15 seconds
+          log_connections = on               # Log database connections
+          log_disconnections = on            # Log database disconnections
+          log_duration = off                 # Do not log the duration of all queries
+          log_lock_waits = on                # Log when queries are waiting for locks
+          log_statement = 'none'             # Avoid logging all queries by default
           log_timezone = 'Etc/UTC'
+
+          # Locale Settings
           datestyle = 'iso, mdy'
           timezone = 'Etc/UTC'
           lc_messages = 'en_US.utf8'
@@ -436,7 +453,8 @@ osm-seed:
           lc_numeric = 'en_US.utf8'
           lc_time = 'en_US.utf8'
           default_text_search_config = 'pg_catalog.english'
-          # Parallelism settings
+
+          # Parallelism Settings
           max_parallel_workers_per_gather = 4
           max_parallel_workers = 8
           max_worker_processes = 8
@@ -444,57 +462,61 @@ osm-seed:
           parallel_setup_cost = 1000
           min_parallel_table_scan_size = 8MB
           min_parallel_index_scan_size = 512kB
-          session_preload_libraries = 'auto_explain,pg_stat_statements'
-          auto_explain.log_min_duration = '15s'
-          # Timeout settings
+
+          # Shared Libraries for Monitoring and Optimization
+          shared_preload_libraries = 'auto_explain,pg_stat_statements'
+          auto_explain.log_min_duration = '15s'  # Log queries explained by auto_explain that take more than 15 seconds
+
+          # Timeout Settings
           tcp_keepalives_idle = 300
           tcp_keepalives_interval = 60
           tcp_keepalives_count = 10
-          # Disable join options for routes
-          enable_mergejoin = false
-          enable_hashjoin = false
-          # Complete large queries statements
-          statement_timeout = '600s'
-          lock_timeout = '60s'
-          idle_in_transaction_session_timeout = '600s'
-          # pg_stat_statements settings
-          pg_stat_statements.max = 10000
-          pg_stat_statements.track = all
+          enable_mergejoin = false  # Disable merge joins for specific query patterns
+          enable_hashjoin = false   # Disable hash joins for specific query patterns
+          statement_timeout = '600s'  # Maximum time allowed for a query to complete (10 minutes)
+          lock_timeout = '60s'        # Maximum time to wait for a lock (60 seconds)
+          idle_in_transaction_session_timeout = '600s'  # Terminate idle transactions after 10 minutes
+
+          # pg_stat_statements Settings
+          pg_stat_statements.max = 10000  # Maximum number of queries tracked in pg_stat_statements
+          pg_stat_statements.track = all  # Track all queries (DDL, DML, etc.)
+
 
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
   
     tilerImposm:
-      enabled: true
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: web_large
+      enabled: false
       env:
         TILER_IMPORT_FROM: osm
-        TILER_IMPORT_PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240726_0003.osm.pbf
+        TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
         REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-        SEQUENCE_NUMBER: "1497000"
+        SEQUENCE_NUMBER: '1690000'
         OVERWRITE_STATE: false
         UPLOAD_EXPIRED_FILES: true
         IMPORT_NATURAL_EARTH: true
         IMPORT_OSM_LAND: true
+        IMPOSM3_IMPORT_LAYERS: all
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
         # In case cloudProvider: aws
-        AWS_ElasticBlockStore_volumeID: vol-05eeb57b8e67b3cd5
-        AWS_ElasticBlockStore_size: 200Gi
+        AWS_ElasticBlockStore_volumeID: vol-0b77b2c5e00d8f452
+        AWS_ElasticBlockStore_size: 50Gi
       resources:
         enabled: false
         requests:
-          memory: "20Gi"
-          cpu: "8"
+          memory: 20Gi
+          cpu: '8'
         limits:
-          memory: "24Gi"
-          cpu: "10"
+          memory: 24Gi
+          cpu: '10'
+      nodeSelector:
+        enabled: true
+        label_key: nodegroup_type
+        label_value: web_medium
     # ====================================================================================================
     # Variables for tiler-server
     # ====================================================================================================
@@ -502,11 +524,10 @@ osm-seed:
     tilerServer:
       enabled: true
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
-      commad: './start.sh'
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: vtiles.staging.openhistoricalmap.org
@@ -521,6 +542,8 @@ osm-seed:
         TILER_CACHE_AWS_ACCESS_KEY_ID: {{STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID}}
         TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
         # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
+        EXECUTE_REINDEX: false
+        EXECUTE_VACUUM_ANALYZE: false
       persistenceDisk:
         enabled: false
         accessMode: ReadWriteOnce
@@ -531,11 +554,11 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: "2Gi"
-          cpu: "1"
+          memory: 2Gi
+          cpu: '1'
         limits:
-          memory: "10Gi"
-          cpu: "2"
+          memory: 10Gi
+          cpu: '2'
       autoscaling:
         enabled: false
         minReplicas: 1
@@ -545,21 +568,21 @@ osm-seed:
     # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
     # ====================================================================================================
     tilerServerCacheCleaner:
-      enabled: true
+      enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
-      command: './cache_cleaner.sh'
+      command: './cache_cleaner.sh' 
       resources:
         enabled: true
         requests:
-          memory: "1Gi"
-          cpu: "500m"
+          memory: 1Gi
+          cpu: '500m'
         limits:
-          memory: "1Gi"
-          cpu: "600m"
+          memory: 1Gi
+          cpu: '600m'
       env:
         KILL_PROCESS: manually
         MAX_NUM_PS: 4
@@ -581,7 +604,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       env:
         POSTGRES_DB: tm
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
@@ -610,7 +633,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       replicaCount: 1
       staticIp: c
       serviceAnnotations:
@@ -649,10 +672,10 @@ osm-seed:
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
         TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
-        TM_ORG_FB: openhistoricalmap
-        TM_ORG_INSTAGRAM: openhistoricalmap
-        TM_ORG_TWITTER: openhistoricalmap
-        TM_ORG_YOUTUBE: openhistoricalmap
+        TM_ORG_FB: https://www.facebook.com/openhistoricalmap
+        TM_ORG_INSTAGRAM: https://www.openhistoricalmap.org
+        TM_ORG_TWITTER: https://x.com/OpenHistMap
+        TM_ORG_YOUTUBE: https://www.youtube.com/playlist?list=PLOi35w6_Hpx_CYdYBUpPeuiJ1djn5-wIx
       resources:
         enabled: false
         requests:
@@ -751,7 +774,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: taginfo.staging.openhistoricalmap.org
@@ -779,7 +802,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: web_medium
       cronjob:
         enabled: false
         schedule: "0 2 */3 * *"
@@ -856,54 +879,54 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
+      image:
+        name: ghcr.io/openhistoricalmap/osmcha-frontend
+        tag: d004a05
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       image:
-        name: "ghcr.io/openhistoricalmap/osmcha-django"
-        tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
+        name: ghcr.io/openhistoricalmap/osmcha-django
+        tag: 1e9d9dd
       ingressDomain: osmcha.staging.openhistoricalmap.org
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}        
-        OAUTH_OSM_KEY: {{STAGING_OSMCHA_API_CONSUMER_KEY}}
-        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_API_CONSUMER_SECRET}}
+        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}
         DJANGO_SECURE_SSL_REDIRECT: "False"
         OSM_SERVER_URL: https://www.openhistoricalmap.org
-        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/oauth-landing.html
+        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/authorized
         OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
         ## frontend
         OSMCHA_URL: https://osmcha.staging.openhistoricalmap.org
         OSMCHA_API_URL: www.openhistoricalmap.org
-        REACT_APP_OSM_URL: https://www.openhistoricalmap.org
-        REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
-        REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
-        REACT_APP_ENABLE_REAL_CHANGESETS: 0
-        REACT_APP_MAPBOX_ACCESS_TOKEN: {{STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
+        OAUTH2_OSM_KEY: tHRgc_GVLsUj2tuVQSg05nn5f8Tnda8mF-ZfEbI3ItA
+        OAUTH2_OSM_SECRET: s9blyq71UditeidYeiQc_J40-DffUh3EVlDCGVcskQI
       resources:
         enabled: false
         requests:
-          memory: "512Mi"
-          cpu: "1"
+          memory: '512Mi'
+          cpu: '1'
         limits:
-          memory: "512Mi"
-          cpu: "1"
+          memory: '512Mi'
+          cpu: '1'
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
         label_value: web
+      fetch_changesets_cronjob: '*/2 * * * *'
+      process_changesets_cronjob: '0 * * * *'
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
-      image:
-        name: "developmentseed/osmseed-osmcha-db"
-        tag: "0.1.0-n767.h0090e97"
+      enabled: true
+      # image:
+      #   name: developmentseed/osmseed-osmcha-db
+      #   tag: 0.1.0-n767.h0090e97
       env:
         POSTGRES_DB: osmcha
         POSTGRES_USER: postgres
@@ -911,11 +934,11 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: "20Gi"
-          cpu: "8"
+          memory: '20Gi'
+          cpu: '8'
         limits:
-          memory: "24Gi"
-          cpu: "10"
+          memory: '24Gi'
+          cpu: '10'
       persistenceDisk:
         enabled: false
         accessMode: ReadWriteOnce
@@ -932,8 +955,83 @@ osm-seed:
       nodeSelector:
         enabled: false
 # ====================================================================================================
+# Variables for osmcha osm-adiff-service
+# ====================================================================================================
+    adiffService:
+      enabled: false
+      image:
+        name: ghcr.io/openhistoricalmap/osm-adiff-service
+        tag: a343422497bb2ad4735ca7eada921b60eeb19e20
+# ====================================================================================================
 # Planet files server
 # ====================================================================================================
     planetFiles:
       enabled: false
-      
+
+# ====================================================================================================
+# Tiles cache SQS processor
+# ====================================================================================================
+ohm:
+  tilerCache:
+    enabled: true
+    
+  tilerCachePurge:
+    enabled: false
+    env:
+      REGION_NAME: us-east-1
+      NAMESPACE: default # Namespace to run the job
+      DOCKER_IMAGE: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2091.h774c4ed # TODO, this should be automatically updated from tiler server image
+      SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
+      NODEGROUP_TYPE: web_medium # Nodegroup type to run the purge and seed job
+      # Maximum number of active jobs in high concurrency queue
+      MAX_ACTIVE_JOBS: 10 
+      DELETE_OLD_JOBS_AGE: 3600 # 1 hours
+      ## Execute purging
+      EXECUTE_PURGE: true
+      PURGE_CONCURRENCY: 64
+      PURGE_MIN_ZOOM: 3
+      PURGE_MAX_ZOOM: 12 # Purging zoom 15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
+      ## Execute seeding
+      EXECUTE_SEED: false
+      SEED_CONCURRENCY: 64
+      SEED_MIN_ZOOM: 0
+      SEED_MAX_ZOOM: 12
+      ## Remove tiles from s3 for zoom levels
+      ZOOM_LEVELS_TO_DELETE: 13,14,15,16,17,18,19,20
+      S3_BUCKET_CACHE_TILER: tiler-cache-staging
+      S3_BUCKET_PATH_FILES: mnt/data/osm
+    resources:
+      enabled: false
+      requests:
+        memory: 20Gi
+        cpu: '8'
+      limits:
+        memory: 24Gi
+        cpu: '10'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web_medium
+
+  # Tiler seed by default is giong to seet tiles from 0-5 zoom level
+  tilerCacheSeed:
+    enabled: false
+    schedule: '* * * * *'
+    env:
+      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
+      ZOOM_LEVELS: 8,9,10
+      CONCURRENCY: 128
+      S3_BUCKET: osmseed-dev
+      OUTPUT_FILE: /logs/tiler_benchmark.log
+    resources:
+      enabled: false
+      requests:
+        memory: 20Gi
+        cpu: '8'
+      limits:
+        memory: 24Gi
+        cpu: '10'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web_medium
