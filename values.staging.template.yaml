@@ -879,54 +879,54 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
+      image:
+        name: ghcr.io/openhistoricalmap/osmcha-frontend
+        tag: d004a05
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       image:
-        name: "ghcr.io/openhistoricalmap/osmcha-django"
-        tag: "a1bcea85dc1f7c27566c20bafe7fff7aaa1e38a4"
+        name: ghcr.io/openhistoricalmap/osmcha-django
+        tag: 1e9d9dd
       ingressDomain: osmcha.staging.openhistoricalmap.org
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}        
-        OAUTH_OSM_KEY: {{STAGING_OSMCHA_API_CONSUMER_KEY}}
-        OAUTH_OSM_SECRET: {{STAGING_OSMCHA_API_CONSUMER_SECRET}}
+        DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}
         DJANGO_SECURE_SSL_REDIRECT: "False"
         OSM_SERVER_URL: https://www.openhistoricalmap.org
-        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/oauth-landing.html
+        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/authorized
         OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
         ## frontend
         OSMCHA_URL: https://osmcha.staging.openhistoricalmap.org
         OSMCHA_API_URL: www.openhistoricalmap.org
-        REACT_APP_OSM_URL: https://www.openhistoricalmap.org
-        REACT_APP_OSM_API: https://www.openhistoricalmap.org/api/0.6
-        REACT_APP_OVERPASS_BASE: //overpass-api.openhistoricalmap.org/api/interpreter
-        REACT_APP_ENABLE_REAL_CHANGESETS: 0
-        REACT_APP_MAPBOX_ACCESS_TOKEN: {{STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN}}
+        OAUTH2_OSM_KEY: tHRgc_GVLsUj2tuVQSg05nn5f8Tnda8mF-ZfEbI3ItA
+        OAUTH2_OSM_SECRET: s9blyq71UditeidYeiQc_J40-DffUh3EVlDCGVcskQI
       resources:
         enabled: false
         requests:
-          memory: "512Mi"
-          cpu: "1"
+          memory: '512Mi'
+          cpu: '1'
         limits:
-          memory: "512Mi"
-          cpu: "1"
+          memory: '512Mi'
+          cpu: '1'
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
         label_value: web
+      fetch_changesets_cronjob: '*/2 * * * *'
+      process_changesets_cronjob: '0 * * * *'
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
-      image:
-        name: "developmentseed/osmseed-osmcha-db"
-        tag: "0.1.0-n767.h0090e97"
+      enabled: true
+      # image:
+      #   name: developmentseed/osmseed-osmcha-db
+      #   tag: 0.1.0-n767.h0090e97
       env:
         POSTGRES_DB: osmcha
         POSTGRES_USER: postgres
@@ -934,11 +934,11 @@ osm-seed:
       resources:
         enabled: false
         requests:
-          memory: "20Gi"
-          cpu: "8"
+          memory: '20Gi'
+          cpu: '8'
         limits:
-          memory: "24Gi"
-          cpu: "10"
+          memory: '24Gi'
+          cpu: '10'
       persistenceDisk:
         enabled: false
         accessMode: ReadWriteOnce
@@ -954,6 +954,14 @@ osm-seed:
         GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: false
+# ====================================================================================================
+# Variables for osmcha osm-adiff-service
+# ====================================================================================================
+    adiffService:
+      enabled: false
+      image:
+        name: ghcr.io/openhistoricalmap/osm-adiff-service
+        tag: a343422497bb2ad4735ca7eada921b60eeb19e20
 # ====================================================================================================
 # Planet files server
 # ====================================================================================================
