@@ -7,6 +7,7 @@ from datetime import datetime, timezone, timedelta
 import logging
 from utils import check_tiler_db_postgres_status
 from s3_cleanup import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
+import threading
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -23,7 +24,7 @@ DOCKER_IMAGE = os.getenv(
     "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1780.h62561a8",
 )
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
-MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
+MAX_ACTIVE_JOBS = 1
 DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))  # default 1 hour
 
 # Tiler cache purge and seed settings
@@ -86,7 +87,7 @@ def get_active_jobs_count():
     logging.info(f"Total active or pending jobs: {active_jobs_count}")
     return active_jobs_count
 
-def get_purge_and_seed_commands(script_path='purge_and_seed.sh'):
+def get_purge_and_seed_commands(script_path='purge_seed_tiles.sh'):
     try:
         with open(script_path, 'r') as file:
             commands = file.read()
@@ -225,7 +226,11 @@ def process_sqs_messages():
                     create_kubernetes_job(file_url, file_name)
 
                     # Remove zoom levels 18,19,20
-                    cleanup_zoom_levels(file_url, ZOOM_LEVELS_TO_DELETE, S3_BUCKET_CACHE_TILER, S3_BUCKET_PATH_FILES)
+                    cleanup_thread = threading.Thread(
+                        target=cleanup_zoom_levels, 
+                        args=(file_url, ZOOM_LEVELS_TO_DELETE, S3_BUCKET_CACHE_TILER, S3_BUCKET_PATH_FILES)
+                    )
+                    cleanup_thread.start()
 
                 elif "Event" in body and body["Event"] == "s3:TestEvent":
                     logging.info("Test event detected. Ignoring...")
@@ -241,7 +246,6 @@ def process_sqs_messages():
                 logging.error(f"Error processing message: {e}")
 
         time.sleep(10)
-
 
 if __name__ == "__main__":
     logging.info("Starting SQS message processing...")

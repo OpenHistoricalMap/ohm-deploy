@@ -1,6 +1,5 @@
 import boto3
 import re
-import click
 import logging
 
 def compute_children_tiles(s3_path, zoom_levels):
@@ -12,9 +11,9 @@ def compute_children_tiles(s3_path, zoom_levels):
         zoom_levels (list): List of zoom levels for which to compute children.
 
     Returns:
-        list: A list of child tile paths in "zoom/x/y" format only for the target zoom levels.
+        list: A sorted list of unique child tile paths in "zoom/x/y" format only for the target zoom levels.
     """
-    logging.info(f"Starting computation of child tiles for {s3_path} and zoom levels {zoom_levels}.")
+    logging.info(f"Starting computation of child tiles for {s3_path} and zoom levels {sorted(set(zoom_levels))}.")
     
     s3_client = boto3.client("s3")
     s3_match = re.match(r"s3://([^/]+)/(.+)", s3_path)
@@ -35,23 +34,24 @@ def compute_children_tiles(s3_path, zoom_levels):
             match = re.match(r"(\d+)/(\d+)/(\d+)", tile)
             if match:
                 z, x, y = map(int, match.groups())
-                for target_zoom in zoom_levels:
+                for target_zoom in sorted(set(zoom_levels)):
                     while z < target_zoom:
                         x *= 2
                         y *= 2
                         z += 1
-                        # Add all 4 children tiles only for the target zoom level
                         if z == target_zoom:
-                            child_tiles.add(f"{z}/{x}/{y}")
-                            child_tiles.add(f"{z}/{x+1}/{y}")
-                            child_tiles.add(f"{z}/{x}/{y+1}")
-                            child_tiles.add(f"{z}/{x+1}/{y+1}")
+                            child_tiles.update([
+                                f"{z}/{x}/{y}",
+                                f"{z}/{x+1}/{y}",
+                                f"{z}/{x}/{y+1}",
+                                f"{z}/{x+1}/{y+1}"
+                            ])
 
     except Exception as e:
         logging.error(f"Error processing S3 file: {e}")
         raise
 
-    return list(child_tiles)
+    return sorted(child_tiles) 
 
 def generate_tile_patterns(tiles):
     """
@@ -64,13 +64,18 @@ def generate_tile_patterns(tiles):
         list: List of unique patterns in the format 'zoom/prefix'.
     """
     patterns = set()
+    
     for tile in tiles:
         match = re.match(r"(\d+)/(\d+)/(\d+)", tile)
         if match:
             zoom, x, _ = match.groups()
-            prefix = f"{zoom}/{str(x)[:2]}"
+            x_str = str(x)
+            # If x has 2 or more digits, take the first 2 digits; otherwise, keep it as is
+            prefix = f"{zoom}/{x_str[:2]}" if len(x_str) > 1 else f"{zoom}/{x_str}"
             patterns.add(prefix)
-    return list(patterns)
+
+    return sorted(patterns)
+
 
 def delete_folders_by_pattern(bucket_name, patterns, path_file):
     """
@@ -90,7 +95,7 @@ def delete_folders_by_pattern(bucket_name, patterns, path_file):
         for pattern in patterns:
             zoom, prefix = pattern.split("/")
             folder_prefix = f"{path_file}/{zoom}/{prefix}"
-            logging.info(f"Looking for objects under folder: {folder_prefix}")
+            logging.info(f"Looking for objects under folder: {folder_prefix}...")
             paginator = s3_client.get_paginator("list_objects_v2")
             response_iterator = paginator.paginate(Bucket=bucket_name, Prefix=folder_prefix)
 
