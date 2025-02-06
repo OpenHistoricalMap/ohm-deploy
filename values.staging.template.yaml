@@ -976,7 +976,7 @@ ohm:
     enabled: true
     
   tilerCachePurge:
-    enabled: false
+    enabled: true
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
