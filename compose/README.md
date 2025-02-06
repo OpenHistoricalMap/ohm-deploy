@@ -19,3 +19,11 @@ Make a coppy of the enviroment files `envs/.env.tiler.example` file and name it 
 docker compose -f compose/tiler.yml build
 docker compose -f compose/tiler.yml run --service-ports tiler bash
 ```
+
+
+## Tasking manager
+Make a coppy of the enviroment files `envs/.env.tiler.example` file and name it `envs/.env.tiler`.
+
+```sh
+docker compose -f compose/tm.yml run --service-ports tm-web bash
+```

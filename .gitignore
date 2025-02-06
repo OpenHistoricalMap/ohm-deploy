@@ -13,9 +13,12 @@ config.toml
 !config.general.toml
 !config.osm.template.toml
 config.osm.toml
+envs/.env.tm
+values.staging.yaml
 
 .DS_Store
 */.DS_Store
 .env
 values.dev.staging.yaml
 images/tiler-server/utils/exec.sh
+__pycache__/

@@ -10,7 +10,7 @@ services:
       - ../envs/.env.tiler
     restart: always
   tm-web:
-    image: node:16
+    image: node:18
     ports:
       - "3000:3000"
     env_file:

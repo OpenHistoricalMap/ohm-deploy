@@ -39,7 +39,7 @@ spec:
             - name: SQS_QUEUE_URL
               value: {{  .Values.ohm.tilerCachePurge.env.SQS_QUEUE_URL | quote }}
             - name: DOCKER_IMAGE
-              value: "{{ .Values.tilerServer.image.name }}:{{ .Values.tilerServer.image.tag }}"
+              value: "{{ .Values.osm-seed.tilerServer.image.name }}:{{ .Values.osm-seed.tilerServer.image.tag }}"
             - name: NODEGROUP_TYPE
               value: {{ .Values.ohm.tilerCachePurge.env.NODEGROUP_TYPE | quote }}
             - name: MAX_ACTIVE_JOBS
