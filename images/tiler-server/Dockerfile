@@ -61,7 +61,7 @@ RUN cd /opt/ && python build_config.py \
     other_lines,\
     other_points"
 
-COPY ./tile2bounds.py .
+COPY ./*.py .
 COPY ./*.sh .
 
 ENTRYPOINT ["/bin/bash", "-c"]
