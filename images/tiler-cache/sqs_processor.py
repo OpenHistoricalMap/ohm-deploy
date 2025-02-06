@@ -24,7 +24,7 @@ DOCKER_IMAGE = os.getenv(
     "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1780.h62561a8",
 )
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
-MAX_ACTIVE_JOBS = 1
+MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
 DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))  # default 1 hour
 
 # Tiler cache purge and seed settings
