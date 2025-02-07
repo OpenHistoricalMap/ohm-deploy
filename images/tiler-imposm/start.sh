@@ -142,8 +142,11 @@ function updateData() {
 
     # create views 
     echo "Create views"
+    psql $PG_CONNECTION -f queries/transport_lines_mviews.sql
+    
     python materialized_views.py &
     local local_last_state_path="$DIFF_DIR/last.state.txt"
+
     ### Update the DB with the new data from minute replication
     if [ "$OVERWRITE_STATE" = "true" ]; then
         echo "Overwriting last.state.txt..."
@@ -218,7 +221,7 @@ function importData() {
     # These index will help speed up tegola tile generation
     psql $PG_CONNECTION -f queries/postgis_post_import.sql
     psql $PG_CONNECTION -f queries/land_mviews.sql
-    # psql $PG_CONNECTION -f queries/postgis_helpers.sql
+    psql $PG_CONNECTION -f queries/transport_lines_mviews.sql
 
     # To not import again
     touch $INIT_FILE

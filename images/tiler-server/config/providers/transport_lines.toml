@@ -142,7 +142,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z14_20
+    osm_transport_lines
 WHERE 
     geometry && !BBOX!
 """

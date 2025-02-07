@@ -28,7 +28,7 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     python3 -m pip install pip --upgrade && \
     python3 -m pip install wheel
 
-RUN apt-get update && apt-get install -y postgresql-client && \
+RUN apt-get update && apt-get install -y postgresql-client postgresql-14-cron && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget -c https://dl.google.com/go/go1.21.0.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
