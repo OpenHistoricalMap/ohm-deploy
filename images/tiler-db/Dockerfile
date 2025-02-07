@@ -19,7 +19,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN mkdir -p /docker-entrypoint-initdb.d
 
 COPY ./scripts/update_db.sh /docker-entrypoint-initdb.d/
-COPY ./scripts/update_postgresql.sh /docker-entrypoint-initdb.d/
+# COPY ./scripts/update_postgresql.sh /docker-entrypoint-initdb.d/
 WORKDIR /usr/local/datefunctions
 RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git .
 
