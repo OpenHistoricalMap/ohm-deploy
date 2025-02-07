@@ -105,11 +105,3 @@ BEGIN
         RAISE NOTICE 'Indexes created on mview_transport_lines%s', zoom;
     END LOOP;
 END $$;
-
-
-SELECT cron.schedule('refresh_transport_views', '*/2 * * * *', $$ 
-    REFRESH MATERIALIZED VIEW CONCURRENTLY mview_transport_lines_z5_7;
-    REFRESH MATERIALIZED VIEW CONCURRENTLY mview_transport_lines_z8_9;
-    REFRESH MATERIALIZED VIEW CONCURRENTLY mview_transport_lines_z10_11;
-    REFRESH MATERIALIZED VIEW CONCURRENTLY mview_transport_lines_z12_13;
-$$);

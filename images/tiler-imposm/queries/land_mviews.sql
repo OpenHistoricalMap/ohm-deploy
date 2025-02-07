@@ -1,3 +1,5 @@
+-- This query creates materialized views for land polygons
+
 -- Materialized View for land_0-2
 CREATE MATERIALIZED VIEW mview_land_0_2 AS
 SELECT 
@@ -6,6 +8,9 @@ SELECT
 FROM land_polygons
 WHERE wkb_geometry IS NOT NULL
   AND ST_Simplify(wkb_geometry, 500) IS NOT NULL;
+
+CREATE INDEX idx_mview_land_0_2_geom ON mview_land_0_2 USING GIST (geometry);
+CREATE INDEX idx_mview_land_0_2_ogc_fid ON mview_land_0_2 (ogc_fid);
 
 -- Materialized View for land_3-5
 CREATE MATERIALIZED VIEW mview_land_3_5 AS
@@ -16,6 +21,9 @@ FROM land_polygons
 WHERE wkb_geometry IS NOT NULL
   AND ST_Simplify(wkb_geometry, 200) IS NOT NULL;
 
+CREATE INDEX idx_mview_land_3_5_geom ON mview_land_3_5 USING GIST (geometry);
+CREATE INDEX idx_mview_land_3_5_ogc_fid ON mview_land_3_5 (ogc_fid);
+
 -- Materialized View for land_6-7
 CREATE MATERIALIZED VIEW mview_land_6_7 AS
 SELECT 
@@ -24,6 +32,9 @@ SELECT
 FROM land_polygons
 WHERE wkb_geometry IS NOT NULL
   AND ST_Simplify(wkb_geometry, 70) IS NOT NULL;
+
+CREATE INDEX idx_mview_land_6_7_geom ON mview_land_6_7 USING GIST (geometry);
+CREATE INDEX idx_mview_land_6_7_ogc_fid ON mview_land_6_7 (ogc_fid);
 
 -- Materialized View for land_8-9
 CREATE MATERIALIZED VIEW mview_land_8_9 AS
@@ -34,6 +45,9 @@ FROM land_polygons
 WHERE wkb_geometry IS NOT NULL
   AND ST_Simplify(wkb_geometry, 30) IS NOT NULL;
 
+CREATE INDEX idx_mview_land_8_9_geom ON mview_land_8_9 USING GIST (geometry);
+CREATE INDEX idx_mview_land_8_9_ogc_fid ON mview_land_8_9 (ogc_fid);
+
 -- Materialized View for land_10-12
 CREATE MATERIALIZED VIEW mview_land_10_12 AS
 SELECT 
@@ -42,6 +56,9 @@ SELECT
 FROM land_polygons
 WHERE wkb_geometry IS NOT NULL
   AND ST_Simplify(wkb_geometry, 10) IS NOT NULL;
+
+CREATE INDEX idx_mview_land_10_12_geom ON mview_land_10_12 USING GIST (geometry);
+CREATE INDEX idx_mview_land_10_12_ogc_fid ON mview_land_10_12 (ogc_fid);
 
 -- Materialized View for land_13-15
 CREATE MATERIALIZED VIEW mview_land_13_15 AS
@@ -52,6 +69,9 @@ FROM land_polygons
 WHERE wkb_geometry IS NOT NULL
   AND ST_Simplify(wkb_geometry, 5) IS NOT NULL;
 
+CREATE INDEX idx_mview_land_13_15_geom ON mview_land_13_15 USING GIST (geometry);
+CREATE INDEX idx_mview_land_13_15_ogc_fid ON mview_land_13_15 (ogc_fid);
+
 -- Materialized View for land_16-20
 CREATE MATERIALIZED VIEW mview_land_16_20 AS
 SELECT 
@@ -60,3 +80,6 @@ SELECT
 FROM land_polygons
 WHERE wkb_geometry IS NOT NULL
   AND ST_Simplify(wkb_geometry, 1) IS NOT NULL;
+
+CREATE INDEX idx_mview_land_16_20_geom ON mview_land_16_20 USING GIST (geometry);
+CREATE INDEX idx_mview_land_16_20_ogc_fid ON mview_land_16_20 (ogc_fid);
