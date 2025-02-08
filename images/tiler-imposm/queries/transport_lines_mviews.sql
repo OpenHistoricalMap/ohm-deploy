@@ -83,22 +83,27 @@ BEGIN
 END $$;
 
 
-
 DO $$ 
 DECLARE 
     zoom_levels TEXT[] := ARRAY['_z5_7', '_z8_9', '_z10_11', '_z12_13'];
     zoom TEXT;
-    sql_osm_id TEXT;
+    sql_unique_index TEXT;
     sql_geometry TEXT;
 BEGIN
     FOR zoom IN SELECT UNNEST(zoom_levels)
     LOOP
-        -- Create index on osm_id
-        sql_osm_id := format('CREATE INDEX idx_mview_transport_lines%s_osm_id ON mview_transport_lines%s (osm_id);', zoom, zoom);
-        EXECUTE sql_osm_id;
+        -- Create UNIQUE index
+        sql_unique_index := format(
+            'CREATE UNIQUE INDEX idx_mview_transport_lines%s_osm_id ON mview_transport_lines%s (osm_id);', 
+            zoom, zoom
+        );
+        EXECUTE sql_unique_index;
 
         -- Create spatial index on geometry
-        sql_geometry := format('CREATE INDEX idx_mview_transport_lines%s_geom ON mview_transport_lines%s USING GIST (geometry);', zoom, zoom);
+        sql_geometry := format(
+            'CREATE INDEX idx_mview_transport_lines%s_geom ON mview_transport_lines%s USING GIST (geometry);', 
+            zoom, zoom
+        );
         EXECUTE sql_geometry;
 
         -- Log success message
