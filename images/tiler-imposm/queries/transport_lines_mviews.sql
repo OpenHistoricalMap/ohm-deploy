@@ -43,7 +43,7 @@ BEGIN
             FROM osm_transport_lines%s
             WHERE geometry IS NOT NULL
             UNION ALL
-            SELECT
+            SELECT DISTINCT ON (osm_id)
                 ''relation_'' || CAST(osm_id AS TEXT) || ''_'' || COALESCE(CAST(member AS TEXT), '''') AS osm_id,
                 geometry,
                 type,
@@ -92,9 +92,9 @@ DECLARE
 BEGIN
     FOR zoom IN SELECT UNNEST(zoom_levels)
     LOOP
-        -- Create UNIQUE index
+        -- Create UNIQUE index using osm_id + type to prevent duplicates
         sql_unique_index := format(
-            'CREATE UNIQUE INDEX idx_mview_transport_lines%s_osm_id ON mview_transport_lines%s (osm_id);', 
+            'CREATE UNIQUE INDEX idx_mview_transport_lines%s_osm_id ON mview_transport_lines%s (osm_id, type);', 
             zoom, zoom
         );
         EXECUTE sql_unique_index;
