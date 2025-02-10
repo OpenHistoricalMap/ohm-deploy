@@ -17,9 +17,7 @@ SELECT
     {{LENGUAGES}} 
 FROM 
     mview_admin_boundaries_centroid_z0_2
-WHERE 
-    has_label = 0 
-    AND geometry && !BBOX!
+WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -41,9 +39,7 @@ SELECT
     {{LENGUAGES}} 
 FROM 
     mview_admin_boundaries_centroid_z3_5
-WHERE 
-    has_label = 0 
-    AND geometry && !BBOX!
+WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -65,9 +61,7 @@ SELECT
     {{LENGUAGES}} 
 FROM 
     mview_admin_boundaries_centroid_z6_7
-WHERE 
-    has_label = 0 
-    AND geometry && !BBOX!
+WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -89,9 +83,7 @@ SELECT
     {{LENGUAGES}} 
 FROM 
     mview_admin_boundaries_centroid_z8_9
-WHERE 
-    has_label = 0 
-    AND geometry && !BBOX!
+WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -113,9 +105,7 @@ SELECT
     {{LENGUAGES}} 
 FROM 
     mview_admin_boundaries_centroid_z10_12
-WHERE 
-    has_label = 0 
-    AND geometry && !BBOX!
+WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -137,9 +127,7 @@ SELECT
     {{LENGUAGES}} 
 FROM 
     mview_admin_boundaries_centroid_z13_15
-WHERE 
-    has_label = 0 
-    AND geometry && !BBOX!
+WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -161,9 +149,7 @@ SELECT
     {{LENGUAGES}} 
 FROM 
     mview_admin_boundaries_centroid_z16_20
-WHERE 
-    has_label = 0 
-    AND geometry && !BBOX!
+WHERE geometry && !BBOX!
 """
 #######Maps
 [[maps.layers]]
