@@ -60,8 +60,8 @@ BEGIN
                 start_date,
                 end_date,
                 tags,
-                NULL AS member, -- No member in osm_transport_lines
-                'osm_transport_lines' AS source_table
+                NULL AS member,
+                'way' AS source_type
             FROM %s
             WHERE geometry IS NOT NULL
 
@@ -92,8 +92,8 @@ BEGIN
                 start_date,
                 end_date,
                 tags,
-                member, -- Include member from osm_transport_multilines
-                'osm_transport_multilines' AS source_table
+                member,
+                'relation' AS source_type
             FROM %s
             WHERE ST_GeometryType(geometry) = 'ST_LineString'
             AND geometry IS NOT NULL;

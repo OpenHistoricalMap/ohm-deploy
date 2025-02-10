@@ -6,7 +6,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     type, 
     tunnel, 
     bridge, 
@@ -35,7 +37,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id,
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     type, 
@@ -65,7 +69,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     type, 
@@ -95,7 +101,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     tunnel, 
@@ -125,7 +133,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id,  
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     type, 

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SLEEP_INTERVAL=120
+# Update materialized views every 10 seconds. Actually, it will be in the queue until the previous one is done.
+SLEEP_INTERVAL=10
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB"
 
 function log_message() {
