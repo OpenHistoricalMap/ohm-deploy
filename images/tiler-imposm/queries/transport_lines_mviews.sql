@@ -33,7 +33,7 @@ BEGIN
         -- Construct the SQL query to create the materialized view
         sql_create := format(
             'CREATE MATERIALIZED VIEW mview_transport_lines%s AS
-            SELECT
+            SELECT DISTINCT ON (osm_id, type) 
                 md5(COALESCE(CAST(osm_id AS TEXT), '''') || ''_'' || COALESCE(type, '''')) AS osm_id, 
                 geometry,
                 type,
@@ -64,7 +64,7 @@ BEGIN
 
             UNION ALL
 
-            SELECT
+            SELECT DISTINCT ON (osm_id, type, member)  -- Keeps only the first row per unique combo
                 md5(COALESCE(CAST(osm_id AS TEXT), '''') || ''_'' || COALESCE(CAST(member AS TEXT), '''') || ''_'' || COALESCE(type, '''')) AS osm_id,
                 geometry,
                 type,
@@ -104,6 +104,8 @@ BEGIN
 
     RAISE NOTICE 'Materialized view creation process completed successfully!';
 END $$;
+
+
 
 DO $$ 
 DECLARE 
