@@ -1,3 +1,5 @@
+-- This script creates materialized views for transport lines
+-- it creates a materialized views for each zoom level merging transport lines and one for the multilines
 DO $$ 
 DECLARE 
     zoom_levels TEXT[] := ARRAY['_z5_7', '_z8_9', '_z10_11', '_z12_13', '_z14_20'];
@@ -117,7 +119,6 @@ BEGIN
         RAISE NOTICE 'Indexes successfully created for mview_transport_lines%s', zoom;
     END LOOP;
 
-    RAISE NOTICE 'Materialized view and index creation process completed successfully!';
 END $$;
 
 -- Refresh Materialized Views

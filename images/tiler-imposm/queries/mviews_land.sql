@@ -1,3 +1,4 @@
+-- This script creates materialized views for land polygons.
 -- ==========================
 -- MATERIALIZED VIEW FOR LAND_Z0_2
 -- ==========================

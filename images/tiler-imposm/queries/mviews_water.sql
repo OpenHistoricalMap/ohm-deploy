@@ -1,3 +1,4 @@
+-- This script creates materialized views for  water cetroids fore each zoom levels.
 DO $$ 
 DECLARE 
     zoom_levels TEXT[] := ARRAY['z0_2', 'z3_5', 'z6_7', 'z8_9', 'z10_12', 'z13_15'];
@@ -33,6 +34,7 @@ BEGIN
                 type,
                 start_date,
                 end_date,
+                area,
                 tags,
                 (ST_MaximumInscribedCircle(geometry)).center AS geometry
             FROM %s

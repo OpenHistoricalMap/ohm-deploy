@@ -1,4 +1,4 @@
--- This is an SQL script to merge lakes tables into materialized views.
+-- This script creates a materialized view for lakes in the Natural Earth dataset, merging data from multiple source tables.
 DROP MATERIALIZED VIEW IF EXISTS mview_ne_lakes CASCADE;
 
 -- Create a new materialized view

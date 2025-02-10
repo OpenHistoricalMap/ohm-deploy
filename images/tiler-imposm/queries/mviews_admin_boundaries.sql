@@ -1,3 +1,8 @@
+-- This script creates materialized views for admin boundaries. 
+-- It creates two materialized views for each zoom level: one for the boundary lines and one for the centroid points.
+-- The boundary lines are created using the ST_Boundary function, and the centroid points are created using the ST_MaximumInscribedCircle function. 
+-- The script also creates spatial indexes on the geometry column for performance and unique indexes on the osm_id column for concurrent refresh.
+
 DO $$ 
 DECLARE 
     zoom_levels TEXT[] := ARRAY['z0_2', 'z3_5', 'z6_7', 'z8_9', 'z10_12', 'z13_15', 'z16_20'];
@@ -8,9 +13,11 @@ DECLARE
     sql_create_centroid TEXT;
     sql_index_lines TEXT;
     sql_index_centroid TEXT;
+    sql_unique_index_lines TEXT;
+    sql_unique_index_centroid TEXT;
     table_name TEXT;
 BEGIN
-    RAISE NOTICE '=================Starting materialized view creation for Admin boundaries =================';
+    RAISE NOTICE '================= Starting materialized view creation for Admin Boundaries =================';
 
     FOR zoom IN SELECT UNNEST(zoom_levels)
     LOOP
@@ -67,7 +74,7 @@ BEGIN
         EXECUTE sql_create_centroid;
         RAISE NOTICE 'Created materialized view: mview_admin_boundaries_centroid_%s', zoom;
 
-        -- Create Index for Performance
+        -- Create Spatial Index for Performance
         sql_index_lines := format('CREATE INDEX IF NOT EXISTS idx_mview_admin_boundaries_lines_%s_geom ON mview_admin_boundaries_lines_%s USING GIST (geometry);', zoom, zoom);
         sql_index_centroid := format('CREATE INDEX IF NOT EXISTS idx_mview_admin_boundaries_centroid_%s_geom ON mview_admin_boundaries_centroid_%s USING GIST (geometry);', zoom, zoom);
 
@@ -76,9 +83,18 @@ BEGIN
 
         EXECUTE sql_index_centroid;
         RAISE NOTICE 'Created spatial index: idx_mview_admin_boundaries_centroid_%s_geom', zoom;
+
+        -- Create UNIQUE INDEX on osm_id for concurrent refresh
+        sql_unique_index_lines := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_mview_admin_boundaries_lines_%s_osm_id ON mview_admin_boundaries_lines_%s (osm_id);', zoom, zoom);
+        sql_unique_index_centroid := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_mview_admin_boundaries_centroid_%s_osm_id ON mview_admin_boundaries_centroid_%s (osm_id);', zoom, zoom);
+
+        EXECUTE sql_unique_index_lines;
+        RAISE NOTICE 'Created unique index: idx_mview_admin_boundaries_lines_%s_osm_id', zoom;
+
+        EXECUTE sql_unique_index_centroid;
+        RAISE NOTICE 'Created unique index: idx_mview_admin_boundaries_centroid_%s_osm_id', zoom;
     END LOOP;
 
-    RAISE NOTICE 'Materialized view creation process completed successfully!';
 END $$;
 
 -- Refresh Materialized Views
