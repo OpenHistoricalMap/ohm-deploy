@@ -43,7 +43,6 @@ RUN cd /opt/ && python build_config.py \
     transport_areas,\
     transport_associated_streets,\
     transport_lines,\
-    transport_multilines,\
     transport_points,\
     route_lines,\
     amenity_areas,\
