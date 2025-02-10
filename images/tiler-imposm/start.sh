@@ -144,21 +144,13 @@ function uploadLastState() {
 function updateData() {
     log_message "Starting database update process..."
 
-    # Step 1: Ensure required queries are executed
-    log_message "Creating materialized views..."
-    psql "$PG_CONNECTION" -f queries/transport_lines_mviews.sql
-
-    # Step 2: Run any Python-based materialized view updates
-    log_message "Running Python script to update materialized views..."
-    python materialized_views.py &
-
-    # Step 3: Start the materialized view refresh in the background
-    log_message "Refreshing materialized views in background..."
-    refreshMaterializedViews &
+    # Step 1: Refreshing materialized views
+    log_message "Refreshing materialized views..."
+    ./refresh_mviews.sh &
 
     local local_last_state_path="$DIFF_DIR/last.state.txt"
 
-    # Step 4: Handle last.state.txt if OVERWRITE_STATE is enabled
+    # Step 2: Handle last.state.txt if OVERWRITE_STATE is enabled
     if [ "$OVERWRITE_STATE" = "true" ]; then
         log_message "Overwriting last.state.txt..."
         cat <<EOF > "$local_last_state_path"
@@ -168,7 +160,7 @@ replicationUrl=${REPLICATION_URL}
 EOF
     fi
 
-    # Step 5: Run the Imposm update process
+    # Step 3: Run the Imposm update process
     log_message "Running Imposm update process..."
     if [ -z "$TILER_IMPORT_LIMIT" ]; then
         imposm run \
@@ -187,7 +179,7 @@ EOF
             -quiet &
     fi
 
-    # Step 6: Continuously upload expired files and last state file to the cloud provider
+    # Step 4: Continuously upload expired files and last state file to the cloud provider
     log_message "Starting background upload process..."
     while true; do
         log_message "Uploading expired files..."
@@ -237,39 +229,18 @@ function importData() {
         -deployproduction
 
     log_message "Creating material views and indexes..."
-    psql $PG_CONNECTION -f queries/postgis_post_import.sql
-    psql $PG_CONNECTION -f queries/ne_lakes_mviews.sql
-    psql $PG_CONNECTION -f queries/land_mviews.sql
-    psql $PG_CONNECTION -f queries/transport_lines_mviews.sql
-    
+    # psql $PG_CONNECTION -f queries/postgis_helpers.sql 
+    # psql $PG_CONNECTION -f queries/postgis_post_import.sql
+    psql $PG_CONNECTION -f queries/mviews_land.sql 
+    psql $PG_CONNECTION -f queries/mviews_ne_lakes.sql 
+    psql $PG_CONNECTION -f queries/mviews_admin_boundaries.sql 
+    psql $PG_CONNECTION -f queries/mviews_transport_lines.sql 
+    psql $PG_CONNECTION -f queries/mviews_water.sql 
+
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }
 
-function refreshMaterializedViews() {
-    local materialized_views=(
-        "mview_transport_lines_z5_7"
-        "mview_transport_lines_z8_9"
-        "mview_transport_lines_z10_11"
-        "mview_transport_lines_z12_13"
-    )
-
-    while true; do
-        log_message "Refreshing materialized views..."
-
-        for mview in "${materialized_views[@]}"; do
-            log_message "Refreshing $mview..."
-            if psql "$PG_CONNECTION" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;"; then
-                log_message "Successfully refreshed $mview."
-            else
-                log_message "ERROR refreshing $mview!"
-            fi
-        done
-
-        log_message "Sleeping for 2 minutes before next refresh..."
-        sleep 120
-    done
-}
 
 function countTables() {
     psql $PG_CONNECTION -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" | xargs

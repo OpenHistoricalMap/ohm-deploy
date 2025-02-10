@@ -2,11 +2,12 @@
 name = "admin_boundaries_lines_z0_2"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    id,
+    osm_id, 
     admin_level, 
     NULLIF(name, '') AS name, 
     NULLIF(type, '') AS type, 
@@ -25,11 +26,12 @@ WHERE
 name = "admin_boundaries_lines_z3_5"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    id,
+    osm_id, 
     admin_level, 
     NULLIF(name, '') AS name, 
     NULLIF(type, '') AS type, 
@@ -49,11 +51,12 @@ WHERE
 name = "admin_boundaries_lines_z6_7"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    id,
+    osm_id, 
     admin_level, 
     NULLIF(name, '') AS name, 
     NULLIF(type, '') AS type, 
@@ -72,11 +75,12 @@ WHERE
 name = "admin_boundaries_lines_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    id,
+    osm_id, 
     admin_level, 
     NULLIF(name, '') AS name, 
     NULLIF(type, '') AS type, 
@@ -95,11 +99,12 @@ WHERE
 name = "admin_boundaries_lines_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    id,
+    osm_id, 
     admin_level, 
     NULLIF(name, '') AS name, 
     NULLIF(type, '') AS type, 
@@ -118,11 +123,12 @@ WHERE
 name = "admin_boundaries_lines_z13_15"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    id,
+    osm_id, 
     admin_level, 
     NULLIF(name, '') AS name, 
     NULLIF(type, '') AS type, 
@@ -141,11 +147,12 @@ WHERE
 name = "admin_boundaries_lines_z16_20"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    id,
+    osm_id, 
     admin_level, 
     NULLIF(name, '') AS name, 
     NULLIF(type, '') AS type, 

@@ -11,120 +11,41 @@
     "admin_areas_z0_2": {
       "source": "admin_areas",
       "tolerance": 5000,
-      "sql_filter": "admin_level IN (1,2)",
-      "materialized_views": [
-        {
-          "view": "mview_admin_boundaries_lines_z0_2",
-          "geometry_transform": "ST_Boundary(geometry)"
-        },
-        {
-          "view": "mview_admin_boundaries_centroid_z0_2",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
-        }
-      ]
+      "sql_filter": "admin_level IN (1,2)"
     },
 
     "admin_areas_z3_5": {
       "source": "admin_areas",
       "tolerance": 1000,
-      "sql_filter": "admin_level IN (1,2,3,4)",
-      "materialized_views": [
-        {
-          "view": "mview_admin_boundaries_lines_z3_5",
-          "geometry_transform": "ST_Boundary(geometry)"
-        },
-        {
-          "view": "mview_admin_boundaries_centroid_z3_5",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
-        }
-      ]
+      "sql_filter": "admin_level IN (1,2,3,4)"
     },
 
     "admin_areas_z6_7": {
       "source": "admin_areas",
       "tolerance": 200,
-      "sql_filter": "admin_level IN (1,2,3,4,5,6)",
-      "materialized_views": [
-        {
-          "view": "mview_admin_boundaries_lines_z6_7",
-          "geometry_transform": "ST_Boundary(geometry)"
-        },
-        {
-          "view": "mview_admin_boundaries_centroid_z6_7",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
-        }
-      ]
+      "sql_filter": "admin_level IN (1,2,3,4,5,6)"
     },
 
     "admin_areas_z8_9": {
       "source": "admin_areas",
       "tolerance": 100,
-      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9)",
-      "materialized_views": [
-        {
-          "view": "mview_admin_boundaries_lines_z8_9",
-          "geometry_transform": "ST_Boundary(geometry)"
-        },
-        {
-          "view": "mview_admin_boundaries_centroid_z8_9",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
-        }
-      ]
+      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9)"
     },
 
     "admin_areas_z10_12": {
       "source": "admin_areas",
       "tolerance": 20,
-      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)",
-      "materialized_views": [
-        {
-          "view": "mview_admin_boundaries_lines_z10_12",
-          "geometry_transform": "ST_Boundary(geometry)"
-        },
-        {
-          "view": "mview_admin_boundaries_centroid_z10_12",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
-        }
-      ]
+      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)"
     },
 
     "admin_areas_z13_15": {
       "source": "admin_areas",
       "tolerance": 5,
-      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)",
-      "materialized_views": [
-        {
-          "view": "mview_admin_boundaries_lines_z13_15",
-          "geometry_transform": "ST_Boundary(geometry)"
-        },
-        {
-          "view": "mview_admin_boundaries_centroid_z13_15",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
-        }
-      ]
+      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)"
     },
     "admin_areas_z16_20": {
       "source": "admin_areas",
-      "geometry_transform": "ST_Boundary(geometry)",
-      "geometry_transform_types": "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
-      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)",
-      "materialized_views": [
-        {
-          "view": "mview_admin_boundaries_lines_z16_20",
-          "geometry_transform": "ST_Boundary(geometry)"
-        },
-        {
-          "view": "mview_admin_boundaries_centroid_z16_20",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> '' AND osm_id NOT IN ( SELECT osm_id FROM osm_relation_members WHERE role = 'label')"
-        }
-      ]
+      "sql_filter": "admin_level IN (1,2,3,4,5,6,7,8,9,10)"
     }
   },
   "tables": {

@@ -53,5 +53,4 @@ ENV PATH $PATH:$GOPATH/bin
 RUN pip3 install -U setuptools awscli psycopg2
 WORKDIR /osm
 COPY . .
-RUN chmod +x ./start.sh
 CMD ["./start.sh"]
