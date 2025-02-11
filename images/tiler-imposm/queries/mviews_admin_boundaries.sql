@@ -66,7 +66,7 @@ BEGIN
                 (ST_MaximumInscribedCircle(geometry)).center AS geometry,
                 start_date,
                 end_date,
-                area,
+                ROUND(CAST(area AS numeric) / 1000000, 1)::numeric(10,1) AS area_km2, -- Convert m² to km²
                 tags
             FROM %s
             WHERE name IS NOT NULL AND name <> ''
