@@ -47,6 +47,7 @@ BEGIN
                 ST_Boundary(geometry) AS geometry,
                 start_date,
                 end_date,
+                area,
                 tags
             FROM %s;
         $sql$, zoom, table_name);
@@ -65,6 +66,7 @@ BEGIN
                 (ST_MaximumInscribedCircle(geometry)).center AS geometry,
                 start_date,
                 end_date,
+                area,
                 tags
             FROM %s
             WHERE name IS NOT NULL AND name <> ''
