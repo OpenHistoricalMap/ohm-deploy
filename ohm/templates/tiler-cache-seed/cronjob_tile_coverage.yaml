@@ -1,0 +1,68 @@
+---
+{{- if .Values.ohm.tilerCacheSeedCoverage.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-tiler-cache-seed-tile-coverage
+  labels:
+    app: {{ template "osm-seed.name" . }}
+    component: tiler-cache-seed--tile-coverage
+    release: {{ .Release.Name }}
+spec:
+  schedule: {{ quote .Values.ohm.tilerCacheSeedCoverage.schedule }}
+  startingDeadlineSeconds: 100
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- if .Values.ohm.tilerCacheSeedCoverage.nodeSelector.enabled }}
+          nodeSelector:
+            {{ .Values.ohm.tilerCacheSeedCoverage.nodeSelector.label_key }}: {{ .Values.ohm.tilerCacheSeedCoverage.nodeSelector.label_value }}
+          {{- end }}
+          containers:
+            - name: {{ .Release.Name }}-tiler-cache-seed-tile-coverage
+              image: "{{ index .Values "osm-seed" "tilerServer" "image" "name" }}:{{ index .Values "osm-seed" "tilerServer" "image" "tag" }}"   
+              command:
+                - sh
+                - -c
+                - |
+                  set -x
+                  tile_list_file="tile-list.tiles"
+                  wget -O "$tile_list_file" "$TILE_LIST_URL"
+                  tegola cache seed tile-list "$tile_list_file" \
+                      --config=/opt/tegola_config/config.toml \
+                      --map=osm \
+                      --min-zoom=$MIN_ZOOM \
+                      --max-zoom=$MAX_ZOOM \
+                      --concurrency=$CONCURRENCY \
+                      --overwrite=false
+
+              {{- if .Values.ohm.tilerCacheSeedCoverage.resources.enabled }}
+              resources:
+                requests:
+                  memory: {{ .Values.ohm.tilerCacheSeedCoverage.resources.requests.memory }}
+                  cpu: {{ .Values.ohm.tilerCacheSeedCoverage.resources.requests.cpu }}
+                limits:
+                  memory: {{ .Values.ohm.tilerCacheSeedCoverage.resources.limits.memory }}
+                  cpu: {{ .Values.ohm.tilerCacheSeedCoverage.resources.limits.cpu }}
+              {{- end }}
+              env:
+                - name: CONCURRENCY
+                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.CONCURRENCY | quote }}
+                - name: TILE_LIST_URL
+                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.TILE_LIST_URL | quote }}
+                - name: MIN_ZOOM
+                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.MIN_ZOOM | quote }}
+                - name: MAX_ZOOM
+                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.MAX_ZOOM | quote }}
+              envFrom:
+              - configMapRef:
+                  name: {{ .Release.Name }}-tiler-server-cm
+              - configMapRef:
+                  name: {{ .Release.Name }}-tiler-db-cm
+          restartPolicy: OnFailure
+      backoffLimit: 3
+{{- end }}

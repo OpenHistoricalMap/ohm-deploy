@@ -973,10 +973,10 @@ osm-seed:
 # ====================================================================================================
 ohm:
   tilerCache:
-    enabled: false
+    enabled: true
     
   tilerCachePurge:
-    enabled: false
+    enabled: true
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
@@ -1001,35 +1001,35 @@ ohm:
       S3_BUCKET_PATH_FILES: mnt/data/osm
     resources:
       enabled: false
-      requests:
-        memory: 20Gi
-        cpu: '8'
-      limits:
-        memory: 24Gi
-        cpu: '10'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: web_medium
 
-  # Tiler seed by default is giong to seet tiles from 0-5 zoom level
-  tilerCacheSeed:
-    enabled: false
-    schedule: '* * * * *'
+  tilerCacheSeedGlobal:
+    enabled: true
+    schedule: '0 * * * *'
     env:
-      GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
-      ZOOM_LEVELS: 8,9,10
       CONCURRENCY: 128
-      S3_BUCKET: osmseed-dev
-      OUTPUT_FILE: /logs/tiler_benchmark.log
+      MIN_ZOOM: 0
+      MAX_ZOOM: 7
     resources:
       enabled: false
-      requests:
-        memory: 20Gi
-        cpu: '8'
-      limits:
-        memory: 24Gi
-        cpu: '10'
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: web_medium
+
+  tilerCacheSeedCoverage:
+    enabled: true
+    schedule: '0 * * * *'
+    env:
+      CONCURRENCY: 64
+      TILE_LIST_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
+      MIN_ZOOM: 8
+      MAX_ZOOM: 14
+    resources:
+      enabled: false
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
