@@ -17,8 +17,8 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
-          NOMINATIM_API: 'https://nominatim-api.staging.openhistoricalmap.org/'
-          NOMINATIM_BUCKET: 'nominatim-staging.openhistoricalmap.org'
+          NOMINATIM_API: https://nominatim-api.staging.openhistoricalmap.org/
+          NOMINATIM_BUCKET: nominatim-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}
 
       - name: Set environment variables - Production
@@ -30,20 +30,19 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_NOMINATIM_CLOUDFRONT_ID }}
 
       - name: Checkout nominatim-ui repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/nominatim-ui
           ref: 81e184d68b5bbe09a18eca79e9a73c08971bcf74
-          # token: ${{ env.DEV_GITHUB_TOKEN }}
 
-      - name: Use Node.js 10
-        uses: actions/setup-node@v1
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 10
+          node-version: 20
 
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-modules
         with:
@@ -62,8 +61,9 @@ jobs:
         run: |
           echo "Nominatim_Config.Nominatim_API_Endpoint = '${NOMINATIM_API}';" >> dist/theme/config.theme.js
           npm run build
-          
-      - uses: actions/setup-python@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
