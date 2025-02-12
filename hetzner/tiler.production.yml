@@ -1,10 +1,10 @@
 services:
   db_production:
-    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.1737.h9b9ef9b
+    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
+    volumes:
+      - /data/tiler_production_db_20250211:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    volumes:
-      - /data/tiler_production_db_20250123:/var/lib/postgresql/data
     env_file:
       - .env.production
     restart: always
@@ -16,9 +16,9 @@ services:
           cpus: '28.0'
           memory: 55G
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2111.he285805
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2179.he1248ec
     volumes:
-      - /data/tiler_production_imposm:/mnt/data
+      - /data/tiler_production_imposm_20250211:/mnt/data
     command:
       - sh
       - -c
