@@ -973,10 +973,10 @@ osm-seed:
 # ====================================================================================================
 ohm:
   tilerCache:
-    enabled: true
+    enabled: false
     
   tilerCachePurge:
-    enabled: true
+    enabled: false
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
@@ -1007,7 +1007,7 @@ ohm:
       label_value: web_medium
 
   tilerCacheSeedGlobal:
-    enabled: true
+    enabled: false
     schedule: '0 * * * *'
     env:
       CONCURRENCY: 32
@@ -1021,7 +1021,7 @@ ohm:
       label_value: web_medium
 
   tilerCacheSeedCoverage:
-    enabled: true
+    enabled: false
     schedule: '0 * * * *'
     env:
       CONCURRENCY: 32
