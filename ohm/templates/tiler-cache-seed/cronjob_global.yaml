@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Release.Name }}-tiler-cache-global
+  name: {{ .Release.Name }}-tiler-cache-seed-global
   labels:
     app: {{ template "osm-seed.name" . }}
-    component: tiler-cache-seed-job-global
+    component: tiler-cache-seed-global
     release: {{ .Release.Name }}
 spec:
   schedule: {{ quote .Values.ohm.tilerCacheSeedGlobal.schedule }}
@@ -22,7 +22,7 @@ spec:
             {{ .Values.ohm.tilerCacheSeedGlobal.nodeSelector.label_key }}: {{ .Values.ohm.tilerCacheSeedGlobal.nodeSelector.label_value }}
           {{- end }}
           containers:
-            - name: {{ .Release.Name }}-tiler-cache-global
+            - name: {{ .Release.Name }}-tiler-cache-seed-global
               image: "{{ index .Values "osm-seed" "tilerServer" "image" "name" }}:{{ index .Values "osm-seed" "tilerServer" "image" "tag" }}"   
               command:
                 - sh

@@ -986,7 +986,7 @@ ohm:
     enabled: true
     schedule: '0 * * * *'
     env:
-      CONCURRENCY: 64
+      CONCURRENCY: 128
       TILE_LIST_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
       MIN_ZOOM: 8
       MAX_ZOOM: 14

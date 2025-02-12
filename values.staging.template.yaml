@@ -1010,7 +1010,7 @@ ohm:
     enabled: true
     schedule: '0 * * * *'
     env:
-      CONCURRENCY: 128
+      CONCURRENCY: 32
       MIN_ZOOM: 0
       MAX_ZOOM: 7
     resources:
@@ -1024,7 +1024,7 @@ ohm:
     enabled: true
     schedule: '0 * * * *'
     env:
-      CONCURRENCY: 64
+      CONCURRENCY: 32
       TILE_LIST_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
       MIN_ZOOM: 8
       MAX_ZOOM: 14
