@@ -23,7 +23,7 @@ spec:
           {{- end }}
           containers:
             - name: {{ .Release.Name }}-tiler-cache-seed-job
-              image: {{ .Values.ohm.tilerCache.image.name }}:{{ .Values.ohm.tilerCache.image.tag }}
+              image: "{{ index .Values "osm-seed" "tilerServer" "image" "name" }}:{{ index .Values "osm-seed" "tilerServer" "image" "tag" }}"   
               command:
                 - sh
                 - -c
