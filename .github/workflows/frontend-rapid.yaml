@@ -12,6 +12,7 @@ jobs:
         uses: styfle/cancel-workflow-action@0.8.0
         with:
           access_token: ${{ github.token }}
+
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
@@ -22,6 +23,7 @@ jobs:
           OHM_API_URL: https://staging.openhistoricalmap.org
           OHM_CLIENT_ID: vwLXYrZ29YiwxWR5LvAcsiG9paLwE7hBod27O-tl16Q
           OHM_CLIENT_SECRET: ${{ secrets.STAGING_RAPID_CLIENT_SECRET }}
+
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v2.0.0
@@ -32,18 +34,21 @@ jobs:
           OHM_API_URL: https://www.openhistoricalmap.org
           OHM_CLIENT_ID: RIIz9U-oZmYzi_LXCKMHwHPgbJxALWAZRcgk9F8cppk
           OHM_CLIENT_SECRET: ${{ secrets.PRODUCTION_RAPID_CLIENT_SECRET }}
+
       - name: Checkout rapid repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/Rapid
           ref: 042f2e27ab0b9a5192549fc17a1ee0f91acab67f
+
       - name: Use Node.js 18
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-modules
         with:
@@ -53,9 +58,11 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
       - name: Install modules
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm install
+
       - name: Build rapid frontend
         run: |
           export OSM_URL=https://www.openstreetmap.org
@@ -73,13 +80,16 @@ jobs:
           npm run build
           npm run dist
           sed -e "s|i.client_id|i.client_id,client_secret:\"${OHM_CLIENT_SECRET}\"|g" dist/rapid.min.js > tmpfile && mv tmpfile dist/rapid.min.js
-      - uses: actions/setup-python@v2
+
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
+
       - name: Install aws cli
         run: |
           python -m pip install --upgrade pip
           pip install awscli
+
       - name: Push data to s3 and clean cloudfront cache
         if: ${{ success() }}
         run: |
