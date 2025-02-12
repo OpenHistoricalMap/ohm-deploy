@@ -43,11 +43,6 @@
           "key": null
         },
         {
-          "type": "pseudoarea",
-          "name": "area",
-          "key": null
-        },
-        {
           "type": "mapping_key",
           "name": "class",
           "key": null
@@ -61,6 +56,11 @@
           "type": "string",
           "name": "end_date",
           "key": "end_date"
+        },
+        {
+          "type": "pseudoarea",
+          "name": "area",
+          "key": null
         },
         {
           "type": "hstore_tags",

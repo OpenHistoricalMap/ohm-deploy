@@ -1,5 +1,4 @@
-#!/bin/bash
-set -e
+set -x
 
 # Default zoom levels
 PURGE_MIN_ZOOM=${PURGE_MIN_ZOOM:-8}

@@ -47,6 +47,11 @@
           "key": "end_date"
         },
         {
+          "type": "pseudoarea",
+          "name": "area",
+          "key": null
+        },
+        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null

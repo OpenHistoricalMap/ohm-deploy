@@ -6,7 +6,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     type, 
     tunnel, 
     bridge, 
@@ -22,7 +24,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z5_7
+    mview_transport_lines_z5_7
 WHERE 
     geometry && !BBOX!
 """
@@ -36,6 +38,8 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     type, 
@@ -52,7 +56,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z8_9
+    mview_transport_lines_z8_9
 WHERE 
     geometry && !BBOX!
 """
@@ -65,7 +69,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     type, 
@@ -82,7 +88,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z10_11
+    mview_transport_lines_z10_11
 WHERE 
     geometry && !BBOX!
 """
@@ -95,7 +101,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     tunnel, 
@@ -112,7 +120,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z12_13
+    mview_transport_lines_z12_13
 WHERE 
     geometry && !BBOX!
 """
@@ -125,7 +133,9 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,  
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
     ref, 
     class, 
     type, 
@@ -142,7 +152,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_lines_z14_20
+    mview_transport_lines_z14_20
 WHERE 
     geometry && !BBOX!
 """

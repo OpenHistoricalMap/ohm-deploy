@@ -17,6 +17,17 @@ https://github.com/orgs/OpenHistoricalMap/packages/container/tiler-db/versions
 - Tiler Imposm
 https://github.com/orgs/OpenHistoricalMap/packages/container/tiler-imposm/versions
 
+
+
+## Deploy Staging
+
+```sh
+docker compose -f hetzner/tiler.staging.yml up db -d
+docker compose -f hetzner/tiler.staging.yml up imposm -d
+```
+
+## Deploy Production
+
 ```sh
 docker compose -f hetzner/tiler.production.yml up -d
 ```

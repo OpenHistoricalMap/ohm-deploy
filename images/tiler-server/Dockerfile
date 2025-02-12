@@ -1,4 +1,4 @@
-FROM gospatial/tegola:v0.19.0
+FROM gospatial/tegola:v0.21.2
 
 RUN apk --no-cache add \
     gcc \
@@ -43,7 +43,6 @@ RUN cd /opt/ && python build_config.py \
     transport_areas,\
     transport_associated_streets,\
     transport_lines,\
-    transport_multilines,\
     transport_points,\
     route_lines,\
     amenity_areas,\
@@ -61,7 +60,7 @@ RUN cd /opt/ && python build_config.py \
     other_lines,\
     other_points"
 
-COPY ./tile2bounds.py .
+COPY ./*.py .
 COPY ./*.sh .
 
 ENTRYPOINT ["/bin/bash", "-c"]
