@@ -1,8 +1,13 @@
 services:
-  db_production:
+  db:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
       - /data/tiler_production_db_20250211:/var/lib/postgresql/data
+      - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     ports:
       - "5432:5432"
     env_file:
@@ -16,7 +21,7 @@ services:
           cpus: '28.0'
           memory: 55G
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2179.he1248ec
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2181.hb02c42b
     volumes:
       - /data/tiler_production_imposm_20250211:/mnt/data
     command:
