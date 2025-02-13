@@ -1,30 +1,36 @@
--- This script creates a materialized view for lakes in the Natural Earth dataset, merging data from multiple source tables.
+-- Drop the materialized view if it exists
 DROP MATERIALIZED VIEW IF EXISTS mview_ne_lakes CASCADE;
 
--- Create a new materialized view
+-- Create the materialized view with a unique serial ID
 CREATE MATERIALIZED VIEW mview_ne_lakes AS
 SELECT 
-    'ne_10m_lakes_' || CAST(ogc_fid AS TEXT) AS ogc_fid,
+    ROW_NUMBER() OVER () AS id,  -- Generates a unique sequential ID
     name,
-    wkb_geometry,
+    ST_Simplify(wkb_geometry, 100) AS wkb_geometry,
     'ne_10m_lakes' AS source_table
 FROM ne_10m_lakes
+WHERE ST_Simplify(wkb_geometry, 100) IS NOT NULL
 
 UNION ALL
 SELECT 
-    'ne_10m_lakes_europe_' || CAST(ogc_fid AS TEXT) AS ogc_fid,
+    ROW_NUMBER() OVER () + (SELECT COUNT(*) FROM ne_10m_lakes WHERE wkb_geometry IS NOT NULL) AS id,  
     name,
-    wkb_geometry,
+    ST_Simplify(wkb_geometry, 100) AS wkb_geometry,
     'ne_10m_lakes_europe' AS source_table
 FROM ne_10m_lakes_europe
+WHERE ST_Simplify(wkb_geometry, 100) IS NOT NULL
 
 UNION ALL
 SELECT 
-    'ne_10m_lakes_north_america_' || CAST(ogc_fid AS TEXT) AS ogc_fid,
+    ROW_NUMBER() OVER () 
+    + (SELECT COUNT(*) FROM ne_10m_lakes WHERE wkb_geometry IS NOT NULL) 
+    + (SELECT COUNT(*) FROM ne_10m_lakes_europe WHERE wkb_geometry IS NOT NULL) AS id,  
     name,
-    wkb_geometry,
+    ST_Simplify(wkb_geometry, 100) AS wkb_geometry,
     'ne_10m_lakes_north_america' AS source_table
-FROM ne_10m_lakes_north_america;
+FROM ne_10m_lakes_north_america
+WHERE ST_Simplify(wkb_geometry, 100) IS NOT NULL;
 
+-- Create spatial and ID indexes
 CREATE INDEX idx_mview_ne_lakes_geom ON mview_ne_lakes USING GIST (wkb_geometry);
-CREATE INDEX idx_mview_ne_lakes_ogc_fid ON mview_ne_lakes (ogc_fid);
+CREATE INDEX idx_mview_ne_lakes_id ON mview_ne_lakes (id);
