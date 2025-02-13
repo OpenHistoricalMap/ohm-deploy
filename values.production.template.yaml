@@ -167,7 +167,7 @@ osm-seed:
     autoscaling:
       enabled: true
       minReplicas: 2
-      maxReplicas: 6
+      maxReplicas: 4
       cpuUtilization: 80
     sharedMemorySize: 512Mi
     livenessProbeExec: true
