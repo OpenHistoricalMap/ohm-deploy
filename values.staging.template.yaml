@@ -541,6 +541,7 @@ osm-seed:
         TILER_CACHE_BUCKET: tiler-cache-staging
         TILER_CACHE_AWS_ACCESS_KEY_ID: {{STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID}}
         TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
+        TILER_CACHE_AWS_ENDPOINT: ""
         # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
         EXECUTE_REINDEX: false
         EXECUTE_VACUUM_ANALYZE: false
