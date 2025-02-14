@@ -678,6 +678,8 @@ osm-seed:
       NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
       UPDATE_MODE: continuous
       OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
+      IMPORT_STYLE: extratags
+      EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edt
     resources:
       enabled: false
       requests:
