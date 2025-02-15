@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -249,7 +249,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -726,7 +726,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/16/main
         subPath: nominatim-pgdata
-        AWS_ElasticBlockStore_volumeID: vol-02c45dc066489c670
+        AWS_ElasticBlockStore_volumeID: vol-02c646e4d0ff5cf8b
         AWS_ElasticBlockStore_size: 50Gi
       nodeSelector:
         enabled: true
