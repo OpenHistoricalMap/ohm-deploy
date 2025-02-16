@@ -697,7 +697,7 @@ osm-seed:
       replicaCount: 1
       env:
         PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250213_0001.osm.pbf
-        REPLICATION_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
+        REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
         FREEZE: false
