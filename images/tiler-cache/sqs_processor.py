@@ -3,7 +3,6 @@ import time
 from kubernetes import client, config
 import os
 import json
-from datetime import datetime, timezone, timedelta
 import logging
 from utils import check_tiler_db_postgres_status
 from s3_cleanup import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
@@ -19,13 +18,10 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 NAMESPACE = os.getenv("NAMESPACE", "default")
 SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
 REGION_NAME = os.getenv("REGION_NAME", "us-east-1")
-DOCKER_IMAGE = os.getenv(
-    "DOCKER_IMAGE",
-    "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1780.h62561a8",
-)
+DOCKER_IMAGE = os.getenv("DOCKER_IMAGE","none",)
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
-DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))  # default 1 hour
+DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))
 
 # Tiler cache purge and seed settings
 EXECUTE_PURGE = os.getenv("EXECUTE_PURGE", "true")
@@ -41,7 +37,7 @@ SEED_MAX_ZOOM = os.getenv("SEED_MAX_ZOOM", 14)
 SEED_CONCURRENCY = os.getenv("SEED_CONCURRENCY", 16)
 PURGE_CONCURRENCY = os.getenv("PURGE_CONCURRENCY", 16)
 
-JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge-seed"
+JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge"
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
 POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
@@ -100,8 +96,7 @@ def create_kubernetes_job(file_url, file_name):
     """Create a Kubernetes Job to process a file."""
     configmap_tiler_server = f"{ENVIRONMENT}-tiler-server-cm"
     configmap_tiler_db = f"{ENVIRONMENT}-tiler-db-cm"
-
-    job_name = f"{JOB_NAME_PREFIX}-{file_name}"
+    job_name = f"{JOB_NAME_PREFIX}-{file_name.replace('.', '-')}"
     shell_commands = get_purge_and_seed_commands()
 
     job_manifest = {
@@ -138,6 +133,9 @@ def create_kubernetes_job(file_url, file_name):
             "backoffLimit": 4,
         },
     }
+    print("##"*20)
+    print(job_manifest)
+    print("##"*20)
 
     try:
         batch_v1.create_namespaced_job(namespace=NAMESPACE, body=job_manifest)
@@ -219,7 +217,8 @@ def process_sqs_messages():
 
                     file_url = f"s3://{bucket_name}/{object_key}"
                     file_name = os.path.basename(object_key)
-
+                    print(file_url)
+                    print(file_name)
                     logging.info(f"Processing S3 event for file: {file_url}")
 
                     # Create a Kubernetes job
