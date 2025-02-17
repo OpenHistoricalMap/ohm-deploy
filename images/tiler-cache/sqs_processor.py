@@ -3,7 +3,6 @@ import time
 from kubernetes import client, config
 import os
 import json
-from datetime import datetime, timezone, timedelta
 import logging
 from utils import check_tiler_db_postgres_status
 from s3_cleanup import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
@@ -19,13 +18,10 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 NAMESPACE = os.getenv("NAMESPACE", "default")
 SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
 REGION_NAME = os.getenv("REGION_NAME", "us-east-1")
-DOCKER_IMAGE = os.getenv(
-    "DOCKER_IMAGE",
-    "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1780.h62561a8",
-)
+DOCKER_IMAGE = os.getenv("DOCKER_IMAGE","none",)
 NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
 MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
-DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))  # default 1 hour
+DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))
 
 # Tiler cache purge and seed settings
 EXECUTE_PURGE = os.getenv("EXECUTE_PURGE", "true")
@@ -101,7 +97,6 @@ def create_kubernetes_job(file_url, file_name):
     configmap_tiler_server = f"{ENVIRONMENT}-tiler-server-cm"
     configmap_tiler_db = f"{ENVIRONMENT}-tiler-db-cm"
     job_name = f"{JOB_NAME_PREFIX}-{file_name.replace('.', '-')}"
-    # job_name = f"{JOB_NAME_PREFIX}-{file_name.replace('.', '-')}" 
     shell_commands = get_purge_and_seed_commands()
 
     job_manifest = {
