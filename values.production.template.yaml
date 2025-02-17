@@ -674,7 +674,7 @@ osm-seed:
       IMPORT_TIGER_ADDRESSES: false
       THREADS: 8
       NOMINATIM_PASSWORD: {{PRODUCTION_NOMINATIM_PG_PASSWORD}}
-      PGDATA: /var/lib/postgresql/14/main
+      PGDATA: /var/lib/postgresql/16/main
       NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
       UPDATE_MODE: continuous
       OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
@@ -691,17 +691,10 @@ osm-seed:
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/14/main
+      mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
-      # Minikube
-      localVolumeHostPath: /mnt/nominatim-db-data
-      localVolumeSize: 20Gi
-      # AWS
-      AWS_ElasticBlockStore_volumeID: vol-0c9fb16e2365c4f36
-      AWS_ElasticBlockStore_size: 100Gi
-      # GCP
-      GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
-      GCP_gcePersistentDisk_size: 50Gi
+      AWS_ElasticBlockStore_volumeID: vol-00cb511ba46fb3e25
+      AWS_ElasticBlockStore_size: 50Gi
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
