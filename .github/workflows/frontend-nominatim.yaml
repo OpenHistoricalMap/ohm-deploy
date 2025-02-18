@@ -1,12 +1,16 @@
 name: Build and Publish Nominatim site
+
 on:
   push:
     branches:
       - 'main'
       - 'staging'
+      - 'nominatim-ui'
+
 jobs:
   nominatim:
     runs-on: ubuntu-latest
+
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.8.0
@@ -15,68 +19,44 @@ jobs:
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
-        uses: allenevans/set-env@v2.0.0
-        with:
-          NOMINATIM_API: https://nominatim-api.staging.openhistoricalmap.org/
-          NOMINATIM_BUCKET: nominatim-staging.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}
+        run: |
+          echo "NOMINATIM_API=https://nominatim-api.staging.openhistoricalmap.org/" >> $GITHUB_ENV
+          echo "NOMINATIM_BUCKET=nominatim-staging.openhistoricalmap.org" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DISTRIBUTION_ID=${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}" >> $GITHUB_ENV
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
-        uses: allenevans/set-env@v2.0.0
-        with:
-          NOMINATIM_API: 'https://nominatim-api.openhistoricalmap.org/'
-          NOMINATIM_BUCKET: 'nominatim.openhistoricalmap.org'
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_NOMINATIM_CLOUDFRONT_ID }}
+        run: |
+          echo "NOMINATIM_API=https://nominatim-api.openhistoricalmap.org/" >> $GITHUB_ENV
+          echo "NOMINATIM_BUCKET=nominatim.openhistoricalmap.org" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DISTRIBUTION_ID=${{ secrets.PRODUCTION_NOMINATIM_CLOUDFRONT_ID }}" >> $GITHUB_ENV
 
-      - name: Checkout nominatim-ui repo
+      - name: Checkout nominatim-ui repo (Specific SHA)
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/nominatim-ui
-          ref: 81e184d68b5bbe09a18eca79e9a73c08971bcf74
-
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Install modules
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm install
+          ref: c14d033389acedf4dcbaabd9d88e14bc40212279
+          fetch-depth: 0
 
       - name: Build nominatim-ui frontend
         run: |
           echo "Nominatim_Config.Nominatim_API_Endpoint = '${NOMINATIM_API}';" >> dist/theme/config.theme.js
-          npm run build
+          # npm run build
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
-      - name: Install aws cli
+      - name: Install AWS CLI
         run: |
           python -m pip install --upgrade pip
           pip install awscli
 
-      - name: Push data to s3 and clean cloudfront cache
-        if: ${{ success() }}
+      - name: Deploy to S3 and Invalidate CloudFront
         run: |
-          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/
-          aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
+          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/ --delete
+          aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

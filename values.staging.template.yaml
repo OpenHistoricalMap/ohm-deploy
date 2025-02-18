@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -249,7 +249,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -690,13 +690,13 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: false
+      enabled: true
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: nominatim-api.staging.openhistoricalmap.org
       replicaCount: 1
       env:
-        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240612_0002.osm.pbf
+        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250213_0001.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
@@ -707,10 +707,12 @@ osm-seed:
         IMPORT_TIGER_ADDRESSES: false
         THREADS: 8
         NOMINATIM_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
-        PGDATA: /var/lib/postgresql/14/main
+        PGDATA: /var/lib/postgresql/16/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
         OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
+        IMPORT_STYLE: extratags
+        EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edt
       resources:
         enabled: false
         requests:
@@ -722,17 +724,10 @@ osm-seed:
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        mountPath: /var/lib/postgresql/14/main
+        mountPath: /var/lib/postgresql/16/main
         subPath: nominatim-pgdata
-        # Minikube
-        localVolumeHostPath: /mnt/nominatim-db-data
-        localVolumeSize: 10Gi
-        # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0a530cc12fd745545
-        AWS_ElasticBlockStore_size: 100Gi
-        # GCP
-        GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
-        GCP_gcePersistentDisk_size: 50Gi
+        AWS_ElasticBlockStore_volumeID: vol-02c646e4d0ff5cf8b
+        AWS_ElasticBlockStore_size: 50Gi
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
