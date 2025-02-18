@@ -693,7 +693,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
-      AWS_ElasticBlockStore_volumeID: vol-00cb511ba46fb3e25
+      AWS_ElasticBlockStore_volumeID: vol-012355ce0247b5ccc
       AWS_ElasticBlockStore_size: 50Gi
     nodeSelector:
       enabled: true
