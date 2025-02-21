@@ -9,3 +9,4 @@ boto3
 boto3
 kubernetes
 psycopg2-binary
+docker
