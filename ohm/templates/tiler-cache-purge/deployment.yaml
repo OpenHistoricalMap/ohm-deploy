@@ -30,7 +30,6 @@ spec:
             - -c
             - |
               set -x
-              export PYTHONPATH=/app
               python sqs_processor.py
           env:
             - name: REGION_NAME

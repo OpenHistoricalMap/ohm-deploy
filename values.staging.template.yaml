@@ -979,7 +979,7 @@ ohm:
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_medium # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
-      MAX_ACTIVE_JOBS: 10 
+      MAX_ACTIVE_JOBS: 2 
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
       ## Execute purging
       EXECUTE_PURGE: true

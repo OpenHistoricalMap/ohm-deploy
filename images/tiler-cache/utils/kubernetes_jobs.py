@@ -107,10 +107,6 @@ def create_kubernetes_job(file_url, file_name):
             "backoffLimit": 4,
         },
     }
-    print("##"*20)
-    print(job_manifest)
-    print("##"*20)
-
     try:
         batch_v1.create_namespaced_job(namespace=Config.NAMESPACE, body=job_manifest)
         logger.info(f"Kubernetes Job '{job_name}' created for file: {file_url}")
