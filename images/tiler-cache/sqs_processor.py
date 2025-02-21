@@ -4,7 +4,7 @@ import os
 import json
 import threading
 
-from utils.s3_cleanup import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
+from utils.s3_utils import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
 from utils.kubernetes_jobs import get_active_k8s_jobs_count , create_kubernetes_job
 
 from utils.utils import check_tiler_db_postgres_status
