@@ -64,4 +64,4 @@ COPY ./*.py .
 COPY ./*.sh .
 
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ./start.sh
+CMD ["/opt/start.sh"]
