@@ -167,7 +167,7 @@ osm-seed:
     autoscaling:
       enabled: true
       minReplicas: 2
-      maxReplicas: 6
+      maxReplicas: 4
       cpuUtilization: 80
     sharedMemorySize: 512Mi
     livenessProbeExec: true
@@ -495,7 +495,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: web_large
-    replicaCount: 1
+    replicaCount: 4
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: vtiles.openhistoricalmap.org
@@ -509,6 +509,7 @@ osm-seed:
       TILER_CACHE_BUCKET: tiler-cache-production
       TILER_CACHE_AWS_ACCESS_KEY_ID: {{PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID}}
       TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
+      TILER_CACHE_AWS_ENDPOINT: ""
       EXECUTE_REINDEX: false
       EXECUTE_VACUUM_ANALYZE: false
     # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
@@ -529,8 +530,8 @@ osm-seed:
         cpu: "2"
     autoscaling:
       enabled: true
-      minReplicas: 1
-      maxReplicas: 3
+      minReplicas: 4
+      maxReplicas: 6
       cpuUtilization: 60  
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
@@ -673,10 +674,12 @@ osm-seed:
       IMPORT_TIGER_ADDRESSES: false
       THREADS: 8
       NOMINATIM_PASSWORD: {{PRODUCTION_NOMINATIM_PG_PASSWORD}}
-      PGDATA: /var/lib/postgresql/14/main
+      PGDATA: /var/lib/postgresql/16/main
       NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
       UPDATE_MODE: continuous
       OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
+      IMPORT_STYLE: extratags
+      EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edt
     resources:
       enabled: false
       requests:
@@ -688,17 +691,10 @@ osm-seed:
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/14/main
+      mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
-      # Minikube
-      localVolumeHostPath: /mnt/nominatim-db-data
-      localVolumeSize: 20Gi
-      # AWS
-      AWS_ElasticBlockStore_volumeID: vol-0c9fb16e2365c4f36
-      AWS_ElasticBlockStore_size: 100Gi
-      # GCP
-      GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
-      GCP_gcePersistentDisk_size: 50Gi
+      AWS_ElasticBlockStore_volumeID: vol-012355ce0247b5ccc
+      AWS_ElasticBlockStore_size: 50Gi
     nodeSelector:
       enabled: true
       label_key: nodegroup_type

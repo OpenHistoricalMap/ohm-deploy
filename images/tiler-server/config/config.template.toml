@@ -13,6 +13,7 @@ bucket = "${TILER_CACHE_BUCKET}"
 region = "${TILER_CACHE_REGION}"
 aws_access_key_id = "${TILER_CACHE_AWS_ACCESS_KEY_ID}"
 aws_secret_access_key = "${TILER_CACHE_AWS_SECRET_ACCESS_KEY}"
+endpoint = "${TILER_CACHE_AWS_ENDPOINT}"
 
 # metrics
 [observer]
@@ -38,25 +39,11 @@ uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POS
 max_connections = 25
 	###### Water lands ne
 	[[providers.layers]]
-	name = "ne_water_lakes_0-2"
+	name = "ne_water_lakes_0-8"
 	geometry_fieldname = "geometry"
 	geometry_type = "multipolygon"
-	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 1000),!BBOX!) AS geometry, name, ogc_fid FROM ne_50m_lakes WHERE wkb_geometry && !BBOX!"
-
-	[[providers.layers]]
-	name = "ne_water_lakes_3-5"
-	geometry_fieldname = "geometry"
-	geometry_type = "multipolygon"
-	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 500),!BBOX!) AS geometry, name, ogc_fid FROM ne_50m_lakes WHERE wkb_geometry && !BBOX!"
-
-	[[providers.layers]]
-	name = "ne_water_lakes_6-8"
-	geometry_fieldname = "geometry"
-	geometry_type = "multipolygon"
-	id_fieldname = "ogc_fid"
-	sql = "SELECT ST_AsMVTGeom(ST_Simplify(wkb_geometry, 100),!BBOX!) AS geometry, name, ogc_fid FROM ne_10m_lakes WHERE wkb_geometry && !BBOX!"
+	id_fieldname = "id"
+	sql = "SELECT ST_AsMVTGeom(wkb_geometry,!BBOX!) AS geometry, name, id FROM mview_ne_lakes WHERE wkb_geometry && !BBOX!"
 
 ####################################
 ## OpenHistoricalMap maps
@@ -77,18 +64,6 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 	# Water lakes Natural Earth
 	[[maps.layers]]
 	name = "water_areas"
-	provider_layer = "ne.ne_water_lakes_0-2"
+	provider_layer = "ne.ne_water_lakes_0-8"
 	min_zoom = 0
-	max_zoom = 2
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "ne.ne_water_lakes_3-5"
-	min_zoom = 3
-	max_zoom = 5
-
-	[[maps.layers]]
-	name = "water_areas"
-	provider_layer = "ne.ne_water_lakes_6-8"
-	min_zoom = 6
 	max_zoom = 8

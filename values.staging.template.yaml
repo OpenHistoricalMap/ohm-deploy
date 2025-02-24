@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -153,8 +153,8 @@ osm-seed:
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: ohm-admins@googlegroups.com
-        NOMINATIM_URL: nominatim-api.openhistoricalmap.org
-        OVERPASS_URL: overpass-api.openhistoricalmap.org	
+        NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
+        OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
@@ -249,7 +249,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_large
+        label_value: db_large
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -541,6 +541,7 @@ osm-seed:
         TILER_CACHE_BUCKET: tiler-cache-staging
         TILER_CACHE_AWS_ACCESS_KEY_ID: {{STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID}}
         TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
+        TILER_CACHE_AWS_ENDPOINT: ""
         # In case you use TILER_CACHE_TYPE: file with  persistenceDisk
         EXECUTE_REINDEX: false
         EXECUTE_VACUUM_ANALYZE: false
@@ -695,7 +696,7 @@ osm-seed:
       ingressDomain: nominatim-api.staging.openhistoricalmap.org
       replicaCount: 1
       env:
-        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240612_0002.osm.pbf
+        PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250213_0001.osm.pbf
         REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
         REPLICATION_UPDATE_INTERVAL: 60
         REPLICATION_RECHECK_INTERVAL: 30
@@ -706,10 +707,12 @@ osm-seed:
         IMPORT_TIGER_ADDRESSES: false
         THREADS: 8
         NOMINATIM_PASSWORD: {{STAGING_NOMINATIM_PG_PASSWORD}}
-        PGDATA: /var/lib/postgresql/14/main
+        PGDATA: /var/lib/postgresql/16/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
         OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
+        IMPORT_STYLE: extratags
+        EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edt
       resources:
         enabled: false
         requests:
@@ -721,17 +724,10 @@ osm-seed:
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
-        mountPath: /var/lib/postgresql/14/main
+        mountPath: /var/lib/postgresql/16/main
         subPath: nominatim-pgdata
-        # Minikube
-        localVolumeHostPath: /mnt/nominatim-db-data
-        localVolumeSize: 10Gi
-        # AWS
-        AWS_ElasticBlockStore_volumeID: vol-0a530cc12fd745545
-        AWS_ElasticBlockStore_size: 100Gi
-        # GCP
-        GCP_gcePersistentDisk_pdName: osmseed-disk-nominatim_db-v1
-        GCP_gcePersistentDisk_size: 50Gi
+        AWS_ElasticBlockStore_volumeID: vol-02c646e4d0ff5cf8b
+        AWS_ElasticBlockStore_size: 50Gi
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -973,17 +969,17 @@ osm-seed:
 # ====================================================================================================
 ohm:
   tilerCache:
-    enabled: false
+    enabled: true
     
   tilerCachePurge:
-    enabled: false
+    enabled: true
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
       NODEGROUP_TYPE: web_medium # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
-      MAX_ACTIVE_JOBS: 10 
+      MAX_ACTIVE_JOBS: 2 
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
       ## Execute purging
       EXECUTE_PURGE: true

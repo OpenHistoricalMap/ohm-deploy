@@ -33,6 +33,27 @@ services:
     restart: always
     networks:
       - tiler_network_staging
+
+  tiler:
+    image: ohm-tiler-server:v1
+    ports:
+      - "9091:9090"
+    env_file:
+      - .env.staging
+    restart: always
+    networks:
+      - tiler_network_staging
+
+  tiler-cache:
+    image: ohm-tiler-cache:v1
+    env_file:
+      - .env.staging
+    # volumes:
+    #   - ../images/tiler-cache:/app
+    restart: always
+    networks:
+      - tiler_network_staging
+
 networks:
   tiler_network_staging:
     driver: bridge

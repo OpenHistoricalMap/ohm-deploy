@@ -1,6 +1,9 @@
 import boto3
 import re
 import logging
+from config import Config
+from utils.utils import get_logger
+logger = get_logger()
 
 
 def compute_children_tiles(s3_path, zoom_levels):
@@ -14,11 +17,11 @@ def compute_children_tiles(s3_path, zoom_levels):
     Returns:
         list: A sorted list of unique child tile paths in "zoom/x/y" format only for the target zoom levels.
     """
-    logging.info(
+    logger.info(
         f"Starting computation of child tiles for {s3_path} and zoom levels {sorted(set(zoom_levels))}."
     )
+    s3_client=boto3.client("s3")
 
-    s3_client = boto3.client("s3")
     s3_match = re.match(r"s3://([^/]+)/(.+)", s3_path)
     if not s3_match:
         raise ValueError(f"Invalid S3 path: {s3_path}")
@@ -27,11 +30,11 @@ def compute_children_tiles(s3_path, zoom_levels):
     child_tiles = set()
 
     try:
-        logging.info(f"Fetching file from S3 bucket: {bucket_name}, key: {key}.")
+        logger.info(f"Fetching file from S3 bucket: {bucket_name}, key: {key}.")
         response = s3_client.get_object(Bucket=bucket_name, Key=key)
         file_content = response["Body"].read().decode("utf-8")
 
-        logging.info(f"Processing tiles in file.")
+        logger.info(f"Processing tiles in file.")
         for line in file_content.splitlines():
             tile = line.strip()
             match = re.match(r"(\d+)/(\d+)/(\d+)", tile)
@@ -53,7 +56,7 @@ def compute_children_tiles(s3_path, zoom_levels):
                             )
 
     except Exception as e:
-        logging.error(f"Error processing S3 file: {e}")
+        logger.error(f"Error processing S3 file: {e}")
         raise
 
     return sorted(child_tiles)
@@ -86,7 +89,7 @@ def generate_tile_patterns(tiles):
 def delete_folders_by_pattern(bucket_name, patterns, path_file, batch_size=1000):
     """
     Delete folders in the S3 bucket matching the pattern:
-    s3://<bucket>/mnt/data/osm/<zoom>/<prefix>, using bulk delete.
+    s3://<bucket>/mnt/data/osm/<zoom>/<prefix>***, using bulk delete.
 
     Args:
         bucket_name (str): The name of the S3 bucket.
@@ -97,13 +100,13 @@ def delete_folders_by_pattern(bucket_name, patterns, path_file, batch_size=1000)
     Returns:
         None
     """
-    s3_client = boto3.client("s3")
+    s3_client = Config.get_s3_client()
 
     try:
         for pattern in patterns:
             zoom, prefix = pattern.split("/")
-            folder_prefix = f"{path_file}/{zoom}/{prefix}/"
-            logging.info(f"Fetching objects under folder: {folder_prefix}...")
+            folder_prefix = f"{path_file}/{zoom}/{prefix}"
+            logger.info(f"Fetching objects under prefix: {folder_prefix}...")
 
             paginator = s3_client.get_paginator("list_objects_v2")
             response_iterator = paginator.paginate(
@@ -113,11 +116,15 @@ def delete_folders_by_pattern(bucket_name, patterns, path_file, batch_size=1000)
             objects_to_delete = []
             for page in response_iterator:
                 for obj in page.get("Contents", []):
-                    objects_to_delete.append({"Key": obj["Key"]})
+                    obj_key = obj["Key"]
+                    # logger.info(f"Marked for deletion: {bucket_name}/{obj_key}")
+                    objects_to_delete.append({"Key": obj_key})
 
                     # Delete in batches of `batch_size`
                     if len(objects_to_delete) >= batch_size:
-                        logging.info(f"Deleting {len(objects_to_delete)} objects...")
+                        logger.info(
+                            f"Deleting {len(objects_to_delete)} objects under the patern: {patterns}..."
+                        )
                         s3_client.delete_objects(
                             Bucket=bucket_name, Delete={"Objects": objects_to_delete}
                         )
@@ -125,13 +132,20 @@ def delete_folders_by_pattern(bucket_name, patterns, path_file, batch_size=1000)
 
             # Delete remaining objects if any
             if objects_to_delete:
-                logging.info(f"Deleting final {len(objects_to_delete)} objects...")
+                print(
+                    f"Deleting final {len(objects_to_delete)} objects under the patern: {patterns}..."
+                )
+                logger.info(
+                    f"Deleting final {len(objects_to_delete)} objects under the patern: {patterns}..."
+                )
                 s3_client.delete_objects(
                     Bucket=bucket_name, Delete={"Objects": objects_to_delete}
                 )
 
-        logging.info("Bulk deletion completed for all matching patterns.")
+        print("Bulk deletion completed for all matching patterns.")
+        logger.info("Bulk deletion completed for all matching patterns.")
 
     except Exception as e:
-        logging.error(f"Error during bulk deletion: {e}")
+        print(f"Error during bulk deletion: {e}")
+        logger.error(f"Error during bulk deletion: {e}")
         raise
