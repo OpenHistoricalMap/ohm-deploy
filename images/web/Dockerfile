@@ -8,7 +8,7 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ad4ea829a7f794a456ef5c1484e977653cd9f7c3
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ca6b5c573134a5b3b1e90d4d58d11f5c268bf163
 
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
@@ -16,7 +16,7 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'New translations plus repeat removal of "missing interpolation argument"s from ~30 locale files'
+RUN echo 'map-styles as npm module'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages
