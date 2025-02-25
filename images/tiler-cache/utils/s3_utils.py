@@ -3,6 +3,7 @@ import re
 import logging
 from config import Config
 from utils.utils import get_logger
+
 logger = get_logger()
 
 
@@ -20,7 +21,7 @@ def compute_children_tiles(s3_path, zoom_levels):
     logger.info(
         f"Starting computation of child tiles for {s3_path} and zoom levels {sorted(set(zoom_levels))}."
     )
-    s3_client=boto3.client("s3")
+    s3_client = boto3.client("s3")
 
     s3_match = re.match(r"s3://([^/]+)/(.+)", s3_path)
     if not s3_match:
@@ -109,21 +110,19 @@ def delete_folders_by_pattern(bucket_name, patterns, path_file, batch_size=1000)
             logger.info(f"Fetching objects under prefix: {folder_prefix}...")
 
             paginator = s3_client.get_paginator("list_objects_v2")
-            response_iterator = paginator.paginate(
-                Bucket=bucket_name, Prefix=folder_prefix
-            )
+            response_iterator = paginator.paginate(Bucket=bucket_name, Prefix=folder_prefix)
 
             objects_to_delete = []
             for page in response_iterator:
                 for obj in page.get("Contents", []):
                     obj_key = obj["Key"]
-                    # logger.info(f"Marked for deletion: {bucket_name}/{obj_key}")
+                    logger.info(f"Marked for deletion: {bucket_name}/{obj_key}")
                     objects_to_delete.append({"Key": obj_key})
 
                     # Delete in batches of `batch_size`
                     if len(objects_to_delete) >= batch_size:
                         logger.info(
-                            f"Deleting {len(objects_to_delete)} objects under the patern: {patterns}..."
+                            f"INFRASTRUTURE {Config.CLOUD_INFRASTRUCTURE},  REGION: {Config.AWS_REGION_NAME} , BUCKER Deleting {len(objects_to_delete)} objects under the patern: {patterns}"
                         )
                         s3_client.delete_objects(
                             Bucket=bucket_name, Delete={"Objects": objects_to_delete}
@@ -132,17 +131,11 @@ def delete_folders_by_pattern(bucket_name, patterns, path_file, batch_size=1000)
 
             # Delete remaining objects if any
             if objects_to_delete:
-                print(
-                    f"Deleting final {len(objects_to_delete)} objects under the patern: {patterns}..."
-                )
                 logger.info(
-                    f"Deleting final {len(objects_to_delete)} objects under the patern: {patterns}..."
+                    f"Deleting final {len(objects_to_delete)} objects under the patern: {patterns}...in bucket and region: {bucket_name} {Config.AWS_REGION}"
                 )
-                s3_client.delete_objects(
-                    Bucket=bucket_name, Delete={"Objects": objects_to_delete}
-                )
+                s3_client.delete_objects(Bucket=bucket_name, Delete={"Objects": objects_to_delete})
 
-        print("Bulk deletion completed for all matching patterns.")
         logger.info("Bulk deletion completed for all matching patterns.")
 
     except Exception as e:

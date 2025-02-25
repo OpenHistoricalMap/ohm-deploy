@@ -5,23 +5,24 @@ import json
 import threading
 
 from utils.s3_utils import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
-from utils.kubernetes_jobs import get_active_k8s_jobs_count , create_kubernetes_job
+from utils.kubernetes_jobs import get_active_k8s_jobs_count, create_kubernetes_job
 
 from utils.utils import check_tiler_db_postgres_status
 from config import Config
 from utils.utils import get_logger
+
 logger = get_logger()
 
 
 # Initialize SQS Client
-sqs = boto3.client("sqs", region_name=Config.REGION_NAME)
+sqs = boto3.client("sqs", region_name=Config.AWS_REGION_NAME)
 
 
 def get_active_jobs_count():
     """Returns the number of active jobs based on the infrastructure (Kubernetes or Docker)."""
-    if Config.CLOUD_INFRASTRUCTURE == "aws":
+    if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
         return get_active_k8s_jobs_count(Config.NAMESPACE, Config.JOB_NAME_PREFIX)
-    elif Config.CLOUD_INFRASTRUCTURE == "hetzner":
+    elif Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "hetzner":
         return 0
     return 0
 
@@ -29,7 +30,9 @@ def get_active_jobs_count():
 def cleanup_zoom_levels(s3_path, zoom_levels, bucket_name, path_file):
     """Executes the S3 cleanup process for specific zoom levels."""
     try:
-        logger.info(f"Starting cleanup for S3 path: {s3_path}, zoom levels: {zoom_levels}, bucket: {bucket_name}")
+        logger.info(
+            f"Starting cleanup for S3 path: {s3_path}, zoom levels: {zoom_levels}, bucket: {bucket_name}"
+        )
 
         # Compute child tiles
         tiles = compute_children_tiles(s3_path, zoom_levels)
@@ -81,7 +84,7 @@ def process_sqs_messages():
 
                 # Parse the SQS message
                 body = json.loads(message["Body"])
-                
+
                 if "Records" in body and body["Records"][0]["eventSource"] == "aws:s3":
                     record = body["Records"][0]
                     bucket_name = record["s3"]["bucket"]["name"]
@@ -93,16 +96,21 @@ def process_sqs_messages():
                     logger.info(f"Processing S3 event for file: {file_url}")
 
                     # Create a job based on infrastructure
-                    if Config.CLOUD_INFRASTRUCTURE == "aws":
+                    if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
                         create_kubernetes_job(file_url, file_name)
-                    elif Config.CLOUD_INFRASTRUCTURE == "hetzner":
+                    elif Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "hetzner":
                         # create_docker_job(file_url, file_name)
                         logger.info(f"Docker wont start")
 
                     # Cleanup old zoom levels asynchronously
                     cleanup_thread = threading.Thread(
-                        target=cleanup_zoom_levels, 
-                        args=(file_url, Config.ZOOM_LEVELS_TO_DELETE, Config.S3_BUCKET_CACHE_TILER, Config.S3_BUCKET_PATH_FILES)
+                        target=cleanup_zoom_levels,
+                        args=(
+                            file_url,
+                            Config.ZOOM_LEVELS_TO_DELETE,
+                            Config.S3_BUCKET_CACHE_TILER,
+                            Config.S3_BUCKET_PATH_FILES,
+                        ),
                     )
                     cleanup_thread.start()
 

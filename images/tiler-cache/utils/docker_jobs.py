@@ -2,6 +2,7 @@ import docker
 import logging
 from config import Config
 from utils.utils import get_logger, get_purge_and_seed_commands
+
 logger = get_logger("docker_jobs")
 
 
@@ -25,7 +26,6 @@ def get_active_docker_jobs_count(job_name_prefix):
     return active_containers_count
 
 
-
 def create_docker_job(file_url, file_name):
     """
     Creates and starts a Docker container to process the given file.
@@ -46,6 +46,12 @@ def create_docker_job(file_url, file_name):
         # Define container name
         container_name = f"{Config.JOB_NAME_PREFIX}-{file_name.replace('.', '-')}"
 
+        # Get the shell command for purge/seed
+        command = get_purge_and_seed_commands()
+        if "Error" in command:
+            logger.error("Failed to retrieve purge/seed commands.")
+            return None
+
         # Run Docker container with necessary environment variables
         container = client.containers.run(
             image=Config.DOCKER_IMAGE,
@@ -63,16 +69,22 @@ def create_docker_job(file_url, file_name):
                 "PURGE_CONCURRENCY": str(Config.PURGE_CONCURRENCY),
             },
             volumes={
-                "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},  # Allow Docker access
+                "/var/run/docker.sock": {
+                    "bind": "/var/run/docker.sock",
+                    "mode": "rw",
+                },  # Allow Docker access
             },
-            remove=False
-            command=["bash", "-c", get_purge_and_seed_commands()]
+            remove=False,  # Ensure containers are not automatically removed
+            command=["bash", "-c", command],  # Run the bash command
         )
 
         logger.info(f"Docker job started successfully: {container.id}")
         return container.id
 
+    except docker.errors.APIError as e:
+        logger.error(f"API Error while starting Docker job: {e}")
+        return None
+
     except docker.errors.DockerException as e:
         logger.error(f"Error starting Docker job: {e}")
         return None
-    
