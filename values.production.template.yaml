@@ -491,6 +491,10 @@ osm-seed:
 
   tilerServer:
     enabled: true
+    externalService:
+      enabled: true
+      ip: {{PRODUCTION_TILER_SERVER_HOST}}
+      port: 9090
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
