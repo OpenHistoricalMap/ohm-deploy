@@ -15,7 +15,8 @@ RUN apk --no-cache add \
     postgresql-client \
     coreutils \
     jq \
-    procps
+    procps \
+    dcron
 
 RUN pip install --upgrade pip && pip3 install awscli mercantile
 
