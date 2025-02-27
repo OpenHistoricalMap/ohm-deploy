@@ -526,7 +526,7 @@ osm-seed:
       externalService:
         enabled: true
         ip: {{STAGING_TILER_SERVER_HOST}}
-        port: 9091
+        port: 9090
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
