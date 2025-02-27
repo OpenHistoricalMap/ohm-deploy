@@ -390,7 +390,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerDb:
-      enabled: false
+      enabled: true
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
         enabled: true
       env:
