@@ -185,7 +185,7 @@ def get_and_delete_existing_tiles(bucket_name, path_file, tiles_patterns, batch_
             if objects_to_delete:
                 s3_client.delete_objects(Bucket=bucket_name, Delete={"Objects": objects_to_delete})
                 total_deleted += len(objects_to_delete)
-                logger.info(f"Deleted {len(objects_to_delete)} tiles under {prefix}")
+                logger.info(f"Deleted {len(objects_to_delete)} tiles under {prefix}...")
 
     except ClientError as e:
         logger.error(f"S3 ClientError while fetching or deleting tiles: {e}")
