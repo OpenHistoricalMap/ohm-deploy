@@ -2,12 +2,15 @@ services:
   db:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_20250211:/var/lib/postgresql/data
+      - /data/tiler_production_db_20250225_v7:/var/lib/postgresql/data
       - ./config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
       - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
-    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    command:
+      - postgres
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
     ports:
       - "5433:5432"
     env_file:
@@ -17,12 +20,13 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4'
-          memory: 4G
+          cpus: '2'
+          memory: 2G
+
   imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2181.hb02c42b
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2191.hdcb5877
     volumes:
-      - /data/tiler_production_imposm_20250211:/mnt/data
+      - /data/tiler_production_imposm_20250225_v7:/mnt/data
     command:
       - sh
       - -c
@@ -33,24 +37,94 @@ services:
     restart: always
     networks:
       - tiler_network_staging
-
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
   tiler:
-    image: ohm-tiler-server:v1
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
     ports:
       - "9091:9090"
     env_file:
       - .env.staging
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128MiB
     networks:
       - tiler_network_staging
 
-  tiler-cache:
-    image: ohm-tiler-cache:v1
+  cache:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2235.h3310673 
     env_file:
       - .env.staging
-    # volumes:
-    #   - ../images/tiler-cache:/app
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128MiB
+    networks:
+      - tiler_network_staging
+
+  global_seeding:
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
+    env_file:
+      - .env.staging
+    entrypoint:
+      - /bin/bash
+      - "-c"
+      - |
+        set -x
+        while true; do
+          pkill -f "tegola" && sleep 5
+          echo "0/0/0" > /opt/tile-list.tiles
+          tegola cache seed tile-list /opt/tile-list.tiles \
+            --config=/opt/tegola_config/config.toml \
+            --map=osm \
+            --min-zoom=0 \
+            --max-zoom=4 \
+            --concurrency=32 \
+            --overwrite=true
+          sleep 3600
+        done
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128MiB
+    networks:
+      - tiler_network_staging
+
+  tile_coverage_seeding:
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
+    env_file:
+      - .env.staging
+    entrypoint:
+      - /bin/bash
+      - "-c"
+      - |
+        set -x
+        while true; do
+          wget -O tile-list.tiles https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
+          pkill -f "tegola" && sleep 5
+          tegola cache seed tile-list tile-list.tiles \
+            --config=/opt/tegola_config/config.toml \
+            --map=osm \
+            --min-zoom=8 \
+            --max-zoom=14 \
+            --concurrency=32 \
+            --overwrite=false
+          sleep 3600
+        done
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128MiB
     networks:
       - tiler_network_staging
 
