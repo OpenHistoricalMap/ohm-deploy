@@ -1,185 +1,61 @@
 import boto3
 import time
-from kubernetes import client, config
 import os
 import json
-import logging
-from utils import check_tiler_db_postgres_status
-from s3_cleanup import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
 import threading
 
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
+from utils.s3_utils import (
+    get_list_expired_tiles,
+    generate_all_related_tiles,
+    generate_tile_patterns,
+    get_and_delete_existing_tiles,
 )
+from utils.kubernetes_jobs import get_active_k8s_jobs_count, create_kubernetes_job
 
-# Environment variables
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
-NAMESPACE = os.getenv("NAMESPACE", "default")
-SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
-REGION_NAME = os.getenv("REGION_NAME", "us-east-1")
-DOCKER_IMAGE = os.getenv("DOCKER_IMAGE","none",)
-NODEGROUP_TYPE = os.getenv("NODEGROUP_TYPE", "job_large")
-MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
-DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))
+from utils.utils import check_tiler_db_postgres_status
+from config import Config
+from utils.utils import get_logger
 
-# Tiler cache purge and seed settings
-EXECUTE_PURGE = os.getenv("EXECUTE_PURGE", "true")
-EXECUTE_SEED = os.getenv("EXECUTE_SEED", "true")
+logger = get_logger()
 
-# zoom
-PURGE_MIN_ZOOM = os.getenv("PURGE_MIN_ZOOM", 8)
-PURGE_MAX_ZOOM = os.getenv("PURGE_MAX_ZOOM", 20)
-SEED_MIN_ZOOM = os.getenv("SEED_MIN_ZOOM", 8)
-SEED_MAX_ZOOM = os.getenv("SEED_MAX_ZOOM", 14)
 
-## concurrency
-SEED_CONCURRENCY = os.getenv("SEED_CONCURRENCY", 16)
-PURGE_CONCURRENCY = os.getenv("PURGE_CONCURRENCY", 16)
-
-JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge"
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
-POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
-POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
-
-ZOOM_LEVELS_TO_DELETE = list(map(int, os.getenv("ZOOM_LEVELS_TO_DELETE", "18,19,20").split(",")))
-S3_BUCKET_CACHE_TILER = os.getenv("S3_BUCKET_CACHE_TILER", "tiler-cache-staging")
-S3_BUCKET_PATH_FILES = os.getenv("S3_BUCKET_PATH_FILES", "mnt/data/osm")
-
-# Initialize Kubernetes and AWS clients
-sqs = boto3.client("sqs", region_name=REGION_NAME)
-config.load_incluster_config()
-batch_v1 = client.BatchV1Api()
-core_v1 = client.CoreV1Api()
+# Initialize SQS Client
+sqs = boto3.client("sqs", region_name=Config.AWS_REGION_NAME)
 
 
 def get_active_jobs_count():
-    """Returns the number of active jobs in the namespace with names starting with 'tiler-purge-seed-'."""
-    logging.info("Checking active or pending jobs...")
-    jobs = batch_v1.list_namespaced_job(namespace=NAMESPACE)
-    active_jobs_count = 0
+    """Returns the number of active jobs based on the infrastructure (Kubernetes or Docker)."""
+    if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
+        return get_active_k8s_jobs_count(Config.NAMESPACE, Config.JOB_NAME_PREFIX)
+    elif Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "hetzner":
+        return 0
+    return 0
 
-    for job in jobs.items:
-        if not job.metadata.name.startswith(JOB_NAME_PREFIX):
-            continue
 
-        label_selector = f"job-name={job.metadata.name}"
-        pods = core_v1.list_namespaced_pod(namespace=NAMESPACE, label_selector=label_selector)
-
-        for pod in pods.items:
-            if pod.status.phase in [
-                "Pending",
-                "PodInitializing",
-                "ContainerCreating",
-                "Running",
-                "Error",
-            ]:
-                logging.debug(f"Job '{job.metadata.name}' has a pod in {pod.status.phase} state.")
-                active_jobs_count += 1
-                break
-
-    logging.info(f"Total active or pending jobs: {active_jobs_count}")
-    return active_jobs_count
-
-def get_purge_and_seed_commands(script_path='purge_seed_tiles.sh'):
+def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file):
+    """Executes the S3 cleanup process for specific zoom levels with improved logging and error handling."""
+    logger.info(f"S3 Expiration File: {s3_imposm3_exp_path}")
+    logger.info(f"Zoom Levels: {sorted(set(zoom_levels))}")
+    logger.info(f"S3 Bucket: {bucket_name}")
+    logger.info(f"Target Path: {path_file}")
     try:
-        with open(script_path, 'r') as file:
-            commands = file.read()
-        return commands
-    except FileNotFoundError:
-        return "Error: Bash script file not found."
-    
+        expired_tiles = get_list_expired_tiles(s3_imposm3_exp_path)
+        related_tile = generate_all_related_tiles(expired_tiles, zoom_levels)
+        tiles_patterns = generate_tile_patterns(related_tile)
+        get_and_delete_existing_tiles(bucket_name, path_file, tiles_patterns)
 
-def create_kubernetes_job(file_url, file_name):
-    """Create a Kubernetes Job to process a file."""
-    configmap_tiler_server = f"{ENVIRONMENT}-tiler-server-cm"
-    configmap_tiler_db = f"{ENVIRONMENT}-tiler-db-cm"
-    job_name = f"{JOB_NAME_PREFIX}-{file_name.replace('.', '-')}"
-    shell_commands = get_purge_and_seed_commands()
-
-    job_manifest = {
-        "apiVersion": "batch/v1",
-        "kind": "Job",
-        "metadata": {"name": job_name},
-        "spec": {
-            "ttlSecondsAfterFinished": DELETE_OLD_JOBS_AGE,
-            "template": {
-                "spec": {
-                    "nodeSelector": {"nodegroup_type": NODEGROUP_TYPE},
-                    "containers": [
-                        {
-                            "name": "tiler-purge-seed",
-                            "image": DOCKER_IMAGE,
-                            "command": ["bash", "-c", shell_commands],
-                            "envFrom": [{"configMapRef": {"name": configmap_tiler_server}},{"configMapRef": {"name": configmap_tiler_db}}],
-                            "env": [
-                                {"name": "IMPOSM_EXPIRED_FILE", "value": file_url},
-                                {"name": "EXECUTE_PURGE", "value": str(EXECUTE_PURGE)},
-                                {"name": "EXECUTE_SEED", "value": str(EXECUTE_SEED)},
-                                {"name": "PURGE_MIN_ZOOM", "value": str(PURGE_MIN_ZOOM)},
-                                {"name": "PURGE_MAX_ZOOM", "value": str(PURGE_MAX_ZOOM)},
-                                {"name": "SEED_MIN_ZOOM", "value": str(SEED_MIN_ZOOM)},
-                                {"name": "SEED_MAX_ZOOM", "value": str(SEED_MAX_ZOOM)},
-                                {"name": "SEED_CONCURRENCY", "value": str(SEED_CONCURRENCY)},
-                                {"name": "PURGE_CONCURRENCY", "value": str(PURGE_CONCURRENCY)},
-                            ],
-                        }
-                    ],
-                    "restartPolicy": "Never",
-                }
-            },
-            "backoffLimit": 4,
-        },
-    }
-    print("##"*20)
-    print(job_manifest)
-    print("##"*20)
-
-    try:
-        batch_v1.create_namespaced_job(namespace=NAMESPACE, body=job_manifest)
-        logging.info(f"Kubernetes Job '{job_name}' created for file: {file_url}")
-    except Exception as e:
-        logging.error(f"Failed to create Kubernetes Job '{job_name}': {e}")
-
-
-
-def cleanup_zoom_levels(s3_path, zoom_levels, bucket_name, path_file):
-    """
-    Executes the S3 cleanup process for specific zoom levels.
-    
-    Args:
-        s3_path (str): Path to the S3 tiles file.
-        zoom_levels (list): List of zoom levels to process.
-        bucket_name (str): Name of the S3 bucket for deletion.
-
-    Returns:
-        None
-    """
-    try:
-        logging.info(f"Starting cleanup for S3 path: {s3_path}, zoom levels: {zoom_levels}, bucket: {bucket_name}")
-
-        # Compute child tiles
-        tiles = compute_children_tiles(s3_path, zoom_levels)
-
-        # Generate patterns for deletion
-        patterns = generate_tile_patterns(tiles)
-        logging.info(f"Generated tile patterns for deletion: {patterns}")
-
-        # Delete folders based on patterns
-        delete_folders_by_pattern(bucket_name, patterns, path_file)
-        logging.info("S3 cleanup completed successfully.")
+        logger.info("S3 Cleanup Completed Successfully.")
 
     except Exception as e:
-        logging.error(f"Error during cleanup: {e}")
+        logger.exception("Error during S3 cleanup:")
         raise
 
+
 def process_sqs_messages():
-    """Process messages from the SQS queue and create Kubernetes Jobs for each file."""
+    """Unified function to process SQS messages and create jobs based on infrastructure."""
     while True:
         response = sqs.receive_message(
-            QueueUrl=SQS_QUEUE_URL,
+            QueueUrl=Config.SQS_QUEUE_URL,
             MaxNumberOfMessages=1,
             WaitTimeSeconds=10,
             AttributeNames=["All"],
@@ -188,7 +64,7 @@ def process_sqs_messages():
 
         messages = response.get("Messages", [])
         if not messages:
-            logging.info("No messages in the queue. Retrying in 5 seconds...")
+            logger.info("No messages in the queue. Retrying in 5 seconds...")
             time.sleep(5)
             continue
 
@@ -196,14 +72,14 @@ def process_sqs_messages():
             try:
                 # Check PostgreSQL status
                 if not check_tiler_db_postgres_status():
-                    logging.error("PostgreSQL database is down. Retrying in 1 minute...")
+                    logger.error("PostgreSQL database is down. Retrying in 1 minute...")
                     time.sleep(60)
                     continue
 
-                # Check active job count before processing
-                while get_active_jobs_count() >= MAX_ACTIVE_JOBS:
-                    logging.warning(
-                        f"Max active jobs limit ({MAX_ACTIVE_JOBS}) reached. Waiting 1 minute..."
+                # Wait until job limit is under threshold
+                while get_active_jobs_count() >= Config.MAX_ACTIVE_JOBS:
+                    logger.warning(
+                        f"Max active jobs limit ({Config.MAX_ACTIVE_JOBS}) reached. Waiting 1 minute..."
                     )
                     time.sleep(60)
 
@@ -212,40 +88,46 @@ def process_sqs_messages():
 
                 if "Records" in body and body["Records"][0]["eventSource"] == "aws:s3":
                     record = body["Records"][0]
+                    eventTime = record["eventTime"]
                     bucket_name = record["s3"]["bucket"]["name"]
                     object_key = record["s3"]["object"]["key"]
-
-                    file_url = f"s3://{bucket_name}/{object_key}"
+                    s3_imposm3_exp_path = f"s3://{bucket_name}/{object_key}"
                     file_name = os.path.basename(object_key)
-                    print(file_url)
-                    print(file_name)
-                    logging.info(f"Processing S3 event for file: {file_url}")
+                    logger.info(f"Event: {eventTime},{'##' * 60} ")
+                    # Create a job based on infrastructure
+                    if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
+                        create_kubernetes_job(s3_imposm3_exp_path, file_name)
+                    elif Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "hetzner":
+                        logger.info(f"No docker job ")
 
-                    # Create a Kubernetes job
-                    create_kubernetes_job(file_url, file_name)
-
-                    # Remove zoom levels 18,19,20
+                    # Start a cleanup thread
                     cleanup_thread = threading.Thread(
-                        target=cleanup_zoom_levels, 
-                        args=(file_url, ZOOM_LEVELS_TO_DELETE, S3_BUCKET_CACHE_TILER, S3_BUCKET_PATH_FILES)
+                        target=cleanup_zoom_levels,
+                        args=(
+                            s3_imposm3_exp_path,
+                            Config.ZOOM_LEVELS_TO_DELETE,
+                            Config.S3_BUCKET_CACHE_TILER,
+                            Config.S3_BUCKET_PATH_FILES,
+                        ),
                     )
                     cleanup_thread.start()
 
                 elif "Event" in body and body["Event"] == "s3:TestEvent":
-                    logging.info("Test event detected. Ignoring...")
+                    logger.info("Test event detected. Ignoring...")
 
                 # Delete the processed message
                 sqs.delete_message(
-                    QueueUrl=SQS_QUEUE_URL,
+                    QueueUrl=Config.SQS_QUEUE_URL,
                     ReceiptHandle=message["ReceiptHandle"],
                 )
-                logging.info(f"Message processed and deleted: {message['MessageId']}")
+                logger.info(f"Message processed and deleted: {message['MessageId']}")
 
             except Exception as e:
-                logging.error(f"Error processing message: {e}")
+                logger.error(f"Error processing message: {e}")
 
         time.sleep(10)
 
+
 if __name__ == "__main__":
-    logging.info("Starting SQS message processing...")
+    logger.info("Starting SQS message processing...")
     process_sqs_messages()

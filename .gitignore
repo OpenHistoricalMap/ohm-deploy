@@ -15,6 +15,7 @@ config.toml
 config.osm.toml
 envs/.env.tm
 values.staging.yaml
+hetzner/.env.staging
 
 .DS_Store
 */.DS_Store
