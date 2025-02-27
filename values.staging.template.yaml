@@ -524,7 +524,7 @@ osm-seed:
     tilerServer:
       enabled: true
       externalService:
-        enabled: true
+        enabled: false
         ip: {{STAGING_TILER_SERVER_HOST}}
         port: 9091
       nodeSelector:
@@ -973,10 +973,10 @@ osm-seed:
 # ====================================================================================================
 ohm:
   tilerCache:
-    enabled: false
+    enabled: true
     
   tilerCachePurge:
-    enabled: false
+    enabled: true
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
@@ -1007,7 +1007,7 @@ ohm:
       label_value: web_medium
 
   tilerCacheSeedGlobal:
-    enabled: false
+    enabled: true
     schedule: '0 * * * *'
     env:
       CONCURRENCY: 32
@@ -1021,7 +1021,7 @@ ohm:
       label_value: web_medium
 
   tilerCacheSeedCoverage:
-    enabled: false
+    enabled: true
     schedule: '0 * * * *'
     env:
       CONCURRENCY: 32
