@@ -48,24 +48,19 @@ services:
       - tiler_network
   # Tiler server
   tiler_production:
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2241.hba0f0a5
       ports:
-        - "9091:9090"
+        - "9090:9090"
       env_file:
-        - .env.staging
+        - .env.production
       restart: always
-      # deploy:
-      #   resources:
-      #     limits:
-      #       cpus: '0.2'
-      #       memory: 128MiB
       networks:
         - tiler_network
   # Tiler cache
   cache_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2235.h3310673 
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
     env_file:
-      - .env.staging
+      - .env.production
     restart: always
     deploy:
       resources:
@@ -79,7 +74,7 @@ services:
   global_seeding_production:
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
     env_file:
-      - .env.staging
+      - .env.production
     entrypoint:
       - /bin/bash
       - "-c"
@@ -92,7 +87,7 @@ services:
             --config=/opt/tegola_config/config.toml \
             --map=osm \
             --min-zoom=0 \
-            --max-zoom=4 \
+            --max-zoom=7\
             --concurrency=32 \
             --overwrite=true
           sleep 3600
@@ -108,7 +103,7 @@ services:
   tile_coverage_seeding_production:
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
     env_file:
-      - .env.staging
+      - .env.production
     entrypoint:
       - /bin/bash
       - "-c"
