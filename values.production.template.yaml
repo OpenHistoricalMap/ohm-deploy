@@ -983,7 +983,7 @@ ohm:
       label_value: web_large
 
   tilerCacheSeedCoverage:
-    enabled: true
+    enabled: false
     schedule: '0 * * * *'
     env:
       CONCURRENCY: 128
