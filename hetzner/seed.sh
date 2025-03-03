@@ -41,10 +41,11 @@ seed_coverage() {
     tegola cache seed tile-list /opt/tile-list.tiles \
       --config=/opt/tegola_config/config.toml \
       --map=osm \
-      --min-zoom=8 \
+      --min-zoom=0 \
       --max-zoom=14 \
       --concurrency=32 \
       --overwrite=false
+    sleep 300
   done
 }
 
@@ -65,4 +66,3 @@ case "$1" in
     exit 1
     ;;
 esac
-

@@ -11,6 +11,12 @@ Ensure you are using the correct Docker images for production deployment, https:
 
 ```sh
 docker compose -f hetzner/tiler.production.yml up -d
+# docker compose -f hetzner/tiler.production.yml up tiler_production -d
+# docker compose -f hetzner/tiler.production.yml up imposm_production -d
+# docker compose -f hetzner/tiler.production.yml up cache_production -d
+# docker compose -f hetzner/tiler.production.yml up global_seeding_production -d
+# docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d
+
 ```
 
 🛠 Deploying to Staging
@@ -30,3 +36,4 @@ docker compose -f hetzner/tiler.staging.yml up tile_coverage_seeding -d
 	•	Ensure that you are using the correct Docker images for each environment.
 	•	Manually update the images before deploying production services.
 	•	For troubleshooting, check logs using:
+
