@@ -32,8 +32,7 @@ RUN mkdir /opt/tegola_config
 RUN cd /opt/ && python build_config.py \
     --output=/opt/tegola_config/config.toml \
     --provider_names \
-    "land,\
-    admin_boundaries_lines,\
+    "admin_boundaries_lines,\
     admin_boundaries.centroids,\
     admin_boundaries_maritime,\
     place_areas,\
