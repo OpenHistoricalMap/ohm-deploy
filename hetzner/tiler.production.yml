@@ -48,7 +48,7 @@ services:
       - tiler_network
   # Tiler server
   tiler_production:
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2241.hba0f0a5
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2248.he042bfb
       ports:
         - "9090:9090"
       env_file:
@@ -75,23 +75,13 @@ services:
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
     env_file:
       - .env.production
+    volumes:
+      - ./seed.sh:/opt/seed.sh
     entrypoint:
       - /bin/bash
       - "-c"
       - |
-        set -x
-        while true; do
-          pkill -f "tegola" && sleep 5
-          echo "0/0/0" > /opt/tile-list.tiles
-          tegola cache seed tile-list /opt/tile-list.tiles \
-            --config=/opt/tegola_config/config.toml \
-            --map=osm \
-            --min-zoom=0 \
-            --max-zoom=7\
-            --concurrency=32 \
-            --overwrite=true
-          sleep 3600
-        done
+        /opt/seed.sh global
     deploy:
       resources:
         limits:
@@ -104,23 +94,13 @@ services:
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2234.hfa6976e
     env_file:
       - .env.production
+    volumes:
+      - ./seed.sh:/opt/seed.sh
     entrypoint:
       - /bin/bash
       - "-c"
       - |
-        set -x
-        while true; do
-          wget -O tile-list.tiles https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
-          pkill -f "tegola" && sleep 5
-          tegola cache seed tile-list tile-list.tiles \
-            --config=/opt/tegola_config/config.toml \
-            --map=osm \
-            --min-zoom=8 \
-            --max-zoom=14 \
-            --concurrency=32 \
-            --overwrite=false
-          sleep 3600
-        done
+        /opt/seed.sh coverage
     deploy:
       resources:
         limits:
