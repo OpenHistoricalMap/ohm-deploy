@@ -139,10 +139,10 @@ END;
 $$
 LANGUAGE plpgsql;
 
-SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_simplified_z0_2', 5000, 'admin_level IN (1,2)');
-SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_simplified_z3_5', 1000, 'admin_level IN (1,2,3,4)');
-SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_simplified_z6_7', 200, 'admin_level IN (1,2,3,4,5,6)');
-SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_simplified_z8_9', 100, 'admin_level IN (1,2,3,4,5,6,7,8,9)');
-SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_simplified_z10_12', 20, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
-SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_simplified_z13_15', 5, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
-SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_simplified_z16_20', 1, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
+SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z0_2', 5000, 'admin_level IN (1,2)');
+SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z3_5', 1000, 'admin_level IN (1,2,3,4)');
+SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z6_7', 200, 'admin_level IN (1,2,3,4,5,6)');
+SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z8_9', 100, 'admin_level IN (1,2,3,4,5,6,7,8,9)');
+SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z10_12', 20, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
+SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z13_15', 5, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
+SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z16_20', 1, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');

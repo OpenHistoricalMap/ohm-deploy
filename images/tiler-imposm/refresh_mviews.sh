@@ -24,14 +24,13 @@ function refresh_admin_boundaries_mviews() {
         "mview_admin_boundaries_centroid_z10_12"
         "mview_admin_boundaries_centroid_z13_15"
         "mview_admin_boundaries_centroid_z16_20"
-        "mview_admin_boundaries_lines_simplified_z0_2"
-        "mview_admin_boundaries_lines_simplified_z3_5"
-        "mview_admin_boundaries_lines_simplified_z6_7"
-        "mview_admin_boundaries_lines_simplified_z8_9"
-        "mview_admin_boundaries_lines_simplified_z10_12"
-        "mview_admin_boundaries_lines_simplified_z13_15"
-        "mview_admin_boundaries_lines_simplified_z16_20"
-
+        "mview_admin_boundaries_lines_merged_z0_2"
+        "mview_admin_boundaries_lines_merged_z3_5"
+        "mview_admin_boundaries_lines_merged_z6_7"
+        "mview_admin_boundaries_lines_merged_z8_9"
+        "mview_admin_boundaries_lines_merged_z10_12"
+        "mview_admin_boundaries_lines_merged_z13_15"
+        "mview_admin_boundaries_lines_merged_z16_20"
     )
 
     while true; do
