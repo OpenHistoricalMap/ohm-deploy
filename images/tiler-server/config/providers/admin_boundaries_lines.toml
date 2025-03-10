@@ -9,8 +9,8 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    start_decdate, 
-    end_decdate
+    min_start_date as start_decdate, 
+    max_end_date as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z0_2
 WHERE 
@@ -27,8 +27,8 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    start_decdate, 
-    end_decdate
+    min_start_date as start_decdate, 
+    max_end_date as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z3_5
 WHERE 
@@ -47,8 +47,8 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    start_decdate, 
-    end_decdate
+    min_start_date as start_decdate, 
+    max_end_date as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z6_7
 WHERE 
@@ -66,8 +66,8 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    start_decdate, 
-    end_decdate
+    min_start_date as start_decdate, 
+    max_end_date as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z8_9
 WHERE 
@@ -85,8 +85,8 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    start_decdate, 
-    end_decdate
+    min_start_date as start_decdate, 
+    max_end_date as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z10_12 
 WHERE 
@@ -104,8 +104,8 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    start_decdate, 
-    end_decdate
+    min_start_date as start_decdate, 
+    max_end_date as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z13_15 
 WHERE 
@@ -123,8 +123,8 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    start_decdate, 
-    end_decdate
+    min_start_date as start_decdate, 
+    max_end_date as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z16_20
 WHERE 
