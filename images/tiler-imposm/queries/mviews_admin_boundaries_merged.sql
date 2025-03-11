@@ -1,3 +1,5 @@
+-- This script creates materialized views for admin boundaries (lines) merged by admin_level, member, and type.
+-- The script also creates a function to backfill start_decdate and end_decdate columns in osm_relation_members_boundaries table.
 -- Add New Columns in osm_relation_members_boundaries table
 ALTER TABLE osm_relation_members_boundaries 
 ADD COLUMN start_decdate DOUBLE PRECISION,
@@ -23,8 +25,7 @@ FOR EACH ROW
 EXECUTE FUNCTION decimal_dates_members_boundaries();
 
 
--- Backfill Existing Data
--- Set timeout to 20 minutes (1200000 milliseconds) for the current session
+-- Backfill Existing Data, Set timeout to 20 minutes (1200000 milliseconds) for the current session
 SET statement_timeout = 1200000;
 UPDATE osm_relation_members_boundaries
 SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
