@@ -56,7 +56,9 @@ BEGIN
             admin_level,
             member,
             type,  
-            ST_Simplify(geometry, %L) AS geometry, 
+            ST_SimplifyPreserveTopology(geometry, %L) AS geometry, 
+            start_decdate,  
+            end_decdate,
             start_decdate,  
             end_decdate,    
             LAG(end_decdate) OVER (
@@ -66,7 +68,7 @@ BEGIN
           FROM osm_relation_members_boundaries
           WHERE ST_GeometryType(geometry) = ''ST_LineString''
           AND geometry IS NOT NULL 
-          AND ST_Simplify(geometry, %L) IS NOT NULL 
+          AND ST_SimplifyPreserveTopology(geometry, %L) IS NOT NULL 
           AND %s 
         ),
 
@@ -76,6 +78,8 @@ BEGIN
             member,
             type,  
             geometry,
+            start_decdate,  
+            end_decdate,
             start_decdate,  
             end_decdate,    
             CASE 
