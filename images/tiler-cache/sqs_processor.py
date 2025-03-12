@@ -4,46 +4,50 @@ import os
 import json
 import threading
 
-from utils.s3_utils import compute_children_tiles, generate_tile_patterns, delete_folders_by_pattern
-from utils.kubernetes_jobs import get_active_k8s_jobs_count , create_kubernetes_job
+from utils.s3_utils import (
+    get_list_expired_tiles,
+    generate_all_related_tiles,
+    generate_tile_patterns,
+    get_and_delete_existing_tiles,
+)
+from utils.kubernetes_jobs import get_active_k8s_jobs_count, create_kubernetes_job
 
 from utils.utils import check_tiler_db_postgres_status
 from config import Config
 from utils.utils import get_logger
+
 logger = get_logger()
 
 
 # Initialize SQS Client
-sqs = boto3.client("sqs", region_name=Config.REGION_NAME)
+sqs = boto3.client("sqs", region_name=Config.AWS_REGION_NAME)
 
 
 def get_active_jobs_count():
     """Returns the number of active jobs based on the infrastructure (Kubernetes or Docker)."""
-    if Config.CLOUD_INFRASTRUCTURE == "aws":
+    if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
         return get_active_k8s_jobs_count(Config.NAMESPACE, Config.JOB_NAME_PREFIX)
-    elif Config.CLOUD_INFRASTRUCTURE == "hetzner":
+    elif Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "hetzner":
         return 0
     return 0
 
 
-def cleanup_zoom_levels(s3_path, zoom_levels, bucket_name, path_file):
-    """Executes the S3 cleanup process for specific zoom levels."""
+def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file):
+    """Executes the S3 cleanup process for specific zoom levels with improved logging and error handling."""
+    logger.info(f"S3 Expiration File: {s3_imposm3_exp_path}")
+    logger.info(f"Zoom Levels: {sorted(set(zoom_levels))}")
+    logger.info(f"S3 Bucket: {bucket_name}")
+    logger.info(f"Target Path: {path_file}")
     try:
-        logger.info(f"Starting cleanup for S3 path: {s3_path}, zoom levels: {zoom_levels}, bucket: {bucket_name}")
+        expired_tiles = get_list_expired_tiles(s3_imposm3_exp_path)
+        related_tile = generate_all_related_tiles(expired_tiles, zoom_levels)
+        tiles_patterns = generate_tile_patterns(related_tile)
+        get_and_delete_existing_tiles(bucket_name, path_file, tiles_patterns)
 
-        # Compute child tiles
-        tiles = compute_children_tiles(s3_path, zoom_levels)
-
-        # Generate patterns for deletion
-        patterns = generate_tile_patterns(tiles)
-        logger.info(f"Generated tile patterns for deletion: {patterns}")
-
-        # Delete folders based on patterns
-        delete_folders_by_pattern(bucket_name, patterns, path_file)
-        logger.info("S3 cleanup completed successfully.")
+        logger.info("S3 Cleanup Completed Successfully.")
 
     except Exception as e:
-        logger.error(f"Error during cleanup: {e}")
+        logger.exception("Error during S3 cleanup:")
         raise
 
 
@@ -81,28 +85,30 @@ def process_sqs_messages():
 
                 # Parse the SQS message
                 body = json.loads(message["Body"])
-                
+
                 if "Records" in body and body["Records"][0]["eventSource"] == "aws:s3":
                     record = body["Records"][0]
+                    eventTime = record["eventTime"]
                     bucket_name = record["s3"]["bucket"]["name"]
                     object_key = record["s3"]["object"]["key"]
-
-                    file_url = f"s3://{bucket_name}/{object_key}"
+                    s3_imposm3_exp_path = f"s3://{bucket_name}/{object_key}"
                     file_name = os.path.basename(object_key)
-                    print(file_url)
-                    logger.info(f"Processing S3 event for file: {file_url}")
-
+                    logger.info(f"Event: {eventTime},{'##' * 60} ")
                     # Create a job based on infrastructure
-                    if Config.CLOUD_INFRASTRUCTURE == "aws":
-                        create_kubernetes_job(file_url, file_name)
-                    elif Config.CLOUD_INFRASTRUCTURE == "hetzner":
-                        # create_docker_job(file_url, file_name)
-                        logger.info(f"Docker wont start")
+                    if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
+                        create_kubernetes_job(s3_imposm3_exp_path, file_name)
+                    elif Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "hetzner":
+                        logger.info(f"No docker job ")
 
-                    # Cleanup old zoom levels asynchronously
+                    # Start a cleanup thread
                     cleanup_thread = threading.Thread(
-                        target=cleanup_zoom_levels, 
-                        args=(file_url, Config.ZOOM_LEVELS_TO_DELETE, Config.S3_BUCKET_CACHE_TILER, Config.S3_BUCKET_PATH_FILES)
+                        target=cleanup_zoom_levels,
+                        args=(
+                            s3_imposm3_exp_path,
+                            Config.ZOOM_LEVELS_TO_DELETE,
+                            Config.S3_BUCKET_CACHE_TILER,
+                            Config.S3_BUCKET_PATH_FILES,
+                        ),
                     )
                     cleanup_thread.start()
 

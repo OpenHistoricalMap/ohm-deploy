@@ -99,11 +99,13 @@ def check_tiler_db_postgres_status():
 #         logging.error(f"Error processing GeoJSON to tiles: {e}")
 #         return [], []
 
+
 def save_geojson_boundary(features, file_path):
     featureCollection = {"type": "FeatureCollection", "features": features}
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(featureCollection, file, ensure_ascii=False, indent=4)
     logging.info(f"GeoJSON saved successfully to {file_path}.")
+
 
 def seed_tiles(tiles, concurrency, min_zoom, max_zoom, log_file, skipped_tiles_file):
     """Seeds tiles using Tegola and logs the process."""
@@ -188,6 +190,7 @@ def seed_tiles(tiles, concurrency, min_zoom, max_zoom, log_file, skipped_tiles_f
         logging.error(f"Failed tiles: {failed_tiles}")
     return failed_tiles
 
+
 def upload_to_s3(local_file, s3_bucket, s3_key):
     """Uploads a local file to an S3 bucket."""
     s3_url = f"s3://{s3_bucket}/{s3_key}"
@@ -199,4 +202,3 @@ def upload_to_s3(local_file, s3_bucket, s3_key):
         logging.info(f"Uploaded {local_file} to {s3_url}.")
     except Exception as e:
         logging.error(f"Error uploading to S3: {e}")
-

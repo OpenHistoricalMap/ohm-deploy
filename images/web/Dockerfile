@@ -8,7 +8,7 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ca6b5c573134a5b3b1e90d4d58d11f5c268bf163
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=dae4f4273c2ac1f991ac337842b33f6fea07d41c
 
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
@@ -16,7 +16,7 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'map-styles as npm module'
+RUN echo 'Hotfix to remove "missing interpolation argument"s from ~30 locale files'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages
@@ -86,7 +86,7 @@ RUN apache2ctl configtest
 RUN chown -R www-data: $workdir
 
 # Clone Map-styles
-ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=6de6e329569ab6561d1fa6ab2cebb42df7fd17c7
+ENV OPENHISTORICALMAP_MAP_STYLES_GITSHA=7a70bbef491db6928f28256a3a68d3158a6f9710
 RUN git clone --branch staging --depth 1 https://github.com/OpenHistoricalMap/map-styles.git $workdir/public/map-styles
 RUN cd $workdir/public/map-styles && git fetch --depth 1 origin $OPENHISTORICALMAP_MAP_STYLES_GITSHA && git checkout $OPENHISTORICALMAP_MAP_STYLES_GITSHA
 RUN rm -rf $workdir/public/map-styles/.git

@@ -68,7 +68,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -137,7 +137,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       replicaCount: 1
       # Set staticIp, if you are using cloudProvider=gcp
       staticIp: c
@@ -249,7 +249,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: db_large
+        label_value: web_medium
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -390,7 +390,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerDb:
-      enabled: true
+      enabled: false
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
         enabled: true
       env:
@@ -523,6 +523,10 @@ osm-seed:
   
     tilerServer:
       enabled: true
+      externalService:
+        enabled: true
+        ip: {{STAGING_TILER_SERVER_HOST}}
+        port: 9091
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -969,10 +973,10 @@ osm-seed:
 # ====================================================================================================
 ohm:
   tilerCache:
-    enabled: true
+    enabled: false
     
   tilerCachePurge:
-    enabled: true
+    enabled: false
     env:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job

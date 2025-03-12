@@ -1,31 +1,36 @@
 import logging
 from kubernetes import client, config
 from config import Config
-from utils.utils import get_logger,get_purge_and_seed_commands
+from utils.utils import get_logger, get_purge_and_seed_commands
+
 logger = get_logger()
+
 
 def init_kubernetes_clients():
     """Initialize Kubernetes API clients globally."""
     try:
-        config.load_incluster_config()
-        logger.info("Loaded in-cluster Kubernetes configuration.")
+        if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
+            config.load_incluster_config()
+            logger.info("Loaded in-cluster Kubernetes configuration.")
     except config.ConfigException:
         logger.error("Failed to load in-cluster config. Ensure this script runs inside Kubernetes.")
         return None, None
 
     return client.BatchV1Api(), client.CoreV1Api()
 
+
 # Global Kubernetes API clients
 batch_v1, core_v1 = init_kubernetes_clients()
+
 
 def get_active_k8s_jobs_count(namespace, job_name_prefix):
     """
     Returns the number of active jobs in the namespace with names starting with 'JOB_NAME_PREFIX'.
-    
+
     Args:
         namespace (str): The Kubernetes namespace to check.
         job_name_prefix (str): Prefix to filter relevant jobs.
-    
+
     Returns:
         int: Number of active or pending jobs.
     """
@@ -54,7 +59,9 @@ def get_active_k8s_jobs_count(namespace, job_name_prefix):
                     "Running",
                     "Error",
                 ]:
-                    logger.debug(f"Job '{job.metadata.name}' has a pod in {pod.status.phase} state.")
+                    logger.debug(
+                        f"Job '{job.metadata.name}' has a pod in {pod.status.phase} state."
+                    )
                     active_jobs_count += 1
                     break
 
@@ -87,7 +94,10 @@ def create_kubernetes_job(file_url, file_name):
                             "name": "tiler-purge-seed",
                             "image": Config.DOCKER_IMAGE,
                             "command": ["bash", "-c", shell_commands],
-                            "envFrom": [{"configMapRef": {"name": configmap_tiler_server}},{"configMapRef": {"name": configmap_tiler_db}}],
+                            "envFrom": [
+                                {"configMapRef": {"name": configmap_tiler_server}},
+                                {"configMapRef": {"name": configmap_tiler_db}},
+                            ],
                             "env": [
                                 {"name": "IMPOSM_EXPIRED_FILE", "value": file_url},
                                 {"name": "EXECUTE_PURGE", "value": str(Config.EXECUTE_PURGE)},
@@ -97,7 +107,10 @@ def create_kubernetes_job(file_url, file_name):
                                 {"name": "SEED_MIN_ZOOM", "value": str(Config.SEED_MIN_ZOOM)},
                                 {"name": "SEED_MAX_ZOOM", "value": str(Config.SEED_MAX_ZOOM)},
                                 {"name": "SEED_CONCURRENCY", "value": str(Config.SEED_CONCURRENCY)},
-                                {"name": "PURGE_CONCURRENCY", "value": str(Config.PURGE_CONCURRENCY)},
+                                {
+                                    "name": "PURGE_CONCURRENCY",
+                                    "value": str(Config.PURGE_CONCURRENCY),
+                                },
                             ],
                         }
                     ],

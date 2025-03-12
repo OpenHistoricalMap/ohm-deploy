@@ -1,33 +1,39 @@
-# Tiler DB and Imposm Deployed in Hetzner
+# Tiler Service Deployment in Hetzner
 
-This is a basic manual deployment using Docker Compose to deploy `tiler-db` and `tiler-imposm` on a Hetzner server. The Compose files allocate resources for  only production enviroment
+This repository provides the deployment setup for the Tiler service used in OpenHistoricalMap, utilizing Docker Compose.
 
-*Note 1*: This server is used only for production. Testing the instance for staging slows down the data import process the whole machine.
+🚀 Deploying to Production
 
-*Note 2*: Eventually, this approach should be improved by adding the Hetzner server as a node to EKS.
-
-## Deploy Production
-
-Make sure you are using the right, docker  images for production deployment,  it need to be added manully from
-
-- Tiler Db:
-https://github.com/orgs/OpenHistoricalMap/packages/container/tiler-db/versions
+Ensure you are using the correct Docker images for production deployment, https://github.com/orgs/OpenHistoricalMap/packages/
 
 
-- Tiler Imposm
-https://github.com/orgs/OpenHistoricalMap/packages/container/tiler-imposm/versions
+📌 Deploy Production Services
 
+```sh
+docker compose -f hetzner/tiler.production.yml up -d
+# docker compose -f hetzner/tiler.production.yml up tiler_production -d
+# docker compose -f hetzner/tiler.production.yml up imposm_production -d
+# docker compose -f hetzner/tiler.production.yml up cache_production -d
+# docker compose -f hetzner/tiler.production.yml up global_seeding_production -d
+# docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d
 
+```
 
-## Deploy Staging
+🛠 Deploying to Staging
+
+To deploy the staging environment, use the following commands:
 
 ```sh
 docker compose -f hetzner/tiler.staging.yml up db -d
 docker compose -f hetzner/tiler.staging.yml up imposm -d
+docker compose -f hetzner/tiler.staging.yml up tiler -d
+docker compose -f hetzner/tiler.staging.yml up cache -d
+docker compose -f hetzner/tiler.staging.yml up global_seeding -d
+docker compose -f hetzner/tiler.staging.yml up tile_coverage_seeding -d
 ```
 
-## Deploy Production
+📌 Notes
+	•	Ensure that you are using the correct Docker images for each environment.
+	•	Manually update the images before deploying production services.
+	•	For troubleshooting, check logs using:
 
-```sh
-docker compose -f hetzner/tiler.production.yml up -d
-```
