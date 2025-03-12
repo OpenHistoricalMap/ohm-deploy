@@ -54,6 +54,7 @@ osm-seed:
   # ====================================================================================================
   db:
     enabled: true
+    priorityClass: 'high-priority'
     # For node selector you should create the node with a label "nodegroup_type"
     nodeSelector:
       enabled: true
@@ -124,7 +125,8 @@ osm-seed:
   # ====================================================================================================
   web:
     enabled: true
-    replicaCount: 2
+    priorityClass: 'high-priority'
+    replicaCount: 1
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
     serviceAnnotations:
@@ -157,7 +159,7 @@ osm-seed:
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
     resources:
-      enabled: true
+      enabled: false
       requests:
         memory: "2Gi"
         cpu: "1000m"
@@ -168,7 +170,7 @@ osm-seed:
       enabled: true
       minReplicas: 2
       maxReplicas: 4
-      cpuUtilization: 80
+      cpuUtilization: 50
     sharedMemorySize: 512Mi
     livenessProbeExec: true
   # ====================================================================================================
@@ -176,6 +178,7 @@ osm-seed:
   # ====================================================================================================
   memcached:
     enabled: true
+    priorityClass: 'high-priority'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -194,6 +197,7 @@ osm-seed:
   # ====================================================================================================
   planetDump:
     enabled: true
+    priorityClass: 'medium-priority'
     schedule: '0 0 * * *'
     nodeSelector:
       enabled: true
@@ -215,6 +219,7 @@ osm-seed:
   # ====================================================================================================
   fullHistory:
     enabled: true
+    priorityClass: 'low-priority'
     schedule: '0 0 * * 0'
     nodeSelector:
       enabled: true
@@ -236,6 +241,7 @@ osm-seed:
   # ====================================================================================================
   replicationJob:
     enabled: true
+    priorityClass: 'high-priority'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -257,6 +263,7 @@ osm-seed:
   # ====================================================================================================
   populateApidb:
     enabled: false
+    priorityClass: 'low-priority'
     env:
       URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
     resources:
@@ -273,6 +280,7 @@ osm-seed:
   # ====================================================================================================
   osmProcessor:
     enabled: false
+    priorityClass: 'low-priority'
     env: 
       URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
       OSM_FILE_ACTION: simple_pbf
@@ -361,12 +369,13 @@ osm-seed:
 
   tilerDb:
     enabled: false
+    priorityClass: 'medium-priority'
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
       enabled: true
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: api_db
+      label_value: misc_large
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
       POSTGRES_DB: tiler_osm_production
@@ -456,10 +465,11 @@ osm-seed:
 
   tilerImposm:
     enabled: false
+    priorityClass: 'medium-priority'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
@@ -491,6 +501,7 @@ osm-seed:
 
   tilerServer:
     enabled: true
+    priorityClass: 'medium-priority'
     externalService:
       enabled: true
       ip: {{PRODUCTION_TILER_SERVER_HOST}}
@@ -498,7 +509,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
     replicaCount: 4
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -542,10 +553,11 @@ osm-seed:
   # ====================================================================================================
   tilerServerCacheCleaner:
     enabled: false
+    priorityClass: 'medium-priority'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: misc_large
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
@@ -571,13 +583,14 @@ osm-seed:
   # ====================================================================================================
   tmDb:
     enabled: true
+    priorityClass: 'medium-priority'
     image:
       name: "postgis/postgis"
       tag: "11-2.5"
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: {{PRODUCTION_TM_DB_PASSWORD}}
@@ -603,10 +616,11 @@ osm-seed:
 
   tmApi:
     enabled: true
+    priorityClass: 'medium-priority'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
     replicaCount: 2
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -662,6 +676,7 @@ osm-seed:
   # ====================================================================================================
   nominatimApi:
     enabled: true
+    priorityClass: 'medium-priority'
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: nominatim-api.openhistoricalmap.org
@@ -702,17 +717,18 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
 
 # ====================================================================================================
 # Variables for overpass-api
 # ====================================================================================================
   overpassApi:
     enabled: true
+    priorityClass: 'medium-priority'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: overpass-api.openhistoricalmap.org
@@ -743,6 +759,7 @@ osm-seed:
 # ====================================================================================================
   taginfo:
     enabled: true
+    priorityClass: 'medium-priority'
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: taginfo.openhistoricalmap.org
@@ -770,7 +787,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
@@ -791,6 +808,7 @@ osm-seed:
 # ====================================================================================================
   osmSimpleMetrics:
     enabled: true
+    priorityClass: 'medium-priority'
     schedule: '0 2 * * *'
     resources:
       enabled: false
@@ -803,13 +821,14 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
       
   # ====================================================================================================
   # Variables for replication nomitoring task
   # ====================================================================================================
   monitoringReplication:
     enabled: true
+    priorityClass: 'medium-priority'
     schedule: '*/30 * * * *'
     env:
       CREATE_MISSING_FILES: "empty"
@@ -825,12 +844,13 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
   # ====================================================================================================
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   changesetReplicationJob:
     enabled: true
+    priorityClass: 'medium-priority'
     resources:
       enabled: false
       requests:
@@ -842,13 +862,14 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
 
 # ====================================================================================================
 # Variables for osmcha web
 # ====================================================================================================
   osmchaWeb:
     enabled: true
+    priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
       tag: 80eb324
@@ -857,6 +878,7 @@ osm-seed:
 # ====================================================================================================
   osmchaApi:
     enabled: true
+    priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-django
       tag: 1e9d9dd
@@ -885,12 +907,13 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
 # ====================================================================================================
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
     adiffService:
       enabled: false
+      priorityClass: 'medium-priority'
       image:
         name: ghcr.io/openhistoricalmap/osm-adiff-service
         tag: a343422497bb2ad4735ca7eada921b60eeb19e20
@@ -899,6 +922,7 @@ osm-seed:
 # ====================================================================================================
   osmchaDb:
     enabled: true
+    priorityClass: 'medium-priority'
     image:
       name: "developmentseed/osmseed-osmcha-db"
       tag: "0.1.0-n767.h0090e97"
@@ -923,12 +947,13 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
 # ====================================================================================================
 # Planet files server
 # ====================================================================================================
   planetFiles:
     enabled: false
+    priorityClass: 'low-priority'
 
 # ====================================================================================================
 # Tiles cache SQS processor
@@ -943,7 +968,7 @@ ohm:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
+      NODEGROUP_TYPE: misc_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
@@ -966,7 +991,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
 
   tilerCacheSeedGlobal:
     enabled: false
@@ -980,7 +1005,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
 
   tilerCacheSeedCoverage:
     enabled: false
@@ -995,4 +1020,4 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: misc_large
