@@ -76,11 +76,13 @@ osm-seed:
     resources:
       enabled: true
       requests:
-        memory: "13Gi"
-        cpu: "2800m"
-      limits:
-        memory: "14Gi"
+        enabled: true
+        memory: "12Gi"
         cpu: "3800m"
+      limits:
+        enabled: false
+        memory: "6Gi"
+        cpu: "1700m"
     sharedMemorySize: 2Gi
     postgresqlConfig:
       enabled: true
@@ -126,7 +128,7 @@ osm-seed:
   web:
     enabled: true
     priorityClass: 'high-priority'
-    replicaCount: 1
+    replicaCount: 2
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
     serviceAnnotations:
@@ -159,13 +161,15 @@ osm-seed:
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
     resources:
-      enabled: false
+      enabled: true
       requests:
-        memory: "2Gi"
-        cpu: "1000m"
-      limits:
-        memory: "3Gi"
+        enabled: true
+        memory: "6Gi"
         cpu: "1500m"
+      limits:
+        enabled: false
+        memory: "8Gi"
+        cpu: "1800m"
     autoscaling:
       enabled: true
       minReplicas: 2
@@ -186,9 +190,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "8Gi"
         cpu: "2"
       limits:
+        enabled: false
         memory: "8Gi"
         cpu: "2"
 
@@ -208,9 +214,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "4Gi"
         cpu: "2"
       limits:
+        enabled: false
         memory: "8Gi"
         cpu: "4"
 
@@ -230,9 +238,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "4Gi"
         cpu: "2"
       limits:
+        enabled: false
         memory: "8Gi"
         cpu: "4"
         
@@ -252,9 +262,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "20Gi"
         cpu: "8"
       limits:
+        enabled: false
         memory: "24Gi"
         cpu: "10"
 
@@ -269,9 +281,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "1Gi"
         cpu: "2"
       limits:
+        enabled: false
         memory: "2Gi"
         cpu: "2.5"
 
@@ -394,9 +408,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
+        enabled: false
         memory: "29Gi"
         cpu: "7500m"
       limits:
+        enabled: false
         memory: "29Gi"
         cpu: "7600m"
     postgresqlConfig:
@@ -490,9 +506,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
+        enabled: false
         memory: "2Gi"
         cpu: "1"
       limits:
+        enabled: false
         memory: "2Gi"
         cpu: "1"
   # ====================================================================================================
@@ -538,9 +556,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "2Gi"
         cpu: "1"
       limits:
+        enabled: false
         memory: "4Gi"
         cpu: "2"
     autoscaling:
@@ -563,9 +583,11 @@ osm-seed:
     resources:
       enabled: true
       requests:
+        enabled: false
         memory: "1Gi"
         cpu: "2"
       limits:
+        enabled: false
         memory: "2Gi"
         cpu: "4"
     env:
@@ -605,9 +627,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "1Gi"
         cpu: "2"
       limits:
+        enabled: false
         memory: "2Gi"
         cpu: "2"
   # ====================================================================================================
@@ -665,9 +689,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: 1Gi
         cpu: '2'
       limits:
+        enabled: false
         memory: 2Gi
         cpu: '2'
 
@@ -702,9 +728,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: '1Gi'
         cpu: '2'
       limits:
+        enabled: false
         memory: '2Gi'
         cpu: '2'
     persistenceDisk:
@@ -749,9 +777,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: '1Gi'
         cpu: '2'
       limits:
+        enabled: false
         memory: '2Gi'
         cpu: '2'
 # ====================================================================================================
@@ -778,12 +808,6 @@ osm-seed:
       INTERVAL_DOWNLOAD_DATA: 7d
     resources:
       enabled: false
-      requests:
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        memory: '2Gi'
-        cpu: '2'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -797,12 +821,6 @@ osm-seed:
         label_value: job_xlarge
       resources:
         enabled: true
-        requests:
-          memory: "13Gi"
-          cpu: "3600m"
-        limits:
-          memory: "14Gi"
-          cpu: "3800m"
 # ====================================================================================================
 # Variables for osm-simple-metrics
 # ====================================================================================================
@@ -813,9 +831,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: '1Gi'
         cpu: '2'
       limits:
+        enabled: false
         memory: '2Gi'
         cpu: '2'
     nodeSelector:
@@ -836,9 +856,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: '1Gi'
         cpu: '2'
       limits:
+        enabled: false
         memory: '2Gi'
         cpu: '2'
     nodeSelector:
@@ -854,9 +876,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: '20Gi'
         cpu: '8'
       limits:
+        enabled: false
         memory: '24Gi'
         cpu: '10'
     nodeSelector:
@@ -899,9 +923,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "512Mi"
         cpu: "1"
       limits:
+        enabled: false
         memory: "512Mi"
         cpu: "1"
     nodeSelector:
@@ -933,9 +959,11 @@ osm-seed:
     resources:
       enabled: false
       requests:
+        enabled: false
         memory: "20Gi"
         cpu: "8"
       limits:
+        enabled: false
         memory: "24Gi"
         cpu: "10"
     persistenceDisk:
