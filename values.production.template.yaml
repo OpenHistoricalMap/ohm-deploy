@@ -78,7 +78,7 @@ osm-seed:
       requests:
         enabled: true
         memory: "12Gi"
-        cpu: "3800m"
+        cpu: "3500m"
       limits:
         enabled: false
         memory: "6Gi"
