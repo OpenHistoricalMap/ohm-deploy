@@ -783,7 +783,7 @@ osm-seed:
           memory: '8Gi'
           cpu: '2'
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: job_xlarge
   # ====================================================================================================
