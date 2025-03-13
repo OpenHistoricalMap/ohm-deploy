@@ -44,47 +44,43 @@ $$
 DECLARE
     sql TEXT;
 BEGIN
-    -- Drop the materialized view if it exists
+    -- Drop the materialized view if it already exists
     sql := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
     EXECUTE sql;
 
-    -- Construct the SQL query dynamically
+    -- Construct the query for the materialized view
     sql := format(
         'CREATE MATERIALIZED VIEW %I AS
         WITH ordered AS (
           SELECT
+            type,
             admin_level,
             member,
-            type,  
             ST_SimplifyPreserveTopology(geometry, %L) AS geometry, 
-            start_decdate,  
-            end_decdate,
             start_decdate,  
             end_decdate,    
             LAG(end_decdate) OVER (
               PARTITION BY admin_level, member, type  
-              ORDER BY start_decdate
+              ORDER BY start_decdate NULLS FIRST
             ) AS prev_end
           FROM osm_relation_members_boundaries
           WHERE ST_GeometryType(geometry) = ''ST_LineString''
           AND geometry IS NOT NULL 
-          AND ST_SimplifyPreserveTopology(geometry, %L) IS NOT NULL 
-          AND %s 
+          AND %s
         ),
 
         flagged AS (
           SELECT
+            type,
             admin_level,
             member,
-            type,  
             geometry,
-            start_decdate,  
-            end_decdate,
             start_decdate,  
             end_decdate,    
             CASE 
               WHEN prev_end IS NULL THEN 0               
-              WHEN start_decdate <= prev_end + 1 THEN 0  
+              WHEN start_decdate IS NULL THEN 0         
+              WHEN start_decdate <= prev_end + 1 THEN 0 -- No gap
               ELSE 1
             END AS gap_flag
           FROM ordered
@@ -92,42 +88,46 @@ BEGIN
 
         grouped AS (
           SELECT
+            type,
             admin_level,
             member,
-            type,  
             geometry,
             start_decdate,  
             end_decdate,    
             SUM(gap_flag) OVER (
               PARTITION BY admin_level, member, type  
-              ORDER BY start_decdate
+              ORDER BY start_decdate NULLS FIRST
               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
             ) AS group_id
           FROM flagged
         )
 
         SELECT
+          type,
           admin_level,
           member,
-          type,  
           group_id,
-          COUNT(*) AS group_count,         
-          (array_agg(geometry))[1] AS geometry,
-          MIN(start_decdate) AS min_start_date,    
-          MAX(end_decdate)   AS max_end_date       
+          (ARRAY_AGG(geometry ORDER BY start_decdate NULLS FIRST))[1] AS geometry,
+          COUNT(*) AS merged_row_count,         
+          CASE 
+            WHEN bool_or(start_decdate IS NULL) THEN NULL
+            ELSE MIN(start_decdate) 
+          END AS min_start_date,    
+          CASE 
+            WHEN bool_or(end_decdate IS NULL) THEN NULL
+            ELSE MAX(end_decdate)
+          END AS max_end_date       
         FROM grouped
         GROUP BY 
-          admin_level,
-          member,
-          type,   
-          group_id
+          type, admin_level, member, group_id
         WITH DATA;', 
-        view_name, simplification, simplification, filter_condition);
+        view_name, simplification, filter_condition
+    );
 
-    -- Execute the SQL query
+    -- Execute the query to create the materialized view
     EXECUTE sql;
 
-    -- Create unique index for concurrent refresh
+    -- Create a unique index to improve concurrent refresh performance
     sql := format(
         'CREATE UNIQUE INDEX IF NOT EXISTS %I_idx 
         ON %I (admin_level, member, type, group_id);',
@@ -140,9 +140,12 @@ BEGIN
         ON %I USING GIST (geometry);',
         view_name, view_name);
     EXECUTE sql;
+
+    RAISE NOTICE 'Materialized view % created successfully', view_name;
 END;
 $$
 LANGUAGE plpgsql;
+
 
 SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z0_2', 5000, 'admin_level IN (1,2)');
 SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z3_5', 1000, 'admin_level IN (1,2,3,4)');
