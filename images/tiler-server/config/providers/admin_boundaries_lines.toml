@@ -9,6 +9,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
+    maritime,
+    dispute,
+    indefinite,
+    indeterminate, 
+    min_start_date_iso AS start_date,
+    max_end_date_iso AS end_date,
     min_start_date as start_decdate, 
     max_end_date as end_decdate
 FROM 
@@ -27,6 +33,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
+    maritime,
+    dispute,
+    indefinite,
+    indeterminate, 
+    min_start_date_iso AS start_date,
+    max_end_date_iso AS end_date,
     min_start_date as start_decdate, 
     max_end_date as end_decdate
 FROM 
@@ -47,6 +59,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
+    maritime,
+    dispute,
+    indefinite,
+    indeterminate, 
+    min_start_date_iso AS start_date,
+    max_end_date_iso AS end_date,
     min_start_date as start_decdate, 
     max_end_date as end_decdate
 FROM 
@@ -66,6 +84,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
+    maritime,
+    dispute,
+    indefinite,
+    indeterminate, 
+    min_start_date_iso AS start_date,
+    max_end_date_iso AS end_date,
     min_start_date as start_decdate, 
     max_end_date as end_decdate
 FROM 
@@ -85,6 +109,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
+    maritime,
+    dispute,
+    indefinite,
+    indeterminate, 
+    min_start_date_iso AS start_date,
+    max_end_date_iso AS end_date,
     min_start_date as start_decdate, 
     max_end_date as end_decdate
 FROM 
@@ -104,6 +134,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
+    maritime,
+    dispute,
+    indefinite,
+    indeterminate, 
+    min_start_date_iso AS start_date,
+    max_end_date_iso AS end_date,
     min_start_date as start_decdate, 
     max_end_date as end_decdate
 FROM 
@@ -123,6 +159,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
+    maritime,
+    dispute,
+    indefinite,
+    indeterminate, 
+    min_start_date_iso AS start_date,
+    max_end_date_iso AS end_date,
     min_start_date as start_decdate, 
     max_end_date as end_decdate
 FROM 
