@@ -15,8 +15,8 @@ SELECT
     indeterminate, 
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date,
-    min_start_date as start_decdate, 
-    max_end_date as end_decdate
+    min_start_decdate as start_decdate, 
+    max_end_decdate as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z0_2
 WHERE 
@@ -39,8 +39,8 @@ SELECT
     indeterminate, 
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date,
-    min_start_date as start_decdate, 
-    max_end_date as end_decdate
+    min_start_decdate as start_decdate, 
+    max_end_decdate as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z3_5
 WHERE 
@@ -65,8 +65,8 @@ SELECT
     indeterminate, 
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date,
-    min_start_date as start_decdate, 
-    max_end_date as end_decdate
+    min_start_decdate as start_decdate, 
+    max_end_decdate as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z6_7
 WHERE 
@@ -90,8 +90,8 @@ SELECT
     indeterminate, 
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date,
-    min_start_date as start_decdate, 
-    max_end_date as end_decdate
+    min_start_decdate as start_decdate, 
+    max_end_decdate as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z8_9
 WHERE 
@@ -115,8 +115,8 @@ SELECT
     indeterminate, 
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date,
-    min_start_date as start_decdate, 
-    max_end_date as end_decdate
+    min_start_decdate as start_decdate, 
+    max_end_decdate as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z10_12 
 WHERE 
@@ -140,8 +140,8 @@ SELECT
     indeterminate, 
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date,
-    min_start_date as start_decdate, 
-    max_end_date as end_decdate
+    min_start_decdate as start_decdate, 
+    max_end_decdate as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z13_15 
 WHERE 
@@ -165,8 +165,8 @@ SELECT
     indeterminate, 
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date,
-    min_start_date as start_decdate, 
-    max_end_date as end_decdate
+    min_start_decdate as start_decdate, 
+    max_end_decdate as end_decdate
 FROM 
     mview_admin_boundaries_lines_merged_z16_20
 WHERE 

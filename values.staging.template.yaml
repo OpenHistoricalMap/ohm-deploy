@@ -663,7 +663,7 @@ osm-seed:
   # Variables for overpass-api
   # ====================================================================================================
     overpassApi:
-      enabled: true
+      enabled: false
       priorityClass: "medium-priority"
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
