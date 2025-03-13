@@ -40,7 +40,6 @@ WHERE ST_GeometryType(geometry) = 'ST_LineString';
 -- The function will create a unique index on admin_level, member, type, and group_id to improve concurrent refresh performance
 -- The function will create a spatial index on the geometry column
 -- The function will return the merged geometries, the count of rows merged, the minimum and maximum start and end decimal dates, and the converted ISO dates for the decimal dates
--- The function will also return the first non-null value found in the group for maritime, dispute, indefinite, and indeterminate attributes
 CREATE OR REPLACE FUNCTION create_merge_lines_boundaries(
     view_name TEXT, 
     simplification FLOAT, 
@@ -65,12 +64,7 @@ BEGIN
             member,
             ST_SimplifyPreserveTopology(geometry, %L) AS geometry, 
             start_decdate,  
-            end_decdate,    
-            -- Extra attributes from ways
-            (me_tags::JSONB)->>''maritime'' AS maritime,
-            (me_tags::JSONB)->>''dispute'' AS dispute,
-            (me_tags::JSONB)->>''indefinite'' AS indefinite,
-            (me_tags::JSONB)->>''indeterminate'' AS indeterminate,
+            end_decdate,
             LAG(end_decdate) OVER (
               PARTITION BY admin_level, member, type  
               ORDER BY start_decdate NULLS FIRST
@@ -88,11 +82,7 @@ BEGIN
             member,
             geometry,
             start_decdate,  
-            end_decdate,
-            maritime,
-            dispute,
-            indefinite,
-            indeterminate,   
+            end_decdate,   
             CASE 
               WHEN prev_end IS NULL THEN 0               
               WHEN start_decdate IS NULL THEN 0         
@@ -110,10 +100,6 @@ BEGIN
             geometry,
             start_decdate,  
             end_decdate,
-            maritime,
-            dispute,
-            indefinite,
-            indeterminate, 
             SUM(gap_flag) OVER (
               PARTITION BY admin_level, member, type  
               ORDER BY start_decdate NULLS FIRST
@@ -154,28 +140,8 @@ BEGIN
                   WHEN BOOL_OR(end_decdate IS NULL) THEN NULL 
                   ELSE MAX(end_decdate) 
               END::NUMERIC
-          ) AS max_end_date_iso,
-
-          -- Return the first non-null value found in the group
-          COALESCE(
-            (ARRAY_AGG(maritime ORDER BY maritime NULLS LAST))[1], 
-            NULL
-          ) AS maritime,
-
-          COALESCE(
-            (ARRAY_AGG(dispute ORDER BY dispute NULLS LAST))[1], 
-            NULL
-          ) AS dispute,
-
-          COALESCE(
-            (ARRAY_AGG(indefinite ORDER BY indefinite NULLS LAST))[1], 
-            NULL
-          ) AS indefinite,
-
-          COALESCE(
-            (ARRAY_AGG(indeterminate ORDER BY indeterminate NULLS LAST))[1], 
-            NULL
-          ) AS indeterminate     
+          ) AS max_end_date_iso
+             
         FROM grouped
         GROUP BY 
           type, admin_level, member, group_id
@@ -204,7 +170,6 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
-
 
 SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z0_2', 5000, 'admin_level IN (1,2)');
 SELECT create_merge_lines_boundaries('mview_admin_boundaries_lines_merged_z3_5', 1000, 'admin_level IN (1,2,3,4)');
