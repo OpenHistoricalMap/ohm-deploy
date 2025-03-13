@@ -9,16 +9,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    maritime,
-    dispute,
-    indefinite,
-    indeterminate, 
-    min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date,
-    min_start_decdate as start_decdate, 
-    max_end_decdate as end_decdate
+    start_date,
+    end_date,
+    start_decdate, 
+    end_decdate
 FROM 
-    mview_admin_boundaries_lines_merged_z0_2
+    mview_land_ohm_lines_z0_2
 WHERE 
     geometry && !BBOX!
 """
@@ -33,16 +29,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    maritime,
-    dispute,
-    indefinite,
-    indeterminate, 
-    min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date,
-    min_start_decdate as start_decdate, 
-    max_end_decdate as end_decdate
+    start_date,
+    end_date,
+    start_decdate, 
+    end_decdate
 FROM 
-    mview_admin_boundaries_lines_merged_z3_5
+    mview_land_ohm_lines_z3_5
 WHERE 
     admin_level IN (1,2,3,4) 
     AND geometry && !BBOX!
@@ -59,16 +51,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    maritime,
-    dispute,
-    indefinite,
-    indeterminate, 
-    min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date,
-    min_start_decdate as start_decdate, 
-    max_end_decdate as end_decdate
+    start_date,
+    end_date,
+    start_decdate, 
+    end_decdate
 FROM 
-    mview_admin_boundaries_lines_merged_z6_7
+    mview_land_ohm_lines_z6_7
 WHERE 
     geometry && !BBOX!
 """
@@ -84,16 +72,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    maritime,
-    dispute,
-    indefinite,
-    indeterminate, 
-    min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date,
-    min_start_decdate as start_decdate, 
-    max_end_decdate as end_decdate
+    start_date,
+    end_date,
+    start_decdate, 
+    end_decdate
 FROM 
-    mview_admin_boundaries_lines_merged_z8_9
+    mview_land_ohm_lines_z8_9
 WHERE 
     geometry && !BBOX!
 """
@@ -109,16 +93,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    maritime,
-    dispute,
-    indefinite,
-    indeterminate, 
-    min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date,
-    min_start_decdate as start_decdate, 
-    max_end_decdate as end_decdate
+    start_date,
+    end_date,
+    start_decdate, 
+    end_decdate
 FROM 
-    mview_admin_boundaries_lines_merged_z10_12 
+    mview_land_ohm_lines_z10_12 
 WHERE 
     geometry && !BBOX!
 """
@@ -134,16 +114,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    maritime,
-    dispute,
-    indefinite,
-    indeterminate, 
-    min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date,
-    min_start_decdate as start_decdate, 
-    max_end_decdate as end_decdate
+    start_date,
+    end_date,
+    start_decdate, 
+    end_decdate
 FROM 
-    mview_admin_boundaries_lines_merged_z13_15 
+    mview_land_ohm_lines_z13_15 
 WHERE 
     geometry && !BBOX!
 """
@@ -159,16 +135,12 @@ SELECT
     member as osm_id, 
     admin_level, 
     type,
-    maritime,
-    dispute,
-    indefinite,
-    indeterminate, 
-    min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date,
-    min_start_decdate as start_decdate, 
-    max_end_decdate as end_decdate
+    start_date,
+    end_date,
+    start_decdate, 
+    end_decdate
 FROM 
-    mview_admin_boundaries_lines_merged_z16_20
+    mview_land_ohm_lines_z16_20
 WHERE 
     geometry && !BBOX!
 """

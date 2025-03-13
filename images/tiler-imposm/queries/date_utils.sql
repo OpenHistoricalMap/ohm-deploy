@@ -48,3 +48,16 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+
+
+--  This function converts a date in ISO format to a decimal date. usually user in triggers
+CREATE OR REPLACE FUNCTION convert_dates_to_decimal ()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.start_decdate := isodatetodecimaldate(pad_date(NEW.start_date::TEXT, 'start')::TEXT, FALSE);
+    NEW.end_decdate := isodatetodecimaldate(pad_date(NEW.end_date::TEXT, 'end')::TEXT, FALSE);
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
