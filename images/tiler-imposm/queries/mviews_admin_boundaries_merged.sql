@@ -51,9 +51,9 @@ WHERE ST_GeometryType(geometry) = 'ST_LineString';
 -- STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate, admin_level, member and type
 -----------------------------------
 
-DROP MATERIALIZED VIEW IF EXISTS mview_relation_members_boundaries_merged CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mview_relation_members_boundaries CASCADE;
 
-CREATE MATERIALIZED VIEW mview_relation_members_boundaries_merged AS
+CREATE MATERIALIZED VIEW mview_relation_members_boundaries AS
 WITH ordered AS (
   SELECT
     type,
@@ -68,7 +68,7 @@ WITH ordered AS (
     ) AS prev_end
   FROM osm_relation_members_boundaries
   WHERE ST_GeometryType(geometry) = 'ST_LineString'
-    AND geometry IS NOT NULL Limit 1000000
+    AND geometry IS NOT NULL
 ),
 
 flagged AS (
