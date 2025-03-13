@@ -63,11 +63,16 @@ for key, value in files.items():
                     )
                 )
             else:
-                json_str = json_str.replace(
-                    "openhistoricalmap.github.io",
-                    "staging.openhistoricalmap.org",
+                json_str = (
+                    json_str.replace(
+                        "vtiles.openhistoricalmap.org",
+                        "vtiles.staging.openhistoricalmap.org",
+                    )
+                    .replace(
+                        "openhistoricalmap.github.io",
+                        "staging.openhistoricalmap.org",
+                    )
                 )
-
             json_data = json.loads(json_str)
 
             ohm_website_path = value["ohm-website"]
