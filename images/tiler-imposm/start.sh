@@ -229,15 +229,14 @@ function importData() {
         -deployproduction
 
     log_message "Creating material views and indexes..."
-    # psql $PG_CONNECTION -f queries/postgis_helpers.sql 
-    # psql $PG_CONNECTION -f queries/postgis_post_import.sql
+    psql $PG_CONNECTION -f queries/date_utils.sql
     psql $PG_CONNECTION -f queries/mviews_land.sql 
     psql $PG_CONNECTION -f queries/mviews_ne_lakes.sql 
     psql $PG_CONNECTION -f queries/mviews_admin_boundaries.sql 
     psql $PG_CONNECTION -f queries/mviews_admin_boundaries_merged.sql 
     psql $PG_CONNECTION -f queries/mviews_transport_lines.sql 
     psql $PG_CONNECTION -f queries/mviews_water.sql 
-
+    
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }
