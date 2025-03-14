@@ -52,6 +52,7 @@ BEGIN
             FROM %s;
         $sql$, zoom, table_name);
         
+        -- NOTE: Do not create admin lines since we are merging in mviews_admin_boundaries_merged.sql
         EXECUTE sql_create_lines;
         RAISE NOTICE 'Created materialized view: mview_admin_boundaries_lines_%s', zoom;
 
