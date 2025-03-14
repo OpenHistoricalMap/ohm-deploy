@@ -5,7 +5,7 @@ import re
 
 SERVER_URL = os.getenv('SERVER_URL', 'www.openhistoricalmap.org')
 environment = 'staging' if 'staging' in SERVER_URL else 'production'
-file_path = os.path.join($workdir, 'node_modules', '@openhistoricalmap', 'map-styles', 'dist', 'ohm.styles.js')
+file_path = os.path.join('node_modules', '@openhistoricalmap', 'map-styles', 'dist', 'ohm.styles.js')
 
 try:
     with open(file_path, 'r+') as file:
