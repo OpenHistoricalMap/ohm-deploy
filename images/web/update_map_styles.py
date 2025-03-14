@@ -2,6 +2,8 @@ import json
 import os
 import shutil
 import re
+import pathlib
+
 
 SERVER_URL = os.getenv('SERVER_URL', 'www.openhistoricalmap.org')
 environment = 'staging' if 'staging' in SERVER_URL else 'production'
@@ -31,7 +33,9 @@ try:
         # Write the separately-hosted styles
         for style in styles_py:
             style_snake_case = re.sub(r'(?<!^)(?=[A-Z])', '_', style).lower()
-            file_path = os.path.join(os.sep, 'var', 'www', 'public', 'map-styles', style_snake_case, style_snake_case+'.json')
+            dir_path = os.path.join(os.sep, 'var', 'www', 'public', 'map-styles', style_snake_case)
+            pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
+            file_path = os.path.join(dir_path, style_snake_case+'.json')
             with open(file_path, 'w') as file:
                 file.write(json.dumps(styles_py[style], indent=2))
 
