@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'nominatim-ui'
+      - 'nominatim-ui-2'
 
 jobs:
   nominatim:
@@ -17,20 +17,18 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/staging'
+      - name: Set environment variables - Staging & Nominatim-UI-2
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/nominatim-ui-2'
         run: |
           echo "NOMINATIM_API=https://nominatim-api.staging.openhistoricalmap.org/" >> $GITHUB_ENV
           echo "NOMINATIM_BUCKET=nominatim-staging.openhistoricalmap.org" >> $GITHUB_ENV
           echo "CLOUDFRONT_DISTRIBUTION_ID=${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}" >> $GITHUB_ENV
-
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
         run: |
           echo "NOMINATIM_API=https://nominatim-api.openhistoricalmap.org/" >> $GITHUB_ENV
           echo "NOMINATIM_BUCKET=nominatim.openhistoricalmap.org" >> $GITHUB_ENV
           echo "CLOUDFRONT_DISTRIBUTION_ID=${{ secrets.PRODUCTION_NOMINATIM_CLOUDFRONT_ID }}" >> $GITHUB_ENV
-
       - name: Checkout nominatim-ui repo (Specific SHA)
         uses: actions/checkout@v4
         with:
@@ -55,7 +53,7 @@ jobs:
 
       - name: Deploy to S3 and Invalidate CloudFront
         run: |
-          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/ --delete
+          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
