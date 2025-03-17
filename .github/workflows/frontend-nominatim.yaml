@@ -5,7 +5,6 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'nominatim-ui'
 
 jobs:
   nominatim:
@@ -17,10 +16,10 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - name: Set environment variables - Staging
+      - name: Set environment variables - Staging & Nominatim-UI-2
         if: github.ref == 'refs/heads/staging'
         run: |
-          echo "NOMINATIM_API=https://nominatim-api.staging.openhistoricalmap.org/" >> $GITHUB_ENV
+          echo "NOMINATIM_API=https://nominatim-api.openhistoricalmap.org/" >> $GITHUB_ENV
           echo "NOMINATIM_BUCKET=nominatim-staging.openhistoricalmap.org" >> $GITHUB_ENV
           echo "CLOUDFRONT_DISTRIBUTION_ID=${{ secrets.STAGING_NOMINATIM_CLOUDFRONT_ID }}" >> $GITHUB_ENV
 
@@ -38,10 +37,15 @@ jobs:
           ref: c14d033389acedf4dcbaabd9d88e14bc40212279
           fetch-depth: 0
 
+      - name: Install Dependencies with Legacy Peer Deps
+        run: |
+          npm install --legacy-peer-deps
+          npm install rollup-plugin-svelte@latest --save-dev --legacy-peer-deps
+
       - name: Build nominatim-ui frontend
         run: |
           echo "Nominatim_Config.Nominatim_API_Endpoint = '${NOMINATIM_API}';" >> dist/theme/config.theme.js
-          # npm run build
+          npm run build
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -55,7 +59,7 @@ jobs:
 
       - name: Deploy to S3 and Invalidate CloudFront
         run: |
-          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/ --delete
+          aws s3 sync dist/ s3://${NOMINATIM_BUCKET}/
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
