@@ -48,14 +48,14 @@ services:
       - tiler_network
   # Tiler server
   tiler_production:
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2253.h575fadd
-      ports:
-        - "9090:9090"
-      env_file:
-        - .env.production
-      restart: always
-      networks:
-        - tiler_network
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2253.h575fadd
+    ports:
+      - "9090:9090"
+    env_file:
+      - .env.production
+    restart: always
+    networks:
+      - tiler_network
   # Tiler cache
   cache_production:
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
