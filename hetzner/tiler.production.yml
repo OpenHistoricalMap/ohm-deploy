@@ -24,7 +24,7 @@ services:
           
   # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2191.hdcb5877
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2296.h6936774
     volumes:
       - /data/tiler_production_imposm_20250211:/mnt/data
     command:
@@ -48,7 +48,7 @@ services:
       - tiler_network
   # Tiler server
   tiler_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2253.h575fadd
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
     ports:
       - "9090:9090"
     env_file:
