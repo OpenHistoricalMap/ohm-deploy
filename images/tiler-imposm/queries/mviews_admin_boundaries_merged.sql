@@ -80,10 +80,13 @@ flagged AS (
     start_decdate,  
     end_decdate,   
     CASE 
-      WHEN prev_end IS NULL THEN 0               
-      WHEN start_decdate IS NULL THEN 0         
-      WHEN start_decdate <= prev_end + 1 THEN 0 -- No gap, +1 allows overlap, Note, 1 means 1 year of overlap, this can be reducies to 0.5 or 0.25, for not lets keep it 1
-      ELSE 1
+        WHEN prev_end IS NULL THEN 0 
+        WHEN start_decdate IS NULL THEN 0
+        WHEN 
+            -- 0.003 covers all possible decimal gaps that correspond to one day (whether it’s a leap year or not).
+            (start_decdate - prev_end) < 0.003
+        THEN 0 -- No gap, merge
+        ELSE 1 -- Gap exists
     END AS gap_flag
   FROM ordered
 ),
