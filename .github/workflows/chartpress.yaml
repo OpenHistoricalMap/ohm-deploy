@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'refactor/web_docker'
+      - 'admin_lines'
 jobs:
   build:
     runs-on: ubuntu-20.04
