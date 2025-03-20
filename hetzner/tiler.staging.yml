@@ -24,7 +24,7 @@ services:
           memory: 2G
 
   imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2296.h6936774
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2302.h7c8d3da
     volumes:
       - /data/tiler_production_imposm_20250225_v7:/mnt/data
     command:
@@ -43,7 +43,7 @@ services:
           cpus: '1'
           memory: 1G
   tiler:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2298.hfb649bb
     ports:
       - "9091:9090"
     env_file:
