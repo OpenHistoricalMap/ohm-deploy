@@ -24,7 +24,7 @@ services:
           memory: 2G
 
   imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2300.h463b3df
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2302.h7c8d3da
     volumes:
       - /data/tiler_production_imposm_20250225_v7:/mnt/data
     command:
