@@ -23,8 +23,8 @@ function refresh_admin_boundaries_mviews() {
         "mview_land_ohm_lines_z3_5"
         "mview_land_ohm_lines_z6_7"
         "mview_land_ohm_lines_z8_9"
-        "mview_land_ohm_lines_z8_9"
         "mview_land_ohm_lines_z10_12"
+        "mview_land_ohm_lines_z13_15"
         "mview_land_ohm_lines_z16_20"
     )
 
