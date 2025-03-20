@@ -17,6 +17,8 @@ function refresh_admin_boundaries_mviews() {
         "mview_admin_boundaries_centroid_z10_12"
         "mview_admin_boundaries_centroid_z13_15"
         "mview_admin_boundaries_centroid_z16_20"
+        "mview_relation_members_boundaries"
+        "mview_admin_boundaries_relations_ways"
         "mview_land_ohm_lines_z0_2"
         "mview_land_ohm_lines_z3_5"
         "mview_land_ohm_lines_z6_7"
