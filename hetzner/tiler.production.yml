@@ -1,10 +1,16 @@
 services:
+  # Tiler db
   db_production:
-    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.1737.h9b9ef9b
+    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
+    volumes:
+      - /data/tiler_production_db_20250211:/var/lib/postgresql/data
+      - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     ports:
       - "5432:5432"
-    volumes:
-      - /data/tiler_production_db_20250123:/var/lib/postgresql/data
     env_file:
       - .env.production
     restart: always
@@ -15,10 +21,12 @@ services:
         limits:
           cpus: '28.0'
           memory: 55G
+          
+  # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2111.he285805
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2302.h7c8d3da
     volumes:
-      - /data/tiler_production_imposm:/mnt/data
+      - /data/tiler_production_imposm_20250211:/mnt/data
     command:
       - sh
       - -c
@@ -38,6 +46,69 @@ services:
           memory: 3G
     networks:
       - tiler_network
+  # Tiler server
+  tiler_production:
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2298.hfb649bb
+    ports:
+      - "9090:9090"
+    env_file:
+      - .env.production
+    restart: always
+    networks:
+      - tiler_network
+  # Tiler cache
+  cache_production:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
+    env_file:
+      - .env.production
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    networks:
+      - tiler_network
+
+
+  global_seeding_production:
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2298.hfb649bb
+    env_file:
+      - .env.production
+    volumes:
+      - ./seed.sh:/opt/seed.sh
+    entrypoint:
+      - /bin/bash
+      - "-c"
+      - |
+        /opt/seed.sh global
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    networks:
+      - tiler_network
+
+  tile_coverage_seeding_production:
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2298.hfb649bb
+    env_file:
+      - .env.production
+    volumes:
+      - ./seed.sh:/opt/seed.sh
+    entrypoint:
+      - /bin/bash
+      - "-c"
+      - |
+        /opt/seed.sh coverage
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    networks:
+      - tiler_network
+
   node_exporter:
     image: quay.io/prometheus/node-exporter
     container_name: node-exporter

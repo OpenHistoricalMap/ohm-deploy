@@ -1,4 +1,4 @@
-FROM gospatial/tegola:v0.19.0
+FROM gospatial/tegola:v0.21.2
 
 RUN apk --no-cache add \
     gcc \
@@ -15,7 +15,8 @@ RUN apk --no-cache add \
     postgresql-client \
     coreutils \
     jq \
-    procps
+    procps \
+    dcron
 
 RUN pip install --upgrade pip && pip3 install awscli mercantile
 
@@ -31,8 +32,7 @@ RUN mkdir /opt/tegola_config
 RUN cd /opt/ && python build_config.py \
     --output=/opt/tegola_config/config.toml \
     --provider_names \
-    "land,\
-    admin_boundaries_lines,\
+    "admin_boundaries_lines,\
     admin_boundaries.centroids,\
     admin_boundaries_maritime,\
     place_areas,\
@@ -43,7 +43,6 @@ RUN cd /opt/ && python build_config.py \
     transport_areas,\
     transport_associated_streets,\
     transport_lines,\
-    transport_multilines,\
     transport_points,\
     route_lines,\
     amenity_areas,\
@@ -61,8 +60,8 @@ RUN cd /opt/ && python build_config.py \
     other_lines,\
     other_points"
 
-COPY ./tile2bounds.py .
+COPY ./*.py .
 COPY ./*.sh .
 
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ./start.sh
+CMD ["/opt/start.sh"]

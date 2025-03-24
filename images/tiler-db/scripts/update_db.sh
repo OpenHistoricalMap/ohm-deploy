@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Add hstore into the DB
+# Add hstore and pg_cron into the DB
 for DB in template_postgis "$POSTGRES_DB" "${@}"; do
     echo "Updating extensions '$DB'"
     psql --dbname="$DB" -c "

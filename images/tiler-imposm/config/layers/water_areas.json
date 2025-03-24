@@ -3,74 +3,32 @@
     "water_areas_z0_2": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'riverbank') AND area > 100000000",
-      "tolerance": 5000,
-      "materialized_views": [
-        {
-          "view": "mview_water_areas_centroid_z0_2",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> ''"
-        }
-      ]
+      "tolerance": 5000
     },
     "water_areas_z3_5": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 50000000",
-      "tolerance": 1000,
-      "materialized_views": [
-        {
-          "view": "mview_water_areas_centroid_z3_5",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> ''"
-        }
-      ]
+      "tolerance": 1000
     },
     "water_areas_z6_7": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 1000000",
-      "tolerance": 200,
-      "materialized_views": [
-        {
-          "view": "mview_water_areas_centroid_z6_7",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> ''"
-        }
-      ]
+      "tolerance": 200
     },
     "water_areas_z8_9": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank') AND area > 10000",
-      "tolerance": 100,
-      "materialized_views": [
-        {
-          "view": "mview_water_areas_centroid_z8_9",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> ''"
-        }
-      ]
+      "tolerance": 100
     },
     "water_areas_z10_12": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank')",
-      "tolerance": 20,
-      "materialized_views": [
-        {
-          "view": "mview_water_areas_centroid_z10_12",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> ''"
-        }
-      ]
+      "tolerance": 20
     },
     "water_areas_z13_15": {
       "source": "water_areas",
       "sql_filter": "type IN ('water', 'pond', 'basin', 'canal', 'mill_pond', 'riverbank', 'dock')",
-      "tolerance": 5,
-      "materialized_views": [
-        {
-          "view": "mview_water_areas_centroid_z13_15",
-          "geometry_transform": "(ST_MaximumInscribedCircle(geometry)).center",
-          "sql_filter": "name IS NOT NULL AND name <> ''"
-        }
-      ]
+      "tolerance": 5
     }
   },
   "tables": {

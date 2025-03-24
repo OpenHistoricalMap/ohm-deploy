@@ -30,7 +30,7 @@ spec:
             - -c
             - |
               set -x
-              python purge.py
+              python sqs_processor.py
           env:
             - name: REGION_NAME
               value: {{ .Values.ohm.tilerCachePurge.env.REGION_NAME | quote }}
@@ -39,7 +39,7 @@ spec:
             - name: SQS_QUEUE_URL
               value: {{  .Values.ohm.tilerCachePurge.env.SQS_QUEUE_URL | quote }}
             - name: DOCKER_IMAGE
-              value: {{ .Values.ohm.tilerCachePurge.env.DOCKER_IMAGE | quote }}
+              value: "{{ index .Values "osm-seed" "tilerServer" "image" "name" }}:{{ index .Values "osm-seed" "tilerServer" "image" "tag" }}"              
             - name: NODEGROUP_TYPE
               value: {{ .Values.ohm.tilerCachePurge.env.NODEGROUP_TYPE | quote }}
             - name: MAX_ACTIVE_JOBS
