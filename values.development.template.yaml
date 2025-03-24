@@ -61,7 +61,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: {{DEVELOPMENT_TM_DB_PASSWORD}}
@@ -90,7 +90,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
