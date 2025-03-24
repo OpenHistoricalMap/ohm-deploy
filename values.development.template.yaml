@@ -169,5 +169,7 @@ ohm:
     enabled: false
   tilerCachePurge:
     enabled: false
-  tilerCacheSeed:
+  tilerCacheSeedGlobal:
+    enabled: false
+  tilerCacheSeedCoverage:
     enabled: false
