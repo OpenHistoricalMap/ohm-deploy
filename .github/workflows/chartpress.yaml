@@ -195,12 +195,15 @@ jobs:
       - name: Install helm dependencies for
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
         run: cd ohm && helm dep up
+      # Development
+      - name: development - helm deploy
+        if: github.ref == 'refs/heads/development'
+        run: helm upgrade --install development --wait ohm/ -f values.development.yaml  -f ohm/values.yaml
+      # Staging
       - name: Staging - helm deploy
         if: github.ref == 'refs/heads/staging'
         run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
-      # - name: development - helm deploy
-      #   if: github.ref == 'refs/heads/development'
-      #   run: helm upgrade --install development --wait ohm/ -f values.staging.yaml  -f ohm/values.yaml
+      # Production
       - name: Production - helm deploy
         if: github.ref == 'refs/heads/main'
         run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml

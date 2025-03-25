@@ -4,7 +4,7 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'tm-fix-version'
+      - 'development'
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -13,6 +13,36 @@ jobs:
         uses: styfle/cancel-workflow-action@0.8.0
         with:
           access_token: ${{ github.token }}
+
+      - name: Set environment variables - development
+        if: github.ref == 'refs/heads/development'
+        uses: allenevans/set-env@v2.0.0
+        with:
+          TM_ORG_NAME: OpenHistoricalMap
+          TM_ORG_CODE: OHM
+          TM_ORG_URL: staging.openhistoricalmap.org
+          TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+          TM_ORG_GITHUB: github.com/openhistoricalmap
+          OSM_SERVER_URL: https://staging.openhistoricalmap.org
+          OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
+          OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
+          ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
+          POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
+          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+          TM_DEFAULT_LOCALE: en
+          TM_APP_API_URL: https://tm-api.development.staging.openhistoricalmap.org
+          TM_APP_BASE_URL: https://tasks-development.openhistoricalmap.org
+          TM_IMPORT_MAX_FILESIZE: 3000000
+          TM_MAX_AOI_AREA: 15000
+          TM_CLIENT_ID: fcskO6_EJa_Je4wBBzM59kJexhOtVbzMxNgmcVOUH-c
+          TM_CLIENT_SECRET: 6qy8iNojubeY1wc3QEmUpLwLKcMOORjRy17za4x3f8g
+          TM_DEFAULT_CHANGESET_COMMENT: staging
+          TM_REDIRECT_URI: https://tasks-development.openhistoricalmap.org/authorized
+          TM_SCOPE: "read_prefs write_api"
+          TM_APP_API_VERSION: v4
+          AWS_S3_BUCKET: tasks.development.staging.openhistoricalmap.org
+          CLOUDFRONT_DISTRIBUTION_ID: EZIPGFJYNA7K9
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
@@ -63,27 +93,35 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
 
       - name: Checkout tasking-manager repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: 3902d566d9d2d8d5a9c37bf61894ed649b581ee5
-          # token: ${{ env.DEV_GITHUB_TOKEN }}
+          ref: 506bae7b5fecc2b0b6038d21c137ff6eb1bf5e5e
+          path: tasking-manager
 
-      - name: Use Node.js 12
-        uses: actions/setup-node@v1
+      - name: Debug Checkout
+        run: ls -la tasking-manager
+
+      - name: Use Node.js 18.19.1
+        uses: actions/setup-node@v4
         with:
-          node-version: '12'
+          node-version: '18.19.1'
 
       - name: npm Install
         run: |
-          cat package.json
-          npm install
-          npm install @openhistoricalmap/id@2.18.5
-          npm install @babel/core@^7.16.0 --save-dev
-          npm run build
-        working-directory: frontend
+          cd tasking-manager/frontend && npm install  && CI=false GENERATE_SOURCEMAP=false npm run build
 
-      - uses: actions/setup-python@v2
+      - name: Replace API URL for Development
+        if: github.ref == 'refs/heads/development'
+        run: |
+          find tasking-manager/frontend/build -type f -exec sed -i 's/tm-api.staging.openhistoricalmap.org/tm-api.development.staging.openhistoricalmap.org/g' {} \;
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
@@ -95,7 +133,7 @@ jobs:
       - name: Sync to S3 and clean cache in cloudfront
         if: ${{ success() }}
         run: |
-          aws s3 sync frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
+          aws s3 sync tasking-manager/frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
