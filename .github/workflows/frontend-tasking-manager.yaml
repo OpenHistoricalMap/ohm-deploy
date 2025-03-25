@@ -4,7 +4,6 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'development'
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -13,36 +12,6 @@ jobs:
         uses: styfle/cancel-workflow-action@0.8.0
         with:
           access_token: ${{ github.token }}
-
-      - name: Set environment variables - development
-        if: github.ref == 'refs/heads/development'
-        uses: allenevans/set-env@v2.0.0
-        with:
-          TM_ORG_NAME: OpenHistoricalMap
-          TM_ORG_CODE: OHM
-          TM_ORG_URL: staging.openhistoricalmap.org
-          TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
-          TM_ORG_GITHUB: github.com/openhistoricalmap
-          OSM_SERVER_URL: https://staging.openhistoricalmap.org
-          OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
-          OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
-          ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
-          POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
-          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
-          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
-          TM_DEFAULT_LOCALE: en
-          TM_APP_API_URL: https://tm-api.development.staging.openhistoricalmap.org
-          TM_APP_BASE_URL: https://tasks-development.openhistoricalmap.org
-          TM_IMPORT_MAX_FILESIZE: 3000000
-          TM_MAX_AOI_AREA: 15000
-          TM_CLIENT_ID: fcskO6_EJa_Je4wBBzM59kJexhOtVbzMxNgmcVOUH-c
-          TM_CLIENT_SECRET: 6qy8iNojubeY1wc3QEmUpLwLKcMOORjRy17za4x3f8g
-          TM_DEFAULT_CHANGESET_COMMENT: staging
-          TM_REDIRECT_URI: https://tasks-development.openhistoricalmap.org/authorized
-          TM_SCOPE: "read_prefs write_api"
-          TM_APP_API_VERSION: v4
-          AWS_S3_BUCKET: tasks.development.staging.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: EZIPGFJYNA7K9
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
@@ -78,26 +47,32 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v2.0.0
         with:
-          TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
-          TM_APP_API_URL: https://tm-api.openhistoricalmap.org
-          TM_APP_API_VERSION: v2
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
           TM_ORG_URL: www.openhistoricalmap.org
           TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
-          TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
-          TM_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
-          TM_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
           OSM_SERVER_URL: https://www.openhistoricalmap.org
+          OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
           POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
-          TM_MAX_AOI_AREA: 15000
+          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+          TM_DEFAULT_LOCALE: en
+          TM_APP_API_URL: https://tm-api.openhistoricalmap.org
+          TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
           TM_IMPORT_MAX_FILESIZE: 3e+06
+          TM_MAX_AOI_AREA: 15000
+          TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
+          TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
+          TM_DEFAULT_CHANGESET_COMMENT: staging
+          TM_REDIRECT_URI: https://tasks.openhistoricalmap.org/authorized
+          TM_SCOPE: "read_prefs write_api"
+          TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
-
+          CLOUDFRONT_DISTRIBUTION_ID: E2J02LH05GBWB0
+          
       - name: Checkout tasking-manager repo
         uses: actions/checkout@v4
         with:
@@ -123,10 +98,6 @@ jobs:
           npm run update-id-static
           npm run patch-rapid
           npx craco build
-      - name: Replace API URL for Development
-        if: github.ref == 'refs/heads/development'
-        run: |
-          find tasking-manager/frontend/build -type f -exec sed -i 's/tm-api.staging.openhistoricalmap.org/tm-api.development.staging.openhistoricalmap.org/g' {} \;
 
       - name: Setup Python
         uses: actions/setup-python@v5

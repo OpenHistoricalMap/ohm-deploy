@@ -589,8 +589,6 @@ osm-seed:
         ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
         POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
         TM_SECRET: {{STAGING_TM_API_SECRET}}
-        # TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
-        # TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
         TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
         TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
         TM_SMTP_PORT: 25
