@@ -75,8 +75,6 @@ COPY --from=build \
 USER root
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git /usr/src/app && \
     chown -R appuser:appuser /usr/src/app
-# RUN git clone https://github.com/hotosm/tasking-manager.git /usr/src/app && \
-#     chown -R appuser:appuser /usr/src/app
 USER appuser:appuser
 RUN cd /usr/src/app && git checkout -f 0003afb25f67c51c1ae434471e96733ba840538c
 
