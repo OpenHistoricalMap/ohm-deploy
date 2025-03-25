@@ -59,7 +59,7 @@ USER root
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git /usr/src/app && \
     chown -R appuser:appuser /usr/src/app
 USER appuser:appuser
-RUN cd /usr/src/app && git checkout -f 506bae7b5fecc2b0b6038d21c137ff6eb1bf5e5e
+RUN cd /usr/src/app && git checkout -f 5fc6ce6f3e9d981e7c2a74473b00be9bb84fe3e9
 
 FROM runtime as debug
 RUN python -m pip install --user --no-warn-script-location \
