@@ -113,10 +113,16 @@ jobs:
         with:
           node-version: '18.19.1'
 
-      - name: npm Install
+      - name: npm Install and Build
         run: |
-          cd tasking-manager/frontend && npm install && npm run preparation && npm run update-static && npm run update-id-static && npm run patch-rapid && craco build
-
+          cd tasking-manager/frontend
+          npm install
+          npm install --save-dev @craco/craco
+          npm run preparation
+          npm run update-static
+          npm run update-id-static
+          npm run patch-rapid
+          npx craco build
       - name: Replace API URL for Development
         if: github.ref == 'refs/heads/development'
         run: |
