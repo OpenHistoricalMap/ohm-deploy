@@ -66,7 +66,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get -q install --no-install-recommends -y \
-    postgresql-client libgeos3.11.1 proj-bin curl && \
+    postgresql-client libgeos3.11.1 proj-bin curl git && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY --from=build \
     /home/appuser/.local \
