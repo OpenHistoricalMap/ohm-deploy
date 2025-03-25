@@ -575,7 +575,7 @@ osm-seed:
         label_value: web_medium
       replicaCount: 1
       serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
       ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
         TM_ORG_NAME: OpenHistoricalMap
@@ -603,9 +603,9 @@ osm-seed:
         TM_MAX_AOI_AREA: 15000
         TM_APP_API_VERSION: v4
         # The following environment variables are for future versions of TM
-        TM_CLIENT_ID: {{STAGING_TM_CLIENT_ID}}
-        TM_CLIENT_SECRET: {{STAGING_TM_CLIENT_SECRET}}
-        TM_DEFAULT_CHANGESET_COMMENT: "Staging comments"
+        TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
+        TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
+        TM_DEFAULT_CHANGESET_COMMENT: 'Staging comments'
         TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
