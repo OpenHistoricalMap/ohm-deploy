@@ -894,7 +894,7 @@ osm-seed:
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
-      tag: 80eb324
+      tag: 4d6003e
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================

@@ -779,7 +779,7 @@ osm-seed:
       priorityClass: "medium-priority"
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
-        tag: d004a05
+        tag: 4d6003e
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
