@@ -11,7 +11,7 @@ seed_global() {
       --map=osm \
       --min-zoom=0 \
       --max-zoom=5 \
-      --concurrency=32 \
+      --concurrency=4 \
       --overwrite=true
 
     # Seed land areas separately (zoom 6-7)
@@ -24,11 +24,11 @@ seed_global() {
         --map=osm \
         --min-zoom="$zoom" \
         --max-zoom="$zoom" \
-        --concurrency=32 \
+        --concurrency=4 \
         --overwrite=true
     done
-    echo "Global seeding completed. Sleeping for 1 hour..."
-    sleep 3600
+    echo "Global seeding completed. Sleeping for 3 hour..."
+    sleep 10800
   done
 }
 
@@ -38,13 +38,18 @@ seed_coverage() {
     wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_14.list"
     pkill -f "tegola" && sleep 5
 
-    tegola cache seed tile-list /opt/tile-list.tiles \
-      --config=/opt/tegola_config/config.toml \
-      --map=osm \
-      --min-zoom=0 \
-      --max-zoom=14 \
-      --concurrency=32 \
-      --overwrite=false
+    for zoom in $(seq 8 14); do
+      echo "Downloading tile list for zoom level $zoom..."
+      wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_boundary_$zoom.list"
+
+      tegola cache seed tile-list /opt/tile-list.tiles \
+        --config=/opt/tegola_config/config.toml \
+        --map=osm \
+        --min-zoom=$zoom \
+        --max-zoom=$zoom \
+        --concurrency=4 \
+        --overwrite=false
+    done
     sleep 300
   done
 }

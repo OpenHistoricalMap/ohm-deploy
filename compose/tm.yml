@@ -1,6 +1,6 @@
 services:
   tm-api:
-    image: ohm/ohm-tm-api:v3
+    image: rub21/ohm-tm-api:v11
     build:
       context: ../images/tasking-manager-api
       dockerfile: Dockerfile

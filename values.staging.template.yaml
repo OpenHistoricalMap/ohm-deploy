@@ -544,7 +544,7 @@ osm-seed:
       priorityClass: "medium-priority"
       image:
         name: "postgis/postgis"
-        tag: "11-2.5"
+        tag: "14-3.3"
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -558,8 +558,8 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
-        AWS_ElasticBlockStore_volumeID: vol-077f1a9f62a1951e8
-        AWS_ElasticBlockStore_size: 50Gi
+        AWS_ElasticBlockStore_volumeID: vol-0a434d40790ae216f
+        AWS_ElasticBlockStore_size: 20Gi
       resources:
         enabled: false
     # ====================================================================================================
@@ -568,45 +568,42 @@ osm-seed:
   
     tmApi:
       enabled: true
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
         label_value: web_medium
       replicaCount: 1
-      staticIp: c
       serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
       ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
-        TM_ORG_NAME: 'OpenHistoricalMap'
-        TM_ORG_CODE: 'OHM'
-        TM_ORG_URL: 'openhistoricalmap.org'
-        TM_ORG_PRIVACY_POLICY_URL: 'staging.openhistoricalmap.org/copyright'
-        TM_ORG_GITHUB: 'github.com/openhistoricalmap'
-        OSM_SERVER_URL: 'https://staging.openhistoricalmap.org'
-        OSM_NOMINATIM_SERVER_URL: 'https://nominatim-api.staging.openhistoricalmap.org'
-        OSM_REGISTER_URL: 'https://staging.openhistoricalmap.org/user/new'
-        ID_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=id'
-        POTLATCH2_EDITOR_URL: 'https://staging.openhistoricalmap.org/edit?editor=potlatch2'
+        TM_ORG_NAME: OpenHistoricalMap
+        TM_ORG_CODE: OHM
+        TM_ORG_URL: staging.openhistoricalmap.org
+        TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+        TM_ORG_GITHUB: github.com/openhistoricalmap
+        OSM_SERVER_URL: https://staging.openhistoricalmap.org
+        OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
+        OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
+        ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
+        POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
         TM_SECRET: {{STAGING_TM_API_SECRET}}
-        TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
-        TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
-        TM_EMAIL_FROM_ADDRESS: 'ohm-admins@googlegroups.com'
-        TM_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
+        TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+        TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
         TM_SMTP_PORT: 25
         TM_SMTP_USER: {{MAILER_USERNAME}}
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
-        TM_DEFAULT_LOCALE: 'en'
-        TM_APP_API_URL: 'https://tm-api.staging.openhistoricalmap.org'
-        TM_APP_BASE_URL: 'https://tasks-staging.openhistoricalmap.org'
+        TM_DEFAULT_LOCALE: en
+        TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
+        TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
-        TM_APP_API_VERSION: v2
+        TM_APP_API_VERSION: v4
         # The following environment variables are for future versions of TM
-        TM_CLIENT_ID: {{STAGING_TM_CLIENT_ID}}
-        TM_CLIENT_SECRET: {{STAGING_TM_CLIENT_SECRET}}
-        TM_DEFAULT_CHANGESET_COMMENT: STAGING
+        TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
+        TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
+        TM_DEFAULT_CHANGESET_COMMENT: 'Staging comments'
         TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
@@ -615,6 +612,7 @@ osm-seed:
         TM_ORG_INSTAGRAM: https://www.openhistoricalmap.org
         TM_ORG_TWITTER: https://x.com/OpenHistMap
         TM_ORG_YOUTUBE: https://www.youtube.com/playlist?list=PLOi35w6_Hpx_CYdYBUpPeuiJ1djn5-wIx
+
       resources:
         enabled: false
   

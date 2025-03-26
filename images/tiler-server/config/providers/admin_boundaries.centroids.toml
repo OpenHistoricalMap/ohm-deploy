@@ -12,7 +12,7 @@ SELECT
     NULLIF(type, '') AS type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area_km2, 
+    CAST(area_km2 AS INTEGER) AS area_km2, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -35,7 +35,7 @@ SELECT
     NULLIF(type, '') AS type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area_km2, 
+    CAST(area_km2 AS INTEGER) AS area_km2, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -58,7 +58,7 @@ SELECT
     NULLIF(type, '') AS type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area_km2, 
+    CAST(area_km2 AS INTEGER) AS area_km2, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -81,7 +81,7 @@ SELECT
     NULLIF(type, '') AS type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area_km2, 
+    CAST(area_km2 AS INTEGER) AS area_km2, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -104,7 +104,7 @@ SELECT
     NULLIF(type, '') AS type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area_km2, 
+    CAST(area_km2 AS INTEGER) AS area_km2, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -127,7 +127,7 @@ SELECT
     NULLIF(type, '') AS type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area_km2, 
+    CAST(area_km2 AS INTEGER) AS area_km2, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
@@ -150,7 +150,7 @@ SELECT
     NULLIF(type, '') AS type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area_km2, 
+    CAST(area_km2 AS INTEGER) AS area_km2, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 

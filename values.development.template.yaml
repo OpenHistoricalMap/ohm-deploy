@@ -1,7 +1,7 @@
 osm-seed:
   environment: dev
   cloudProvider: aws
-  AWS_S3_BUCKET: {{STAGING_S3_BUCKET}}
+  AWS_S3_BUCKET: s3://osmseed-dev
   AWS_SSL_ARN: {{AWS_SSL_ARN}}
   serviceType: ClusterIP
   createClusterIssuer: false
@@ -25,9 +25,6 @@ osm-seed:
   fullHistory:
     enabled: false
 
-  idEditor:
-    enabled: false
-
   replicationJob:
     enabled: false
 
@@ -43,7 +40,7 @@ osm-seed:
         enabled: false
 
   tilerDb:
-    enabled: true
+    enabled: false
 
   tilerImposm:
     enabled: false
@@ -51,9 +48,6 @@ osm-seed:
     enabled: false
 
   tilerServerCacheCleaner:
-    enabled: false
-
-  tilerVisor:
     enabled: false
 
   # ====================================================================================================
@@ -67,10 +61,10 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_medium
     env:
       POSTGRES_DB: tm
-      POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
+      POSTGRES_PASSWORD: {{DEVELOPMENT_TM_DB_PASSWORD}}
       POSTGRES_USER: postgres
     persistenceDisk:
       enabled: true
@@ -96,11 +90,11 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web
+      label_value: web_medium
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: tm-api.staging.openhistoricalmap.org
+    ingressDomain: tm-api.development.staging.openhistoricalmap.org
     env:
       TM_ORG_NAME: OpenHistoricalMap
       TM_ORG_CODE: OHM
@@ -112,7 +106,7 @@ osm-seed:
       OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
       ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
-      TM_SECRET: {{STAGING_TM_API_SECRET}}
+      TM_SECRET: {{DEVELOPMENT_TM_API_SECRET}}
       # TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
       # TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
       TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
@@ -122,16 +116,22 @@ osm-seed:
       TM_SMTP_USER: {{MAILER_USERNAME}}
       TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
       TM_DEFAULT_LOCALE: en
-      TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
-      TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
+      TM_APP_API_URL: https://tm-api.development.staging.openhistoricalmap.org
+      TM_APP_BASE_URL: https://tm-dev-web.staging.openhistoricalmap.org
       TM_IMPORT_MAX_FILESIZE: 3000000
       TM_MAX_AOI_AREA: 15000
-      TM_CLIENT_ID: {{STAGING_TM_CLIENT_ID}}
-      TM_CLIENT_SECRET: {{STAGING_TM_CLIENT_SECRET}}
+      TM_CLIENT_ID: fcskO6_EJa_Je4wBBzM59kJexhOtVbzMxNgmcVOUH-c
+      TM_CLIENT_SECRET: 6qy8iNojubeY1wc3QEmUpLwLKcMOORjRy17za4x3f8g
+
       TM_DEFAULT_CHANGESET_COMMENT: staging
-      TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+      TM_REDIRECT_URI: https://tm-dev-web.staging.openhistoricalmap.org/authorized
       TM_SCOPE: "read_prefs write_api"
       TM_APP_API_VERSION: v4
+      # Add extra info
+      TM_ORG_FB: https://www.facebook.com//OpenHistoricalMap
+      TM_ORG_INSTAGRAM: https://www.instagram.com/OpenHistoricalMap
+      TM_ORG_TWITTER: http://twitter.com/OpenHistoricalMap
+      TM_ORG_YOUTUBE: https://www.youtube.com/OpenHistoricalMap
     resources:
       enabled: false
       requests:
@@ -146,7 +146,7 @@ osm-seed:
   overpassApi:
     enabled: false
   taginfo:
-    enabled: true
+    enabled: false
   osmSimpleMetrics:
     enabled: false
   monitoringReplication:
@@ -161,4 +161,15 @@ osm-seed:
   osmchaDb:
     enabled: false
   planetFiles:
+    enabled: false
+  adiffService:
+    enabled: false
+ohm:
+  tilerCache:
+    enabled: false
+  tilerCachePurge:
+    enabled: false
+  tilerCacheSeedGlobal:
+    enabled: false
+  tilerCacheSeedCoverage:
     enabled: false
