@@ -78,9 +78,6 @@ EOF
   sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
 }
 
-## Update map styles. This line should be removed later, as the configuration should come from the module.
-find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
-
 restore_db() {
   export PGPASSWORD="$POSTGRES_PASSWORD"
   curl -s -o backup.sql "$BACKUP_FILE_URL" || {
@@ -105,7 +102,11 @@ start_background_jobs() {
 setup_production() {
   setup_env_vars
 
-  python3 update_map_styles.py
+  ## Update map styles. This line should be removed later, as the configuration should come from the module.
+  SERVER_URL_="${SERVER_URL/www./}"
+  find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL_}/map-styles|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
 
   echo "Waiting for PostgreSQL to be ready..."
   until pg_isready -h "$POSTGRES_HOST" -p 5432; do
