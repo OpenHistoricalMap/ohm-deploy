@@ -78,7 +78,8 @@ EOF
   sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
 }
 
-
+## Update map styles. This line should be removed later, as the configuration should come from the module.
+find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}|g" {} +
 
 restore_db() {
   export PGPASSWORD="$POSTGRES_PASSWORD"
