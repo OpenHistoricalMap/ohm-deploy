@@ -1,8 +1,8 @@
 [project]
 name = "HOTOSM Tasking Manager"
 version = "0.1.0"
-description = "The tool to team up for mapping in OpenStreetMap"
-authors = [{ name = "HOT Sysadmin", email = "sysadmin@hotosm.org" }]
+description = "The tool to team up for mapping in OpenHistoricalMap"
+authors = [{ name = "HOT Sysadmin", email = "ohm-admins@googlegroups.com" }]
 dependencies = [
     # Direct dependencies (at least one import requires it)
     "APScheduler==3.10.1",

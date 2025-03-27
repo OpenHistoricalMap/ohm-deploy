@@ -682,7 +682,7 @@ osm-seed:
       # Add extra info
       TM_ORG_FB: https://www.facebook.com/openhistoricalmap
       TM_ORG_INSTAGRAM: https://www.openhistoricalmap.org
-      TM_ORG_TWITTER: https://x.com/OpenHistMap
+      TM_ORG_TWITTER: https://x.com/OpenHistoricalMap
       TM_ORG_YOUTUBE: https://www.youtube.com/playlist?list=PLOi35w6_Hpx_CYdYBUpPeuiJ1djn5-wIx
     resources:
       enabled: false
