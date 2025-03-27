@@ -4,7 +4,6 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'tm-fix-version'
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -18,72 +17,94 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
-          TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
-          TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
-          TM_APP_API_VERSION: v2
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
-          TM_ORG_URL: openhistoricalmap.org
+          TM_ORG_URL: staging.openhistoricalmap.org
           TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
-          TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
-          TM_CONSUMER_KEY: CGWeUmRTFb6o0OQy4AyXb8bnl5fuSdCPODknveW7
-          TM_CONSUMER_SECRET: lIVcx44V97QqgTSbXeJw5EKAdIBZrJ2N5negJsF4
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
+          OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
           POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
-          TM_MAX_AOI_AREA: 15000
+          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+          TM_DEFAULT_LOCALE: en
+          TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
+          TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
           TM_IMPORT_MAX_FILESIZE: 3e+06
+          TM_MAX_AOI_AREA: 15000
+          TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
+          TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
+          TM_DEFAULT_CHANGESET_COMMENT: staging
+          TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
+          TM_SCOPE: "read_prefs write_api"
+          TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_TM_CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: E38F009PE1FJVW
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v2.0.0
         with:
-          TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
-          TM_APP_API_URL: https://tm-api.openhistoricalmap.org
-          TM_APP_API_VERSION: v2
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
           TM_ORG_URL: www.openhistoricalmap.org
           TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
-          TM_ORG_TWITTER: http://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
-          TM_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
-          TM_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
           OSM_SERVER_URL: https://www.openhistoricalmap.org
+          OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
           POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
-          TM_MAX_AOI_AREA: 15000
+          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+          TM_DEFAULT_LOCALE: en
+          TM_APP_API_URL: https://tm-api.openhistoricalmap.org
+          TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
           TM_IMPORT_MAX_FILESIZE: 3e+06
+          TM_MAX_AOI_AREA: 15000
+          TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
+          TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
+          TM_DEFAULT_CHANGESET_COMMENT: staging
+          TM_REDIRECT_URI: https://tasks.openhistoricalmap.org/authorized
+          TM_SCOPE: "read_prefs write_api"
+          TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_TM_CLOUDFRONT_DISTRIBUTION_ID }}
-
+          CLOUDFRONT_DISTRIBUTION_ID: E2J02LH05GBWB0
+          
       - name: Checkout tasking-manager repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: 3902d566d9d2d8d5a9c37bf61894ed649b581ee5
-          # token: ${{ env.DEV_GITHUB_TOKEN }}
+          ref: a6085714771fc9b34ad02a3055fef27aa39ae1b9
+          path: tasking-manager
 
-      - name: Use Node.js 12
-        uses: actions/setup-node@v1
+      - name: Debug Checkout
+        run: ls -la tasking-manager
+
+      - name: Use Node.js 18.19.1
+        uses: actions/setup-node@v4
         with:
-          node-version: '12'
+          node-version: '18.19.1'
 
-      - name: npm Install
+      - name: npm Install and Build
         run: |
-          cat package.json
+          cd tasking-manager/frontend
           npm install
-          npm install @openhistoricalmap/id@2.18.5
-          npm install @babel/core@^7.16.0 --save-dev
-          npm run build
-        working-directory: frontend
+          npm install --save-dev @craco/craco
+          npm run preparation
+          npm run update-static
+          npm run update-id-static
+          npm run patch-rapid
+          npx craco build
 
-      - uses: actions/setup-python@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
@@ -95,7 +116,7 @@ jobs:
       - name: Sync to S3 and clean cache in cloudfront
         if: ${{ success() }}
         run: |
-          aws s3 sync frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
+          aws s3 sync tasking-manager/frontend/build s3://${AWS_S3_BUCKET} --acl public-read --delete
           aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths=/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

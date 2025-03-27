@@ -622,7 +622,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
-      AWS_ElasticBlockStore_volumeID: vol-03a2f95687a51a531
+      AWS_ElasticBlockStore_volumeID: vol-006a1b2cc0f0a0909
       AWS_ElasticBlockStore_size: 20Gi
     resources:
       enabled: false
@@ -661,8 +661,6 @@ osm-seed:
       ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
       TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
-      TM_CONSUMER_KEY: {{PRODUCTION_TM_API_CONSUMER_KEY}}
-      TM_CONSUMER_SECRET: {{PRODUCTION_TM_API_CONSUMER_SECRET}}
       TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
       TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
       TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
@@ -674,17 +672,17 @@ osm-seed:
       TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
       TM_IMPORT_MAX_FILESIZE: 3000000
       TM_MAX_AOI_AREA: 15000
-      TM_APP_API_VERSION: v2
+      TM_APP_API_VERSION: v4
       # The following environment variables are for future versions of TM
-      TM_CLIENT_ID: {{PRODUCTION_TM_CLIENT_ID}}
-      TM_CLIENT_SECRET: {{PRODUCTION_TM_CLIENT_SECRET}}
+      TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
+      TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
       TM_DEFAULT_CHANGESET_COMMENT: production
-      TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+      TM_REDIRECT_URI: https://tm-api.openhistoricalmap.org/authorized
       TM_SCOPE: 'read_prefs write_api'
       # Add extra info
       TM_ORG_FB: https://www.facebook.com/openhistoricalmap
       TM_ORG_INSTAGRAM: https://www.openhistoricalmap.org
-      TM_ORG_TWITTER: https://x.com/OpenHistMap
+      TM_ORG_TWITTER: https://x.com/OpenHistoricalMap
       TM_ORG_YOUTUBE: https://www.youtube.com/playlist?list=PLOi35w6_Hpx_CYdYBUpPeuiJ1djn5-wIx
     resources:
       enabled: false
@@ -896,7 +894,7 @@ osm-seed:
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
-      tag: 80eb324
+      tag: 4d6003e
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================

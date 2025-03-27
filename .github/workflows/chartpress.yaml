@@ -59,7 +59,6 @@ jobs:
           DEVELOPMENT_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
           DEVELOPMENT_S3_BUCKET: osmseed-dev
           ## tiler
-          
           DEVELOPMENT_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           DEVELOPMENT_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           DEVELOPMENT_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
@@ -69,8 +68,6 @@ jobs:
           ## tm
           DEVELOPMENT_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
           DEVELOPMENT_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
-          DEVELOPMENT_TM_CLIENT_ID: ${{secrets.STAGING_TM_CLIENT_ID}}
-          DEVELOPMENT_TM_CLIENT_SECRET: ${{secrets.STAGING_TM_CLIENT_SECRET}}
           ## nominatim
           DEVELOPMENT_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
           ## osmcha
@@ -112,12 +109,8 @@ jobs:
           STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
           STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
           ## tm
-          STAGING_TM_API_CONSUMER_KEY: ${{ secrets.STAGING_TM_API_CONSUMER_KEY }}
-          STAGING_TM_API_CONSUMER_SECRET: ${{ secrets.STAGING_TM_API_CONSUMER_SECRET }}
           STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
           STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
-          STAGING_TM_CLIENT_ID: ${{secrets.STAGING_TM_CLIENT_ID}}
-          STAGING_TM_CLIENT_SECRET: ${{secrets.STAGING_TM_CLIENT_SECRET}}
           ## nominatim
           STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
           ## osmcha
@@ -153,21 +146,20 @@ jobs:
           PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
           PRODUCTION_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.PRODUCTION_RAILS_CREDENTIALS_YML_ENC }}
           PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
-
           ## tiler
           PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_SERVER_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
           PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
-          ## tm
           PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
-          PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
-          PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
+          ## tm
+          # PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
+          # PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
           PRODUCTION_TM_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_DB_PASSWORD }}
           PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
-          PRODUCTION_TM_CLIENT_ID: ${{secrets.PRODUCTION_TM_CLIENT_ID}}
-          PRODUCTION_TM_CLIENT_SECRET: ${{secrets.PRODUCTION_TM_CLIENT_SECRET}}
+          # PRODUCTION_TM_CLIENT_ID: ${{secrets.PRODUCTION_TM_CLIENT_ID}}
+          # PRODUCTION_TM_CLIENT_SECRET: ${{secrets.PRODUCTION_TM_CLIENT_SECRET}}
           ## nominatim
           PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
           ## osmcha
@@ -195,12 +187,15 @@ jobs:
       - name: Install helm dependencies for
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
         run: cd ohm && helm dep up
+      # Development
+      - name: development - helm deploy
+        if: github.ref == 'refs/heads/development'
+        run: helm upgrade --install development --wait ohm/ -f values.development.yaml  -f ohm/values.yaml
+      # Staging
       - name: Staging - helm deploy
         if: github.ref == 'refs/heads/staging'
         run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
-      # - name: development - helm deploy
-      #   if: github.ref == 'refs/heads/development'
-      #   run: helm upgrade --install development --wait ohm/ -f values.staging.yaml  -f ohm/values.yaml
+      # Production
       - name: Production - helm deploy
         if: github.ref == 'refs/heads/main'
         run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
