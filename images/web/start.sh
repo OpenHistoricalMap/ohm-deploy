@@ -79,7 +79,7 @@ EOF
 }
 
 ## Update map styles. This line should be removed later, as the configuration should come from the module.
-find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}|g" {} +
+find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
 
 restore_db() {
   export PGPASSWORD="$POSTGRES_PASSWORD"
