@@ -608,7 +608,7 @@ osm-seed:
     priorityClass: 'medium-priority'
     image:
       name: "postgis/postgis"
-      tag: "11-2.5"
+      tag: "14-3.3"
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -622,7 +622,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
-      AWS_ElasticBlockStore_volumeID: vol-006a1b2cc0f0a0909
+      AWS_ElasticBlockStore_volumeID: vol-05d28e1a06628bcb8
       AWS_ElasticBlockStore_size: 20Gi
     resources:
       enabled: false
@@ -1047,3 +1047,4 @@ ohm:
       enabled: true
       label_key: nodegroup_type
       label_value: misc_large
+      
