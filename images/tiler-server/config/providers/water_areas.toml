@@ -109,7 +109,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_water_areas_z10_12
+    mview_water_areas_z10_12_subdivided
 WHERE 
     geometry && !BBOX!
 """
@@ -141,7 +141,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
-name = "water_areas_16_20"
+name = "water_areas_z16_20"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -198,6 +198,6 @@ max_zoom = 15
 
 [[maps.layers]]
 name = "water_areas"
-provider_layer = "osm.water_areas_16_20"
+provider_layer = "osm.water_areas_z16_20"
 min_zoom = 16
 max_zoom = 20
