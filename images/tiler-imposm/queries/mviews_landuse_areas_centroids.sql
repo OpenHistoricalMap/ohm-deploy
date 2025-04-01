@@ -1,5 +1,6 @@
 -- This script creates materialized views for  water cetroids fore each zoom levels.
-CREATE OR REPLACE FUNCTION create_water_areas_centroid_test_mview(
+DROP FUNCTION IF EXISTS create_landuse_centroid_mviews;
+CREATE OR REPLACE FUNCTION create_landuse_centroid_mviews(
     source_table TEXT,
     view_name TEXT
 )
@@ -24,6 +25,7 @@ BEGIN
             osm_id,
             name,
             type,
+            class,
             start_date,
             end_date,
             area,
@@ -48,9 +50,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_water_areas_centroid_test_mview('osm_water_areas_z0_2', 'mview_water_areas_centroid_test_z0_2');
-SELECT create_water_areas_centroid_test_mview('osm_water_areas_z3_5', 'mview_water_areas_centroid_test_z3_5');
-SELECT create_water_areas_centroid_test_mview('osm_water_areas_z6_7', 'mview_water_areas_centroid_test_z6_7');
-SELECT create_water_areas_centroid_test_mview('osm_water_areas_z8_9', 'mview_water_areas_centroid_test_z8_9');
-SELECT create_water_areas_centroid_test_mview('osm_water_areas_z10_12', 'mview_water_areas_centroid_test_z10_12');
-SELECT create_water_areas_centroid_test_mview('osm_water_areas_z13_15', 'mview_water_areas_centroid_test_z13_15');
+SELECT create_landuse_centroid_mviews('osm_landuse_areas_z0_2', 'mview_landuse_areas_centroid_z0_2');
+SELECT create_landuse_centroid_mviews('osm_landuse_areas_z3_5', 'mview_landuse_areas_centroid_z3_5');
+SELECT create_landuse_centroid_mviews('osm_landuse_areas_z6_7', 'mview_landuse_areas_centroid_z6_7');
+SELECT create_landuse_centroid_mviews('osm_landuse_areas_z8_9', 'mview_landuse_areas_centroid_z8_9');
+SELECT create_landuse_centroid_mviews('osm_landuse_areas_z10_12', 'mview_landuse_areas_centroid_z10_12');
+SELECT create_landuse_centroid_mviews('osm_landuse_areas_z13_15', 'mview_landuse_areas_centroid_z13_15');
