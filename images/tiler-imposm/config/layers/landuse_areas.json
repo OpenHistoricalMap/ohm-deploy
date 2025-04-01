@@ -8,88 +8,59 @@
     ]
   },
   "generalized_tables": {
-    "landuse_areas_gen1": {
-      "source": "landuse_areas",
-      "sql_filter": "ST_Area(geometry)>50000.000000",
-      "tolerance": 50.0
+    "landuse_areas_z3_5": {
+      "source": "landuse_areas_z6_7",
+      "sql_filter": "ST_Area(geometry)>50000000",
+      "tolerance": 1000
+    },    "landuse_areas_z6_7": {
+      "source": "landuse_areas_z8_9",
+      "sql_filter": "ST_Area(geometry)>1000000",
+      "tolerance": 200
     },
-    "landuse_areas_gen0": {
-      "source": "landuse_areas_gen1",
-      "sql_filter": "ST_Area(geometry)>500000.000000",
-      "tolerance": 200.0
+    "landuse_areas_z8_9": {
+      "source": "landuse_areas_z10_12",
+      "sql_filter": "ST_Area(geometry)>1000000 AND type IN ('forest', 'wood', 'nature reserve', 'nature_reserve', 'military')",
+      "tolerance": 100
+    },
+    "landuse_areas_z10_12": {
+      "source": "landuse_areas_z13_15",
+      "tolerance": 20
+    },
+    "landuse_areas_z13_15": {
+      "source": "landuse_areas",
+      "tolerance": 5
     }
   },
   "tables": {
     "landuse_areas": {
       "fields": [
-        {
-          "type": "id",
-          "name": "osm_id",
-          "key": null
-        },
-        {
-          "type": "geometry",
-          "name": "geometry",
-          "key": null
-        },
-        {
-          "type": "string",
-          "name": "name",
-          "key": "name"
-        },
-        {
-          "type": "mapping_value",
-          "name": "type",
-          "key": null
-        },
-        {
-          "type": "mapping_key",
-          "name": "class",
-          "key": null
-        },
-        {
-          "type": "string",
-          "name": "start_date",
-          "key": "start_date"
-        },
-        {
-          "type": "string",
-          "name": "end_date",
-          "key": "end_date"
-        },
-        {
-          "type": "pseudoarea",
-          "name": "area",
-          "key": null
-        },
-        {
-          "type": "hstore_tags",
-          "name": "tags",
-          "key": null
-        }
+        { "type": "id", "name": "osm_id", "key": null },
+        { "type": "geometry", "name": "geometry", "key": null },
+        { "type": "string", "name": "name", "key": "name" },
+        { "type": "mapping_value", "name": "type", "key": null },
+        { "type": "mapping_key", "name": "class", "key": null },
+        { "type": "string", "name": "start_date", "key": "start_date" },
+        { "type": "string", "name": "end_date", "key": "end_date" },
+        { "type": "pseudoarea", "name": "area", "key": null },
+        { "type": "hstore_tags", "name": "tags", "key": null }
       ],
       "type": "polygon",
       "mappings": {
         "landuse": {
           "mapping": {
-            "landuse": [
-              "__any__"
-            ]
+            "landuse": ["__any__"]
           }
         },
         "leisure": {
           "mapping": {
-            "leisure": [
-              "__any__"
-            ]
+            "leisure": ["__any__"]
           }
         },
         "natural": {
           "mapping": {
-            "natural": [
-              "__any__"
-            ]
-          }
+            "natural": ["__any__"]
+          },
+          "exclude": ["water"]
         }
       }
     }
