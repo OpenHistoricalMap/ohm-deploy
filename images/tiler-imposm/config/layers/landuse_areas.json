@@ -12,7 +12,8 @@
       "source": "landuse_areas_z6_7",
       "sql_filter": "ST_Area(geometry)>50000000",
       "tolerance": 1000
-    },    "landuse_areas_z6_7": {
+    },
+    "landuse_areas_z6_7": {
       "source": "landuse_areas_z8_9",
       "sql_filter": "ST_Area(geometry)>1000000",
       "tolerance": 200
@@ -34,33 +35,77 @@
   "tables": {
     "landuse_areas": {
       "fields": [
-        { "type": "id", "name": "osm_id", "key": null },
-        { "type": "geometry", "name": "geometry", "key": null },
-        { "type": "string", "name": "name", "key": "name" },
-        { "type": "mapping_value", "name": "type", "key": null },
-        { "type": "mapping_key", "name": "class", "key": null },
-        { "type": "string", "name": "start_date", "key": "start_date" },
-        { "type": "string", "name": "end_date", "key": "end_date" },
-        { "type": "pseudoarea", "name": "area", "key": null },
-        { "type": "hstore_tags", "name": "tags", "key": null }
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "pseudoarea",
+          "name": "area",
+          "key": null
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
       ],
       "type": "polygon",
       "mappings": {
         "landuse": {
           "mapping": {
-            "landuse": ["__any__"]
+            "landuse": [
+              "__any__"
+            ]
           }
         },
         "leisure": {
           "mapping": {
-            "leisure": ["__any__"]
+            "leisure": [
+              "__any__"
+            ]
           }
         },
         "natural": {
           "mapping": {
-            "natural": ["__any__"]
+            "natural": [
+              "__any__"
+            ]
           },
-          "exclude": ["water"]
+          "exclude": [
+            "water"
+          ]
         }
       }
     }

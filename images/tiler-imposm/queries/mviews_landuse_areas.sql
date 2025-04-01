@@ -1,6 +1,6 @@
--- The script aims to create materialized views for water areas using ST_Subdivide function is used to reduce the complexity of certain geometries.
+-- The script aims to create materialized views for landuse using ST_Subdivide function is used to reduce the complexity of certain geometries.
 
-CREATE OR REPLACE FUNCTION create_water_areas_subdivided_mviews(
+CREATE OR REPLACE FUNCTION create_landuse_subdivided_mviews(
   input_table TEXT,
   mview_name TEXT
 )
@@ -21,6 +21,7 @@ BEGIN
         osm_id,
         name,
         type,
+        class,
         start_date,
         end_date,
         area,
@@ -30,6 +31,7 @@ BEGIN
           osm_id,
           name,
           type,
+          class,
           start_date,
           end_date,
           tags,
@@ -52,10 +54,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create the materialized views for each zoom level
-SELECT create_water_areas_subdivided_mviews('osm_water_areas_z0_2', 'mview_water_areas_z0_2_subdivided');
-SELECT create_water_areas_subdivided_mviews('osm_water_areas_z3_5', 'mview_water_areas_z3_5_subdivided');
-SELECT create_water_areas_subdivided_mviews('osm_water_areas_z6_7', 'mview_water_areas_z6_7_subdivided');
-SELECT create_water_areas_subdivided_mviews('osm_water_areas_z8_9', 'mview_water_areas_z8_9_subdivided');
-SELECT create_water_areas_subdivided_mviews('osm_water_areas_z10_12', 'mview_water_areas_z10_12_subdivided');
+SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z3_5', 'mview_landuse_areas_z3_5_subdivided');
+SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z6_7', 'mview_landuse_areas_z6_7_subdivided');
+SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z8_9', 'mview_landuse_areas_z8_9_subdivided');
+SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z10_12', 'mview_landuse_areas_z10_12_subdivided');
 
--- We are giong to use same water tables for zoom=>13, osm_water_areas_z13_15 and osm_water_areas
+-- We are giong to use same ladnuse tables for zoom=>13, osm_landuse_areas_z13_15, osm_landuse_areas
