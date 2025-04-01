@@ -1,4 +1,4 @@
-FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2087.h29c3843
+FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2389.h29c3843
 
 # Install Passenger
 RUN gem install passenger && passenger-install-apache2-module --auto
