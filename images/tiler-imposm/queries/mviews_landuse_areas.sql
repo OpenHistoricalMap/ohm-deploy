@@ -57,6 +57,5 @@ $$ LANGUAGE plpgsql;
 SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z3_5', 'mview_landuse_areas_z3_5_subdivided');
 SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z6_7', 'mview_landuse_areas_z6_7_subdivided');
 SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z8_9', 'mview_landuse_areas_z8_9_subdivided');
-SELECT create_landuse_subdivided_mviews('osm_landuse_areas_z10_12', 'mview_landuse_areas_z10_12_subdivided');
 
--- We are giong to use same ladnuse tables for zoom=>13, osm_landuse_areas_z13_15, osm_landuse_areas
+-- We are giong to use same ladnuse tables for zoom=>10,osm_landuse_areas_z10_12, osm_landuse_areas_z13_15, osm_landuse_areas

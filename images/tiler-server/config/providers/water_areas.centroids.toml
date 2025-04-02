@@ -112,9 +112,7 @@ SELECT
 FROM 
     mview_water_areas_centroid_z10_12
 WHERE 
-    name IS NOT NULL 
-    AND name <> '' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
 [[providers.layers]]
@@ -139,6 +137,7 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
+
 #######Maps
 [[maps.layers]]
 name = "water_areas_centroids"

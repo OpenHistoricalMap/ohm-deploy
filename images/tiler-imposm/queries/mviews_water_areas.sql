@@ -56,6 +56,5 @@ SELECT create_water_areas_subdivided_mviews('osm_water_areas_z0_2', 'mview_water
 SELECT create_water_areas_subdivided_mviews('osm_water_areas_z3_5', 'mview_water_areas_z3_5_subdivided');
 SELECT create_water_areas_subdivided_mviews('osm_water_areas_z6_7', 'mview_water_areas_z6_7_subdivided');
 SELECT create_water_areas_subdivided_mviews('osm_water_areas_z8_9', 'mview_water_areas_z8_9_subdivided');
-SELECT create_water_areas_subdivided_mviews('osm_water_areas_z10_12', 'mview_water_areas_z10_12_subdivided');
 
--- We are giong to use same water tables for zoom=>13, osm_water_areas_z13_15 and osm_water_areas
+-- We are giong to use same water tables for zoom>9, osm_water_areas_z10_12, osm_water_areas_z13_15 and osm_water_areas

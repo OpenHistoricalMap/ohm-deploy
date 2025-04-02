@@ -58,7 +58,6 @@ water_views=(
     "mview_water_areas_z3_5_subdivided"
     "mview_water_areas_z6_7_subdivided"
     "mview_water_areas_z8_9_subdivided"
-    "mview_water_areas_z10_12_subdivided"
     "mview_water_areas_centroid_z0_2"
     "mview_water_areas_centroid_z3_5"
     "mview_water_areas_centroid_z6_7"
@@ -68,7 +67,6 @@ water_views=(
 )
 
 landuse_views=(
-    "mview_landuse_areas_centroid_z0_2"
     "mview_landuse_areas_centroid_z3_5"
     "mview_landuse_areas_centroid_z6_7"
     "mview_landuse_areas_centroid_z8_9"
@@ -77,7 +75,6 @@ landuse_views=(
     "mview_landuse_areas_z3_5_subdivided"
     "mview_landuse_areas_z6_7_subdivided"
     "mview_landuse_areas_z8_9_subdivided"
-    "mview_landuse_areas_z10_12_subdivided"
 )
 
 # Start refreshing in parallel

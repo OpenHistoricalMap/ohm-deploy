@@ -50,7 +50,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_landuse_centroid_mviews('osm_landuse_areas_z0_2', 'mview_landuse_areas_centroid_z0_2');
 SELECT create_landuse_centroid_mviews('osm_landuse_areas_z3_5', 'mview_landuse_areas_centroid_z3_5');
 SELECT create_landuse_centroid_mviews('osm_landuse_areas_z6_7', 'mview_landuse_areas_centroid_z6_7');
 SELECT create_landuse_centroid_mviews('osm_landuse_areas_z8_9', 'mview_landuse_areas_centroid_z8_9');
