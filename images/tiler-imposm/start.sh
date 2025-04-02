@@ -145,8 +145,12 @@ function updateData() {
     log_message "Starting database update process..."
 
     # Step 1: Refreshing materialized views
-    log_message "Refreshing materialized views..."
-    ./refresh_mviews.sh &
+    if [ "$REFRESH_MVIEWS" = "true" ]; then
+        log_message "Refreshing materialized views..."
+        ./refresh_mviews.sh &
+    else
+        log_message "Skipping materialized views refresh (REFRESH_MVIEWS=$REFRESH_MVIEWS)"
+    fi
 
     local local_last_state_path="$DIFF_DIR/last.state.txt"
 
