@@ -107,4 +107,4 @@ SELECT create_transport_lines_mviews('osm_transport_lines_z8', 'osm_transport_mu
 SELECT create_transport_lines_mviews('osm_transport_lines_z9', 'osm_transport_multilines_z9', 'mview_transport_lines_z9');
 SELECT create_transport_lines_mviews('osm_transport_lines_z10_11', 'osm_transport_multilines_z10_11', 'mview_transport_lines_z10_11');
 SELECT create_transport_lines_mviews('osm_transport_lines_z12_13', 'osm_transport_multilines_z12_13', 'mview_transport_lines_z12_13');
-SELECT create_transport_lines_mviews('osm_transport_lines', 'osm_transport_multilines', 'mview_transport_lines_14_20');
+SELECT create_transport_lines_mviews('osm_transport_lines', 'osm_transport_multilines', 'mview_transport_lines_z14_20');

@@ -17,7 +17,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_landuse_areas_z3_5_subdivided 
+    osm_landuse_areas_z3_5
 WHERE 
     geometry && !BBOX!
 """
@@ -41,7 +41,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_landuse_areas_z6_7_subdivided 
+    osm_landuse_areas_z6_7
 WHERE 
     geometry && !BBOX!
 """
@@ -65,7 +65,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_landuse_areas_z8_9_subdivided 
+    osm_landuse_areas_z8_9
 WHERE 
     geometry && !BBOX!
 """
@@ -89,7 +89,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_landuse_areas_z8_9 
+    osm_landuse_areas_z10_12
 WHERE 
     geometry && !BBOX!
 """
