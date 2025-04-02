@@ -7,9 +7,9 @@ embed_server_url: "https://embed.openhistoricalmap.org/"
 #publisher_url: ""
 # The generator
 generator: "OpenHistoricalMap server"
-copyright_owner: "OpenHistoricalMap and contributors"
+copyright_owner: "OpenHistoricalMap is dedicated to the public domain except where otherwise noted."
 attribution_url: "http://www.openhistoricalmap.org/copyright"
-license_url: "http://opendatacommons.org/licenses/odbl/1-0/"
+license_url: "https://creativecommons.org/public-domain/cc0/"
 # Support email address
 support_email: "ohm-admins@googlegroups.com"
 # Sender addresses for emails
