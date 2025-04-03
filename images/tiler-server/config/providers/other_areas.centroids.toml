@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "other_areas_centroids_z_6_8"
+name = "other_areas_centroids_z6_8"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
