@@ -1,4 +1,4 @@
-FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2087.h94d548c
+FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2393.h74d1139
 
 # Install Passenger
 RUN gem install passenger && passenger-install-apache2-module --auto
@@ -8,7 +8,7 @@ RUN npm install -g svgo
 
 # Install openstreetmap-website
 RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=daefee44772d61c68b2b491d77a9b2658d0ad9cb
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=b6dda6c893e0e6f7c2c2f5d3c39727efe2b4080e
 
 RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
     && cd $workdir \
@@ -16,7 +16,7 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'various date and daterange improvements, new translations'
+RUN echo 'iD version bump to our 2.29.3'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages

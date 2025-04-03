@@ -37,12 +37,15 @@ ENV CGIMAP_GITSHA=8ea707e10aeab5698e6859856111816d75354592
 RUN git clone -b master https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap \
     && cd $cgimap \
     && git checkout $CGIMAP_GITSHA \
+    && sed -i 's#OpenStreetMap and contributors#OpenHistoricalMap is dedicated to the public domain except where otherwise noted.#g' include/cgimap/output_formatter.hpp \
+    && sed -i 's#http://www.openstreetmap.org/copyright#https://www.openhistoricalmap.org/copyright#g' include/cgimap/output_formatter.hpp \
+    && sed -i 's#http://opendatacommons.org/licenses/odbl/1-0/#https://creativecommons.org/public-domain/cc0/#g' include/cgimap/output_formatter.hpp \
     && rm -rf .git \
     && mkdir build \
     && cd build \
     && cmake .. \
     && cmake --build .
-
+    
 RUN cp $cgimap/build/openstreetmap-cgimap /usr/local/bin/ && rm -rf $cgimap
 
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
