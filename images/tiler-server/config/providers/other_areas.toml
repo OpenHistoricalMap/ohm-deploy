@@ -20,7 +20,7 @@ SELECT
 FROM 
     mview_other_areas_z6_8 
 WHERE 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
 [[providers.layers]]
