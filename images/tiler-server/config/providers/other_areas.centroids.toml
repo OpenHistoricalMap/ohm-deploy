@@ -1,136 +1,124 @@
-# Layer configuration for other areas with a filter
 [[providers.layers]]
-name = "other_areas_centroids_6-8"
+name = "other_areas_centroids_z6_8"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
     class, 
-    type, 
+    type,
+    area,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_other_areas 
+    mview_other_areas_centroids_z6_8 
 WHERE 
-    area > 1000000
-    AND name IS NOT NULL
-    AND name <> ''
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
-# Layer configuration for other areas
 [[providers.layers]]
-name = "other_areas_centroids_9-11"
+name = "other_areas_centroids_z9_11"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
     class, 
-    type, 
+    type,
+    area, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_other_areas 
+    mview_other_areas_centroids_z9_11 
 WHERE 
-    area > 100000
-    AND name IS NOT NULL
-    AND name <> ''
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
-
-# Layer configuration for other areas
 [[providers.layers]]
-name = "other_areas_centroids_12-14"
+name = "other_areas_centroids_z12_14"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
     class, 
-    type, 
+    type,
+    area, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_other_areas 
+    mview_other_areas_centroids_z12_14 
 WHERE 
-    area > 10000
-    AND name IS NOT NULL
-    AND name <> ''
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
-
-# Layer configuration for other areas
 [[providers.layers]]
-name = "other_areas_centroids_15-20"
+name = "other_areas_centroids_z15_20"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     id, 
     osm_id, 
     name, 
     class, 
-    type, 
+    type,
+    area,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_other_areas 
+    mview_other_areas_centroids_z15_20 
 WHERE 
-    name IS NOT NULL
-    AND name <> ''
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
+
 #######Maps
 [[maps.layers]]
 name = "other_areas_centroids"
-provider_layer = "osm.other_areas_centroids_6-8"
+provider_layer = "osm.other_areas_centroids_z6_8"
 min_zoom = 6
 max_zoom = 8
 
 [[maps.layers]]
 name = "other_areas_centroids"
-provider_layer = "osm.other_areas_centroids_9-11"
+provider_layer = "osm.other_areas_centroids_z9_11"
 min_zoom = 9
 max_zoom = 11
 
 [[maps.layers]]
 name = "other_areas_centroids"
-provider_layer = "osm.other_areas_centroids_12-14"
+provider_layer = "osm.other_areas_centroids_z12_14"
 min_zoom = 12
 max_zoom = 14
 
 [[maps.layers]]
 name = "other_areas_centroids"
-provider_layer = "osm.other_areas_centroids_15-20"
+provider_layer = "osm.other_areas_centroids_z15_20"
 min_zoom = 15
 max_zoom = 20
