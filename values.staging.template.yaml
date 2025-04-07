@@ -657,6 +657,9 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job_xlarge
+      ui:
+        enabled: true
+        domain: d15ux3p5m99eih.cloudfront.net
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
