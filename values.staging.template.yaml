@@ -157,7 +157,7 @@ osm-seed:
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: ohm-admins@googlegroups.com
-        NOMINATIM_URL: nominatim-api.staging.openhistoricalmap.org
+        NOMINATIM_URL: nominatim.staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
