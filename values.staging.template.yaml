@@ -67,7 +67,7 @@ osm-seed:
       enabled: true
       priorityClass: "high-priority"
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
       env:
@@ -139,7 +139,7 @@ osm-seed:
       enabled: true
       priorityClass: "high-priority"
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
       replicaCount: 1
@@ -195,7 +195,7 @@ osm-seed:
       enabled: true
       priorityClass: "high-priority"
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
       resources:
@@ -239,7 +239,7 @@ osm-seed:
       enabled: true
       priorityClass: medium-priority
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
       env:
@@ -662,7 +662,7 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID: vol-0874ffe0fc1703bba
         AWS_ElasticBlockStore_size: 50Gi
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
   # ====================================================================================================
