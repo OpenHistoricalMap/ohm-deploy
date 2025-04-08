@@ -540,7 +540,7 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
@@ -567,7 +567,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
@@ -664,7 +664,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job_xlarge
+        label_value: web_medium
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
