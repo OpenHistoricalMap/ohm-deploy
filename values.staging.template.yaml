@@ -205,7 +205,7 @@ osm-seed:
     # ====================================================================================================
     planetDump:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -221,7 +221,7 @@ osm-seed:
     # ====================================================================================================
     fullHistory:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -237,7 +237,7 @@ osm-seed:
     # ====================================================================================================
     replicationJob:
       enabled: true
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -253,7 +253,7 @@ osm-seed:
     # ====================================================================================================
     populateApidb:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -268,7 +268,7 @@ osm-seed:
     # ====================================================================================================
     osmProcessor:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -349,7 +349,7 @@ osm-seed:
   
     tilerDb:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
         enabled: true
       env:
@@ -441,7 +441,7 @@ osm-seed:
   
     tilerImposm:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250207_0001.osm.pbf
@@ -471,7 +471,7 @@ osm-seed:
   
     tilerServer:
       enabled: true
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       externalService:
         enabled: true
         ip: {{STAGING_TILER_SERVER_HOST}}
@@ -517,7 +517,7 @@ osm-seed:
     # ====================================================================================================
     tilerServerCacheCleaner:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -541,7 +541,7 @@ osm-seed:
     # ====================================================================================================
     tmDb:
       enabled: true
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       image:
         name: "postgis/postgis"
         tag: "14-3.3"
@@ -622,16 +622,16 @@ osm-seed:
     nominatimUI:
       enabled: true
       image:
-        name: "rub21/nominatim-ui"
-        tag: "v7"
+        name: ghcr.io/openhistoricalmap/nominatim-ui
+        tag: 961c18c
   # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
       enabled: true
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
       ingressDomain: nominatim.staging.openhistoricalmap.org
       replicaCount: 1
       env:
@@ -665,15 +665,12 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job_xlarge
-      ui:
-        enabled: true
-        domain: d15ux3p5m99eih.cloudfront.net
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
     overpassApi:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: overpass-api.staging.openhistoricalmap.org
@@ -696,13 +693,13 @@ osm-seed:
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
-        label_value: job_xlarge
+        label_value: web_medium
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: taginfo.staging.openhistoricalmap.org
@@ -745,7 +742,7 @@ osm-seed:
   # ====================================================================================================
     osmSimpleMetrics:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       schedule: '0 2 * * *'
       resources:
         enabled: false
@@ -759,7 +756,7 @@ osm-seed:
   # ====================================================================================================
     monitoringReplication:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       schedule: '*/30 * * * *'
       env:
         CREATE_MISSING_FILES: "empty"
@@ -775,7 +772,7 @@ osm-seed:
 # ====================================================================================================
     changesetReplicationJob:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       resources:
         enabled: false
       nodeSelector:
@@ -787,7 +784,7 @@ osm-seed:
 # ====================================================================================================
     osmchaWeb:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
         tag: 4a2543f
@@ -796,7 +793,7 @@ osm-seed:
 # ====================================================================================================
     osmchaApi:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
         tag: 1e9d9dd
@@ -827,7 +824,7 @@ osm-seed:
 # ====================================================================================================
     osmchaDb:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       # image:
       #   name: developmentseed/osmseed-osmcha-db
       #   tag: 0.1.0-n767.h0090e97
@@ -857,7 +854,7 @@ osm-seed:
 # ====================================================================================================
     adiffService:
       enabled: false
-      priorityClass: "medium-priority"
+      priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osm-adiff-service
         tag: a343422497bb2ad4735ca7eada921b60eeb19e20
