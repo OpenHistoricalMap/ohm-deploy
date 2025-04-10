@@ -104,10 +104,11 @@ setup_production() {
 
   ## Update map styles. This line should be removed later, as the configuration should come from the module.
   SERVER_URL_="${SERVER_URL/www./}"
-  find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|openhistoricalmap.github.io|${SERVER_URL}|g" {} +
-  find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
-  find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
-  find /var/www/node_modules/@openhistoricalmap/map-styles/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|openhistoricalmap.github.io|${SERVER_URL}|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|www.openhistoricalmap.org|${SERVER_URL}|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
 
   echo "Waiting for PostgreSQL to be ready..."
   until pg_isready -h "$POSTGRES_HOST" -p 5432; do
