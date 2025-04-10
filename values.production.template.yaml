@@ -147,7 +147,7 @@ osm-seed:
       OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
       OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
       MAILER_FROM: ohm-admins@googlegroups.com
-      NOMINATIM_URL: nominatim-api.openhistoricalmap.org
+      NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
       NEW_RELIC_LICENSE_KEY: 'none'
       NEW_RELIC_APP_NAME: 'none'
@@ -174,7 +174,7 @@ osm-seed:
       enabled: true
       minReplicas: 2
       maxReplicas: 4
-      cpuUtilization: 50
+      cpuUtilization: 70
     sharedMemorySize: 512Mi
     livenessProbeExec: true
   # ====================================================================================================
@@ -656,7 +656,7 @@ osm-seed:
       TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
       TM_ORG_GITHUB: github.com/openhistoricalmap
       OSM_SERVER_URL: https://www.openhistoricalmap.org
-      OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
+      OSM_NOMINATIM_SERVER_URL: https://nominatim.openhistoricalmap.org
       OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
       ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
@@ -703,7 +703,7 @@ osm-seed:
     priorityClass: 'medium-priority'
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: nominatim-api.openhistoricalmap.org
+    ingressDomain: nominatim.openhistoricalmap.org
     replicaCount: 1
     env:
       PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-230727_1030.osm.pbf
