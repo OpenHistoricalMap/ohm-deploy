@@ -695,6 +695,14 @@ osm-seed:
         memory: 2Gi
         cpu: '2'
 
+ # ====================================================================================================
+  # Variables for nominatim api
+  # ====================================================================================================
+  nominatimUI:
+    enabled: true
+    image:
+      name: ghcr.io/openhistoricalmap/nominatim-ui
+      tag: a469b5e
   # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
@@ -809,7 +817,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
