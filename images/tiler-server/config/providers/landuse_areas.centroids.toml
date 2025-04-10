@@ -1,11 +1,11 @@
 [[providers.layers]]
-name = "landuse_areas_gen0_centroids_3-5"
+name = "landuse_areas_centroid_z3_5"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
     name, 
     class, 
@@ -17,24 +17,19 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_landuse_areas_gen0 
+    mview_landuse_areas_centroid_z3_5 
 WHERE 
-    type IN ('forest', 'wood', 'nature reserve', 'nature_reserve', 'military') 
-    AND area > 50000000 
-    AND name IS NOT NULL
-    AND name <> ''
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
-# Layer 1,000,000
 [[providers.layers]]
-name = "landuse_areas_gen0_centroids_6-9"
+name = "landuse_areas_centroid_z6_7"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
     name, 
     class, 
@@ -46,24 +41,19 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_landuse_areas_gen0 
+    mview_landuse_areas_centroid_z6_7
 WHERE 
-    type IN ('forest', 'wood', 'nature reserve', 'nature_reserve', 'military') 
-    AND area > 1000000 
-    AND name IS NOT NULL 
-    AND name <> '' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 
-# Layer configuration for landuse areas gen1
 [[providers.layers]]
-name = "landuse_areas_gen1_centroids_10-12"
+name = "landuse_areas_centroid_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
     name, 
     class, 
@@ -75,27 +65,23 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_landuse_areas_gen1 
+    mview_landuse_areas_centroid_z8_9
 WHERE 
-    name IS NOT NULL 
-    AND name <> '' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
-# Layer configuration for landuse areas
+
 [[providers.layers]]
-name = "landuse_areas_centroids_13-20"
+name = "landuse_areas_centroid_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
-    ST_AsMVTGeom((ST_MaximumInscribedCircle(geometry)).center, !BBOX!) AS geometry, 
-    id, 
-    osm_id, 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ABS(osm_id) AS osm_id, 
     name, 
     class, 
     type, 
-    tags->'wetland' AS wetland, 
     area, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
@@ -103,33 +89,62 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_landuse_areas 
+    mview_landuse_areas_centroid_z10_12
 WHERE 
-    name IS NOT NULL
-    AND name <> '' 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
+
+[[providers.layers]]
+name = "landuse_areas_centroid_z13_15"
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ABS(osm_id) AS osm_id, 
+    name, 
+    class, 
+    type, 
+    area, 
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}} 
+FROM 
+    mview_landuse_areas_centroid_z13_15
+WHERE 
+    geometry && !BBOX!
+"""
+
 #######Maps
 [[maps.layers]]
 name = "landuse_areas_centroids"
-provider_layer = "osm.landuse_areas_gen0_centroids_3-5"
+provider_layer = "osm.landuse_areas_centroid_z3_5"
 min_zoom = 3
 max_zoom = 5
 
 [[maps.layers]]
 name = "landuse_areas_centroids"
-provider_layer = "osm.landuse_areas_gen0_centroids_6-9"
+provider_layer = "osm.landuse_areas_centroid_z6_7"
 min_zoom = 6
+max_zoom = 7
+
+[[maps.layers]]
+name = "landuse_areas_centroids"
+provider_layer = "osm.landuse_areas_centroid_z8_9"
+min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
 name = "landuse_areas_centroids"
-provider_layer = "osm.landuse_areas_gen1_centroids_10-12"
+provider_layer = "osm.landuse_areas_centroid_z10_12"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "landuse_areas_centroids"
-provider_layer = "osm.landuse_areas_centroids_13-20"
+provider_layer = "osm.landuse_areas_centroid_z13_15"
 min_zoom = 13
 max_zoom = 20

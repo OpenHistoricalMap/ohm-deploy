@@ -2,7 +2,7 @@ services:
   db:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_20250225_v7:/var/lib/postgresql/data
+      - /data/tiler_production_db_02042025_v2:/var/lib/postgresql/data
       - ./config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
@@ -17,16 +17,16 @@ services:
       - .env.staging
     networks:
       - tiler_network_staging
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 2G
 
   imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2302.h7c8d3da
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2403.h998578a
     volumes:
-      - /data/tiler_production_imposm_20250225_v7:/mnt/data
+      - /data/tiler_production_imposm_02042025_v2:/mnt/data
     command:
       - sh
       - -c
@@ -37,13 +37,13 @@ services:
     restart: always
     networks:
       - tiler_network_staging
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #       memory: 1G
   tiler:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2298.hfb649bb
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2405.h994520b
     ports:
       - "9091:9090"
     env_file:

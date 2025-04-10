@@ -145,8 +145,12 @@ function updateData() {
     log_message "Starting database update process..."
 
     # Step 1: Refreshing materialized views
-    log_message "Refreshing materialized views..."
-    ./refresh_mviews.sh &
+    if [ "$REFRESH_MVIEWS" = "true" ]; then
+        log_message "Refreshing materialized views..."
+        ./refresh_mviews.sh &
+    else
+        log_message "Skipping materialized views refresh (REFRESH_MVIEWS=$REFRESH_MVIEWS)"
+    fi
 
     local local_last_state_path="$DIFF_DIR/last.state.txt"
 
@@ -232,11 +236,15 @@ function importData() {
     psql $PG_CONNECTION -f queries/date_utils.sql
     psql $PG_CONNECTION -f queries/mviews_land.sql 
     psql $PG_CONNECTION -f queries/mviews_ne_lakes.sql 
-    psql $PG_CONNECTION -f queries/mviews_admin_boundaries.sql 
+    psql $PG_CONNECTION -f queries/mviews_admin_boundaries_centroids.sql 
     psql $PG_CONNECTION -f queries/mviews_admin_boundaries_merged.sql 
     psql $PG_CONNECTION -f queries/mviews_transport_lines.sql 
-    psql $PG_CONNECTION -f queries/mviews_water.sql 
-    
+    psql $PG_CONNECTION -f queries/mviews_water_areas.sql 
+    psql $PG_CONNECTION -f queries/mviews_water_areas_centroids.sql 
+    psql $PG_CONNECTION -f queries/mviews_landuse_areas.sql 
+    psql $PG_CONNECTION -f queries/mviews_landuse_areas_centroids.sql 
+    psql $PG_CONNECTION -f queries/mviews_other_areas.sql 
+    psql $PG_CONNECTION -f queries/mviews_other_areas_centroids.sql 
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }

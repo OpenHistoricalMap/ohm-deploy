@@ -5,10 +5,10 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'admin_lines'
+      - 'water_areas'
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 120
     env:
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
