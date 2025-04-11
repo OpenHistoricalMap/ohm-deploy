@@ -115,8 +115,8 @@ setup_production() {
     sleep 2
   done
 
-  echo "Running asset precompilation..."
-  time bundle exec rake i18n:js:export assets:precompile
+  # echo "Running asset precompilation..."
+  #time bundle exec rake i18n:js:export assets:precompile
 
   echo "Copying static assets..."
   cp "$workdir/public/leaflet-ohm-timeslider-v2/assets/"* "$workdir/public/assets/"
@@ -124,8 +124,10 @@ setup_production() {
   echo "Running database migrations..."
   time bundle exec rails db:migrate
 
-  echo "Running cgimap..."
-  ./cgimap.sh
+  if [ "$EXTERNAL_CGIMAP" == "false" ]; then
+    echo "Running cgimap..."
+    ./cgimap.sh
+  fi
 
   echo "Starting Apache server..."
   apachectl -k start -DFOREGROUND &
