@@ -16,7 +16,7 @@ RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
 WORKDIR $workdir
 
 # change the echo here with a reason for changing the commithash
-RUN echo 'map-styles version bump to 0.9.6'
+RUN echo 'map-styles version bump to 0.9.7'
 RUN git fetch && rm -rf .git
 
 # Install Ruby packages

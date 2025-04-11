@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'water_areas'
+      - 'service/cgimap'
 jobs:
   build:
     runs-on: ubuntu-22.04
