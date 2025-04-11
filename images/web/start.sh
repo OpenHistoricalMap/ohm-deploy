@@ -124,6 +124,11 @@ setup_production() {
   echo "Running database migrations..."
   time bundle exec rails db:migrate
 
+  if [ "$EXTERNAL_CGIMAP" == "false" ]; then
+    echo "Running cgimap..."
+    ./cgimap.sh
+  fi
+
   echo "Starting Apache server..."
   apachectl -k start -DFOREGROUND &
 
