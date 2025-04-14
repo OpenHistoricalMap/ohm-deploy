@@ -41,5 +41,7 @@ else
   psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SHOW enable_mergejoin;"
   psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SHOW enable_hashjoin;"
   # Start the cgimap service
-  exec openstreetmap-cgimap --port=8000 --instances=10
+  openstreetmap-cgimap --port=8000 --instances=10
+  # Keep container alive
+  tail -f /dev/null
 fi
