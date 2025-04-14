@@ -1,4 +1,4 @@
-Git add FROM ruby:3.3.0 AS builder
+FROM ruby:3.3.0 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV workdir=/var/www
