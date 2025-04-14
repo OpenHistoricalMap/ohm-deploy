@@ -1,111 +1,95 @@
-FROM ghcr.io/openhistoricalmap/cgimap:0.0.1-0.dev.git.2393.h74d1139
+FROM ruby:3.3-slim
 
-# Install Passenger
-RUN gem install passenger && passenger-install-apache2-module --auto
+ENV DEBIAN_FRONTEND=noninteractive \
+    workdir=/var/www
 
-# Install svgo required
-RUN npm install -g svgo
-
-# Install openstreetmap-website
-RUN rm -rf $workdir/html
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=fb2292b81faefb5ce7c704ddb0c57814e1c4cd7a
-
-RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir \
-    && cd $workdir \
-    && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA
 WORKDIR $workdir
 
-# change the echo here with a reason for changing the commithash
-RUN echo 'map-styles version bump to 0.9.7'
-RUN git fetch && rm -rf .git
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git curl gnupg libarchive-dev \
+    zlib1g-dev libcurl4-openssl-dev \
+    apache2 apache2-dev libapache2-mod-passenger libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
+    build-essential postgresql-client && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs libpq-dev libxml2-dev libyaml-dev && \
+    if ! command -v yarn >/dev/null 2>&1; then npm install -g yarn; fi && \
+    npm install -g svgo && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Ruby packages
-RUN gem install bundler && bundle install
-
-# Configure database.yml
-RUN cp $workdir/config/example.database.yml $workdir/config/database.yml
-RUN touch $workdir/config/settings.local.yml
-RUN cp $workdir/config/example.storage.yml $workdir/config/storage.yml
-# Protect sensitive information
-RUN chmod 600 $workdir/config/database.yml
-
-RUN yarn install
-RUN bundle exec rake yarn:install
-
-# Generate RAILS_MASTER_KEY and SECRET_KEY_BASE during build
-RUN rm -f config/credentials.yml.enc
-RUN export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
-    export SECRET_KEY_BASE=$(rails secret) && \
-    echo $RAILS_MASTER_KEY > config/master.key && \
-    if [ ! -f config/credentials.yml.enc ]; then \
-        EDITOR="echo" RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails credentials:edit; \
-    fi && \
-    RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails runner " \
-        require 'active_support/encrypted_configuration'; \
-        require 'yaml'; \
-        creds = ActiveSupport::EncryptedConfiguration.new( \
-          config_path: 'config/credentials.yml.enc', \
-          key_path: 'config/master.key', \
-          env_key: 'RAILS_MASTER_KEY', \
-          raise_if_missing_key: true \
-        ); \
-        credentials = { secret_key_base: '${SECRET_KEY_BASE}' }; \
-        creds.write(credentials.to_yaml); \
-        puts 'Credentials configured correctly.'"
-RUN bundle exec rake i18n:js:export --trace
-RUN bundle exec rake assets:precompile
-
-# The rack interface requires a `tmp` directory to use openstreetmap-cgimap
-RUN ln -s /tmp /var/www/tmp
-
-# Add Apache configuration file
-ADD config/production.conf /etc/apache2/sites-available/production.conf
-RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_byrequests
-RUN a2dissite 000-default
-RUN a2ensite production
-
-# Enable the Passenger Apache module and restart Apache
-RUN echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
-
-# Config passenger module
-RUN echo "LoadModule passenger_module $(passenger-config --root)/buildout/apache2/mod_passenger.so" > /etc/apache2/mods-available/passenger.load
-RUN echo "<IfModule mod_passenger.c>\n\
-    PassengerRoot $(passenger-config --root)\n\
-    PassengerRuby /usr/local/bin/ruby\n\
-</IfModule>" > /etc/apache2/mods-available/passenger.conf
+# Install Passenger
 RUN a2enmod passenger
 
-# Check installation
-RUN /usr/local/bundle/bin/passenger-config validate-install
-RUN /usr/local/bundle/bin/passenger-memory-stats
+# Clone OHM Website
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=fb2292b81faefb5ce7c704ddb0c57814e1c4cd7a
+RUN rm -rf $workdir/*
+RUN git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
+    cd $workdir && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && rm -rf .git
 
-# Config the virtual host apache2
+ 
+# Install Ruby/Node dependencies
+RUN gem install bundler && bundle install && \
+    yarn install && \
+    bundle exec rake yarn:install
+
+RUN cp config/example.database.yml config/database.yml && \
+    cp config/example.storage.yml config/storage.yml && \
+    touch config/settings.local.yml && \
+    chmod 600 config/database.yml
+
+RUN rm -f config/credentials.yml.enc && \
+    export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
+    export SECRET_KEY_BASE=$(bundle exec rails secret) && \
+    echo $RAILS_MASTER_KEY > config/master.key && \
+    EDITOR="echo" RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails credentials:edit && \
+    RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails runner "\
+      require 'active_support/encrypted_configuration'; \
+      require 'yaml'; \
+      creds = ActiveSupport::EncryptedConfiguration.new(\
+        config_path: 'config/credentials.yml.enc', \
+        key_path: 'config/master.key', \
+        env_key: 'RAILS_MASTER_KEY', \
+        raise_if_missing_key: true \
+      ); \
+      credentials = { secret_key_base: '$SECRET_KEY_BASE' }; \
+      creds.write(credentials.to_yaml); \
+      puts 'Credentials configured correctly.'"
+
+# Precompile assets
+RUN bundle exec rake i18n:js:export && \
+    bundle exec rake assets:precompile
+RUN ln -s /tmp /var/www/tmp
+
+# Apache config
+COPY config/production.conf /etc/apache2/sites-available/production.conf
+RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_byrequests passenger && \
+    a2dissite 000-default && \
+    a2ensite production && \
+    echo "ServerName $(cat /etc/hostname)" >> /etc/apache2/apache2.conf
+
 RUN apache2ctl configtest
-
-# Set Permissions for www-data
 RUN chown -R www-data: $workdir
 
-# Prepare to set env variables & host map-styles publicly independent of the Rails app
-RUN mkdir -p $workdir/public/map-styles
+# Map styles
+RUN mkdir -p public/map-styles
 COPY update_map_styles.py $workdir/
 
-# Clone leaflet-ohm-timeslider-v2
+# Leaflet timeslider assets
 ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
-RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git $workdir/public/leaflet-ohm-timeslider-v2 \
-    && cd $workdir/public/leaflet-ohm-timeslider-v2 \
-    && git checkout dd0acbdc9432fae6a4d09a17a4848c391e5064f0 \
-    && rm -rf .git \
-    && chmod 777 -R assets/ \
-    && cp decimaldate.* $workdir/app/assets/javascripts/ \
-    && cp leaflet-ohm-timeslider.* $workdir/app/assets/javascripts/ \
-    && cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ \
-    && cp assets/* $workdir/app/assets/images/
+RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git $workdir/public/leaflet-ohm-timeslider-v2 && \
+    cd $workdir/public/leaflet-ohm-timeslider-v2 && \
+    git checkout $LEAFLET_OHM_TIMESLIDER_V2 && \
+    rm -rf .git && \
+    chmod 777 -R assets/ && \
+    cp decimaldate.* $workdir/app/assets/javascripts/ && \
+    cp leaflet-ohm-timeslider.* $workdir/app/assets/javascripts/ && \
+    cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ && \
+    cp assets/* $workdir/app/assets/images/
 
-# Add settings
-ADD config/settings.yml $workdir/config/
 
-COPY start.sh $workdir/
-COPY cgimap.sh $workdir/
-COPY liveness.sh $workdir/
+COPY config/settings.yml $workdir/config/
+COPY start.sh liveness.sh $workdir/
+RUN chmod +x $workdir/*.sh
 
-CMD $workdir/start.sh
+CMD ["./start.sh"]
