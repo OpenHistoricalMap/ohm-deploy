@@ -171,8 +171,6 @@ osm-seed:
         RAILS_STORAGE_REGION: us-east-1
         RAILS_STORAGE_BUCKET: ohm-website-staging
         EXTERNAL_CGIMAP: true
-        # API_TIMEOUT: 600
-        # WEB_TIMEOUT: 600
       resources:
         enabled: true
         requests:
@@ -208,8 +206,8 @@ osm-seed:
     cgimap:
       enabled: true
       image:
-        name: ghcr.io/openhistoricalmap/cgimap
-        tag: 0.0.1-0.dev.git.2427.h1c6a803
+        name: ""
+        tag: ""
       priorityClass: "low-priority"
       resources:
         enabled: false

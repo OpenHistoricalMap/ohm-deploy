@@ -8,8 +8,8 @@ export CGIMAP_PASSWORD=$POSTGRES_PASSWORD
 export CGIMAP_OAUTH_HOST=$POSTGRES_HOST
 export CGIMAP_UPDATE_HOST=$POSTGRES_HOST
 # Export CGIMAP configuration
-# export CGIMAP_LOGFILE="/var/www/log/cgimap.log"
-export CGIMAP_LOGFILE="/dev/stdout"
+export CGIMAP_LOGFILE="/var/log/cgimap.log"
+# export CGIMAP_LOGFILE="/dev/stdout"
 export CGIMAP_MEMCACHE=$OPENSTREETMAP_MEMCACHE_SERVERS
 # Average number of bytes/s to allow each client
 export CGIMAP_RATELIMIT="204800"
@@ -43,5 +43,5 @@ else
   # Start the cgimap service
   openstreetmap-cgimap --port=8000 --daemon --instances=10
   # Keep container alive
-  tail -f /dev/null
+  tail -f /var/log/cgimap.log
 fi
