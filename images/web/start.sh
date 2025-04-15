@@ -116,7 +116,7 @@ setup_production() {
   done
 
   # echo "Running asset precompilation..."
-  #time bundle exec rake i18n:js:export assets:precompile
+  # time bundle exec rake i18n:js:export assets:precompile
 
   echo "Copying static assets..."
   cp "$workdir/public/leaflet-ohm-timeslider-v2/assets/"* "$workdir/public/assets/"

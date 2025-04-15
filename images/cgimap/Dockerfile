@@ -20,13 +20,10 @@ RUN git clone https://github.com/zerebubuth/openstreetmap-cgimap.git $cgimap \
  && sed -i 's#http://opendatacommons.org/licenses/odbl/1-0/#https://creativecommons.org/public-domain/cc0/#g' include/cgimap/output_formatter.hpp \
  && mkdir build && cd build && cmake .. && cmake --build .
 
-
-# -- Final image
 FROM ruby:3.3.0-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Add PostgreSQL official repo and install only required runtime libs and postgresql-client
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl gnupg && \
     echo "deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
@@ -38,10 +35,8 @@ RUN apt-get update && \
     libargon2-1 libyajl2 libapache2-mod-fcgid postgresql-client \
  && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-# Copy built binary from builder
 COPY --from=builder /tmp/openstreetmap-cgimap/build/openstreetmap-cgimap /usr/local/bin/openstreetmap-cgimap
 
-# Copy scripts and configure shared libs
 COPY *.sh /
 RUN chmod +x /*.sh && echo "/usr/local/lib" > /etc/ld.so.conf.d/local_libs.conf && ldconfig
 
