@@ -24,7 +24,10 @@ RUN a2enmod passenger
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=fb2292b81faefb5ce7c704ddb0c57814e1c4cd7a
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
-    cd $workdir && git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && rm -rf .git
+    cd $workdir && \
+    git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
+    echo 'map-styles version bump to 0.9.7' && \
+    git fetch && rm -rf .git
 
 # Install Ruby/Node dependencies
 RUN gem install bundler && \
