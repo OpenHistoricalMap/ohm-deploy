@@ -206,9 +206,9 @@ osm-seed:
     cgimap:
       enabled: true
       image:
-        name: "ghcr.io/openhistoricalmap/cgimap"
-        tag: "0.0.1-0.dev.git.2438.h5ab4b65"
-      priorityClass: "low-priority"
+        name: ghcr.io/openhistoricalmap/cgimap
+        tag: 0.0.1-0.dev.git.2440.hb7f38e6
+      priorityClass: "high-priority"
       resources:
         enabled: false
         requests:
@@ -219,6 +219,12 @@ osm-seed:
           cpu: '10'
       nodeSelector:
         enabled: false
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 4
+        cpuUtilization: 70
+        memoryUtilization: 70
     # ====================================================================================================
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
