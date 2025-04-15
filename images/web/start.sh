@@ -131,7 +131,6 @@ setup_production() {
 
   echo "Starting Apache server..."
   apachectl -k start -DFOREGROUND &
-
   start_background_jobs
 }
 
