@@ -85,7 +85,7 @@ WORKDIR $workdir
 # Install only runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apache2 libapache2-mod-passenger libapache2-mod-fcgid \
-    libpq5 libxml2 libyaml-0-2 libarchive13 \
+    libpq5 libxml2 libyaml-0-2 libarchive13 file libgd-dev \
     postgresql-client curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
