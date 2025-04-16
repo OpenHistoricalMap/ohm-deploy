@@ -565,7 +565,7 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
@@ -592,7 +592,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
