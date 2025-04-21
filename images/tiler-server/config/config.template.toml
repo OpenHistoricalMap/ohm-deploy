@@ -109,7 +109,7 @@ max_connections = 25
 [[maps]]
 name = "osm"
 attribution = "OpenHistoricalMap"
-center = [-74.275329586789, -12.153492567373, 1.0]
+center = [-42.31214, 70.00455, 10.0]
 	###### MAPS
 
 ####################################
@@ -118,7 +118,7 @@ center = [-74.275329586789, -12.153492567373, 1.0]
 [[maps]]
 name = "ne"
 attribution = "Natural Earth"
-center = [-74.275329586789, -12.153492567373, 8.0]
+center = [-42.31214, 70.00455, 10.0]
 	# Water lakes Natural Earth
 	[[maps.layers]]
 	name = "water_areas"
@@ -133,7 +133,7 @@ center = [-74.275329586789, -12.153492567373, 8.0]
 [[maps]]
 name = "osm_land"
 attribution = "OpenStreetMap Land"
-center = [-74.275329586789, -12.153492567373, 8.0]
+center = [-42.31214, 70.00455, 10.0]
 	[[maps.layers]]
 	name = "land"
 	provider_layer = "osm_land.osm_land_0-2"
