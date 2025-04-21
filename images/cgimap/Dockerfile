@@ -34,7 +34,7 @@ FROM debian:bookworm-slim
 COPY --from=builder /app/build/*.deb /app_deb/
 
 RUN apt-get update -qq && \
-    apt install --no-install-recommends -y /app_deb/*.deb && \
+    apt install --no-install-recommends -y /app_deb/*.deb postgresql-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
