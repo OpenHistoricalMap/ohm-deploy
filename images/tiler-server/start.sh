@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "Starting tile server setup..."
 
-# --- Configurable paths ---
+# Configurable paths
 UTILS_DIR="/opt/utils"
 CONFIG_DIR="/opt/config"
 TEGOLA_CONFIG_DIR="/opt/tegola_config"
@@ -12,21 +12,19 @@ TAGINFO_URL="https://taginfo.openhistoricalmap.org/api/4/keys/all"
 LANGUAGE_SQL_FILE="${CONFIG_DIR}/languages.sql"
 TEGOLA_CONFIG_FILE="${TEGOLA_CONFIG_DIR}/config.toml"
 
-
 mkdir -p ${CONFIG_DIR} ${TEGOLA_CONFIG_DIR}
 
-# --- Extract language tags ---
+# Extract language tags
 echo "Extracting languages from Taginfo..."
 python "${UTILS_DIR}/extract_taginfo_languages.py" \
   --url "${TAGINFO_URL}" \
   --output "${LANGUAGE_SQL_FILE}"
 
-# --- Build Tegola config ---
+# Build Tegola config
 echo "Building Tegola config..."
 python "${UTILS_DIR}/build_config.py" \
   --output="${TEGOLA_CONFIG_FILE}" \
-  --provider_names "$(cat <<EOF
-admin_boundaries_lines,
+  --provider_names "admin_boundaries_lines,
 admin_boundaries.centroids,
 admin_boundaries_maritime,
 place_areas,
@@ -52,18 +50,16 @@ landuse_points,
 other_areas,
 other_areas.centroids,
 other_lines,
-other_points
-EOF
-)"
+other_points"
 
-# --- Wait for PostgreSQL ---
+# Wait for PostgreSQL
 echo "Waiting for PostgreSQL to be ready..."
 until pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT}" > /dev/null 2>&1; do
   sleep 1
 done
 echo "PostgreSQL is ready."
 
-# --- Run VACUUM and ANALYZE ---
+# Run VACUUM and ANALYZE
 if [[ "${EXECUTE_VACUUM_ANALYZE:-false}" == "true" ]]; then
   echo "Running VACUUM and ANALYZE for public tables..."
   tables=$(psql -U "$POSTGRES_USER" -h "$POSTGRES_HOST" -d "$POSTGRES_DB" -Atc \
@@ -81,7 +77,7 @@ if [[ "${EXECUTE_VACUUM_ANALYZE:-false}" == "true" ]]; then
   echo "VACUUM and ANALYZE completed."
 fi
 
-# --- Run REINDEX ---
+# Run REINDEX
 if [[ "${EXECUTE_REINDEX:-false}" == "true" ]]; then
   echo "Running REINDEX on primary key indexes..."
   psql -U "$POSTGRES_USER" -h "$POSTGRES_HOST" -d "$POSTGRES_DB" -c "
@@ -109,6 +105,6 @@ if [[ "${EXECUTE_REINDEX:-false}" == "true" ]]; then
   echo "REINDEX completed."
 fi
 
-# --- Start Tegola ---
+# Start Tegola
 echo "Starting Tegola server..."
 exec tegola serve --config="${TEGOLA_CONFIG_FILE}"

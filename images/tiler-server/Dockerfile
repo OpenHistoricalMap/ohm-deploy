@@ -12,22 +12,18 @@ RUN apk add --no-cache \
     jq \
     procps \
     dcron \
- && apk add --no-cache --virtual .build-deps \
+    && apk add --no-cache --virtual .build-deps \
     gcc \
     libffi-dev \
     musl-dev \
     openssl-dev \
     python3-dev \
-    linux-headers \
     py3-pip \
- \
- && pip install --upgrade pip \
- && pip install awscli mercantile requests \
- \
- && apk del .build-deps \
- && rm -rf /root/.cache /var/cache/apk/*
+    && pip install --upgrade pip \
+    && pip install awscli mercantile requests boto3 \
+    && apk del .build-deps \
+    && rm -rf /root/.cache /var/cache/apk/*
 
- 
 # Symlink tegola binary for easier access
 RUN ln -s /opt/tegola /usr/bin/tegola
 COPY . /opt/
