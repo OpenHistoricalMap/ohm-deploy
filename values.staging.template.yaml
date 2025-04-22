@@ -207,7 +207,7 @@ osm-seed:
       enabled: true
       image:
         name: ghcr.io/openhistoricalmap/cgimap
-        tag: 0.0.1-0.dev.git.2453.h512aaae
+        tag: 0.0.1-0.dev.git.2456.h138266c
       priorityClass: "high-priority"
       resources:
         enabled: false
