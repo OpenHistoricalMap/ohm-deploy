@@ -42,6 +42,8 @@ else
   psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SHOW enable_hashjoin;"
   # Start the cgimap service
   openstreetmap-cgimap --port=8000 --daemon --instances=10
+  # Sleep fo 3 sec for tail the logs
+  sleep 3
   # Keep container alive
   tail -f $CGIMAP_LOGFILE
 fi
