@@ -128,7 +128,7 @@ osm-seed:
   web:
     enabled: true
     priorityClass: 'high-priority'
-    replicaCount: 2
+    replicaCount: 1
     # Set staticIp, if you are using cloudProvider=gcp
     staticIp: c
     serviceAnnotations:
@@ -166,16 +166,16 @@ osm-seed:
       requests:
         enabled: true
         memory: "3Gi"
-        cpu: "850m"
+        cpu: "600m"
       limits:
         enabled: false
         memory: "4Gi"
         cpu: "1000m"
     autoscaling:
       enabled: true
-      minReplicas: 2
-      maxReplicas: 6
-      cpuUtilization: 70
+      minReplicas: 1
+      maxReplicas: 10
+      cpuUtilization: 50
     sharedMemorySize: 512Mi
     livenessProbeExec: true
   # ====================================================================================================
@@ -212,8 +212,8 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "3Gi"
-        cpu: "850m"
+        memory: "2Gi"
+        cpu: "600m"
       limits:
         enabled: false
         memory: "4Gi"
@@ -221,13 +221,13 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: cgimap_large
+      label_value: web_large
     autoscaling:
       enabled: true
-      minReplicas: 2
-      maxReplicas: 6
-      cpuUtilization: 70
-      memoryUtilization: 70
+      minReplicas: 1
+      maxReplicas: 10
+      cpuUtilization: 50
+      memoryUtilization: 50
 
   # ====================================================================================================
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb

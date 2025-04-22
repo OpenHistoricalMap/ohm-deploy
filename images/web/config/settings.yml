@@ -157,10 +157,10 @@ csp_enforce: false
 # URL for reporting Content-Security-Policy violations
 #csp_report_url: ""
 # Storage services to use in production mode
-avatar_storage: "local"
-trace_file_storage: "local"
-trace_image_storage: "local"
-trace_icon_storage: "local"
+avatar_storage: "s3"
+trace_file_storage: "s3"
+trace_image_storage: "s3"
+trace_icon_storage: "s3"
 # Root URL for storage services
 # avatar_storage_url:
 # trace_image_storage_url:
