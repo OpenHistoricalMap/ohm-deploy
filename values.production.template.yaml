@@ -160,20 +160,21 @@ osm-seed:
       RAILS_STORAGE_SERVICE: s3
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
+      EXTERNAL_CGIMAP: true
     resources:
       enabled: true
       requests:
         enabled: true
-        memory: "6Gi"
-        cpu: "1500m"
+        memory: "3Gi"
+        cpu: "850m"
       limits:
         enabled: false
-        memory: "8Gi"
-        cpu: "1800m"
+        memory: "4Gi"
+        cpu: "1000m"
     autoscaling:
       enabled: true
       minReplicas: 2
-      maxReplicas: 4
+      maxReplicas: 6
       cpuUtilization: 70
     sharedMemorySize: 512Mi
     livenessProbeExec: true
@@ -197,6 +198,36 @@ osm-seed:
         enabled: false
         memory: "8Gi"
         cpu: "2"
+
+    # ====================================================================================================
+    # Cgimap
+    # ====================================================================================================
+  cgimap:
+    enabled: true
+    image:
+      name: ghcr.io/openhistoricalmap/cgimap
+      tag: 0.0.1-0.dev.git.2456.h138266c
+    priorityClass: "high-priority"
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        memory: "3Gi"
+        cpu: "850m"
+      limits:
+        enabled: false
+        memory: "4Gi"
+        cpu: "1200m"
+    nodeSelector:
+      enabled: true
+      label_key: nodegroup_type
+      label_value: cgimap_large
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 6
+      cpuUtilization: 70
+      memoryUtilization: 70
 
   # ====================================================================================================
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb

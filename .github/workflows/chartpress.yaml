@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'water_areas'
+      - 'dockerfile/cgimap'
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -28,9 +28,9 @@ jobs:
         run: git config --global user.email "noreply@developmentseed.org" && git config --global user.name "Github Action"
       - name: Install Chartpress
         run: |
-          pip install chartpress six ruamel.yaml
+          pip install chartpress==2.3.0 six ruamel.yaml
       - name: Run Chartpress
-        run: chartpress --push 
+        run: chartpress --push
         env:
           GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
