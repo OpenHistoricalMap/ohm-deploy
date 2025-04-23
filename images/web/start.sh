@@ -59,12 +59,15 @@ EOF
   sed -i -e 's/memcache_servers: \[\]/memcache_servers: "'$OPENSTREETMAP_memcache_servers'"/g' $workdir/config/settings.yml
 
   #### Setting up nominatim url
-  sed -i -e 's/nominatim-api.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
+  sed -i -e 's/nominatim.openhistoricalmap.org/'$NOMINATIM_URL'/g' $workdir/config/settings.yml
 
   ## Setting up overpass url
   sed -i -e 's/overpass-api.openhistoricalmap.org/'$OVERPASS_URL'/g' $workdir/config/settings.yml
   sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
   sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
+
+  # Replace overpass-api.de with $OVERPASS_URL in the public assets, from https://github.com/OpenHistoricalMap/issues/issues/1034
+  find "$workdir/public/assets/" -type f -exec sed -i -e "s#overpass-api.de#${OVERPASS_URL}#g" {} +
 
   ## Setting up required credentials 
   echo $RAILS_CREDENTIALS_YML_ENC > config/credentials.yml.enc
