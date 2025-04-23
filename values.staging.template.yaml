@@ -175,8 +175,8 @@ osm-seed:
         enabled: true
         requests:
           enabled: true
-          memory: "0.3Gi"
-          cpu: "100m"
+          memory: "0.5Gi"
+          cpu: "200m"
         limits:
           enabled: false
           memory: "6Gi"
@@ -568,7 +568,7 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
@@ -595,7 +595,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: true

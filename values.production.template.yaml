@@ -165,12 +165,12 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "2Gi"
-        cpu: "450m"
+        memory: "3.5Gi"
+        cpu: "1500m"
       limits:
         enabled: false
         memory: "4Gi"
-        cpu: "1000m"
+        cpu: "1800m"
     autoscaling:
       enabled: true
       minReplicas: 1
@@ -213,12 +213,12 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "2Gi"
-        cpu: "450m"
+        memory: "0.5Gi"
+        cpu: "100m"
       limits:
         enabled: false
-        memory: "4Gi"
-        cpu: "1200m"
+        memory: "1Gi"
+        cpu: "500m"
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -677,7 +677,7 @@ osm-seed:
       enabled: true
       label_key: nodegroup_type
       label_value: misc_large
-    replicaCount: 2
+    replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
     ingressDomain: tm-api.openhistoricalmap.org
