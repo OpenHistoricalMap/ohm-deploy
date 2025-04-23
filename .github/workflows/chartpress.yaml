@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'cgimap/dockerfile-build'
+      - 'cgimap-dockerfile-build'
 jobs:
   build:
     runs-on: ubuntu-22.04
