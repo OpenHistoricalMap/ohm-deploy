@@ -66,6 +66,9 @@ EOF
   sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/views/site/export.html.erb
   sed -i -e 's/overpass-api.de/'$OVERPASS_URL'/g' $workdir/app/assets/javascripts/index/export.js
 
+  # Replace overpass-api.de with $OVERPASS_URL in the public assets, from https://github.com/OpenHistoricalMap/issues/issues/1034
+  find "$workdir/public/assets/" -type f -exec sed -i -e "s#overpass-api.de#${OVERPASS_URL}#g" {} +
+
   ## Setting up required credentials 
   echo $RAILS_CREDENTIALS_YML_ENC > config/credentials.yml.enc
   echo $RAILS_MASTER_KEY > config/master.key 

@@ -79,7 +79,6 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
-        # In case cloudProvider: aws
         AWS_ElasticBlockStore_volumeID : vol-0d644eb9ea4e8fccf
         AWS_ElasticBlockStore_size: 200Gi
       resources:
@@ -143,8 +142,6 @@ osm-seed:
         label_key: nodegroup_type
         label_value: web_medium
       replicaCount: 1
-      # Set staticIp, if you are using cloudProvider=gcp
-      staticIp: c
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: www.staging.openhistoricalmap.org
@@ -158,7 +155,7 @@ osm-seed:
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: ohm-admins@googlegroups.com
         NOMINATIM_URL: nominatim.staging.openhistoricalmap.org
-        OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
+        OVERPASS_URL: overpass-api.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
@@ -208,7 +205,7 @@ osm-seed:
       enabled: true
       image:
         name: ghcr.io/openhistoricalmap/cgimap
-        tag: 0.0.1-0.dev.git.2456.h138266c
+        tag: 0.0.1-0.dev.git.2463.hb0e1e7f
       priorityClass: "high-priority"
       resources:
         enabled: true
@@ -392,7 +389,6 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
-        # In case cloudProvider: aws
         AWS_ElasticBlockStore_volumeID : vol-03fdf35caf55300d9
         AWS_ElasticBlockStore_size: 100Gi
       resources:
@@ -484,7 +480,6 @@ osm-seed:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
-        # In case cloudProvider: aws
         AWS_ElasticBlockStore_volumeID: vol-01ba324e4582c3206
         AWS_ElasticBlockStore_size: 50Gi
       resources:
@@ -530,7 +525,6 @@ osm-seed:
         enabled: false
         accessMode: ReadWriteOnce
         mountPath: /mnt/data
-        # In case cloudProvider: aws
         AWS_ElasticBlockStore_volumeID: vol-0e8b605fe3b16bf08
         AWS_ElasticBlockStore_size: 100Gi
       resources:

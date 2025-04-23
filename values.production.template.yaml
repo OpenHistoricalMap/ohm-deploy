@@ -55,7 +55,6 @@ osm-seed:
   db:
     enabled: true
     priorityClass: 'high-priority'
-    # For node selector you should create the node with a label "nodegroup_type"
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
@@ -70,7 +69,6 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-db
-      # In case cloudProvider: aws
       AWS_ElasticBlockStore_volumeID : vol-08b85b3e370f2d690
       AWS_ElasticBlockStore_size: 600Gi
     resources:
@@ -128,9 +126,7 @@ osm-seed:
   web:
     enabled: true
     priorityClass: 'high-priority'
-    replicaCount: 1
-    # Set staticIp, if you are using cloudProvider=gcp
-    staticIp: c
+    replicaCount: 2
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: www.openhistoricalmap.org
@@ -207,7 +203,7 @@ osm-seed:
     enabled: true
     image:
       name: ghcr.io/openhistoricalmap/cgimap
-      tag: 0.0.1-0.dev.git.2456.h138266c
+      tag: 0.0.1-0.dev.git.2463.hb0e1e7f
     priorityClass: "high-priority"
     resources:
       enabled: true
@@ -434,7 +430,6 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
-      # In case cloudProvider: aws
       AWS_ElasticBlockStore_volumeID: vol-0e4d738f35f5361fe
       AWS_ElasticBlockStore_size: 200Gi
     resources:
@@ -532,7 +527,6 @@ osm-seed:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
-      # In case cloudProvider: aws
       AWS_ElasticBlockStore_volumeID: vol-02dfd0aac5821f25b
       AWS_ElasticBlockStore_size: 50Gi
     resources:
@@ -582,9 +576,6 @@ osm-seed:
       enabled: false
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
-      # In case cloudProvider: aws
-      # AWS_ElasticBlockStore_volumeID : {{PRODUCTION_TILER_SERVER_EBS}}
-      # AWS_ElasticBlockStore_size: 100Gi
     resources:
       enabled: false
       requests:
