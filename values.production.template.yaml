@@ -165,8 +165,8 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "3Gi"
-        cpu: "600m"
+        memory: "2Gi"
+        cpu: "450m"
       limits:
         enabled: false
         memory: "4Gi"
@@ -175,7 +175,8 @@ osm-seed:
       enabled: true
       minReplicas: 1
       maxReplicas: 10
-      cpuUtilization: 50
+      cpuUtilization: 70
+      memoryUtilization: 70
     sharedMemorySize: 512Mi
     livenessProbeExec: true
   # ====================================================================================================
@@ -213,7 +214,7 @@ osm-seed:
       requests:
         enabled: true
         memory: "2Gi"
-        cpu: "600m"
+        cpu: "450m"
       limits:
         enabled: false
         memory: "4Gi"
