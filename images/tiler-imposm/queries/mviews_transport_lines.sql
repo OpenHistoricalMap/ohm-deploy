@@ -101,6 +101,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+SELECT create_transport_lines_mviews('osm_transport_lines_z5', 'osm_transport_multilines_z5', 'mview_transport_lines_z5');
 SELECT create_transport_lines_mviews('osm_transport_lines_z6', 'osm_transport_multilines_z6', 'mview_transport_lines_z6');
 SELECT create_transport_lines_mviews('osm_transport_lines_z7', 'osm_transport_multilines_z7', 'mview_transport_lines_z7');
 SELECT create_transport_lines_mviews('osm_transport_lines_z8', 'osm_transport_multilines_z8', 'mview_transport_lines_z8');

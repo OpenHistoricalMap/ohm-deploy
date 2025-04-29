@@ -43,7 +43,7 @@ services:
     #       cpus: '1'
     #       memory: 1G
   tiler:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2449.h6cf4aa9
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2479.h1211abd
     ports:
       - "9091:9090"
     env_file:
