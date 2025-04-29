@@ -16,7 +16,7 @@ SELECT
     NULLIF(operator, '') AS operator,
     NULLIF(state, '') AS state,
     NULLIF(symbol, '') AS symbol,
-    distance,
+    NULLIF(symbol, '') AS symbol, --TODO Fix this to decimal
     NULLIF(roundtrip, '') AS roundtrip,
     NULLIF(interval, '') AS interval,
     NULLIF(duration, '') AS duration,
