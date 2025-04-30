@@ -36,7 +36,7 @@ BEGIN
             (ST_MaximumInscribedCircle(geometry)).center AS geometry,
             name,
             NULLIF(as_numeric(height), -1) AS height,
-            ROUND(ST_Area(geometry)::numeric, 2) AS area,
+            area,
             type,
             start_date,
             end_date,
