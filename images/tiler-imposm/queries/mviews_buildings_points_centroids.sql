@@ -36,7 +36,7 @@ BEGIN
             (ST_MaximumInscribedCircle(geometry)).center AS geometry,
             name,
             NULLIF(as_numeric(height), -1) AS height,
-            ST_Area(geometry) AS area,
+            ROUND(ST_Area(geometry)::numeric, 2) AS area,
             type,
             start_date,
             end_date,
@@ -65,4 +65,6 @@ $$ LANGUAGE plpgsql;
 
 SELECT create_buildings_materialized_view(1500, 'mview_buildings_points_centroids_z14');
 SELECT create_buildings_materialized_view(1000, 'mview_buildings_points_centroids_z15');
-SELECT create_buildings_materialized_view(0, 'mview_buildings_points_centroids_z16_20');
+SELECT create_buildings_materialized_view(500, 'mview_buildings_points_centroids_z16');
+SELECT create_buildings_materialized_view(250, 'mview_buildings_points_centroids_z17');
+SELECT create_buildings_materialized_view(0, 'mview_buildings_points_centroids_z18_20');
