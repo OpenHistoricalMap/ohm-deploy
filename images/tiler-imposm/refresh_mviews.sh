@@ -76,6 +76,7 @@ landuse_views=(
     "mview_landuse_areas_centroid_z13_15"
 )
 
+
 other_areas_views=(
     "mview_other_areas_centroids_z6_8"
     "mview_other_areas_centroids_z9_11"

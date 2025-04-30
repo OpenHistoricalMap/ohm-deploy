@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION create_other_areas_mviews(
 )
 RETURNS VOID AS $$
 BEGIN
-  RAISE NOTICE 'Creating materialized view % with area > %', mview_name, min_area;
+  RAISE NOTICE '%', format('Creating materialized view %s with area > %s', mview_name, min_area);
 
   EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I;', mview_name);
 
@@ -21,8 +21,6 @@ BEGIN
       area,
       NULLIF(start_date, '') AS start_date,
       NULLIF(end_date, '') AS end_date,
-      isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
-      isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
       tags
     FROM %I
     WHERE area > %L
@@ -32,7 +30,7 @@ BEGIN
   EXECUTE format('CREATE UNIQUE INDEX idx_%I_id ON %I (id);', mview_name, mview_name);
   EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
 
-  RAISE NOTICE 'Materialized view % created.', mview_name;
+  RAISE NOTICE '%', format('Materialized view %s created.', mview_name);
 END;
 $$ LANGUAGE plpgsql;
 
