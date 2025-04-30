@@ -4,9 +4,9 @@ set -euo pipefail
 echo "Starting tile server setup..."
 
 # Configurable paths
-UTILS_DIR="/opt/utils"
-CONFIG_DIR="/opt/config"
-TEGOLA_CONFIG_DIR="/opt/tegola_config"
+UTILS_DIR="/app/utils"
+CONFIG_DIR="/app/config"
+TEGOLA_CONFIG_DIR="/app/tegola_config"
 
 TAGINFO_URL="https://taginfo.openhistoricalmap.org/api/4/keys/all"
 LANGUAGE_SQL_FILE="${CONFIG_DIR}/languages.sql"
@@ -41,6 +41,7 @@ amenity_areas,
 amenity_areas.centroids,
 amenity_points,
 buildings,
+buildings_points_centroids,
 buildings.centroids,
 buildings_points,
 landuse_areas,

@@ -1,6 +1,6 @@
 # Layer configuration for buildings
 [[providers.layers]]
-name = "buildings_14"
+name = "buildings_centroids_z14"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
@@ -27,7 +27,7 @@ WHERE
 """
 
 [[providers.layers]]
-name = "buildings_15"
+name = "buildings_centroids_z15"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
@@ -54,7 +54,7 @@ WHERE
 """
 
 [[providers.layers]]
-name = "buildings_16"
+name = "buildings_centroids_z16"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
@@ -81,7 +81,7 @@ WHERE
 """
 
 [[providers.layers]]
-name = "buildings_17"
+name = "buildings_centroids_z17"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
@@ -109,7 +109,7 @@ WHERE
 
 
 [[providers.layers]]
-name = "buildings_18"
+name = "buildings_centroids_z18"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
@@ -136,7 +136,7 @@ WHERE
 """
 
 [[providers.layers]]
-name = "buildings_19"
+name = "buildings_centroids_z19"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
@@ -163,7 +163,7 @@ WHERE
 """
 
 [[providers.layers]]
-name = "buildings_20"
+name = "buildings_centroids_z20"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "id"
@@ -191,42 +191,42 @@ WHERE
 # Buildings
 [[maps.layers]]
 name = "buildings_centroids"
-provider_layer = "osm.buildings_14"
+provider_layer = "osm.buildings_centroids_z14"
 min_zoom = 14
 max_zoom = 14
 
 [[maps.layers]]
 name = "buildings_centroids"
-provider_layer = "osm.buildings_15"
+provider_layer = "osm.buildings_centroids_z15"
 min_zoom = 15
 max_zoom = 15
 
 [[maps.layers]]
 name = "buildings_centroids"
-provider_layer = "osm.buildings_16"
+provider_layer = "osm.buildings_centroids_z16"
 min_zoom = 16
 max_zoom = 16
 
 [[maps.layers]]
 name = "buildings_centroids"
-provider_layer = "osm.buildings_17"
+provider_layer = "osm.buildings_centroids_z17"
 min_zoom = 17
 max_zoom = 17
 
 [[maps.layers]]
 name = "buildings_centroids"
-provider_layer = "osm.buildings_18"
+provider_layer = "osm.buildings_centroids_z18"
 min_zoom = 18
 max_zoom = 18
 
 [[maps.layers]]
 name = "buildings_centroids"
-provider_layer = "osm.buildings_19"
+provider_layer = "osm.buildings_centroids_z19"
 min_zoom = 19
 max_zoom = 19
 
 [[maps.layers]]
 name = "buildings_centroids"
-provider_layer = "osm.buildings_20"
+provider_layer = "osm.buildings_centroids_z20"
 min_zoom = 20
 max_zoom = 20

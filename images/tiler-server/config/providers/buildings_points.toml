@@ -1,4 +1,3 @@
-# Layer configuration for buildings
 [[providers.layers]]
 name = "buildings_points"
 geometry_fieldname = "geometry"
