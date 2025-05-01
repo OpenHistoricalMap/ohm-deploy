@@ -1,4 +1,33 @@
 [[providers.layers]]
+name = "transport_lines_z5"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    ABS(osm_id) AS osm_id,
+    source_type,
+    member,
+    NULLIF(type, '') AS type,
+    NULLIF(ref, '') AS ref,
+    NULLIF(service, '') AS service,
+    NULLIF(name, '') AS name,
+    NULLIF(electrified, '') AS electrified,
+    NULLIF(highspeed, '') AS highspeed,
+    NULLIF(usage, '') AS usage,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mview_transport_lines_z5
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
 name = "transport_lines_z6"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
@@ -214,6 +243,12 @@ WHERE
 """
 
 #######Maps
+[[maps.layers]]
+name = "transport_lines"
+provider_layer = "osm.transport_lines_z5"
+min_zoom = 5
+max_zoom = 5
+
 [[maps.layers]]
 name = "transport_lines"
 provider_layer = "osm.transport_lines_z6"
