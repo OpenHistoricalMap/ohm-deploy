@@ -3,7 +3,7 @@ services:
   db_production:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_02042025_v2:/var/lib/postgresql/data
+      - /data/tiler_production_db_30_04_2025:/var/lib/postgresql/data
       - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
@@ -26,7 +26,7 @@ services:
   imposm_production:
     image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2403.h998578a
     volumes:
-      - /data/tiler_production_imposm_02042025_v2:/mnt/data
+      - /data/tiler_production_imposm_30_04_2025:/mnt/data
     command:
       - sh
       - -c
@@ -48,7 +48,7 @@ services:
       - tiler_network
   # Tiler server
   tiler_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2479.h1211abd
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2488.h11d6f85
     ports:
       - "9090:9090"
     env_file:
