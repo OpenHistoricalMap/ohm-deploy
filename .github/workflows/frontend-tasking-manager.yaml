@@ -4,6 +4,7 @@ on:
     branches:
       - 'main'
       - 'staging'
+      - 'tm-frontend'
 jobs:
   tm:
     runs-on: ubuntu-latest
@@ -14,7 +15,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/staging'
+        if: github.ref == 'refs/heads/tm-frontend'
         uses: allenevans/set-env@v2.0.0
         with:
           TM_ORG_NAME: OpenHistoricalMap
@@ -79,7 +80,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: ca3aff17ad58b99f2584b7170a04b25407881c24
+          ref: a202be37092d6919cf28e318709c5079bb219874
           path: tasking-manager
 
       - name: Debug Checkout
