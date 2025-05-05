@@ -76,7 +76,7 @@ USER root
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git /usr/src/app && \
     chown -R appuser:appuser /usr/src/app
 USER appuser:appuser
-RUN cd /usr/src/app && git checkout -f f3c5916dde0ac1587f1fc2502f23c8bcaa4f8d7a
+RUN cd /usr/src/app && git checkout -f ca3aff17ad58b99f2584b7170a04b25407881c24
 
 
 FROM runtime as debug
