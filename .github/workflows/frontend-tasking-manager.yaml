@@ -15,7 +15,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/tm-frontend'
+        if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v2.0.0
         with:
           TM_ORG_NAME: OpenHistoricalMap
@@ -46,7 +46,7 @@ jobs:
           REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.staging.openhistoricalmap.org/api/v4/system/statistics/
 
       - name: Set environment variables - Production
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/tm-frontend'
         uses: allenevans/set-env@v2.0.0
         with:
           TM_ORG_NAME: OpenHistoricalMap
