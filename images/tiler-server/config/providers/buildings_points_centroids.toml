@@ -1,176 +1,155 @@
 [[providers.layers]]
+name = "buildings_points_centroids_z14"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z0_2"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
+    osm_id, 
+    name, 
+    type, 
+    height,
+    area,
+    source,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z0_2
+    mview_buildings_points_centroids_z14
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "buildings_points_centroids_z15"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z3_5"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
+    osm_id, 
+    name, 
+    type, 
+    height,
+    area,
+    source,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z3_5 
-WHERE 
-    geometry && !BBOX!
-"""
-
-# Water bodies > 1,000,000 sqm
-[[providers.layers]]
-geometry_fieldname = "geometry"
-geometry_type = "point"
-id_fieldname = "osm_id"
-name = "water_areas_centroid_z6_7"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    mview_water_areas_centroid_z6_7
-WHERE 
-    geometry && !BBOX!
-"""
-
-# Water bodies > 10,000 sqm
-[[providers.layers]]
-geometry_fieldname = "geometry"
-geometry_type = "point"
-id_fieldname = "osm_id"
-name = "water_areas_centroid_z8_9"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
-FROM 
-    mview_water_areas_centroid_z8_9 
+    mview_buildings_points_centroids_z15
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "buildings_points_centroids_z16"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z10_12"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
+    osm_id, 
+    name, 
+    type, 
+    height,
+    area,
+    source,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z10_12
+    mview_buildings_points_centroids_z16
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "buildings_points_centroids_z17"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z13_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
+    osm_id, 
+    name, 
+    type, 
+    height,
+    area,
+    source,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_water_areas_centroid_z13_15 
+    mview_buildings_points_centroids_z17
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "buildings_points_centroids_z18_20"
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name, 
+    type, 
+    height,
+    area,
+    source,
+    NULLIF(start_date, '') AS start_date, 
+    NULLIF(end_date, '') AS end_date, 
+    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
+    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mview_buildings_points_centroids_z18_20
 WHERE 
     geometry && !BBOX!
 """
 
 #######Maps
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z0_2"
-min_zoom = 0
-max_zoom = 2
+name = "buildings_points_centroids"
+provider_layer = "osm.buildings_points_centroids_z14"
+min_zoom = 14
+max_zoom = 14
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z3_5"
-min_zoom = 3
-max_zoom = 5
+name = "buildings_points_centroids"
+provider_layer = "osm.buildings_points_centroids_z15"
+min_zoom = 15
+max_zoom = 15
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z6_7"
-min_zoom = 6
-max_zoom = 7
+name = "buildings_points_centroids"
+provider_layer = "osm.buildings_points_centroids_z16"
+min_zoom = 16
+max_zoom = 16
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z8_9"
-min_zoom = 8
-max_zoom = 9
+name = "buildings_points_centroids"
+provider_layer = "osm.buildings_points_centroids_z17"
+min_zoom = 17
+max_zoom = 17
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z10_12"
-min_zoom = 10
-max_zoom = 12
-
-[[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z13_15"
-min_zoom = 13
+name = "buildings_points_centroids"
+provider_layer = "osm.buildings_points_centroids_z18_20"
+min_zoom = 18
 max_zoom = 20

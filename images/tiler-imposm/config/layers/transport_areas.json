@@ -27,9 +27,9 @@
           "key": "name"
         },
         {
-          "type": "string",
+          "type": "pseudoarea",
           "name": "area",
-          "key": "area"
+          "key": null
         },
         {
           "type": "mapping_value",

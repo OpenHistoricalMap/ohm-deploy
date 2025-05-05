@@ -8,6 +8,11 @@
     ]
   },
   "generalized_tables": {
+    "transport_lines_z5": {
+      "source": "transport_lines_z6",
+      "sql_filter": null,
+      "tolerance": 200
+    },
     "transport_lines_z6": {
       "source": "transport_lines_z7",
       "sql_filter": null,
