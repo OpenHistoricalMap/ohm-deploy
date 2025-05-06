@@ -59,8 +59,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- SELECT create_landuse_points_centroid_mviews('osm_landuse_areas_z3_5', 'mview_landuse_points_centroids_z3_5');
--- SELECT create_landuse_points_centroid_mviews('osm_landuse_areas_z6_7', 'mview_landuse_points_centroids_z6_7');
--- SELECT create_landuse_points_centroid_mviews('osm_landuse_areas_z8_9', 'mview_landuse_points_centroids_z8_9');
 SELECT create_landuse_points_centroid_mviews('osm_landuse_areas_z10_12', 'mview_landuse_points_centroids_z10_12');
 SELECT create_landuse_points_centroid_mviews('osm_landuse_areas_z13_15', 'mview_landuse_points_centroids_z13_15');
