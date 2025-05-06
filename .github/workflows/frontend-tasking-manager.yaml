@@ -74,13 +74,13 @@ jobs:
           TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: E2J02LH05GBWB0
-          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.openhistoricalmap.org/api/v4/system/statistics
+          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.openhistoricalmap.org/api/v4/system/statistics/
           
       - name: Checkout tasking-manager repo
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: a202be37092d6919cf28e318709c5079bb219874
+          ref: e46312695718f723f109b2f2262d708fceeebdd5
           path: tasking-manager
 
       - name: Debug Checkout
