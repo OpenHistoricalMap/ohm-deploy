@@ -246,6 +246,7 @@ function importData() {
     psql $PG_CONNECTION -f queries/mviews_other_areas.sql 
     psql $PG_CONNECTION -f queries/mviews_other_areas_centroids.sql 
     psql $PG_CONNECTION -f queries/mviews_buildings_points_centroids.sql 
+    psql $PG_CONNECTION -f queries/mviews_landuse_points_centroids.sql 
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }

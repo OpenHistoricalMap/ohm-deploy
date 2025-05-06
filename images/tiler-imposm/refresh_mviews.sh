@@ -97,9 +97,6 @@ buildings_points_centroids_views=(
 
 
 landuse_points_centroids_views=(
-    "mview_landuse_points_centroids_z3_5"
-    "mview_landuse_points_centroids_z6_7"
-    "mview_landuse_points_centroids_z8_9"
     "mview_landuse_points_centroids_z10_12"
     "mview_landuse_points_centroids_z13_15"
 )
