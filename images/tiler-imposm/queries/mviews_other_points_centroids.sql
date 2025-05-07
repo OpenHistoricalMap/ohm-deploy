@@ -1,60 +1,65 @@
+-- This script creates materialized views that combine named other area centroids
+-- and other points into a single materialized view to generate a unified layer named "other_points_centroids".
+-- The function accepts two arguments: the materialized view name and a minimum area threshold.
+-- The area threshold filters polygons according to the zoom level at which the points will be displayed.
+-- Other points are included with a NULL value for the area field.
+
+DROP FUNCTION IF EXISTS create_other_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_other_points_centroids_mview(
-  source_table TEXT,
-  mview_name TEXT,
-  min_area DOUBLE PRECISION DEFAULT 0
+    view_name TEXT,
+    min_area DOUBLE PRECISION DEFAULT 0
 )
-RETURNS VOID AS $$
+RETURNS void AS $$
+DECLARE 
+    sql_drop TEXT;
+    sql_create TEXT;
+    sql_index TEXT;
+    sql_unique_index TEXT;
 BEGIN
-  RAISE NOTICE 'Creating materialized view % with centroids and area > %', mview_name, min_area;
-  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I;', mview_name);
+    RAISE NOTICE 'Creating materialized view: % with area > %', view_name, min_area;
 
-  EXECUTE format($sql$
-    CREATE MATERIALIZED VIEW %I AS
-    SELECT 
-      osm_id,
-      (ST_MaximumInscribedCircle(geometry)).center AS geometry,
-      name,
-      class,
-      type,
-      area,
-      start_date,
-      end_date,
-      tags
-    FROM %I
-    WHERE 
-      geometry IS NOT NULL
-      AND name IS NOT NULL
-      AND name <> ''
-      AND area > %L
+    sql_drop := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    EXECUTE sql_drop;
 
-    UNION ALL
+    sql_create := format($sql$
+        CREATE MATERIALIZED VIEW %I AS
+        SELECT
+            (ST_MaximumInscribedCircle(geometry)).center AS geometry,
+            osm_id, 
+            name, 
+            type, 
+            class, 
+            start_date, 
+            end_date, 
+            area, 
+            tags
+        FROM osm_other_areas
+        WHERE name IS NOT NULL AND name <> '' AND area > %L
 
-    SELECT 
-      osm_id,
-      geometry,
-      name,
-      class,
-      type,
-      NULL::double precision AS area,
-      start_date,
-      end_date,
-      tags
-    FROM osm_other_points
-    WHERE 
-      geometry IS NOT NULL
-      AND name IS NOT NULL
-      AND name <> ''
-  $sql$, mview_name, source_table, min_area);
+        UNION ALL
 
-  EXECUTE format('CREATE UNIQUE INDEX idx_%I_id ON %I (id);', mview_name, mview_name);
-  EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
+        SELECT 
+            geometry,
+            osm_id, 
+            name, 
+            type, 
+            class, 
+            start_date, 
+            end_date, 
+            NULL AS area, 
+            tags
+        FROM osm_other_points
+        WHERE name IS NOT NULL AND name <> ''
+    $sql$, view_name, min_area);
+    EXECUTE sql_create;
 
-  RAISE NOTICE 'Materialized view % created.', mview_name;
+    sql_index := format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
+    EXECUTE sql_index;
+
+    sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', view_name, view_name);
+    EXECUTE sql_unique_index;
+
 END;
 $$ LANGUAGE plpgsql;
 
-
-SELECT create_other_areas_centroids_mviews('osm_other_areas', 'mview_other_areas_centroids_z6_8', 1000000);
-SELECT create_other_areas_centroids_mviews('osm_other_areas', 'mview_other_areas_centroids_z9_11', 100000);
-SELECT create_other_areas_centroids_mviews('osm_other_areas', 'mview_other_areas_centroids_z12_14', 10000);
-SELECT create_other_areas_centroids_mviews('osm_other_areas', 'mview_other_areas_centroids_z15_20');
+SELECT create_other_points_centroids_mview('mview_other_points_centroids_z14_20', 0);
