@@ -156,9 +156,10 @@ function updateData() {
 
     # Step 2: Handle last.state.txt if OVERWRITE_STATE is enabled
     if [ "$OVERWRITE_STATE" = "true" ]; then
-        log_message "Overwriting last.state.txt..."
-        cat <<EOF > "$local_last_state_path"
-timestamp=0001-01-01T00:00:00Z
+    log_message "Overwriting last.state.txt..."
+    timestamp=$(date -u +"%Y-%m-%dT%H\\:%M\\:%SZ")
+    cat <<EOF > "$local_last_state_path"
+timestamp=${timestamp}
 sequenceNumber=${SEQUENCE_NUMBER:-0}
 replicationUrl=${REPLICATION_URL}
 EOF
