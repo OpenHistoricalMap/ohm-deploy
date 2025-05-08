@@ -76,8 +76,8 @@ seed_global() {
         --concurrency=4 \
         --overwrite=true
     done
-    echo "Global seeding completed. Sleeping for 3 hour..."
-    sleep 600
+    echo "Global seeding completed. Sleeping for 1 hour..."
+    sleep 1800
   done
 }
 
@@ -99,6 +99,7 @@ seed_coverage() {
         --concurrency=4 \
         --overwrite=false
     done
+    echo "Global seeding completed. Sleeping for 5 minutes.."
     sleep 300
   done
 }
