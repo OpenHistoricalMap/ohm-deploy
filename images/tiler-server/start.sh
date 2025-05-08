@@ -36,20 +36,23 @@ transport_areas,
 transport_associated_streets,
 transport_lines,
 transport_points,
+transport_points_centroids,
 route_lines,
 amenity_areas,
 amenity_areas.centroids,
 amenity_points,
+amenity_points_centroids,
 buildings,
 buildings_points_centroids,
 buildings.centroids,
 buildings_points,
 landuse_areas,
 landuse_areas.centroids,
-landuse_lines,
+landuse_points_centroids,
 landuse_points,
 other_areas,
 other_areas.centroids,
+other_points_centroids,
 other_lines,
 other_points"
 
@@ -108,4 +111,5 @@ fi
 
 # Start Tegola
 echo "Starting Tegola server..."
-exec tegola serve --config="${TEGOLA_CONFIG_FILE}"
+# TEGOLA_SQL_DEBUG=LAYER_SQL:EXECUTE_SQL tegola serve --config="${TEGOLA_CONFIG_FILE}" --log-level=TRACE
+tegola serve --config="${TEGOLA_CONFIG_FILE}"
