@@ -1,0 +1,65 @@
+-- This script creates materialized views that combine named transport area centroids
+-- and transport points into a single materialized view to generate a unified layer named "transport_points_centroids".
+-- The function accepts two arguments: the materialized view name and a minimum area threshold.
+-- The area threshold filters polygons according to the zoom level at which the points will be displayed.
+-- Transport points are included with a NULL value for the area field.
+
+DROP FUNCTION IF EXISTS create_transport_points_centroids_mview;
+CREATE OR REPLACE FUNCTION create_transport_points_centroids_mview(
+    view_name TEXT,
+    min_area DOUBLE PRECISION DEFAULT 0
+)
+RETURNS void AS $$
+DECLARE 
+    sql_drop TEXT;
+    sql_create TEXT;
+    sql_index TEXT;
+    sql_unique_index TEXT;
+BEGIN
+    RAISE NOTICE 'Creating materialized view: % with area > %', view_name, min_area;
+
+    sql_drop := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    EXECUTE sql_drop;
+
+    sql_create := format($sql$
+        CREATE MATERIALIZED VIEW %I AS
+        SELECT
+            (ST_MaximumInscribedCircle(geometry)).center AS geometry,
+            osm_id, 
+            name, 
+            class, 
+            type, 
+            start_date, 
+            end_date, 
+            area, 
+            tags
+        FROM osm_transport_areas
+        WHERE name IS NOT NULL AND name <> '' AND area > %L
+
+        UNION ALL
+
+        SELECT 
+            geometry,
+            osm_id, 
+            name, 
+            class, 
+            type, 
+            start_date, 
+            end_date, 
+            NULL AS area, 
+            tags
+        FROM osm_transport_points
+    $sql$, view_name, min_area);
+    EXECUTE sql_create;
+
+    sql_index := format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
+    EXECUTE sql_index;
+
+    sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', view_name, view_name);
+    EXECUTE sql_unique_index;
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+SELECT create_transport_points_centroids_mview('mview_transport_points_centroids_z14_20', 0);

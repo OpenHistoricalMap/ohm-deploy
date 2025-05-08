@@ -92,5 +92,10 @@ if __name__ == "__main__":
 
     json_data, sql_lines = fetch_and_process_data(args.url)
     print(f"Found {len(json_data)} matching keys.")
+
+    # Sort alphabetically
+    sql_lines = sorted(sql_lines)
+    json_data = sorted(json_data, key=lambda x: x["key"])
+
     write_sql_file(sql_lines, args.output)
     write_json_and_upload(json_data, args.json_output)
