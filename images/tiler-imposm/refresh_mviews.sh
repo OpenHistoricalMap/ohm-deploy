@@ -95,12 +95,20 @@ buildings_points_centroids_views=(
     "mview_buildings_points_centroids_z18_20"
 )
 
-
-landuse_points_centroids_views=(
-    "mview_landuse_points_centroids_z10_12"
-    "mview_landuse_points_centroids_z13_15"
+points_centroids_views=(
+    # amenity
+    mview_amenity_points_centroids_z14_20
+    # buildings
+    mview_buildings_points_centroids_z14_20
+    # landuse
+    mview_landuse_points_centroids_z10_11
+    mview_landuse_points_centroids_z12_13
+    mview_landuse_points_centroids_z14_20
+    # other areas
+    mview_other_points_centroids_z14_20
+    # transport
+    mview_transport_points_centroids_z14_20
 )
-
 
 # Start refreshing in parallel with a sleep interval  all of them in average of 4 min refresh
 ## Benchmark admin refresh those views takes 4 min to complete
@@ -116,4 +124,4 @@ refresh_mviews_group "other_areas" 230 "${other_areas_views[@]}" &
 ## Benchmark: Refreshing building points/centroids takes 60 seconds to complete.
 refresh_mviews_group "buildings_points_centroids" 230 "${buildings_points_centroids_views[@]}" &
 # Benchmark: Refreshing landuse points/centroids takes 120 seconds to complete.
-refresh_mviews_group "buildings_points_centroids" 120 "${landuse_points_centroids_views[@]}" &
+refresh_mviews_group "points_centroids" 120 "${points_centroids_views[@]}" &
