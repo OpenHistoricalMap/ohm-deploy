@@ -71,7 +71,7 @@ services:
       - tiler_network_staging
 
   global_seeding:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2298.hfb649bb
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2501.h3be86db
     env_file:
       - .env.staging
     entrypoint:
@@ -100,7 +100,7 @@ services:
       - tiler_network_staging
 
   tile_coverage_seeding:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2298.hfb649bb
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2501.h3be86db
     env_file:
       - .env.staging
     entrypoint:
