@@ -925,7 +925,7 @@ osm-seed:
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
-      tag: 4a2543f
+      tag: 1ab0e38
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================
@@ -934,7 +934,7 @@ osm-seed:
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-django
-      tag: 1e9d9dd
+      tag: 1bd58e1
     ingressDomain: osmcha.openhistoricalmap.org
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
