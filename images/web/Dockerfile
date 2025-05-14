@@ -21,12 +21,12 @@ RUN apt-get update && \
 RUN a2enmod passenger
 
 # Clone OHM Website
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=fb2292b81faefb5ce7c704ddb0c57814e1c4cd7a
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=67fab2fc9e2bcba4fa48c0777b855414771a8889
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
     cd $workdir && \
     git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
-    echo 'map-styles version bump to 0.9.7' && \
+    echo 'multilingual labels for testing, round 2' && \
     git fetch && rm -rf .git
 
 # Install Ruby/Node dependencies

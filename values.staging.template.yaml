@@ -809,7 +809,7 @@ osm-seed:
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
-        tag: f0c4d71
+        tag: 1ab0e38
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
@@ -847,9 +847,9 @@ osm-seed:
     osmchaDb:
       enabled: true
       priorityClass: medium-priority
-      # image:
-      #   name: developmentseed/osmseed-osmcha-db
-      #   tag: 0.1.0-n767.h0090e97
+      image:
+        name: postgis/postgis
+        tag: 17-3.5
       env:
         POSTGRES_DB: osmcha
         POSTGRES_USER: postgres
@@ -857,18 +857,11 @@ osm-seed:
       resources:
         enabled: false
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
-        # Minikube
-        localVolumeHostPath: /mnt/db-data/osmcha-data
-        localVolumeSize: 10Gi
-        # AWS
-        AWS_ElasticBlockStore_volumeID: vol-06f981afe8def5915
+        AWS_ElasticBlockStore_volumeID: vol-01924d8040c54d067
         AWS_ElasticBlockStore_size: 10Gi
-        # GCP
-        GCP_gcePersistentDisk_pdName: osmseed-osmcha-disk--v1
-        GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: false
 # ====================================================================================================

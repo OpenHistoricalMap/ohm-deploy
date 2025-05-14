@@ -5,7 +5,11 @@ on:
       - 'main'
       - 'staging'
       - 'development'
+<<<<<<< HEAD
       - 'points_centroids'
+=======
+      - 'imposm_state'
+>>>>>>> staging
 jobs:
   build:
     runs-on: ubuntu-22.04
