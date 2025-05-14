@@ -805,20 +805,20 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
-        tag: 4a2543f
+        tag: 1ab0e38
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
-        tag: 1e9d9dd
+        tag: 1bd58e1
       ingressDomain: osmcha.staging.openhistoricalmap.org
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
@@ -845,11 +845,11 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
-      # image:
-      #   name: developmentseed/osmseed-osmcha-db
-      #   tag: 0.1.0-n767.h0090e97
+      image:
+        name: postgis/postgis
+        tag: 17-3.5
       env:
         POSTGRES_DB: osmcha
         POSTGRES_USER: postgres
@@ -857,18 +857,11 @@ osm-seed:
       resources:
         enabled: false
       persistenceDisk:
-        enabled: false
+        enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
-        # Minikube
-        localVolumeHostPath: /mnt/db-data/osmcha-data
-        localVolumeSize: 10Gi
-        # AWS
-        AWS_ElasticBlockStore_volumeID: vol-06f981afe8def5915
+        AWS_ElasticBlockStore_volumeID: vol-01924d8040c54d067
         AWS_ElasticBlockStore_size: 10Gi
-        # GCP
-        GCP_gcePersistentDisk_pdName: osmseed-osmcha-disk--v1
-        GCP_gcePersistentDisk_size: 50Gi
       nodeSelector:
         enabled: false
 # ====================================================================================================
