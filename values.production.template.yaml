@@ -964,23 +964,14 @@ osm-seed:
       label_key: nodegroup_type
       label_value: misc_large
 # ====================================================================================================
-# Variables for osmcha osm-adiff-service
-# ====================================================================================================
-    adiffService:
-      enabled: false
-      priorityClass: 'medium-priority'
-      image:
-        name: ghcr.io/openhistoricalmap/osm-adiff-service
-        tag: a343422497bb2ad4735ca7eada921b60eeb19e20
-# ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
   osmchaDb:
     enabled: true
     priorityClass: 'medium-priority'
     image:
-      name: "developmentseed/osmseed-osmcha-db"
-      tag: "0.1.0-n767.h0090e97"
+      name: postgis/postgis
+      tag: 17-3.5
     env:
       POSTGRES_DB: osmcha
       POSTGRES_USER: postgres
@@ -999,12 +990,21 @@ osm-seed:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
-      AWS_ElasticBlockStore_volumeID: vol-03f47ec4b4532e93d
-      AWS_ElasticBlockStore_size: 20Gi
+      AWS_ElasticBlockStore_volumeID: vol-033e4150d0378c45e
+      AWS_ElasticBlockStore_size: 10Gi
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
       label_value: misc_large
+# ====================================================================================================
+# Variables for osmcha osm-adiff-service
+# ====================================================================================================
+  adiffService:
+    enabled: false
+    priorityClass: 'medium-priority'
+    image:
+      name: ghcr.io/openhistoricalmap/osm-adiff-service
+      tag: a343422497bb2ad4735ca7eada921b60eeb19e20
 # ====================================================================================================
 # Planet files server
 # ====================================================================================================
