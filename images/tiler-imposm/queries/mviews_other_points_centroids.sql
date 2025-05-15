@@ -1,8 +1,22 @@
--- This script creates materialized views that combine named other area centroids
--- and other points into a single materialized view to generate a unified layer named "other_points_centroids".
--- The function accepts two arguments: the materialized view name and a minimum area threshold.
--- The area threshold filters polygons according to the zoom level at which the points will be displayed.
--- Other points are included with a NULL value for the area field.
+-- ============================================================================
+-- Function: create_other_points_centroids_mview
+-- Description:
+--   This function creates a materialized view that merges centroids of named
+--   polygon features from `osm_other_areas` and points from `osm_other_points`
+--   into a unified layer named "other_points_centroids".
+--
+-- Parameters:
+--   view_name   TEXT             - The name of the materialized view to be created.
+--   min_area    DOUBLE PRECISION - Minimum area (in m²) for polygons to be included.
+--                                  This is useful for filtering features by zoom level.
+--
+-- Notes:
+--   - Centroids are calculated using ST_MaximumInscribedCircle for polygons.
+--   - Points are included directly with NULL as their area(as an integer) to reduce the size of vector tiles..
+--   - Only features with non-empty names are included.
+--   - A GiST index is created on geometry for spatial performance.
+--   - A unique index is enforced on (osm_id, type, class).
+-- ============================================================================
 
 DROP FUNCTION IF EXISTS create_other_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_other_points_centroids_mview(
@@ -31,7 +45,7 @@ BEGIN
             class, 
             start_date, 
             end_date, 
-            area, 
+            ROUND(area)::bigint AS area_m2, 
             tags
         FROM osm_other_areas
         WHERE name IS NOT NULL AND name <> '' AND area > %L
@@ -46,10 +60,10 @@ BEGIN
             class, 
             start_date, 
             end_date, 
-            NULL AS area, 
+            NULL AS area_m2, 
             tags
         FROM osm_other_points
-        WHERE name IS NOT NULL AND name <> ''
+        -- WHERE name IS NOT NULL AND name <> ''
     $sql$, view_name, min_area);
     EXECUTE sql_create;
 

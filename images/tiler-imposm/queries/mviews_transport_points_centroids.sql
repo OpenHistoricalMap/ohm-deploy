@@ -1,8 +1,21 @@
--- This script creates materialized views that combine named transport area centroids
--- and transport points into a single materialized view to generate a unified layer named "transport_points_centroids".
--- The function accepts two arguments: the materialized view name and a minimum area threshold.
--- The area threshold filters polygons according to the zoom level at which the points will be displayed.
--- Transport points are included with a NULL value for the area field.
+-- ============================================================================
+-- Function: create_transport_points_centroids_mview
+-- Description:
+--   This function creates a materialized view that merges transport area centroids 
+--   (calculated from polygons) and transport points into a unified layer.
+--
+-- Parameters:
+--   view_name   TEXT             - The name of the materialized view to create.
+--   min_area    DOUBLE PRECISION - The minimum area (in m²) for including transport areas.
+--                                  Used to filter polygon features based on zoom levels.
+--
+-- Notes:
+--   - Centroids are computed using ST_MaximumInscribedCircle for polygonal geometries.
+--   - Transport points are included directly and will have a NULL value for area_m2 (as an integer) to reduce the size of vector tiles.
+--   - Only features with a non-empty "name"  from areas table are included.
+--   - The resulting view is useful for rendering transport labels at appropriate zoom levels.
+--   - A GiST index is created on geometry, and uniqueness is enforced on (osm_id, type, class).
+-- ============================================================================
 
 DROP FUNCTION IF EXISTS create_transport_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_transport_points_centroids_mview(
@@ -31,7 +44,7 @@ BEGIN
             type, 
             start_date, 
             end_date, 
-            area, 
+            ROUND(area)::bigint AS area_m2,
             tags
         FROM osm_transport_areas
         WHERE name IS NOT NULL AND name <> '' AND area > %L
@@ -46,7 +59,7 @@ BEGIN
             type, 
             start_date, 
             end_date, 
-            NULL AS area, 
+            NULL AS area_m2, 
             tags
         FROM osm_transport_points
     $sql$, view_name, min_area);

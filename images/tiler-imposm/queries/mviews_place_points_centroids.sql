@@ -56,7 +56,7 @@ BEGIN
             type,
             start_date,
             end_date,
-            ROUND(area)::integer AS area_m2,
+            ROUND(area)::bigint AS area_m2,
             tags->'capital' AS capital,
             tags
         FROM osm_place_areas
@@ -85,28 +85,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- ZOOM 0–2
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z0_2',
   ARRAY['plot', 'square', 'islet'],
   ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory']
 );
 
--- ZOOM 3–5
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z3_5',
   ARRAY['plot', 'square', 'islet'],
   ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region']
 );
 
--- ZOOM 6–10
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z6_10',
   ARRAY['plot', 'square', 'islet'],
   ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town']
 );
 
--- ZOOM 11–20
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z11_20',
   ARRAY['plot', 'square', 'islet'],

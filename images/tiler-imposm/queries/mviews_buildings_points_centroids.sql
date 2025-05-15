@@ -1,8 +1,28 @@
--- This script creates materialized views that combine named building area centroids
--- and named building points into a single materialized view to generate a unified layer named "buildings_points_centroids".
--- The function accepts two arguments: the materialized view name and a minimum area threshold.
--- The area threshold filters polygons according to the zoom level at which the points will be displayed.
--- Building points are included with NULL values for area and height fields.
+-- ============================================================================
+-- Function: create_buildings_points_centroids_mview
+-- Description:
+--   This function creates a materialized view that merges named centroids from
+--   polygonal building areas and named building points into a single unified layer 
+--   called "buildings_points_centroids".
+--
+--   For building areas, centroids are calculated using ST_MaximumInscribedCircle, and
+--   the area is included in square meters (as integer). If available, height values 
+--   are cleaned and cast to double precision.
+--
+--   Named building points are included directly, with NULL values for both 
+--   height and area.
+--
+-- Parameters:
+--   view_name   TEXT             - The name of the materialized view to be created.
+--   min_area    DOUBLE PRECISION - Minimum area (in m²) to include building areas.
+--
+-- Notes:
+--   - Only features with a non-empty "name" are included.
+--   - Designed to support zoom-level generalization for vector tiles.
+--   - Area is stored as integer (m²) to reduce tile size.
+--   - Height values are sanitized (non-numeric characters removed).
+--   - Geometry is indexed using GiST; uniqueness is enforced on (osm_id, type).
+-- ============================================================================
 
 DROP FUNCTION IF EXISTS create_buildings_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_buildings_points_centroids_mview(
@@ -29,7 +49,7 @@ BEGIN
             osm_id,
             name,
             NULL AS height,
-            NULL AS area,
+            NULL AS area_m2,
             type,
             start_date,
             end_date,
@@ -47,7 +67,7 @@ BEGIN
 			  WHEN height IS NULL OR trim(height) = '' THEN NULL
 			  ELSE regexp_replace(height, '[^0-9\.]', '', 'g')::double precision
 			END AS height,
-            area,
+            ROUND(area)::bigint AS area_m2,
             type,
             start_date,
             end_date,

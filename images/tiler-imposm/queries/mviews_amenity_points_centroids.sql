@@ -1,8 +1,23 @@
--- This script creates materialized views that combine named amenity area centroids
--- and amenity points into a single materialized view to generate a unified layer named "amenity_points_centroids".
--- The function accepts two arguments: the materialized view name and a minimum area threshold.
--- The area threshold filters polygons according to the zoom level at which the points will be displayed.
--- Amenity points are included with a NULL value for the area field.
+-- ============================================================================
+-- Function: create_amenity_points_centroids_mview
+-- Description:
+--   This function creates a materialized view that combines named centroids from
+--   polygonal amenity areas and named amenity points into a unified layer
+--   called "amenity_points_centroids".
+--
+--   For amenity areas, centroids are calculated using ST_MaximumInscribedCircle,
+--   and their area is included in square meters as an integer. Amenity points are
+--   included directly with a NULL value for the area field.
+--
+-- Parameters:
+--   view_name   TEXT             - The name of the materialized view to create.
+--   min_area    DOUBLE PRECISION - Minimum area (in m²) to include amenity areas.
+--
+-- Notes:
+--   - Only features with a non-empty "name" are included.
+--   - The resulting view is optimized for vector tile generation.
+--   - Geometry is indexed using GiST; uniqueness is enforced on (osm_id, type).
+-- ============================================================================
 
 DROP FUNCTION IF EXISTS create_amenity_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_amenity_points_centroids_mview(
@@ -28,7 +43,7 @@ BEGIN
             osm_id, 
             name, 
             type, 
-            area, 
+            ROUND(area)::bigint AS area_m2,
             start_date, 
             end_date, 
             tags
@@ -42,7 +57,7 @@ BEGIN
             osm_id, 
             name, 
             type, 
-            NULL AS area, 
+            NULL AS area_m2, 
             start_date, 
             end_date,
             tags

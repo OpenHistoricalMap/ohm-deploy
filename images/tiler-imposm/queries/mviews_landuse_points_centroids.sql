@@ -1,9 +1,23 @@
--- This script creates materialized views that combine named landuse area centroids
--- and landuse points into a single materialized view to generate a unified layer named "landuse_points_centroids".
--- The function accepts two arguments: the materialized view name and a minimum area threshold.
--- The area threshold filters polygons according to the zoom level at which the points will be displayed.
--- Landuse points are included with a NULL value for the area field.
-
+-- ============================================================================
+-- Function: create_landuse_points_centroids_mview
+-- Description:
+--   This script creates a materialized view that merges named centroids from
+--   polygonal landuse areas and named landuse points into a unified layer called 
+--   "landuse_points_centroids".
+--
+--   Centroids are calculated using ST_MaximumInscribedCircle on the area geometries,
+--   while landuse points are included directly, with the area field set to NULL.
+--
+-- Parameters:
+--   view_name   TEXT             - The name of the materialized view to create.
+--   min_area    DOUBLE PRECISION - Minimum area (in m²) required to include a landuse area.
+--
+-- Notes:
+--   - Only features with non-empty "name" values are included.
+--   - The resulting view is optimized for vector tiles at different zoom levels.
+--   - The area is stored in square meters (area_m2) as an integer to minimize tile size.
+--   - Geometry is indexed using GiST; uniqueness is enforced on (osm_id, type, class).
+-- ============================================================================
 DROP FUNCTION IF EXISTS create_landuse_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_landuse_points_centroids_mview(
     view_name TEXT,
@@ -31,7 +45,7 @@ BEGIN
             class, 
             start_date, 
             end_date, 
-            area, 
+            ROUND(area)::bigint AS area_m2,
             tags
         FROM osm_landuse_areas
         WHERE name IS NOT NULL AND name <> '' AND area > %L --Filter centroids that has a name
@@ -46,7 +60,7 @@ BEGIN
             class, 
             start_date, 
             end_date, 
-            NULL AS area, 
+            NULL AS area_m2, 
             tags
         FROM osm_landuse_points
         WHERE name IS NOT NULL AND name <> '' --Filter points that has a name
