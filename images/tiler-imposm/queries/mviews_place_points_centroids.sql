@@ -3,38 +3,48 @@
 -- Description:
 --   This function creates a materialized view that combines named centroids 
 --   from polygonal place areas and named place points into a unified layer.
---   Centroids are calculated using ST_MaximumInscribedCircle for the area geometries,
+--   Centroids are calculated using ST_MaximumInscribedCircle for area geometries,
 --   while place points are included as-is with a NULL value for the area field.
 --
 -- Parameters:
---   view_name      TEXT    - The name of the materialized view to create.
---   allowed_types  TEXT[]  - An optional array of place types to include (e.g., 'region', 'state').
---                            If empty or NULL, all types will be included.
+--   view_name            TEXT     - The name of the materialized view to create.
+--   allowed_types_areas  TEXT[]   - Optional array of place types (e.g., 'region', 'state')
+--                                   to include **only from** `osm_place_areas`.
+--                                   If empty or NULL, all area types are included.
+--   allowed_types_points TEXT[]   - Optional array of place types to include **only from**
+--                                   `osm_place_points`. If empty or NULL, all point types are included.
 --
 -- Notes:
 --   - Only features with a non-empty "name" are included.
 --   - The resulting view is useful for rendering simplified place labels
 --     at various zoom levels in vector tiles.
 --   - Geometry is indexed with GiST; uniqueness is enforced on (osm_id, type).
+--   - This separation allows finer control over which feature types are drawn
+--     as centroids vs. raw points.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_place_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_place_points_centroids_mview(
     view_name TEXT,
-    allowed_types TEXT[] DEFAULT ARRAY[]::TEXT[]
+    allowed_types_areas TEXT[] DEFAULT ARRAY[]::TEXT[],
+    allowed_types_points TEXT[] DEFAULT ARRAY[]::TEXT[]
 )
 RETURNS void AS $$
 DECLARE 
     sql TEXT;
-    type_filter TEXT := '';
+    type_filter_areas TEXT := '';
+    type_filter_points TEXT := '';
 BEGIN
-    RAISE NOTICE 'Creating materialized view: % with allowed types: %', view_name, allowed_types;
+    RAISE NOTICE 'Creating materialized view: %', view_name;
 
-    -- Construye la cláusula de filtro por tipo si hay tipos permitidos
-    IF array_length(allowed_types, 1) IS NOT NULL THEN
-        type_filter := format(' AND type = ANY (%L)', allowed_types);
+    IF array_length(allowed_types_areas, 1) IS NOT NULL THEN
+        type_filter_areas := format(' AND type = ANY (%L)', allowed_types_areas);
     END IF;
 
+    IF array_length(allowed_types_points, 1) IS NOT NULL THEN
+        type_filter_points := format(' AND type = ANY (%L)', allowed_types_points);
+    END IF;
+    
     EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
 
     sql := format($sql$
@@ -46,11 +56,11 @@ BEGIN
             type,
             start_date,
             end_date,
-            area,
+            ROUND(area)::integer AS area_m2,
             tags->'capital' AS capital,
             tags
         FROM osm_place_areas
-        WHERE name IS NOT NULL AND name <> '' %s
+        WHERE name IS NOT NULL AND name <> ''%s
 
         UNION ALL
 
@@ -65,8 +75,8 @@ BEGIN
             tags->'capital' AS capital,
             tags
         FROM osm_place_points
-        WHERE name IS NOT NULL AND name <> '' %s
-    $sql$, view_name, type_filter, type_filter);
+        WHERE osm_id > 0 AND name IS NOT NULL AND name <> ''%s
+    $sql$, view_name, type_filter_areas, type_filter_points);
 
     EXECUTE sql;
 
@@ -75,58 +85,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 -- ZOOM 0–2
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z0_2',
-  ARRAY[
-    'ocean',
-    'sea',
-    'archipelago',
-    'country',
-    'territory',
-    'unorganized territory'
-  ]
+  ARRAY['plot', 'square', 'islet'],
+  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory']
 );
 
 -- ZOOM 3–5
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z3_5',
-  ARRAY[
-    'ocean',
-    'sea',
-    'archipelago',
-    'country',
-    'territory',
-    'unorganized territory',
-    'state',
-    'province',
-    'region'
-  ]
+  ARRAY['plot', 'square', 'islet'],
+  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region']
 );
 
 -- ZOOM 6–10
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z6_10',
-  ARRAY[
-    'ocean',
-    'sea',
-    'archipelago',
-    'country',
-    'territory',
-    'unorganized territory',
-    'state',
-    'province',
-    'region',
-    'county',
-    'municipality',
-    'city',
-    'town'
-  ]
+  ARRAY['plot', 'square', 'islet'],
+  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town']
 );
 
--- ZOOM 11–20 (sin filtro, incluye todos los tipos disponibles con nombre)
+-- ZOOM 11–20
 SELECT create_place_points_centroids_mview(
   'mview_place_points_centroids_z11_20',
-  NULL
+  ARRAY['plot', 'square', 'islet'],
+  ARRAY['country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood']
 );
