@@ -9,7 +9,7 @@ SELECT
     ABS(osm_id) AS osm_id, 
     name, 
     type, 
-    area, 
+    area_m2, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 

@@ -96,18 +96,23 @@ buildings_points_centroids_views=(
 )
 
 points_centroids_views=(
-    # amenity
+    # Amenity
     mview_amenity_points_centroids_z14_20
-    # buildings
+    # Buildings
     mview_buildings_points_centroids_z14_20
-    # landuse
+    # Landuse
     mview_landuse_points_centroids_z10_11
     mview_landuse_points_centroids_z12_13
     mview_landuse_points_centroids_z14_20
-    # other areas
+    # Other Areas
     mview_other_points_centroids_z14_20
-    # transport
+    # Transport
     mview_transport_points_centroids_z14_20
+    # Places
+    mview_place_points_centroids_z0_2
+    mview_place_points_centroids_z3_5
+    mview_place_points_centroids_z6_10
+    mview_place_points_centroids_z11_20
 )
 
 # Start refreshing in parallel with a sleep interval  all of them in average of 4 min refresh
