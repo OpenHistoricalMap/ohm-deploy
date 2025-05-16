@@ -38,3 +38,8 @@ This is what the process of making changes to openhistoricalmap.org looks like:
 4. When we do that and push here, that kicks off a Github Actions automated deploy that will make your changes live on https://staging.openhistoricalmap.org.
 5. Test on Staging. This is when we can review with folks who are not running locally, share with the community, etc.
 6. When we're all happy with the code on Staging, make a PR of `staging` into `main` branch in this OHM-deploy repo, which then kicks off deploy to production to make changes live on https://openhistoricalmap.org.
+
+
+## License
+
+This project is licensed under the BSD-2-Clause License. See the [LICENSE.txt](./LICENSE.txt) file for full details.
