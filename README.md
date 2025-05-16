@@ -42,6 +42,4 @@ This is what the process of making changes to openhistoricalmap.org looks like:
 
 ## License
 
-This project is licensed under the BSD-2-Clause License. See the [LICENSE](./LICENSE) file for details.
-
-This repository includes components derived from third-party projects such as [`osm-seed`](https://github.com/developmentseed/osm-seed), licensed under the MIT License. See [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md) for more.
+This project is licensed under the BSD-2-Clause License. See the [LICENSE.txt](./LICENSE.txt) file for full details.
