@@ -43,7 +43,7 @@ BEGIN
     RAISE NOTICE 'Created spatial index: idx_%_geom', view_name;
 
     -- Create unique index on osm_id
-    sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', view_name, view_name);
+    sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id, type);', view_name, view_name);
     EXECUTE sql_unique_index;
     RAISE NOTICE 'Created unique index: idx_%_osm_id', view_name;
 
