@@ -82,17 +82,6 @@ other_areas_views=(
     "mview_other_areas_centroids_z9_11"
     "mview_other_areas_centroids_z12_14"
     "mview_other_areas_centroids_z15_20"
-    "mview_other_areas_z6_8"
-    "mview_other_areas_z9_11"
-    "mview_other_areas_z12_14"
-)
-
-buildings_points_centroids_views=(
-    "mview_buildings_points_centroids_z14"
-    "mview_buildings_points_centroids_z15"
-    "mview_buildings_points_centroids_z16"
-    "mview_buildings_points_centroids_z17"
-    "mview_buildings_points_centroids_z18_20"
 )
 
 points_centroids_views=(
@@ -126,7 +115,5 @@ refresh_mviews_group "water" 160 "${water_views[@]}" &
 refresh_mviews_group "landuse" 220 "${landuse_views[@]}" &
 ## Benchmark other areas and centroids refresh those views takes 3 secs to complete
 refresh_mviews_group "other_areas" 230 "${other_areas_views[@]}" &
-## Benchmark: Refreshing building points/centroids takes 60 seconds to complete.
-refresh_mviews_group "buildings_points_centroids" 230 "${buildings_points_centroids_views[@]}" &
-# Benchmark: Refreshing landuse points/centroids takes 120 seconds to complete.
-refresh_mviews_group "points_centroids" 120 "${points_centroids_views[@]}" &
+# Benchmark: Refreshing all points/centroids takes 180 seconds to complete.
+refresh_mviews_group "points_centroids" 180 "${points_centroids_views[@]}" &
