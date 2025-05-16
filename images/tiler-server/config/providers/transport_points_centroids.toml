@@ -1,15 +1,15 @@
 [[providers.layers]]
-name = "buildings_points_centroids_z14_20"
+name = "transport_points_centroids_z14_20"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    ABS(osm_id) AS osm_id, 
     name, 
+    class, 
     type, 
-    height,
     area_m2,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
@@ -17,15 +17,13 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_buildings_points_centroids_z14_20
+    mview_transport_points_centroids_z14_20 
 WHERE 
     geometry && !BBOX!
 """
-
 #######Maps
-
 [[maps.layers]]
-name = "buildings_points_centroids"
-provider_layer = "osm.buildings_points_centroids_z14_20"
+name = "transport_points_centroids"
+provider_layer = "osm.transport_points_centroids_z14_20"
 min_zoom = 14
 max_zoom = 20

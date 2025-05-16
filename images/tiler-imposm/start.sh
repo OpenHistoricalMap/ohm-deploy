@@ -244,9 +244,16 @@ function importData() {
     psql $PG_CONNECTION -f queries/mviews_water_areas_centroids.sql 
     psql $PG_CONNECTION -f queries/mviews_landuse_areas.sql 
     psql $PG_CONNECTION -f queries/mviews_landuse_areas_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_other_areas.sql 
     psql $PG_CONNECTION -f queries/mviews_other_areas_centroids.sql 
+
+    # Funtion to create points_centroids
+    psql $PG_CONNECTION -f queries/mviews_amenity_points_centroids.sql 
     psql $PG_CONNECTION -f queries/mviews_buildings_points_centroids.sql 
+    psql $PG_CONNECTION -f queries/mviews_landuse_points_centroids.sql 
+    psql $PG_CONNECTION -f queries/mviews_other_points_centroids.sql 
+    psql $PG_CONNECTION -f queries/mviews_place_points_centroids.sql 
+    psql $PG_CONNECTION -f queries/mviews_transport_points_centroids.sql 
+
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }

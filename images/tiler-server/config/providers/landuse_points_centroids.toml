@@ -1,68 +1,71 @@
 [[providers.layers]]
+name = "landuse_points_centroids_z10_11"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z8_9"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
+    name, 
+    class, 
+    type, 
+    area_m2, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
+    {{LENGUAGES}} 
 FROM 
-    mview_water_areas_centroid_z8_9 
+    mview_landuse_points_centroids_z10_11
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "landuse_points_centroids_z12_13"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z10_12"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
+    name, 
+    class, 
+    type, 
+    area_m2, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
+    {{LENGUAGES}} 
 FROM 
-    mview_water_areas_centroid_z10_12
+    mview_landuse_points_centroids_z12_13
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
+name = "landuse_points_centroids_z14_20"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z13_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
-    area, 
+    name, 
+    class, 
+    type, 
+    area_m2, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-    {{LENGUAGES}}
+    {{LENGUAGES}} 
 FROM 
-    mview_water_areas_centroid_z13_15 
+    mview_landuse_points_centroids_z14_20
 WHERE 
     geometry && !BBOX!
 """
@@ -70,19 +73,19 @@ WHERE
 #######Maps
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z8_9"
-min_zoom = 8
-max_zoom = 9
-
-[[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z10_12"
+name = "landuse_points_centroids"
+provider_layer = "osm.landuse_points_centroids_z10_11"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
-name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z13_15"
+name = "landuse_points_centroids"
+provider_layer = "osm.landuse_points_centroids_z12_13"
 min_zoom = 13
+max_zoom = 14
+
+[[maps.layers]]
+name = "landuse_points_centroids"
+provider_layer = "osm.landuse_points_centroids_z14_20"
+min_zoom = 15
 max_zoom = 20
