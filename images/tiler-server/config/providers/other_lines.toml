@@ -18,7 +18,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_other_lines 
+    mview_other_lines_z14_20 
 WHERE 
     geometry && !BBOX!
 """
