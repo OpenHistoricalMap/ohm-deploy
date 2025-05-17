@@ -3,15 +3,15 @@
 name = "other_lines"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
     osm_id, 
-    name, 
+    NULLIF(name, '') AS name, 
     class, 
     type, 
+    source, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
