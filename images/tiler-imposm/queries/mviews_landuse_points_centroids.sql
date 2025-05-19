@@ -63,7 +63,6 @@ BEGIN
             NULL AS area_m2, 
             tags
         FROM osm_landuse_points
-        WHERE name IS NOT NULL AND name <> '' --Filter points that has a name
     $sql$, view_name, min_area);
     EXECUTE sql_create;
 
