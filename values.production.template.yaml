@@ -170,9 +170,9 @@ osm-seed:
     autoscaling:
       enabled: true
       minReplicas: 1
-      maxReplicas: 10
-      cpuUtilization: 70
-      memoryUtilization: 70
+      maxReplicas: 6
+      cpuUtilization: 85
+      memoryUtilization: 85
     sharedMemorySize: 512Mi
     livenessProbeExec: true
   # ====================================================================================================
