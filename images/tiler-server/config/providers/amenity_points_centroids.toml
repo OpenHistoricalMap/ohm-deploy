@@ -7,7 +7,7 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     ABS(osm_id) AS osm_id, 
-    name, 
+    NULLIF(name, '') AS name, 
     type, 
     area_m2, 
     NULLIF(start_date, '') AS start_date, 
