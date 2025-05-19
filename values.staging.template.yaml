@@ -809,7 +809,7 @@ osm-seed:
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
-        tag: 1ab0e38
+        tag: 3ac123c
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
