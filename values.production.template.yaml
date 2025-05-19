@@ -161,8 +161,8 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "3.5Gi"
-        cpu: "1500m"
+        memory: 5Gi"
+        cpu: "1600m"
       limits:
         enabled: false
         memory: "4Gi"
