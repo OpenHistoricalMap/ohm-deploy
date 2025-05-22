@@ -157,22 +157,36 @@ osm-seed:
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
       EXTERNAL_CGIMAP: true
+      PASSENGER_MAX_POOL_SIZE: 6
     resources:
       enabled: true
       requests:
         enabled: true
-        memory: 5Gi"
-        cpu: "1600m"
+        memory: 2Gi"
+        cpu: "500m"
       limits:
         enabled: false
-        memory: "4Gi"
-        cpu: "1800m"
+        memory: "3Gi"
+        cpu: "700m"
     autoscaling:
       enabled: true
       minReplicas: 1
-      maxReplicas: 6
-      cpuUtilization: 85
-      memoryUtilization: 85
+      maxReplicas: 10
+      cpuUtilization:
+        enable: true
+        value: 70
+      memoryUtilization:
+        enable: false
+        value: 85
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 60       # Wait 60 seconds of sustained high usage before scaling up.
+          policyValue: 100                     # Allow up to 100% increase in replicas (e.g., 3 → 6).
+          periodSeconds: 60                    # This increase limit applies within a 60-second window.
+        scaleDown:
+          stabilizationWindowSeconds: 120      # Wait 120 seconds (2 minutes) of low usage before scaling down.
+          policyValue: 50                      # Allow up to 50% decrease in replicas at once (e.g., 6 → 3).
+          periodSeconds: 60                    # This decrease limit applies within a 60-second window.
     sharedMemorySize: 512Mi
     livenessProbeExec: true
   # ====================================================================================================
