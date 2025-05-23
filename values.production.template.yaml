@@ -133,7 +133,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: openhistoricalmap.org
@@ -157,26 +157,27 @@ osm-seed:
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
       EXTERNAL_CGIMAP: true
+      PASSENGER_MAX_POOL_SIZE: 6
     resources:
       enabled: true
       requests:
         enabled: true
-        memory: "3.5Gi"
+        memory: 3Gi"
         cpu: "1500m"
       limits:
         enabled: false
-        memory: "4Gi"
+        memory: "3.5Gi"
         cpu: "1800m"
     autoscaling:
       enabled: true
-      minReplicas: 1
-      maxReplicas: 10
+      minReplicas: 2
+      maxReplicas: 6
       cpuUtilization:
         enable: true
-        value: 70
+        value: 80
       memoryUtilization:
         enable: false
-        value: 85
+        value: 80
       behavior:
         scaleUp:
           stabilizationWindowSeconds: 60       # Wait 60 seconds of sustained high usage before scaling up.
@@ -197,7 +198,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     resources:
       enabled: false
       requests:
@@ -231,10 +232,10 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     autoscaling:
       enabled: true
-      minReplicas: 1
+      minReplicas: 2
       maxReplicas: 10
       cpuUtilization: 50
       memoryUtilization: 50
@@ -296,7 +297,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     env:
       ENABLE_SEND_SLACK_MESSAGE: "true"
       SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -853,7 +854,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
