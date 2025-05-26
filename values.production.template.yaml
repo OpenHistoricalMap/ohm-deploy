@@ -431,7 +431,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
       POSTGRES_DB: tiler_osm_production
@@ -526,7 +526,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
@@ -567,7 +567,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     replicaCount: 4
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -614,7 +614,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
@@ -649,7 +649,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: {{PRODUCTION_TM_DB_PASSWORD}}
@@ -681,7 +681,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -788,7 +788,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
 
 # ====================================================================================================
 # Variables for overpass-api
@@ -799,7 +799,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: overpass_small
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: overpass-api.openhistoricalmap.org
@@ -884,7 +884,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
       
   # ====================================================================================================
   # Variables for replication nomitoring task
@@ -909,7 +909,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
   # ====================================================================================================
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
@@ -929,7 +929,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
 
 # ====================================================================================================
 # Variables for osmcha web
@@ -976,7 +976,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
@@ -1009,7 +1009,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
 # ====================================================================================================
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
@@ -1039,7 +1039,7 @@ ohm:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: misc_large # Nodegroup type to run the purge and seed job
+      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
@@ -1062,7 +1062,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
 
   tilerCacheSeedGlobal:
     enabled: false
@@ -1076,7 +1076,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
 
   tilerCacheSeedCoverage:
     enabled: false
@@ -1091,5 +1091,5 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
       
