@@ -649,7 +649,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: downstream_apps_medium
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: {{PRODUCTION_TM_DB_PASSWORD}}
@@ -681,7 +681,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: downstream_apps_medium
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -788,7 +788,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: downstream_apps_medium
 
 # ====================================================================================================
 # Variables for overpass-api
@@ -976,7 +976,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: downstream_apps_medium
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
@@ -1009,7 +1009,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: downstream_apps_medium
 # ====================================================================================================
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
