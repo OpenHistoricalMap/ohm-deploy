@@ -828,7 +828,7 @@ osm-seed:
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
@@ -859,7 +859,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: postgis/postgis
