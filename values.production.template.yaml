@@ -133,7 +133,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_medium
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: openhistoricalmap.org
@@ -157,22 +157,36 @@ osm-seed:
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
       EXTERNAL_CGIMAP: true
+      PASSENGER_MAX_POOL_SIZE: 6
     resources:
       enabled: true
       requests:
         enabled: true
-        memory: "3.5Gi"
+        memory: "3Gi"
         cpu: "1500m"
       limits:
         enabled: false
-        memory: "4Gi"
+        memory: "3.5Gi"
         cpu: "1800m"
     autoscaling:
       enabled: true
-      minReplicas: 1
-      maxReplicas: 10
-      cpuUtilization: 70
-      memoryUtilization: 70
+      minReplicas: 2
+      maxReplicas: 6
+      cpuUtilization:
+        enable: true
+        value: 80
+      memoryUtilization:
+        enable: false
+        value: 80
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 60       # Wait 60 seconds of sustained high usage before scaling up.
+          policyValue: 100                     # Allow up to 100% increase in replicas (e.g., 3 → 6).
+          periodSeconds: 60                    # This increase limit applies within a 60-second window.
+        scaleDown:
+          stabilizationWindowSeconds: 120      # Wait 120 seconds (2 minutes) of low usage before scaling down.
+          policyValue: 50                      # Allow up to 50% decrease in replicas at once (e.g., 6 → 3).
+          periodSeconds: 60                    # This decrease limit applies within a 60-second window.
     sharedMemorySize: 512Mi
     livenessProbeExec: true
   # ====================================================================================================
@@ -184,7 +198,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     resources:
       enabled: false
       requests:
@@ -218,10 +232,10 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     autoscaling:
       enabled: true
-      minReplicas: 1
+      minReplicas: 2
       maxReplicas: 10
       cpuUtilization: 50
       memoryUtilization: 50
@@ -283,7 +297,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     env:
       ENABLE_SEND_SLACK_MESSAGE: "true"
       SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -417,7 +431,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
       POSTGRES_DB: tiler_osm_production
@@ -512,7 +526,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
@@ -553,7 +567,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     replicaCount: 4
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -600,7 +614,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
@@ -635,7 +649,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: downstream_apps_medium
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: {{PRODUCTION_TM_DB_PASSWORD}}
@@ -667,7 +681,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: downstream_apps_medium
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -774,7 +788,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: downstream_apps_medium
 
 # ====================================================================================================
 # Variables for overpass-api
@@ -785,7 +799,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: overpass_small
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: overpass-api.openhistoricalmap.org
@@ -840,7 +854,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web_helpers_medium
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
@@ -870,7 +884,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
       
   # ====================================================================================================
   # Variables for replication nomitoring task
@@ -895,7 +909,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
   # ====================================================================================================
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
@@ -915,7 +929,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_helpers_medium
 
 # ====================================================================================================
 # Variables for osmcha web
@@ -925,7 +939,7 @@ osm-seed:
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
-      tag: 1ab0e38
+      tag: f5cfe9c
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================
@@ -962,7 +976,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: downstream_apps_medium
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
@@ -995,7 +1009,7 @@ osm-seed:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: downstream_apps_medium
 # ====================================================================================================
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
@@ -1025,7 +1039,7 @@ ohm:
       REGION_NAME: us-east-1
       NAMESPACE: default # Namespace to run the job
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: misc_large # Nodegroup type to run the purge and seed job
+      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
       # Maximum number of active jobs in high concurrency queue
       MAX_ACTIVE_JOBS: 10 
       DELETE_OLD_JOBS_AGE: 3600 # 1 hours
@@ -1048,7 +1062,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
 
   tilerCacheSeedGlobal:
     enabled: false
@@ -1062,7 +1076,7 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
 
   tilerCacheSeedCoverage:
     enabled: false
@@ -1077,5 +1091,5 @@ ohm:
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: misc_large
+      label_value: web_large
       
