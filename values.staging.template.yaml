@@ -168,10 +168,11 @@ osm-seed:
         RAILS_STORAGE_REGION: us-east-1
         RAILS_STORAGE_BUCKET: ohm-website-staging
         EXTERNAL_CGIMAP: true
+        PASSENGER_MAX_POOL_SIZE: 3
       resources:
         enabled: true
         requests:
-          enabled: true
+          enabled: false
           memory: "0.5Gi"
           cpu: "200m"
         limits:
@@ -182,8 +183,21 @@ osm-seed:
         enabled: true
         minReplicas: 1
         maxReplicas: 2
-        cpuUtilization: 90
-        memoryUtilization: 90
+        cpuUtilization:
+          enable: true
+          value: 85
+        memoryUtilization:
+          enable: false
+          value: 85
+        behavior:
+          scaleUp:
+            stabilizationWindowSeconds: 60       # Wait 60 seconds of sustained high usage before scaling up.
+            policyValue: 100                     # Allow up to 100% increase in replicas (e.g., 3 → 6).
+            periodSeconds: 60                    # This increase limit applies within a 60-second window.
+          scaleDown:
+            stabilizationWindowSeconds: 120      # Wait 120 seconds (2 minutes) of low usage before scaling down.
+            policyValue: 50                      # Allow up to 50% decrease in replicas at once (e.g., 6 → 3).
+            periodSeconds: 60                    # This decrease limit applies within a 60-second window.
       sharedMemorySize: 16Mi
     # ====================================================================================================
     # Variables for memcached. Memcached is used to store session cookies
@@ -562,7 +576,7 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
@@ -589,7 +603,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
@@ -809,7 +823,7 @@ osm-seed:
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
-        tag: 1ab0e38
+        tag: f5cfe9c
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
