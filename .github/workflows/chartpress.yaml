@@ -118,6 +118,9 @@ jobs:
           STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+          # ohm website
+          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
+          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
 
       ################ Production secrets ################ 
       - name: Production - substitute secrets
@@ -167,6 +170,9 @@ jobs:
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+          # ohm website
+          PRODUCTION_OPENSTREETMAP_AUTH_ID: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_ID }}
+          PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
 
       - name: AWS Credentials
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'

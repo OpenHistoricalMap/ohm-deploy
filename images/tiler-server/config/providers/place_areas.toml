@@ -1,28 +1,25 @@
-# Layer configuration for place areas
 [[providers.layers]]
 name = "place_areas"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
-    osm_id, 
-    name, 
+    ABS(osm_id) AS osm_id, 
+    NULLIF(name, '') AS name, 
     type, 
+    area_m2,
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
-    area, 
     isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
     tags->'capital' AS capital,
     {{LENGUAGES}}
 FROM 
-    osm_place_areas 
+    mview_place_areas_z14_20 
 WHERE 
-    type IN ('square') 
-    AND geometry && !BBOX!
+    geometry && !BBOX!
 """
 #######Maps
 [[maps.layers]]

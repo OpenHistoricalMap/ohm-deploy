@@ -1,4 +1,3 @@
-# Layer configuration for other lines
 [[providers.layers]]
 name = "other_lines"
 geometry_fieldname = "geometry"

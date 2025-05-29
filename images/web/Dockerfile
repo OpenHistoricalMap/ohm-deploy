@@ -21,7 +21,7 @@ RUN apt-get update && \
 RUN a2enmod passenger
 
 # Clone OHM Website
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ea625f6d40b001bc9a68a73d8a2986efd31bf87c
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=10df245c44c811cce660000a373df3ed53551314
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
     cd $workdir && \
@@ -86,7 +86,7 @@ WORKDIR $workdir
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apache2 libapache2-mod-passenger libapache2-mod-fcgid \
     libpq5 libxml2 libyaml-0-2 libarchive13 file libgd-dev \
-    postgresql-client curl \
+    postgresql-client curl libvips \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /var/www /var/www

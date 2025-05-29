@@ -2,6 +2,7 @@
 
 This container is for rendering the vector tiles base on [Tegola](https://github.com/go-spatial/tegola), the container connects to the database `tiler-db` and serves the tiles through the port `9090`.
 
+A version of vtiles is currently running on Hetzner. The configuration in [hetzner](../../hetzner/).
 
 ### Configuration
 
