@@ -24,7 +24,7 @@ services:
           
   # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2527.hd2096b0
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2572.h77205fe
     volumes:
       - /data/tiler_production_imposm_28_05_2025:/mnt/data
     command:
