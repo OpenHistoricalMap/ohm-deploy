@@ -1,4 +1,3 @@
-# Layer configuration for landuse lines
 [[providers.layers]]
 name = "landuse_lines"
 geometry_fieldname = "geometry"
