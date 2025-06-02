@@ -22,7 +22,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z5
+    mv_transport_lines_z5
 WHERE 
     geometry && !BBOX!
 """
@@ -51,7 +51,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z6
+    mv_transport_lines_z6
 WHERE 
     geometry && !BBOX!
 """
@@ -80,7 +80,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z7
+    mv_transport_lines_z7
 WHERE 
     geometry && !BBOX!
 """
@@ -111,7 +111,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z8
+    mv_transport_lines_z8
 WHERE 
     geometry && !BBOX!
 """
@@ -142,7 +142,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z9
+    mv_transport_lines_z9
 WHERE 
     geometry && !BBOX!
 """
@@ -174,7 +174,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z10_11
+    mv_transport_lines_z10_11
 WHERE 
     geometry && !BBOX!
 """
@@ -206,7 +206,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z12_13
+    mv_transport_lines_z12_13
 WHERE 
     geometry && !BBOX!
 """
@@ -237,7 +237,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z14_20
+    mv_transport_lines_z14_20
 WHERE 
     geometry && !BBOX!
 """

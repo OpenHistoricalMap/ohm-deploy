@@ -87,6 +87,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-SELECT create_or_refresh_landuse_points_centroids_mview('mview_landuse_points_centroids_z10_11', 500, TRUE);
-SELECT create_or_refresh_landuse_points_centroids_mview('mview_landuse_points_centroids_z12_13', 100, TRUE);
-SELECT create_or_refresh_landuse_points_centroids_mview('mview_landuse_points_centroids_z14_20', 0, TRUE);
+SELECT create_or_refresh_landuse_points_centroids_mview('mv_landuse_points_centroids_z10_11', 500, TRUE);
+SELECT create_or_refresh_landuse_points_centroids_mview('mv_landuse_points_centroids_z12_13', 100, TRUE);
+SELECT create_or_refresh_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20', 0, TRUE);

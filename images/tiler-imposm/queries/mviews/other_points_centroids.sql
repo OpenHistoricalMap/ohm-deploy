@@ -98,4 +98,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_or_refresh_other_points_centroids_mview('mview_other_points_centroids_z14_20', 0, TRUE);
+SELECT create_or_refresh_other_points_centroids_mview('mv_other_points_centroids_z14_20', 0, TRUE);

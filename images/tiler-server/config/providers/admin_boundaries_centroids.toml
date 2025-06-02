@@ -17,7 +17,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_admin_boundaries_centroid_z0_2
+    mv_admin_boundaries_centroids_z0_2
 WHERE geometry && !BBOX!
 """
 
@@ -40,7 +40,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_admin_boundaries_centroid_z3_5
+    mv_admin_boundaries_centroids_z3_5
 WHERE geometry && !BBOX!
 """
 
@@ -63,7 +63,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_admin_boundaries_centroid_z6_7
+    mv_admin_boundaries_centroids_z6_7
 WHERE geometry && !BBOX!
 """
 
@@ -86,7 +86,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_admin_boundaries_centroid_z8_9
+    mv_admin_boundaries_centroids_z8_9
 WHERE geometry && !BBOX!
 """
 
@@ -109,7 +109,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_admin_boundaries_centroid_z10_12
+    mv_admin_boundaries_centroids_z10_12
 WHERE geometry && !BBOX!
 """
 
@@ -132,7 +132,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_admin_boundaries_centroid_z13_15
+    mv_admin_boundaries_centroids_z13_15
 WHERE geometry && !BBOX!
 """
 
@@ -155,7 +155,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_admin_boundaries_centroid_z16_20
+    mv_admin_boundaries_centroids_z16_20
 WHERE geometry && !BBOX!
 """
 #######Maps

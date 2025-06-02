@@ -128,11 +128,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z5', 'osm_transport_multilines_z5', 'mview_transport_lines_z5', TRUE);
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z6', 'osm_transport_multilines_z6', 'mview_transport_lines_z6', TRUE);
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z7', 'osm_transport_multilines_z7', 'mview_transport_lines_z7', TRUE);
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z8', 'osm_transport_multilines_z8', 'mview_transport_lines_z8', TRUE);
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z9', 'osm_transport_multilines_z9', 'mview_transport_lines_z9', TRUE);
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z10_11', 'osm_transport_multilines_z10_11', 'mview_transport_lines_z10_11', TRUE);
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z12_13', 'osm_transport_multilines_z12_13', 'mview_transport_lines_z12_13', TRUE);
-SELECT create_or_refresh_transport_lines_mview('osm_transport_lines', 'osm_transport_multilines', 'mview_transport_lines_z14_20', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z5', 'osm_transport_multilines_z5', 'mv_transport_lines_z5', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z6', 'osm_transport_multilines_z6', 'mv_transport_lines_z6', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z7', 'osm_transport_multilines_z7', 'mv_transport_lines_z7', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z8', 'osm_transport_multilines_z8', 'mv_transport_lines_z8', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z9', 'osm_transport_multilines_z9', 'mv_transport_lines_z9', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z10_11', 'osm_transport_multilines_z10_11', 'mv_transport_lines_z10_11', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines_z12_13', 'osm_transport_multilines_z12_13', 'mv_transport_lines_z12_13', TRUE);
+SELECT create_or_refresh_transport_lines_mview('osm_transport_lines', 'osm_transport_multilines', 'mv_transport_lines_z14_20', TRUE);

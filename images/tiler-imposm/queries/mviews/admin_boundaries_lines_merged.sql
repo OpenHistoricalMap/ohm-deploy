@@ -51,9 +51,9 @@ WHERE ST_GeometryType(geometry) = 'ST_LineString';
 -- STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate, admin_level, member and type
 -----------------------------------
 
-DROP MATERIALIZED VIEW IF EXISTS mview_relation_members_boundaries CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_relation_members_boundaries CASCADE;
 
-CREATE MATERIALIZED VIEW mview_relation_members_boundaries AS
+CREATE MATERIALIZED VIEW mv_relation_members_boundaries AS
 WITH ordered AS (
   SELECT
     type,
@@ -151,20 +151,20 @@ WITH DATA;
 
 -- Create indexes for performance
 CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_idx 
-ON mview_relation_members_boundaries (admin_level, member, type, group_id);
+ON mv_relation_members_boundaries (admin_level, member, type, group_id);
 
 CREATE INDEX IF NOT EXISTS mview_admin_boundaries_geometry_idx 
-ON mview_relation_members_boundaries USING GIST (geometry);
+ON mv_relation_members_boundaries USING GIST (geometry);
 
 
 
 -----------------------------------
--- STEP 5: Create a materialized view that combines the data from mview_relation_members_boundaries and osm_admin_lines
+-- STEP 5: Create a materialized view that combines the data from mv_relation_members_boundaries and osm_admin_lines
 -----------------------------------
 
-DROP MATERIALIZED VIEW IF EXISTS mview_admin_boundaries_relations_ways CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_relations_ways CASCADE;
 
-CREATE MATERIALIZED VIEW mview_admin_boundaries_relations_ways AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_relations_ways AS
 WITH relation_boundaries AS (
   SELECT
     type,
@@ -176,7 +176,7 @@ WITH relation_boundaries AS (
     max_end_decdate AS end_decdate,
     min_start_date_iso AS start_date,
     max_end_date_iso AS end_date
-  FROM mview_relation_members_boundaries
+  FROM mv_relation_members_boundaries
 ),
 way_boundaries AS (
   SELECT
@@ -191,7 +191,7 @@ way_boundaries AS (
     end_decdate
   FROM osm_admin_lines
   WHERE type = 'administrative'
-    AND osm_id NOT IN (SELECT member FROM mview_relation_members_boundaries) 
+    AND osm_id NOT IN (SELECT member FROM mv_relation_members_boundaries) 
 )
 -- Join the two tables
 SELECT 
@@ -221,26 +221,26 @@ SELECT
 FROM way_boundaries
 WITH DATA;
 
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_relations_ways_idx 
-ON mview_admin_boundaries_relations_ways (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_relations_ways_idx 
+ON mv_admin_boundaries_relations_ways (admin_level, member, group_id);
 
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_relations_ways_geometry_idx 
-ON mview_admin_boundaries_relations_ways USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_relations_ways_geometry_idx 
+ON mv_admin_boundaries_relations_ways USING GIST (geometry);
 
 
 -----------------------------------
 -- STEP 6: Create  materialized views with different simplification levels and filters
 -----------------------------------
-DROP MATERIALIZED VIEW IF EXISTS mview_land_ohm_lines_z0_2 CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS mview_land_ohm_lines_z3_5 CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS mview_land_ohm_lines_z6_7 CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS mview_land_ohm_lines_z8_9 CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS mview_land_ohm_lines_z10_12 CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS mview_land_ohm_lines_z13_15 CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS mview_land_ohm_lines_z16_20 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z0_2 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z3_5 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z6_7 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z8_9 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z10_12 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z13_15 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z16_20 CASCADE;
 
 
-CREATE MATERIALIZED VIEW mview_land_ohm_lines_z0_2 AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z0_2 AS
 SELECT 
     type,
     admin_level,
@@ -251,11 +251,11 @@ SELECT
     end_decdate,
     start_date,
     end_date
-FROM mview_admin_boundaries_relations_ways
+FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2)
 WITH DATA;
 
-CREATE MATERIALIZED VIEW mview_land_ohm_lines_z3_5 AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z3_5 AS
 SELECT 
     type,
     admin_level,
@@ -266,11 +266,11 @@ SELECT
     end_decdate,
     start_date,
     end_date
-FROM mview_admin_boundaries_relations_ways
+FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4)
 WITH DATA;
 
-CREATE MATERIALIZED VIEW mview_land_ohm_lines_z6_7 AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z6_7 AS
 SELECT 
     type,
     admin_level,
@@ -281,11 +281,11 @@ SELECT
     end_decdate,
     start_date,
     end_date
-FROM mview_admin_boundaries_relations_ways
+FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4,5,6)
 WITH DATA;
 
-CREATE MATERIALIZED VIEW mview_land_ohm_lines_z8_9 AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z8_9 AS
 SELECT 
     type,
     admin_level,
@@ -296,11 +296,11 @@ SELECT
     end_decdate,
     start_date,
     end_date
-FROM mview_admin_boundaries_relations_ways
+FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4,5,6,7,8,9)
 WITH DATA;
 
-CREATE MATERIALIZED VIEW mview_land_ohm_lines_z10_12 AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z10_12 AS
 SELECT 
     type,
     admin_level,
@@ -311,11 +311,11 @@ SELECT
     end_decdate,
     start_date,
     end_date
-FROM mview_admin_boundaries_relations_ways
+FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
 WITH DATA;
 
-CREATE MATERIALIZED VIEW mview_land_ohm_lines_z13_15 AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z13_15 AS
 SELECT 
     type,
     admin_level,
@@ -326,11 +326,11 @@ SELECT
     end_decdate,
     start_date,
     end_date
-FROM mview_admin_boundaries_relations_ways
+FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
 WITH DATA;
 
-CREATE MATERIALIZED VIEW mview_land_ohm_lines_z16_20 AS
+CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z16_20 AS
 SELECT 
     type,
     admin_level,
@@ -341,50 +341,50 @@ SELECT
     end_decdate,
     start_date,
     end_date
-FROM mview_admin_boundaries_relations_ways
+FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
 WITH DATA;
 
 -- Create indexes for performance
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_z0_2_idx 
-ON mview_land_ohm_lines_z0_2 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z0_2_idx 
+ON mv_admin_boundaries_lines_z0_2 (admin_level, member, group_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_z3_5_idx 
-ON mview_land_ohm_lines_z3_5 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z3_5_idx 
+ON mv_admin_boundaries_lines_z3_5 (admin_level, member, group_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_z6_7_idx 
-ON mview_land_ohm_lines_z6_7 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z6_7_idx 
+ON mv_admin_boundaries_lines_z6_7 (admin_level, member, group_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_z8_9_idx 
-ON mview_land_ohm_lines_z8_9 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z8_9_idx 
+ON mv_admin_boundaries_lines_z8_9 (admin_level, member, group_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_z10_12_idx 
-ON mview_land_ohm_lines_z10_12 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z10_12_idx 
+ON mv_admin_boundaries_lines_z10_12 (admin_level, member, group_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_z13_15_idx 
-ON mview_land_ohm_lines_z13_15 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z13_15_idx 
+ON mv_admin_boundaries_lines_z13_15 (admin_level, member, group_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS mview_admin_boundaries_z16_20_idx 
-ON mview_land_ohm_lines_z16_20 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_idx 
+ON mv_admin_boundaries_lines_z16_20 (admin_level, member, group_id);
 
 -- Spatial indexes
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_z0_2_geometry_idx 
-ON mview_land_ohm_lines_z0_2 USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z0_2_geometry_idx 
+ON mv_admin_boundaries_lines_z0_2 USING GIST (geometry);
 
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_z3_5_geometry_idx 
-ON mview_land_ohm_lines_z3_5 USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z3_5_geometry_idx 
+ON mv_admin_boundaries_lines_z3_5 USING GIST (geometry);
 
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_z6_7_geometry_idx 
-ON mview_land_ohm_lines_z6_7 USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z6_7_geometry_idx 
+ON mv_admin_boundaries_lines_z6_7 USING GIST (geometry);
 
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_z8_9_geometry_idx 
-ON mview_land_ohm_lines_z8_9 USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z8_9_geometry_idx 
+ON mv_admin_boundaries_lines_z8_9 USING GIST (geometry);
 
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_z10_12_geometry_idx 
-ON mview_land_ohm_lines_z10_12 USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z10_12_geometry_idx 
+ON mv_admin_boundaries_lines_z10_12 USING GIST (geometry);
 
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_z13_15_geometry_idx 
-ON mview_land_ohm_lines_z13_15 USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z13_15_geometry_idx 
+ON mv_admin_boundaries_lines_z13_15 USING GIST (geometry);
 
-CREATE INDEX IF NOT EXISTS mview_admin_boundaries_z16_20_geometry_idx 
-ON mview_land_ohm_lines_z16_20 USING GIST (geometry);
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_geometry_idx 
+ON mv_admin_boundaries_lines_z16_20 USING GIST (geometry);

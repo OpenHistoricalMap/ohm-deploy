@@ -88,4 +88,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_or_refresh_amenity_points_centroids_mview('mview_amenity_points_centroids_z14_20', 0, TRUE);
+SELECT create_or_refresh_amenity_points_centroids_mview('mv_amenity_points_centroids_z14_20', 0, TRUE);
