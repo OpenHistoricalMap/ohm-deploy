@@ -1,7 +1,7 @@
 -- ============================================================================
--- Function: create_buildings_points_centroids_mview
+-- Function: create_or_refresh_buildings_points_centroids_mview
 -- Description:
---   This function creates a materialized view that merges named centroids from
+--   This function creates or refreshes a materialized view that merges named centroids from
 --   polygonal building areas and named building points into a single unified layer 
 --   called "buildings_points_centroids".
 --
@@ -13,8 +13,9 @@
 --   height and area.
 --
 -- Parameters:
---   view_name   TEXT             - The name of the materialized view to be created.
---   min_area    DOUBLE PRECISION - Minimum area (in m²) to include building areas.
+--   view_name     TEXT              - The name of the materialized view to be created.
+--   min_area      DOUBLE PRECISION - Minimum area (in m²) to include building areas.
+--   force_create  BOOLEAN DEFAULT FALSE - If true, forces recreation regardless of changes.
 --
 -- Notes:
 --   - Only features with a non-empty "name" are included.
@@ -22,12 +23,14 @@
 --   - Area is stored as integer (m²) to reduce tile size.
 --   - Height values are sanitized (non-numeric characters removed).
 --   - Geometry is indexed using GiST; uniqueness is enforced on (osm_id, type).
+--   - Multilingual name columns are dynamically added from the `languages` table.
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS create_buildings_points_centroids_mview;
-CREATE OR REPLACE FUNCTION create_buildings_points_centroids_mview(
+DROP FUNCTION IF EXISTS create_or_refresh_buildings_points_centroids_mview;
+CREATE OR REPLACE FUNCTION create_or_refresh_buildings_points_centroids_mview(
     view_name TEXT,
-    min_area DOUBLE PRECISION DEFAULT 0
+    min_area DOUBLE PRECISION DEFAULT 0,
+    force_create BOOLEAN DEFAULT FALSE
 )
 RETURNS void AS $$
 DECLARE
@@ -35,7 +38,16 @@ DECLARE
     sql_create TEXT;
     sql_index TEXT;
     sql_unique_index TEXT;
+    lang_columns TEXT;
 BEGIN
+    -- Check if view should be recreated
+    IF NOT force_create AND NOT recreate_or_refresh_view(view_name) THEN
+        RETURN;
+    END IF;
+
+    -- Get dynamic language columns from `languages` table
+    lang_columns := get_language_columns();
+
     RAISE NOTICE 'Dropping materialized view %', view_name;
     sql_drop := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
     EXECUTE sql_drop;
@@ -53,7 +65,8 @@ BEGIN
             type,
             start_date,
             end_date,
-            tags
+            tags,
+            %s
         FROM osm_buildings_points_named
         WHERE name IS NOT NULL AND name <> ''
 
@@ -64,18 +77,18 @@ BEGIN
             osm_id,
             name,
             CASE
-			  WHEN height IS NULL OR trim(height) = '' THEN NULL
-			  ELSE regexp_replace(height, '[^0-9\.]', '', 'g')::double precision
-			END AS height,
+                WHEN height IS NULL OR trim(height) = '' THEN NULL
+                ELSE regexp_replace(height, '[^0-9\.]', '', 'g')::double precision
+            END AS height,
             ROUND(area)::bigint AS area_m2,
             type,
             start_date,
             end_date,
-            tags
+            tags,
+            %s
         FROM osm_buildings
-        WHERE name IS NOT NULL AND name <> '' AND area >= %L
-
-    $sql$, view_name, min_area);
+        WHERE name IS NOT NULL AND name <> '' AND area >= %L;
+    $sql$, view_name, lang_columns, lang_columns, min_area);
     EXECUTE sql_create;
 
     RAISE NOTICE 'Creating indexes on %', view_name;
@@ -89,5 +102,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-SELECT create_buildings_points_centroids_mview('mview_buildings_points_centroids_z14_20', 0);
+SELECT create_or_refresh_buildings_points_centroids_mview('mview_buildings_points_centroids_z14_20', 0);
