@@ -148,6 +148,7 @@ fossgis_valhalla_url: "https://valhalla1.openstreetmap.de/route"
 #wikipedia_auth_secret: ""
 openstreetmap_auth_id: ""
 openstreetmap_auth_secret: ""
+openstreetmap_auth_scopes: ["read_prefs"]
 # Thunderforest authentication details
 #thunderforest_key: ""
 # Tracestrack authentication details
