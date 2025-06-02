@@ -54,8 +54,10 @@ if __name__ == "__main__":
     template_file = args.template
     providers_dir = args.providers
     output_file = args.output
-    requested_providers = [p.strip() for p in args.provider_names.split(',')]
-
+    requested_providers = [
+        p.strip() for p in args.provider_names.split(',')
+        if not p.strip().startswith('--') # <-- Igno  providers with "--"
+    ]
     # Load and process template
     with open(template_file, 'r') as f:
         template_content = f.read()

@@ -234,36 +234,42 @@ function importData() {
         -deployproduction
 
     log_message "Creating material views and indexes..."
-    psql $PG_CONNECTION -f queries/date_utils.sql
-    psql $PG_CONNECTION -f queries/mviews_land.sql 
-    psql $PG_CONNECTION -f queries/mviews_ne_lakes.sql 
-    psql $PG_CONNECTION -f queries/mviews_admin_boundaries_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_admin_boundaries_merged.sql 
-    psql $PG_CONNECTION -f queries/mviews_transport_lines.sql 
-    psql $PG_CONNECTION -f queries/mviews_water_areas.sql 
-    psql $PG_CONNECTION -f queries/mviews_water_areas_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_landuse_areas.sql 
-    psql $PG_CONNECTION -f queries/mviews_landuse_areas_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_other_areas_centroids.sql 
+    # Create functions under queries/utils
+    for sql_file in $(find "queries/utils" -type f -name "*.sql"); do
+        log_message "Executing util functions: $sql_file..."
+        psql $PG_CONNECTION -f "$sql_file"
+    done
 
-    # Funtion to create points_centroids
-    psql $PG_CONNECTION -f queries/mviews_amenity_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_buildings_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_landuse_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_other_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_place_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_transport_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_place_areas.sql
+    # Create functions  for natural earth
+    log_message " Executing NE views: queries/ne_mviews/lakes.sql..."
+    psql $PG_CONNECTION -f queries/ne_mviews/lakes.sql
 
+    # Create osm land functions
+    log_message " Executing OSM land views: queries/osm_views/land.sql..."
+    psql $PG_CONNECTION -f queries/osm_views/land.sql
+
+    # Create functions under queries/ohm_views
+    for sql_file in $(find "queries/ohm_views" -type f -name "*.sql"); do
+        log_message " Executing OHM views: $sql_file..."
+        psql $PG_CONNECTION -f "$sql_file"
+    done
+    
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }
 
+# Function to fetch languages from Taginfo API
+function fetchLanguages() {
+    log_message "Fetching languages..."
+    while true; do
+        python fetch_languages.py
+        sleep 72000
+    done
+}
 
 function countTables() {
     psql $PG_CONNECTION -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" | xargs
 }
-
 
 # Wait for PostgreSQL to be ready
 log_message "Waiting for PostgreSQL to be ready..."
@@ -277,9 +283,13 @@ log_message "PostgreSQL is ready! Proceeding with setup..."
 # Run date functions
 psql "$PG_CONNECTION" -f /usr/local/datefunctions/datefunctions.sql
 
+# Start the background process to fetch languages
+fetchLanguages &
+
 # Check the number of tables in the database
 table_count=$(countTables)
 
+## Start the main process
 # Check if the INIT_FILE exists or if the table count is greater than 30
 if [[ -f "$INIT_FILE" || "$table_count" -gt 30 ]]; then
     updateData
