@@ -38,7 +38,7 @@ DECLARE
   sql_unique_index TEXT;
 BEGIN
   -- Check if we should recreate or refresh the view
-  IF NOT force_create AND NOT recreate_or_refresh_view(view_name) THEN
+  IF NOT force_create AND NOT refresh_mview(view_name) THEN
     RETURN FALSE;
   END IF;
 

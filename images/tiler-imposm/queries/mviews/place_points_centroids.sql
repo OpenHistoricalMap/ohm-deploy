@@ -38,7 +38,7 @@ DECLARE
     lang_columns TEXT;
 BEGIN
     -- Check if we should recreate or refresh the view
-    IF NOT force_create AND NOT recreate_or_refresh_view(view_name) THEN
+    IF NOT force_create AND NOT refresh_mview(view_name) THEN
         RETURN;
     END IF;
 

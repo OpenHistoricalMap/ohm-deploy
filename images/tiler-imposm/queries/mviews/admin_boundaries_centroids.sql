@@ -31,7 +31,7 @@ DECLARE
   lang_columns TEXT;
 BEGIN
   -- Skip recreation if not forced and no language change
-  IF NOT force_create AND NOT recreate_or_refresh_view(mview_name) THEN
+  IF NOT force_create AND NOT refresh_mview(mview_name) THEN
     RETURN;
   END IF;
 

@@ -22,7 +22,7 @@ DECLARE
     lang_columns TEXT;
 BEGIN
     -- Check if we should recreate or refresh the view
-    IF NOT force_create AND NOT recreate_or_refresh_view(mview_name) THEN
+    IF NOT force_create AND NOT refresh_mview(mview_name) THEN
         RETURN;
     END IF;
 
@@ -85,10 +85,66 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create the materialized views for each zoom level
-SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z0_2', 'mv_water_areas_z0_2_subdivided');
-SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z3_5', 'mv_water_areas_z3_5_subdivided');
-SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z6_7', 'mv_water_areas_z6_7_subdivided');
-SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z8_9', 'mv_water_areas_z8_9_subdivided');
 
--- We are giong to use same water tables for zoom>9, osm_water_areas_z10_12, osm_water_areas_z13_15 and osm_water_areas
+
+DROP FUNCTION IF EXISTS create_or_refresh_water_areas_mview;
+CREATE OR REPLACE FUNCTION create_or_refresh_water_areas_mview(
+  input_table TEXT,
+  mview_name TEXT,
+  force_create BOOLEAN DEFAULT FALSE
+)
+RETURNS void AS $$
+DECLARE
+    lang_columns TEXT;
+    sql TEXT;
+BEGIN
+    -- Check if we should recreate or refresh the view
+    IF NOT force_create AND NOT refresh_mview(mview_name) THEN
+        RETURN;
+    END IF;
+
+    RAISE NOTICE 'Creating water areas materialized view from % to %', input_table, mview_name;
+
+    -- Get dynamic language columns from `languages` table
+    lang_columns := get_language_columns();
+
+    -- Drop existing materialized view if it exists
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I;', mview_name);
+
+    -- Construct and execute the CREATE MATERIALIZED VIEW statement
+    sql := format($sql$
+        CREATE MATERIALIZED VIEW %I AS
+        SELECT
+            osm_id,
+            geometry,
+            name,
+            type,
+            start_date,
+            end_date,
+            area,
+            tags,
+            %s
+        FROM %I
+        WHERE geometry IS NOT NULL;
+    $sql$, mview_name, lang_columns, input_table);
+
+    EXECUTE sql;
+
+    -- Create unique index
+    EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(osm_id);', mview_name, mview_name);
+
+    -- Create geometry index
+    EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Create the materialized views for each zoom level
+SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z0_2', 'mv_water_areas_z0_2_subdivided', TRUE);
+SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z3_5', 'mv_water_areas_z3_5_subdivided', TRUE);
+SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z6_7', 'mv_water_areas_z6_7_subdivided', TRUE);
+SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z8_9', 'mv_water_areas_z8_9_subdivided', TRUE);
+-- Create mv using generic function
+SELECT create_or_refresh_generic_mview('osm_water_areas_z10_12', 'mv_water_areas_z10_12', TRUE);
+SELECT create_or_refresh_generic_mview('osm_water_areas_z13_15', 'mv_water_areas_z13_15', TRUE);
+SELECT create_or_refresh_generic_mview('osm_water_areas', 'mv_water_areas_z16_20', TRUE);

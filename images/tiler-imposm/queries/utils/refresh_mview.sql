@@ -1,5 +1,5 @@
 -- ============================================================================
--- Function: recreate_or_refresh_view
+-- Function: refresh_mview
 -- Description:
 --   Checks if the materialized view exists and whether the languages hash
 --   has changed. If the view exists and the languages hash hasn't changed,
@@ -12,7 +12,7 @@
 -- Returns:
 --   BOOLEAN - TRUE if the view should be recreated, FALSE if only refreshed.
 -- ============================================================================
-CREATE OR REPLACE FUNCTION recreate_or_refresh_view(view_name TEXT)
+CREATE OR REPLACE FUNCTION refresh_mview(view_name TEXT)
 RETURNS BOOLEAN AS $$
 DECLARE
     view_exists BOOLEAN;
