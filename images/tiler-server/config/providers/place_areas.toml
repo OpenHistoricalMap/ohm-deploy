@@ -17,7 +17,7 @@ SELECT
     tags->'capital' AS capital,
     {{LENGUAGES}}
 FROM 
-    mview_place_areas_z14_20 
+    mv_place_areas_z14_20 
 WHERE 
     geometry && !BBOX!
 """

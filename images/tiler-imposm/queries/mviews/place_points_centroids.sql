@@ -1,5 +1,5 @@
 -- ============================================================================
--- Function: create_place_points_centroids_mview
+-- Function: create_or_refresh_place_points_centroids_mview
 -- Description:
 --   This function creates a materialized view that combines named centroids 
 --   from polygonal place areas and named place points into a unified layer.
@@ -10,9 +10,9 @@
 --   view_name            TEXT     - The name of the materialized view to create.
 --   allowed_types_areas  TEXT[]   - Optional array of place types (e.g., 'region', 'state')
 --                                   to include **only from** `osm_place_areas`.
---                                   If empty or NULL, all area types are included.
 --   allowed_types_points TEXT[]   - Optional array of place types to include **only from**
 --                                   `osm_place_points`. If empty or NULL, all point types are included.
+--   force_create         BOOLEAN  - If TRUE, forces the materialized view to be recreated.
 --
 -- Notes:
 --   - Only features with a non-empty "name" are included.
@@ -23,20 +23,31 @@
 --     as centroids vs. raw points.
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS create_place_points_centroids_mview;
-CREATE OR REPLACE FUNCTION create_place_points_centroids_mview(
+DROP FUNCTION IF EXISTS create_or_refresh_place_points_centroids_mview;
+CREATE OR REPLACE FUNCTION create_or_refresh_place_points_centroids_mview(
     view_name TEXT,
     allowed_types_areas TEXT[] DEFAULT ARRAY[]::TEXT[],
-    allowed_types_points TEXT[] DEFAULT ARRAY[]::TEXT[]
+    allowed_types_points TEXT[] DEFAULT ARRAY[]::TEXT[],
+    force_create BOOLEAN DEFAULT FALSE
 )
 RETURNS void AS $$
 DECLARE 
     sql TEXT;
     type_filter_areas TEXT := '';
     type_filter_points TEXT := '';
+    lang_columns TEXT;
 BEGIN
-    RAISE NOTICE 'Creating materialized view: %', view_name;
+    -- Check if we should recreate or refresh the view
+    IF NOT force_create AND NOT recreate_or_refresh_view(view_name) THEN
+        RETURN;
+    END IF;
 
+    RAISE NOTICE 'Creating or refreshing view: %', view_name;
+
+    -- Get dynamic language columns
+    lang_columns := get_language_columns();
+
+    -- Apply filters for allowed types
     IF array_length(allowed_types_areas, 1) IS NOT NULL THEN
         type_filter_areas := format(' AND type = ANY (%L)', allowed_types_areas);
     END IF;
@@ -58,6 +69,7 @@ BEGIN
             end_date,
             ROUND(area)::bigint AS area_m2,
             tags->'capital' AS capital,
+            %s,
             tags
         FROM osm_place_areas
         WHERE name IS NOT NULL AND name <> ''%s
@@ -71,12 +83,13 @@ BEGIN
             type,
             start_date,
             end_date,
-            NULL AS area,
+            NULL AS area_m2,
             tags->'capital' AS capital,
+            %s,
             tags
         FROM osm_place_points
         WHERE osm_id > 0 AND name IS NOT NULL AND name <> ''%s
-    $sql$, view_name, type_filter_areas, type_filter_points);
+    $sql$, view_name, lang_columns, type_filter_areas, lang_columns, type_filter_points);
 
     EXECUTE sql;
 
@@ -85,26 +98,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_place_points_centroids_mview(
-  'mview_place_points_centroids_z0_2',
+
+SELECT create_or_refresh_place_points_centroids_mview(
+  'mv_place_points_centroids_z0_2',
   ARRAY['plot', 'square', 'islet'],
-  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory']
+  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory'],
+  TRUE
 );
 
-SELECT create_place_points_centroids_mview(
-  'mview_place_points_centroids_z3_5',
+SELECT create_or_refresh_place_points_centroids_mview(
+  'mv_place_points_centroids_z3_5',
   ARRAY['plot', 'square', 'islet'],
-  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region']
+  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region'],
+  TRUE
 );
 
-SELECT create_place_points_centroids_mview(
-  'mview_place_points_centroids_z6_10',
+SELECT create_or_refresh_place_points_centroids_mview(
+  'mv_place_points_centroids_z6_10',
   ARRAY['plot', 'square', 'islet'],
-  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town']
+  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town'],
+  TRUE
 );
 
-SELECT create_place_points_centroids_mview(
-  'mview_place_points_centroids_z11_20',
+SELECT create_or_refresh_place_points_centroids_mview(
+  'mv_place_points_centroids_z11_20',
   ARRAY['plot', 'square', 'islet'],
-  ARRAY['country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood']
+  ARRAY['country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood'],
+  TRUE
 );
