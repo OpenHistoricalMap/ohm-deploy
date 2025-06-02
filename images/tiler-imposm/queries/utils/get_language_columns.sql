@@ -1,24 +1,26 @@
 -- ============================================================================
--- Function: get_language_columns()
+-- Function: get_language_columns(prefix TEXT)
 -- Description:
---   Returns a comma-separated string of SQL expressions to extract language
---   tag values from the `tags` hstore using the `languages` table.
+--   Returns a comma-separated list of SQL expressions like:
+--     prefix.tags -> 'name:es' AS "name_es"
+--   Based on aliases found in the `languages` table.
 --
--- Output:
---   TEXT - e.g., "tags -> 'name:es' AS name_es, tags -> 'name:fr' AS name_fr"
+-- Example:
+--   get_language_columns('r.') → "r.tags->'name:es' AS name_es, ..."
 -- ============================================================================
-DROP FUNCTION IF EXISTS get_language_columns;
-CREATE OR REPLACE FUNCTION get_language_columns()
+
+CREATE OR REPLACE FUNCTION get_language_columns(prefix TEXT)
 RETURNS TEXT AS $$
 DECLARE
-    lang_columns TEXT;
+    result TEXT;
 BEGIN
     SELECT string_agg(
-        format('tags -> %L AS %I', key_name, alias),
+        format('%s.tags -> %L AS %I', prefix, 'name:' || alias, 'name_' || alias),
         ', '
-    ) INTO lang_columns
+    )
+    INTO result
     FROM languages;
 
-    RETURN lang_columns;
+    RETURN COALESCE(result, '');
 END;
 $$ LANGUAGE plpgsql;
