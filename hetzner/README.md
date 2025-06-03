@@ -14,9 +14,9 @@ docker compose -f hetzner/tiler.production.yml up -d
 # docker compose -f hetzner/tiler.production.yml up tiler_production -d
 # docker compose -f hetzner/tiler.production.yml up imposm_production -d
 # docker compose -f hetzner/tiler.production.yml up cache_production -d
-# docker compose -f hetzner/tiler.production.yml up global_seeding_production -d
-# docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d
-
+# docker compose -f hetzner/tiler.production.yml up global_seeding_production -d --force-recreate
+# docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
+# docker compose -f hetzner/tiler.production.yml up remove_cache_tiles_production -d --force-recreate
 ```
 
 🛠 Deploying to Staging

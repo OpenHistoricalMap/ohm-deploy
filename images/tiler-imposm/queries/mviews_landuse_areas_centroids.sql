@@ -1,4 +1,25 @@
--- This script creates materialized views for  water cetroids fore each zoom levels.
+-- ============================================================================
+-- Function: create_landuse_centroid_mviews
+-- Description:
+--   This function creates a materialized view that generates centroid points
+--   from named landuse area geometries using ST_MaximumInscribedCircle.
+--   It is intended to support generalized vector tiles for specific zoom levels.
+--
+--   The resulting view includes only features with a non-empty "name", and uses
+--   DISTINCT ON (osm_id, type, class) to avoid duplicate geometries.
+--
+-- Parameters:
+--   source_table TEXT - Name of the source table containing polygonal landuse areas.
+--   view_name    TEXT - Name of the materialized view to be created.
+--
+-- Notes:
+--   - Only features with a non-null, non-empty "name" are included.
+--   - Centroids are calculated for polygon geometries using the center of the
+--     maximum inscribed circle, improving label placement.
+--   - A GiST index is created on the geometry column for spatial efficiency.
+--   - A unique index is created on (osm_id, type, class) to ensure consistency.
+--   - Designed for use in rendering landuse labels in vector tile maps.
+-- ============================================================================
 DROP FUNCTION IF EXISTS create_landuse_centroid_mviews;
 CREATE OR REPLACE FUNCTION create_landuse_centroid_mviews(
     source_table TEXT,
@@ -21,7 +42,7 @@ BEGIN
     -- Create the materialized view with centroid geometry
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
-        SELECT
+        SELECT DISTINCT ON (osm_id, type, class)
             osm_id,
             name,
             type,
@@ -43,7 +64,7 @@ BEGIN
     RAISE NOTICE 'Created spatial index: idx_%_geom', view_name;
 
     -- Create unique index on osm_id
-    sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id, type);', view_name, view_name);
+    sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id, type, class);', view_name, view_name);
     EXECUTE sql_unique_index;
     RAISE NOTICE 'Created unique index: idx_%_osm_id', view_name;
 

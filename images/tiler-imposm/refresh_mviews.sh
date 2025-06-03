@@ -84,6 +84,10 @@ other_areas_views=(
     "mview_other_areas_centroids_z15_20"
 )
 
+places_areas_views=(
+    mview_place_areas_z14_20
+)
+
 points_centroids_views=(
     # Amenity
     mview_amenity_points_centroids_z14_20
@@ -104,6 +108,7 @@ points_centroids_views=(
     mview_place_points_centroids_z11_20
 )
 
+
 # Start refreshing in parallel with a sleep interval  all of them in average of 4 min refresh
 ## Benchmark admin refresh those views takes 4 min to complete
 refresh_mviews_group "admin" 1 "${admin_views[@]}" &
@@ -115,5 +120,7 @@ refresh_mviews_group "water" 160 "${water_views[@]}" &
 refresh_mviews_group "landuse" 220 "${landuse_views[@]}" &
 ## Benchmark other areas and centroids refresh those views takes 3 secs to complete
 refresh_mviews_group "other_areas" 230 "${other_areas_views[@]}" &
+# Benchmark: Refreshing place areas takes 2 seconds to complete.
+refresh_mviews_group "place_areas" 300 "${places_areas_views[@]}" &
 # Benchmark: Refreshing all points/centroids takes 180 seconds to complete.
 refresh_mviews_group "points_centroids" 180 "${points_centroids_views[@]}" &

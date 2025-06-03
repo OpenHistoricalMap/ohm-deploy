@@ -2,7 +2,7 @@ services:
   db:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_27_05_2025:/var/lib/postgresql/data
+      - /data/tiler_production_db_28_05_2025:/var/lib/postgresql/data
       - ./config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
@@ -17,10 +17,16 @@ services:
       - .env.staging
     networks:
       - tiler_network_staging
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 2G
+
   imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2527.hd2096b0
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2572.h77205fe
     volumes:
-      - /data/tiler_production_imposm_27_05_2025:/mnt/data
+      - /data/tiler_production_imposm_28_05_2025:/mnt/data
     command:
       - sh
       - -c
@@ -31,14 +37,23 @@ services:
     restart: always
     networks:
       - tiler_network_staging
-
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #       memory: 1G
   tiler:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2526.h5aeedab
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
     ports:
       - "9091:9090"
     env_file:
       - .env.staging
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128MiB
     networks:
       - tiler_network_staging
 
@@ -56,7 +71,7 @@ services:
       - tiler_network_staging
 
   global_seeding:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2526.h5aeedab
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
     env_file:
       - .env.staging
     entrypoint:
@@ -85,7 +100,7 @@ services:
       - tiler_network_staging
 
   tile_coverage_seeding:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2526.h5aeedab
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
     env_file:
       - .env.staging
     entrypoint:

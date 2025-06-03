@@ -169,6 +169,8 @@ osm-seed:
         RAILS_STORAGE_BUCKET: ohm-website-staging
         EXTERNAL_CGIMAP: true
         PASSENGER_MAX_POOL_SIZE: 3
+        OPENSTREETMAP_AUTH_ID: {{STAGING_OPENSTREETMAP_AUTH_ID}}
+        OPENSTREETMAP_AUTH_SECRET: {{STAGING_OPENSTREETMAP_AUTH_SECRET}}
       resources:
         enabled: true
         requests:
@@ -828,7 +830,7 @@ osm-seed:
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
@@ -859,7 +861,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: postgis/postgis
