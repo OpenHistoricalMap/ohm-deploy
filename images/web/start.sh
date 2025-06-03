@@ -70,8 +70,8 @@ EOF
   find "$workdir/public/assets/" -type f -exec sed -i -e "s#overpass-api.de#${OVERPASS_URL}#g" {} +
 
   ### Setting up OpenStreetMap authentication
-  sed -i -e 's/^openstreetmap_auth_id: ".*"/openstreetmap_auth_id: "'$OPENSTREETMAP_AUTH_ID'"/g' $workdir/config/settings.yml
-  sed -i -e 's/^openstreetmap_auth_secret: ".*"/openstreetmap_auth_secret: "'$OPENSTREETMAP_AUTH_SECRET'"/g' $workdir/config/settings.yml
+  # sed -i -e 's/^openstreetmap_auth_id: ".*"/openstreetmap_auth_id: "'$OPENSTREETMAP_AUTH_ID'"/g' $workdir/config/settings.yml
+  # sed -i -e 's/^openstreetmap_auth_secret: ".*"/openstreetmap_auth_secret: "'$OPENSTREETMAP_AUTH_SECRET'"/g' $workdir/config/settings.yml
 
   ## Setting up required credentials 
   echo $RAILS_CREDENTIALS_YML_ENC > config/credentials.yml.enc
