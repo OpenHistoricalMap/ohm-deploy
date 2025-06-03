@@ -145,6 +145,6 @@ SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z3_5', 'm
 SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z6_7', 'mv_water_areas_z6_7_subdivided', TRUE);
 SELECT create_or_refresh_water_areas_subdivided_mview('osm_water_areas_z8_9', 'mv_water_areas_z8_9_subdivided', TRUE);
 -- Create mv using generic function
-SELECT create_or_refresh_generic_mview('osm_water_areas_z10_12', 'mv_water_areas_z10_12', TRUE);
-SELECT create_or_refresh_generic_mview('osm_water_areas_z13_15', 'mv_water_areas_z13_15', TRUE);
-SELECT create_or_refresh_generic_mview('osm_water_areas', 'mv_water_areas_z16_20', TRUE);
+SELECT create_or_refresh_generic_mview('osm_water_areas_z10_12', 'mv_water_areas_z10_12', TRUE, ARRAY['osm_id', 'type']);
+SELECT create_or_refresh_generic_mview('osm_water_areas_z13_15', 'mv_water_areas_z13_15', TRUE, ARRAY['osm_id', 'type']);
+SELECT create_or_refresh_generic_mview('osm_water_areas', 'mv_water_areas_z16_20', TRUE, ARRAY['osm_id', 'type']);

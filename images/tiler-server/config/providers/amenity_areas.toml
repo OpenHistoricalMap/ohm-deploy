@@ -1,4 +1,3 @@
-# Layer configuration for amenity areas
 [[providers.layers]]
 name = "amenity_areas"
 geometry_fieldname = "geometry"
@@ -8,7 +7,7 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     osm_id, 
-    name, 
+    NULLIF(name, '') AS name, 
     type, 
     NULLIF(start_date, '') AS start_date, 
     NULLIF(end_date, '') AS end_date, 
@@ -17,7 +16,7 @@ SELECT
     isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_amenity_areas 
+    mv_amenity_areas_z14_20
 WHERE 
     geometry && !BBOX!
 """

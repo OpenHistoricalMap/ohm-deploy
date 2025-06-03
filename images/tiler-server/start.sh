@@ -4,9 +4,9 @@ set -euo pipefail
 echo "Starting tile server setup..."
 
 # Configurable paths
-UTILS_DIR="/app/utils"
-CONFIG_DIR="/app/config"
-TEGOLA_CONFIG_DIR="/app/tegola_config"
+UTILS_DIR="/opt/utils"
+CONFIG_DIR="/opt/config"
+TEGOLA_CONFIG_DIR="/opt/tegola_config"
 TEGOLA_CONFIG_FILE="${TEGOLA_CONFIG_DIR}/config.toml"
 
 mkdir -p ${CONFIG_DIR} ${TEGOLA_CONFIG_DIR}
@@ -32,23 +32,23 @@ transport_lines,
 --transport_points,
 transport_points_centroids,
 --route_lines,
---amenity_areas,
+amenity_areas,
 --amenity_areas.centroids,
 --amenity_points,
 amenity_points_centroids,
---buildings,
+buildings_areas,
 buildings_points_centroids,
 --buildings.centroids,
 --buildings_points,
---landuse_areas,
+landuse_areas,
 --landuse_areas.centroids,
 landuse_points_centroids,
 --landuse_points,
---landuse_lines,
---other_areas,
+landuse_lines,
+other_areas,
 --other_areas.centroids,
 other_points_centroids,
---other_lines,
+other_lines,
 --other_points"
 
 

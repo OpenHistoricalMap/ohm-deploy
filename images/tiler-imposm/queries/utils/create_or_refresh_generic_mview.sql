@@ -19,7 +19,9 @@
 --   - Automatically adds indexes for geometry and a composite unique index based on input columns.
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS create_or_refresh_generic_mview;
+
+DROP FUNCTION IF EXISTS create_or_refresh_generic_mview(TEXT, TEXT, BOOLEAN, TEXT[]);
+
 CREATE OR REPLACE FUNCTION create_or_refresh_generic_mview(
   input_table TEXT,
   mview_name TEXT,
@@ -78,3 +80,4 @@ BEGIN
     END;
 END;
 $$ LANGUAGE plpgsql;
+
