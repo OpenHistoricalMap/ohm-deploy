@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Function: create_amenity_points_centroids_mview
 -- Description:
---   This function createsa materialized view that combines named
+--   This function creates  materialized view that combines named
 --   centroids from polygonal amenity areas and named amenity points into a 
 --   unified layer called "amenity_points_centroids".
 --

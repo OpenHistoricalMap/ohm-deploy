@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Function: create_other_points_centroids_mview
 -- Description:
---   createsa materialized view combining:
+--   creates  materialized view combining:
 --     - Centroids of polygon features from `osm_other_areas`, and
 --     - Point features from `osm_other_points`.
 --   The result is a unified layer of named features for rendering and labeling.

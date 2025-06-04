@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Function: create_buildings_points_centroids_mview
 -- Description:
---   This function createsa materialized view that merges named centroids from
+--   This function creates  materialized view that merges named centroids from
 --   polygonal building areas and named building points into a single unified layer 
 --   called "buildings_points_centroids".
 --

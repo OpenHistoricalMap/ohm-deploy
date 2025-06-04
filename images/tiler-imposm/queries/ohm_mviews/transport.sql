@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Function: create_transport_lines_mview
 -- Description:
---   createsa materialized view that merges transport lines and multi-lines
+--   creates  materialized view that merges transport lines and multi-lines
 --   into one unified layer for rendering, including multilingual name tags.
 --
 -- Parameters:
@@ -15,7 +15,6 @@
 --   - If force_create is FALSE, the function checks whether language hash or view state changed.
 --   - Creates spatial (GiST) and unique indexes.
 -- ============================================================================
-
 DROP FUNCTION IF EXISTS create_transport_lines_mview;
 CREATE OR REPLACE FUNCTION create_transport_lines_mview(
   lines_table TEXT,
@@ -25,97 +24,100 @@ CREATE OR REPLACE FUNCTION create_transport_lines_mview(
 RETURNS void AS $$
 DECLARE
   lang_columns TEXT;
-  sql_drop TEXT;
-  sql_create TEXT;
-  sql_unique_index TEXT;
-  sql_geometry_index TEXT;
+  sql TEXT;
 BEGIN
   RAISE NOTICE 'Creating or refreshing transport lines view: %', mview_name;
   RAISE NOTICE 'Tables: {"lines": "%", "multilines": "%"}', lines_table, multilines_table;
 
-  -- Get dynamic language columns from `languages` table
   lang_columns := get_language_columns();
 
-  -- Drop existing view
-  sql_drop := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
-  EXECUTE sql_drop;
+  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
 
-  -- Create new materialized view
-  sql_create := format($sql$
+  sql := format($sql$
     CREATE MATERIALIZED VIEW %I AS
-    SELECT DISTINCT ON (osm_id, type) 
-      md5(COALESCE(CAST(osm_id AS TEXT), '') || '_' || COALESCE(type, '')) AS id, 
-      osm_id,
-      geometry,
-      type,
-      name,
-      tunnel,
-      bridge,
-      oneway,
-      ref,
-      z_order,
-      access,
-      service,
-      ford,
-      class,
-      electrified,
-      highspeed,
-      usage,
-      railway,
-      aeroway,
-      highway,
-      route,
-      start_date,
-      end_date,
-      tags,
-      NULL AS member,
-      'way' AS source_type,
-      %s
-    FROM %I
-    WHERE geometry IS NOT NULL
+    WITH combined AS (
+      SELECT
+        md5(
+          COALESCE(CAST(osm_id AS TEXT), '') || '_' ||
+          COALESCE(type, '') || '_' ||
+          COALESCE(class, '')
+        ) AS id,
+        osm_id,
+        geometry,
+        type,
+        name,
+        tunnel,
+        bridge,
+        oneway,
+        ref,
+        z_order,
+        access,
+        service,
+        ford,
+        class,
+        electrified,
+        highspeed,
+        usage,
+        railway,
+        aeroway,
+        highway,
+        route,
+        start_date,
+        end_date,
+        tags,
+        NULL AS member,
+        'way' AS source_type,
+        %s
+      FROM %I
+      WHERE geometry IS NOT NULL
 
-    UNION ALL
+      UNION ALL
 
-    SELECT DISTINCT ON (osm_id, type, member)
-      md5(COALESCE(CAST(osm_id AS TEXT), '') || '_' || COALESCE(CAST(member AS TEXT), '') || '_' || COALESCE(type, '')) AS id,
-      osm_id,
-      geometry,
-      type,
-      name,
-      tunnel,
-      bridge,
-      oneway,
-      ref,
-      z_order,
-      access,
-      service,
-      ford,
-      class,
-      electrified,
-      highspeed,
-      usage,
-      railway,
-      aeroway,
-      highway,
-      route,
-      start_date,
-      end_date,
-      tags,
-      member,
-      'relation' AS source_type,
-      %s
-    FROM %I
-    WHERE ST_GeometryType(geometry) = 'ST_LineString'
-      AND geometry IS NOT NULL;
+      SELECT
+        md5(
+          COALESCE(CAST(osm_id AS TEXT), '') || '_' ||
+          COALESCE(CAST(member AS TEXT), '') || '_' ||
+          COALESCE(type, '') || '_' ||
+          COALESCE(class, '')
+        ) AS id,
+        osm_id,
+        geometry,
+        type,
+        name,
+        tunnel,
+        bridge,
+        oneway,
+        ref,
+        z_order,
+        access,
+        service,
+        ford,
+        class,
+        electrified,
+        highspeed,
+        usage,
+        railway,
+        aeroway,
+        highway,
+        route,
+        start_date,
+        end_date,
+        tags,
+        member,
+        'relation' AS source_type,
+        %s
+      FROM %I
+      WHERE ST_GeometryType(geometry) = 'ST_LineString'
+        AND geometry IS NOT NULL
+    )
+    SELECT DISTINCT ON (id) *
+    FROM combined;
   $sql$, mview_name, lang_columns, lines_table, lang_columns, multilines_table);
-  EXECUTE sql_create;
+  
+  EXECUTE sql;
 
-  -- Indexes
-  sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (id);', mview_name, mview_name);
-  EXECUTE sql_unique_index;
-
-  sql_geometry_index := format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
-  EXECUTE sql_geometry_index;
+  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I(id);', mview_name, mview_name);
+  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST(geometry);', mview_name, mview_name);
 
   RAISE NOTICE 'Materialized view % created and indexed.', mview_name;
 END;
@@ -125,7 +127,7 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Function: create_transport_points_centroids_mview
 -- Description:
---   This function createsa materialized view that merges transport area centroids 
+--   This function creates  materialized view that merges transport area centroids 
 --   (calculated from polygons) and transport points into a unified layer.
 --
 -- Parameters:
@@ -221,7 +223,7 @@ SELECT create_transport_lines_mview('osm_transport_lines', 'osm_transport_multil
 -- ============================================================================
 -- Create materialized views for transport areas
 -- ============================================================================
-SELECT create_generic_mview('osm_transport_areas', 'mv_transport_areas_z12_20', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview('osm_transport_areas', 'mv_transport_areas_z12_20', ARRAY['osm_id', 'type', 'class']);
 
 -- ============================================================================
 -- Create materialized views for transport points centroids

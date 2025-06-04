@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Function: create_landuse_points_centroids_mview
 -- Description:
---   createsa materialized view that merges:
+--   creates  materialized view that merges:
 --     - Centroids of polygonal landuse areas using ST_MaximumInscribedCircle
 --     - Landuse points directly, with area_m2 set to NULL
 --
