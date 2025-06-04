@@ -143,7 +143,7 @@ function updateData() {
     # Step 1: Refreshing materialized views
     if [ "$REFRESH_MVIEWS" = "true" ]; then
         log_message "Refreshing materialized views..."
-        ./refresh_mviews.sh &
+        ./mv_refresh.sh &
     else
         log_message "Skipping materialized views refresh (REFRESH_MVIEWS=$REFRESH_MVIEWS)"
     fi
@@ -229,33 +229,9 @@ function importData() {
         -config $WORKDIR/config.json \
         -deployproduction
 
-    log_message "Creating material ohm views"
-    psql $PG_CONNECTION -f queries/ohm_mviews/admin_boundaries_centroids.sql 
-    # psql $PG_CONNECTION -f queries/ohm_mviews/admin_boundaries_lines.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/admin_boundaries_maritime.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/amenity.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/buildings.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/landuse.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/others.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/places.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/transport.sql 
-    psql $PG_CONNECTION -f queries/ohm_mviews/water.sql
+    # Create materialized views
+    ./mv_creation.sh
 
-
-    # Create functions  for natural earth
-    log_message " Executing NE views: queries/ne_mviews/lakes.sql..."
-    psql $PG_CONNECTION -f queries/ne_mviews/lakes.sql
-
-    # Create osm land functions
-    log_message " Executing OSM land views: queries/osm_views/land.sql..."
-    psql $PG_CONNECTION -f queries/osm_views/land.sql
-
-    # Create functions under queries/ohm_views
-    for sql_file in $(find "queries/ohm_views" -type f -name "*.sql"); do
-        log_message " Executing OHM views: $sql_file..."
-        psql $PG_CONNECTION -f "$sql_file"
-    done
-    
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }

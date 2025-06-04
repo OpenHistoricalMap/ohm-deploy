@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION create_place_areas_mview(
 RETURNS void AS $$
 DECLARE 
     sql TEXT;
-    type_filter_areas TEXT := 'TRUE';  -- Default WHERE clause
+    type_filter_areas TEXT := 'TRUE';
     lang_columns TEXT;
 BEGIN
     RAISE NOTICE 'Creating or refreshing view: %', view_name;
@@ -163,14 +163,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-
-
 -- ============================================================================
 -- Create materialized views for place points centroids
 -- ============================================================================
-
-
 SELECT create_place_points_centroids_mview(
   'mv_place_points_centroids_z0_2',
   ARRAY['plot', 'square', 'islet'],
@@ -199,7 +194,6 @@ SELECT create_place_points_centroids_mview(
 -- ============================================================================
 -- Create materialized views for place areas
 -- ============================================================================
-
 SELECT create_place_areas_mview(
   'mv_place_areas_z14_20',
   ARRAY['plot', 'square', 'islet']

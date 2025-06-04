@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source ./pg_utils.sh
+source ./scripts/utils.sh
 
 function refresh_mviews_group() {
     local group_name="$1"
@@ -12,7 +12,7 @@ function refresh_mviews_group() {
     while true; do
         for mview in "${materialized_views[@]}"; do
             log_message "[$group_name] Refreshing $mview..."
-            if psql "$PG_CONNECTION" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;" > /dev/null 2>&1; then
+            if psql "$PG_CONNECTION" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;"; then
                 log_message "[$group_name] ✅ Successfully refreshed $mview."
             else
                 log_message "[$group_name] ❌ ERROR refreshing $mview!"
@@ -45,7 +45,7 @@ admin_boundaries_lines_views=(
     mv_admin_boundaries_lines_z16_20
 )
 
-admin_boundaries_lines_views=(    
+admin_maritime_lines_views=(    
     mv_admin_maritime_lines_z0_5
     mv_admin_maritime_lines_z6_9
     mv_admin_maritime_lines_z10_15
@@ -57,11 +57,11 @@ amenity_views=(
 ) # TODO , missing amenity lines
 
 landuse_views=(
-    mv_landuse_areas_z3_5
-    mv_landuse_areas_z6_7
-    mv_landuse_areas_z8_9
-    mv_landuse_areas_z10_12
-    mv_landuse_areas_z13_15
+    mv_landuse_areas_v2_z3_5
+    mv_landuse_areas_v2_z6_7
+    mv_landuse_areas_v2_z8_9
+    mv_landuse_areas_v2_z10_12
+    mv_landuse_areas_v2_z13_15
     mv_landuse_points_centroids_z10_11
     mv_landuse_points_centroids_z12_13
     mv_landuse_points_centroids_z14_20
@@ -115,19 +115,14 @@ water_views=(
     mv_water_lines_z16_20
 )
 
+# Start refreshing in parallel with a interval for each group acoording to the benchmark that takes to complete
+refresh_mviews_group "ADMIN_BOUNDARIES_CENTROIDS" 60 "${admin_boundaries_centroids_views[@]}" &
+# refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 "${admin_boundaries_lines_views[@]}" &
+refresh_mviews_group "ADMIN_MARITIME_LINES" 300 "${admin_maritime_lines_views[@]}" &
+refresh_mviews_group "AMENITY" 180 "${amenity_views[@]}" &
+refresh_mviews_group "LANDUSE" 180 "${landuse_views[@]}" &
+refresh_mviews_group "OTHERS" 180 "${others_views[@]}" &
+refresh_mviews_group "PLACES" 180 "${places_views[@]}" &
+refresh_mviews_group "TRANSPORTS" 180 "${transport_views[@]}" &
+refresh_mviews_group "WATER" 180 "${water_views[@]}" &
 
-# Start refreshing in parallel with a sleep interval  all of them in average of 4 min refresh
-## Benchmark admin refresh those views takes 4 min to complete
-refresh_mviews_group "admin" 1 "${admin_views[@]}" &
-## Benchmark transport refresh those views takes 40 seconds to complete
-refresh_mviews_group "transport" 200 "${transport_views[@]}" &
-## Benchmark water areas and centroids refresh those views takes 1:20 min to complete
-refresh_mviews_group "water" 160 "${water_views[@]}" &
-## Benchmark landuse centroids refresh those views takes 22 secs to complete
-refresh_mviews_group "landuse" 220 "${landuse_views[@]}" &
-## Benchmark other areas and centroids refresh those views takes 3 secs to complete
-refresh_mviews_group "other_areas" 230 "${other_areas_views[@]}" &
-# Benchmark: Refreshing place areas takes 2 seconds to complete.
-refresh_mviews_group "place_areas" 300 "${places_areas_views[@]}" &
-# Benchmark: Refreshing all points/centroids takes 180 seconds to complete.
-refresh_mviews_group "points_centroids" 180 "${points_centroids_views[@]}" &

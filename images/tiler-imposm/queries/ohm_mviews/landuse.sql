@@ -86,7 +86,6 @@ SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z10_11
 SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z12_13', 100);
 SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20', 0);
 
-
 -- ============================================================================
 -- Create materialized views for landuse areas
 -- ============================================================================
@@ -96,7 +95,8 @@ SELECT create_generic_mview( 'osm_landuse_areas_z8_9', 'mv_landuse_areas_z8_9', 
 SELECT create_generic_mview( 'osm_landuse_areas_z10_12', 'mv_landuse_areas_z10_12', ARRAY['osm_id', 'type']);
 SELECT create_generic_mview( 'osm_landuse_areas_z13_15', 'mv_landuse_areas_z13_15', ARRAY['osm_id', 'type']);
 
+
 -- ============================================================================
 -- Create materialized views for landuse lines
 -- ============================================================================
-SELECT create_generic_mview( 'osm_landuse_lines', 'mv_landuse_lines_z14_20', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_lines', 'mv_landuse_lines_z14_20', ARRAY['osm_id', 'type', 'class']);

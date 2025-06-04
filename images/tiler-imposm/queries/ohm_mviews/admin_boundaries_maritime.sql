@@ -18,3 +18,4 @@ SELECT create_generic_mview(
     'mv_admin_maritime_lines_z10_15',
     ARRAY ['osm_id', 'type']
   );
+  

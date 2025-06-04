@@ -14,22 +14,22 @@ services:
   #   networks:
   #     - tiler_network
 
-  # imposm:
-  #   image: rub21/tiler-imposm:v21
-  #   build:
-  #     context: ../images/tiler-imposm
-  #     dockerfile: Dockerfile
-  #   # volumes:
-  #   #   - ../data/tiler-imposm-data2:/mnt/data
-  #     # - ../images/tiler-imposm:/osm
-  #   command:
-  #     - sh
-  #     - -c
-  #     - "./start.sh"
-  #   env_file:
-  #     - ../envs/.env.tiler
-  #   networks:
-  #     - tiler_network
+  imposm:
+    image: rub21/tiler-imposm:v21
+    build:
+      context: ../images/tiler-imposm
+      dockerfile: Dockerfile
+    volumes:
+    #   - ../data/tiler-imposm-data2:/mnt/data
+      - ../images/tiler-imposm:/osm
+    command:
+      - sh
+      - -c
+      - "./start.sh"
+    env_file:
+      - ../envs/.env.tiler
+    networks:
+      - tiler_network
 
   tiler:
     image: rub21/tiler-server:v22

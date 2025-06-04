@@ -9,13 +9,14 @@
 -- Parameters:
 --   input_table     TEXT     - Source table to build the materialized view from.
 --   mview_name      TEXT     - Name of the materialized view to be created.
---   unique_columns  TEXT[]   - Array of column names to use for the unique index.
+--   unique_columns  TEXT[]   - Array of column names to use for DISTINCT ON and unique index.
 --
 -- Behavior:
 --   - Uses `get_language_columns()` to inject dynamic language-specific fields.
 --   - Excludes the `geometry` column from the base column list to add it last.
 --   - Always recreates the view.
---   - Automatically adds indexes for geometry and a composite unique index.
+--   - Uses DISTINCT ON + ORDER BY to avoid duplicates based on `unique_columns`.
+--   - Automatically adds spatial index and a composite unique index.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_generic_mview(TEXT, TEXT, TEXT[]);
@@ -48,27 +49,24 @@ BEGIN
     -- Drop existing materialized view if it exists
     EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
 
-    -- Create the materialized view
+    -- Construct quoted column list for DISTINCT ON and ORDER BY
+    SELECT string_agg(quote_ident(c), ', ') INTO quoted_unique_cols FROM unnest(unique_columns) AS c;
+
+    -- Create the materialized view with DISTINCT ON + ORDER BY to ensure deterministic results
     sql := format($sql$
         CREATE MATERIALIZED VIEW %I AS
-        SELECT
+        SELECT DISTINCT ON (%s)
             %s,
             %s,
             geometry
         FROM %I
-        WHERE geometry IS NOT NULL;
-    $sql$, mview_name, table_columns, lang_columns, input_table);
+        WHERE geometry IS NOT NULL
+        ORDER BY %s;
+    $sql$, mview_name, quoted_unique_cols, table_columns, lang_columns, input_table, quoted_unique_cols);
     EXECUTE sql;
 
-    -- Create spatial GiST index
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
+    EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(%s);', mview_name, mview_name, quoted_unique_cols);
 
-    -- Attempt to create a composite unique index
-    BEGIN
-        SELECT string_agg(quote_ident(c), ', ') INTO quoted_unique_cols FROM unnest(unique_columns) AS c;
-        EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(%s);', mview_name, mview_name, quoted_unique_cols);
-    EXCEPTION WHEN OTHERS THEN
-        RAISE NOTICE 'Skipping unique index creation on view %, due to error: %', mview_name, SQLERRM;
-    END;
 END;
 $$ LANGUAGE plpgsql;

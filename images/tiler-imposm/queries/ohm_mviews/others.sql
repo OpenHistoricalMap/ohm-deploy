@@ -94,15 +94,14 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Create materialized views for other points centroids
 -- ============================================================================
-
 SELECT create_other_points_centroids_mview('mv_other_points_centroids_z14_20', 0);
 
 -- ============================================================================
 -- Create materialized views for other areas
 -- ============================================================================
-SELECT create_generic_mview( 'osm_other_areas', 'mv_other_areas_z14_20', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_other_areas', 'mv_other_areas_z14_20', ARRAY['osm_id', 'type', 'class']);
 
 -- ============================================================================
 -- Create materialized views for other lines
 -- ============================================================================
-SELECT create_generic_mview( 'osm_other_lines', 'mv_other_lines_z14_20', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_other_lines', 'mv_other_lines_z14_20', ARRAY['osm_id', 'type', 'class']);
