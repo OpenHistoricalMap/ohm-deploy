@@ -1,7 +1,7 @@
 -- ============================================================================
--- Function: create_or_refresh_other_points_centroids_mview
+-- Function: create_other_points_centroids_mview
 -- Description:
---   Creates or refreshes a materialized view combining:
+--   createsa materialized view combining:
 --     - Centroids of polygon features from `osm_other_areas`, and
 --     - Point features from `osm_other_points`.
 --   The result is a unified layer of named features for rendering and labeling.
@@ -14,7 +14,6 @@
 -- Parameters:
 --   view_name     TEXT             - Name of the materialized view.
 --   min_area      DOUBLE PRECISION - Minimum area (in m²) for polygons to be included.
---   force_create  BOOLEAN          - If TRUE, always recreates the view.
 --
 -- Notes:
 --   - Uses `ST_MaximumInscribedCircle` to compute polygon centroids.
@@ -23,11 +22,10 @@
 --   - Spatial and unique indexes are created to optimize rendering and queries.
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS create_or_refresh_other_points_centroids_mview;
-CREATE OR REPLACE FUNCTION create_or_refresh_other_points_centroids_mview(
+DROP FUNCTION IF EXISTS create_other_points_centroids_mview;
+CREATE OR REPLACE FUNCTION create_other_points_centroids_mview(
   view_name TEXT,
-  min_area DOUBLE PRECISION DEFAULT 0,
-  force_create BOOLEAN DEFAULT FALSE
+  min_area DOUBLE PRECISION DEFAULT 0
 )
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -37,11 +35,6 @@ DECLARE
   sql_index TEXT;
   sql_unique_index TEXT;
 BEGIN
-  -- Check if we should recreate or refresh the view
-  IF NOT force_create AND NOT refresh_mview(view_name) THEN
-    RETURN FALSE;
-  END IF;
-
   RAISE NOTICE 'Creating or refreshing view: %', view_name;
 
   -- Get dynamic language columns
@@ -98,4 +91,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_or_refresh_other_points_centroids_mview('mv_other_points_centroids_z14_20', 0, TRUE);
+-- ============================================================================
+-- Create materialized views for other points centroids
+-- ============================================================================
+
+SELECT create_other_points_centroids_mview('mv_other_points_centroids_z14_20', 0);
+
+-- ============================================================================
+-- Create materialized views for other areas
+-- ============================================================================
+SELECT create_generic_mview( 'osm_other_areas', 'mv_other_areas_z14_20', ARRAY['osm_id', 'type']);
+
+-- ============================================================================
+-- Create materialized views for other lines
+-- ============================================================================
+SELECT create_generic_mview( 'osm_other_lines', 'mv_other_lines_z14_20', ARRAY['osm_id', 'type']);

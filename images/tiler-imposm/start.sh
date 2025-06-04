@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source ./pg_utils.sh
+
 # Directories to store imposm's cache for updating the DB
 WORKDIR=/mnt/data
 CACHE_DIR=$WORKDIR/cachedir
@@ -14,8 +16,6 @@ LIMITFILE="limitFile.geojson"
 # Folder to store the imposm expirer files in S3 or GCS
 BUCKET_IMPOSM_FOLDER=imposm
 INIT_FILE="$WORKDIR/init_done"
-
-PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB"
 
 mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
@@ -36,10 +36,6 @@ cat <<EOF >"$WORKDIR/config.json"
     "replication_url": "$REPLICATION_URL"
 }
 EOF
-
-function log_message() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') - $1"
-}
 
 # Function to download the PBF file
 function getData() {
@@ -233,12 +229,18 @@ function importData() {
         -config $WORKDIR/config.json \
         -deployproduction
 
-    log_message "Creating material views and indexes..."
-    # Create functions under queries/utils
-    for sql_file in $(find "queries/utils" -type f -name "*.sql"); do
-        log_message "Executing util functions: $sql_file..."
-        psql $PG_CONNECTION -f "$sql_file"
-    done
+    log_message "Creating material ohm views"
+    psql $PG_CONNECTION -f queries/ohm_mviews/admin_boundaries_centroids.sql 
+    # psql $PG_CONNECTION -f queries/ohm_mviews/admin_boundaries_lines.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/admin_boundaries_maritime.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/amenity.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/buildings.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/landuse.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/others.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/places.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/transport.sql 
+    psql $PG_CONNECTION -f queries/ohm_mviews/water.sql
+
 
     # Create functions  for natural earth
     log_message " Executing NE views: queries/ne_mviews/lakes.sql..."

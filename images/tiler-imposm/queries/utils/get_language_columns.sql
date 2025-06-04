@@ -1,21 +1,24 @@
 -- ============================================================================
--- Function: get_language_columns(prefix TEXT)
+-- Function: get_language_columns()
 -- Description:
 --   Returns a comma-separated list of SQL expressions like:
---     prefix.tags -> 'name:es' AS "name_es"
+--     tags -> 'name:es' AS "name_es"
 --   Based on aliases found in the `languages` table.
 --
+-- Notes:
+--   - Designed for direct use when `tags` is accessed without a table alias.
+--   - Useful for generating multilingual columns dynamically in SQL queries.
+--
 -- Example:
---   get_language_columns('r.') → "r.tags->'name:es' AS name_es, ..."
+--   get_language_columns() → "tags->'name:es' AS name_es, tags->'name:fr' AS name_fr, ..."
 -- ============================================================================
-
-CREATE OR REPLACE FUNCTION get_language_columns(prefix TEXT)
+CREATE OR REPLACE FUNCTION get_language_columns()
 RETURNS TEXT AS $$
 DECLARE
     result TEXT;
 BEGIN
     SELECT string_agg(
-        format('%s.tags -> %L AS %I', prefix, 'name:' || alias, 'name_' || alias),
+        format('tags -> %L AS %I', 'name:' || alias, 'name_' || alias),
         ', '
     )
     INTO result

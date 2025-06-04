@@ -1,7 +1,7 @@
 -- ============================================================================
--- Function: create_or_refresh_admin_boundaries_centroids_mview
+-- Function: create_admin_boundaries_centroids_mview
 -- Description:
---   Creates or refreshes a materialized view of admin boundary centroids using
+--   createsa materialized view of admin boundary centroids using
 --   ST_MaximumInscribedCircle from polygons in the given input table.
 --
 -- Parameters:
@@ -16,11 +16,10 @@
 --   - Includes multilingual name columns using `get_language_columns()`.
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS create_or_refresh_admin_boundaries_centroids_mview;
-CREATE OR REPLACE FUNCTION create_or_refresh_admin_boundaries_centroids_mview(
+DROP FUNCTION IF EXISTS create_admin_boundaries_centroids_mview;
+CREATE OR REPLACE FUNCTION create_admin_boundaries_centroids_mview(
   input_table TEXT,
-  mview_name TEXT,
-  force_create BOOLEAN DEFAULT FALSE
+  mview_name TEXT
 )
 RETURNS void AS $$
 DECLARE
@@ -30,10 +29,6 @@ DECLARE
   sql_unique_index_centroid TEXT;
   lang_columns TEXT;
 BEGIN
-  -- Skip recreation if not forced and no language change
-  IF NOT force_create AND NOT refresh_mview(mview_name) THEN
-    RETURN;
-  END IF;
 
   -- Get multilingual columns from `languages` table
   lang_columns := get_language_columns();
@@ -74,25 +69,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
--- ============================================================================
--- Function: refresh_all_admin_boundaries_centroids
--- ============================================================================
-DROP FUNCTION IF EXISTS refresh_all_admin_boundaries_centroids;
-CREATE OR REPLACE FUNCTION refresh_all_admin_boundaries_centroids(force_create BOOLEAN DEFAULT FALSE)
-RETURNS void AS $$
-BEGIN
-  PERFORM create_or_refresh_admin_boundaries_centroids_mview('osm_admin_areas_z0_2', 'mv_admin_boundaries_centroids_z0_2', force_create);
-  PERFORM create_or_refresh_admin_boundaries_centroids_mview('osm_admin_areas_z3_5', 'mv_admin_boundaries_centroids_z3_5', force_create);
-  PERFORM create_or_refresh_admin_boundaries_centroids_mview('osm_admin_areas_z6_7', 'mv_admin_boundaries_centroids_z6_7', force_create);
-  PERFORM create_or_refresh_admin_boundaries_centroids_mview('osm_admin_areas_z8_9', 'mv_admin_boundaries_centroids_z8_9', force_create);
-  PERFORM create_or_refresh_admin_boundaries_centroids_mview('osm_admin_areas_z10_12', 'mv_admin_boundaries_centroids_z10_12', force_create);
-  PERFORM create_or_refresh_admin_boundaries_centroids_mview('osm_admin_areas_z13_15', 'mv_admin_boundaries_centroids_z13_15', force_create);
-  PERFORM create_or_refresh_admin_boundaries_centroids_mview('osm_admin_areas_z16_20', 'mv_admin_boundaries_centroids_z16_20', force_create);
-END;
-$$ LANGUAGE plpgsql;
-
 -- ============================================================================
 -- Execute force creation of all admin boundaries centroids materialized views
 -- ============================================================================
-SELECT refresh_all_admin_boundaries_centroids(TRUE); 
+SELECT create_admin_boundaries_centroids_mview('osm_admin_areas_z0_2', 'mv_admin_boundaries_centroids_z0_2');
+SELECT create_admin_boundaries_centroids_mview('osm_admin_areas_z3_5', 'mv_admin_boundaries_centroids_z3_5');
+SELECT create_admin_boundaries_centroids_mview('osm_admin_areas_z6_7', 'mv_admin_boundaries_centroids_z6_7');
+SELECT create_admin_boundaries_centroids_mview('osm_admin_areas_z8_9', 'mv_admin_boundaries_centroids_z8_9');
+SELECT create_admin_boundaries_centroids_mview('osm_admin_areas_z10_12', 'mv_admin_boundaries_centroids_z10_12');
+SELECT create_admin_boundaries_centroids_mview('osm_admin_areas_z13_15', 'mv_admin_boundaries_centroids_z13_15');
+SELECT create_admin_boundaries_centroids_mview('osm_admin_areas_z16_20', 'mv_admin_boundaries_centroids_z16_20');

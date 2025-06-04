@@ -1,7 +1,7 @@
 -- ============================================================================
--- Function: create_or_refresh_amenity_points_centroids_mview
+-- Function: create_amenity_points_centroids_mview
 -- Description:
---   This function creates or refreshes a materialized view that combines named
+--   This function createsa materialized view that combines named
 --   centroids from polygonal amenity areas and named amenity points into a 
 --   unified layer called "amenity_points_centroids".
 --
@@ -12,7 +12,6 @@
 -- Parameters:
 --   view_name     TEXT              - The name of the materialized view to create.
 --   min_area      DOUBLE PRECISION - Minimum area (in m²) to include amenity areas.
---   force_create  BOOLEAN DEFAULT FALSE - If TRUE, always recreates the view.
 --
 -- Notes:
 --   - Only features with a non-empty "name" are included.
@@ -20,11 +19,10 @@
 --   - Geometry is indexed using GiST; uniqueness is enforced on (osm_id, type).
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS create_or_refresh_amenity_points_centroids_mview;
-CREATE OR REPLACE FUNCTION create_or_refresh_amenity_points_centroids_mview(
+DROP FUNCTION IF EXISTS create_amenity_points_centroids_mview;
+CREATE OR REPLACE FUNCTION create_amenity_points_centroids_mview(
     view_name TEXT,
-    min_area DOUBLE PRECISION DEFAULT 0,
-    force_create BOOLEAN DEFAULT FALSE
+    min_area DOUBLE PRECISION DEFAULT 0
 )
 RETURNS void AS $$
 DECLARE 
@@ -34,12 +32,7 @@ DECLARE
     sql_unique_index TEXT;
     lang_columns TEXT;
 BEGIN
-    -- Check if we need to recreate the view
-    IF NOT force_create AND NOT refresh_mview(view_name) THEN
-        RETURN;
-    END IF;
-
-    RAISE NOTICE 'Creating materialized view: % with area > %', view_name, min_area;
+    RAISE NOTICE 'Recreating materialized view: % with area > %', view_name, min_area;
 
     -- Get dynamic language columns from `languages` table
     lang_columns := get_language_columns();
@@ -88,4 +81,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_or_refresh_amenity_points_centroids_mview('mv_amenity_points_centroids_z14_20', 0, TRUE);
+-- ============================================================================
+-- Create materialized view for amenity points centroids
+-- ============================================================================
+SELECT create_amenity_points_centroids_mview('mv_amenity_points_centroids_z14_20', 0);
+
+-- ============================================================================
+-- Create materialized view for amenity areas
+-- ============================================================================
+SELECT create_generic_mview( 'osm_amenity_areas', 'mv_amenity_areas_z14_20', ARRAY ['osm_id', 'type']);

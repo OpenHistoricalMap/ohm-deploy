@@ -1,14 +1,13 @@
 -- ============================================================================
--- Function: create_or_refresh_landuse_points_centroids_mview
+-- Function: create_landuse_points_centroids_mview
 -- Description:
---   Creates or refreshes a materialized view that merges:
+--   createsa materialized view that merges:
 --     - Centroids of polygonal landuse areas using ST_MaximumInscribedCircle
 --     - Landuse points directly, with area_m2 set to NULL
 --
 -- Parameters:
 --   view_name    TEXT              - Name of the materialized view.
 --   min_area     DOUBLE PRECISION  - Minimum area (in m²) to include landuse areas.
---   force_create BOOLEAN DEFAULT FALSE - If TRUE, always recreates the view.
 --
 -- Notes:
 --   - Only includes features with non-empty "name" values.
@@ -16,11 +15,10 @@
 --   - View is recreated if language hash changed or if force_create = TRUE.
 --   - Adds GiST index on geometry and a UNIQUE index on (osm_id, type, class).
 -- ============================================================================
-DROP FUNCTION IF EXISTS create_or_refresh_landuse_points_centroids_mview;
-CREATE OR REPLACE FUNCTION create_or_refresh_landuse_points_centroids_mview(
+DROP FUNCTION IF EXISTS create_landuse_points_centroids_mview;
+CREATE OR REPLACE FUNCTION create_landuse_points_centroids_mview(
     view_name TEXT,
-    min_area DOUBLE PRECISION DEFAULT 0,
-    force_create BOOLEAN DEFAULT FALSE
+    min_area DOUBLE PRECISION DEFAULT 0
 )
 RETURNS void AS $$
 DECLARE 
@@ -30,11 +28,6 @@ DECLARE
     sql_unique_index TEXT;
     lang_columns TEXT;
 BEGIN
-    -- Check if we should recreate based on lang hash or force flag
-    IF NOT force_create AND NOT refresh_mview(view_name) THEN
-        RETURN;
-    END IF;
-
     RAISE NOTICE 'Creating materialized view: % with area > %', view_name, min_area;
 
     -- Get dynamic language columns from `languages` table
@@ -86,7 +79,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================================================
+-- Create materialized views for landuse points centroids
+-- ============================================================================
+SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z10_11', 500);
+SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z12_13', 100);
+SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20', 0);
 
-SELECT create_or_refresh_landuse_points_centroids_mview('mv_landuse_points_centroids_z10_11', 500, TRUE);
-SELECT create_or_refresh_landuse_points_centroids_mview('mv_landuse_points_centroids_z12_13', 100, TRUE);
-SELECT create_or_refresh_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20', 0, TRUE);
+
+-- ============================================================================
+-- Create materialized views for landuse areas
+-- ============================================================================
+SELECT create_generic_mview( 'osm_landuse_areas_z3_5', 'mv_landuse_areas_z3_5', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z6_7', 'mv_landuse_areas_z6_7', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z8_9', 'mv_landuse_areas_z8_9', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z10_12', 'mv_landuse_areas_z10_12', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z13_15', 'mv_landuse_areas_z13_15', ARRAY['osm_id', 'type']);
+
+-- ============================================================================
+-- Create materialized views for landuse lines
+-- ============================================================================
+SELECT create_generic_mview( 'osm_landuse_lines', 'mv_landuse_lines_z14_20', ARRAY['osm_id', 'type']);

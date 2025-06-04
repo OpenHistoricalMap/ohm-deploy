@@ -1,5 +1,5 @@
 -- ============================================================================
--- Function: create_or_refresh_generic_mview
+-- Function: create_generic_mview
 -- Description:
 --   General-purpose function to create materialized views from any table with
 --   geospatial data. It dynamically selects all non-geometry columns,
@@ -7,25 +7,22 @@
 --   and includes the `geometry` column at the end.
 --
 -- Parameters:
---   input_table   TEXT     - Source table to build the materialized view from.
---   mview_name    TEXT     - Name of the materialized view to be created.
---   force_create  BOOLEAN  - If TRUE, forcibly recreates the view even if unchanged.
---   unique_columns TEXT[]  - Array of column names to use for the unique index.
+--   input_table     TEXT     - Source table to build the materialized view from.
+--   mview_name      TEXT     - Name of the materialized view to be created.
+--   unique_columns  TEXT[]   - Array of column names to use for the unique index.
 --
 -- Behavior:
 --   - Uses `get_language_columns()` to inject dynamic language-specific fields.
 --   - Excludes the `geometry` column from the base column list to add it last.
---   - Skips view creation if `force_create` is FALSE and `recreate_or_refresh_view` returns FALSE.
---   - Automatically adds indexes for geometry and a composite unique index based on input columns.
+--   - Always recreates the view.
+--   - Automatically adds indexes for geometry and a composite unique index.
 -- ============================================================================
 
+DROP FUNCTION IF EXISTS create_generic_mview(TEXT, TEXT, TEXT[]);
 
-DROP FUNCTION IF EXISTS create_or_refresh_generic_mview(TEXT, TEXT, BOOLEAN, TEXT[]);
-
-CREATE OR REPLACE FUNCTION create_or_refresh_generic_mview(
+CREATE OR REPLACE FUNCTION create_generic_mview(
   input_table TEXT,
   mview_name TEXT,
-  force_create BOOLEAN DEFAULT FALSE,
   unique_columns TEXT[] DEFAULT ARRAY['osm_id']
 )
 RETURNS void AS $$
@@ -35,11 +32,6 @@ DECLARE
     quoted_unique_cols TEXT;
     sql TEXT;
 BEGIN
-    -- Check if we should recreate or refresh the view
-    IF NOT force_create AND NOT recreate_or_refresh_view(mview_name) THEN
-        RETURN;
-    END IF;
-
     RAISE NOTICE 'Creating generic materialized view from % to %', input_table, mview_name;
 
     -- Get dynamic language columns from `languages` table
@@ -80,4 +72,3 @@ BEGIN
     END;
 END;
 $$ LANGUAGE plpgsql;
-

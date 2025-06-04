@@ -1,16 +1,22 @@
---============================================================================
--- Script: Language Extraction and Change Detection from Vtiles Tables
+-- ============================================================================
+-- Script: Language Extraction and Change Detection from DB Tables
 -- Description:
--- This script extracts all language keys (tags starting with name:xx) from a
--- fixed list of OSM-related tables that contain `tags` in hstore format.
--- It stores the detected languages in the `languages` table and calculates
--- a hash of the current set to detect changes over time.
-
+--   This script extracts all language keys (tags starting with name:xx) from a
+--   fixed list of OSM-related tables that contain `tags` in hstore format.
+--   It stores the detected languages in the `languages` table and calculates
+--   a hash of the current set to detect changes over time.
+--
 -- Features:
---        - Scans OSM tables for valid language tags using a strict regex.
---        - Stores tag aliases and counts in the `languages` table.
---        - Computes a hash of the current language list.
---        - Tracks whether the hash has changed since the previous run.
+--   - Scans OSM tables for valid language tags using a strict regex.
+--   - Inserts new languages or updates existing ones in the `languages` table.
+--   - Does NOT delete existing languages by default to preserve schema stability.
+--   - Optional `force_regeneration` parameter allows full reset when needed.
+--   - Automatically computes and inserts a hash into `languages_hash`.
+--   - Tracks whether the hash has changed since the previous run.
+--
+-- Usage:
+--   SELECT update_languages_from_tables(10);            -- Normal update mode
+--   SELECT update_languages_from_tables(10, TRUE);      -- Force full regeneration
 -- ============================================================================
 
 -- Table to store valid language tags detected in OSM data
@@ -29,8 +35,11 @@ CREATE TABLE IF NOT EXISTS languages_hash (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Function to update the `languages` table by scanning specified tables
-CREATE OR REPLACE FUNCTION update_languages_from_tables(min_count INTEGER DEFAULT 5)
+-- Function to update the `languages` table and insert hash if changed
+CREATE OR REPLACE FUNCTION update_languages_from_tables(
+    min_count INTEGER DEFAULT 5,
+    force_regeneration BOOLEAN DEFAULT FALSE
+)
 RETURNS void AS $$
 DECLARE
     tbl TEXT;
@@ -39,11 +48,18 @@ DECLARE
     lang_alias TEXT;
     lang_count INT;
     language_regex TEXT := '^name:[a-z]{2,3}(-[A-Z][a-z]{3})?((-[a-z]{2,}|x-[a-z]{2,})(-[a-z]{2,})?)?(-([A-Z]{2}|\\d{3}))?$';
-BEGIN
-    -- Clear existing languages to fully regenerate
-    DELETE FROM languages;
 
-    -- List of relevant OSM tables to evaluate
+    current_hash TEXT;
+    last_hash TEXT;
+    is_changed BOOLEAN;
+BEGIN
+    -- Optionally clear existing languages if forced
+    IF force_regeneration THEN
+        DELETE FROM languages;
+        RAISE NOTICE 'Forced regeneration: existing entries in "languages" table deleted.';
+    END IF;
+
+    -- List of relevant OHM tables to evaluate
     FOR tbl IN 
         SELECT unnest(ARRAY[
             'osm_admin_areas',
@@ -102,21 +118,8 @@ BEGIN
         END LOOP;
     END LOOP;
 
-    RAISE NOTICE 'Languages updated from OSM tables with min_count=%', min_count;
-END;
-$$ LANGUAGE plpgsql;
-
--- Function to insert a new hash and detect if it differs from the previous one
-CREATE OR REPLACE FUNCTION insert_languages_hash_if_changed()
-RETURNS BOOLEAN AS $$
-DECLARE
-    current_hash TEXT;
-    last_hash TEXT;
-    is_changed BOOLEAN;
-BEGIN
-    SELECT md5(string_agg(alias, ',' ORDER BY alias))
-    INTO current_hash
-    FROM languages;
+    -- Compute current hash
+    SELECT md5(string_agg(alias, ',' ORDER BY alias)) INTO current_hash FROM languages;
 
     -- Get most recent hash
     SELECT hash INTO last_hash
@@ -124,18 +127,18 @@ BEGIN
     ORDER BY created_at DESC
     LIMIT 1;
 
-    -- Check if it changed
+    -- Determine if hash changed
     is_changed := last_hash IS NULL OR current_hash IS DISTINCT FROM last_hash;
 
-    -- Insert the new hash record
+    -- Insert new hash entry
     INSERT INTO languages_hash (hash, has_changed)
     VALUES (current_hash, is_changed);
 
-    RAISE NOTICE 'Inserted hash: %, has_changed: %', current_hash, is_changed;
-    RETURN is_changed;
+    RAISE NOTICE 'Languages updated. New hash: %, Changed: %', current_hash, is_changed;
 END;
 $$ LANGUAGE plpgsql;
 
--- Example execution
-SELECT update_languages_from_tables(10);
-SELECT insert_languages_hash_if_changed();
+-- ============================================================================
+-- Execute for the first time to populate languages and hash
+-- ============================================================================
+SELECT update_languages_from_tables(10, TRUE);
