@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source ./pg_utils.sh
+source ./scripts/utils.sh
 
 # Directories to store imposm's cache for updating the DB
 WORKDIR=/mnt/data
@@ -143,7 +143,7 @@ function updateData() {
     # Step 1: Refreshing materialized views
     if [ "$REFRESH_MVIEWS" = "true" ]; then
         log_message "Refreshing materialized views..."
-        ./mv_refresh.sh &
+        ./scripts/refresh_mviews.sh &
     else
         log_message "Skipping materialized views refresh (REFRESH_MVIEWS=$REFRESH_MVIEWS)"
     fi
@@ -230,20 +230,12 @@ function importData() {
         -deployproduction
 
     # Create materialized views
-    ./mv_creation.sh
+    ./scripts/create_mviews.sh --force=true
 
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
 }
 
-# Function to fetch languages from Taginfo API
-function fetchLanguages() {
-    log_message "Fetching languages..."
-    while true; do
-        python fetch_languages.py
-        sleep 72000
-    done
-}
 
 function countTables() {
     psql $PG_CONNECTION -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" | xargs
@@ -260,9 +252,6 @@ log_message "PostgreSQL is ready! Proceeding with setup..."
 
 # Run date functions
 psql "$PG_CONNECTION" -f /usr/local/datefunctions/datefunctions.sql
-
-# Start the background process to fetch languages
-fetchLanguages &
 
 # Check the number of tables in the database
 table_count=$(countTables)
