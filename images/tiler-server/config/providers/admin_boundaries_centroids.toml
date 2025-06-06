@@ -6,15 +6,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry,  
-    ABS(osm_id) AS osm_id, 
+    osm_id, 
     admin_level,
-    NULLIF(name, '') AS name, 
-    NULLIF(type, '') AS type, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    CAST(area_km2 AS INTEGER) AS area_km2, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    name, 
+    type, 
+    start_date, 
+    end_date, 
+    area_km2, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z0_2
@@ -29,15 +29,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    osm_id, 
     admin_level,
-    NULLIF(name, '') AS name, 
-    NULLIF(type, '') AS type, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    CAST(area_km2 AS INTEGER) AS area_km2, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    name, 
+    type, 
+    start_date, 
+    end_date, 
+    area_km2, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z3_5
@@ -52,15 +52,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    osm_id, 
     admin_level,
-    NULLIF(name, '') AS name, 
-    NULLIF(type, '') AS type, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    CAST(area_km2 AS INTEGER) AS area_km2, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    name, 
+    type, 
+    start_date, 
+    end_date, 
+    area_km2, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z6_7
@@ -75,15 +75,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    osm_id, 
     admin_level,
-    NULLIF(name, '') AS name, 
-    NULLIF(type, '') AS type, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    CAST(area_km2 AS INTEGER) AS area_km2, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    name, 
+    type, 
+    start_date, 
+    end_date, 
+    area_km2, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z8_9
@@ -98,15 +98,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    osm_id, 
     admin_level,
-    NULLIF(name, '') AS name, 
-    NULLIF(type, '') AS type, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    CAST(area_km2 AS INTEGER) AS area_km2, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    name, 
+    type, 
+    start_date, 
+    end_date, 
+    area_km2, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z10_12
@@ -121,15 +121,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    osm_id, 
     admin_level,
-    NULLIF(name, '') AS name, 
-    NULLIF(type, '') AS type, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    CAST(area_km2 AS INTEGER) AS area_km2, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    name, 
+    type, 
+    start_date, 
+    end_date, 
+    area_km2, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z13_15
@@ -144,15 +144,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
+    osm_id, 
     admin_level,
-    NULLIF(name, '') AS name, 
-    NULLIF(type, '') AS type, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    CAST(area_km2 AS INTEGER) AS area_km2, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    name, 
+    type, 
+    start_date, 
+    end_date, 
+    area_km2, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z16_20

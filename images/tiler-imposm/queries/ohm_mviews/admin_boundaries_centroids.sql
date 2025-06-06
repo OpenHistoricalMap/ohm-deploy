@@ -42,14 +42,15 @@ BEGIN
     CREATE MATERIALIZED VIEW %I AS
     SELECT
       osm_id,
-      name,
+      NULLIF(name, '') AS name,
       admin_level,
-      type,
+      NULLIF(type, '') AS type,
       (ST_MaximumInscribedCircle(geometry)).center AS geometry,
-      start_date,
-      end_date,
-      ROUND(CAST(area AS numeric) / 1000000, 1)::numeric(10,1) AS area_km2,
-      tags,
+      NULLIF(start_date, '') AS start_date,
+      NULLIF(end_date, '') AS end_date,
+      isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+      isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+      ROUND(CAST(area AS numeric) / 1000000)::integer AS area_km2,
       %s
     FROM %I
     WHERE name IS NOT NULL AND name <> ''
