@@ -1,19 +1,26 @@
 -- ============================================================================
 -- Function: create_landuse_points_centroids_mview
 -- Description:
---   creates  materialized view that merges:
---     - Centroids of polygonal landuse areas using ST_MaximumInscribedCircle
---     - Landuse points directly, with area_m2 set to NULL
+--   Creates a materialized view that merges named centroids from polygonal 
+--   landuse areas and named landuse points into a unified layer.
+--
+--   For polygonal features, centroids are calculated using ST_MaximumInscribedCircle,
+--   and area is stored in square meters (as integer). Point features are included 
+--   directly with area set to NULL.
+--
+--   Temporal fields `start_date` and `end_date` are included as-is, and 
+--   additional precalculated columns `start_decdate` and `end_decdate` 
+--   are generated using the `isodatetodecimaldate` function.
 --
 -- Parameters:
---   view_name    TEXT              - Name of the materialized view.
---   min_area     DOUBLE PRECISION  - Minimum area (in m²) to include landuse areas.
+--   view_name     TEXT              - Name of the materialized view to create.
+--   min_area      DOUBLE PRECISION - Minimum area (in m²) to include landuse areas.
 --
 -- Notes:
---   - Only includes features with non-empty "name" values.
---   - Multilingual name columns are dynamically added using the `languages` table.
---   - View is recreated if language hash changed or if force_create = TRUE.
---   - Adds GiST index on geometry and a UNIQUE index on (osm_id, type, class).
+--   - Only features with a non-empty "name" are included.
+--   - Geometry is indexed using GiST.
+--   - Uniqueness is enforced on the combination of (osm_id, type, class).
+--   - Language-specific name columns are added dynamically from the `languages` table.
 -- ============================================================================
 DROP FUNCTION IF EXISTS create_landuse_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_landuse_points_centroids_mview(
@@ -41,11 +48,13 @@ BEGIN
         SELECT
             (ST_MaximumInscribedCircle(geometry)).center AS geometry,
             osm_id, 
-            name, 
+            NULLIF(name, '') AS name, 
             type, 
             class, 
-            start_date, 
-            end_date, 
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             ROUND(area)::bigint AS area_m2,
             tags,
             %s
@@ -57,11 +66,13 @@ BEGIN
         SELECT 
             geometry,
             osm_id, 
-            name, 
+            NULLIF(name, '') AS name, 
             type, 
             class, 
-            start_date, 
-            end_date, 
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             NULL AS area_m2, 
             tags,
             %s
@@ -94,7 +105,7 @@ SELECT create_generic_mview( 'osm_landuse_areas_z6_7', 'mv_landuse_areas_z6_7', 
 SELECT create_generic_mview( 'osm_landuse_areas_z8_9', 'mv_landuse_areas_z8_9', ARRAY['osm_id', 'type']);
 SELECT create_generic_mview( 'osm_landuse_areas_z10_12', 'mv_landuse_areas_z10_12', ARRAY['osm_id', 'type']);
 SELECT create_generic_mview( 'osm_landuse_areas_z13_15', 'mv_landuse_areas_z13_15', ARRAY['osm_id', 'type']);
-
+SELECT create_generic_mview( 'osm_landuse_areas', 'mv_landuse_areas_z16_20', ARRAY['osm_id', 'type']);
 
 -- ============================================================================
 -- Create materialized views for landuse lines

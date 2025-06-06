@@ -115,6 +115,10 @@ water_views=(
     mv_water_lines_z16_20
 )
 
+Buildings
+mv_buildings_points_centroids_z14_20
+mv_osm_buildings_areas_z14_20
+
 refresh_mviews_group "ADMIN_BOUNDARIES_CENTROIDS" 60 "${admin_boundaries_centroids_views[@]}" &
 refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 "${admin_boundaries_lines_views[@]}" &
 refresh_mviews_group "ADMIN_MARITIME_LINES" 300 "${admin_maritime_lines_views[@]}" &
