@@ -63,7 +63,7 @@ BEGIN
             public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
             public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s
-        FROM osm_buildings_points_named
+        FROM osm_buildings_points
         WHERE name IS NOT NULL AND name <> ''
 
         UNION ALL

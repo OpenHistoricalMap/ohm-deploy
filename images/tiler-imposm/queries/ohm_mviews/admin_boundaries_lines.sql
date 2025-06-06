@@ -33,20 +33,20 @@ EXECUTE FUNCTION convert_dates_to_decimal();
 -- ============================================================================
 -- STEP 3: Backfill Existing Data, Set timeout to 40 minutes (2400000 milliseconds) for the current session, this takes quite a while, sincecurrnelty thrre are ~5 million rows in the table
 -- ============================================================================
--- SELECT log_notice('STEP 3: Backfill existing data for osm_relation_members_boundaries table');
--- SET statement_timeout = 2400000;
--- UPDATE osm_relation_members_boundaries
--- SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
---     end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
--- WHERE ST_GeometryType(geometry) = 'ST_LineString';
+SELECT log_notice('STEP 3: Backfill existing data for osm_relation_members_boundaries table');
+SET statement_timeout = 2400000;
+UPDATE osm_relation_members_boundaries
+SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
+    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
+WHERE ST_GeometryType(geometry) = 'ST_LineString';
 
 
--- SELECT log_notice('STEP 3: Backfill existing data for osm_admin_lines table');
--- SET statement_timeout = 2400000;
--- UPDATE osm_admin_lines
--- SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
---     end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
--- WHERE ST_GeometryType(geometry) = 'ST_LineString';
+SELECT log_notice('STEP 3: Backfill existing data for osm_admin_lines table');
+SET statement_timeout = 2400000;
+UPDATE osm_admin_lines
+SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
+    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
+WHERE ST_GeometryType(geometry) = 'ST_LineString';
 
 
 -- ============================================================================
