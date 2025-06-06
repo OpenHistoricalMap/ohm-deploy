@@ -53,8 +53,8 @@ BEGIN
             ROUND(area)::bigint AS area_m2,
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s
         FROM public.osm_amenity_areas
         WHERE name IS NOT NULL
@@ -68,8 +68,8 @@ BEGIN
             NULL AS area_m2,
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s
         FROM public.osm_amenity_points;
     $sql$,

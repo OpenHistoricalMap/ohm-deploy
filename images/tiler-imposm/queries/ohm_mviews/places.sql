@@ -1,25 +1,29 @@
 -- ============================================================================
 -- Function: create_place_points_centroids_mview
 -- Description:
---   This function creates a materialized view that combines named centroids 
---   from polygonal place areas and named place points into a unified layer.
---   Centroids are calculated using ST_MaximumInscribedCircle for area geometries,
---   while place points are included as-is with a NULL value for the area field.
+--   Creates a materialized view that merges:
+--     - Centroids of polygonal place areas using ST_MaximumInscribedCircle
+--     - Place points directly from `osm_place_points`, with NULL for area.
+--
+--   This provides a unified layer of named place features optimized for
+--   rendering at various zoom levels in vector tiles.
+--
+--   Temporal fields `start_date` and `end_date` are included as-is,
+--   and additional precalculated columns `start_decdate` and `end_decdate`
+--   are generated using the `isodatetodecimaldate` function.
+--
+--   Also includes the `capital` tag (if present), full `tags` column,
+--   and dynamically generated multilingual name columns from the `languages` table.
 --
 -- Parameters:
---   view_name            TEXT     - The name of the materialized view to create.
---   allowed_types_areas  TEXT[]   - Optional array of place types (e.g., 'region', 'state')
---                                   to include **only from** `osm_place_areas`.
---   allowed_types_points TEXT[]   - Optional array of place types to include **only from**
---                                   `osm_place_points`. If empty or NULL, all point types are included.
+--   view_name            TEXT     - Name of the materialized view to create.
+--   allowed_types_areas  TEXT[]   - Optional list of types to include only from `osm_place_areas`.
+--   allowed_types_points TEXT[]   - Optional list of types to include only from `osm_place_points`.
 --
 -- Notes:
---   - Only features with a non-empty "name" are included.
---   - The resulting view is useful for rendering simplified place labels
---     at various zoom levels in vector tiles.
---   - Geometry is indexed with GiST; uniqueness is enforced on (osm_id, type).
---   - This separation allows finer control over which feature types are drawn
---     as centroids vs. raw points.
+--   - Only features with non-empty "name" values are included.
+--   - Centroid area is stored in `area_m2` for polygons; NULL for points.
+--   - GiST index is created on `geometry`; uniqueness on (osm_id, type).
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_place_points_centroids_mview;
@@ -56,14 +60,15 @@ BEGIN
         SELECT
             (ST_MaximumInscribedCircle(geometry)).center AS geometry,
             osm_id,
-            name,
+            NULLIF(name, '') AS name,
             type,
-            start_date,
-            end_date,
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             ROUND(area)::bigint AS area_m2,
             tags->'capital' AS capital,
-            %s,
-            tags
+            %s
         FROM osm_place_areas
         WHERE name IS NOT NULL AND name <> ''%s
 
@@ -72,14 +77,15 @@ BEGIN
         SELECT 
             geometry,
             osm_id,
-            name,
+            NULLIF(name, '') AS name,
             type,
-            start_date,
-            end_date,
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             NULL AS area_m2,
             tags->'capital' AS capital,
-            %s,
-            tags
+            %s
         FROM osm_place_points
         WHERE osm_id > 0 AND name IS NOT NULL AND name <> ''%s
     $sql$, view_name, lang_columns, type_filter_areas, lang_columns, type_filter_points);
@@ -95,22 +101,30 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Function: create_place_areas_mview
 -- Description:
---   Creates a materialized view from polygonal place areas in the table 
---   `osm_place_areas`. The function filters by allowed place types.
+--   Creates a materialized view from polygonal place areas in the `osm_place_areas` table.
+--   Only features with non-empty "name" values are included, and an optional filter
+--   by type allows control over which place types are added to the view.
 --
---   The output includes geometry, name, type, start/end date, area in m², 
---   capital tag, all tags, and dynamic language columns.
+--   The view includes:
+--     - Raw geometry of the polygon,
+--     - Name and type fields,
+--     - Temporal fields `start_date` and `end_date` (as-is),
+--     - Precomputed fields `start_decdate` and `end_decdate` using the
+--       `isodatetodecimaldate` function for date filtering,
+--     - Area in square meters (`area_m2`),
+--     - `capital` tag (if available),
+--     - Complete `tags` column,
+--     - Multilingual name columns dynamically generated from the `languages` table.
 --
 -- Parameters:
---   view_name            TEXT     - The name of the materialized view to be created.
---   allowed_types_areas  TEXT[]   - Optional array of place types (e.g., 'square', 'islet').
---                                   If NULL, all types are included.
+--   view_name            TEXT     - Name of the materialized view to be created.
+--   allowed_types_areas  TEXT[]   - Optional list of place types (e.g., 'square', 'islet').
+--                                   If NULL or empty, all types are included.
 --
--- Behavior:
---   - Drops the materialized view if it exists.
---   - Filters by `type` only if `allowed_types_areas` is provided.
---   - Computes the area using ST_Area and rounds it to the nearest integer.
---   - Adds GiST index on geometry and a unique index on (osm_id, type).
+-- Notes:
+--   - Drops the materialized view if it already exists.
+--   - Geometry is indexed using GiST.
+--   - Uniqueness is enforced on (osm_id, type).
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_place_areas_mview;
@@ -145,11 +159,12 @@ BEGIN
             osm_id,
             NULLIF(name, '') AS name,
             type,
-            start_date,
-            end_date,
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             ROUND(ST_Area(geometry))::bigint AS area_m2,
             tags->'capital' AS capital,
-            tags,
             %s
         FROM osm_place_areas
         WHERE %s;

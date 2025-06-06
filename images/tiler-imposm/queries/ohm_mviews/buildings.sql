@@ -60,8 +60,8 @@ BEGIN
             type,
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s
         FROM osm_buildings_points
         WHERE name IS NOT NULL AND name <> ''
@@ -80,8 +80,8 @@ BEGIN
             type,
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s
         FROM osm_buildings
         WHERE name IS NOT NULL AND name <> '' AND area >= %L;

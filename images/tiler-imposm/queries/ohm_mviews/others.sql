@@ -60,10 +60,9 @@ BEGIN
       class, 
       NULLIF(start_date, '') AS start_date,
       NULLIF(end_date, '') AS end_date,
-      public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-      public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+      isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+      isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
       ROUND(area)::bigint AS area_m2, 
-      tags,
       %s
     FROM osm_other_areas
     WHERE name IS NOT NULL AND name <> '' AND area > %L
@@ -78,10 +77,9 @@ BEGIN
       class, 
       NULLIF(start_date, '') AS start_date,
       NULLIF(end_date, '') AS end_date,
-      public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-      public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+      isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+      isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
       NULL AS area_m2, 
-      tags,
       %s
     FROM osm_other_points;
   $sql$, view_name, lang_columns, min_area, lang_columns);
