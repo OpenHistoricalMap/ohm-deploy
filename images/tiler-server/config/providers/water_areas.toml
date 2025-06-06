@@ -6,14 +6,14 @@ name = "water_areas_z0_2"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
+    osm_id, 
+    name,
+    type,
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
     mv_water_areas_z0_2_subdivided
@@ -29,14 +29,14 @@ name = "water_areas_z3_5"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
+    osm_id, 
+    name,
+    type,
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
    mv_water_areas_z3_5_subdivided 
@@ -53,14 +53,14 @@ name = "water_areas_z6_7"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
+    osm_id, 
+    name,
+    type,
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
     mv_water_areas_z6_7_subdivided
@@ -76,14 +76,14 @@ name = "water_areas_z8_9"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
+    osm_id, 
+    name,
+    type,
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
     mv_water_areas_z8_9_subdivided
@@ -99,14 +99,14 @@ name = "water_areas_z10_12"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
+    osm_id, 
+    name,
+    type,
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
     mv_water_areas_z10_12
@@ -122,14 +122,14 @@ name = "water_areas_z13_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
+    osm_id, 
+    name,
+    type,
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
     mv_water_areas_z13_15 
@@ -145,14 +145,14 @@ name = "water_areas_z16_20"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
-    NULLIF(name, '') AS name,
-    NULLIF(type, '') AS type,
+    osm_id,
+    name,
+    type,
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
     mv_water_areas_z16_20 

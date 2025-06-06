@@ -6,15 +6,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
+    osm_id, 
+    name,
     type, 
     area_m2, 
-    NULLIF(capital, '') AS capital,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
+    capital,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate, 
     {{LENGUAGES}}
 FROM 
     mv_place_points_centroids_z0_2
@@ -31,15 +31,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
+    osm_id, 
+    name,
     type, 
     area_m2, 
-    NULLIF(capital, '') AS capital,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
+    capital,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate, 
     {{LENGUAGES}}
 FROM 
     mv_place_points_centroids_z3_5
@@ -56,15 +56,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
+    osm_id, 
+    name,
     type, 
     area_m2, 
-    NULLIF(capital, '') AS capital,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
+    capital,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate, 
     {{LENGUAGES}}
 FROM 
     mv_place_points_centroids_z6_10
@@ -81,15 +81,15 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name,
+    osm_id, 
+    name,
     type, 
     area_m2, 
-    NULLIF(capital, '') AS capital,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate, 
+    capital,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate, 
     {{LENGUAGES}}
 FROM 
     mv_place_points_centroids_z11_20

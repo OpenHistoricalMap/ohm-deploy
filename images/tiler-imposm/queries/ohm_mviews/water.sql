@@ -18,6 +18,7 @@ CREATE OR REPLACE FUNCTION create_water_areas_subdivided_mview(
 RETURNS void AS $$
 DECLARE
     lang_columns TEXT;
+    sql_create TEXT;
 BEGIN
     RAISE NOTICE 'Creating subdivided materialized view from % to %', input_table, mview_name;
 
@@ -28,18 +29,19 @@ BEGIN
     EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I;', mview_name);
 
     -- Create the materialized view with subdivided and valid geometries
-    EXECUTE format($sql$
+    sql_create :=  format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
           row_number() OVER () AS id,
           geometry,
           osm_id,
-          name,
-          type,
-          start_date,
-          end_date,
+          NULLIF(name, '') AS name,
+          NULLIF(type, '') AS type,
+          NULLIF(start_date, '') AS start_date,
+          NULLIF(end_date, '') AS end_date,
+          isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+          isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
           area,
-          tags,
           %s
         FROM (
           SELECT
@@ -59,9 +61,9 @@ BEGIN
               type,
               start_date,
               end_date,
-              tags,
               area,
               ST_Dump(ST_MakeValid(geometry)) AS g,
+              tags,
               %s
             FROM %I
             WHERE geometry IS NOT NULL
@@ -70,10 +72,10 @@ BEGIN
         ) AS final_data;
     $sql$, mview_name, lang_columns, lang_columns, lang_columns, input_table);
 
-    -- Create unique index
-    EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(id);', mview_name, mview_name);
+    EXECUTE sql_create;
 
-    -- Create geometry index
+    -- Create indexes
+    EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(id);', mview_name, mview_name);
     EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
 END;
 $$ LANGUAGE plpgsql;
@@ -114,8 +116,8 @@ BEGIN
     lang_columns := get_language_columns();
 
     -- Drop existing materialized view
-    sql_drop := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-    EXECUTE sql_drop;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
     RAISE NOTICE 'Dropped materialized view: %', view_name;
 
     -- Create the materialized view with centroid geometry
@@ -123,29 +125,24 @@ BEGIN
         CREATE MATERIALIZED VIEW %I AS
         SELECT
             osm_id,
-            name,
-            type,
-            start_date,
-            end_date,
+            NULLIF(name, '') AS name,
+            NULLIF(type, '') AS type,
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             area,
             %s,
-            tags,
             (ST_MaximumInscribedCircle(geometry)).center AS geometry
         FROM %I
         WHERE name IS NOT NULL AND name <> '';
     $sql$, view_name, lang_columns, source_table);
+
     EXECUTE sql_create;
-    RAISE NOTICE 'Created materialized view: %', view_name;
 
-    -- Create spatial index
-    sql_index := format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-    EXECUTE sql_index;
-    RAISE NOTICE 'Created spatial index: idx_%_geom', view_name;
-
-    -- Create unique index on osm_id
-    sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', view_name, view_name);
-    EXECUTE sql_unique_index;
-    RAISE NOTICE 'Created unique index: idx_%_osm_id', view_name;
+    -- Create indexs
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
+    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', view_name, view_name);
 
 END;
 $$ LANGUAGE plpgsql;
@@ -158,7 +155,7 @@ SELECT create_water_areas_centroids_mview('osm_water_areas_z3_5', 'mv_water_area
 SELECT create_water_areas_centroids_mview('osm_water_areas_z6_7', 'mv_water_areas_centroids_z6_7');
 SELECT create_water_areas_centroids_mview('osm_water_areas_z8_9', 'mv_water_areas_centroids_z8_9');
 SELECT create_water_areas_centroids_mview('osm_water_areas_z10_12', 'mv_water_areas_centroids_z10_12');
-SELECT create_water_areas_centroids_mview('osm_water_areas_z13_15', 'mv_water_areas_centroids_z13_15');
+SELECT create_water_areas_centroids_mview('osm_water_areas_z13_15', 'mv_water_areas_centroids_z13_20');
 
 -- ============================================================================
 -- Create materialized views for water areas using subdivided geometries and generic function
