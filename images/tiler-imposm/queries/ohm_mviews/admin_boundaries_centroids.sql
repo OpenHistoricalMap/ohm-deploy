@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Function: create_admin_boundaries_centroids_mview
 -- Description:
---   creates  materialized view of admin boundary centroids using
+--   createsa materialized view of admin boundary centroids using
 --   ST_MaximumInscribedCircle from polygons in the given input table.
 --
 -- Parameters:

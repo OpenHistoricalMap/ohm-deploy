@@ -1,6 +1,8 @@
+-- ============================================================================
 --This is fuction to convert decimal date to iso date, in that it handles BCE dates properly, and it also returns NULL if any conversion error happens.
 --It is used in images/tiler-imposm/queries/mviews_admin_boundaries_merged.sql
 --This script differs from https://github.com/OpenHistoricalMap/DateFunctions-plpgsql/blob/master/datefunctions.sql
+-- ============================================================================
 CREATE OR REPLACE FUNCTION convert_decimal_to_iso_date(decimal_date NUMERIC)
 RETURNS VARCHAR AS $$
 DECLARE
@@ -49,8 +51,9 @@ END;
 $$
 LANGUAGE plpgsql;
 
-
+-- ============================================================================
 --  This function converts a date in ISO format to a decimal date. usually user in triggers
+-- ============================================================================
 CREATE OR REPLACE FUNCTION convert_dates_to_decimal ()
 RETURNS TRIGGER AS
 $$
@@ -61,3 +64,43 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+
+-- ============================================================================
+--  This function is used to log text for tracking purposes.
+-- ============================================================================
+CREATE OR REPLACE FUNCTION log_notice(msg TEXT)
+RETURNS void AS $$
+BEGIN
+  RAISE NOTICE '%', msg;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- Function: get_language_columns()
+-- Description:
+--   Returns a comma-separated list of SQL expressions like:
+--     tags -> 'name:es' AS "es"
+--   Based on aliases found in the `languages` table.
+--
+-- Notes:
+--   - Designed for direct use when `tags` is accessed without a table alias.
+--   - Useful for generating multilingual columns dynamically in SQL queries.
+--
+-- Example:
+--   get_language_columns() → "tags->'name:es' AS es, tags->'name:fr' AS fr, ..."
+-- ============================================================================
+CREATE OR REPLACE FUNCTION get_language_columns()
+RETURNS TEXT AS $$
+DECLARE
+    result TEXT;
+BEGIN
+    SELECT string_agg(
+        format('tags -> %L AS %I', 'name:' || alias, alias),
+        ', '
+    )
+    INTO result
+    FROM languages;
+
+    RETURN COALESCE(result, '');
+END;
+$$ LANGUAGE plpgsql;

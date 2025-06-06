@@ -3,7 +3,7 @@
 -- ============================================================================
 --STEP 1: Add New Columns in osm_relation_members_boundaries and osm_admin_lines
 -- ============================================================================
-DO $$ BEGIN RAISE NOTICE 'STEP 1: Adding new columns in osm_relation_members_boundaries and osm_admin_lines table'; END; $$;
+SELECT log_notice('STEP 1: Adding new columns in osm_relation_members_boundaries and osm_admin_lines table');
 ALTER TABLE osm_relation_members_boundaries 
 ADD COLUMN start_decdate DOUBLE PRECISION,
 ADD COLUMN end_decdate DOUBLE PRECISION;
@@ -16,7 +16,7 @@ ADD COLUMN end_decdate DOUBLE PRECISION;
 -- ============================================================================
 -- STEP 2: Create the Trigger, which will call the function above
 -- ============================================================================
-DO $$ BEGIN RAISE NOTICE 'STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_relation_members_boundaries and osm_admin_lines table'; END; $$;
+SELECT log_notice('STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_relation_members_boundaries and osm_admin_lines table');
 CREATE TRIGGER trigger_decimal_dates_osm_relation_members_boundaries 
 BEFORE INSERT OR UPDATE 
 ON osm_relation_members_boundaries
@@ -30,11 +30,10 @@ ON osm_admin_lines
 FOR EACH ROW
 EXECUTE FUNCTION convert_dates_to_decimal();
 
-
 -- ============================================================================
 -- STEP 3: Backfill Existing Data, Set timeout to 40 minutes (2400000 milliseconds) for the current session, this takes quite a while, sincecurrnelty thrre are ~5 million rows in the table
 -- ============================================================================
--- DO $$ BEGIN RAISE NOTICE 'STEP 3: Backfill existing data for osm_relation_members_boundaries table'; END; $$;
+-- SELECT log_notice('STEP 3: Backfill existing data for osm_relation_members_boundaries table');
 -- SET statement_timeout = 2400000;
 -- UPDATE osm_relation_members_boundaries
 -- SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
@@ -42,7 +41,7 @@ EXECUTE FUNCTION convert_dates_to_decimal();
 -- WHERE ST_GeometryType(geometry) = 'ST_LineString';
 
 
--- DO $$ BEGIN RAISE NOTICE 'STEP 3: Backfill existing data for osm_admin_lines table'; END; $$;
+-- SELECT log_notice('STEP 3: Backfill existing data for osm_admin_lines table');
 -- SET statement_timeout = 2400000;
 -- UPDATE osm_admin_lines
 -- SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
@@ -53,7 +52,7 @@ EXECUTE FUNCTION convert_dates_to_decimal();
 -- ============================================================================
 -- STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate, admin_level, member and type
 -- ============================================================================
-DO $$ BEGIN RAISE NOTICE 'STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate using osm_relation_members_boundaries table'; END; $$;
+SELECT log_notice('STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate using osm_relation_members_boundaries table');
 
 DROP MATERIALIZED VIEW IF EXISTS mv_relation_members_boundaries CASCADE;
 
@@ -166,10 +165,9 @@ ON mv_relation_members_boundaries USING GIST (geometry);
 -- ============================================================================
 -- STEP 5: Create a materialized view that combines the data from mv_relation_members_boundaries and osm_admin_lines
 -- ============================================================================
-DO $$ BEGIN RAISE NOTICE 'STEP 5: Create a materialized view that combines the data from mv_relation_members_boundaries and osm_admin_lines'; END; $$;
+SELECT log_notice('STEP 5: Create a materialized view that combines the data from mv_relation_members_boundaries and osm_admin_lines');
 
 DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_relations_ways CASCADE;
-
 CREATE MATERIALIZED VIEW mv_admin_boundaries_relations_ways AS
 WITH relation_boundaries AS (
   SELECT
@@ -241,8 +239,7 @@ ON mv_admin_boundaries_relations_ways USING GIST (geometry);
 -- ============================================================================
 -- Execute force creation of all admin boundaries lines materialized views
 -- ============================================================================
-DO $$ BEGIN RAISE NOTICE 'STEP 6: Create a materialized view for zoom levels'; END; $$;
-
+SELECT log_notice('STEP 6: Create a materialized view for zoom levels');
 
 -- ==========================================
 -- MViews for admin lines zoom 0-2
