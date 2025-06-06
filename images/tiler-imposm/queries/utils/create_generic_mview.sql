@@ -1,26 +1,28 @@
 -- ============================================================================
 -- Function: create_generic_mview
 -- Description:
---   General-purpose function to create materialized views from any table with
---   geospatial data. It dynamically selects all non-geometry columns,
---   appends dynamic language columns from the `languages` table,
---   and includes the `geometry` column at the end.
+--   Creates a materialized view from the specified input table, selecting all
+--   columns (except 'geometry', 'name', 'start_date', 'end_date') along with:
+--     - `name`: cleaned with NULLIF(name, '')
+--     - `start_date`, `end_date`: cleaned with NULLIF(..., '')
+--     - `start_decdate`, `end_decdate`: derived as decimal dates using 
+--        `pad_date()` and `isodatetodecimaldate()` for temporal filtering support
+--     - Language-specific columns dynamically fetched from the `languages` table
+--     - `geometry`: included at the end
 --
 -- Parameters:
---   input_table     TEXT     - Source table to build the materialized view from.
---   mview_name      TEXT     - Name of the materialized view to be created.
---   unique_columns  TEXT[]   - Array of column names to use for DISTINCT ON and unique index.
+--   input_table   TEXT              - Name of the source table.
+--   mview_name    TEXT              - Name of the materialized view to create.
+--   unique_columns TEXT[]           - Array of columns to enforce uniqueness 
+--                                     (default: ['osm_id']).
 --
--- Behavior:
---   - Uses `get_language_columns()` to inject dynamic language-specific fields.
---   - Excludes the `geometry` column from the base column list to add it last.
---   - Always recreates the view.
---   - Uses DISTINCT ON + ORDER BY to avoid duplicates based on `unique_columns`.
---   - Automatically adds spatial index and a composite unique index.
+-- Notes:
+--   - DISTINCT ON + ORDER BY is used for deterministic deduplication.
+--   - Geometry is indexed using GiST.
+--   - Uniqueness is enforced on the specified `unique_columns`.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_generic_mview(TEXT, TEXT, TEXT[]);
-
 CREATE OR REPLACE FUNCTION create_generic_mview(
   input_table TEXT,
   mview_name TEXT,
@@ -38,35 +40,47 @@ BEGIN
     -- Get dynamic language columns from `languages` table
     lang_columns := get_language_columns();
 
-    -- Get all column names from the input table except 'geometry'
+    -- Get all columns except geometry, name, start_date, end_date
     SELECT string_agg(quote_ident(column_name), ', ')
     INTO table_columns
     FROM information_schema.columns
     WHERE table_schema = 'public'
       AND table_name = input_table
-      AND column_name <> 'geometry';
+      AND column_name NOT IN ('geometry', 'name', 'start_date', 'end_date');
 
     -- Drop existing materialized view if it exists
     EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
 
-    -- Construct quoted column list for DISTINCT ON and ORDER BY
+    -- Quoted unique columns for DISTINCT ON and ORDER BY
     SELECT string_agg(quote_ident(c), ', ') INTO quoted_unique_cols FROM unnest(unique_columns) AS c;
 
-    -- Create the materialized view with DISTINCT ON + ORDER BY to ensure deterministic results
+    -- Create materialized view
     sql := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT DISTINCT ON (%s)
             %s,
+            NULLIF(name, '') AS name,
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s,
             geometry
         FROM %I
         WHERE geometry IS NOT NULL
         ORDER BY %s;
-    $sql$, mview_name, quoted_unique_cols, table_columns, lang_columns, input_table, quoted_unique_cols);
+    $sql$,
+        mview_name,
+        quoted_unique_cols,
+        table_columns,
+        lang_columns,
+        input_table,
+        quoted_unique_cols
+    );
+
     EXECUTE sql;
 
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
     EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(%s);', mview_name, mview_name, quoted_unique_cols);
-
 END;
 $$ LANGUAGE plpgsql;
