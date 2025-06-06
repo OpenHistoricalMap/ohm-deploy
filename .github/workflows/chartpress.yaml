@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'points_centroids'
+      - 'tiler_index'
 jobs:
   build:
     runs-on: ubuntu-22.04

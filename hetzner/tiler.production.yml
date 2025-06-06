@@ -48,7 +48,7 @@ services:
       - tiler_network
   # Tiler server
   tiler_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
     ports:
       - "9090:9090"
     env_file:
@@ -72,7 +72,7 @@ services:
 
 
   global_seeding_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
     env_file:
       - .env.production
     volumes:
@@ -91,7 +91,7 @@ services:
       - tiler_network
 
   tile_coverage_seeding_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
     env_file:
       - .env.production
     volumes:
@@ -110,7 +110,7 @@ services:
       - tiler_network
 
   remove_cache_tiles_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
     env_file:
       - .env.production
     volumes:
@@ -119,7 +119,11 @@ services:
       - /bin/bash
       - "-c"
       - |
-        python3 /opt/rm_s3.py
+        set -x
+        while true; do
+          python3 /opt/rm_s3.py
+          sleep 86400
+        done
     deploy:
       resources:
         limits:
