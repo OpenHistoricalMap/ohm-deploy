@@ -1,25 +1,30 @@
 -- ============================================================================
 -- Function: create_other_points_centroids_mview
 -- Description:
---   creates  materialized view combining:
---     - Centroids of polygon features from `osm_other_areas`, and
+--   Creates a materialized view combining:
+--     - Centroids of polygonal features from `osm_other_areas`, and
 --     - Point features from `osm_other_points`.
 --   The result is a unified layer of named features for rendering and labeling.
 --
---   It will:
---     - Refresh the view if the set of languages has not changed.
---     - Recreate the view from scratch if the set of languages has changed
---       or if `force_create` is set to TRUE.
+--   For polygonal features, centroids are computed using ST_MaximumInscribedCircle,
+--   and their area is included in square meters (`area_m2` as integer).
+--   For point features, `area_m2` is set to NULL.
+--
+--   Temporal fields `start_date` and `end_date` are included as-is, and
+--   additional precalculated columns `start_decdate` and `end_decdate` are 
+--   generated using the `isodatetodecimaldate` function to support fast 
+--   temporal filtering.
 --
 -- Parameters:
---   view_name     TEXT             - Name of the materialized view.
---   min_area      DOUBLE PRECISION - Minimum area (in m²) for polygons to be included.
+--   view_name     TEXT              - Name of the materialized view to create.
+--   min_area      DOUBLE PRECISION - Minimum area (in m²) to include polygon features.
 --
 -- Notes:
---   - Uses `ST_MaximumInscribedCircle` to compute polygon centroids.
 --   - Only includes features with non-empty "name" values.
---   - Multilingual name columns are dynamically added from `languages` table.
---   - Spatial and unique indexes are created to optimize rendering and queries.
+--   - Language-specific name columns are added dynamically using the `languages` table.
+--   - The `tags` column is included for additional metadata.
+--   - Geometry is indexed using GiST.
+--   - Uniqueness is enforced on the combination of (osm_id, type, class).
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_other_points_centroids_mview;
@@ -53,8 +58,10 @@ BEGIN
       name, 
       type, 
       class, 
-      start_date, 
-      end_date, 
+      NULLIF(start_date, '') AS start_date,
+      NULLIF(end_date, '') AS end_date,
+      public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+      public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
       ROUND(area)::bigint AS area_m2, 
       tags,
       %s
@@ -69,8 +76,10 @@ BEGIN
       name, 
       type, 
       class, 
-      start_date, 
-      end_date, 
+      NULLIF(start_date, '') AS start_date,
+      NULLIF(end_date, '') AS end_date,
+      public.isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+      public.isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
       NULL AS area_m2, 
       tags,
       %s

@@ -137,7 +137,7 @@ SELECT
     end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_landuse_areas 
+    mv_landuse_areas_z16_20
 WHERE 
     geometry && !BBOX!
 """
