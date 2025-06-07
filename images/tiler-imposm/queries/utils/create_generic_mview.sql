@@ -21,7 +21,6 @@
 --   - Geometry is indexed using GiST.
 --   - Uniqueness is enforced on the specified `unique_columns`.
 -- ============================================================================
-
 DROP FUNCTION IF EXISTS create_generic_mview(TEXT, TEXT, TEXT[]);
 CREATE OR REPLACE FUNCTION create_generic_mview(
   input_table TEXT,
@@ -40,8 +39,14 @@ BEGIN
     -- Get dynamic language columns from `languages` table
     lang_columns := get_language_columns();
 
-    -- Get all columns except geometry, name, start_date, end_date
-    SELECT string_agg(quote_ident(column_name), ', ')
+    -- Build list of columns, replacing 'osm_id' with ABS(osm_id) AS osm_id
+    SELECT string_agg(
+        CASE
+            WHEN column_name = 'osm_id' THEN 'ABS(osm_id) AS osm_id'
+            ELSE quote_ident(column_name)
+        END,
+        ', '
+    )
     INTO table_columns
     FROM information_schema.columns
     WHERE table_schema = 'public'

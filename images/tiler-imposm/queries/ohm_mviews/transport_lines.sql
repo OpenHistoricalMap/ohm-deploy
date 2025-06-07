@@ -1,19 +1,30 @@
 -- ============================================================================
 -- Function: create_transport_lines_mview
 -- Description:
---   creates  materialized view that merges transport lines and multi-lines
---   into one unified layer for rendering, including multilingual name tags.
+--   Creates a materialized view that merges transport lines from two source tables:
+--     - `lines_table`: individual OSM way-based transport lines.
+--     - `multilines_table`: relation-based multi-line transport features.
+--
+--
+--   Each row is uniquely identified by a hash-based `id` composed of relevant attributes.
+--   Features from multi-line relations include a `member` value and are marked with
+--   `source_type = 'relation'`. Way-based features have `source_type = 'way'`.
 --
 -- Parameters:
---   lines_table       TEXT    - Table with individual transport lines.
---   multilines_table  TEXT    - Table with multi-line transport features.
---   mview_name        TEXT    - Name of the materialized view to create or refresh.
+--   lines_table       TEXT   - Table containing way-based transport lines.
+--   multilines_table  TEXT   - Table containing relation-based multi-line transport features.
+--   mview_name        TEXT   - Name of the materialized view to be created.
+--
+-- Behavior:
+--   - Drops the materialized view if it already exists.
+--   - Deduplicates using DISTINCT ON (id), prioritizing the first appearance.
+--   - Adds multilingual name columns dynamically from the `languages` table.
+--   - Creates GiST index on geometry and unique index on (id).
 --
 -- Notes:
---   - Uses DISTINCT ON to deduplicate by (osm_id, type[, member]).
---   - Language columns are dynamically generated from the `languages` table.
---   - If force_create is FALSE, the function checks whether language hash or view state changed.
---   - Creates spatial (GiST) and unique indexes.
+--   - Both input tables must contain `geometry`, `osm_id`, `type`, `class`, `name`,
+--     and extended transport-related tags (e.g., `route`, `railway`, `aeroway`, etc.).
+--   - Filtering by geometry type ensures valid line features from relations.
 -- ============================================================================
 DROP FUNCTION IF EXISTS create_transport_lines_mview;
 CREATE OR REPLACE FUNCTION create_transport_lines_mview(
@@ -24,7 +35,7 @@ CREATE OR REPLACE FUNCTION create_transport_lines_mview(
 RETURNS void AS $$
 DECLARE
   lang_columns TEXT;
-  sql TEXT;
+  sql_create TEXT;
 BEGIN
   RAISE NOTICE 'Creating or refreshing transport lines view: %', mview_name;
   RAISE NOTICE 'Tables: {"lines": "%", "multilines": "%"}', lines_table, multilines_table;
@@ -33,7 +44,7 @@ BEGIN
 
   EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
 
-  sql := format($sql$
+  sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
     WITH combined AS (
       SELECT
@@ -42,28 +53,30 @@ BEGIN
           COALESCE(type, '') || '_' ||
           COALESCE(class, '')
         ) AS id,
-        osm_id,
+        ABS(osm_id) AS osm_id,
         geometry,
         type,
-        name,
+        class,
+        NULLIF(name, '') AS name,
         tunnel,
         bridge,
         oneway,
-        ref,
+        NULLIF(ref, '') AS ref,
         z_order,
-        access,
-        service,
-        ford,
-        class,
-        electrified,
-        highspeed,
-        usage,
+        NULLIF(access, '') AS access,
+        NULLIF(service, '') AS service,
+        NULLIF(ford, '') AS ford,
+        NULLIF(electrified, '') AS electrified,
+        NULLIF(highspeed, '') AS highspeed,
+        NULLIF(usage, '') AS usage,
         railway,
         aeroway,
         highway,
         route,
-        start_date,
-        end_date,
+        NULLIF(start_date, '') AS start_date,
+        NULLIF(end_date, '') AS end_date,
+        isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+        isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
         tags,
         NULL AS member,
         'way' AS source_type,
@@ -80,28 +93,30 @@ BEGIN
           COALESCE(type, '') || '_' ||
           COALESCE(class, '')
         ) AS id,
-        osm_id,
+        ABS(osm_id) AS osm_id,
         geometry,
         type,
-        name,
+        class,
+        NULLIF(name, '') AS name,
         tunnel,
         bridge,
         oneway,
-        ref,
+        NULLIF(ref, '') AS ref,
         z_order,
-        access,
-        service,
-        ford,
-        class,
-        electrified,
-        highspeed,
-        usage,
+        NULLIF(access, '') AS access,
+        NULLIF(service, '') AS service,
+        NULLIF(ford, '') AS ford,
+        NULLIF(electrified, '') AS electrified,
+        NULLIF(highspeed, '') AS highspeed,
+        NULLIF(usage, '') AS usage,
         railway,
         aeroway,
         highway,
         route,
-        start_date,
-        end_date,
+        NULLIF(start_date, '') AS start_date,
+        NULLIF(end_date, '') AS end_date,
+        isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
+        isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
         tags,
         member,
         'relation' AS source_type,
@@ -114,7 +129,7 @@ BEGIN
     FROM combined;
   $sql$, mview_name, lang_columns, lines_table, lang_columns, multilines_table);
   
-  EXECUTE sql;
+  EXECUTE sql_create;
 
   EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I(id);', mview_name, mview_name);
   EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST(geometry);', mview_name, mview_name);
