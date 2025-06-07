@@ -7,13 +7,7 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {
-    "buildings_points_named": {
-      "source": "buildings_points",
-      "tolerance": null,
-      "sql_filter": "name IS NOT NULL AND name <> ''"
-    }
-  },
+  "generalized_tables": {},
   "tables": {
     "buildings_points": {
       "fields": [

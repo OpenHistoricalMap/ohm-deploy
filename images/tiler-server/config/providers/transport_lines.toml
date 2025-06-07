@@ -6,23 +6,23 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    type,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z5
+    mv_transport_lines_z5
 WHERE 
     geometry && !BBOX!
 """
@@ -35,23 +35,23 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    type,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z6
+    mv_transport_lines_z6
 WHERE 
     geometry && !BBOX!
 """
@@ -64,23 +64,23 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    type,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z7
+    mv_transport_lines_z7
 WHERE 
     geometry && !BBOX!
 """
@@ -93,25 +93,25 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
+    type,
     tunnel, 
     bridge, 
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z8
+    mv_transport_lines_z8
 WHERE 
     geometry && !BBOX!
 """
@@ -124,25 +124,25 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
+    type,
     tunnel, 
     bridge, 
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z9
+    mv_transport_lines_z9
 WHERE 
     geometry && !BBOX!
 """
@@ -156,25 +156,25 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
+    type,
     tunnel, 
     bridge, 
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z10_11
+    mv_transport_lines_z10_11
 WHERE 
     geometry && !BBOX!
 """
@@ -188,25 +188,25 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
+    type,
     tunnel, 
     bridge, 
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z12_13
+    mv_transport_lines_z12_13
 WHERE 
     geometry && !BBOX!
 """
@@ -219,25 +219,25 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id,
+    osm_id,
     source_type,
     member,
-    NULLIF(type, '') AS type,
+    type,
     tunnel, 
     bridge, 
-    NULLIF(ref, '') AS ref,
-    NULLIF(service, '') AS service,
-    NULLIF(name, '') AS name,
-    NULLIF(electrified, '') AS electrified,
-    NULLIF(highspeed, '') AS highspeed,
-    NULLIF(usage, '') AS usage,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    ref,
+    service,
+    name,
+    electrified,
+    highspeed,
+    usage,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_lines_z14_20
+    mv_transport_lines_z14_20
 WHERE 
     geometry && !BBOX!
 """
