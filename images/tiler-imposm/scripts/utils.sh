@@ -7,12 +7,16 @@ function log_message() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') - $1"
 }
 
-function execute_sql_file() {
+execute_sql_file() {
     local file="$1"
     log_message "Executing: $file"
+
+    local start_time=$SECONDS
     if psql "$PG_CONNECTION" -f "$file"; then
-        log_message "✅ Successfully executed: $file"
+        local elapsed=$((SECONDS - start_time))
+        log_message "✅ Successfully executed: $file (Time: ${elapsed}s)"
     else
-        log_message "❌ ERROR executing: $file"
+        local elapsed=$((SECONDS - start_time))
+        log_message "❌ ERROR executing: $file (Time: ${elapsed}s)"
     fi
 }

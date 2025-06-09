@@ -57,11 +57,11 @@ amenity_views=(
 ) # TODO , missing amenity lines
 
 landuse_views=(
-    mv_landuse_areas_v2_z3_5
-    mv_landuse_areas_v2_z6_7
-    mv_landuse_areas_v2_z8_9
-    mv_landuse_areas_v2_z10_12
-    mv_landuse_areas_v2_z13_15
+    mv_landuse_areas_z3_5
+    mv_landuse_areas_z6_7
+    mv_landuse_areas_z8_9
+    mv_landuse_areas_z10_12
+    mv_landuse_areas_z13_15
     mv_landuse_points_centroids_z10_11
     mv_landuse_points_centroids_z12_13
     mv_landuse_points_centroids_z14_20
@@ -115,9 +115,11 @@ water_views=(
     mv_water_lines_z16_20
 )
 
-Buildings
-mv_buildings_points_centroids_z14_20
-mv_osm_buildings_areas_z14_20
+buildings_views=(
+    mv_buildings_points_centroids_z14_20
+    mv_osm_buildings_areas_z14_20
+)
+
 
 refresh_mviews_group "ADMIN_BOUNDARIES_CENTROIDS" 60 "${admin_boundaries_centroids_views[@]}" &
 refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 "${admin_boundaries_lines_views[@]}" &
@@ -128,3 +130,4 @@ refresh_mviews_group "LANDUSE" 180 "${landuse_views[@]}" &
 refresh_mviews_group "OTHERS" 180 "${others_views[@]}" &
 refresh_mviews_group "PLACES" 180 "${places_views[@]}" &
 refresh_mviews_group "WATER" 180 "${water_views[@]}" &
+refresh_mviews_group "BUILDINGS" 180 "${buildings_views[@]}" &
