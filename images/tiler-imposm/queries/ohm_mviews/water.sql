@@ -110,17 +110,8 @@ DECLARE
     sql_unique_index TEXT;
     lang_columns TEXT;
 BEGIN
-    RAISE NOTICE 'Creating centroid materialized view from % to %', source_table, view_name;
-
-    -- Get dynamic language columns from `languages` table
     lang_columns := get_language_columns();
 
-    -- Drop existing materialized view
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    RAISE NOTICE 'Dropped materialized view: %', view_name;
-
-    -- Create the materialized view with centroid geometry
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -138,12 +129,13 @@ BEGIN
         WHERE name IS NOT NULL AND name <> '';
     $sql$, view_name, lang_columns, source_table);
 
+    RAISE NOTICE '====Creating centroid materialized view from % to % ====', source_table, view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
     EXECUTE sql_create;
-
-    -- Create indexs
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
     EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', view_name, view_name);
 
+    RAISE NOTICE 'Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
 

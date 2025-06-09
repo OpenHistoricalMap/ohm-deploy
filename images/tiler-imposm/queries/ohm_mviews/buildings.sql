@@ -40,13 +40,7 @@ DECLARE
     sql_unique_index TEXT;
     lang_columns TEXT;
 BEGIN
-    -- Get dynamic language columns from `languages` table
     lang_columns := get_language_columns();
-
-    RAISE NOTICE 'Dropping materialized view %', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    RAISE NOTICE 'Creating materialized view % with area > %', view_name, min_area;
 
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
@@ -86,9 +80,10 @@ BEGIN
         FROM osm_buildings
         WHERE name IS NOT NULL AND name <> '' AND area >= %L;
     $sql$, view_name, lang_columns, lang_columns, min_area);
-    EXECUTE sql_create;
 
-    RAISE NOTICE 'Creating indexes on %', view_name;
+    RAISE NOTICE '====Creating buildings points and centroids materialized view % with area > % ====', view_name, min_area;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    EXECUTE sql_create;
     EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_uid ON %I (osm_id, type);', view_name, view_name);
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
 

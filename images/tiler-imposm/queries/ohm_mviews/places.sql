@@ -39,9 +39,6 @@ DECLARE
     type_filter_points TEXT := '';
     lang_columns TEXT;
 BEGIN
-    RAISE NOTICE 'Creating or refreshing view: %', view_name;
-
-    -- Get dynamic language columns
     lang_columns := get_language_columns();
 
     -- Apply filters for allowed types
@@ -53,9 +50,7 @@ BEGIN
         type_filter_points := format(' AND type = ANY (%L)', allowed_types_points);
     END IF;
     
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    sql := format($sql$
+    sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
             (ST_MaximumInscribedCircle(geometry)).center AS geometry,
@@ -90,8 +85,10 @@ BEGIN
         WHERE osm_id > 0 AND name IS NOT NULL AND name <> ''%s
     $sql$, view_name, lang_columns, type_filter_areas, lang_columns, type_filter_points);
 
-    EXECUTE sql;
 
+    RAISE NOTICE '====Creating places points and centroids materialized view  : % ====', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    EXECUTE sql_create;
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
     EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type);', view_name, view_name);
 END;
@@ -134,13 +131,10 @@ CREATE OR REPLACE FUNCTION create_place_areas_mview(
 )
 RETURNS void AS $$
 DECLARE 
-    sql TEXT;
+    sql_create TEXT;
     type_filter_areas TEXT := 'TRUE';
     lang_columns TEXT;
 BEGIN
-    RAISE NOTICE 'Creating or refreshing view: %', view_name;
-
-    -- Get dynamic language columns
     lang_columns := get_language_columns();
 
     -- Prepare filtering condition
@@ -148,11 +142,8 @@ BEGIN
         type_filter_areas := format('type = ANY (%L)', allowed_types_areas);
     END IF;
 
-    -- Drop existing materialized view
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
     -- Create materialized view with dynamic language columns
-    sql := format($sql$
+    sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
             geometry,
@@ -170,11 +161,14 @@ BEGIN
         WHERE %s;
     $sql$, view_name, lang_columns, type_filter_areas);
 
-    EXECUTE sql;
-
-    -- Create spatial and unique indexes
+    RAISE NOTICE '====Creating places areas materialized view  : % ====', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    EXECUTE sql_create;
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
     EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type);', view_name, view_name);
+    
+    RAISE NOTICE 'View % recreated successfully.', view_name;
+
 END;
 $$ LANGUAGE plpgsql;
 

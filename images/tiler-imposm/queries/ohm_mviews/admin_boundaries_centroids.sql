@@ -30,13 +30,7 @@ DECLARE
   lang_columns TEXT;
 BEGIN
 
-  -- Get multilingual columns from `languages` table
   lang_columns := get_language_columns();
-
-  RAISE NOTICE '==== Creating centroid materialized view: % from table: % ====', mview_name, input_table;
-
-  sql_drop_centroid := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
-  EXECUTE sql_drop_centroid;
 
   sql_create_centroid := format($sql$
     CREATE MATERIALIZED VIEW %I AS
@@ -58,13 +52,12 @@ BEGIN
         SELECT osm_id FROM osm_relation_members WHERE role = 'label'
       );
   $sql$, mview_name, lang_columns, input_table);
+
+  RAISE NOTICE '==== Creating admin bounduaries centroid materialized view: % from table: % ====', mview_name, input_table;
+  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
   EXECUTE sql_create_centroid;
-
-  sql_index_centroid := format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
-  EXECUTE sql_index_centroid;
-
-  sql_unique_index_centroid := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', mview_name, mview_name);
-  EXECUTE sql_unique_index_centroid;
+  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
+  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', mview_name, mview_name);
 
   RAISE NOTICE 'Materialized view % created successfully.', mview_name;
 END;

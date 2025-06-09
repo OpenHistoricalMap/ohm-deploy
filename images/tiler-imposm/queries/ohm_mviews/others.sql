@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION create_other_points_centroids_mview(
   view_name TEXT,
   min_area DOUBLE PRECISION DEFAULT 0
 )
-RETURNS BOOLEAN AS $$
+RETURNS void AS $$
 DECLARE
   lang_columns TEXT;
   sql_drop TEXT;
@@ -40,16 +40,8 @@ DECLARE
   sql_index TEXT;
   sql_unique_index TEXT;
 BEGIN
-  RAISE NOTICE 'Creating or refreshing view: %', view_name;
-
-  -- Get dynamic language columns
   lang_columns := get_language_columns();
 
-  -- Drop the existing materialized view
-  sql_drop := format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-  EXECUTE sql_drop;
-
-  -- Create the new materialized view with centroids and multilingual name tags
   sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
     SELECT
@@ -83,17 +75,15 @@ BEGIN
       %s
     FROM osm_other_points;
   $sql$, view_name, lang_columns, min_area, lang_columns);
+
+  RAISE NOTICE '====Creating others points and centroids materialized view  : % ====', view_name;
+  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
   EXECUTE sql_create;
-
-  -- Create spatial index
-  sql_index := format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-  EXECUTE sql_index;
-
-  -- Create unique index
-  sql_unique_index := format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', view_name, view_name);
-  EXECUTE sql_unique_index;
+  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
+  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', view_name, view_name);
 
   RAISE NOTICE 'View % recreated successfully.', view_name;
+
   RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;

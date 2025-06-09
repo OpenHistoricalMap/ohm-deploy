@@ -32,11 +32,8 @@ DECLARE
     lang_columns TEXT;
     table_columns TEXT;
     quoted_unique_cols TEXT;
-    sql TEXT;
+    sql_create TEXT;
 BEGIN
-    RAISE NOTICE 'Creating generic materialized view from % to %', input_table, mview_name;
-
-    -- Get dynamic language columns from `languages` table
     lang_columns := get_language_columns();
 
     -- Build list of columns, replacing 'osm_id' with ABS(osm_id) AS osm_id
@@ -53,14 +50,11 @@ BEGIN
       AND table_name = input_table
       AND column_name NOT IN ('geometry', 'name', 'start_date', 'end_date');
 
-    -- Drop existing materialized view if it exists
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
-
     -- Quoted unique columns for DISTINCT ON and ORDER BY
     SELECT string_agg(quote_ident(c), ', ') INTO quoted_unique_cols FROM unnest(unique_columns) AS c;
 
     -- Create materialized view
-    sql := format($sql$
+    sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT DISTINCT ON (%s)
             %s,
@@ -83,9 +77,12 @@ BEGIN
         quoted_unique_cols
     );
 
-    EXECUTE sql;
-
+    RAISE NOTICE '====Creating generic materialized view from % to % ====', input_table, mview_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
+    EXECUTE sql_create;
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
     EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(%s);', mview_name, mview_name, quoted_unique_cols);
+    
+    RAISE NOTICE 'Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;

@@ -37,12 +37,7 @@ DECLARE
   lang_columns TEXT;
   sql_create TEXT;
 BEGIN
-  RAISE NOTICE 'Creating or refreshing transport lines view: %', mview_name;
-  RAISE NOTICE 'Tables: {"lines": "%", "multilines": "%"}', lines_table, multilines_table;
-
   lang_columns := get_language_columns();
-
-  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
 
   sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
@@ -129,8 +124,9 @@ BEGIN
     FROM combined;
   $sql$, mview_name, lang_columns, lines_table, lang_columns, multilines_table);
   
+  RAISE NOTICE '====Creating transports lines view: % ====', mview_name;
+  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
   EXECUTE sql_create;
-
   EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I(id);', mview_name, mview_name);
   EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST(geometry);', mview_name, mview_name);
 

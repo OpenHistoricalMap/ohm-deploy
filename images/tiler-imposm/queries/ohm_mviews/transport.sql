@@ -35,13 +35,8 @@ DECLARE
     sql_unique_index TEXT;
     lang_columns TEXT;
 BEGIN
-    RAISE NOTICE 'Creating  transport points and centroids view: %', view_name;
-
     lang_columns := get_language_columns();
 
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    RAISE NOTICE 'Creating materialized view % with area > %', view_name, min_area;
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -77,8 +72,10 @@ BEGIN
             %s
         FROM osm_transport_points;
     $sql$, view_name, lang_columns, min_area, lang_columns);
-    EXECUTE sql_create;
 
+    RAISE NOTICE '==== Creating transport points and centroids view: % ====', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    EXECUTE sql_create;
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
     EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', view_name, view_name);
 
