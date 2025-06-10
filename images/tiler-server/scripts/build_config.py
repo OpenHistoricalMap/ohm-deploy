@@ -14,9 +14,9 @@ Requirements:
     POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
 """
 
-import psycopg2
 import os
 import argparse
+from utils import get_db_connection
 
 def fetch_languages_from_db():
     """
@@ -24,13 +24,7 @@ def fetch_languages_from_db():
     Returns:
         str: A newline-separated string of aliases sorted alphabetically.
     """
-    conn = psycopg2.connect(
-        dbname=os.getenv("POSTGRES_DB", "gis"),
-        user=os.getenv("POSTGRES_USER", "postgres"),
-        password=os.getenv("POSTGRES_PASSWORD", "password"),
-        host=os.getenv("POSTGRES_HOST", "localhost"),
-        port=os.getenv("POSTGRES_PORT", "5432")
-    )
+    conn = get_db_connection()
     try:
         with conn.cursor() as cur:
             cur.execute("SELECT alias FROM languages ORDER BY alias;")

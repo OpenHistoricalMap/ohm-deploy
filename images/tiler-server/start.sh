@@ -4,17 +4,22 @@ set -euo pipefail
 echo "Starting tile server setup..."
 
 # Configurable paths
-UTILS_DIR="/app/utils"
-CONFIG_DIR="/app/config"
-TEGOLA_CONFIG_DIR="/app/tegola_config"
-TEGOLA_CONFIG_FILE="${TEGOLA_CONFIG_DIR}/config.toml"
+WORK_DIR="/app"
+SCRIPTS_DIR="${WORK_DIR}/scripts"
+PROVIDERS_DIR="${WORK_DIR}/config/providers"
+TEGOLA_CONFIG_FILE="${WORK_DIR}/config/config.toml"
+CONFIG_TEMPLATE_FILE="${WORK_DIR}/config/config.template.toml"
 
-mkdir -p ${CONFIG_DIR} ${TEGOLA_CONFIG_DIR}
+# Languages to geojson
+echo "Extracting languages to geojson..."
+python "${SCRIPTS_DIR}/lang2geojson.py"
 
 # Build Tegola config
 echo "Building Tegola config..."
-python "${UTILS_DIR}/build_config.py" \
+python "${SCRIPTS_DIR}/build_config.py" \
+  --template="${CONFIG_TEMPLATE_FILE}" \
   --output="${TEGOLA_CONFIG_FILE}" \
+  --providers="${PROVIDERS_DIR}" \
   --provider_names "
 admin_boundaries_lines,
 admin_boundaries_centroids,
@@ -37,7 +42,6 @@ landuse_lines,
 other_areas,
 other_points_centroids,
 other_lines"
-
 
 # Wait for PostgreSQL
 echo "Waiting for PostgreSQL to be ready..."

@@ -8,8 +8,6 @@ class Config:
     SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
     ## In case the container is running in hetzner cloud, we need to load the AWS credentials env vars to read sqs messages
     AWS_REGION_NAME = os.getenv("AWS_REGION_NAME", "us-east-1")
-    # AWS_ACCESS_KEY_ID
-    # AWS_SECRET_ACCESS_KEY
 
     # Kubernetes settings
     NAMESPACE = os.getenv("NAMESPACE", "default")

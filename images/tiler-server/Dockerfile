@@ -26,8 +26,7 @@ RUN apk add --no-cache \
 
 # Symlink tegola binary for easier access
 RUN ln -s /opt/tegola /usr/bin/tegola
-COPY . /opt/
-COPY ./*.sh .
-
+WORKDIR /app
+COPY . .
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["/opt/start.sh"]
+CMD ["/app/start.sh"]
