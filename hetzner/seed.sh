@@ -1,53 +1,41 @@
 #!/bin/bash
 
-UTILS_DIR="/opt/utils"
-CONFIG_DIR="/opt/config"
-TEGOLA_CONFIG_DIR="/opt/tegola_config"
-
-TAGINFO_URL="https://taginfo.openhistoricalmap.org/api/4/keys/all"
-LANGUAGE_SQL_FILE="${CONFIG_DIR}/languages.sql"
-TEGOLA_CONFIG_FILE="${TEGOLA_CONFIG_DIR}/config.toml"
-
-mkdir -p ${CONFIG_DIR} ${TEGOLA_CONFIG_DIR}
-
-# Extract language tags
-echo "Extracting languages from Taginfo..."
-python "${UTILS_DIR}/extract_taginfo_languages.py" \
-  --url "${TAGINFO_URL}" \
-  --output "${LANGUAGE_SQL_FILE}"
+# Configurable paths
+WORK_DIR="/app"
+SCRIPTS_DIR="${WORK_DIR}/scripts"
+PROVIDERS_DIR="${WORK_DIR}/config/providers"
+TEGOLA_CONFIG_FILE="${WORK_DIR}/config/config.toml"
+CONFIG_TEMPLATE_FILE="${WORK_DIR}/config/config.template.toml"
 
 # Build Tegola config
 echo "Building Tegola config..."
-python "${UTILS_DIR}/build_config.py" \
+python "${SCRIPTS_DIR}/build_config.py" \
+  --template="${CONFIG_TEMPLATE_FILE}" \
   --output="${TEGOLA_CONFIG_FILE}" \
-  --provider_names "admin_boundaries_lines,
-admin_boundaries.centroids,
+  --providers="${PROVIDERS_DIR}" \
+  --provider_names "
+admin_boundaries_lines,
+admin_boundaries_centroids,
 admin_boundaries_maritime,
 place_areas,
-place_points,
+place_points_centroids,
 water_areas,
-water_areas.centroids,
+water_areas_centroids,
 water_lines,
 transport_areas,
-transport_associated_streets,
 transport_lines,
-transport_points,
-route_lines,
+transport_points_centroids,
 amenity_areas,
-amenity_areas.centroids,
-amenity_points,
-buildings,
+amenity_points_centroids,
+buildings_areas,
 buildings_points_centroids,
-buildings.centroids,
-buildings_points,
 landuse_areas,
-landuse_areas.centroids,
+landuse_points_centroids,
 landuse_lines,
-landuse_points,
 other_areas,
-other_areas.centroids,
-other_lines,
-other_points"
+other_points_centroids,
+other_lines"
+
 
 seed_global() {
   while true; do

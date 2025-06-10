@@ -145,11 +145,6 @@
       "source": "admin_lines",
       "sql_filter": "maritime='yes'"
     },
-    "buildings_points_named": {
-      "source": "buildings_points",
-      "tolerance": null,
-      "sql_filter": "name IS NOT NULL AND name <> ''"
-    },
     "transport_lines_z5": {
       "source": "transport_lines_z6",
       "sql_filter": null,

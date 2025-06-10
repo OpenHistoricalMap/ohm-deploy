@@ -20,8 +20,8 @@ services:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
     volumes:
-    #   - ../data/tiler-imposm-data2:/mnt/data
       - ../images/tiler-imposm:/osm
+      - ../hetzner:/hetzner
     command:
       - sh
       - -c
@@ -32,12 +32,12 @@ services:
       - tiler_network
 
   tiler:
-    image: rub21/tiler-server:v52
+    image: rub21/tiler-server:v54
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile
     volumes:
-      - ../data/tiler-server-data:/mnt/data
+      - ../hetzner:/hetzner
       - ../images/tiler-server:/app
     ports:
       - "9090:9090"
@@ -47,19 +47,18 @@ services:
     networks:
       - tiler_network
 
-  # tiler-cache:
-  #   image: ohm-tiler-cache:v1
-  #   build:
-  #     context: ../images/tiler-cache
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ../images/tiler-cache:/app
-
-  #   env_file:
-  #     - ../envs/.env.tiler
-  #   restart: always
-  #   networks:
-  #     - tiler_network
+  tiler-cache:
+    image: ohm-tiler-cache:v1
+    build:
+      context: ../images/tiler-cache
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-cache:/app
+    env_file:
+      - ../envs/.env.tiler
+    restart: always
+    networks:
+      - tiler_network
 
 networks:
   tiler_network:
