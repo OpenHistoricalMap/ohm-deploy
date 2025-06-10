@@ -1,144 +1,145 @@
 -- ============================================================================
--- Script: Language Extraction and Change Detection from DB Tables
+-- Function: search_languages()
+-- 
 -- Description:
---   This script extracts all language keys (tags starting with name:xx) from a
---   fixed list of OSM-related tables that contain `tags` in hstore format.
---   It stores the detected languages in the `languages` table and calculates
---   a hash of the current set to detect changes over time.
---
--- Features:
---   - Scans OSM tables for valid language tags using a strict regex.
---   - Inserts new languages or updates existing ones in the `languages` table.
---   - Does NOT delete existing languages by default to preserve schema stability.
---   - Optional `force_regeneration` parameter allows full reset when needed.
---   - Automatically computes and inserts a hash into `languages_hash`.
---   - Tracks whether the hash has changed since the previous run.
---
--- Usage:
---   SELECT update_languages_from_tables(10);            -- Normal update mode
---   SELECT update_languages_from_tables(10, TRUE);      -- Force full regeneration
+--   Scans all relevant tables to extract language tags of the form `name:*`,
+--   following a strict regex pattern that matches BCP 47 language codes.
+--   For each matching language key, it calculates:
+--     - A normalized alias (lowercase, with ':' and '-' replaced by '_')
+--     - The original key as it appears in the tags (e.g., 'name:es', 'name:ar-Latn')
+--     - The total number of objects containing that key
+--     - A bounding box (geometry) that encompasses all matching features
+-- 
+-- Returns:
+--   - alias TEXT         -- normalized form, safe for database use (e.g., 'name_es')
+--   - language_key TEXT  -- original OHM tag key (e.g., 'name:es')
+--   - total_count BIGINT -- number of features with this key
+--   - bbox GEOMETRY      -- bounding box for all matching geometries
+
 -- ============================================================================
 
--- Table to store valid language tags detected in OSM data
-CREATE TABLE IF NOT EXISTS languages (
-    alias TEXT PRIMARY KEY,
-    key_name TEXT NOT NULL,
-    count INTEGER,
-    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table to store hashes of the language list for change detection
-CREATE TABLE IF NOT EXISTS languages_hash (
-    id SERIAL PRIMARY KEY,
-    hash TEXT NOT NULL,
-    has_changed BOOLEAN NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Function to update the `languages` table and insert hash if changed
-CREATE OR REPLACE FUNCTION update_languages_from_tables(
-    min_count INTEGER DEFAULT 5,
-    force_regeneration BOOLEAN DEFAULT FALSE
-)
-RETURNS void AS $$
-DECLARE
-    tbl TEXT;
-    rec RECORD;
-    lang_key TEXT;
-    lang_alias TEXT;
-    lang_count INT;
-    language_regex TEXT := '^name:[a-z]{2,3}(-[A-Z][a-z]{3})?((-[a-z]{2,}|x-[a-z]{2,})(-[a-z]{2,})?)?(-([A-Z]{2}|\\d{3}))?$';
-
-    current_hash TEXT;
-    last_hash TEXT;
-    is_changed BOOLEAN;
+CREATE OR REPLACE FUNCTION search_languages()
+RETURNS TABLE(
+    alias TEXT,              -- normalized and lowercase alias
+    language_key TEXT,       -- original tag key like 'name:es'
+    total_count BIGINT,      -- number of objects with this key
+    bbox GEOMETRY            -- bounding box of all geometries with this key
+) AS $$
 BEGIN
-    -- Optionally clear existing languages if forced
-    IF force_regeneration THEN
-        DELETE FROM languages;
-        RAISE NOTICE 'Forced regeneration: existing entries in "languages" table deleted.';
-    END IF;
-
-    -- List of relevant OHM tables to evaluate
-    FOR tbl IN 
-        SELECT unnest(ARRAY[
-            'osm_admin_areas',
-            'osm_admin_lines',
-            'osm_amenity_areas',
-            'osm_amenity_points',
-            'osm_buildings_points',
-            'osm_buildings',
-            'osm_landuse_areas',
-            'osm_landuse_lines',
-            'osm_landuse_points',
-            'osm_other_areas',
-            'osm_other_lines',
-            'osm_other_points',
-            'osm_place_areas',
-            'osm_place_points',
-            'osm_relation_members_boundaries',
-            'osm_relations',
-            'osm_transport_areas',
-            'osm_transport_lines',
-            'osm_transport_multilines',
-            'osm_transport_points',
-            'osm_water_areas',
-            'osm_water_lines'
-        ])
-    LOOP
-        FOR rec IN EXECUTE format(
-            $sql$
-            SELECT
-                key AS lang_key,
-                count(*) AS lang_count
-            FROM (
-                SELECT skeys(tags) AS key
-                FROM %I
-                WHERE tags IS NOT NULL
-            ) sub
-            WHERE key ~ %L
-            GROUP BY key
-            HAVING count(*) >= %s
-            $sql$,
-            tbl,
-            language_regex,
-            min_count
-        )
-        LOOP
-            lang_key := rec.lang_key;
-            lang_count := rec.lang_count;
-            lang_alias := replace(replace(lower(lang_key), ':', '_'), '-', '_');
-
-            -- Insert or update the language in the `languages` table
-            INSERT INTO languages(alias, key_name, count)
-            VALUES (lang_alias, lang_key, lang_count)
-            ON CONFLICT (alias) DO UPDATE
-            SET count = EXCLUDED.count,
-                date_added = CURRENT_TIMESTAMP;
-        END LOOP;
-    END LOOP;
-
-    -- Compute current hash
-    SELECT md5(string_agg(alias, ',' ORDER BY alias)) INTO current_hash FROM languages;
-
-    -- Get most recent hash
-    SELECT hash INTO last_hash
-    FROM languages_hash
-    ORDER BY created_at DESC
-    LIMIT 1;
-
-    -- Determine if hash changed
-    is_changed := last_hash IS NULL OR current_hash IS DISTINCT FROM last_hash;
-
-    -- Insert new hash entry
-    INSERT INTO languages_hash (hash, has_changed)
-    VALUES (current_hash, is_changed);
-
-    RAISE NOTICE 'Languages updated. New hash: %, Changed: %', current_hash, is_changed;
+    RETURN QUERY
+    WITH all_ohm_data AS (
+        SELECT tags, geometry FROM osm_admin_areas WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_admin_lines WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_amenity_areas WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_amenity_points WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_buildings_points WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_buildings WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_landuse_areas WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_landuse_lines WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_landuse_points WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_other_areas WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_other_lines WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_other_points WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_place_areas WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_place_points WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_transport_areas WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_transport_lines WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_transport_multilines WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_transport_points WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_water_areas WHERE tags IS NOT NULL AND geometry IS NOT NULL
+        UNION ALL SELECT tags, geometry FROM osm_water_lines WHERE tags IS NOT NULL AND geometry IS NOT NULL
+    )
+    SELECT
+        lower(regexp_replace(keys.key, '[:\-]', '_', 'g')) AS alias,
+        keys.key AS language_key,
+        COUNT(*) AS total_count,
+        CAST(ST_Extent(all_ohm_data.geometry) AS GEOMETRY) AS bbox
+    FROM
+        all_ohm_data,
+        LATERAL each(all_ohm_data.tags) AS keys(key, value)
+    WHERE
+        keys.key ~ '^name:[a-z]{2,3}(-[A-Z][a-z]{3})?((-[a-z]{2,}|x-[a-z]{2,})(-[a-z]{2,})?)?(-([A-Z]{2}|\\d{3}))?$'
+    GROUP BY
+        keys.key
+    ORDER BY
+        total_count DESC;
 END;
 $$ LANGUAGE plpgsql;
 
 -- ============================================================================
--- Execute for the first time to populate languages and hash
+-- Function: populate_languages(min_number_languages INTEGER, force BOOLEAN)
+-- 
+-- Description:
+--   Populates or updates the `languages` table with aggregated language metadata
+--   based on the results of the `search_languages()` function.
+--
+-- Parameters:
+--   - min_number_languages (INTEGER):
+--       Only includes languages with at least this number of matching features.
+--   - force (BOOLEAN, default FALSE):
+--       If TRUE, all existing rows in the `languages` table are deleted before insert.
+-- 
+-- Logic:
+--   1. Creates the `languages` table if it doesn't already exist.
+--   2. Optionally clears existing rows if `force = TRUE`.
+--   3. Inserts aggregated language data:
+--      - `alias`: normalized language key (e.g., name_es)
+--      - `key_name`: original key (e.g., name:es)
+--      - `count`: total object count per language
+--      - `bbox`: geometry bounding all features for that language
+--   4. If an alias already exists, it is updated instead of inserted.
+--
+-- Use Cases:
+--   - Regular updates to a language summary table
+--   - Precomputing language metadata for performance or analytics
+--   - Supporting filters or dropdowns based on available name tags
 -- ============================================================================
-SELECT update_languages_from_tables(10, TRUE);
+
+CREATE OR REPLACE FUNCTION populate_languages(min_number_languages INTEGER, force BOOLEAN DEFAULT FALSE)
+RETURNS VOID AS $$
+BEGIN
+    -- Step 1: Create the table if it doesn't exist
+    EXECUTE $create$
+        CREATE TABLE IF NOT EXISTS languages (
+            alias TEXT PRIMARY KEY,
+            key_name TEXT NOT NULL,
+            count INTEGER,
+            date_added TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+            is_new BOOLEAN DEFAULT TRUE,
+            bbox GEOMETRY
+        );
+    $create$;
+
+    -- Step 2: Optionally delete all existing rows
+    IF force THEN
+        DELETE FROM languages;
+    END IF;
+
+    -- Step 3: Insert or update from search_languages
+    EXECUTE format($sql$
+        INSERT INTO languages (alias, key_name, count, bbox)
+        SELECT
+            alias,
+            MIN(language_key) AS key_name,
+            SUM(total_count)::INTEGER AS count,
+            ST_Envelope(ST_Collect(bbox)) AS bbox
+        FROM
+            search_languages()
+        GROUP BY
+            alias
+        HAVING
+            SUM(total_count) >= %s
+        ON CONFLICT (alias) DO UPDATE SET
+            count = EXCLUDED.count,
+            bbox = EXCLUDED.bbox,
+            date_added = CURRENT_TIMESTAMP,
+            is_new = FALSE;
+    $sql$, min_number_languages);
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- Populate languages with a minimum of 10 features, forcing an update:
+-- ============================================================================
+
+select populate_languages(10, TRUE);
