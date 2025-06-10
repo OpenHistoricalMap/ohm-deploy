@@ -22,12 +22,12 @@
 -- Notes:
 --   - Only includes features with non-empty "name" values.
 --   - Language-specific name columns are added dynamically using the `languages` table.
---   - The `tags` column is included for additional metadata.
 --   - Geometry is indexed using GiST.
 --   - Uniqueness is enforced on the combination of (osm_id, type, class).
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_other_points_centroids_mview;
+
 CREATE OR REPLACE FUNCTION create_other_points_centroids_mview(
   view_name TEXT,
   min_area DOUBLE PRECISION DEFAULT 0
@@ -35,10 +35,8 @@ CREATE OR REPLACE FUNCTION create_other_points_centroids_mview(
 RETURNS void AS $$
 DECLARE
   lang_columns TEXT;
-  sql_drop TEXT;
+  tmp_view_name TEXT := view_name || '_tmp';
   sql_create TEXT;
-  sql_index TEXT;
-  sql_unique_index TEXT;
 BEGIN
   lang_columns := get_language_columns();
 
@@ -47,7 +45,7 @@ BEGIN
     SELECT
       (ST_MaximumInscribedCircle(geometry)).center AS geometry,
       osm_id, 
-      name, 
+      NULLIF(name, '') AS name, 
       type, 
       class, 
       NULLIF(start_date, '') AS start_date,
@@ -64,7 +62,7 @@ BEGIN
     SELECT 
       geometry,
       osm_id, 
-      name, 
+      NULLIF(name, '') AS name, 
       type, 
       class, 
       NULLIF(start_date, '') AS start_date,
@@ -74,17 +72,30 @@ BEGIN
       NULL AS area_m2, 
       %s
     FROM osm_other_points;
-  $sql$, view_name, lang_columns, min_area, lang_columns);
+  $sql$, tmp_view_name, lang_columns, min_area, lang_columns);
 
-  RAISE NOTICE '====Creating others points and centroids materialized view  : % ====', view_name;
-  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+  -- === LOG & EXECUTION SEQUENCE ===
+  RAISE NOTICE '==> [START] Creating other points and centroids view: % (area > %)', view_name, min_area;
+
+  RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
+  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+  RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
   EXECUTE sql_create;
-  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', view_name, view_name);
 
-  RAISE NOTICE 'View % recreated successfully.', view_name;
+  RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
 
-  RETURN TRUE;
+  RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type, class)';
+  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', tmp_view_name, tmp_view_name);
+
+  RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
+  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
+  RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
+  EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
+
+  RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -96,9 +107,9 @@ SELECT create_other_points_centroids_mview('mv_other_points_centroids_z14_20', 0
 -- ============================================================================
 -- Create materialized views for other areas
 -- ============================================================================
-SELECT create_generic_mview( 'osm_other_areas', 'mv_other_areas_z14_20', ARRAY['osm_id', 'type', 'class']);
+SELECT create_generic_mview('osm_other_areas', 'mv_other_areas_z14_20', ARRAY['osm_id', 'type', 'class']);
 
 -- ============================================================================
 -- Create materialized views for other lines
 -- ============================================================================
-SELECT create_generic_mview( 'osm_other_lines', 'mv_other_lines_z14_20', ARRAY['osm_id', 'type', 'class']);
+SELECT create_generic_mview('osm_other_lines', 'mv_other_lines_z14_20', ARRAY['osm_id', 'type', 'class']);

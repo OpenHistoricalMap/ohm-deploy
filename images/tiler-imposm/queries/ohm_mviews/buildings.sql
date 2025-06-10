@@ -26,6 +26,7 @@
 --   - Uniqueness is enforced on the combination of (osm_id, type).
 --   - Language-specific name columns are added dynamically from the `languages` table.
 -- ============================================================================
+
 DROP FUNCTION IF EXISTS create_buildings_points_centroids_mview;
 
 CREATE OR REPLACE FUNCTION create_buildings_points_centroids_mview(
@@ -34,17 +35,14 @@ CREATE OR REPLACE FUNCTION create_buildings_points_centroids_mview(
 )
 RETURNS void AS $$
 DECLARE
-    sql_drop TEXT;
+    tmp_view_name TEXT := view_name || '_tmp';
     sql_create TEXT;
-    sql_index TEXT;
-    sql_unique_index TEXT;
     lang_columns TEXT;
 BEGIN
     lang_columns := get_language_columns();
 
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
-
         SELECT
             geometry,
             osm_id,
@@ -54,8 +52,8 @@ BEGIN
             type,
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s
         FROM osm_buildings_points
         WHERE name IS NOT NULL AND name <> ''
@@ -74,20 +72,35 @@ BEGIN
             type,
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             %s
         FROM osm_buildings
         WHERE name IS NOT NULL AND name <> '' AND area >= %L;
-    $sql$, view_name, lang_columns, lang_columns, min_area);
+    $sql$, tmp_view_name, lang_columns, lang_columns, min_area);
 
-    RAISE NOTICE '====Creating buildings points and centroids materialized view % with area > % ====', view_name, min_area;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    -- === LOG & EXECUTION SEQUENCE ===
+    RAISE NOTICE '==> [START] Creating buildings centroids view: % (area > %)', view_name, min_area;
+
+    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
     EXECUTE sql_create;
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_uid ON %I (osm_id, type);', view_name, view_name);
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
 
-    RAISE NOTICE 'Materialized view % created successfully.', view_name;
+    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type)';
+    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_uid ON %I (osm_id, type);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
+    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
+    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
+
+    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
 

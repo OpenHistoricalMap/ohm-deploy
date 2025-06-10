@@ -1,19 +1,20 @@
 -- ============================================================================
 -- Function: create_admin_boundaries_centroids_mview
 -- Description:
---   createsa materialized view of admin boundary centroids using
---   ST_MaximumInscribedCircle from polygons in the given input table.
+--   Creates a materialized view of admin boundary centroids using
+--   ST_MaximumInscribedCircle from polygons in the input table.
 --
 -- Parameters:
---   input_table  TEXT             - Source table name (e.g., osm_admin_areas_z0_2).
---   mview_name   TEXT             - Name of the materialized view to create.
---   force_create BOOLEAN DEFAULT FALSE - Forces recreation even if language hash hasn't changed.
+--   input_table  TEXT - Source table name (e.g., osm_admin_areas_z0_2).
+--   mview_name   TEXT - Name of the final materialized view to create.
 --
 -- Notes:
 --   - Excludes boundaries with role='label' from centroid calculation.
---   - Geometry is indexed using GiST; uniqueness is enforced on osm_id.
---   - Area is stored in square kilometers as numeric(10,1).
---   - Includes multilingual name columns using `get_language_columns()`.
+--   - Geometry is indexed using GiST.
+--   - Uniqueness is enforced on osm_id.
+--   - Area is stored in square kilometers as integer.
+--   - Includes multilingual name columns via get_language_columns().
+--   - Creates a temporary view first and then renames it for safety.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_admin_boundaries_centroids_mview;
@@ -23,16 +24,14 @@ CREATE OR REPLACE FUNCTION create_admin_boundaries_centroids_mview(
 )
 RETURNS void AS $$
 DECLARE
-  sql_drop_centroid TEXT;
-  sql_create_centroid TEXT;
-  sql_index_centroid TEXT;
-  sql_unique_index_centroid TEXT;
+  tmp_mview_name TEXT := mview_name || '_tmp';
+  sql_create TEXT;
   lang_columns TEXT;
 BEGIN
-
   lang_columns := get_language_columns();
 
-  sql_create_centroid := format($sql$
+  -- Generate SQL for creating the temp materialized view
+  sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
     SELECT
       osm_id,
@@ -51,15 +50,28 @@ BEGIN
       AND osm_id NOT IN (
         SELECT osm_id FROM osm_relation_members WHERE role = 'label'
       );
-  $sql$, mview_name, lang_columns, input_table);
+  $sql$, tmp_mview_name, lang_columns, input_table);
 
-  RAISE NOTICE '==== Creating admin bounduaries centroid materialized view: % from table: % ====', mview_name, input_table;
+  -- === LOG & EXECUTION SEQUENCE ===
+  RAISE NOTICE '==> [START] Creating materialized view: % from table: %', mview_name, input_table;
+
+  RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_mview_name;
+  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_mview_name);
+
+  RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_mview_name;
+  EXECUTE sql_create;
+
+  RAISE NOTICE '==> [INDEX] Creating GiST and UNIQUE indexes on temp view: %', tmp_mview_name;
+  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_mview_name, tmp_mview_name);
+  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', tmp_mview_name, tmp_mview_name);
+
+  RAISE NOTICE '==> [DROP OLD] Dropping old materialized view: %', mview_name;
   EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
-  EXECUTE sql_create_centroid;
-  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
-  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', mview_name, mview_name);
 
-  RAISE NOTICE 'Materialized view % created successfully.', mview_name;
+  RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_mview_name, mview_name;
+  EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_mview_name, mview_name);
+
+  RAISE NOTICE '==> [DONE] Materialized view % created successfully.', mview_name;
 END;
 $$ LANGUAGE plpgsql;
 

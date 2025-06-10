@@ -22,6 +22,7 @@
 --   - Geometry is indexed with GiST.
 --   - Uniqueness enforced on specified unique_columns.
 -- ============================================================================
+
 DROP FUNCTION IF EXISTS create_generic_mview(TEXT, TEXT, TEXT[]);
 CREATE OR REPLACE FUNCTION create_generic_mview(
   input_table TEXT,
@@ -34,6 +35,7 @@ DECLARE
     table_columns TEXT;
     quoted_unique_cols TEXT;
     sql_create TEXT;
+    tmp_view_name TEXT := view_name || '_tmp';
 BEGIN
     lang_columns := get_language_columns();
 
@@ -56,7 +58,7 @@ BEGIN
     INTO quoted_unique_cols
     FROM unnest(unique_columns) AS c;
 
-    -- Create materialized view
+    -- Generate SQL for creating the materialized view
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT DISTINCT ON (%s)
@@ -72,7 +74,7 @@ BEGIN
         WHERE geometry IS NOT NULL
         ORDER BY %s;
     $sql$,
-        view_name,
+        tmp_view_name,
         quoted_unique_cols,
         table_columns,
         lang_columns,
@@ -80,12 +82,27 @@ BEGIN
         quoted_unique_cols
     );
 
-    RAISE NOTICE '====Creating generic materialized view from % to % ====', input_table, view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-    EXECUTE sql_create;
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-    EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(%s);', view_name, view_name, quoted_unique_cols);
+    -- === LOG & EXECUTION SEQUENCE ===
+    RAISE NOTICE '==> [START] Creating materialized view: % from table: %', view_name, input_table;
 
-    RAISE NOTICE 'Materialized view % created successfully.', view_name;
+    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
+    EXECUTE sql_create;
+
+    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating unique index on (%s)', quoted_unique_cols;
+    EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(%s);', tmp_view_name, tmp_view_name, quoted_unique_cols);
+
+    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
+    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
+    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
+
+    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
