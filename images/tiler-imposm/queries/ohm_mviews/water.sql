@@ -1,15 +1,21 @@
 -- ============================================================================
 -- Function: create_water_areas_subdivided_mview
 -- Description:
---   This script creates materialized views for water areas using the 
---   ST_Subdivide function to reduce the complexity of certain geometries.
---   It includes multilingual columns dynamically loaded from the `languages` table.
+--   Creates a materialized view for water areas using ST_Subdivide to simplify
+--   complex geometries. The input geometries are validated with ST_MakeValid and
+--   dumped using ST_Dump to extract components.
+--
+--   Multilingual name columns are added dynamically from the `languages` table.
 --
 -- Parameters:
 --   input_table  TEXT  - The source table containing raw geometries.
 --   mview_name   TEXT  - The name of the materialized view to be created.
+--
+-- Behavior:
+--   - Uses a temporary view during creation to avoid downtime.
+--   - Only valid POLYGON and MULTIPOLYGON geometries are retained.
+--   - Adds GiST spatial index on geometry and unique index on (id).
 -- ============================================================================
-
 DROP FUNCTION IF EXISTS create_water_areas_subdivided_mview;
 CREATE OR REPLACE FUNCTION create_water_areas_subdivided_mview(
   input_table TEXT,
@@ -19,16 +25,10 @@ RETURNS void AS $$
 DECLARE
     lang_columns TEXT;
     sql_create TEXT;
+    tmp_view_name TEXT := mview_name || '_tmp';
 BEGIN
-    RAISE NOTICE 'Creating subdivided materialized view from % to %', input_table, mview_name;
-
-    -- Get dynamic language columns from `languages` table
     lang_columns := get_language_columns();
 
-    -- Drop existing materialized view if it exists
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I;', mview_name);
-
-    -- Create the materialized view with subdivided and valid geometries
     sql_create :=  format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -70,13 +70,30 @@ BEGIN
           ) AS fixed_geoms
           WHERE GeometryType((g).geom) IN ('POLYGON', 'MULTIPOLYGON')
         ) AS final_data;
-    $sql$, mview_name, lang_columns, lang_columns, lang_columns, input_table);
+    $sql$, tmp_view_name, lang_columns, lang_columns, lang_columns, input_table);
 
+    -- === LOG & EXECUTION SEQUENCE ===
+    RAISE NOTICE '==> [START] Creating subdivided water areas view: %', mview_name;
+
+    RAISE NOTICE '==> [DROP TEMP] Dropping temporary materialized view if exists: %', tmp_view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
     EXECUTE sql_create;
 
-    -- Create indexes
-    EXECUTE format('CREATE UNIQUE INDEX idx_%I_unique ON %I(id);', mview_name, mview_name);
-    EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', mview_name, mview_name);
+    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+    EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on id';
+    EXECUTE format('CREATE UNIQUE INDEX idx_%I_id ON %I(id);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [DROP OLD] Dropping old materialized view: %', mview_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
+
+    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, mview_name;
+    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, mview_name);
+
+    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', mview_name;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -95,6 +112,7 @@ $$ LANGUAGE plpgsql;
 --   - Only features with non-empty names are included.
 --   - Geometry is computed as the center of the maximum inscribed circle.
 --   - A GiST index is created on geometry, and uniqueness is enforced on osm_id.
+--   - Uses a temporary view to avoid downtime during refresh.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_water_areas_centroids_mview;
@@ -104,11 +122,9 @@ CREATE OR REPLACE FUNCTION create_water_areas_centroids_mview(
 )
 RETURNS void AS $$
 DECLARE 
-    sql_drop TEXT;
-    sql_create TEXT;
-    sql_index TEXT;
-    sql_unique_index TEXT;
     lang_columns TEXT;
+    sql_create TEXT;
+    tmp_view_name TEXT := view_name || '_tmp';
 BEGIN
     lang_columns := get_language_columns();
 
@@ -127,17 +143,33 @@ BEGIN
             (ST_MaximumInscribedCircle(geometry)).center AS geometry
         FROM %I
         WHERE name IS NOT NULL AND name <> '';
-    $sql$, view_name, lang_columns, source_table);
+    $sql$, tmp_view_name, lang_columns, source_table);
 
-    RAISE NOTICE '====Creating centroid materialized view from % to % ====', source_table, view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    -- === LOG & EXECUTION SEQUENCE ===
+    RAISE NOTICE '==> [START] Creating water area centroids view: %', view_name;
+
+    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
     EXECUTE sql_create;
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', view_name, view_name);
 
-    RAISE NOTICE 'Materialized view % created successfully.', view_name;
+    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+    EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on osm_id';
+    EXECUTE format('CREATE UNIQUE INDEX idx_%I_osm_id ON %I (osm_id);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [DROP OLD] Dropping old materialized view: %', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
+    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
+    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
+
+    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- ============================================================================
 -- Create materialized views for water ceontroids

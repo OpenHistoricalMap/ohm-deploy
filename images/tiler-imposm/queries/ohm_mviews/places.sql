@@ -27,6 +27,7 @@
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_place_points_centroids_mview;
+
 CREATE OR REPLACE FUNCTION create_place_points_centroids_mview(
     view_name TEXT,
     allowed_types_areas TEXT[] DEFAULT ARRAY[]::TEXT[],
@@ -34,14 +35,14 @@ CREATE OR REPLACE FUNCTION create_place_points_centroids_mview(
 )
 RETURNS void AS $$
 DECLARE 
-    sql TEXT;
+    sql_create TEXT;
     type_filter_areas TEXT := '';
     type_filter_points TEXT := '';
     lang_columns TEXT;
+    tmp_view_name TEXT := view_name || '_tmp';
 BEGIN
     lang_columns := get_language_columns();
 
-    -- Apply filters for allowed types
     IF array_length(allowed_types_areas, 1) IS NOT NULL THEN
         type_filter_areas := format(' AND type = ANY (%L)', allowed_types_areas);
     END IF;
@@ -49,7 +50,7 @@ BEGIN
     IF array_length(allowed_types_points, 1) IS NOT NULL THEN
         type_filter_points := format(' AND type = ANY (%L)', allowed_types_points);
     END IF;
-    
+
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -82,18 +83,33 @@ BEGIN
             tags->'capital' AS capital,
             %s
         FROM osm_place_points
-        WHERE osm_id > 0 AND name IS NOT NULL AND name <> ''%s
-    $sql$, view_name, lang_columns, type_filter_areas, lang_columns, type_filter_points);
+        WHERE osm_id > 0 AND name IS NOT NULL AND name <> ''%s;
+    $sql$, tmp_view_name, lang_columns, type_filter_areas, lang_columns, type_filter_points);
 
+    -- === LOG & EXECUTION SEQUENCE ===
+    RAISE NOTICE '==> [START] Creating place points and centroids view: %', view_name;
 
-    RAISE NOTICE '====Creating places points and centroids materialized view  : % ====', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
     EXECUTE sql_create;
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type);', view_name, view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type)';
+    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
+    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
+    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
+
+    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
-
 
 -- ============================================================================
 -- Function: create_place_areas_mview
@@ -125,24 +141,24 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_place_areas_mview;
+
 CREATE OR REPLACE FUNCTION create_place_areas_mview(
     view_name TEXT,
     allowed_types_areas TEXT[] DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE 
-    sql_create TEXT;
-    type_filter_areas TEXT := 'TRUE';
+    tmp_view_name TEXT := view_name || '_tmp';
     lang_columns TEXT;
+    type_filter_areas TEXT := 'TRUE';
+    sql_create TEXT;
 BEGIN
     lang_columns := get_language_columns();
 
-    -- Prepare filtering condition
     IF array_length(allowed_types_areas, 1) IS NOT NULL THEN
         type_filter_areas := format('type = ANY (%L)', allowed_types_areas);
     END IF;
 
-    -- Create materialized view with dynamic language columns
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -159,16 +175,30 @@ BEGIN
             %s
         FROM osm_place_areas
         WHERE %s;
-    $sql$, view_name, lang_columns, type_filter_areas);
+    $sql$, tmp_view_name, lang_columns, type_filter_areas);
 
-    RAISE NOTICE '====Creating places areas materialized view  : % ====', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    -- === LOG & EXECUTION SEQUENCE ===
+    RAISE NOTICE '==> [START] Creating place areas view: %', view_name;
+
+    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
     EXECUTE sql_create;
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type);', view_name, view_name);
-    
-    RAISE NOTICE 'View % recreated successfully.', view_name;
 
+    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type)';
+    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
+    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
+    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
+
+    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
 

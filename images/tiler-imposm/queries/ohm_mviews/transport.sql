@@ -12,10 +12,10 @@
 --   min_area   DOUBLE PRECISION - Minimum area (in m²) to include polygonal features.
 --
 -- Behavior:
---   - Drops the materialized view if it already exists.
+--   - Drops and replaces the view using a temporary view to avoid downtime.
 --   - Filters polygons by name and area before calculating centroids.
 --   - Adds multilingual name columns dynamically from the `languages` table.
---   - Adds GiST spatial index on geometry and unique index on (osm_id, type, class).
+--   - Creates GiST spatial index on geometry and unique index on (osm_id, type, class).
 --
 -- Notes:
 --   - Useful for rendering transport-related labels and icons at mid/high zoom levels.
@@ -29,11 +29,9 @@ CREATE OR REPLACE FUNCTION create_transport_points_centroids_mview(
 )
 RETURNS void AS $$
 DECLARE 
-    sql_drop TEXT;
-    sql_create TEXT;
-    sql_index TEXT;
-    sql_unique_index TEXT;
     lang_columns TEXT;
+    sql_create TEXT;
+    tmp_view_name TEXT := view_name || '_tmp';
 BEGIN
     lang_columns := get_language_columns();
 
@@ -71,15 +69,30 @@ BEGIN
             tags,
             %s
         FROM osm_transport_points;
-    $sql$, view_name, lang_columns, min_area, lang_columns);
+    $sql$, tmp_view_name, lang_columns, min_area, lang_columns);
 
-    RAISE NOTICE '==== Creating transport points and centroids view: % ====', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+    -- === LOG & EXECUTION SEQUENCE ===
+    RAISE NOTICE '==> [START] Creating transport points and centroids view: % (tmp: %)', view_name, tmp_view_name;
+
+    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
+
+    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
     EXECUTE sql_create;
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', view_name, view_name);
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', view_name, view_name);
 
-    RAISE NOTICE 'Materialized view % created successfully.', view_name;
+    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type, class)';
+    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', tmp_view_name, tmp_view_name);
+
+    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
+
+    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
+    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
+
+    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
 END;
 $$ LANGUAGE plpgsql;
 

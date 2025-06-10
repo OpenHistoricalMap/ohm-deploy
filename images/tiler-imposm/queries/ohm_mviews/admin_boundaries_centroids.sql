@@ -61,8 +61,10 @@ BEGIN
   RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_mview_name;
   EXECUTE sql_create;
 
-  RAISE NOTICE '==> [INDEX] Creating GiST and UNIQUE indexes on temp view: %', tmp_mview_name;
+  RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
   EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_mview_name, tmp_mview_name);
+  
+  RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id)';
   EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', tmp_mview_name, tmp_mview_name);
 
   RAISE NOTICE '==> [DROP OLD] Dropping old materialized view: %', mview_name;
