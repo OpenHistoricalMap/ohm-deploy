@@ -15,7 +15,7 @@ services:
   #     - tiler_network
 
   imposm:
-    image: rub21/tiler-imposm:v54
+    image: rub21/tiler-imposm:v59
     build:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
@@ -48,7 +48,7 @@ services:
       - tiler_network
 
   tiler-cache:
-    image: ohm-tiler-cache:v1
+    image: rub21/tiler-cache:v2
     build:
       context: ../images/tiler-cache
       dockerfile: Dockerfile

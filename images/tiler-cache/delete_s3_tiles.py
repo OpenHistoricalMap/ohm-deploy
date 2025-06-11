@@ -3,9 +3,10 @@
 # Script: delete_s3_tiles.py
 # Description:
 #   This script deletes cached tile files from an S3 bucket, either:
-#     1. By a specified bounding box (bbox) + zoom levels
+#     1. By a specified bounding box (bbox) or multiple bboxes
 #     2. Or, if no bbox is given, by deleting all tiles per zoom prefix
 # -----------------------------------------------------------------------------
+
 
 import argparse
 from config import Config
@@ -65,17 +66,33 @@ def delete_tiles_in_bbox(bbox_str, zoom_levels, s3_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Delete cached tiles from S3.")
     parser.add_argument("--bbox", help="Bounding box in format minx,miny,maxx,maxy")
+    parser.add_argument("--bboxes", help="Multiple bboxes separated by '|'")
     parser.add_argument("--tile-prefix", default=Config.S3_BUCKET_PATH_FILES + "/", help="Tile base path in S3")
 
     args = parser.parse_args()
 
     if args.bbox:
+        logger.info(f"Deleting tiles for bbox: {args.bbox}")
         delete_tiles_in_bbox(
             bbox_str=args.bbox,
-            zoom_levels=[12], # Zoom 12 is not for delete the tiles, it is to generate the tile patterns
+            zoom_levels=[12],
             s3_path=args.tile_prefix
         )
+    elif args.bboxes:
+        bboxes_list = args.bboxes.split("|")
+        logger.info(f"Deleting tiles for multiple bboxes: {len(bboxes_list)}")
+        for bbox_str in bboxes_list:
+            bbox_str = bbox_str.strip()
+            if bbox_str:
+                logger.info(f"Processing bbox: {bbox_str}")
+                delete_tiles_in_bbox(
+                    bbox_str=bbox_str,
+                    zoom_levels=[12],
+                    s3_path=args.tile_prefix
+                )
     else:
+        logger.info("No bbox provided. Deleting all tiles per zoom level.")
         for zoom in ZOOM_LEVELS:
             prefix = f"{args.tile_prefix}{zoom}/"
             delete_objects_with_prefix(prefix)
+            

@@ -13,7 +13,7 @@
 # Environment Variables:
 #   DOCKER_CONFIG_ENVIRONMENT  - Target environment (default: "staging")
 #   NIM_NUMBER_LANGUAGES       - Max number of languages to track (default: 10)
-#   FORCE_MVIEWS_GENERATION    - Force refresh of all mviews (default: false)
+#   FORCE_LANGUAGES_GENERATION    - Force refresh of all mviews (default: false)
 #   EVALUATION_INTERVAL        - Interval in seconds between checks (default: 600)
 #
 # Usage:
@@ -30,7 +30,7 @@ export POSTGRES_PORT=$([[ "$DOCKER_CONFIG_ENVIRONMENT" == "production" ]] && ech
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
 
 NIM_NUMBER_LANGUAGES="${NIM_NUMBER_LANGUAGES:-5}" # Default to 5 languages
-FORCE_MVIEWS_GENERATION="${FORCE_MVIEWS_GENERATION:-false}"
+FORCE_LANGUAGES_GENERATION="${FORCE_LANGUAGES_GENERATION:-false}"
 EVALUATION_INTERVAL="${EVALUATION_INTERVAL:-3600}" # Default to 1 hour (3600 seconds)
 
 echo "Configuration Summary:"
@@ -40,7 +40,7 @@ echo "  Postgres Port:           $POSTGRES_PORT"
 echo "  Database:                $POSTGRES_DB"
 echo "  User:                    $POSTGRES_USER"
 echo "  NIM_NUMBER_LANGUAGES:    $NIM_NUMBER_LANGUAGES"
-echo "  FORCE_MVIEWS_GENERATION: $FORCE_MVIEWS_GENERATION"
+echo "  FORCE_LANGUAGES_GENERATION: $FORCE_LANGUAGES_GENERATION"
 echo "  EVALUATION_INTERVAL:     $EVALUATION_INTERVAL seconds"
 echo
 
@@ -52,15 +52,16 @@ fi
 
 
 function get_new_languages_bbox() {
-  ## This function retrieves the bounding boxes of new languages from the database.
+  ## Returns bbox list: minx,miny,maxx,maxy|minx,miny,maxx,maxy|...
   psql "$PG_CONNECTION" -t -A -F '|' -c \
-  "SELECT alias,
-          ST_XMin(b) || ',' || ST_YMin(b) || ',' || ST_XMax(b) || ',' || ST_YMax(b) AS bbox_str
-   FROM (
-     SELECT alias, ST_Transform(ST_SetSRID(bbox, 3857), 4326) AS b
-     FROM languages
-     WHERE is_new = TRUE
-   ) sub;"
+  "SELECT string_agg(bbox_str, '|') FROM (
+     SELECT ST_XMin(b) || ',' || ST_YMin(b) || ',' || ST_XMax(b) || ',' || ST_YMax(b) AS bbox_str
+     FROM (
+       SELECT ST_Transform(ST_SetSRID(bbox, 3857), 4326) AS b
+       FROM languages
+       WHERE is_new = TRUE
+     ) sub
+   ) agg;"
 }
 
 function restart_production_containers() {
@@ -69,11 +70,6 @@ function restart_production_containers() {
   ## NOTE: This will not affect the currently running tiler server.
   ## =================================================================
   docker compose -f  tiler.production.yml run imposm /osm/scripts/create_mviews.sh # --all=true
-
-  ## ================================================================= 
-  ## Restart imposm, which going to refresh the mviews
-  ## =================================================================
-  ## docker compose -f tiler.production.yml up imposm_production -d --force-recreate
 
   ## =================================================================
   ## Restart tiler container, which is going to take the new languages in the configuration 
@@ -89,39 +85,33 @@ function restart_production_containers() {
   ## =================================================================
   ## Remove tiles that the new languages are covering. 
   ## =================================================================
-  get_new_languages_bbox | while IFS='|' read -r alias bbox; do
-    echo "Language: $alias"
-    docker compose -f tiler.staging.yml run s3_tiles python delete_s3_tiles.py --bbox="$bbox"
-  done
+  echo "Removing tiles for new languages...$(get_new_languages_bbox)"
+  docker compose -f tiler.staging.yml run --rm tiler_s3_cleaner_staging python delete_s3_tiles.py --bboxes="$(get_new_languages_bbox)"
 }
-
 
 function restart_staging_containers() {
   ## Restart staging continaers - testing environment
   docker compose -f  tiler.staging.yml run imposm_staging /osm/scripts/create_mviews.sh 
-  docker compose -f tiler.staging.yml up imposm_staging -d --force-recreate
   docker compose -f tiler.staging.yml up tiler_staging -d --force-recreate
-  docker compose -f tiler.staging.yml up tiler_sqs_cleaner_staging -d --force-recreate
-  get_new_languages_bbox | while IFS='|' read -r alias bbox; do
-    echo "Language: $alias"
-    docker compose -f tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py --bbox="$bbox"
-  done
+  # Remove all tiles that the new languages are covering.
+  echo "Removing tiles for new languages...$(get_new_languages_bbox)"
+  docker compose -f tiler.staging.yml run --rm tiler_s3_cleaner_staging python delete_s3_tiles.py --bboxes="$(get_new_languages_bbox)"
 }
 
 while true; do
   echo "Checking for language changes..."
 
-  psql "$PG_CONNECTION" -c "SELECT populate_languages(${NIM_NUMBER_LANGUAGES}, '${FORCE_MVIEWS_GENERATION}'::BOOLEAN);"
+  psql "$PG_CONNECTION" -c "SELECT populate_languages(${NIM_NUMBER_LANGUAGES}, '${FORCE_LANGUAGE
+S_GENERATION}'::BOOLEAN);"
   HAS_CHANGED=$(psql "$PG_CONNECTION" -t -A -c "SELECT EXISTS (SELECT 1 FROM languages WHERE is_new = TRUE);")
   echo "has_changed = $HAS_CHANGED"
   if [[ "$HAS_CHANGED" == "t" ]]; then
     echo "Restarting Docker containers..."
-    restart_staging_containers
-    # if [[ "$DOCKER_CONFIG_ENVIRONMENT" == "production" ]]; then
-    #   restart_production_containers
-    # else
-    #   restart_staging_containers
-    # fi
+    if [[ "$DOCKER_CONFIG_ENVIRONMENT" == "production" ]]; then
+      restart_production_containers
+    else
+      restart_staging_containers
+    fi
   else
     echo "No changes detected. Waiting $EVALUATION_INTERVAL seconds..."
   fi

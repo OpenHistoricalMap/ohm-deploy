@@ -122,7 +122,12 @@ BEGIN
             alias,
             MIN(language_key) AS key_name,
             SUM(total_count)::INTEGER AS count,
-            ST_Envelope(ST_Collect(bbox)) AS bbox
+            CASE
+                WHEN GeometryType(ST_Envelope(ST_Collect(bbox))) = 'POINT' THEN
+                    ST_Envelope(ST_Buffer(ST_Envelope(ST_Collect(bbox))::geography, 10)::geometry)
+                ELSE
+                    ST_Envelope(ST_Collect(bbox))
+            END AS bbox
         FROM
             search_languages()
         GROUP BY
@@ -139,7 +144,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ============================================================================
--- Populate languages with a minimum of 10 features, forcing an update:
+-- Populate languages with a default of 5 features, forcing an update:
 -- ============================================================================
 
-select populate_languages(10, TRUE);
+select populate_languages(5, TRUE);

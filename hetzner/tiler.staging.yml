@@ -2,7 +2,7 @@ services:
   db_staging:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_28_05_2025:/var/lib/postgresql/data
+      - tiler_staging_pgdata:/var/lib/postgresql/data
       - ./config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
@@ -12,16 +12,16 @@ services:
       - "-c"
       - "config_file=/etc/postgresql/postgresql.conf"
     ports:
-      - "5433:5432"
+      - "54321:5432"
     env_file:
       - .env.staging
     networks:
       - tiler_network_staging
 
   imposm_staging:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2621.hd366608
+    image: rub21/tiler-imposm:v58
     volumes:
-      - /data/tiler_production_imposm_28_05_2025:/mnt/data
+      - tiler_staging_imposmdata:/mnt/data
     command:
       - sh
       - -c
@@ -64,10 +64,19 @@ services:
   tiler_s3_cleaner_staging:
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2622.hf249ec9
     env_file:
-      - .env.production
+      - .env.staging
     networks:
       - tiler_network_staging
 
 networks:
   tiler_network_staging:
     driver: bridge
+
+volumes:
+  tiler_staging_pgdata:
+    driver: local
+    name: tiler_db_10_06_2025
+  tiler_staging_imposmdata:
+    driver: local
+    name: tiler_imposm_10_06_2025
+    

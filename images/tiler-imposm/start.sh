@@ -195,8 +195,8 @@ EOF
 
 function importData() {
     ### Import the PBF  and Natural Earth files to the DB
-    log_message "Execute the missing functions"
-    psql $PG_CONNECTION -f queries/postgis_helpers.sql
+    # log_message "Execute the missing functions"
+    execute_sql_file ./queries/utils/postgis_helpers.sql
 
     if [ "$IMPORT_NATURAL_EARTH" = "true" ]; then
         log_message "Importing Natural Earth..."
@@ -230,7 +230,7 @@ function importData() {
         -deployproduction
 
     # Create materialized views
-    ./scripts/create_mviews.sh --force=true
+    ./scripts/create_mviews.sh --all=true
 
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
@@ -251,7 +251,7 @@ done
 log_message "PostgreSQL is ready! Proceeding with setup..."
 
 # Run date functions
-psql "$PG_CONNECTION" -f /usr/local/datefunctions/datefunctions.sql
+execute_sql_file /usr/local/datefunctions/datefunctions.sql
 
 # Check the number of tables in the database
 table_count=$(countTables)

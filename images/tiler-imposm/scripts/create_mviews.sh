@@ -11,7 +11,7 @@ set -e
 #
 # Usage:
 #   ./create_mviews.sh             # Runs only OHM views
-#   ./create_mviews.sh --all     # Runs OHM views + utils + NE + OSM base views, this is used at importing data 
+#   ./create_mviews.sh --all==true     # Runs OHM views + utils + NE + OSM base views, this is used at importing data 
 # ------------------------------------------------------------------------------
 
 source ./scripts/utils.sh
@@ -25,15 +25,13 @@ for arg in "$@"; do
   fi
 done
 
-
 if [[ "$ALL" == true ]]; then
   ##################### Utils #####################
   log_message "Creating utility functions and generic materialized views"
   execute_sql_file queries/utils/utils.sql 
   execute_sql_file queries/utils/create_generic_mview.sql 
-  execute_sql_file queries/utils/fetch_db_languages.sql 
-  # execute_sql_file queries/utils/postgis_helpers.sql 
-  # execute_sql_file queries/utils/postgis_post_import.sql
+  # This will populate languages
+  execute_sql_file queries/utils/fetch_db_languages.sql
 
   ##################### NE #####################
   log_message "Creating materialized views for NE data"
@@ -56,5 +54,6 @@ execute_sql_file queries/ohm_mviews/buildings.sql
 execute_sql_file queries/ohm_mviews/landuse.sql
 execute_sql_file queries/ohm_mviews/others.sql
 execute_sql_file queries/ohm_mviews/places.sql
+execute_sql_file queries/ohm_mviews/transport_lines.sql
 execute_sql_file queries/ohm_mviews/transport.sql
 execute_sql_file queries/ohm_mviews/water.sql
