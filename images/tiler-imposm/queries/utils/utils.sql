@@ -95,7 +95,11 @@ DECLARE
     result TEXT;
 BEGIN
     SELECT string_agg(
-        format('tags -> %L AS %I', 'name:' || alias, alias),
+        format(
+            'tags -> %L AS %I',
+            key_name,
+            'name_' || regexp_replace(lower(substring(key_name from 6)), '[^a-z0-9]', '_', 'g')
+        ),
         ', '
     )
     INTO result

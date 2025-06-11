@@ -10,11 +10,11 @@
 --
 -- Notes:
 --   - Excludes boundaries with role='label' from centroid calculation.
+--   - Area is stored in square kilometers as integer.
 --   - Geometry is indexed using GiST.
 --   - Uniqueness is enforced on osm_id.
---   - Area is stored in square kilometers as integer.
 --   - Includes multilingual name columns via get_language_columns().
---   - Creates a temporary view first and then renames it for safety.
+--   - Uses finalize_materialized_view() for atomic creation and renaming.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_admin_boundaries_centroids_mview;
@@ -26,11 +26,9 @@ RETURNS void AS $$
 DECLARE
   tmp_mview_name TEXT := mview_name || '_tmp';
   sql_create TEXT;
-  lang_columns TEXT;
+  lang_columns TEXT := get_language_columns();
+  unique_columns TEXT := 'osm_id';
 BEGIN
-  lang_columns := get_language_columns();
-
-  -- Generate SQL for creating the temp materialized view
   sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
     SELECT
@@ -52,28 +50,13 @@ BEGIN
       );
   $sql$, tmp_mview_name, lang_columns, input_table);
 
-  -- === LOG & EXECUTION SEQUENCE ===
-  RAISE NOTICE '==> [START] Creating materialized view: % from table: %', mview_name, input_table;
-
-  RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_mview_name;
-  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_mview_name);
-
-  RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_mview_name;
-  EXECUTE sql_create;
-
-  RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
-  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_mview_name, tmp_mview_name);
-  
-  RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id)';
-  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_osm_id ON %I (osm_id);', tmp_mview_name, tmp_mview_name);
-
-  RAISE NOTICE '==> [DROP OLD] Dropping old materialized view: %', mview_name;
-  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
-
-  RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_mview_name, mview_name;
-  EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_mview_name, mview_name);
-
-  RAISE NOTICE '==> [DONE] Materialized view % created successfully.', mview_name;
+  -- Finalize the materialized view and its indexes
+  PERFORM finalize_materialized_view(
+    tmp_mview_name,
+    mview_name,
+    unique_columns,
+    sql_create
+  );
 END;
 $$ LANGUAGE plpgsql;
 

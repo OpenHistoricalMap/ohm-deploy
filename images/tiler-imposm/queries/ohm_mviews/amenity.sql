@@ -13,6 +13,9 @@
 --   additional precalculated columns `start_decdate` and `end_decdate` 
 --   are generated using the `isodatetodecimaldate` function.
 --
+--   This function uses finalize_materialized_view for consistent creation,
+--   indexing, and renaming steps.
+--
 -- Parameters:
 --   view_name     TEXT              - Name of the materialized view to create.
 --   min_area      DOUBLE PRECISION - Minimum area (in m²) to include amenity areas.
@@ -34,9 +37,9 @@ RETURNS void AS $$
 DECLARE 
     tmp_view_name TEXT := view_name || '_tmp';
     sql_create TEXT;
-    lang_columns TEXT;
+    lang_columns TEXT := get_language_columns();
+    unique_columns TEXT := 'osm_id, type';
 BEGIN
-    lang_columns := get_language_columns();
 
     sql_create := format(
         $sql$ 
@@ -76,28 +79,12 @@ BEGIN
         lang_columns
     );
 
-    -- === LOG & EXECUTION SEQUENCE ===
-    RAISE NOTICE '==> [START] Creating amenity centroids view: % (area > %)', view_name, min_area;
-
-    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
-
-    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
-    EXECUTE sql_create;
-
-    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type)';
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
-    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
-
-    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
+    PERFORM finalize_materialized_view(
+        tmp_view_name,
+        view_name,
+        unique_columns,
+        sql_create
+    );
 END;
 $$ LANGUAGE plpgsql;
 

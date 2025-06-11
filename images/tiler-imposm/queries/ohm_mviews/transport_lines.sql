@@ -1,32 +1,26 @@
 -- ============================================================================
 -- Function: create_transport_lines_mview
 -- Description:
---   Creates a materialized view that merges transport lines from two source tables:
---     - `lines_table`: way-based transport lines (e.g., highway, railway).
---     - `multilines_table`: relation-based transport lines (e.g., route relations).
+--   Creates a materialized view that merges transport lines from:
+--     - `lines_table` (ways: e.g. highway, railway),
+--     - `multilines_table` (relations: e.g. route relations).
 --
---   Each row is uniquely identified by a hash-based `id`, combining relevant attributes.
---   Records from relations include a `member` value and are marked as `source_type = 'relation'`,
---   while way-based features are marked as `source_type = 'way'`.
---
---   The resulting view supports temporal filtering and includes multilingual name columns.
+--   Each row gets a hash-based `id` and is marked with a `source_type`
+--   ('way' or 'relation'). Multilingual name columns are added.
 --
 -- Parameters:
---   lines_table       TEXT   - Table containing way-based transport lines.
---   multilines_table  TEXT   - Table containing relation-based transport lines.
---   view_name         TEXT   - Name of the final materialized view to be created.
---
--- Behavior:
---   - Drops and recreates a temporary view for safe replacement.
---   - Adds language-specific name columns using the `languages` table.
---   - Creates a GiST index on geometry and a unique index on (id).
+--   lines_table       TEXT - Table with way-based transport lines.
+--   multilines_table  TEXT - Table with relation-based transport lines.
+--   view_name         TEXT - Final materialized view name.
 --
 -- Notes:
---   - Input tables must include fields: geometry, osm_id, type, class, name, and transport tags.
+--   - Input tables must include geometry, osm_id, type, class, name, and transport tags.
 --   - Only valid geometries (LineString) are included from relation sources.
+--   - View uses GiST index on geometry and unique index on `id`.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_transport_lines_mview;
+
 CREATE OR REPLACE FUNCTION create_transport_lines_mview(
   lines_table TEXT,
   multilines_table TEXT,
@@ -34,12 +28,11 @@ CREATE OR REPLACE FUNCTION create_transport_lines_mview(
 )
 RETURNS void AS $$
 DECLARE
-  lang_columns TEXT;
-  sql_create TEXT;
+  lang_columns TEXT := get_language_columns();
   tmp_view_name TEXT := view_name || '_tmp';
+  unique_columns TEXT := 'id';
+  sql_create TEXT;
 BEGIN
-  lang_columns := get_language_columns();
-
   sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
     WITH combined AS (
@@ -71,8 +64,8 @@ BEGIN
         route,
         NULLIF(start_date, '') AS start_date,
         NULLIF(end_date, '') AS end_date,
-        isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-        isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+        isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+        isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
         tags,
         NULL AS member,
         'way' AS source_type,
@@ -111,42 +104,25 @@ BEGIN
         route,
         NULLIF(start_date, '') AS start_date,
         NULLIF(end_date, '') AS end_date,
-        isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-        isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+        isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+        isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
         tags,
         member,
         'relation' AS source_type,
         %s
       FROM %I
-      WHERE ST_GeometryType(geometry) = 'ST_LineString'
-        AND geometry IS NOT NULL
+      WHERE ST_GeometryType(geometry) = 'ST_LineString' AND geometry IS NOT NULL
     )
     SELECT DISTINCT ON (id) *
     FROM combined;
   $sql$, tmp_view_name, lang_columns, lines_table, lang_columns, multilines_table);
 
-  -- === LOG & EXECUTION SEQUENCE ===
-  RAISE NOTICE '==> [START] Creating transport lines view: % (tmp: %)', view_name, tmp_view_name;
-
-  RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
-  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
-
-  RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
-  EXECUTE sql_create;
-
-  RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (id)';
-  EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I(id);', tmp_view_name, tmp_view_name);
-
-  RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
-  EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST(geometry);', tmp_view_name, tmp_view_name);
-
-  RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
-  EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-  RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
-  EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
-
-  RAISE NOTICE '==> [DONE] Materialized view % created and indexed.', view_name;
+  PERFORM finalize_materialized_view(
+    tmp_view_name,
+    view_name,
+    unique_columns,
+    sql_create
+  );
 END;
 $$ LANGUAGE plpgsql;
 

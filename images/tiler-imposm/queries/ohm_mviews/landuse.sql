@@ -21,6 +21,7 @@
 --   - Geometry is indexed using GiST.
 --   - Uniqueness is enforced on the combination of (osm_id, type, class).
 --   - Language-specific name columns are added dynamically from the `languages` table.
+--   - Uses finalize_materialized_view() for safety and reusability.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_landuse_points_centroids_mview;
@@ -32,10 +33,9 @@ RETURNS void AS $$
 DECLARE 
     tmp_view_name TEXT := view_name || '_tmp';
     sql_create TEXT;
-    lang_columns TEXT;
+    lang_columns TEXT := get_language_columns();
+    unique_columns TEXT := 'osm_id, type, class';
 BEGIN
-    lang_columns := get_language_columns();
-
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -70,28 +70,12 @@ BEGIN
         FROM osm_landuse_points;
     $sql$, tmp_view_name, lang_columns, min_area, lang_columns);
 
-    -- === LOG & EXECUTION SEQUENCE ===
-    RAISE NOTICE '==> [START] Creating landuse centroids view: % (area > %)', view_name, min_area;
-
-    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
-
-    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
-    EXECUTE sql_create;
-
-    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type, class)';
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
-    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
-
-    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
+    PERFORM finalize_materialized_view(
+        tmp_view_name,
+        view_name,
+        unique_columns,
+        sql_create
+    );
 END;
 $$ LANGUAGE plpgsql;
 

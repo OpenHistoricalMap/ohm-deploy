@@ -17,83 +17,67 @@
 --   - Adds GiST spatial index on geometry and unique index on (id).
 -- ============================================================================
 DROP FUNCTION IF EXISTS create_water_areas_subdivided_mview;
+
 CREATE OR REPLACE FUNCTION create_water_areas_subdivided_mview(
   input_table TEXT,
   mview_name TEXT
 )
 RETURNS void AS $$
 DECLARE
-    lang_columns TEXT;
-    sql_create TEXT;
+    lang_columns TEXT := get_language_columns();
     tmp_view_name TEXT := mview_name || '_tmp';
+    sql_create TEXT;
+    unique_columns TEXT := 'id';
 BEGIN
-    lang_columns := get_language_columns();
-
-    sql_create :=  format($sql$
+    sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
-          row_number() OVER () AS id,
-          geometry,
-          osm_id,
-          NULLIF(name, '') AS name,
-          NULLIF(type, '') AS type,
-          NULLIF(start_date, '') AS start_date,
-          NULLIF(end_date, '') AS end_date,
-          isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-          isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
-          area,
-          %s
-        FROM (
-          SELECT
-            ST_Subdivide((g).geom, 512) AS geometry,
+            row_number() OVER () AS id,
+            geometry,
             osm_id,
-            name,
-            type,
-            start_date,
-            end_date,
+            NULLIF(name, '') AS name,
+            NULLIF(type, '') AS type,
+            NULLIF(start_date, '') AS start_date,
+            NULLIF(end_date, '') AS end_date,
+            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             area,
-            tags,
             %s
-          FROM (
-            SELECT 
-              osm_id,
-              name,
-              type,
-              start_date,
-              end_date,
-              area,
-              ST_Dump(ST_MakeValid(geometry)) AS g,
-              tags,
-              %s
-            FROM %I
-            WHERE geometry IS NOT NULL
-          ) AS fixed_geoms
-          WHERE GeometryType((g).geom) IN ('POLYGON', 'MULTIPOLYGON')
+        FROM (
+            SELECT
+                ST_Subdivide((g).geom, 512) AS geometry,
+                osm_id,
+                name,
+                type,
+                start_date,
+                end_date,
+                area,
+                tags,
+                %s
+            FROM (
+                SELECT 
+                    osm_id,
+                    name,
+                    type,
+                    start_date,
+                    end_date,
+                    area,
+                    ST_Dump(ST_MakeValid(geometry)) AS g,
+                    tags,
+                    %s
+                FROM %I
+                WHERE geometry IS NOT NULL
+            ) AS fixed_geoms
+            WHERE GeometryType((g).geom) IN ('POLYGON', 'MULTIPOLYGON')
         ) AS final_data;
     $sql$, tmp_view_name, lang_columns, lang_columns, lang_columns, input_table);
 
-    -- === LOG & EXECUTION SEQUENCE ===
-    RAISE NOTICE '==> [START] Creating subdivided water areas view: %', mview_name;
-
-    RAISE NOTICE '==> [DROP TEMP] Dropping temporary materialized view if exists: %', tmp_view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
-
-    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
-    EXECUTE sql_create;
-
-    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
-    EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on id';
-    EXECUTE format('CREATE UNIQUE INDEX idx_%I_id ON %I(id);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [DROP OLD] Dropping old materialized view: %', mview_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', mview_name);
-
-    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, mview_name;
-    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, mview_name);
-
-    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', mview_name;
+    PERFORM finalize_materialized_view(
+        tmp_view_name,
+        mview_name,
+        unique_columns,
+        sql_create
+    );
 END;
 $$ LANGUAGE plpgsql;
 
@@ -116,18 +100,18 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_water_areas_centroids_mview;
+
 CREATE OR REPLACE FUNCTION create_water_areas_centroids_mview(
     source_table TEXT,
     view_name TEXT
 )
 RETURNS void AS $$
 DECLARE 
-    lang_columns TEXT;
-    sql_create TEXT;
+    lang_columns TEXT := get_language_columns();
     tmp_view_name TEXT := view_name || '_tmp';
+    sql_create TEXT;
+    unique_columns TEXT := 'osm_id, type';
 BEGIN
-    lang_columns := get_language_columns();
-
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -136,8 +120,8 @@ BEGIN
             NULLIF(type, '') AS type,
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             area,
             %s,
             (ST_MaximumInscribedCircle(geometry)).center AS geometry
@@ -145,31 +129,14 @@ BEGIN
         WHERE name IS NOT NULL AND name <> '';
     $sql$, tmp_view_name, lang_columns, source_table);
 
-    -- === LOG & EXECUTION SEQUENCE ===
-    RAISE NOTICE '==> [START] Creating water area centroids view: %', view_name;
-
-    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
-
-    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
-    EXECUTE sql_create;
-
-    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
-    EXECUTE format('CREATE INDEX idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on osm_id';
-    EXECUTE format('CREATE UNIQUE INDEX idx_%I_osm_id ON %I (osm_id);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [DROP OLD] Dropping old materialized view: %', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
-    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
-
-    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
+    PERFORM finalize_materialized_view(
+        tmp_view_name,
+        view_name,
+        unique_columns,
+        sql_create
+    );
 END;
 $$ LANGUAGE plpgsql;
-
 
 -- ============================================================================
 -- Create materialized views for water ceontroids

@@ -1,40 +1,37 @@
 -- ============================================================================
 -- Function: create_transport_points_centroids_mview
 -- Description:
---   Creates a materialized view that merges centroids of transport area polygons
---   and transport points into a single unified layer for rendering.
+--   Creates a materialized view combining:
+--     - Centroids of named transport polygons (filtered by area),
+--     - Named transport points directly.
 --
---   - Centroids are calculated using ST_MaximumInscribedCircle for named polygonal features.
---   - Points are included directly with NULL as area to optimize vector tile size.
+--   Centroids are computed using ST_MaximumInscribedCircle, and multilingual
+--   columns are added using get_language_columns().
 --
 -- Parameters:
 --   view_name  TEXT              - Name of the materialized view to be created.
---   min_area   DOUBLE PRECISION - Minimum area (in m²) to include polygonal features.
---
--- Behavior:
---   - Drops and replaces the view using a temporary view to avoid downtime.
---   - Filters polygons by name and area before calculating centroids.
---   - Adds multilingual name columns dynamically from the `languages` table.
---   - Creates GiST spatial index on geometry and unique index on (osm_id, type, class).
+--   min_area   DOUBLE PRECISION - Minimum polygon area (in m²) for inclusion.
 --
 -- Notes:
---   - Useful for rendering transport-related labels and icons at mid/high zoom levels.
---   - Supports time-based filtering with `start_date`, `end_date`, and derived decimal dates.
+--   - Drops existing view using a temporary swap pattern.
+--   - GiST spatial index on geometry.
+--   - Unique index on (osm_id, type, class).
+--   - Supports temporal filtering via date columns.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_transport_points_centroids_mview;
+
 CREATE OR REPLACE FUNCTION create_transport_points_centroids_mview(
     view_name TEXT,
     min_area DOUBLE PRECISION DEFAULT 0
 )
 RETURNS void AS $$
 DECLARE 
-    lang_columns TEXT;
-    sql_create TEXT;
+    lang_columns TEXT := get_language_columns();
     tmp_view_name TEXT := view_name || '_tmp';
+    unique_columns TEXT := 'osm_id, type, class';
+    sql_create TEXT;
 BEGIN
-    lang_columns := get_language_columns();
-
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -45,8 +42,8 @@ BEGIN
             type, 
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             ROUND(area)::bigint AS area_m2,
             tags,
             %s
@@ -63,36 +60,20 @@ BEGIN
             type, 
             NULLIF(start_date, '') AS start_date,
             NULLIF(end_date, '') AS end_date,
-            isodatetodecimaldate(public.pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            isodatetodecimaldate(public.pad_date(end_date, 'end'), FALSE) AS end_decdate,
+            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             NULL AS area_m2, 
             tags,
             %s
         FROM osm_transport_points;
     $sql$, tmp_view_name, lang_columns, min_area, lang_columns);
 
-    -- === LOG & EXECUTION SEQUENCE ===
-    RAISE NOTICE '==> [START] Creating transport points and centroids view: % (tmp: %)', view_name, tmp_view_name;
-
-    RAISE NOTICE '==> [DROP TEMP] Dropping temporary view if exists: %', tmp_view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', tmp_view_name);
-
-    RAISE NOTICE '==> [CREATE TEMP] Creating temporary materialized view: %', tmp_view_name;
-    EXECUTE sql_create;
-
-    RAISE NOTICE '==> [INDEX] Creating GiST index on geometry';
-    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_geom ON %I USING GIST (geometry);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (osm_id, type, class)';
-    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%I_id ON %I (osm_id, type, class);', tmp_view_name, tmp_view_name);
-
-    RAISE NOTICE '==> [DROP OLD] Dropping old view if exists: %', view_name;
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;', view_name);
-
-    RAISE NOTICE '==> [RENAME] Renaming % → %', tmp_view_name, view_name;
-    EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I;', tmp_view_name, view_name);
-
-    RAISE NOTICE '==> [DONE] Materialized view % created successfully.', view_name;
+    PERFORM finalize_materialized_view(
+        tmp_view_name,
+        view_name,
+        unique_columns,
+        sql_create
+    );
 END;
 $$ LANGUAGE plpgsql;
 
