@@ -21,7 +21,7 @@ RUN apt-get update && \
 RUN a2enmod passenger
 
 # Clone OHM Website
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ea625f6d40b001bc9a68a73d8a2986efd31bf87c
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ce8458391dca3f655b16226281db2d08db24ec0d
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
     cd $workdir && \
