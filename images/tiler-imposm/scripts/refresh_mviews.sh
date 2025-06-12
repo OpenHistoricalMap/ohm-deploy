@@ -101,7 +101,7 @@ water_views=(
     mv_water_areas_centroids_z6_7
     mv_water_areas_centroids_z8_9
     mv_water_areas_centroids_z10_12
-    mv_water_areas_centroids_z13_15
+    mv_water_areas_centroids_z13_20
     mv_water_areas_z0_2_subdivided
     mv_water_areas_z3_5_subdivided
     mv_water_areas_z6_7_subdivided
