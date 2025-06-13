@@ -124,8 +124,8 @@ setup_production() {
       -e "s|openhistoricalmap.github.io|${SERVER_URL}|g" \
       -e "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" \
       -e "s|www.openhistoricalmap.org|${SERVER_URL}|g" \
-      -e "s|https://vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
-      -e "s|https://vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
+      -e "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
+      -e "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
       "$file"
   done
 
