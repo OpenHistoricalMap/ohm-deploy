@@ -50,7 +50,7 @@ class Config:
         "TILER_CACHE_AWS_ENDPOINT", "https://s3.amazonaws.com"
     )  # https://s3.amazonaws.com or https://hel1.your-objectstorage.com
     TILER_CACHE_REGION = os.getenv("TILER_CACHE_REGION", "us-east-1")  # us-east-1 or hel1
-
+    TILER_CACHE_BUCKET = os.getenv("TILER_CACHE_BUCKET", "none") 
     # PostgreSQL Database Settings
     POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))

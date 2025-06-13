@@ -65,20 +65,16 @@ def delete_tiles_in_bbox(bbox_str, zoom_levels, s3_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Delete cached tiles from S3.")
-    parser.add_argument("--bbox", help="Bounding box in format minx,miny,maxx,maxy")
     parser.add_argument("--bboxes", help="Multiple bboxes separated by '|'")
-    parser.add_argument("--tile-prefix", default=Config.S3_BUCKET_PATH_FILES + "/", help="Tile base path in S3")
+    parser.add_argument("--tile-prefix", default=Config.S3_BUCKET_CACHE_TILER + "/", help="Tile base path in S3")
 
     args = parser.parse_args()
 
-    if args.bbox:
-        logger.info(f"Deleting tiles for bbox: {args.bbox}")
-        delete_tiles_in_bbox(
-            bbox_str=args.bbox,
-            zoom_levels=[12],
-            s3_path=args.tile_prefix
-        )
-    elif args.bboxes:
+    if args.bboxes:
+        logger.info("Deleting tiles for specified bboxes.")
+        logger.info(f"bbox: {args.bboxes}")
+        logger.info(f"tile_prefix: {args.tile_prefix}")
+
         bboxes_list = args.bboxes.split("|")
         logger.info(f"Deleting tiles for multiple bboxes: {len(bboxes_list)}")
         for bbox_str in bboxes_list:

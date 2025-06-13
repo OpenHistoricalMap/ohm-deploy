@@ -46,12 +46,13 @@ if [[ "$ALL" == true ]]; then
 fi
 
 ##################### OHM #####################
-# log_message "Creating materialized views for OSM data"
-execute_sql_file queries/ohm_mviews/admin_boundaries_centroids.sql
+log_message "Creating materialized views for OSM data"
+# admin_boundaries_centroids and landuse takes lot time, lets run in background
+execute_sql_file queries/ohm_mviews/admin_boundaries_centroids.sql &
+execute_sql_file queries/ohm_mviews/landuse.sql &
 execute_sql_file queries/ohm_mviews/admin_boundaries_maritime.sql
 execute_sql_file queries/ohm_mviews/amenity.sql
 execute_sql_file queries/ohm_mviews/buildings.sql
-execute_sql_file queries/ohm_mviews/landuse.sql
 execute_sql_file queries/ohm_mviews/others.sql
 execute_sql_file queries/ohm_mviews/places.sql
 execute_sql_file queries/ohm_mviews/transport_lines.sql

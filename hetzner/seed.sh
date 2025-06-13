@@ -36,35 +36,32 @@ other_areas,
 other_points_centroids,
 other_lines"
 
-
 seed_global() {
   while true; do
     echo "Starting global seeding..."
     pkill -f "tegola" && sleep 5
 
-    # Seed all areas (min 0 to max 5)
-    tegola cache seed tile-name "0/0/0"  \
-      --config=/opt/tegola_config/config.toml \
+    tegola cache seed tile-name "0/0/0" \
+      --config=${TEGOLA_CONFIG_FILE} \
       --map=osm \
       --min-zoom=0 \
       --max-zoom=5 \
       --concurrency=4 \
       --overwrite=true
 
-    # Seed land areas separately (zoom 6-7)
     for zoom in $(seq 6 7); do
       echo "Downloading tile list for zoom level $zoom..."
       wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_boundary_$zoom.list"
 
       tegola cache seed tile-list /opt/tile-list.tiles \
-        --config=/opt/tegola_config/config.toml \
+        --config=${TEGOLA_CONFIG_FILE} \
         --map=osm \
         --min-zoom="$zoom" \
         --max-zoom="$zoom" \
         --concurrency=4 \
         --overwrite=true
     done
-    echo "Global seeding completed. Sleeping for 1 hour..."
+    echo "Global seeding completed. Sleeping for 30 minutes..."
     sleep 1800
   done
 }
@@ -72,7 +69,6 @@ seed_global() {
 seed_coverage() {
   while true; do
     echo "Starting coverage seeding..."
-    wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_14.list"
     pkill -f "tegola" && sleep 5
 
     for zoom in $(seq 8 14); do
@@ -80,20 +76,33 @@ seed_coverage() {
       wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_boundary_$zoom.list"
 
       tegola cache seed tile-list /opt/tile-list.tiles \
-        --config=/opt/tegola_config/config.toml \
+        --config=${TEGOLA_CONFIG_FILE} \
         --map=osm \
         --min-zoom=$zoom \
         --max-zoom=$zoom \
         --concurrency=4 \
         --overwrite=false
     done
-    echo "Global seeding completed. Sleeping for 5 minutes.."
+    echo "Coverage seeding completed. Sleeping for 5 minutes..."
     sleep 300
   done
 }
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <global|coverage>"
+purge_bbox() {
+  local bbox="$1"
+  echo "Purging cache for bbox: $bbox"
+
+  tegola cache purge \
+    --config=${TEGOLA_CONFIG_FILE} \
+    --map=osm \
+    --bounds="$bbox" \
+    --min-zoom=0 \
+    --max-zoom=20 \
+    --concurrency=4
+}
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $0 <global|coverage|purge> [bbox]"
   exit 1
 fi
 
@@ -104,8 +113,15 @@ case "$1" in
   coverage)
     seed_coverage
     ;;
+  purge)
+    if [ -z "$2" ]; then
+      echo "Missing bbox for purge. Usage: $0 purge <bbox>"
+      exit 1
+    fi
+    purge_bbox "$2"
+    ;;
   *)
-    echo "Invalid option. Use 'global' or 'coverage'."
+    echo "Invalid option. Use 'global', 'coverage', or 'purge <bbox>'."
     exit 1
     ;;
 esac

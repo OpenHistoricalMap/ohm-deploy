@@ -29,7 +29,7 @@ export POSTGRES_PORT=$([[ "$DOCKER_CONFIG_ENVIRONMENT" == "production" ]] && ech
 
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
 
-NIM_NUMBER_LANGUAGES="${NIM_NUMBER_LANGUAGES:-5}" # Default to 5 languages
+NIM_NUMBER_LANGUAGES="${NIM_NUMBER_LANGUAGES:-2}" # Default to 5 languages
 FORCE_LANGUAGES_GENERATION="${FORCE_LANGUAGES_GENERATION:-false}"
 EVALUATION_INTERVAL="${EVALUATION_INTERVAL:-3600}" # Default to 1 hour (3600 seconds)
 
@@ -49,20 +49,6 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   echo "Aborting script."
   exit 0
 fi
-
-
-function get_new_languages_bbox() {
-  ## Returns bbox list: minx,miny,maxx,maxy|minx,miny,maxx,maxy|...
-  psql "$PG_CONNECTION" -t -A -F '|' -c \
-  "SELECT string_agg(bbox_str, '|') FROM (
-     SELECT ST_XMin(b) || ',' || ST_YMin(b) || ',' || ST_XMax(b) || ',' || ST_YMax(b) AS bbox_str
-     FROM (
-       SELECT ST_Transform(ST_SetSRID(bbox, 3857), 4326) AS b
-       FROM languages
-       WHERE is_new = TRUE
-     ) sub
-   ) agg;"
-}
 
 function restart_production_containers() {
   ## ================================================================= 
@@ -94,15 +80,15 @@ function restart_staging_containers() {
   docker compose -f  tiler.staging.yml run imposm_staging /osm/scripts/create_mviews.sh 
   docker compose -f tiler.staging.yml up tiler_staging -d --force-recreate
   # Remove all tiles that the new languages are covering.
-  echo "Removing tiles for new languages...$(get_new_languages_bbox)"
-  docker compose -f tiler.staging.yml run --rm tiler_s3_cleaner_staging python delete_s3_tiles.py --bboxes="$(get_new_languages_bbox)"
+  docker compose -f tiler.staging.yml run --rm tiler_s3_cleaner_staging python delete_s3_tiles.py
+  # TODO: filter by bbox thatdoe snot take to much time
+  # docker compose -f hetzner/tiler.staging.yml run tiler_clean_cache_bbox_staging /opt/seed.sh purge -180,-90,180,90
 }
 
 while true; do
   echo "Checking for language changes..."
 
-  psql "$PG_CONNECTION" -c "SELECT populate_languages(${NIM_NUMBER_LANGUAGES}, '${FORCE_LANGUAGE
-S_GENERATION}'::BOOLEAN);"
+  psql "$PG_CONNECTION" -c "SELECT populate_languages(${NIM_NUMBER_LANGUAGES}, '${FORCE_LANGUAGES_GENERATION}'::BOOLEAN);"
   HAS_CHANGED=$(psql "$PG_CONNECTION" -t -A -c "SELECT EXISTS (SELECT 1 FROM languages WHERE is_new = TRUE);")
   echo "has_changed = $HAS_CHANGED"
   if [[ "$HAS_CHANGED" == "t" ]]; then
