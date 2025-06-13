@@ -145,3 +145,4 @@ if __name__ == "__main__":
         f.write(template_content)
 
     print(f"\nConfig created: {args.output}")
+    
