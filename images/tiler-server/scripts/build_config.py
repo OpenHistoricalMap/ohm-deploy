@@ -2,42 +2,92 @@
 
 """
 This script generates a merged TOML configuration file for a tile server.
-It reads a template file and inserts provider and map configurations from individual TOML files.
-Additionally, it fetches dynamic language tag columns from a PostgreSQL database (using the `languages` table),
-which replaces placeholder values (like {{LENGUAGES}}) inside the provider definitions.
 
+It reads a TOML template and merges provider/map configurations from per-layer files.
+For each layer SQL block, it detects the table/view name and dynamically replaces
+the `{{LENGUAGES}}` placeholder with the actual list of `name_*` columns found in the database.
 
 Requirements:
 -------------
-- PostgreSQL database with a populated `languages` table.
-- Environment variables for DB connection:
+- PostgreSQL database with views and `name_*` columns
+- DB credentials passed via environment variables:
     POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
 """
 
 import os
 import argparse
+import re
 from utils import get_db_connection
 
-def fetch_languages_from_db():
+def fetch_all_languages() -> dict:
     """
-    Fetch only the 'alias' values from the 'languages' table in the PostgreSQL database.
+    Fetch all 'name_*' columns from materialized views starting with 'mv_' (excluding 'mview_%').
+
     Returns:
-        str: A newline-separated string of aliases sorted alphabetically.
+        dict[str, str]: A dictionary where the key is the materialized view name
+                        and the value is a comma-separated string of name_* columns.
     """
     conn = get_db_connection()
+    result = {}
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT alias FROM languages ORDER BY alias;")
-            return ", ".join(row[0] for row in cur.fetchall())
+            cur.execute("""
+                SELECT
+                  c.relname AS mview_name,
+                  string_agg(a.attname, ', ' ORDER BY a.attname) AS name_columns
+                FROM
+                  pg_class c
+                JOIN
+                  pg_namespace n ON n.oid = c.relnamespace
+                JOIN
+                  pg_attribute a ON a.attrelid = c.oid
+                WHERE
+                  c.relkind = 'm'
+                  AND c.relname LIKE 'mv_%'
+                  AND c.relname NOT LIKE 'mview_%'
+                  AND a.attname LIKE 'name_%'
+                  AND NOT a.attisdropped
+                GROUP BY
+                  c.relname
+                ORDER BY
+                  c.relname;
+            """)
+            for view_name, name_columns in cur.fetchall():
+                result[view_name] = name_columns
     finally:
         conn.close()
+    return result
 
 def indent_block(block: str, indent: str = "\t") -> str:
-    lines = block.splitlines()
-    return "\n".join(indent + line for line in lines)
+    """Indent every line of a block with the given string."""
+    return "\n".join(indent + line for line in block.splitlines())
+
+
+def process_layer_blocks(raw_content: str, lang_map: dict) -> str:
+    """
+    Process and replace `{{LENGUAGES}}` in each [[providers.layers]] block.
+    """
+    parts = re.split(r'(\[\[providers\.layers\]\])', raw_content)
+    final = []
+    for i in range(1, len(parts), 2):
+        header = parts[i]
+        block = parts[i + 1] if i + 1 < len(parts) else ''
+        sql_match = re.search(r'FROM\s+([\w_]+)', block)
+        if sql_match:
+            view_name = sql_match.group(1)
+            langs = lang_map.get(view_name)
+            if langs:
+                block = block.replace('{{LENGUAGES}}', langs)
+            else:
+                block = re.sub(r',?\s*{{LENGUAGES}}\s*', '', block)
+        else:
+            block = block.replace('{{LENGUAGES}}', '')
+        final.append(header + block)
+    return ''.join(parts[0:1] + final)
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Merge TOML files into a configuration file.')
+    parser = argparse.ArgumentParser(description='Merge TOML providers and inject language columns.')
     parser.add_argument('--template', default='config/config.template.toml')
     parser.add_argument('--providers', default='config/providers')
     parser.add_argument('--output', default='config/config.osm.toml')
@@ -45,68 +95,53 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    template_file = args.template
-    providers_dir = args.providers
-    output_file = args.output
-    requested_providers = [
-        p.strip() for p in args.provider_names.split(',')
-        if not p.strip().startswith('--') # <-- Igno  providers with "--"
-    ]
-    # Load and process template
-    with open(template_file, 'r') as f:
+    with open(args.template, 'r') as f:
         template_content = f.read()
 
-    # Get language SQL from database
-    languages_content = fetch_languages_from_db()
+    requested_providers = [
+        p.strip() for p in args.provider_names.split(',')
+        if p.strip()
+    ]
 
-    # Collect TOML providers
-    all_toml_files = [f for f in os.listdir(providers_dir) if f.endswith('.toml')]
-    selected_toml_files = []
-    for rp in requested_providers:
-        expected_name = rp if rp.endswith('.toml') else rp + '.toml'
-        if expected_name in all_toml_files:
-            selected_toml_files.append(expected_name)
+    all_toml_files = [f for f in os.listdir(args.providers) if f.endswith('.toml')]
+    selected_files = [
+        p if p.endswith('.toml') else p + '.toml'
+        for p in requested_providers if p + '.toml' in all_toml_files
+    ]
+
+    lang_map = fetch_all_languages()
+
+    providers_content = []
+    maps_content = []
+
+    for toml_file in selected_files:
+        path = os.path.join(args.providers, toml_file)
+        print(f"Processing {path}...")
+        with open(path, 'r') as f:
+            content = f.read()
+
+        updated = process_layer_blocks(content, lang_map)
+
+        if '#######Maps' in updated:
+            p_block, m_block = updated.split('#######Maps', 1)
         else:
-            print(f"WARNING: {expected_name} not found in {providers_dir}. Skipping.")
+            p_block, m_block = updated, ""
 
-    providers_accumulator = []
-    maps_accumulator = []
+        if p_block.strip():
+            providers_content.append(p_block.strip())
+        if m_block.strip():
+            maps_content.append(m_block.strip())
 
-    for toml_filename in selected_toml_files:
-        full_path = os.path.join(providers_dir, toml_filename)
-        print("Importing ->", full_path)
-        with open(full_path, 'r') as f:
-            raw_content = f.read()
-
-        if '{{LENGUAGES}}' in raw_content:
-            raw_content = raw_content.replace('{{LENGUAGES}}', languages_content.replace("\n", " "))
-        if '{{LENGUAGES_RELATION}}' in raw_content:
-            replaced_lines = "r." + languages_content.replace("\n", " r.")
-            raw_content = raw_content.replace('{{LENGUAGES_RELATION}}', replaced_lines)
-
-        if '#######Maps' in raw_content:
-            provider_part, maps_part = raw_content.split('#######Maps', 1)
-        else:
-            provider_part, maps_part = raw_content, ""
-
-        if provider_part.strip():
-            providers_accumulator.append(provider_part.strip())
-        if maps_part.strip():
-            maps_accumulator.append(maps_part.strip())
-
-    # Insert into template
     template_content = template_content.replace(
         "###### PROVIDERS",
-        "###### PROVIDERS\n" + indent_block("\n\n".join(providers_accumulator), "\t")
+        "###### PROVIDERS\n" + indent_block("\n\n".join(providers_content))
     )
-
     template_content = template_content.replace(
         "###### MAPS",
-        "###### MAPS\n" + indent_block("\n\n".join(maps_accumulator), "\t")
+        "###### MAPS\n" + indent_block("\n\n".join(maps_content))
     )
 
-    with open(output_file, 'w') as f:
+    with open(args.output, 'w') as f:
         f.write(template_content)
 
-    print(f"Successfully created merged configuration at: {output_file}")
-    
+    print(f"\nConfig created: {args.output}")
