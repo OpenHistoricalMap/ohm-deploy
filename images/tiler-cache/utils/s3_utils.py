@@ -4,6 +4,7 @@ import logging
 from config import Config
 from utils.utils import get_logger
 from botocore.exceptions import ClientError
+import mercantile
 
 logger = get_logger()
 
@@ -129,6 +130,38 @@ def generate_tile_patterns(tiles):
     sorted_patterns = sorted(patterns)
     logger.info(f"tiles patterns: {sorted_patterns}")
     return sorted_patterns
+
+
+
+def generate_tile_patterns_bbox(minx, miny, maxx, maxy, zoom_levels):
+    """
+    Generate minimal set of unique tile prefixes z/x_prefix based on tile.x only.
+    Avoids iterating over full tile list (x/y) to save time.
+    """
+    prefixes = set()
+
+    for z in zoom_levels:
+        # Only store unique x prefixes at this zoom level
+        x_prefix_set = set()
+        tiles = mercantile.tiles(minx, miny, maxx, maxy, [z])
+
+        for tile in tiles:
+            x_str = str(tile.x)
+            if len(x_str) <= 2:
+                x_prefix = x_str
+            elif len(x_str) == 3:
+                x_prefix = x_str[:-1]
+            else:
+                x_prefix = x_str[:-2]
+
+            x_prefix_set.add(f"{z}/{x_prefix}")
+
+        prefixes.update(x_prefix_set)
+        logger.info(f"Zoom {z}: {len(x_prefix_set)} unique x_prefixes")
+
+    logger.info(f"Total unique prefixes: {len(prefixes)}")
+    return sorted(prefixes)
+
 
 
 def get_and_delete_existing_tiles(bucket_name, path_file, tiles_patterns, batch_size=1000):
