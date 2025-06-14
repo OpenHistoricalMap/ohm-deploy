@@ -117,6 +117,18 @@ setup_production() {
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
 
+  # Replace URLs in the public directory
+  find "/var/www/public" -type f | while read -r file; do
+    echo "Updating $file"
+    sed -i.bak \
+      -e "s|openhistoricalmap.github.io|${SERVER_URL}|g" \
+      -e "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" \
+      -e "s|www.openhistoricalmap.org|${SERVER_URL}|g" \
+      -e "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
+      -e "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
+      "$file"
+  done
+
   echo "Waiting for PostgreSQL to be ready..."
   until pg_isready -h "$POSTGRES_HOST" -p 5432; do
     sleep 2
