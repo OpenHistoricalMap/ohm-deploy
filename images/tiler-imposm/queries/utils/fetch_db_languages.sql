@@ -70,29 +70,35 @@ $$ LANGUAGE plpgsql;
 -- Function: populate_languages(min_number_languages INTEGER, force BOOLEAN)
 -- 
 -- Description:
---   Populates or updates the `languages` table with aggregated language metadata
---   based on the results of the `search_languages()` function.
+--   This function populates the 'languages' table with entries from the 
+--   'search_languages()' function, which returns language usage across various
+--   vector tile source tables. It is designed to track which language tags 
+--   (e.g., name:es, name:fr) are actively used in the dataset.
+--
+--   The function applies the following logic:
+--
+--     1. If the 'languages' table does not exist, it is created.
+--     2. If 'force' is TRUE, all existing rows in 'languages' are deleted.
+--        Otherwise, all rows are marked as is_new = FALSE.
+--     3. New or updated languages are inserted from 'search_languages()', 
+--        filtering out any that appear fewer than 'min_number_languages' times.
+--     4. If a language already exists, its count, bbox, and date_added fields 
+--        are updated — but its is_new flag is left unchanged (i.e., stays FALSE).
+--     5. New entries are inserted with is_new = TRUE by default.
+--
+--   This approach ensures that only truly new languages are flagged as 'is_new',
+--   which is useful for detecting newly added languages and triggering processes
+--   like materialized view updates or tile regeneration.
 --
 -- Parameters:
---   - min_number_languages (INTEGER):
---       Only includes languages with at least this number of matching features.
---   - force (BOOLEAN, default FALSE):
---       If TRUE, all existing rows in the `languages` table are deleted before insert.
--- 
--- Logic:
---   1. Creates the `languages` table if it doesn't already exist.
---   2. Optionally clears existing rows if `force = TRUE`.
---   3. Inserts aggregated language data:
---      - `alias`: normalized language key (e.g., name_es)
---      - `key_name`: original key (e.g., name:es)
---      - `count`: total object count per language
---      - `bbox`: geometry bounding all features for that language
---   4. If an alias already exists, it is updated instead of inserted.
+--   min_number_languages - Minimum number of tagged objects required for a 
+--                          language to be considered valid.
+--   force                - If TRUE, wipes the table and treats all inserted 
+--                          languages as new.
 --
--- Use Cases:
---   - Regular updates to a language summary table
---   - Precomputing language metadata for performance or analytics
---   - Supporting filters or dropdowns based on available name tags
+-- Example Usage:
+--   SELECT populate_languages(5, FALSE);  -- normal run, only mark new
+--   SELECT populate_languages(5, TRUE);   -- full rebuild, all treated as new
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION populate_languages(min_number_languages INTEGER, force BOOLEAN DEFAULT FALSE)
@@ -110,12 +116,14 @@ BEGIN
         );
     $create$;
 
-    -- Step 2: Optionally delete all existing rows
+    -- Step 2: Delete or reset is_new flag
     IF force THEN
         DELETE FROM languages;
+    ELSE
+        UPDATE languages SET is_new = FALSE;
     END IF;
 
-    -- Step 3: Insert or update from search_languages
+    -- Step 3: Insert new or update existing languages
     EXECUTE format($sql$
         INSERT INTO languages (alias, key_name, count, bbox)
         SELECT
@@ -137,12 +145,10 @@ BEGIN
         ON CONFLICT (alias) DO UPDATE SET
             count = EXCLUDED.count,
             bbox = EXCLUDED.bbox,
-            date_added = CURRENT_TIMESTAMP,
-            is_new = FALSE;
+            date_added = CURRENT_TIMESTAMP;
     $sql$, min_number_languages);
 END;
 $$ LANGUAGE plpgsql;
-
 -- ============================================================================
 -- Populate languages with a default of 5 features, forcing an update:
 -- ============================================================================
