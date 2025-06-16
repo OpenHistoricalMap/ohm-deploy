@@ -29,7 +29,7 @@ export POSTGRES_PORT=$([[ "$DOCKER_CONFIG_ENVIRONMENT" == "production" ]] && ech
 
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
 
-NIM_NUMBER_LANGUAGES="${NIM_NUMBER_LANGUAGES:-2}" # Default to 5 languages
+NIM_NUMBER_LANGUAGES="${NIM_NUMBER_LANGUAGES:-3}" # Default to 5 languages
 FORCE_LANGUAGES_GENERATION="${FORCE_LANGUAGES_GENERATION:-false}"
 EVALUATION_INTERVAL="${EVALUATION_INTERVAL:-3600}" # Default to 1 hour (3600 seconds)
 
@@ -63,16 +63,15 @@ function restart_production_containers() {
   docker compose -f tiler.production.yml up tiler_production -d --force-recreate
 
   ## =================================================================
+  ## Remove tiles that the new languages are covering. # TODO: filter by bbox
+  ## =================================================================
+  docker compose -f tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py
+
+  ## =================================================================
   ## Restart global cache generator and coverage 
   ## =================================================================
   docker compose -f tiler.production.yml up global_seeding_production -d --force-recreate
   docker compose -f tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
-
-  ## =================================================================
-  ## Remove tiles that the new languages are covering. 
-  ## =================================================================
-  echo "Removing tiles for new languages...$(get_new_languages_bbox)"
-  docker compose -f tiler.staging.yml run --rm tiler_s3_cleaner_staging python delete_s3_tiles.py --bboxes="$(get_new_languages_bbox)"
 }
 
 function restart_staging_containers() {
@@ -80,9 +79,7 @@ function restart_staging_containers() {
   docker compose -f  tiler.staging.yml run imposm_staging /osm/scripts/create_mviews.sh 
   docker compose -f tiler.staging.yml up tiler_staging -d --force-recreate
   # Remove all tiles that the new languages are covering.
-  docker compose -f tiler.staging.yml run --rm tiler_s3_cleaner_staging python delete_s3_tiles.py
-  # TODO: filter by bbox thatdoe snot take to much time
-  # docker compose -f hetzner/tiler.staging.yml run tiler_clean_cache_bbox_staging /opt/seed.sh purge -180,-90,180,90
+  docker compose -f tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py
 }
 
 while true; do

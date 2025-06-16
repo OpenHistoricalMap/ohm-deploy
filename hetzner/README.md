@@ -47,9 +47,9 @@ This script checks for new languages in the languages table. If new languages ar
 cd hetzner/
 screen -S staging -L -Logfile staging_languages.log
 
-NUM_MIN_LANGUAGES=5  # Default minimum number of languages  
-FORCE_LANGUAGES_GENERATION=false  # Set to true to force repopulation of the languages
-EVALUATION_INTERVAL=3600  # Set the evaluation interval to 1 hour (in seconds) to check for new languages in the database  
+export export NIM_NUMBER_LANGUAGES=1  # Default minimum number of languages  
+export FORCE_LANGUAGES_GENERATION=false  # Set to true to force repopulation of the languages
+export EVALUATION_INTERVAL=600  # Set the evaluation interval to 1 hour (in seconds) to check for new languages in the database  
 
 ./monitor_languages.sh
 

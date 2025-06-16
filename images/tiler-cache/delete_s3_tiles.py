@@ -66,8 +66,7 @@ def delete_tiles_in_bbox(bbox_str, zoom_levels, s3_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Delete cached tiles from S3.")
     parser.add_argument("--bboxes", help="Multiple bboxes separated by '|'")
-    parser.add_argument("--tile-prefix", default=Config.S3_BUCKET_CACHE_TILER + "/", help="Tile base path in S3")
-
+    
     args = parser.parse_args()
 
     if args.bboxes:
@@ -89,6 +88,6 @@ if __name__ == "__main__":
     else:
         logger.info("No bbox provided. Deleting all tiles per zoom level.")
         for zoom in ZOOM_LEVELS:
-            prefix = f"{args.tile_prefix}{zoom}/"
+            prefix = f"mnt/data/osm/{zoom}/"
             delete_objects_with_prefix(prefix)
             
