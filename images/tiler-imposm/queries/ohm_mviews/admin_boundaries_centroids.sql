@@ -32,6 +32,7 @@ BEGIN
   sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
     SELECT
+      ABS(osm_id) AS id,
       osm_id,
       NULLIF(name, '') AS name,
       admin_level,

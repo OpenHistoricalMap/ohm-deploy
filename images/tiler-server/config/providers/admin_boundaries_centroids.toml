@@ -2,11 +2,11 @@
 name = "admin_boundaries_centroid_z0_2"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry,  
-    osm_id, 
+    id, 
     admin_level,
     name, 
     type, 
@@ -25,11 +25,11 @@ WHERE geometry && !BBOX!
 name = "admin_boundaries_centroid_z3_5"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    id, 
     admin_level,
     name, 
     type, 
@@ -48,11 +48,11 @@ WHERE geometry && !BBOX!
 name = "admin_boundaries_centroid_z6_7"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    id, 
     admin_level,
     name, 
     type, 
@@ -71,11 +71,11 @@ WHERE geometry && !BBOX!
 name = "admin_boundaries_centroid_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    id, 
     admin_level,
     name, 
     type, 
@@ -94,11 +94,11 @@ WHERE geometry && !BBOX!
 name = "admin_boundaries_centroid_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    id, 
     admin_level,
     name, 
     type, 
@@ -117,11 +117,11 @@ WHERE geometry && !BBOX!
 name = "admin_boundaries_centroid_z13_15"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    id, 
     admin_level,
     name, 
     type, 
@@ -140,11 +140,11 @@ WHERE geometry && !BBOX!
 name = "admin_boundaries_centroid_z16_20"
 geometry_fieldname = "geometry"
 geometry_type = "point"
-id_fieldname = "osm_id"
+id_fieldname = "id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
+    id, 
     admin_level,
     name, 
     type, 
