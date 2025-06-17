@@ -48,7 +48,7 @@ BEGIN
   END IF;
 
   IF array_length(allowed_types_points, 1) IS NOT NULL THEN
-    type_filter_points := format(' AND type = ANY (%L)', allowed_types_points);
+    type_filter_points := format(' type = ANY (%L)', allowed_types_points);
   END IF;
 
   sql_create := format($sql$
@@ -83,7 +83,7 @@ BEGIN
       tags->'capital' AS capital,
       %s
     FROM osm_place_points
-    WHERE osm_id > 0 AND name IS NOT NULL AND name <> ''%s;
+    WHERE %s;
   $sql$, tmp_view_name, lang_columns, type_filter_areas, lang_columns, type_filter_points);
 
   PERFORM finalize_materialized_view(
@@ -193,7 +193,7 @@ SELECT create_place_points_centroids_mview(
 SELECT create_place_points_centroids_mview(
   'mv_place_points_centroids_z11_20',
   ARRAY['plot', 'square', 'islet'],
-  ARRAY['country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood']
+  ARRAY['county', 'country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood']
 );
 
 
