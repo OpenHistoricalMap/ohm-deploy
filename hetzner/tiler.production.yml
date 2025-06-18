@@ -3,7 +3,7 @@ services:
   db_production:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_28_05_2025:/var/lib/postgresql/data
+      - tiler_production_pgdata:/var/lib/postgresql/data
       - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
@@ -24,9 +24,9 @@ services:
           
   # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2572.h77205fe
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2632.h717d2ec
     volumes:
-      - /data/tiler_production_imposm_28_05_2025:/mnt/data
+      - tiler_production_imposmdata:/mnt/data
     command:
       - sh
       - -c
@@ -48,7 +48,7 @@ services:
       - tiler_network
   # Tiler server
   tiler_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2630.heaedf31
     ports:
       - "9090:9090"
     env_file:
@@ -57,8 +57,9 @@ services:
     networks:
       - tiler_network
   # Tiler cache
-  cache_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
+
+  tiler_sqs_cleaner_production:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2632.h717d2ec
     env_file:
       - .env.production
     restart: always
@@ -109,17 +110,10 @@ services:
     networks:
       - tiler_network
 
-  remove_cache_tiles_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2585.hf4baec4
+  tiler_s3_cleaner_production:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2632.h717d2ec
     env_file:
       - .env.production
-    volumes:
-      - ./rm_s3.py:/opt/rm_s3.py
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        python3 /opt/rm_s3.py
     deploy:
       resources:
         limits:
@@ -144,4 +138,12 @@ services:
 networks:
   tiler_network:
     driver: bridge
+
+volumes:
+  tiler_production_pgdata:
+    driver: local
+    name: tiler_db_11_06_2025
+  tiler_production_imposmdata:
+    driver: local
+    name: tiler_imposm_11_06_2025
     

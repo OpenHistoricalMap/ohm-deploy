@@ -1,28 +1,30 @@
+# Layer configuration for buildings
 [[providers.layers]]
-name = "landuse_lines"
+name = "buildings"
 geometry_fieldname = "geometry"
-geometry_type = "linestring"
+geometry_type = "multipolygon"
 id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     osm_id, 
     name,
-    class, 
+    NULLIF(as_numeric(height), -1) AS height, 
     type, 
     start_date, 
     end_date, 
+    area,  
     start_decdate, 
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_landuse_lines_z14_20 
+    mv_osm_buildings_areas_z14_20
 WHERE 
     geometry && !BBOX!
 """
 #######Maps
 [[maps.layers]]
-name = "landuse_lines"
-provider_layer = "osm.landuse_lines"
+name = "buildings"
+provider_layer = "osm.buildings"
 min_zoom = 14
 max_zoom = 20
