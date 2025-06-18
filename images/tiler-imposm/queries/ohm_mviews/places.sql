@@ -1,30 +1,33 @@
 -- ============================================================================
 -- Function: create_place_points_centroids_mview
 -- Description:
---   Creates a materialized view that merges:
---     - Centroids of polygonal place areas using ST_MaximumInscribedCircle
---     - Place points directly from `osm_place_points`, with NULL for area.
+--   Creates a materialized view that merges place polygons and points into
+--   a unified layer of named geographic features optimized for vector tile rendering.
 --
---   This provides a unified layer of named place features optimized for
---   rendering at various zoom levels in vector tiles.
+--   Includes:
+--     - Centroids of polygonal areas (from `osm_place_areas`) calculated using
+--       ST_MaximumInscribedCircle, with area in m² stored in `area_m2`.
+--     - Direct points (from `osm_place_points`) with NULL for `area_m2`.
 --
---   Temporal fields `start_date` and `end_date` are included as-is,
---   and additional precalculated columns `start_decdate` and `end_decdate`
---   are generated using the `isodatetodecimaldate` function.
---
---   Also includes the `capital` tag (if present), full `tags` column,
---   and dynamically generated multilingual name columns from the `languages` table.
+--   Both sources include:
+--     - Name (only non-empty)
+--     - Temporal fields: `start_date`, `end_date`
+--     - Derived decimal dates: `start_decdate`, `end_decdate` using isodatetodecimaldate()
+--     - Capital tag (`tags->'capital'`)
+--     - Full `tags` column
+--     - Language-specific name columns dynamically from the `languages` table
 --
 -- Parameters:
---   view_name            TEXT     - Name of the materialized view to create.
---   allowed_types_areas  TEXT[]   - Optional list of types to include only from `osm_place_areas`.
---   allowed_types_points TEXT[]   - Optional list of types to include only from `osm_place_points`.
+--   view_name             TEXT     - Name of the materialized view to create.
+--   allowed_types_areas   TEXT[]   - Optional filter for types from `osm_place_areas`.
+--   allowed_types_points  TEXT[]   - Optional filter for types from `osm_place_points`.
 --
 -- Notes:
---   - Only features with non-empty "name" values are included.
---   - Centroid area is stored in `area_m2` for polygons; NULL for points.
---   - GiST index is created on `geometry`; uniqueness on (osm_id, type).
---   - Uses finalize_materialized_view() for atomic creation.
+--   - Features without a name are excluded.
+--   - If the array for area or point types is empty, that part is skipped.
+--   - Use '*' as wildcard to include all types.
+--   - A temporary view is created and replaced atomically using finalize_materialized_view().
+--   - Uniqueness is enforced on (osm_id, type), and GiST index is added on geometry.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_place_points_centroids_mview;
@@ -172,30 +175,29 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Create materialized views for place points centroids
 -- ============================================================================
-SELECT create_place_points_centroids_mview(
-  'mv_place_points_centroids_z0_2',
-  ARRAY['plot', 'square', 'islet'],
-  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory']
-);
+SELECT create_place_points_centroids_mview (
+    'mv_place_points_centroids_z0_2',
+    ARRAY ['island'],
+    ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory']
+  );
 
-SELECT create_place_points_centroids_mview(
-  'mv_place_points_centroids_z3_5',
-  ARRAY['plot', 'square', 'islet'],
-  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region']
-);
+SELECT create_place_points_centroids_mview (
+    'mv_place_points_centroids_z3_5',
+    ARRAY ['island'],
+    ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region']
+  );
 
-SELECT create_place_points_centroids_mview(
-  'mv_place_points_centroids_z6_10',
-  ARRAY['plot', 'square', 'islet'],
-  ARRAY['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town']
-);
+SELECT create_place_points_centroids_mview (
+    'mv_place_points_centroids_z6_10',
+    ARRAY ['island'],
+    ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town']
+  );
 
-SELECT create_place_points_centroids_mview(
-  'mv_place_points_centroids_z11_20',
-  ARRAY['plot', 'square', 'islet'],
-  ARRAY['county', 'country', 'state', 'territory', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood']
-);
-
+SELECT create_place_points_centroids_mview (
+    'mv_place_points_centroids_z11_20',
+    ARRAY ['plot', 'square', 'islet'],
+    ARRAY ['state', 'province', 'region', 'county', 'municipality', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood', 'district', 'borough', 'quarter', 'isolated_dwelling', 'farm']
+  );
 
 -- ============================================================================
 -- Create materialized views for place areas
