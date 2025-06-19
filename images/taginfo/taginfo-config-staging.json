@@ -71,5 +71,11 @@
     },
     "tagstats": {
         "geodistribution": "FlexMem"
+    },
+    "footer": {
+        "project_name": "OpenHistoricalMap",
+        "project_url": "https://www.openhistoricalmap.org/",
+        "copyright_attribution": "Data is public domain (CC0)",
+        "copyright_url": "https://wiki.openstreetmap.org/wiki/OpenHistoricalMap/License"
     }
 }
