@@ -58,6 +58,8 @@ class Config:
     POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
 
+    DELAYED_CLEANUP_TIMER_SECONDS = int(os.getenv("DELAYED_CLEANUP_TIMER_SECONDS", 3600))
+
     @staticmethod
     def get_s3_client():
         """Returns an initialized S3 client based on the configured cloud infrastructure."""
