@@ -20,14 +20,13 @@ RUN apk add --no-cache \
     python3-dev \
     py3-pip \
     && pip install --upgrade pip \
-    && pip install awscli mercantile requests boto3 \
+    && pip install awscli mercantile requests boto3 psycopg2-binary \
     && apk del .build-deps \
     && rm -rf /root/.cache /var/cache/apk/*
 
 # Symlink tegola binary for easier access
 RUN ln -s /opt/tegola /usr/bin/tegola
-COPY . /opt/
-COPY ./*.sh .
-
+WORKDIR /app
+COPY . .
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["/opt/start.sh"]
+CMD ["/app/start.sh"]

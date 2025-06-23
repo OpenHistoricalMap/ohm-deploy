@@ -6,17 +6,17 @@ name = "water_lines_z8_9"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
+    osm_id, 
+    name,
     type, 
-    bridge, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    NULLIF(bridge, '') AS bridge,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_water_lines_z8_9 
+    mv_water_lines_z8_9 
 WHERE 
     geometry && !BBOX!
 """
@@ -29,17 +29,17 @@ name = "water_lines_z10_12"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
+    osm_id, 
+    name,
     type, 
-    bridge, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    NULLIF(bridge, '') AS bridge,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_water_lines_z10_12
+    mv_water_lines_z10_12
 WHERE 
     geometry && !BBOX!
 """
@@ -52,17 +52,17 @@ name = "water_lines_z13_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
+    osm_id, 
+    name,
     type, 
-    bridge, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    NULLIF(bridge, '') AS bridge,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_water_lines_z13_15
+    mv_water_lines_z13_15
 WHERE 
     geometry && !BBOX!
 """
@@ -75,17 +75,17 @@ name = "water_lines_z16_20"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    name, 
+    osm_id, 
+    name,
     type, 
-    bridge, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    NULLIF(bridge, '') AS bridge,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
-    osm_water_lines_z16_20 
+    mv_water_lines_z16_20 
 WHERE 
     geometry && !BBOX!
 """

@@ -8,8 +8,6 @@ class Config:
     SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
     ## In case the container is running in hetzner cloud, we need to load the AWS credentials env vars to read sqs messages
     AWS_REGION_NAME = os.getenv("AWS_REGION_NAME", "us-east-1")
-    # AWS_ACCESS_KEY_ID
-    # AWS_SECRET_ACCESS_KEY
 
     # Kubernetes settings
     NAMESPACE = os.getenv("NAMESPACE", "default")
@@ -52,7 +50,7 @@ class Config:
         "TILER_CACHE_AWS_ENDPOINT", "https://s3.amazonaws.com"
     )  # https://s3.amazonaws.com or https://hel1.your-objectstorage.com
     TILER_CACHE_REGION = os.getenv("TILER_CACHE_REGION", "us-east-1")  # us-east-1 or hel1
-
+    TILER_CACHE_BUCKET = os.getenv("TILER_CACHE_BUCKET", "none") 
     # PostgreSQL Database Settings
     POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))

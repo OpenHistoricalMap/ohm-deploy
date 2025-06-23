@@ -14,30 +14,30 @@ services:
   #   networks:
   #     - tiler_network
 
-  # imposm:
-  #   image: rub21/tiler-imposm:v21
-  #   build:
-  #     context: ../images/tiler-imposm
-  #     dockerfile: Dockerfile
-  #   # volumes:
-  #   #   - ../data/tiler-imposm-data2:/mnt/data
-  #     # - ../images/tiler-imposm:/osm
-  #   command:
-  #     - sh
-  #     - -c
-  #     - "./start.sh"
-  #   env_file:
-  #     - ../envs/.env.tiler
-  #   networks:
-  #     - tiler_network
+  imposm:
+    image: rub21/tiler-imposm:v59
+    build:
+      context: ../images/tiler-imposm
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-imposm:/osm
+      - ../hetzner:/hetzner
+    command:
+      - sh
+      - -c
+      - "./start.sh"
+    env_file:
+      - ../envs/.env.tiler
+    networks:
+      - tiler_network
 
   tiler:
-    image: rub21/tiler-server:v22
+    image: rub21/tiler-server:v54
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile
     volumes:
-      - ../data/tiler-server-data:/mnt/data
+      - ../hetzner:/hetzner
       - ../images/tiler-server:/app
     ports:
       - "9090:9090"
@@ -47,19 +47,18 @@ services:
     networks:
       - tiler_network
 
-  # tiler-cache:
-  #   image: ohm-tiler-cache:v1
-  #   build:
-  #     context: ../images/tiler-cache
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ../images/tiler-cache:/app
-
-  #   env_file:
-  #     - ../envs/.env.tiler
-  #   restart: always
-  #   networks:
-  #     - tiler_network
+  tiler-cache:
+    image: rub21/tiler-cache:v2
+    build:
+      context: ../images/tiler-cache
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-cache:/app
+    env_file:
+      - ../envs/.env.tiler
+    restart: always
+    networks:
+      - tiler_network
 
 networks:
   tiler_network:
