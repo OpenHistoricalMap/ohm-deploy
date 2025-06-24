@@ -35,7 +35,7 @@
     },
     "transport_lines_z10_11": {
       "source": "transport_lines_z12_13",
-      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link')",
+      "sql_filter": "type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'taxiway', 'runway')",
       "tolerance": 15
     },
     "transport_lines_z12_13": {

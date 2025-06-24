@@ -5,12 +5,14 @@
 --     - Centroids of named transport polygons (filtered by area),
 --     - Named transport points directly.
 --
---   Centroids are computed using ST_MaximumInscribedCircle, and multilingual
---   columns are added using get_language_columns().
+--   Allows optional filtering by the 'type' column (via a TEXT[] array).
+--   Centroids are computed using ST_MaximumInscribedCircle.
+--   Multilingual columns are added using get_language_columns().
 --
 -- Parameters:
---   view_name  TEXT              - Name of the materialized view to be created.
---   min_area   DOUBLE PRECISION - Minimum polygon area (in m²) for inclusion.
+--   view_name  TEXT                      - Name of the materialized view to be created.
+--   min_area   DOUBLE PRECISION          - Minimum polygon area (in m²) for inclusion.
+--   types      TEXT[] DEFAULT ARRAY['*'] - Optional filter by 'type'. '*' includes all.
 --
 -- Notes:
 --   - Drops existing view using a temporary swap pattern.
@@ -23,7 +25,8 @@ DROP FUNCTION IF EXISTS create_transport_points_centroids_mview;
 
 CREATE OR REPLACE FUNCTION create_transport_points_centroids_mview(
     view_name TEXT,
-    min_area DOUBLE PRECISION DEFAULT 0
+    min_area DOUBLE PRECISION DEFAULT 0,
+    types TEXT[] DEFAULT ARRAY['*']
 )
 RETURNS void AS $$
 DECLARE 
@@ -31,7 +34,13 @@ DECLARE
     tmp_view_name TEXT := view_name || '_tmp';
     unique_columns TEXT := 'osm_id, type, class';
     sql_create TEXT;
+    type_filter TEXT := 'TRUE';
 BEGIN
+    -- Handle type filter
+    IF NOT (array_length(types, 1) = 1 AND types[1] = '*') THEN
+        type_filter := format('type = ANY (%L)', types);
+    END IF;
+
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -44,11 +53,11 @@ BEGIN
             NULLIF(end_date, '') AS end_date,
             isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-            ROUND(area)::bigint AS area_m2,
+            ROUND(ST_Area(geometry)::numeric)::bigint AS area_m2,
             tags,
             %s
         FROM osm_transport_areas
-        WHERE name IS NOT NULL AND name <> '' AND area > %L
+        WHERE name IS NOT NULL AND name <> '' AND ST_Area(geometry) > %L AND %s
 
         UNION ALL
 
@@ -65,8 +74,9 @@ BEGIN
             NULL AS area_m2, 
             tags,
             %s
-        FROM osm_transport_points;
-    $sql$, tmp_view_name, lang_columns, min_area, lang_columns);
+        FROM osm_transport_points
+        WHERE name IS NOT NULL AND name <> '' AND %s;
+    $sql$, tmp_view_name, lang_columns, min_area, type_filter, lang_columns, type_filter);
 
     PERFORM finalize_materialized_view(
         tmp_view_name,
@@ -78,12 +88,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ============================================================================
--- Create materialized views for transport areas
--- ============================================================================
-SELECT create_generic_mview('osm_transport_areas', 'mv_transport_areas_z12_20', ARRAY['osm_id', 'type', 'class']);
-
--- ============================================================================
 -- Create materialized views for transport points centroids
 -- ============================================================================
-SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z14_20', 0);
+-- We include aerodrome to start at zoom 10 from https://github.com/OpenHistoricalMap/issues/issues/1083
+SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z10_11', 0, ARRAY['aerodrome']);
 
+SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z12_20', 0, ARRAY['*']);
