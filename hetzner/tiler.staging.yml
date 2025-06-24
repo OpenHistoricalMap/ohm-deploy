@@ -68,6 +68,21 @@ services:
     networks:
       - tiler_network_staging
 
+  tiler_monitor_staging:
+    image: rub21/tiler-monitor:v1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../images/tiler-monitor:/app
+      - ../hetzner:/app/hetzner
+    environment:
+      - DOCKER_CONFIG_ENVIRONMENT=staging
+    env_file:
+      - .env.staging
+    stdin_open: true
+    tty: true
+    networks:
+      - tiler_network_staging
+
 networks:
   tiler_network_staging:
     driver: bridge

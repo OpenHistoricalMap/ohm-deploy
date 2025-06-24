@@ -21,12 +21,6 @@
 # -----------------------------------------------------------------------------
 set -e
 
-export DOCKER_CONFIG_ENVIRONMENT="staging"
-source ".env.${DOCKER_CONFIG_ENVIRONMENT}"
-export POSTGRES_HOST="localhost"
-
-export POSTGRES_PORT=$([[ "$DOCKER_CONFIG_ENVIRONMENT" == "production" ]] && echo 5432 || echo 54321)
-
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
 
 NIM_NUMBER_LANGUAGES="${NIM_NUMBER_LANGUAGES:-5}" # Default to 5 languages
@@ -44,42 +38,36 @@ echo "  FORCE_LANGUAGES_GENERATION: $FORCE_LANGUAGES_GENERATION"
 echo "  EVALUATION_INTERVAL:     $EVALUATION_INTERVAL seconds"
 echo
 
-read -p "Do you want to run the script? This script will restart containers if a new language is added to the database. (y/N): " confirm
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-  echo "Aborting script."
-  exit 0
-fi
-
 function restart_production_containers() {
   ## ================================================================= 
   ## Update materialized views with the new language columns. This takes around 10 minutes.
   ## NOTE: This will not affect the currently running tiler server.
   ## =================================================================
-  docker compose -f  tiler.production.yml run imposm /osm/scripts/create_mviews.sh # --all=true
+  docker compose -f  hetzner/tiler.production.yml run imposm /osm/scripts/create_mviews.sh # --all=true
 
   ## =================================================================
   ## Restart tiler container, which is going to take the new languages in the configuration 
   ## =================================================================
-  docker compose -f tiler.production.yml up tiler_production -d --force-recreate
+  docker compose -f hetzner/tiler.production.yml up tiler_production -d --force-recreate
 
   ## =================================================================
   ## Remove tiles that the new languages are covering. # TODO: filter by bbox
   ## =================================================================
-  docker compose -f tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py
+  docker compose -f hetzner/tiler.production.yml run tiler_s3_cleaner_production python delete_s3_tiles.py
 
   ## =================================================================
   ## Restart global cache generator and coverage 
   ## =================================================================
-  docker compose -f tiler.production.yml up global_seeding_production -d --force-recreate
-  docker compose -f tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
+  docker compose -f hetzner/tiler.production.yml up global_seeding_production -d --force-recreate
+  docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
 }
 
 function restart_staging_containers() {
   ## Restart staging continaers - testing environment
-  docker compose -f  tiler.staging.yml run imposm_staging /osm/scripts/create_mviews.sh 
-  docker compose -f tiler.staging.yml up tiler_staging -d --force-recreate
+  docker compose -f  hetzner/tiler.staging.yml run imposm_staging /osm/scripts/create_mviews.sh 
+  docker compose -f hetzner/tiler.staging.yml up tiler_staging -d --force-recreate
   # Remove all tiles that the new languages are covering.
-  docker compose -f tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py
+  docker compose -f hetzner/tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py
 }
 
 while true; do
