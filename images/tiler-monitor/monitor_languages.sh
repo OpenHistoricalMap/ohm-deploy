@@ -1,91 +1,82 @@
 #!/bin/bash
-# -----------------------------------------------------------------------------
-# Script: monitor_languages.sh
-# Description:
-#   This script monitors the PostgreSQL database for new language tags.
-#   If changes are detected, it will regenerate materialized views and
-#   restart relevant Docker containers depending on the environment (staging or production).
-#
-#   - It supports configurable environment variables via .env.<environment> files.
-#   - The script checks for updates every N seconds (default: 600). 86400 (24 hours) 
-#   - It uses a confirmation prompt before running the evaluation loop.
-#
-# Environment Variables:
-#   DOCKER_CONFIG_ENVIRONMENT  - Target environment (default: "staging")
-#   NIM_NUMBER_LANGUAGES       - Max number of languages to track (default: 10)
-#   FORCE_LANGUAGES_GENERATION    - Force refresh of all mviews (default: false)
-#   EVALUATION_INTERVAL        - Interval in seconds between checks (default: 600)
-#
-# Usage:
-#   bash monitor_languages.sh
-# -----------------------------------------------------------------------------
 set -e
+
+GREEN="\033[0;32m"
+NC="\033[0m"
+
+log_message() {
+    local message="$1"
+    echo -e "$(date +'%Y-%m-%d %H:%M:%S') - ${GREEN}${message}${NC}"
+}
 
 PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
 
 NIM_NUMBER_LANGUAGES="${NIM_NUMBER_LANGUAGES:-5}" # Default to 5 languages
 FORCE_LANGUAGES_GENERATION="${FORCE_LANGUAGES_GENERATION:-false}"
-EVALUATION_INTERVAL="${EVALUATION_INTERVAL:-3600}" # Default to 1 hour (3600 seconds)
+EVALUATION_INTERVAL="${EVALUATION_INTERVAL:-3600}" # Default to 1 hour
 
-echo "Configuration Summary:"
-echo "  Environment:             $DOCKER_CONFIG_ENVIRONMENT"
-echo "  Postgres Host:           $POSTGRES_HOST"
-echo "  Postgres Port:           $POSTGRES_PORT"
-echo "  Database:                $POSTGRES_DB"
-echo "  User:                    $POSTGRES_USER"
-echo "  NIM_NUMBER_LANGUAGES:    $NIM_NUMBER_LANGUAGES"
-echo "  FORCE_LANGUAGES_GENERATION: $FORCE_LANGUAGES_GENERATION"
-echo "  EVALUATION_INTERVAL:     $EVALUATION_INTERVAL seconds"
-echo
+log_message "Configuration Summary:"
+log_message "  Environment:             $DOCKER_CONFIG_ENVIRONMENT"
+log_message "  Postgres Host:           $POSTGRES_HOST"
+log_message "  Postgres Port:           $POSTGRES_PORT"
+log_message "  Database:                $POSTGRES_DB"
+log_message "  User:                    $POSTGRES_USER"
+log_message "  NIM_NUMBER_LANGUAGES:    $NIM_NUMBER_LANGUAGES"
+log_message "  FORCE_LANGUAGES_GENERATION: $FORCE_LANGUAGES_GENERATION"
+log_message "  EVALUATION_INTERVAL:     $EVALUATION_INTERVAL seconds"
 
 function restart_production_containers() {
-  ## ================================================================= 
-  ## Update materialized views with the new language columns. This takes around 10 minutes.
-  ## NOTE: This will not affect the currently running tiler server.
-  ## =================================================================
-  docker compose -f  hetzner/tiler.production.yml run imposm /osm/scripts/create_mviews.sh # --all=true
+  log_message "Running create_mviews.sh for production..."
+  docker compose -f hetzner/tiler.production.yml run imposm /osm/scripts/create_mviews.sh
 
-  ## =================================================================
-  ## Restart tiler container, which is going to take the new languages in the configuration 
-  ## =================================================================
+  log_message "Restarting tiler_production..."
   docker compose -f hetzner/tiler.production.yml up tiler_production -d --force-recreate
 
-  ## =================================================================
-  ## Remove tiles that the new languages are covering. # TODO: filter by bbox
-  ## =================================================================
+  log_message "Cleaning tiles with tiler_s3_cleaner_production..."
   docker compose -f hetzner/tiler.production.yml run tiler_s3_cleaner_production python delete_s3_tiles.py
 
-  ## =================================================================
-  ## Restart global cache generator and coverage 
-  ## =================================================================
+  log_message "Restarting global_seeding_production..."
   docker compose -f hetzner/tiler.production.yml up global_seeding_production -d --force-recreate
+
+  log_message "Restarting tile_coverage_seeding_production..."
   docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
 }
 
 function restart_staging_containers() {
-  ## Restart staging continaers - testing environment
-  docker compose -f  hetzner/tiler.staging.yml run imposm_staging /osm/scripts/create_mviews.sh 
+  log_message "Running create_mviews.sh for staging..."
+  docker compose -f hetzner/tiler.staging.yml run imposm_staging_mv /osm/scripts/create_mviews.sh
+
+  log_message "Restarting tiler_staging..."
   docker compose -f hetzner/tiler.staging.yml up tiler_staging -d --force-recreate
-  # Remove all tiles that the new languages are covering.
+
+  log_message "Cleaning tiles with tiler_s3_cleaner_staging..."
   docker compose -f hetzner/tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py
 }
 
-while true; do
-  echo "Checking for language changes..."
+log_message "Waiting for PostgreSQL to be ready..."
+until pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT}" > /dev/null 2>&1; do
+  sleep 1
+done
+log_message "PostgreSQL is ready."
 
+# Loop de monitoreo
+while true; do
+  log_message "Checking for language changes..."
   psql "$PG_CONNECTION" -c "SELECT populate_languages(${NIM_NUMBER_LANGUAGES}, '${FORCE_LANGUAGES_GENERATION}'::BOOLEAN);"
   HAS_CHANGED=$(psql "$PG_CONNECTION" -t -A -c "SELECT EXISTS (SELECT 1 FROM languages WHERE is_new = TRUE);")
-  echo "has_changed = $HAS_CHANGED"
+
+  log_message "has_changed = $HAS_CHANGED"
+
   if [[ "$HAS_CHANGED" == "t" ]]; then
-    echo "Restarting Docker containers..."
+    log_message "Restarting Docker containers..."
     if [[ "$DOCKER_CONFIG_ENVIRONMENT" == "production" ]]; then
       restart_production_containers
     else
       restart_staging_containers
     fi
   else
-    echo "No changes detected. Waiting $EVALUATION_INTERVAL seconds..."
+    log_message "No changes detected. Sleeping for $EVALUATION_INTERVAL seconds..."
   fi
-  echo "----------------------------------------"
+  log_message "----------------------------------------"
   sleep "$EVALUATION_INTERVAL"
 done
