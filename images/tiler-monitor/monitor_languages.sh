@@ -27,13 +27,13 @@ log_message "  EVALUATION_INTERVAL:     $EVALUATION_INTERVAL seconds"
 
 function restart_production_containers() {
   log_message "Running create_mviews.sh for production..."
-  docker compose -f hetzner/tiler.production.yml run imposm /osm/scripts/create_mviews.sh
+  docker compose -f hetzner/tiler.production.yml run --no-TTY imposm_mv_production /osm/scripts/create_mviews.sh
 
   log_message "Restarting tiler_production..."
   docker compose -f hetzner/tiler.production.yml up tiler_production -d --force-recreate
 
   log_message "Cleaning tiles with tiler_s3_cleaner_production..."
-  docker compose -f hetzner/tiler.production.yml run tiler_s3_cleaner_production python delete_s3_tiles.py
+  docker compose -f hetzner/tiler.production.yml run --no-TTY tiler_s3_cleaner_production python delete_s3_tiles.py
 
   log_message "Restarting global_seeding_production..."
   docker compose -f hetzner/tiler.production.yml up global_seeding_production -d --force-recreate
@@ -44,13 +44,13 @@ function restart_production_containers() {
 
 function restart_staging_containers() {
   log_message "Running create_mviews.sh for staging..."
-  docker compose -f hetzner/tiler.staging.yml run imposm_staging_mv /osm/scripts/create_mviews.sh
+  docker compose -f hetzner/tiler.staging.yml run --no-TTY imposm_mv_staging /osm/scripts/create_mviews.sh
 
   log_message "Restarting tiler_staging..."
   docker compose -f hetzner/tiler.staging.yml up tiler_staging -d --force-recreate
 
   log_message "Cleaning tiles with tiler_s3_cleaner_staging..."
-  docker compose -f hetzner/tiler.staging.yml run tiler_s3_cleaner_staging python delete_s3_tiles.py
+  docker compose -f hetzner/tiler.staging.yml run --no-TTY tiler_s3_cleaner_staging python delete_s3_tiles.py
 }
 
 log_message "Waiting for PostgreSQL to be ready..."
@@ -77,6 +77,6 @@ while true; do
   else
     log_message "No changes detected. Sleeping for $EVALUATION_INTERVAL seconds..."
   fi
-  log_message "----------------------------------------"
+  log_message "Sleep for $EVALUATION_INTERVAL seconds before next check."
   sleep "$EVALUATION_INTERVAL"
 done

@@ -54,7 +54,6 @@ BEGIN
             isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             ROUND(ST_Area(geometry)::numeric)::bigint AS area_m2,
-            tags,
             %s
         FROM osm_transport_areas
         WHERE name IS NOT NULL AND name <> '' AND ST_Area(geometry) > %L AND %s
@@ -72,7 +71,6 @@ BEGIN
             isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             NULL AS area_m2, 
-            tags,
             %s
         FROM osm_transport_points
         WHERE name IS NOT NULL AND name <> '' AND %s;
@@ -91,6 +89,6 @@ $$ LANGUAGE plpgsql;
 -- Create materialized views for transport points centroids
 -- ============================================================================
 -- We include aerodrome to start at zoom 10 from https://github.com/OpenHistoricalMap/issues/issues/1083
-SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z10_11', 0, ARRAY['aerodrome']);
+SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z10_13', 0, ARRAY['aerodrome']);
 
-SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z12_20', 0, ARRAY['*']);
+SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z14_20', 0, ARRAY['*']);

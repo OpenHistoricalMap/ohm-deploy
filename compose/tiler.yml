@@ -32,7 +32,7 @@ services:
       - tiler_network
 
   tiler:
-    image: rub21/tiler-server:v71
+    image: rub21/tiler-server:v73
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile

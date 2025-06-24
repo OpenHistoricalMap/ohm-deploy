@@ -42,7 +42,7 @@ BEGIN
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
-            (ST_MaximumInscribedCircle(geometry)).center AS geometry,
+            geometry,
             ABS(osm_id) AS osm_id, 
             NULLIF(name, '') AS name, 
             class, 
@@ -51,7 +51,7 @@ BEGIN
             NULLIF(end_date, '') AS end_date,
             isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-            ROUND(ST_Area(geometry)::numeric)::bigint AS area_m2,
+            area,
             %s
         FROM osm_transport_areas
         WHERE %s;
