@@ -18,3 +18,5 @@ charts:
       #   valuesPath: osm-seed.osm.cgimap.image
       tiler-cache:
         valuesPath: ohm.tilerCache.image
+      tiler-monitor:
+        valuesPath: ohm.tilerMonitor.image
