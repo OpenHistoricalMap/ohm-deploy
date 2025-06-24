@@ -1,21 +1,21 @@
 services:
-  # db:
-  #   image: ohm-tiler-db:v1
-  #   build:
-  #     context: ../images/tiler-db
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "5432:5432"
-  #   # volumes:
-  #   #   - ../data/tiler-db-data2:/var/lib/postgresql/data
-  #   env_file:
-  #     - ../envs/.env.tiler
-  #   restart: always
-  #   networks:
-  #     - tiler_network
+  db:
+    image: ohm-tiler-db:v1
+    build:
+      context: ../images/tiler-db
+      dockerfile: Dockerfile
+    ports:
+      - "5432:5432"
+    # volumes:
+    #   - ../data/tiler-db-data2:/var/lib/postgresql/data
+    env_file:
+      - ../envs/.env.tiler
+    restart: always
+    networks:
+      - tiler_network
 
   imposm:
-    image: rub21/tiler-imposm:v59
+    image: rub21/tiler-imposm:v70
     build:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
@@ -32,7 +32,7 @@ services:
       - tiler_network
 
   tiler:
-    image: rub21/tiler-server:v54
+    image: rub21/tiler-server:v73
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile
@@ -59,6 +59,23 @@ services:
     restart: always
     networks:
       - tiler_network
+
+
+  tiler-monitor:
+    image: rub21/tiler-monitor:v1
+    build:
+      context: ../images/tiler-monitor
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../images/tiler-monitor:/app
+      - ../hetzner:/app/hetzner
+    environment:
+      - DOCKER_CONFIG_ENVIRONMENT=staging
+    env_file:
+      - ../envs/.env.tiler
+    stdin_open: true
+    tty: true
 
 networks:
   tiler_network:

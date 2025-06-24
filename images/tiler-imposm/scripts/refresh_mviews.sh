@@ -91,7 +91,9 @@ transport_views=(
     mv_transport_lines_z10_11
     mv_transport_lines_z12_13
     mv_transport_lines_z14_20
+    mv_transport_areas_z10_11
     mv_transport_areas_z12_20
+    mv_transport_points_centroids_z10_13
     mv_transport_points_centroids_z14_20
 )
 

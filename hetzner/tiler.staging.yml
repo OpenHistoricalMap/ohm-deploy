@@ -19,7 +19,7 @@ services:
       - tiler_network_staging
 
   imposm_staging:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2632.h717d2ec
+    image: rub21/tiler-imposm:v70
     volumes:
       - tiler_staging_imposmdata:/mnt/data
     command:
@@ -33,8 +33,15 @@ services:
     networks:
       - tiler_network_staging
 
+  imposm_mv_staging:
+    image: rub21/tiler-imposm:v70
+    env_file:
+      - .env.staging
+    networks:
+      - tiler_network_staging
+
   tiler_staging:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2630.heaedf31
+    image: rub21/tiler-server:v73
     ports:
       - "9091:9090"
     env_file:
@@ -68,6 +75,21 @@ services:
     networks:
       - tiler_network_staging
 
+  tiler_monitor_staging:
+    image: rub21/tiler-monitor:v1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../images/tiler-monitor:/app
+      - ../hetzner:/app/hetzner
+    environment:
+      - DOCKER_CONFIG_ENVIRONMENT=staging
+    env_file:
+      - .env.staging
+    stdin_open: true
+    tty: true
+    networks:
+      - tiler_network_staging
+
 networks:
   tiler_network_staging:
     driver: bridge
@@ -75,8 +97,9 @@ networks:
 volumes:
   tiler_staging_pgdata:
     driver: local
-    name: tiler_db_11_06_2025
+    name: tiler_db_24_06_2025_v2
   tiler_staging_imposmdata:
     driver: local
-    name: tiler_imposm_11_06_2025
+    name: tiler_imposm_24_06_2025_v2
+
     

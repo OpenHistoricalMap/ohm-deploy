@@ -1,6 +1,6 @@
 services:
   # Tiler db
-  db_production_v2:
+  db_production:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
       - tiler_production_pgdata:/var/lib/postgresql/data
@@ -15,7 +15,7 @@ services:
       - .env.production
     restart: always
     networks:
-      - tiler_network
+      - tiler_network_production
     deploy:
       resources:
         limits:
@@ -23,7 +23,7 @@ services:
           memory: 55G
           
   # imposm3
-  imposm_production_v2:
+  imposm_production:
     image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2572.h77205fe
     volumes:
       - tiler_production_imposmdata:/mnt/data
@@ -41,7 +41,16 @@ services:
       - .env.production
     restart: always
     networks:
-      - tiler_network
+      - tiler_network_production
+
+  # imposm3 for materialized views creation
+  imposm_mv_production:
+    image: rub21/tiler-imposm:v70
+    env_file:
+      - .env.production
+    networks:
+      - tiler_network_production
+
   # Tiler server
   tiler_production:
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
@@ -51,40 +60,41 @@ services:
       - .env.production
     restart: always
     networks:
-      - tiler_network
-  # Tiler cache
-  cache_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
+      - tiler_network_production
+
+  tiler_sqs_cleaner_production:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2632.h717d2ec
     env_file:
-      - .env.production
+      - .env.staging
     restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
     networks:
-      - tiler_network
+      - tiler_network_production_production
 
-
-  global_seeding_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+  tiler_s3_cleaner_production:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2632.h717d2ec
     env_file:
-      - .env.production
-    volumes:
-      - ./seed.sh:/opt/seed.sh
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        /opt/seed.sh global
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+      - .env.staging
     networks:
-      - tiler_network
+      - tiler_network_production_production
+
+  tile_global_seeding_production:
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+      env_file:
+        - .env.production
+      volumes:
+        - ./seed.sh:/opt/seed.sh
+      entrypoint:
+        - /bin/bash
+        - "-c"
+        - |
+          /opt/seed.sh global
+      deploy:
+        resources:
+          limits:
+            cpus: '1'
+            memory: 1G
+      networks:
+        - tiler_network_production
 
   tile_coverage_seeding_production:
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
@@ -103,30 +113,22 @@ services:
           cpus: '1'
           memory: 1G
     networks:
-      - tiler_network
+      - tiler_network_production
 
-  remove_cache_tiles_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+  tiler_monitor_production:
+    image: rub21/tiler-monitor:v1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../images/tiler-monitor:/app
+      - ../hetzner:/app/hetzner
+    environment:
+      - DOCKER_CONFIG_ENVIRONMENT=production
     env_file:
       - .env.production
-    volumes:
-      - ./rm_s3.py:/opt/rm_s3.py
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        set -x
-        while true; do
-          python3 /opt/rm_s3.py
-          sleep 86400
-        done
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+    stdin_open: true
+    tty: true
     networks:
-      - tiler_network
+      - tiler_network_production
 
   node_exporter:
     image: quay.io/prometheus/node-exporter
@@ -135,7 +137,7 @@ services:
     ports:
       - "9100:9100"
     networks:
-      - tiler_network
+      - tiler_network_production
     deploy:
       resources:
         limits:
