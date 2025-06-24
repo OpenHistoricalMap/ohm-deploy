@@ -43,6 +43,13 @@ services:
     networks:
       - tiler_network_production
 
+  # imposm3 for materialized views creation
+  imposm_mv_production:
+    image: rub21/tiler-imposm:v70
+    env_file:
+      - .env.production
+    networks:
+      - tiler_network_production
 
   # Tiler server
   tiler_production:
