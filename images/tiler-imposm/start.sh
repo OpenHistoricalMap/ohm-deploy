@@ -161,35 +161,42 @@ replicationUrl=${REPLICATION_URL}
 EOF
     fi
 
-    # Step 3: Run the Imposm update process
-    log_message "Running Imposm update process..."
-    if [ -z "$TILER_IMPORT_LIMIT" ]; then
-        imposm run \
-            -config "${WORKDIR}/config.json" \
-            -cachedir "${CACHE_DIR}" \
-            -diffdir "${DIFF_DIR}" \
-            -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
-            -quiet &
-    else
-        imposm run \
-            -config "${WORKDIR}/config.json" \
-            -cachedir "${CACHE_DIR}" \
-            -diffdir "${DIFF_DIR}" \
-            -limitto "${WORKDIR}/${LIMITFILE}" \
-            -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
-            -quiet &
-    fi
-
-    # Step 4: Continuously upload expired files and last state file to the cloud provider
+    # Step 3: Start uploader in background and store its PID
     log_message "Starting background upload process..."
+    (
+        while true; do
+            log_message "Uploading expired files..."
+            uploadExpiredFiles
+
+            log_message "Uploading last.state.txt..."
+            uploadLastState
+
+            sleep 30s
+        done
+    ) &
+    UPLOADER_PID=$!
+
+    # Step 4: Run Imposm update process
+    log_message "Running Imposm update process..."
+
+    imposm run \
+        -config "${WORKDIR}/config.json" \
+        -cachedir "${CACHE_DIR}" \
+        -diffdir "${DIFF_DIR}" \
+        -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
+        -quiet 2>&1 | tee /tmp/imposm.log &
+    IMPOSM_PID=$!
+
+    # Step 5: Check update process and restart
     while true; do
-        log_message "Uploading expired files..."
-        uploadExpiredFiles
-
-        log_message "Uploading last.state.txt..."
-        uploadLastState
-
-        sleep 30s
+        log_message "Checking for errors during minute replication import into the database"
+        if grep -q "\[error\] Importing" /tmp/imposm.log; then
+            log_message "Detected [error] Importing in Imposm log. Restarting container..."
+            kill $UPLOADER_PID 2>/dev/null
+            kill $IMPOSM_PID 2>/dev/null
+            exit 1
+        fi
+        sleep 10
     done
 }
 
