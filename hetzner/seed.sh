@@ -1,87 +1,67 @@
 #!/bin/bash
 
-UTILS_DIR="/opt/utils"
-CONFIG_DIR="/opt/config"
-TEGOLA_CONFIG_DIR="/opt/tegola_config"
-
-TAGINFO_URL="https://taginfo.openhistoricalmap.org/api/4/keys/all"
-LANGUAGE_SQL_FILE="${CONFIG_DIR}/languages.sql"
-TEGOLA_CONFIG_FILE="${TEGOLA_CONFIG_DIR}/config.toml"
-
-mkdir -p ${CONFIG_DIR} ${TEGOLA_CONFIG_DIR}
-
-# Extract language tags
-echo "Extracting languages from Taginfo..."
-python "${UTILS_DIR}/extract_taginfo_languages.py" \
-  --url "${TAGINFO_URL}" \
-  --output "${LANGUAGE_SQL_FILE}"
+# Configurable paths
+WORK_DIR="/app"
+SCRIPTS_DIR="${WORK_DIR}/scripts"
+PROVIDERS_DIR="${WORK_DIR}/config/providers"
+TEGOLA_CONFIG_FILE="${WORK_DIR}/config/config.toml"
+CONFIG_TEMPLATE_FILE="${WORK_DIR}/config/config.template.toml"
 
 # Build Tegola config
 echo "Building Tegola config..."
-python "${UTILS_DIR}/build_config.py" \
+python "${SCRIPTS_DIR}/build_config.py" \
+  --template="${CONFIG_TEMPLATE_FILE}" \
   --output="${TEGOLA_CONFIG_FILE}" \
-  --provider_names "admin_boundaries_lines,
-admin_boundaries.centroids,
+  --providers="${PROVIDERS_DIR}" \
+  --provider_names "
+admin_boundaries_lines,
+admin_boundaries_centroids,
 admin_boundaries_maritime,
 place_areas,
-place_points,
 place_points_centroids,
 water_areas,
-water_areas.centroids,
+water_areas_centroids,
 water_lines,
 transport_areas,
-transport_associated_streets,
 transport_lines,
-transport_points,
 transport_points_centroids,
-route_lines,
 amenity_areas,
-amenity_areas.centroids,
-amenity_points,
 amenity_points_centroids,
-buildings,
+buildings_areas,
 buildings_points_centroids,
-buildings.centroids,
-buildings_points,
 landuse_areas,
-landuse_areas.centroids,
 landuse_points_centroids,
-landuse_points,
 landuse_lines,
 other_areas,
-other_areas.centroids,
 other_points_centroids,
-other_lines,
-other_points"
+other_lines"
 
 seed_global() {
   while true; do
     echo "Starting global seeding..."
     pkill -f "tegola" && sleep 5
 
-    # Seed all areas (min 0 to max 5)
-    tegola cache seed tile-name "0/0/0"  \
-      --config=/opt/tegola_config/config.toml \
+    tegola cache seed tile-name "0/0/0" \
+      --config=${TEGOLA_CONFIG_FILE} \
       --map=osm \
       --min-zoom=0 \
       --max-zoom=5 \
       --concurrency=4 \
       --overwrite=true
 
-    # Seed land areas separately (zoom 6-7)
     for zoom in $(seq 6 7); do
       echo "Downloading tile list for zoom level $zoom..."
       wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_boundary_$zoom.list"
 
       tegola cache seed tile-list /opt/tile-list.tiles \
-        --config=/opt/tegola_config/config.toml \
+        --config=${TEGOLA_CONFIG_FILE} \
         --map=osm \
         --min-zoom="$zoom" \
         --max-zoom="$zoom" \
         --concurrency=4 \
         --overwrite=true
     done
-    echo "Global seeding completed. Sleeping for 1 hour..."
+    echo "Global seeding completed. Sleeping for 30 minutes..."
     sleep 1800
   done
 }
@@ -89,7 +69,6 @@ seed_global() {
 seed_coverage() {
   while true; do
     echo "Starting coverage seeding..."
-    wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_14.list"
     pkill -f "tegola" && sleep 5
 
     for zoom in $(seq 8 14); do
@@ -97,20 +76,33 @@ seed_coverage() {
       wget -O /opt/tile-list.tiles "https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles_boundary_$zoom.list"
 
       tegola cache seed tile-list /opt/tile-list.tiles \
-        --config=/opt/tegola_config/config.toml \
+        --config=${TEGOLA_CONFIG_FILE} \
         --map=osm \
         --min-zoom=$zoom \
         --max-zoom=$zoom \
         --concurrency=4 \
         --overwrite=false
     done
-    echo "Global seeding completed. Sleeping for 5 minutes.."
+    echo "Coverage seeding completed. Sleeping for 5 minutes..."
     sleep 300
   done
 }
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <global|coverage>"
+purge_bbox() {
+  local bbox="$1"
+  echo "Purging cache for bbox: $bbox"
+
+  tegola cache purge \
+    --config=${TEGOLA_CONFIG_FILE} \
+    --map=osm \
+    --bounds="$bbox" \
+    --min-zoom=0 \
+    --max-zoom=20 \
+    --concurrency=4
+}
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $0 <global|coverage|purge> [bbox]"
   exit 1
 fi
 
@@ -121,8 +113,15 @@ case "$1" in
   coverage)
     seed_coverage
     ;;
+  purge)
+    if [ -z "$2" ]; then
+      echo "Missing bbox for purge. Usage: $0 purge <bbox>"
+      exit 1
+    fi
+    purge_bbox "$2"
+    ;;
   *)
-    echo "Invalid option. Use 'global' or 'coverage'."
+    echo "Invalid option. Use 'global', 'coverage', or 'purge <bbox>'."
     exit 1
     ;;
 esac

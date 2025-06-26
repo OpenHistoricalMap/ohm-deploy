@@ -1,30 +1,59 @@
 [[providers.layers]]
-name = "transport_areas"
+name = "transport_areas_z10_11"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    id, 
     osm_id, 
     name, 
     class, 
     type, 
     area, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_transport_areas 
+    mv_transport_areas_z10_11 
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "transport_areas_z12_20"
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name, 
+    class, 
+    type, 
+    area, 
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_transport_areas_z12_20 
 WHERE 
     geometry && !BBOX!
 """
 #######Maps
 [[maps.layers]]
 name = "transport_areas"
-provider_layer = "osm.transport_areas"
+provider_layer = "osm.transport_areas_z10_11"
+min_zoom = 10
+max_zoom = 11
+
+[[maps.layers]]
+name = "transport_areas"
+provider_layer = "osm.transport_areas_z12_20"
 min_zoom = 12
 max_zoom = 20

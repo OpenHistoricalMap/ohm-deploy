@@ -6,18 +6,18 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name, 
+    osm_id, 
+    name, 
     class, 
     type, 
     area_m2, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_landuse_points_centroids_z10_11
+    mv_landuse_points_centroids_z10_11
 WHERE 
     geometry && !BBOX!
 """
@@ -30,18 +30,18 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name, 
+    osm_id, 
+    name, 
     class, 
     type, 
     area_m2, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_landuse_points_centroids_z12_13
+    mv_landuse_points_centroids_z12_13
 WHERE 
     geometry && !BBOX!
 """
@@ -54,18 +54,18 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name, 
+    osm_id, 
+    name, 
     class, 
     type, 
     area_m2, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mview_landuse_points_centroids_z14_20
+    mv_landuse_points_centroids_z14_20
 WHERE 
     geometry && !BBOX!
 """

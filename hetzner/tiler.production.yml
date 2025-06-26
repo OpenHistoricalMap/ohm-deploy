@@ -3,19 +3,19 @@ services:
   db_production:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_28_05_2025:/var/lib/postgresql/data
+      - tiler_production_pgdata:/var/lib/postgresql/data
       - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
       - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     ports:
-      - "5432:5432"
+      - "54329:5432"
     env_file:
       - .env.production
     restart: always
     networks:
-      - tiler_network
+      - tiler_network_production
     deploy:
       resources:
         limits:
@@ -24,14 +24,15 @@ services:
           
   # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2572.h77205fe
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
     volumes:
-      - /data/tiler_production_imposm_28_05_2025:/mnt/data
+      - tiler_production_imposmdata:/mnt/data
     command:
       - sh
       - -c
       - |
         while true; do
+          # make sure you disable this for importing the data, for update it shule b eenable
           ./liveness.sh || exit 1
           sleep 60
         done &
@@ -39,59 +40,64 @@ services:
     env_file:
       - .env.production
     restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 3G
     networks:
-      - tiler_network
+      - tiler_network_production
+
+  # imposm3 for materialized views creation
+  imposm_mv_production:
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
+    env_file:
+      - .env.production
+    networks:
+      - tiler_network_production
+
   # Tiler server
   tiler_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2669.h101f906
     ports:
       - "9090:9090"
     env_file:
       - .env.production
     restart: always
     networks:
-      - tiler_network
-  # Tiler cache
-  cache_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2238.h67c76c8
+      - tiler_network_production
+
+  tiler_sqs_cleaner_production:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2669.h101f906
     env_file:
       - .env.production
     restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
     networks:
-      - tiler_network
+      - tiler_network_production_production
 
-
-  global_seeding_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+  tiler_s3_cleaner_production:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2669.h101f906
     env_file:
       - .env.production
-    volumes:
-      - ./seed.sh:/opt/seed.sh
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        /opt/seed.sh global
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
     networks:
-      - tiler_network
+      - tiler_network_production_production
+
+  tile_global_seeding_production:
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2669.h101f906
+      env_file:
+        - .env.production
+      volumes:
+        - ./seed.sh:/opt/seed.sh
+      entrypoint:
+        - /bin/bash
+        - "-c"
+        - |
+          /opt/seed.sh global
+      deploy:
+        resources:
+          limits:
+            cpus: '1'
+            memory: 1G
+      networks:
+        - tiler_network_production
 
   tile_coverage_seeding_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2669.h101f906
     env_file:
       - .env.production
     volumes:
@@ -107,30 +113,22 @@ services:
           cpus: '1'
           memory: 1G
     networks:
-      - tiler_network
+      - tiler_network_production
 
-  remove_cache_tiles_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+  tiler_monitor_production:
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2669.h101f906
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../images/tiler-monitor:/app
+      - ../hetzner:/app/hetzner
+    environment:
+      - DOCKER_CONFIG_ENVIRONMENT=production
     env_file:
       - .env.production
-    volumes:
-      - ./rm_s3.py:/opt/rm_s3.py
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        set -x
-        while true; do
-          python3 /opt/rm_s3.py
-          sleep 86400
-        done
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+    stdin_open: true
+    tty: true
     networks:
-      - tiler_network
+      - tiler_network_production
 
   node_exporter:
     image: quay.io/prometheus/node-exporter
@@ -139,13 +137,20 @@ services:
     ports:
       - "9100:9100"
     networks:
-      - tiler_network
+      - tiler_network_production
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+volumes:
+  tiler_production_pgdata:
+    driver: local
+    name: tiler_db_25_06_2025_production
+
+  tiler_production_imposmdata:
+    driver: local
+    name: tiler_imposm_25_06_2025_production
 networks:
   tiler_network:
     driver: bridge
-    

@@ -1,8 +1,8 @@
 services:
-  db:
+  db_staging:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
-      - /data/tiler_production_db_28_05_2025:/var/lib/postgresql/data
+      - tiler_staging_pgdata:/var/lib/postgresql/data
       - ./config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
     environment:
       - PGDATA=/var/lib/postgresql/data
@@ -12,21 +12,16 @@ services:
       - "-c"
       - "config_file=/etc/postgresql/postgresql.conf"
     ports:
-      - "5433:5432"
+      - "54321:5432"
     env_file:
       - .env.staging
     networks:
       - tiler_network_staging
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '2'
-    #       memory: 2G
 
-  imposm:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2572.h77205fe
+  imposm_staging:
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
     volumes:
-      - /data/tiler_production_imposm_28_05_2025:/mnt/data
+      - tiler_staging_imposmdata:/mnt/data
     command:
       - sh
       - -c
@@ -37,13 +32,16 @@ services:
     restart: always
     networks:
       - tiler_network_staging
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '1'
-    #       memory: 1G
-  tiler:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+
+  imposm_mv_staging:
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
+    env_file:
+      - .env.staging
+    networks:
+      - tiler_network_staging
+
+  tiler_staging:
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2669.h101f906
     ports:
       - "9091:9090"
     env_file:
@@ -57,8 +55,8 @@ services:
     networks:
       - tiler_network_staging
 
-  cache:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2235.h3310673 
+  tiler_sqs_cleaner_staging:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2669.h101f906
     env_file:
       - .env.staging
     restart: always
@@ -70,64 +68,36 @@ services:
     networks:
       - tiler_network_staging
 
-  global_seeding:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+  tiler_s3_cleaner_staging:
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2669.h101f906
     env_file:
       - .env.staging
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        set -x
-        while true; do
-          pkill -f "tegola" && sleep 5
-          echo "0/0/0" > /opt/tile-list.tiles
-          tegola cache seed tile-list /opt/tile-list.tiles \
-            --config=/opt/tegola_config/config.toml \
-            --map=osm \
-            --min-zoom=0 \
-            --max-zoom=4 \
-            --concurrency=32 \
-            --overwrite=true
-          sleep 3600
-        done
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 128MiB
     networks:
       - tiler_network_staging
 
-  tile_coverage_seeding:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2591.h83b12a8
+  tiler_monitor_staging:
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2669.h101f906
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../images/tiler-monitor:/app
+      - ../hetzner:/app/hetzner
+    environment:
+      - DOCKER_CONFIG_ENVIRONMENT=staging
     env_file:
       - .env.staging
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        set -x
-        while true; do
-          wget -O tile-list.tiles https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
-          pkill -f "tegola" && sleep 5
-          tegola cache seed tile-list tile-list.tiles \
-            --config=/opt/tegola_config/config.toml \
-            --map=osm \
-            --min-zoom=8 \
-            --max-zoom=14 \
-            --concurrency=32 \
-            --overwrite=false
-          sleep 3600
-        done
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 128MiB
+    stdin_open: true
+    tty: true
     networks:
       - tiler_network_staging
 
 networks:
   tiler_network_staging:
     driver: bridge
+
+volumes:
+  tiler_staging_pgdata:
+    driver: local
+    name: tiler_db_25_06_2025_production
+  tiler_staging_imposmdata:
+    driver: local
+    name: tiler_imposm_25_06_2025_production

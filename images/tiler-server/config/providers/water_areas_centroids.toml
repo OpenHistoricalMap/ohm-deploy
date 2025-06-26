@@ -1,0 +1,88 @@
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_centroid_z8_9"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name,
+    type,
+    area, 
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_water_areas_centroids_z8_9 
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_centroid_z10_12"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name,
+    type,
+    area, 
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_water_areas_centroids_z10_12
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+name = "water_areas_centroid_z13_20"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name,
+    type,
+    area, 
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_water_areas_centroids_z13_20 
+WHERE 
+    geometry && !BBOX!
+"""
+
+#######Maps
+
+[[maps.layers]]
+name = "water_areas_centroids"
+provider_layer = "osm.water_areas_centroid_z8_9"
+min_zoom = 8
+max_zoom = 9
+
+[[maps.layers]]
+name = "water_areas_centroids"
+provider_layer = "osm.water_areas_centroid_z10_12"
+min_zoom = 10
+max_zoom = 12
+
+[[maps.layers]]
+name = "water_areas_centroids"
+provider_layer = "osm.water_areas_centroid_z13_20"
+min_zoom = 13
+max_zoom = 20

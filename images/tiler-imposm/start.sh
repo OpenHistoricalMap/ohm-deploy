@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source ./scripts/utils.sh
+
 # Directories to store imposm's cache for updating the DB
 WORKDIR=/mnt/data
 CACHE_DIR=$WORKDIR/cachedir
@@ -14,8 +16,6 @@ LIMITFILE="limitFile.geojson"
 # Folder to store the imposm expirer files in S3 or GCS
 BUCKET_IMPOSM_FOLDER=imposm
 INIT_FILE="$WORKDIR/init_done"
-
-PG_CONNECTION="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB"
 
 mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
@@ -36,10 +36,6 @@ cat <<EOF >"$WORKDIR/config.json"
     "replication_url": "$REPLICATION_URL"
 }
 EOF
-
-function log_message() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') - $1"
-}
 
 # Function to download the PBF file
 function getData() {
@@ -147,7 +143,7 @@ function updateData() {
     # Step 1: Refreshing materialized views
     if [ "$REFRESH_MVIEWS" = "true" ]; then
         log_message "Refreshing materialized views..."
-        ./refresh_mviews.sh &
+        ./scripts/refresh_mviews.sh &
     else
         log_message "Skipping materialized views refresh (REFRESH_MVIEWS=$REFRESH_MVIEWS)"
     fi
@@ -165,42 +161,49 @@ replicationUrl=${REPLICATION_URL}
 EOF
     fi
 
-    # Step 3: Run the Imposm update process
-    log_message "Running Imposm update process..."
-    if [ -z "$TILER_IMPORT_LIMIT" ]; then
-        imposm run \
-            -config "${WORKDIR}/config.json" \
-            -cachedir "${CACHE_DIR}" \
-            -diffdir "${DIFF_DIR}" \
-            -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
-            -quiet &
-    else
-        imposm run \
-            -config "${WORKDIR}/config.json" \
-            -cachedir "${CACHE_DIR}" \
-            -diffdir "${DIFF_DIR}" \
-            -limitto "${WORKDIR}/${LIMITFILE}" \
-            -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
-            -quiet &
-    fi
-
-    # Step 4: Continuously upload expired files and last state file to the cloud provider
+    # Step 3: Start uploader in background and store its PID
     log_message "Starting background upload process..."
+    (
+        while true; do
+            log_message "Uploading expired files..."
+            uploadExpiredFiles
+
+            log_message "Uploading last.state.txt..."
+            uploadLastState
+
+            sleep 30s
+        done
+    ) &
+    UPLOADER_PID=$!
+
+    # Step 4: Run Imposm update process
+    log_message "Running Imposm update process..."
+
+    imposm run \
+        -config "${WORKDIR}/config.json" \
+        -cachedir "${CACHE_DIR}" \
+        -diffdir "${DIFF_DIR}" \
+        -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
+        -quiet 2>&1 | tee /tmp/imposm.log &
+    IMPOSM_PID=$!
+
+    # Step 5: Check update process and restart
     while true; do
-        log_message "Uploading expired files..."
-        uploadExpiredFiles
-
-        log_message "Uploading last.state.txt..."
-        uploadLastState
-
-        sleep 30s
+        log_message "Checking for errors during minute replication import into the database"
+        if grep -q "\[error\] Importing" /tmp/imposm.log; then
+            log_message "Detected [error] Importing in Imposm log. Restarting container..."
+            kill $UPLOADER_PID 2>/dev/null
+            kill $IMPOSM_PID 2>/dev/null
+            exit 1
+        fi
+        sleep 10
     done
 }
 
 function importData() {
     ### Import the PBF  and Natural Earth files to the DB
-    log_message "Execute the missing functions"
-    psql $PG_CONNECTION -f queries/postgis_helpers.sql
+    # log_message "Execute the missing functions"
+    execute_sql_file ./queries/utils/postgis_helpers.sql
 
     if [ "$IMPORT_NATURAL_EARTH" = "true" ]; then
         log_message "Importing Natural Earth..."
@@ -233,27 +236,8 @@ function importData() {
         -config $WORKDIR/config.json \
         -deployproduction
 
-    log_message "Creating material views and indexes..."
-    psql $PG_CONNECTION -f queries/date_utils.sql
-    psql $PG_CONNECTION -f queries/mviews_land.sql 
-    psql $PG_CONNECTION -f queries/mviews_ne_lakes.sql 
-    psql $PG_CONNECTION -f queries/mviews_admin_boundaries_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_admin_boundaries_merged.sql 
-    psql $PG_CONNECTION -f queries/mviews_transport_lines.sql 
-    psql $PG_CONNECTION -f queries/mviews_water_areas.sql 
-    psql $PG_CONNECTION -f queries/mviews_water_areas_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_landuse_areas.sql 
-    psql $PG_CONNECTION -f queries/mviews_landuse_areas_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_other_areas_centroids.sql 
-
-    # Funtion to create points_centroids
-    psql $PG_CONNECTION -f queries/mviews_amenity_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_buildings_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_landuse_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_other_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_place_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_transport_points_centroids.sql 
-    psql $PG_CONNECTION -f queries/mviews_place_areas.sql
+    # Create materialized views
+    ./scripts/create_mviews.sh --all=true
 
     # Create INIT_FILE to prevent re-importing
     touch $INIT_FILE
@@ -263,7 +247,6 @@ function importData() {
 function countTables() {
     psql $PG_CONNECTION -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" | xargs
 }
-
 
 # Wait for PostgreSQL to be ready
 log_message "Waiting for PostgreSQL to be ready..."
@@ -275,11 +258,12 @@ done
 log_message "PostgreSQL is ready! Proceeding with setup..."
 
 # Run date functions
-psql "$PG_CONNECTION" -f /usr/local/datefunctions/datefunctions.sql
+execute_sql_file /usr/local/datefunctions/datefunctions.sql
 
 # Check the number of tables in the database
 table_count=$(countTables)
 
+## Start the main process
 # Check if the INIT_FILE exists or if the table count is greater than 30
 if [[ -f "$INIT_FILE" || "$table_count" -gt 30 ]]; then
     updateData

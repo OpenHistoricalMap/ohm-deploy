@@ -1,4 +1,28 @@
 [[providers.layers]]
+name = "transport_points_centroids_z10_13"
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name, 
+    class, 
+    type, 
+    area_m2,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_transport_points_centroids_z10_13 
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
 name = "transport_points_centroids_z14_20"
 geometry_fieldname = "geometry"
 geometry_type = "point"
@@ -6,22 +30,28 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    ABS(osm_id) AS osm_id, 
-    NULLIF(name, '') AS name, 
+    osm_id, 
+    name, 
     class, 
     type, 
     area_m2,
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    mview_transport_points_centroids_z14_20 
+    mv_transport_points_centroids_z14_20 
 WHERE 
     geometry && !BBOX!
 """
 #######Maps
+[[maps.layers]]
+name = "transport_points_centroids"
+provider_layer = "osm.transport_points_centroids_z10_13"
+min_zoom = 10
+max_zoom = 13
+
 [[maps.layers]]
 name = "transport_points_centroids"
 provider_layer = "osm.transport_points_centroids_z14_20"

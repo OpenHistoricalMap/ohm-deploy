@@ -11,13 +11,13 @@ SELECT
     name, 
     type, 
     maritime, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_z0_5
+    mv_admin_maritime_lines_z0_5
 WHERE 
     geometry && !BBOX!
 """
@@ -35,13 +35,13 @@ SELECT
     name, 
     type, 
     maritime, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_z6_9 
+    mv_admin_maritime_lines_z6_9 
 WHERE 
     geometry && !BBOX!
 """
@@ -59,13 +59,13 @@ SELECT
     name, 
     type, 
     maritime, 
-    NULLIF(start_date, '') AS start_date, 
-    NULLIF(end_date, '') AS end_date, 
-    isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate, 
-    isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
     {{LENGUAGES}}
 FROM 
-    osm_admin_lines_z10_15
+    mv_admin_maritime_lines_z10_15
 WHERE 
     geometry && !BBOX!
 """

@@ -3,6 +3,7 @@ import time
 import os
 import json
 import threading
+import datetime
 
 from utils.s3_utils import (
     get_list_expired_tiles,
@@ -31,29 +32,27 @@ def get_active_jobs_count():
         return 0
     return 0
 
-
-def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file):
+def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file, cleanup_type="immediate"):
     """Executes the S3 cleanup process for specific zoom levels with improved logging and error handling."""
-    logger.info(f"S3 Expiration File: {s3_imposm3_exp_path}")
-    logger.info(f"Zoom Levels: {sorted(set(zoom_levels))}")
-    logger.info(f"S3 Bucket: {bucket_name}")
-    logger.info(f"Target Path: {path_file}")
+    logger.info(f"[{cleanup_type.upper()} CLEANUP] Starting...")
+    logger.info(f"[{cleanup_type.upper()} CLEANUP] S3 Expiration File: {s3_imposm3_exp_path}")
+    logger.info(f"[{cleanup_type.upper()} CLEANUP] Zoom Levels: {sorted(set(zoom_levels))}")
+    logger.info(f"[{cleanup_type.upper()} CLEANUP] S3 Bucket: {bucket_name}")
+    logger.info(f"[{cleanup_type.upper()} CLEANUP] Target Path: {path_file}")
     try:
         expired_tiles = get_list_expired_tiles(s3_imposm3_exp_path)
         related_tile = generate_all_related_tiles(expired_tiles, zoom_levels)
         tiles_patterns = generate_tile_patterns(related_tile)
         get_and_delete_existing_tiles(bucket_name, path_file, tiles_patterns)
-
-        logger.info("S3 Cleanup Completed Successfully.")
-
+        logger.info(f"[{cleanup_type.upper()} CLEANUP] S3 Cleanup Completed Successfully.")
     except Exception as e:
-        logger.exception("Error during S3 cleanup:")
+        logger.exception(f"[{cleanup_type.upper()} CLEANUP] Error during S3 cleanup:")
         raise
-
 
 def process_sqs_messages():
     """Unified function to process SQS messages and create jobs based on infrastructure."""
     while True:
+        logger.info("Requesting SQS messages...")
         response = sqs.receive_message(
             QueueUrl=Config.SQS_QUEUE_URL,
             MaxNumberOfMessages=1,
@@ -69,13 +68,16 @@ def process_sqs_messages():
             continue
 
         for message in messages:
+            sent_timestamp_ms = int(message["Attributes"]["SentTimestamp"])
+            sent_time = datetime.datetime.utcfromtimestamp(sent_timestamp_ms / 1000)
+            logger.info(f"{'==' * 40}")
+            logger.info(f"Processing message ID {message['MessageId']} created at {sent_time.strftime('%Y-%m-%d %H:%M:%S')} UTC")
             try:
                 # Check PostgreSQL status
                 if not check_tiler_db_postgres_status():
-                    logger.error("PostgreSQL database is down. Retrying in 1 minute...")
-                    time.sleep(60)
-                    continue
-
+                    logger.error("PostgreSQL database is down. Exiting.")
+                    exit(1)
+                    
                 # Wait until job limit is under threshold
                 while get_active_jobs_count() >= Config.MAX_ACTIVE_JOBS:
                     logger.warning(
@@ -86,6 +88,27 @@ def process_sqs_messages():
                 # Parse the SQS message
                 body = json.loads(message["Body"])
 
+                if body.get("action") == "delayed_cleanup":
+                    logger.info(f"======== Delay message ID {message['MessageId']}")
+                    now = datetime.datetime.utcnow()
+                    elapsed_seconds = (now - sent_time).total_seconds()
+
+                    # Only process messages older than the configured delay
+                    if elapsed_seconds < Config.DELAYED_CLEANUP_TIMER_SECONDS:
+                        logger.info(f"Message was sent {int(elapsed_seconds)} seconds ago. Skipping for now.")
+                        continue
+
+                    # Proceed with cleanup
+                    s3_imposm3_exp_path = body["s3_path"]
+                    cleanup_zoom_levels(
+                        s3_imposm3_exp_path=s3_imposm3_exp_path,
+                        zoom_levels=Config.ZOOM_LEVELS_TO_DELETE,
+                        bucket_name=Config.S3_BUCKET_CACHE_TILER,
+                        path_file=Config.S3_BUCKET_PATH_FILES,
+                        cleanup_type="delayed"
+                    )
+                    logger.info("Delayed cleanup executed after 1 hour.")
+                    
                 if "Records" in body and body["Records"][0]["eventSource"] == "aws:s3":
                     record = body["Records"][0]
                     eventTime = record["eventTime"]
@@ -93,27 +116,33 @@ def process_sqs_messages():
                     object_key = record["s3"]["object"]["key"]
                     s3_imposm3_exp_path = f"s3://{bucket_name}/{object_key}"
                     file_name = os.path.basename(object_key)
-                    logger.info(f"Event: {eventTime},{'##' * 60} ")
                     # Create a job based on infrastructure
                     if Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "aws":
                         create_kubernetes_job(s3_imposm3_exp_path, file_name)
                     elif Config.TILER_CACHE_CLOUD_INFRASTRUCTURE == "hetzner":
-                        logger.info(f"No docker job ")
+                        logger.info("Cleaning up in Hetzner")
 
-                    # Start a cleanup thread
-                    cleanup_thread = threading.Thread(
-                        target=cleanup_zoom_levels,
-                        args=(
-                            s3_imposm3_exp_path,
-                            Config.ZOOM_LEVELS_TO_DELETE,
-                            Config.S3_BUCKET_CACHE_TILER,
-                            Config.S3_BUCKET_PATH_FILES,
-                        ),
-                    )
-                    cleanup_thread.start()
+                        # Immediate cleanup
+                        threading.Thread(
+                            target=cleanup_zoom_levels,
+                            args=(
+                                s3_imposm3_exp_path,
+                                Config.ZOOM_LEVELS_TO_DELETE,
+                                Config.S3_BUCKET_CACHE_TILER,
+                                Config.S3_BUCKET_PATH_FILES,
+                                "immediate",
+                            ),
+                        ).start()
 
-                elif "Event" in body and body["Event"] == "s3:TestEvent":
-                    logger.info("Test event detected. Ignoring...")
+                        # Send delayed cleanup via SQS with 1 hour delay
+                        sqs.send_message(
+                            QueueUrl=Config.SQS_QUEUE_URL,
+                            MessageBody=json.dumps({
+                                "action": "delayed_cleanup",
+                                "s3_path": s3_imposm3_exp_path
+                            }),
+                            DelaySeconds=900 # Maximun value is 15 min in SQS
+                        )
 
                 # Delete the processed message
                 sqs.delete_message(
@@ -129,5 +158,5 @@ def process_sqs_messages():
 
 
 if __name__ == "__main__":
-    logger.info("Starting SQS message processing...")
+    logger.info("Starting SQS message processing")
     process_sqs_messages()
