@@ -97,7 +97,7 @@ networks:
 volumes:
   tiler_staging_pgdata:
     driver: local
-    name: tiler_db_25_06_2025_production
+    name: tiler_db_26_06_2025
   tiler_staging_imposmdata:
     driver: local
-    name: tiler_imposm_25_06_2025_production
+    name: tiler_imposm_26_06_2025
