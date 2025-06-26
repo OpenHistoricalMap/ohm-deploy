@@ -19,7 +19,7 @@ services:
       - tiler_network_staging
 
   imposm_staging:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2670.h07e324a
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
     volumes:
       - tiler_staging_imposmdata:/mnt/data
     command:
@@ -34,7 +34,7 @@ services:
       - tiler_network_staging
 
   imposm_mv_staging:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2670.h07e324a
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
     env_file:
       - .env.staging
     networks:

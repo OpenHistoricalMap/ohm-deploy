@@ -24,7 +24,7 @@ services:
           
   # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2670.h07e324a
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
     volumes:
       - tiler_production_imposmdata:/mnt/data
     command:
@@ -45,7 +45,7 @@ services:
 
   # imposm3 for materialized views creation
   imposm_mv_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2670.h07e324a
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
     env_file:
       - .env.production
     networks:
@@ -65,7 +65,7 @@ services:
   tiler_sqs_cleaner_production:
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2669.h101f906
     env_file:
-      - .env.staging
+      - .env.production
     restart: always
     networks:
       - tiler_network_production_production
@@ -73,7 +73,7 @@ services:
   tiler_s3_cleaner_production:
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2669.h101f906
     env_file:
-      - .env.staging
+      - .env.production
     networks:
       - tiler_network_production_production
 
@@ -146,12 +146,11 @@ services:
 volumes:
   tiler_production_pgdata:
     driver: local
-    name: tiler_db_production_12_06_2025_v5
+    name: tiler_db_25_06_2025_production
 
   tiler_production_imposmdata:
     driver: local
-    name: tiler_imposm_production_12_06_2025_v5
+    name: tiler_imposm_25_06_2025_production
 networks:
   tiler_network:
     driver: bridge
-    
