@@ -11,12 +11,13 @@ Ensure you are using the correct Docker images for production deployment, https:
 
 ```sh
 docker compose -f hetzner/tiler.production.yml up -d
+# docker compose -f hetzner/tiler.production.yml up db_production -d --force-recreate
 # docker compose -f hetzner/tiler.production.yml up imposm_production -d --force-recreate
 # docker compose -f hetzner/tiler.production.yml up tiler_production -d --force-recreate
 # docker compose -f hetzner/tiler.production.yml up tiler_sqs_cleaner_production -d --force-recreate
 # docker compose -f hetzner/tiler.production.yml up tile_global_seeding_production -d --force-recreate
 # docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
-# docker compose -f hetzner/tiler.production.yml up tiler_s3_cleaner_production -d --force-recreate
+# docker compose -f hetzner/tiler.production.yml run tiler_s3_cleaner_production python delete_s3_tiles.py
 # docker compose -f hetzner/tiler.production.yml up tiler_monitor_production -d --force-recreate 
 ```
 
