@@ -326,7 +326,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: false
+        enabled: true
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -345,7 +345,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: web_medium
+          label_value: system_medium
       - name: tm-db
         enabled: false
         schedule: '0 1 * * *'
