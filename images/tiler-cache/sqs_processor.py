@@ -7,18 +7,14 @@ import datetime
 
 from utils.s3_utils import (
     get_list_expired_tiles,
-    generate_all_related_tiles,
-    generate_tile_patterns,
+    generate_tile_patterns_from_related,
     get_and_delete_existing_tiles,
 )
 from utils.kubernetes_jobs import get_active_k8s_jobs_count, create_kubernetes_job
-
-from utils.utils import check_tiler_db_postgres_status
 from config import Config
-from utils.utils import get_logger
+from utils.utils import (check_tiler_db_postgres_status, get_logger)
 
 logger = get_logger()
-
 
 # Initialize SQS Client
 sqs = boto3.client("sqs", region_name=Config.AWS_REGION_NAME)
@@ -41,8 +37,8 @@ def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file
     logger.info(f"[{cleanup_type.upper()} CLEANUP] Target Path: {path_file}")
     try:
         expired_tiles = get_list_expired_tiles(s3_imposm3_exp_path)
-        related_tile = generate_all_related_tiles(expired_tiles, zoom_levels)
-        tiles_patterns = generate_tile_patterns(related_tile)
+        tiles_patterns = generate_tile_patterns_from_related(expired_tiles, zoom_levels)
+        # tiles_patterns = generate_tile_patterns(related_tile)
         get_and_delete_existing_tiles(bucket_name, path_file, tiles_patterns)
         logger.info(f"[{cleanup_type.upper()} CLEANUP] S3 Cleanup Completed Successfully.")
     except Exception as e:
