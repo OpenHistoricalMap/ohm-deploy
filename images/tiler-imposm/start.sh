@@ -65,35 +65,29 @@ getFormattedDate() {
 function uploadExpiredFiles() {
     log_message "Checking for expired files to upload..."
 
-    # Upload the expired files to the cloud provider
     for file in $(find "$IMPOSM3_EXPIRE_DIR" -type f -cmin -1); do
         bucketFile=${file#*"$WORKDIR"}
         getFormattedDate "$file"
 
-        # Check if the file has already been uploaded
-        if grep -Fxq "$file" "$TRACKING_FILE"; then
-            log_message "File ${file} has already been uploaded. Skipping..."
+        # check checksum
+        current_checksum=$(md5sum "$file" | awk '{ print $1 }')
+        record="${file}|${current_checksum}"
+
+        # Check if the file with content has already been uploaded
+        if grep -Fxq "$record" "$TRACKING_FILE"; then
+            log_message "File ${file} (checksum match) already uploaded. Skipping..."
             continue
         fi
 
-        # UPLOAD_EXPIRED_FILES=true to upload the expired files to cloud provider
         if [ "$UPLOAD_EXPIRED_FILES" == "true" ]; then
             log_message "Uploading expired file ${file} to ${AWS_S3_BUCKET}..."
             upload_success=false
 
-            # AWS
-            if [ "$CLOUDPROVIDER" == "aws" ]; then
-                aws s3 cp "$file" "${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}${bucketFile}" --acl public-read && upload_success=true
-            fi
-
-            # Google Storage
-            if [ "$CLOUDPROVIDER" == "gcp" ]; then
-                gsutil cp -a public-read "$file" "${GCP_STORAGE_BUCKET}${BUCKET_IMPOSM_FOLDER}${bucketFile}" && upload_success=true
-            fi
+            aws s3 cp "$file" "${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}${bucketFile}" --acl public-read && upload_success=true
 
             if [ "$upload_success" = true ]; then
-                log_message "$file" >> "$TRACKING_FILE"
-                log_message "File ${file} uploaded successfully and recorded."
+                echo "$record" >> "$TRACKING_FILE"
+                log_message "File ${file} uploaded and recorded as: $record"
             else
                 log_message "Failed to upload file ${file}. Will retry in the next run."
             fi
