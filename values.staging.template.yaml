@@ -245,12 +245,12 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: job_xlarge
       schedule: '0 0 * * *'
       env:
         OVERWRITE_PLANET_FILE: true
@@ -326,7 +326,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: true
+        enabled: false
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -345,7 +345,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: db_large
+          label_value: job_xlarge
       - name: tm-db
         enabled: false
         schedule: '0 1 * * *'
