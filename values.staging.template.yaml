@@ -263,7 +263,7 @@ osm-seed:
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
