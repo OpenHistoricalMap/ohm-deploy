@@ -256,6 +256,7 @@ osm-seed:
         OVERWRITE_PLANET_FILE: false
         PLANET_EXPORT_METHOD: planet-dump-ng
         DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
+        PLANET_EPOCH_DATE: '1970-01-01'
       resources:
         enabled: false
   
@@ -274,6 +275,7 @@ osm-seed:
         OVERWRITE_FHISTORY_FILE: false
         PLANET_EXPORT_METHOD: planet-dump-ng
         DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
+        PLANET_EPOCH_DATE: '1970-01-01'
       resources:
         enabled: false
 
