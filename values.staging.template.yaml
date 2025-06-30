@@ -251,9 +251,11 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job_xlarge
-      schedule: '0 0 * * *'
+      schedule: '0 3 * * *'
       env:
-        OVERWRITE_PLANET_FILE: true
+        OVERWRITE_PLANET_FILE: false
+        PLANET_EXPORT_METHOD: planet-dump-ng
+        DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
       resources:
         enabled: false
   
@@ -267,9 +269,11 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web_medium
-      schedule: '0 0 * * *'
+      schedule: '0 4 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
+        PLANET_EXPORT_METHOD: planet-dump-ng
+        DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
       resources:
         enabled: false
 
@@ -326,8 +330,8 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: false
-        schedule: '0 1 * * *'
+        enabled: true
+        schedule: '0 0 * * *'
         env:
           # backup/restore
           DB_ACTION: backup
