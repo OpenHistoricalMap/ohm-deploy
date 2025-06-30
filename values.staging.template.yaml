@@ -345,7 +345,7 @@ osm-seed:
         nodeSelector:
           enabled: true
           label_key: nodegroup_type
-          label_value: system_medium
+          label_value: db_large
       - name: tm-db
         enabled: false
         schedule: '0 1 * * *'
@@ -736,7 +736,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
