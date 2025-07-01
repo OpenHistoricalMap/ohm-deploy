@@ -269,7 +269,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: job_xlarge
       schedule: '0 4 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
