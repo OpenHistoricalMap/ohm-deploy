@@ -19,7 +19,7 @@ services:
       - tiler_network_staging
 
   imposm_staging:
-    image: rub21/tiler-imposm:v80
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
     volumes:
       - tiler_staging_imposmdata:/mnt/data
     command:

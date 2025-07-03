@@ -15,7 +15,7 @@ services:
       - tiler_network
 
   imposm:
-    image: rub21/tiler-imposm:v80
+    image: rub21/tiler-imposm:v70
     build:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
@@ -32,7 +32,7 @@ services:
       - tiler_network
 
   tiler:
-    image: rub21/tiler-server:v80
+    image: rub21/tiler-server:v73
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile
@@ -80,3 +80,4 @@ services:
 networks:
   tiler_network:
     driver: bridge
+    
