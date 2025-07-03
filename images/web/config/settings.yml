@@ -10,11 +10,13 @@ generator: "OpenHistoricalMap server"
 copyright_owner: "OpenHistoricalMap is dedicated to the public domain except where otherwise noted."
 attribution_url: "http://www.openhistoricalmap.org/copyright"
 license_url: "https://creativecommons.org/public-domain/cc0/"
+# Legal email address
+legal_email: "legal@openhistoricalmap.org"
 # Support email address
-support_email: "ohm-admins@googlegroups.com"
+support_email: "admin@openhistoricalmap.org"
 # Sender addresses for emails
-email_from: "OpenHistoricalMap <ohm-admins@googlegroups.com>"
-email_return_path: "ohm-admins@googlegroups.com"
+email_from: "OpenHistoricalMap <admin@openhistoricalmap.org>"
+email_return_path: "bounces@openhistoricalmap.org"
 
 # API version
 api_version: "0.6"

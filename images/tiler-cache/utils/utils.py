@@ -1,14 +1,7 @@
 import sys
 import logging
-import requests
-import csv
-import os
-import subprocess
-import json
-from smart_open import open as s3_open
 import psycopg2
 from psycopg2 import OperationalError
-from mercantile import tiles, bounds
 from config import Config
 
 

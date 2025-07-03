@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'development'
-      - 'vtiles_languages'
+      - 'routes_layer'
 jobs:
   build:
     runs-on: ubuntu-22.04
