@@ -1,0 +1,296 @@
+[[providers.layers]]
+name = "route_lines_z5"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z5
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z6"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z6
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z7"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z7
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z8"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z8
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z9"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z9
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z10_11"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z10_11
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z12_13"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z12_13
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z14_20"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    route,
+    ref,
+    network,
+    direction,
+    operator,
+    state,
+    symbol,
+    roundtrip,
+    interval,
+    duration,
+    tourism,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM mv_route_lines_z14_20
+WHERE geometry && !BBOX!
+"""
+
+#######Maps
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z5"
+min_zoom = 5
+max_zoom = 5
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z6"
+min_zoom = 6
+max_zoom = 6
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z7"
+min_zoom = 7
+max_zoom = 7
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z8"
+min_zoom = 8
+max_zoom = 8
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z9"
+min_zoom = 9
+max_zoom = 9
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z10_11"
+min_zoom = 10
+max_zoom = 11
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z12_13"
+min_zoom = 12
+max_zoom = 13
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z14_20"
+min_zoom = 14
+max_zoom = 20
