@@ -1,0 +1,98 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "route_multilines": {
+      "type": "relation_member",
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "key": "route",
+          "name": "route",
+          "type": "string"
+        },
+        {
+          "key": "ref",
+          "name": "ref",
+          "type": "string"
+        },
+        {
+          "key": "network",
+          "name": "network",
+          "type": "string"
+        },
+        {
+          "key": "direction",
+          "name": "direction",
+          "type": "string"
+        },
+        {
+          "key": "operator",
+          "name": "operator",
+          "type": "string"
+        },
+        {
+          "key": "start_date",
+          "name": "start_date",
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "name": "end_date",
+          "type": "string"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "name": "geometry",
+          "type": "geometry",
+          "key": null
+        },
+        {
+          "name": "member",
+          "type": "member_id"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
+        },
+        {
+          "name": "me_name",
+          "key": "name",
+          "type": "string",
+          "from_member": true
+        }
+      ],
+      "mapping": {
+        "route": [
+          "__any__"
+        ]
+      }
+    }
+  }
+}

@@ -122,6 +122,17 @@ buildings_views=(
     mv_osm_buildings_areas_z14_20
 )
 
+routes_views=(
+    mv_route_lines_z5
+    mv_route_lines_z6
+    mv_route_lines_z7
+    mv_route_lines_z8
+    mv_route_lines_z9
+    mv_route_lines_z10_11
+    mv_route_lines_z12_13
+    mv_route_lines_z14_20
+)
+
 
 refresh_mviews_group "ADMIN_BOUNDARIES_CENTROIDS" 60 "${admin_boundaries_centroids_views[@]}" &
 refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 "${admin_boundaries_lines_views[@]}" &
@@ -133,3 +144,4 @@ refresh_mviews_group "OTHERS" 180 "${others_views[@]}" &
 refresh_mviews_group "PLACES" 180 "${places_views[@]}" &
 refresh_mviews_group "WATER" 180 "${water_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 "${buildings_views[@]}" &
+refresh_mviews_group "ROUTES" 180 "${routes_views[@]}" &
