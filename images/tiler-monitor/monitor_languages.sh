@@ -33,7 +33,7 @@ function restart_production_containers() {
   docker compose -f hetzner/tiler.production.yml up tiler_production -d --force-recreate
 
   log_message "Cleaning tiles with tiler_s3_cleaner_production..."
-  docker compose -f hetzner/tiler.production.yml run --no-TTY tiler_s3_cleaner_production python delete_s3_tiles.py
+  docker compose -f hetzner/tiler.production.yml run --no-TTY tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix 
 
   log_message "Restarting global_seeding_production..."
   docker compose -f hetzner/tiler.production.yml up global_seeding_production -d --force-recreate
@@ -50,7 +50,7 @@ function restart_staging_containers() {
   docker compose -f hetzner/tiler.staging.yml up tiler_staging -d --force-recreate
 
   log_message "Cleaning tiles with tiler_s3_cleaner_staging..."
-  docker compose -f hetzner/tiler.staging.yml run --no-TTY tiler_s3_cleaner_staging python delete_s3_tiles.py
+  docker compose -f hetzner/tiler.staging.yml run --no-TTY tiler_s3_cleaner_staging tiler-cache-cleaner clean_by_prefix
 }
 
 log_message "Waiting for PostgreSQL to be ready..."

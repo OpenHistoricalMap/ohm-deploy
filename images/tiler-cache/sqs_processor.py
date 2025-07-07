@@ -5,14 +5,10 @@ import json
 import threading
 import datetime
 
-from utils.s3_utils import (
-    get_list_expired_tiles,
-    generate_tile_patterns_from_related,
-    get_and_delete_existing_tiles,
-)
+from tiler_cache_cleaner.cleaner import clean_cache_by_file
 from utils.kubernetes_jobs import get_active_k8s_jobs_count, create_kubernetes_job
 from config import Config
-from utils.utils import (check_tiler_db_postgres_status, get_logger)
+from utils.utils import (check_tiler_db_postgres_status, get_logger, s3_path_to_url)
 
 logger = get_logger()
 
@@ -36,11 +32,8 @@ def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file
     logger.info(f"[{cleanup_type.upper()} CLEANUP] S3 Bucket: {bucket_name}")
     logger.info(f"[{cleanup_type.upper()} CLEANUP] Target Path: {path_file}")
     try:
-        expired_tiles = get_list_expired_tiles(s3_imposm3_exp_path)
-        tiles_patterns = generate_tile_patterns_from_related(expired_tiles, zoom_levels)
-        # tiles_patterns = generate_tile_patterns(related_tile)
-        get_and_delete_existing_tiles(bucket_name, path_file, tiles_patterns)
-        logger.info(f"[{cleanup_type.upper()} CLEANUP] S3 Cleanup Completed Successfully.")
+        expired_file_url = s3_path_to_url(s3_imposm3_exp_path)
+        clean_cache_by_file(expired_file_url, path_file, zoom_levels)
     except Exception as e:
         logger.exception(f"[{cleanup_type.upper()} CLEANUP] Error during S3 cleanup:")
         raise

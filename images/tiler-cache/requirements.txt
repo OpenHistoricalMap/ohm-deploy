@@ -10,3 +10,4 @@ boto3
 kubernetes
 psycopg2-binary
 docker
+git+https://github.com/OpenHistoricalMap/tiler_cache_cleaner.git

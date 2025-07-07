@@ -60,3 +60,15 @@ def get_logger(name="default_logger"):
     )
 
     return logger
+
+def s3_path_to_url(s3_path, region="us-east-1"):
+    """
+    Convert an S3 path (s3://bucket/key) to a path-style S3 URL.
+    Example: s3://bucket/key → https://s3.region.amazonaws.com/bucket/key
+    """
+    if not s3_path.startswith("s3://"):
+        raise ValueError("Invalid S3 path. Must start with s3://")
+
+    bucket, key = s3_path.replace("s3://", "").split("/", 1)
+    url = f"https://s3.{region}.amazonaws.com/{bucket}/{key}"
+    return url
