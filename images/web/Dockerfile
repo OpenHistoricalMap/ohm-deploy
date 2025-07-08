@@ -21,12 +21,12 @@ RUN apt-get update && \
 RUN a2enmod passenger
 
 # Clone OHM Website
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=b21e5cff4c5dd3113928f37fd115398e6d56fba2
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=600e12ce43a1fef3ca2bbaa3696f7f350c04e953
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
     cd $workdir && \
     git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
-    echo 'merge PRs 281 & 296 + translations' && \
+    echo 'security patch (1092) + translations' && \
     git fetch && rm -rf .git
 
 # Install Ruby/Node dependencies
