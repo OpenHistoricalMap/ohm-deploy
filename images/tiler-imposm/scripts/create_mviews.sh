@@ -58,3 +58,4 @@ execute_sql_file queries/ohm_mviews/transport_areas.sql
 execute_sql_file queries/ohm_mviews/transport_lines.sql
 execute_sql_file queries/ohm_mviews/transport_points_centroids.sql
 execute_sql_file queries/ohm_mviews/water.sql
+execute_sql_file queries/ohm_mviews/routes_lines.sql
