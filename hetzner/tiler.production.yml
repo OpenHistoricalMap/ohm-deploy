@@ -24,7 +24,7 @@ services:
           
   # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
     volumes:
       - tiler_production_imposmdata:/mnt/data
     command:
@@ -45,7 +45,7 @@ services:
 
   # imposm3 for materialized views creation
   imposm_mv_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
     env_file:
       - .env.production
     networks:
@@ -146,11 +146,11 @@ services:
 volumes:
   tiler_production_pgdata:
     driver: local
-    name: tiler_db_04_07_2025
+    name: tiler_db_08_07_2025
 
   tiler_production_imposmdata:
     driver: local
-    name: tiler_imposm_04_07_2025
+    name: tiler_imposm_08_07_2025
 networks:
   tiler_network_production:
     driver: bridge
