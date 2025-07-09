@@ -245,7 +245,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
@@ -264,7 +264,7 @@ osm-seed:
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
@@ -332,7 +332,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: true
+        enabled: false
         schedule: '0 0 * * *'
         env:
           # backup/restore

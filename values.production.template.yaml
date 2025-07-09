@@ -248,13 +248,16 @@ osm-seed:
   planetDump:
     enabled: true
     priorityClass: 'medium-priority'
-    schedule: '0 0 * * *'
+    schedule: '0 1 * * *'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: job
+      label_value: job_xlarge
     env:
       OVERWRITE_PLANET_FILE: false
+      PLANET_EXPORT_METHOD: planet-dump-ng
+      DUMP_CLOUD_URL: s3://osmseed-production-db/database/web-api-db/state.txt
+      PLANET_EPOCH_DATE: '1970-01-01'
     resources:
       enabled: false
       requests:
@@ -272,13 +275,16 @@ osm-seed:
   fullHistory:
     enabled: true
     priorityClass: 'low-priority'
-    schedule: '0 0 * * 0'
+    schedule: '0 2 * * 0'
     nodeSelector:
       enabled: true
       label_key: nodegroup_type
-      label_value: job
+      label_value: job_xlarge
     env:
       OVERWRITE_FHISTORY_FILE: false
+      PLANET_EXPORT_METHOD: planet-dump-ng
+      DUMP_CLOUD_URL: s3://osmseed-production-db/database/web-api-db/state.txt
+      PLANET_EPOCH_DATE: '1970-01-01'
     resources:
       enabled: false
       requests:
@@ -376,7 +382,7 @@ osm-seed:
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
-        label_value: job
+        label_value: job_xlarge
     - name: tm-db
       enabled: true
       schedule: '0 1 * * *'
