@@ -17,7 +17,7 @@ docker compose -f hetzner/tiler.production.yml up -d
 # docker compose -f hetzner/tiler.production.yml up tiler_sqs_cleaner_production -d --force-recreate
 # docker compose -f hetzner/tiler.production.yml up tile_global_seeding_production -d --force-recreate
 # docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
-# docker compose -f hetzner/tiler.production.yml run tiler_s3_cleaner_production python delete_s3_tiles.py
+# docker compose -f hetzner/tiler.production.yml run tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix
 # docker compose -f hetzner/tiler.production.yml up tiler_monitor_production -d --force-recreate 
 ```
 
@@ -31,7 +31,7 @@ docker compose -f hetzner/tiler.staging.yml up -d
 # docker compose -f hetzner/tiler.staging.yml up imposm_staging -d --force-recreate
 # docker compose -f hetzner/tiler.staging.yml up tiler_staging -d --force-recreate
 # docker compose -f hetzner/tiler.staging.yml up tiler_sqs_cleaner_staging -d --force-recreate
-# docker compose -f hetzner/tiler.staging.yml up tiler_s3_cleaner_staging -d --force-recreate
+# docker compose -f hetzner/tiler.staging.yml up tiler_s3_cleaner_staging tiler-cache-cleaner clean_by_prefix
 # docker compose -f hetzner/tiler.staging.yml up tiler_monitor_staging -d --force-recreate
 ```
 
