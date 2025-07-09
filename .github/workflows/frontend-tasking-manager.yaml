@@ -42,7 +42,7 @@ jobs:
           TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: E38F009PE1FJVW
-          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.staging.openhistoricalmap.org/api/v4/system/statistics/
+          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.openhistoricalmap.org/api/v4/system/statistics/
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
@@ -85,10 +85,10 @@ jobs:
       - name: Debug Checkout
         run: ls -la tasking-manager
 
-      - name: Use Node.js 18.19.1
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '18.19.1'
+          node-version: '22.x'
 
       - name: npm Install and Build
         run: |

@@ -24,7 +24,7 @@ services:
           
   # imposm3
   imposm_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
     volumes:
       - tiler_production_imposmdata:/mnt/data
     command:
@@ -45,7 +45,7 @@ services:
 
   # imposm3 for materialized views creation
   imposm_mv_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2673.h694dd79
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
     env_file:
       - .env.production
     networks:
@@ -53,7 +53,7 @@ services:
 
   # Tiler server
   tiler_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2669.h101f906
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2694.h5468129
     ports:
       - "9090:9090"
     env_file:
@@ -63,7 +63,7 @@ services:
       - tiler_network_production
 
   tiler_sqs_cleaner_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2675.h588af58
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2706.h1b7db88
     env_file:
       - .env.production
     restart: always
@@ -71,14 +71,14 @@ services:
       - tiler_network_production
 
   tiler_s3_cleaner_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2675.h588af58
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2706.h1b7db88
     env_file:
       - .env.production
     networks:
       - tiler_network_production
 
   tile_global_seeding_production:
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2669.h101f906
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2694.h5468129
       env_file:
         - .env.production
       volumes:
@@ -97,7 +97,7 @@ services:
         - tiler_network_production
 
   tile_coverage_seeding_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2669.h101f906
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2694.h5468129
     env_file:
       - .env.production
     volumes:
@@ -116,7 +116,7 @@ services:
       - tiler_network_production
 
   tiler_monitor_production:
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2669.h101f906
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2706.h1b7db88
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../images/tiler-monitor:/app
@@ -146,11 +146,11 @@ services:
 volumes:
   tiler_production_pgdata:
     driver: local
-    name: tiler_db_25_06_2025_production
+    name: tiler_db_08_07_2025
 
   tiler_production_imposmdata:
     driver: local
-    name: tiler_imposm_25_06_2025_production
+    name: tiler_imposm_08_07_2025
 networks:
   tiler_network_production:
     driver: bridge
