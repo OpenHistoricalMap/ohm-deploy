@@ -100,10 +100,10 @@ RUN apt-get update && \
 COPY --from=build --chown=appuser:appuser --chmod=755 /opt/python /opt/python
 
 
-RUN echo "Update TM version 2b2f693e9510b95fc5a374e5edb1733750f3de59 "
+RUN echo "Update TM version 094704cd2f4611de2f7c7ef0daba520ac58bce01"
 USER root
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git /usr/src/app && \
-    git checkout -f 2b2f693e9510b95fc5a374e5edb1733750f3de59
+    git checkout -f 094704cd2f4611de2f7c7ef0daba520ac58bce01
 
 RUN chown -R appuser:appuser ./
 
@@ -154,6 +154,4 @@ EXPOSE 5000
 USER appuser:appuser
 
 CMD ["uvicorn", "backend.main:api", "--host", "0.0.0.0", "--port", "5000", \
-    "--workers", "8", "--log-level", "critical","--no-access-log"]
-
-
+    "--workers", "8", "--log-level", "info"]
