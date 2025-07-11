@@ -245,13 +245,13 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
         label_value: job_xlarge
-      schedule: '0 3 * * *'
+      schedule: '* * * * *'
       env:
         OVERWRITE_PLANET_FILE: false
         PLANET_EXPORT_METHOD: planet-dump-ng
