@@ -245,7 +245,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
@@ -257,6 +257,7 @@ osm-seed:
         PLANET_EXPORT_METHOD: planet-dump-ng
         DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
         PLANET_EPOCH_DATE: '1970-01-01'
+        PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
       resources:
         enabled: false
   
@@ -276,6 +277,7 @@ osm-seed:
         PLANET_EXPORT_METHOD: planet-dump-ng
         DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
         PLANET_EPOCH_DATE: '1970-01-01'
+        PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
       resources:
         enabled: false
 
