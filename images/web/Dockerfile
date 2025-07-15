@@ -21,12 +21,12 @@ RUN apt-get update && \
 RUN a2enmod passenger
 
 # Clone OHM Website
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=4199f796edcc93c3f660278a7557d32032b6598c
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=389ebc99183975ad0cd147b3c27aa9ad6a6b24c9
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
     cd $workdir && \
     git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
-    echo 'security patch (1092) + translations' && \
+    echo '202507 upstream catchup' && \
     git fetch && rm -rf .git
 
 # Install Ruby/Node dependencies
