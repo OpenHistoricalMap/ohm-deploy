@@ -13,7 +13,7 @@ RUN apt-get update && \
     apache2 apache2-dev libapache2-mod-passenger libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
     postgresql-client libpq-dev libxml2-dev libyaml-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g yarn svgo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
