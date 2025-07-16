@@ -21,12 +21,12 @@ RUN apt-get update && \
 RUN a2enmod passenger
 
 # Clone OHM Website
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=ef9c273e79827559a60cff00fced1f5da220143f
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=59cc8669ed4e1fb49a5c2283b657a802d0f54397
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
     cd $workdir && \
     git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
-    echo '202507 upstream catchup; copyright page fix' && \
+    echo '202507 upstream catchup: Vendoring in iD' && \
     git fetch && rm -rf .git
 
 # Install Ruby/Node dependencies
