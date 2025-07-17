@@ -14,6 +14,8 @@ services:
       OVERPASS_PLANET_PREPROCESS: "mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf"
       OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1796000
       OVERPASS_ALLOW_DUPLICATE_QUERIES: yes
+    env_file:
+      - .env.overpass
     restart: always
     networks:
       - overpasss_network_staging

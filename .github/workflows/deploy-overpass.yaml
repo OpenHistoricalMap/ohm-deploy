@@ -52,12 +52,17 @@ jobs:
 
     - name: Upload .env and Deploy App
       run: |
-        scp -o StrictHostKeyChecking=no .env root@${{ secrets.HETZNER_HOST }}:/${ENVIRONMENT}/.env.overpass
+        # Upload .env to temporary location
+        scp -o StrictHostKeyChecking=no .env root@${{ secrets.HETZNER_HOST }}:/tmp/.env.overpass
+
+        # SSH into server and deploy
         ssh root@${{ secrets.HETZNER_HOST }} <<'EOF'
           set -e
           echo "Starting app deployment..."
+
+          # Load variables from temporary .env
           set -o allexport
-          source /${ENVIRONMENT}/.env.overpass
+          source /tmp/.env.overpass
           set +o allexport
 
           echo "-----------------------------------------"
@@ -74,26 +79,54 @@ jobs:
             git pull origin $BRANCH_NAME
           fi
 
+          TARGET_DIR="$REMOTE_APP_DIR/hetzner/overpass"
+          ENV_FILE="$TARGET_DIR/.env.overpass"
+
           echo "-----------------------------------------"
-          echo "Checking for changes in hetzner/overpass/overpass.$ENVIRONMENT.yml"
+          echo "Checking if .env.overpass has changed"
+
+          if [ -f "$ENV_FILE" ]; then
+            if cmp -s /tmp/.env.overpass "$ENV_FILE"; then
+              echo ".env.overpass is identical to the previous version"
+              ENV_CHANGED=false
+            else
+              echo ".env.overpass has changed. Updating..."
+              cp /tmp/.env.overpass "$ENV_FILE"
+              ENV_CHANGED=true
+            fi
+          else
+            echo "No previous .env.overpass found. Copying new one..."
+            cp /tmp/.env.overpass "$ENV_FILE"
+            ENV_CHANGED=true
+          fi
+
+          echo "-----------------------------------------"
+          echo "🔍 Checking for changes in $TARGET_DIR/overpass.$ENVIRONMENT.yml"
 
           # Get list of changed files since last pull
-          CHANGED_FILES=$(git diff --name-only HEAD@{1} HEAD)
+          CHANGED_FILES=$(git diff --name-only HEAD@{1} HEAD || echo "")
           echo "Changed files since last update:"
           echo "$CHANGED_FILES"
 
-          # Check if the specific file changed
           TARGET_FILE="hetzner/overpass/overpass.$ENVIRONMENT.yml"
           if echo "$CHANGED_FILES" | grep -q "^$TARGET_FILE\$"; then
-            echo "Building and redeploying..."
+            echo "$TARGET_FILE changed"
+            FILE_CHANGED=true
+          else
+            echo "No changes in $TARGET_FILE"
+            FILE_CHANGED=false
+          fi
+
+          echo "-----------------------------------------"
+          if [ "$ENV_CHANGED" = true ] || [ "$FILE_CHANGED" = true ]; then
+            echo "Changes detected. Building and redeploying..."
             docker compose -f $TARGET_FILE build --pull --no-cache
             docker compose -f $TARGET_FILE up -d --force-recreate
             echo "Deployment finished in $REMOTE_APP_DIR"
           else
-            echo "No changes in $TARGET_FILE. Skipping Docker build and redeploy."
+            echo "No relevant changes. Skipping Docker build and redeploy."
           fi
 
           echo "-----------------------------------------"
           docker ps | grep overpass || echo "overpass container not running"
         EOF
-        
