@@ -96,10 +96,10 @@ RUN ln -s /tmp /var/www/tmp
 
 # Install Passenger and Apache module
 RUN gem install passenger -v 6.0.27 && \
-    passenger-install-apache2-module --auto && \
+    passenger-install-apache2-module --non-interactive && \
     passenger-config --apache2-load-module-snippet > /etc/apache2/mods-available/passenger.load && \
     passenger-config --apache2-conf-snippet > /etc/apache2/mods-available/passenger.conf
-
+    
 # Apache configuration
 COPY config/production.conf /etc/apache2/sites-available/production.conf
 RUN a2enmod passenger rewrite headers setenvif proxy proxy_http proxy_fcgi fcgid lbmethod_byrequests && \
