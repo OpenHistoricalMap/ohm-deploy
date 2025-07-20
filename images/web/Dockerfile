@@ -31,6 +31,7 @@ RUN rm -rf $workdir/* && \
 
 # Install Ruby/Node dependencies
 RUN gem install bundler && \
+    bundle config set --local path 'vendor/bundle' && \
     bundle install && \
     yarn install && \
     bundle exec rake yarn:install
@@ -46,8 +47,8 @@ RUN rm -f config/credentials.yml.enc && \
     export RAILS_MASTER_KEY=$(openssl rand -hex 16) && \
     export SECRET_KEY_BASE=$(bundle exec rails secret) && \
     echo $RAILS_MASTER_KEY > config/master.key && \
-    EDITOR="echo" RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails credentials:edit && \
-    RAILS_MASTER_KEY=$RAILS_MASTER_KEY rails runner "\
+    EDITOR="echo" RAILS_MASTER_KEY=$RAILS_MASTER_KEY bundle exec rails credentials:edit && \
+    RAILS_MASTER_KEY=$RAILS_MASTER_KEY bundle exec rails runner "\
     require 'active_support/encrypted_configuration'; \
     require 'yaml'; \
     creds = ActiveSupport::EncryptedConfiguration.new(\
@@ -77,7 +78,8 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
 FROM ruby:3.3-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    workdir=/var/www
+    workdir=/var/www \
+    BUNDLE_PATH=vendor/bundle
 
 WORKDIR $workdir
 
@@ -89,7 +91,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /var/www /var/www
-COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Symlink tmp for Passenger
 RUN ln -s /tmp /var/www/tmp
