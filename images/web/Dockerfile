@@ -83,10 +83,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 WORKDIR $workdir
 
-# Install only runtime dependencies
+# Install runtime dependencies including passenger module
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    apache2 libpq5 libxml2 libyaml-0-2 file curl \
-    apache2-dev libcurl4-openssl-dev libssl-dev \
+    apache2 libapache2-mod-passenger libpq5 libxml2 libyaml-0-2 file curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /var/www /var/www
@@ -94,15 +93,8 @@ COPY --from=builder /var/www /var/www
 # Symlink tmp for Passenger
 RUN ln -s /tmp /var/www/tmp
 
-# Install Passenger and Apache module
-RUN gem install passenger -v 6.0.27 && \
-    passenger-install-apache2-module --non-interactive && \
-    passenger-config --apache2-load-module-snippet > /etc/apache2/mods-available/passenger.load && \
-    passenger-config --apache2-conf-snippet > /etc/apache2/mods-available/passenger.conf
-    
-# Apache configuration
 COPY config/production.conf /etc/apache2/sites-available/production.conf
-RUN a2enmod passenger rewrite headers setenvif proxy proxy_http proxy_fcgi fcgid lbmethod_byrequests && \
+RUN a2enmod passenger rewrite headers setenvif proxy proxy_http proxy_fcgi lbmethod_byrequests && \
     a2dissite 000-default && \
     a2ensite production && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
