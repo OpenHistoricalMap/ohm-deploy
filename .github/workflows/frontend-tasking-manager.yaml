@@ -52,6 +52,7 @@ jobs:
           TM_ORG_CODE: OHM
           TM_ORG_URL: www.openhistoricalmap.org
           TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
+          TM_ORG_TWITTER: https://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
           OSM_SERVER_URL: https://www.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
