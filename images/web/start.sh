@@ -136,15 +136,11 @@ setup_production() {
 
   # Create the /passenger-instreg directory if it doesn’t exist. This is required in newer versions of Passenger.
   mkdir -p /var/run/passenger-instreg
-  chown www-data:www-data /var/run/passenger-instreg
-
-  # echo "Running asset precompilation..."
-  # time bundle exec rake i18n:js:export assets:precompile
 
   echo "Copying static assets..."
   cp "$workdir/public/leaflet-ohm-timeslider-v2/assets/"* "$workdir/public/assets/"
 
-  # echo "Running database migrations..."
+  echo "Running database migrations..."
   time bundle exec rails db:migrate
 
   if [ "$EXTERNAL_CGIMAP" == "false" ]; then
@@ -153,8 +149,8 @@ setup_production() {
   fi
 
   echo "Starting Apache server..."
-  apachectl -k start -DFOREGROUND &
-  start_background_jobs
+  start_background_jobs &
+  apachectl -k start -DFOREGROUND
 }
 
 

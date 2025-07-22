@@ -1,7 +1,7 @@
 FROM ruby:3.3-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    workdir=/var/www 
+    workdir=/var/www
 
 WORKDIR $workdir
 
@@ -101,7 +101,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client curl libvips \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /var/www /var/www
+COPY --chown=www-data:www-data --from=builder /var/www /var/www
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Symlink tmp for Passenger
@@ -118,5 +118,4 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
 COPY config/settings.yml $workdir/config/
 COPY start.sh liveness.sh $workdir/
 RUN chmod +x $workdir/*.sh
-RUN chown -R www-data:www-data /var/www
 CMD ["./start.sh"]
