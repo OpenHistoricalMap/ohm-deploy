@@ -117,5 +117,9 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
 
 COPY config/settings.yml $workdir/config/
 COPY start.sh liveness.sh $workdir/
-RUN chmod +x $workdir/*.sh
+RUN chmod +x $workdir/*.sh && \
+    mkdir -p /var/www/log && \
+    chown -R www-data:www-data /var/www && \
+    chmod -R 755 /var/www/log
+
 CMD ["./start.sh"]
