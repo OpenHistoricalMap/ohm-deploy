@@ -109,7 +109,7 @@ start_background_jobs() {
 setup_production() {
   setup_env_vars
 
-  ## Update map styles. This line should be removed later, as the configuration should come from the module.
+  # Update map styles. This line should be removed later, as the configuration should come from the module.
   SERVER_URL_="${SERVER_URL/www./}"
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|openhistoricalmap.github.io|${SERVER_URL}|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
@@ -134,13 +134,17 @@ setup_production() {
     sleep 2
   done
 
+  # Create the /passenger-instreg directory if it doesn’t exist. This is required in newer versions of Passenger.
+  mkdir -p /var/run/passenger-instreg
+  chown www-data:www-data /var/run/passenger-instreg
+
   # echo "Running asset precompilation..."
   # time bundle exec rake i18n:js:export assets:precompile
 
   echo "Copying static assets..."
   cp "$workdir/public/leaflet-ohm-timeslider-v2/assets/"* "$workdir/public/assets/"
 
-  echo "Running database migrations..."
+  # echo "Running database migrations..."
   time bundle exec rails db:migrate
 
   if [ "$EXTERNAL_CGIMAP" == "false" ]; then

@@ -1,7 +1,7 @@
 FROM ruby:3.3-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    workdir=/var/www
+    workdir=/var/www 
 
 WORKDIR $workdir
 
@@ -30,8 +30,11 @@ RUN rm -rf $workdir/* && \
     git fetch && rm -rf .git
 
 # Install Ruby/Node dependencies
+ENV BUNDLE_PATH=/var/www/vendor/bundle \
+    GEM_HOME=/var/www/vendor/bundle \
+    GEM_PATH=/var/www/vendor/bundle
+
 RUN gem install bundler && \
-    bundle config set --local path 'vendor/bundle' && \
     bundle install && \
     yarn install && \
     bundle exec rake yarn:install
@@ -79,22 +82,34 @@ FROM ruby:3.3-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
-    BUNDLE_PATH=vendor/bundle
+    BUNDLE_PATH=/var/www/vendor/bundle \
+    GEM_HOME=/var/www/vendor/bundle \
+    GEM_PATH=/var/www/vendor/bundle
 
 WORKDIR $workdir
 
-# Install runtime dependencies including passenger module
+# Phusion Passenger, need newest vresion because security updates
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates dirmngr gnupg
+RUN gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
+RUN gpg --armor --export 561F9B9CAC40B2F7 | tee /etc/apt/trusted.gpg.d/passenger.asc >/dev/null
+RUN echo "deb https://oss-binaries.phusionpassenger.com/apt/passenger $(. /etc/os-release && echo $VERSION_CODENAME) main" > /etc/apt/sources.list.d/passenger.list
+
+# Install only runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    apache2 libapache2-mod-passenger libpq5 libxml2 libyaml-0-2 file curl \
+    apache2 libapache2-mod-passenger libapache2-mod-fcgid \
+    libpq5 libxml2 libyaml-0-2 libarchive13 file libgd-dev \
+    postgresql-client curl libvips \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /var/www /var/www
+COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Symlink tmp for Passenger
 RUN ln -s /tmp /var/www/tmp
 
+# Apache configuration
 COPY config/production.conf /etc/apache2/sites-available/production.conf
-RUN a2enmod passenger rewrite headers setenvif proxy proxy_http proxy_fcgi lbmethod_byrequests && \
+RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_byrequests passenger && \
     a2dissite 000-default && \
     a2ensite production && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
