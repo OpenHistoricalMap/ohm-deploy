@@ -21,6 +21,7 @@ jobs:
           TM_ORG_CODE: OHM
           TM_ORG_URL: staging.openhistoricalmap.org
           TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+          TM_ORG_TWITTER: https://twitter.com/OpenHistMap
           TM_ORG_GITHUB: github.com/openhistoricalmap
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
