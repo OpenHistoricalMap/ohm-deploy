@@ -723,7 +723,7 @@ osm-seed:
       # The following environment variables are for future versions of TM
       TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
       TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
-      TM_DEFAULT_CHANGESET_COMMENT: production
+      TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
       TM_REDIRECT_URI: https://tm-api.openhistoricalmap.org/authorized
       TM_SCOPE: 'read_prefs write_api'
       # Add extra info

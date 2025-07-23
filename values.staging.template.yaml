@@ -649,7 +649,7 @@ osm-seed:
         # The following environment variables are for future versions of TM
         TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
         TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
-        TM_DEFAULT_CHANGESET_COMMENT: 'Staging comments'
+        TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
         TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
