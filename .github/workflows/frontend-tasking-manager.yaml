@@ -20,12 +20,13 @@ jobs:
           TM_ORG_CODE: OHM
           TM_ORG_TWITTER: https://twitter.com/OpenHistMap
           TM_ORG_GITHUB: https://github.com/openhistoricalmap
-          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
-          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+          TM_EMAIL_FROM_ADDRESS: admin@openhistoricalmap.org
+          TM_EMAIL_CONTACT_ADDRESS: admin@openhistoricalmap.org
           TM_DEFAULT_LOCALE: en
           TM_IMPORT_MAX_FILESIZE: 3e+06
           TM_MAX_AOI_AREA: 15000
           TM_SCOPE: "read_prefs write_api"
+          TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
@@ -42,7 +43,6 @@ jobs:
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
           TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
           TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
-          TM_DEFAULT_CHANGESET_COMMENT: staging
           TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
           TM_APP_API_VERSION: v2
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
@@ -64,7 +64,6 @@ jobs:
           TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
           TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
           TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
-          TM_DEFAULT_CHANGESET_COMMENT: staging
           TM_REDIRECT_URI: https://tasks.openhistoricalmap.org/authorized
           TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
