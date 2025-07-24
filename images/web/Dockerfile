@@ -64,8 +64,8 @@ RUN rm -f config/credentials.yml.enc && \
     creds.write(credentials.to_yaml); \
     puts 'Credentials configured correctly.'"
 
-# Precompile assets
-RUN bundle exec rake assets:precompile
+# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
+RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
 # Leaflet timeslider assets
 ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
@@ -88,7 +88,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 WORKDIR $workdir
 
-# Phusion Passenger, need newest vresion because security updates
+# Phusion Passenger, need newest version because security updates
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates dirmngr gnupg
 RUN gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
 RUN gpg --armor --export 561F9B9CAC40B2F7 | tee /etc/apt/trusted.gpg.d/passenger.asc >/dev/null
