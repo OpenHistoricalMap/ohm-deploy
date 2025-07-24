@@ -65,7 +65,9 @@ RUN rm -f config/credentials.yml.enc && \
     puts 'Credentials configured correctly.'"
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
+RUN SECRET_KEY_BASE_DUMMY=1  \
+    bundle exec i18n export && \
+    bundle exec rails assets:precompile
 
 # Leaflet timeslider assets
 ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
