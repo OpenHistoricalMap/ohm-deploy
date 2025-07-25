@@ -85,19 +85,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
     BUNDLE_PATH=/var/www/vendor/bundle \
     GEM_HOME=/var/www/vendor/bundle \
     GEM_PATH=/var/www/vendor/bundle \
-    RAILS_ENV=production
+    RAILS_ENV=production \
+    PATH="$PATH:$GEM_HOME/bin"
 
-WORKDIR $workdir
-
-# Phusion Passenger, need newest version because security updates
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates dirmngr gnupg
-RUN gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
-RUN gpg --armor --export 561F9B9CAC40B2F7 | tee /etc/apt/trusted.gpg.d/passenger.asc >/dev/null
-RUN echo "deb https://oss-binaries.phusionpassenger.com/apt/passenger $(. /etc/os-release && echo $VERSION_CODENAME) main" > /etc/apt/sources.list.d/passenger.list
-
-# Install only runtime dependencies
+# Install base dependencies for Passenger gem compilation and runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    apache2 libapache2-mod-passenger libapache2-mod-fcgid \
+    build-essential apache2-dev libcurl4-openssl-dev zlib1g-dev libssl-dev \
+    apache2 libapache2-mod-fcgid \
     libpq5 libxml2 libyaml-0-2 libarchive13 file libgd-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle \
     postgresql-client curl libvips \
@@ -106,8 +100,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get purge -y --auto-remove npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --chown=www-data:www-data --from=builder /var/www /var/www
-COPY --from=builder /usr/local/bundle /usr/local/bundle
+# Install Passenger as a gem and compile the Apache module
+ENV PATH="$PATH:$GEM_HOME/bin"
+RUN gem install passenger --no-document && \
+    yes | passenger-install-apache2-module --auto --languages ruby && \
+    passenger-config validate-install --auto
+
+RUN passenger-install-apache2-module --snippet > /etc/apache2/mods-available/passenger.load
+RUN passenger-config build-native-support
 
 # Apache configuration
 COPY config/production.conf /etc/apache2/sites-available/production.conf
@@ -117,11 +117,20 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     apache2ctl configtest
 
+WORKDIR $workdir
+
+COPY --chown=www-data:www-data --from=builder /var/www /$workdir
+COPY --from=builder /var/www/vendor $workdir/vendor
+COPY --from=builder /usr/local/bundle /usr/local/bundle
+
 COPY config/settings.yml $workdir/config/
 COPY start.sh liveness.sh $workdir/
 
-RUN mkdir -p $workdir/tmp/pids $workdir/log && \
-    touch $workdir/log/production.log && \
-    chown -R www-data:www-data $workdir
+RUN mkdir -p /var/www/log /var/www/tmp && \
+    touch /var/www/log/production.log && \
+    chown -R www-data:www-data /var/www/log /var/www/tmp /var/www/public && \
+    chown www-data:www-data /var/www/log/production.log && \
+    chown -R root:root /var/www/vendor && \
+    chmod -R 755 /var/www/vendor
 
 CMD ["./start.sh"]

@@ -118,7 +118,16 @@ setup_production() {
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
 
   # Replace URLs in the public directory
-  find "/var/www/public" -type f -name "*.js" | while read -r file; do
+  find "/var/www/public" -type f \( \
+      -name "mapstyle.js" -o \
+      -name "index.html" -o \
+      -name "index-layeroptions-tegola-ohm-*.js" -o \
+      -name "application-*.js" -o \
+      -name "embed-*.js" -o \
+      -name "ohm.style-*.js" -o \
+      -name "id-*.js" -o \
+      -name "index-*.js" \
+  \) | while read -r file; do
     echo "Updating $file"
     sed -i.bak \
       -e "s|openhistoricalmap.github.io|${SERVER_URL}|g" \
@@ -147,6 +156,10 @@ setup_production() {
     echo "Running cgimap..."
     ./cgimap.sh
   fi
+
+  echo "Redirecting Apache logs to stdout/stderr..."
+  ln -sf /dev/stdout /var/log/apache2/access.log
+  ln -sf /dev/stderr /var/log/apache2/error.log
 
   echo "Starting Apache server..."
   start_background_jobs &
