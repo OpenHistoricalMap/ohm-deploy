@@ -1,7 +1,3 @@
-# =========================================================
-# Builder image stage
-# ==========================================================
-
 FROM ruby:3.3-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -19,7 +15,7 @@ RUN apt-get update && \
     git curl gnupg build-essential \
     libarchive-dev zlib1g-dev libcurl4-openssl-dev \
     apache2 apache2-dev libapache2-mod-passenger libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
-    postgresql-client libpq-dev libxml2-dev libyaml-dev unzip \
+    postgresql-client libpq-dev libxml2-dev libyaml-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs \
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
@@ -28,21 +24,18 @@ RUN apt-get update && \
 
 RUN a2enmod passenger
 
-# Download OHM Website using gitsha, faster than cloning
+# Clone OHM Website
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=59cc8669ed4e1fb49a5c2283b657a802d0f54397
-ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
-RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
-    unzip /tmp/ohm-website.zip -d /tmp && \
-    mv /tmp/ohm-website-$OPENHISTORICALMAP_WEBSITE_GITSHA/* $workdir && \
-    rm -rf /tmp/*
+RUN rm -rf $workdir/* && \
+    git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
+    cd $workdir && \
+    git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
+    echo '202507 upstream catchup: Vendoring in iD' && \
+    git fetch && rm -rf .git
 
-# Install Ruby/Node dependencies
-RUN echo 'gem "passenger", "~> 6.0.27"' >> Gemfile && \
-    rm -f Gemfile.lock && \
-    gem install bundler && \
-    bundle install --jobs "$(nproc)" --retry 3
-
-RUN yarn install && \
+RUN gem install bundler && \
+    bundle install && \
+    yarn install && \
     bundle exec rake yarn:install
 
 # Dummy config for precompile
@@ -50,9 +43,6 @@ RUN cp config/example.database.yml config/database.yml && \
     cp config/example.storage.yml config/storage.yml && \
     touch config/settings.local.yml && \
     chmod 600 config/database.yml
-
-# Test if passenger is working
-RUN bundle exec passenger-config build-native-support
 
 # Create dummy credentials
 RUN rm -f config/credentials.yml.enc && \
@@ -89,17 +79,14 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
     cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ && \
     cp assets/* $workdir/app/assets/images/
 
-# =========================================================
-# Runtime image stage
-# ==========================================================
-
 FROM ruby:3.3-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
     BUNDLE_PATH=/var/www/vendor/bundle \
     GEM_HOME=/var/www/vendor/bundle \
-    GEM_PATH=/var/www/vendor/bundle
+    GEM_PATH=/var/www/vendor/bundle \
+    RAILS_ENV=production
 
 WORKDIR $workdir
 
@@ -113,17 +100,12 @@ RUN echo "deb https://oss-binaries.phusionpassenger.com/apt/passenger $(. /etc/o
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apache2 libapache2-mod-passenger libapache2-mod-fcgid \
     libpq5 libxml2 libyaml-0-2 libarchive13 file libgd-dev \
-    postgresql-client curl libvips \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle \
-    libjpeg-progs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    postgresql-client curl libvips \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/local/bundle /usr/local/bundle
-# COPY --from=builder /usr/local/bin/svgo /usr/local/bin/svgo
 COPY --chown=www-data:www-data --from=builder /var/www /var/www
-
-# Use passenger_native_support.so for native support
-RUN bundle exec passenger-config build-native-support 
+COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Apache configuration
 COPY config/production.conf /etc/apache2/sites-available/production.conf
@@ -133,15 +115,12 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     apache2ctl configtest
 
-# Copy configuration files
 COPY config/settings.yml $workdir/config/
 COPY start.sh liveness.sh $workdir/
-
-# Prepare logging and tmp dirs
 RUN mkdir -p $workdir/log $workdir/tmp && \
     touch $workdir/log/production.log && \
     chown -R www-data:www-data $workdir/log $workdir/tmp && \
-    chmod -R 755 $workdir/log $workdir/tmp && \
-    chmod 664 $workdir/log/production.log
+    chmod -R 755 $workdir/log && \
+    chmod 644 $workdir/log/production.log
 
 CMD ["./start.sh"]
