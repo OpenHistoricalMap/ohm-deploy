@@ -118,7 +118,7 @@ setup_production() {
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
 
   # Replace URLs in the public directory
-  find "/var/www/public" -type f | while read -r file; do
+  find "/var/www/public" -type f -name "*.js" | while read -r file; do
     echo "Updating $file"
     sed -i.bak \
       -e "s|openhistoricalmap.github.io|${SERVER_URL}|g" \

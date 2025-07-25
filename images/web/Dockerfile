@@ -16,7 +16,7 @@ RUN apt-get update && \
     libarchive-dev zlib1g-dev libcurl4-openssl-dev \
     apache2 apache2-dev libapache2-mod-passenger libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
     postgresql-client libpq-dev libxml2-dev libyaml-dev \
-    pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs \
+    pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip\
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g yarn svgo \
@@ -24,14 +24,13 @@ RUN apt-get update && \
 
 RUN a2enmod passenger
 
-# Clone OHM Website
+# Download OHM Website using gitsha, faster than cloning
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=59cc8669ed4e1fb49a5c2283b657a802d0f54397
-RUN rm -rf $workdir/* && \
-    git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
-    cd $workdir && \
-    git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
-    echo '202507 upstream catchup: Vendoring in iD' && \
-    git fetch && rm -rf .git
+ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
+RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
+    unzip /tmp/ohm-website.zip -d /tmp && \
+    mv /tmp/ohm-website-$OPENHISTORICALMAP_WEBSITE_GITSHA/* $workdir && \
+    rm -rf /tmp/*
 
 RUN gem install bundler && \
     bundle install && \
@@ -102,6 +101,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 libxml2 libyaml-0-2 libarchive13 file libgd-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle \
     postgresql-client curl libvips \
+    nodejs npm \
+    && npm install -g svgo \
+    && apt-get purge -y --auto-remove npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --chown=www-data:www-data --from=builder /var/www /var/www
@@ -117,10 +119,9 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
 
 COPY config/settings.yml $workdir/config/
 COPY start.sh liveness.sh $workdir/
-RUN mkdir -p $workdir/log $workdir/tmp && \
+
+RUN mkdir -p $workdir/tmp/pids $workdir/log && \
     touch $workdir/log/production.log && \
-    chown -R www-data:www-data $workdir/log $workdir/tmp && \
-    chmod -R 755 $workdir/log && \
-    chmod 644 $workdir/log/production.log
+    chown -R www-data:www-data $workdir
 
 CMD ["./start.sh"]
