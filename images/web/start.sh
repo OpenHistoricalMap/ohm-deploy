@@ -106,6 +106,16 @@ start_background_jobs() {
   done
 }
 
+log_and_tail() {
+  local file=$1
+  if [ -f "$file" ]; then
+    echo "🔹 Logs from: $file"
+    tail -F "$file" &
+  else
+    echo "⚠️ Log file not found: $file"
+  fi
+}
+
 setup_production() {
   setup_env_vars
 
@@ -157,15 +167,16 @@ setup_production() {
     ./cgimap.sh
   fi
 
-  echo "Redirecting Apache logs to stdout/stderr..."
-  ln -sf /dev/stdout /var/log/apache2/access.log
-  ln -sf /dev/stderr /var/log/apache2/error.log
+  echo "Logging and tailing logs..."
+  # log_and_tail /var/www/log/production.log
+  # log_and_tail /var/www/log/jobs_work.log
+  log_and_tail /var/log/apache2/error.log
+  log_and_tail /var/log/apache2/access.log
 
   echo "Starting Apache server..."
   start_background_jobs &
   apachectl -k start -DFOREGROUND
 }
-
 
 setup_development() {
   restore_db

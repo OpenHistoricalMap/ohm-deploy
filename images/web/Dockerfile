@@ -120,7 +120,6 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
 WORKDIR $workdir
 
 COPY --chown=www-data:www-data --from=builder /var/www /$workdir
-COPY --from=builder /var/www/vendor $workdir/vendor
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 COPY config/settings.yml $workdir/config/
@@ -128,9 +127,10 @@ COPY start.sh liveness.sh $workdir/
 
 RUN mkdir -p /var/www/log /var/www/tmp && \
     touch /var/www/log/production.log && \
-    chown -R www-data:www-data /var/www/log /var/www/tmp /var/www/public && \
-    chown www-data:www-data /var/www/log/production.log && \
-    chown -R root:root /var/www/vendor && \
-    chmod -R 755 /var/www/vendor
+    chown -R www-data:www-data /var/www/log /var/www/tmp /var/www/public
+
+#     chown www-data:www-data /var/www/log/production.log && \
+#     chown -R root:root /var/www/vendor && \
+#     chmod -R 755 /var/www/vendor
 
 CMD ["./start.sh"]
