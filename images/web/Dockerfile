@@ -2,9 +2,10 @@ FROM ruby:3.3-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
-    BUNDLE_PATH=/var/www/vendor/bundle \
-    GEM_HOME=/var/www/vendor/bundle \
-    GEM_PATH=/var/www/vendor/bundle \
+    BUNDLE_PATH=/usr/local/bundle \
+    GEM_HOME=/usr/local/bundle \
+    GEM_PATH=/usr/local/bundle \
+    PATH="/usr/local/bundle/bin:$PATH" \
     RAILS_ENV=production
 
 WORKDIR $workdir
@@ -14,15 +15,13 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git curl gnupg build-essential \
     libarchive-dev zlib1g-dev libcurl4-openssl-dev \
-    apache2 apache2-dev libapache2-mod-passenger libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
+    apache2 apache2-dev libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
     postgresql-client libpq-dev libxml2-dev libyaml-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip\
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g yarn svgo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN a2enmod passenger
 
 # Download OHM Website using gitsha, faster than cloning
 ENV OPENHISTORICALMAP_WEBSITE_GITSHA=59cc8669ed4e1fb49a5c2283b657a802d0f54397
@@ -82,9 +81,10 @@ FROM ruby:3.3-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
-    BUNDLE_PATH=/var/www/vendor/bundle \
-    GEM_HOME=/var/www/vendor/bundle \
-    GEM_PATH=/var/www/vendor/bundle \
+    BUNDLE_PATH=/usr/local/bundle \
+    GEM_HOME=/usr/local/bundle \
+    GEM_PATH=/usr/local/bundle \
+    PATH="/usr/local/bundle/bin:$PATH" \
     RAILS_ENV=production \
     PATH="$PATH:$GEM_HOME/bin"
 
@@ -101,7 +101,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Passenger as a gem and compile the Apache module
-ENV PATH="$PATH:$GEM_HOME/bin"
+# ENV PATH="$PATH:$GEM_HOME/bin"
 RUN gem install passenger --no-document && \
     yes | passenger-install-apache2-module --auto --languages ruby && \
     passenger-config validate-install --auto
@@ -125,12 +125,10 @@ COPY --from=builder /usr/local/bundle /usr/local/bundle
 COPY config/settings.yml $workdir/config/
 COPY start.sh liveness.sh $workdir/
 
-RUN mkdir -p /var/www/log /var/www/tmp && \
-    touch /var/www/log/production.log && \
-    chown -R www-data:www-data /var/www/log /var/www/tmp /var/www/public
+RUN ln -s /tmp /var/www/tmp
 
-#     chown www-data:www-data /var/www/log/production.log && \
-#     chown -R root:root /var/www/vendor && \
-#     chmod -R 755 /var/www/vendor
+RUN mkdir -p /var/www/log && \
+    touch /var/www/log/production.log && \
+    chown -R www-data:www-data /var/www/log /var/www/public
 
 CMD ["./start.sh"]
