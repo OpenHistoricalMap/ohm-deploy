@@ -89,28 +89,55 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="$PATH:$GEM_HOME/bin"
 
 # Install base dependencies for Passenger gem compilation and runtime
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential apache2-dev libcurl4-openssl-dev zlib1g-dev libssl-dev \
-    apache2 libapache2-mod-fcgid \
-    libpq5 libxml2 libyaml-0-2 libarchive13 file libgd-dev \
-    pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle \
-    postgresql-client curl libvips \
-    nodejs npm \
+RUN BUILD_DEPS=" \
+    build-essential \
+    apache2-dev \
+    libcurl4-openssl-dev \
+    zlib1g-dev \
+    libssl-dev \
+    libgd-dev \
+    npm \
+    " \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    $BUILD_DEPS \
+    apache2 \
+    libapache2-mod-fcgid \
+    libpq5 \
+    libxml2 \
+    libyaml-0-2 \
+    libarchive13 \
+    file \
+    pngcrush \
+    optipng \
+    advancecomp \
+    pngquant \
+    jhead \
+    jpegoptim \
+    gifsicle \
+    postgresql-client \
+    curl \
+    libvips \
+    nodejs \
+    \
     && npm install -g svgo \
-    && apt-get purge -y --auto-remove npm \
+    \
+    # Install Passenger as a gem and compile the Apache module
+    \
+    && gem install passenger --no-document \
+    && yes | passenger-install-apache2-module --auto --languages ruby \
+    && passenger-config validate-install --auto \
+    \
+    # delete the build dependencies to reduce image size
+    \
+    && apt-get purge -y --auto-remove $BUILD_DEPS \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Passenger as a gem and compile the Apache module
-# ENV PATH="$PATH:$GEM_HOME/bin"
-RUN gem install passenger --no-document && \
-    yes | passenger-install-apache2-module --auto --languages ruby && \
-    passenger-config validate-install --auto
-
-RUN passenger-install-apache2-module --snippet > /etc/apache2/mods-available/passenger.load
-RUN passenger-config build-native-support
 
 # Apache configuration
 COPY config/production.conf /etc/apache2/sites-available/production.conf
+
+RUN passenger-install-apache2-module --snippet > /etc/apache2/mods-available/passenger.load && \
+    passenger-config build-native-support
+
 RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_byrequests passenger && \
     a2dissite 000-default && \
     a2ensite production && \

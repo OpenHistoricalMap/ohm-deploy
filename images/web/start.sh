@@ -109,7 +109,7 @@ start_background_jobs() {
 log_and_tail() {
   local file=$1
   if [ -f "$file" ]; then
-    echo "🔹 Logs from: $file"
+    echo "Logs from: $file"
     tail -F "$file" &
   else
     echo "⚠️ Log file not found: $file"
