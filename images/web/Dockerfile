@@ -95,7 +95,6 @@ RUN BUILD_DEPS=" \
     libcurl4-openssl-dev \
     zlib1g-dev \
     libssl-dev \
-    libgd-dev \
     npm \
     " \
     && apt-get update && apt-get install -y --no-install-recommends \
@@ -118,6 +117,7 @@ RUN BUILD_DEPS=" \
     curl \
     libvips \
     nodejs \
+    libgd-dev \
     \
     && npm install -g svgo \
     \
