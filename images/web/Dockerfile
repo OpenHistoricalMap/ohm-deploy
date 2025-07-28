@@ -137,7 +137,7 @@ RUN BUILD_DEPS=" \
     \
     # Final cleanup
     \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
 # Apache configuration
