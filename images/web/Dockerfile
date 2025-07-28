@@ -99,6 +99,7 @@ RUN BUILD_DEPS=" \
     " \
     && apt-get update && apt-get install -y --no-install-recommends \
     $BUILD_DEPS \
+    libgd-dev \
     apache2 \
     libapache2-mod-fcgid \
     libpq5 \
@@ -117,7 +118,6 @@ RUN BUILD_DEPS=" \
     curl \
     libvips \
     nodejs \
-    libgd-dev \
     \
     && npm install -g svgo \
     \
@@ -127,10 +127,18 @@ RUN BUILD_DEPS=" \
     && yes | passenger-install-apache2-module --auto --languages ruby \
     && passenger-config validate-install --auto \
     \
-    # delete the build dependencies to reduce image size
+    # Delete the build dependencies to reduce image size
     \
     && apt-get purge -y --auto-remove $BUILD_DEPS \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    \
+    # libgd-dev is requiered by the app on run time to process gps files
+    \
+    && apt-get update && apt-get install -y --no-install-recommends libgd3 libgd-dev \
+    \
+    # Final cleanup
+    \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+
 
 # Apache configuration
 COPY config/production.conf /etc/apache2/sites-available/production.conf
@@ -156,6 +164,7 @@ RUN ln -s /tmp /var/www/tmp
 
 RUN mkdir -p /var/www/log && \
     touch /var/www/log/production.log && \
-    chown -R www-data:www-data /var/www/log /var/www/public
+    chown -R www-data:www-data /var/www/log /var/www/public && \
+    chown -R www-data:www-data /var/www
 
 CMD ["./start.sh"]
