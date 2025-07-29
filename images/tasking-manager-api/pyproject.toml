@@ -2,7 +2,7 @@
 name = "TaskingManager"
 version = "0.1.0"
 description = "The tool to team up for mapping in OpenStreetMap"
-authors = [{ name = "HOT Sysadmin", email = "sysadmin@hotosm.org" }]
+authors = [{ name = "HOT Sysadmin", email = "admin@openhistoricalmap.org" }]
 readme = "README.md"
 license = { text = "BSD-2-Clause" }
 requires-python = ">=3.9,<=3.11"

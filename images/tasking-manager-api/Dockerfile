@@ -9,7 +9,7 @@ ARG APP_VERSION=5.1.0
 ARG DOCKERFILE_VERSION=1.0.0 
 ARG DEBIAN_IMG_TAG
 ARG PYTHON_IMG_TAG
-ARG MAINTAINER=sysadmin@hotosm.org
+ARG MAINTAINER=admin@openhistoricalmap.org
 
 LABEL org.hotosm.tasks.app-version="${APP_VERSION}" \
     org.hotosm.tasks.debian-img-tag="${DEBIAN_IMG_TAG}" \
