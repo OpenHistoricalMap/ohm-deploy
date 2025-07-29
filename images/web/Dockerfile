@@ -21,12 +21,12 @@ RUN apt-get update && \
 RUN a2enmod passenger
 
 # Clone OHM Website
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=59cc8669ed4e1fb49a5c2283b657a802d0f54397
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=497462cb51d1184da292defb79a5459815c657ec
 RUN rm -rf $workdir/* && \
     git clone https://github.com/OpenHistoricalMap/ohm-website.git $workdir && \
     cd $workdir && \
     git checkout $OPENHISTORICALMAP_WEBSITE_GITSHA && \
-    echo '202507 upstream catchup: Vendoring in iD' && \
+    echo '202507 upstream catchup: fixing timeslider cyclical reload' && \
     git fetch && rm -rf .git
 
 # Install Ruby/Node dependencies
