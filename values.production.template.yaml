@@ -152,7 +152,7 @@ osm-seed:
       RAILS_CREDENTIALS_YML_ENC: {{PRODUCTION_RAILS_CREDENTIALS_YML_ENC}}
       RAILS_MASTER_KEY: {{PRODUCTION_RAILS_MASTER_KEY}}
       RAILS_ENV: production
-      RAILS_LOG_LEVEL: info
+      RAILS_LOG_LEVEL: warn
       RAILS_STORAGE_SERVICE: s3
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
@@ -258,6 +258,7 @@ osm-seed:
       PLANET_EXPORT_METHOD: planet-dump-ng
       DUMP_CLOUD_URL: s3://osmseed-production-db/database/web-api-db/state.txt
       PLANET_EPOCH_DATE: '1970-01-01'
+      PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
     resources:
       enabled: false
       requests:
@@ -285,6 +286,7 @@ osm-seed:
       PLANET_EXPORT_METHOD: planet-dump-ng
       DUMP_CLOUD_URL: s3://osmseed-production-db/database/web-api-db/state.txt
       PLANET_EPOCH_DATE: '1970-01-01'
+      PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
     resources:
       enabled: false
       requests:
@@ -721,7 +723,7 @@ osm-seed:
       # The following environment variables are for future versions of TM
       TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
       TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
-      TM_DEFAULT_CHANGESET_COMMENT: production
+      TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
       TM_REDIRECT_URI: https://tm-api.openhistoricalmap.org/authorized
       TM_SCOPE: 'read_prefs write_api'
       # Add extra info

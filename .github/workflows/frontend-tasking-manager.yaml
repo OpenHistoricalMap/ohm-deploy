@@ -13,63 +13,58 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - name: Set environment variables - Staging
-        if: github.ref == 'refs/heads/staging'
-        uses: allenevans/set-env@v2.0.0
+      - name: Set environment variables - Common
+        uses: allenevans/set-env@v4.0.0
         with:
           TM_ORG_NAME: OpenHistoricalMap
           TM_ORG_CODE: OHM
+          TM_ORG_TWITTER: https://twitter.com/OpenHistMap
+          TM_ORG_GITHUB: https://github.com/openhistoricalmap
+          TM_EMAIL_FROM_ADDRESS: admin@openhistoricalmap.org
+          TM_EMAIL_CONTACT_ADDRESS: admin@openhistoricalmap.org
+          TM_DEFAULT_LOCALE: en
+          TM_IMPORT_MAX_FILESIZE: 3e+06
+          TM_MAX_AOI_AREA: 15000
+          TM_SCOPE: "read_prefs write_api"
+          TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
+
+      - name: Set environment variables - Staging
+        if: github.ref == 'refs/heads/staging'
+        uses: allenevans/set-env@v4.0.0
+        with:
           TM_ORG_URL: staging.openhistoricalmap.org
           TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
-          TM_ORG_GITHUB: github.com/openhistoricalmap
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
           POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
-          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
-          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
-          TM_DEFAULT_LOCALE: en
           TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
           TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
-          TM_IMPORT_MAX_FILESIZE: 3e+06
-          TM_MAX_AOI_AREA: 15000
           TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
           TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
-          TM_DEFAULT_CHANGESET_COMMENT: staging
           TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
-          TM_SCOPE: "read_prefs write_api"
-          TM_APP_API_VERSION: v4
+          TM_APP_API_VERSION: v2
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: E38F009PE1FJVW
-          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.openhistoricalmap.org/api/v4/system/statistics/
+          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.staging.openhistoricalmap.org/api/v2/system/statistics/
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
-        uses: allenevans/set-env@v2.0.0
+        uses: allenevans/set-env@v4.0.0
         with:
-          TM_ORG_NAME: OpenHistoricalMap
-          TM_ORG_CODE: OHM
           TM_ORG_URL: www.openhistoricalmap.org
           TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
-          TM_ORG_GITHUB: github.com/openhistoricalmap
           OSM_SERVER_URL: https://www.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
           POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
-          TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
-          TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
-          TM_DEFAULT_LOCALE: en
           TM_APP_API_URL: https://tm-api.openhistoricalmap.org
           TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
-          TM_IMPORT_MAX_FILESIZE: 3e+06
-          TM_MAX_AOI_AREA: 15000
           TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
           TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
-          TM_DEFAULT_CHANGESET_COMMENT: staging
           TM_REDIRECT_URI: https://tasks.openhistoricalmap.org/authorized
-          TM_SCOPE: "read_prefs write_api"
           TM_APP_API_VERSION: v4
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: E2J02LH05GBWB0
@@ -79,7 +74,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/tasking-manager
-          ref: e46312695718f723f109b2f2262d708fceeebdd5
+          ref: fc935876d43430c55c2c74601c6b46d1e3eda8fa
           path: tasking-manager
 
       - name: Debug Checkout

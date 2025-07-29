@@ -154,7 +154,7 @@ osm-seed:
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
         MAILER_FROM: ohm-admins@googlegroups.com
-        NOMINATIM_URL: nominatim.staging.openhistoricalmap.org
+        NOMINATIM_URL: nominatim.openhistoricalmap.org
         OVERPASS_URL: overpass-api.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
@@ -163,7 +163,7 @@ osm-seed:
         RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
         RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
         RAILS_ENV: production
-        RAILS_LOG_LEVEL: debug
+        RAILS_LOG_LEVEL: warn
         RAILS_STORAGE_SERVICE: s3
         RAILS_STORAGE_REGION: us-east-1
         RAILS_STORAGE_BUCKET: ohm-website-staging
@@ -251,12 +251,13 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job_xlarge
-      schedule: '0 3 * * *'
+      schedule: '* * * * *'
       env:
         OVERWRITE_PLANET_FILE: false
         PLANET_EXPORT_METHOD: planet-dump-ng
         DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
         PLANET_EPOCH_DATE: '1970-01-01'
+        PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
       resources:
         enabled: false
   
@@ -276,6 +277,7 @@ osm-seed:
         PLANET_EXPORT_METHOD: planet-dump-ng
         DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
         PLANET_EPOCH_DATE: '1970-01-01'
+        PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
       resources:
         enabled: false
 
@@ -602,7 +604,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
-        AWS_ElasticBlockStore_volumeID: vol-0a434d40790ae216f
+        AWS_ElasticBlockStore_volumeID: vol-025e56094aa8e705b
         AWS_ElasticBlockStore_size: 20Gi
       resources:
         enabled: false
@@ -628,7 +630,7 @@ osm-seed:
         TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
         TM_ORG_GITHUB: github.com/openhistoricalmap
         OSM_SERVER_URL: https://staging.openhistoricalmap.org
-        OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
+        OSM_NOMINATIM_SERVER_URL: https://nominatim.openhistoricalmap.org
         OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
         ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
         POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
@@ -643,12 +645,12 @@ osm-seed:
         TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
-        TM_APP_API_VERSION: v4
+        TM_APP_API_VERSION: v2
         # The following environment variables are for future versions of TM
         TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
         TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
-        TM_DEFAULT_CHANGESET_COMMENT: 'Staging comments'
-        TM_REDIRECT_URI: https://tm-api.staging.openhistoricalmap.org/authorized
+        TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
+        TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
         TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com

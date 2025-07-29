@@ -106,10 +106,20 @@ start_background_jobs() {
   done
 }
 
+log_and_tail() {
+  local file=$1
+  if [ -f "$file" ]; then
+    echo "Logs from: $file"
+    tail -F "$file" &
+  else
+    echo "⚠️ Log file not found: $file"
+  fi
+}
+
 setup_production() {
   setup_env_vars
 
-  ## Update map styles. This line should be removed later, as the configuration should come from the module.
+  # Update map styles. This line should be removed later, as the configuration should come from the module.
   SERVER_URL_="${SERVER_URL/www./}"
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|openhistoricalmap.github.io|${SERVER_URL}|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
@@ -118,7 +128,16 @@ setup_production() {
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
 
   # Replace URLs in the public directory
-  find "/var/www/public" -type f | while read -r file; do
+  find "/var/www/public" -type f \( \
+      -name "mapstyle.js" -o \
+      -name "index.html" -o \
+      -name "index-layeroptions-tegola-ohm-*.js" -o \
+      -name "application-*.js" -o \
+      -name "embed-*.js" -o \
+      -name "ohm.style-*.js" -o \
+      -name "id-*.js" -o \
+      -name "index-*.js" \
+  \) | while read -r file; do
     echo "Updating $file"
     sed -i.bak \
       -e "s|openhistoricalmap.github.io|${SERVER_URL}|g" \
@@ -134,8 +153,8 @@ setup_production() {
     sleep 2
   done
 
-  # echo "Running asset precompilation..."
-  # time bundle exec rake i18n:js:export assets:precompile
+  # Create the /passenger-instreg directory if it doesn’t exist. This is required in newer versions of Passenger.
+  mkdir -p /var/run/passenger-instreg
 
   echo "Copying static assets..."
   cp "$workdir/public/leaflet-ohm-timeslider-v2/assets/"* "$workdir/public/assets/"
@@ -148,11 +167,16 @@ setup_production() {
     ./cgimap.sh
   fi
 
-  echo "Starting Apache server..."
-  apachectl -k start -DFOREGROUND &
-  start_background_jobs
-}
+  echo "Logging and tailing logs..."
+  # log_and_tail /var/www/log/production.log
+  # log_and_tail /var/www/log/jobs_work.log
+  log_and_tail /var/log/apache2/error.log
+  log_and_tail /var/log/apache2/access.log
 
+  echo "Starting Apache server..."
+  start_background_jobs &
+  apachectl -k start -DFOREGROUND
+}
 
 setup_development() {
   restore_db

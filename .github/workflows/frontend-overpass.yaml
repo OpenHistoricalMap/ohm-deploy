@@ -21,7 +21,7 @@ jobs:
 
       - name: Set environment variables - Staging
         if: github.ref == 'refs/heads/staging'
-        uses: allenevans/set-env@v2.0.0
+        uses: allenevans/set-env@v4.0.0
         with:
           OVERPASS_API: overpass-api.openhistoricalmap.org
           OVERPASS_BUCKET: overpass-turbo-staging.openhistoricalmap.org
@@ -29,7 +29,7 @@ jobs:
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
-        uses: allenevans/set-env@v2.0.0
+        uses: allenevans/set-env@v4.0.0
         with:
           OVERPASS_API: overpass-api.openhistoricalmap.org
           OVERPASS_BUCKET: overpass-turbo.openhistoricalmap.org
@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: 1e78c2d2bd138e7debd3933681efd3460afdd767
+          ref: e05586bf081d26dcfa53f3cf269afe8c30e79af1
           path: overpass-turbo
 
       - name: Enable Corepack
