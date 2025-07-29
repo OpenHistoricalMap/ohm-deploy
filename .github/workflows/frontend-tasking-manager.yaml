@@ -65,10 +65,10 @@ jobs:
           TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
           TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
           TM_REDIRECT_URI: https://tasks.openhistoricalmap.org/authorized
-          TM_APP_API_VERSION: v4
+          TM_APP_API_VERSION: v2
           AWS_S3_BUCKET: tasks.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: E2J02LH05GBWB0
-          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.openhistoricalmap.org/api/v4/system/statistics
+          REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.staging.openhistoricalmap.org/api/v2/system/statistics/
           
       - name: Checkout tasking-manager repo
         uses: actions/checkout@v4
