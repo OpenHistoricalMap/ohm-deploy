@@ -99,7 +99,7 @@ networks:
 volumes:
   tiler_staging_pgdata:
     driver: local
-    name: tiler_db_08_07_2025
+    name: tiler_db_29_07_2025_v2
   tiler_staging_imposmdata:
     driver: local
-    name: tiler_imposm_08_07_2025
+    name: tiler_imposm_29_07_2025_v2
