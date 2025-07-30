@@ -24,8 +24,8 @@ services:
     #   timeout: 30s 
     #   retries: 3   
     #   start_period: 14400s
-    mem_limit: 4g
-    cpus: 10
+    mem_limit: 8g
+    cpus: 16
     networks:
       - overpasss_network_production
 networks:

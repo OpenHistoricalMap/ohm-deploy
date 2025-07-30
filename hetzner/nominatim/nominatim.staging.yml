@@ -26,7 +26,7 @@ services:
     env_file:
       - /staging/.env.nominatim
     restart: always
-    mem_limit: 10g
+    mem_limit: 4g
     cpus: 4.0
     networks:
       - nominatim_network_staging
