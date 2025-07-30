@@ -23,3 +23,4 @@ hetzner/.env.staging
 values.dev.staging.yaml
 images/tiler-server/utils/exec.sh
 __pycache__/
+**/.env.*
