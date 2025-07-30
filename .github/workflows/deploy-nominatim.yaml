@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-      - staging
-      - deploy_nominatim
+      # - staging
+      # - deploy_nominatim
 jobs:
   deploy:
     runs-on: ubuntu-latest

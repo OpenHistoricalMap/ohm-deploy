@@ -43,3 +43,77 @@ docker compose -f hetzner/tiler.staging.yml up -d
 
 # Enable Language Monitoring
 To enable language monitoring, we need to start the container tiler_monitor_*, which is connected to the Docker socket (docker.sock). This allows it to start and manage other containers from within the monitoring container.
+
+
+Here’s your README section rewritten in clearer English and with improved formatting:
+
+
+---
+
+# Nominatim Deployment
+
+Nominatim API and UI are automatically deployed through GitHub Actions. However, you can also deploy it manually:
+
+
+### Staging
+
+```sh
+cd /staging/nominatim
+docker compose -f hetzner/nominatim/nominatim.staging.yml up -d
+
+```
+For the staging environment, the exposed ports are:
+	•	API: 8081
+	•	Nominatim UI: 8082
+
+
+### Production
+
+In production, Nominatim is currently limited to:
+	•	Memory: 10g (mem_limit)
+	•	CPUs: 4.0 (cpus)
+
+```sh
+cd /production/nominatim
+docker compose -f hetzner/nominatim.production.yml up
+```
+
+For the production environment, the exposed ports are:
+	•	API: 8083
+	•	Nominatim UI: 8084
+
+
+Since both environments run on the same server, these ports must be configured correctly in the values.staging.template.yaml and values.production.template.yaml file to avoid conflicts.
+
+---
+
+# Overpass API Deployment
+
+Overpass API is automatically deployed through GitHub Actions. However, you can also deploy it manually.
+
+
+### Staging
+
+```sh
+cd /staging/overpass
+docker compose -f hetzner/overpass/overpass.staging.yml up -d
+
+```
+For the staging environment, the exposed port is 8085
+
+### Production
+
+```sh
+cd /production/overpass
+docker compose -f hetzner/overpass/overpass.production.yml up -d
+
+```
+For the production environment, the exposed port is 8086
+
+Make sure you set the right ports in values.staging.template.yaml and values.production.template.yaml file to avoid conflicts.
+
+
+---
+**Note:** 
+
+Staging containers may be disabled by default. To stop deployments for staging or production, comment out or disable the corresponding branch in the relevant GitHub Actions workflow file.

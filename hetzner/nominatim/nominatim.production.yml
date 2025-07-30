@@ -26,12 +26,8 @@ services:
     env_file:
       - /production/.env.nominatim
     restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-      start_period: 14400s
+    mem_limit: 10g
+    cpus: 4.0
     networks:
       - nominatim_network_production
 

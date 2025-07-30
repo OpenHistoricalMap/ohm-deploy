@@ -17,14 +17,16 @@ services:
     env_file:
       - .env.overpass
     restart: always
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+    #   interval: 30s
+    #   timeout: 30s 
+    #   retries: 3   
+    #   start_period: 14400s
+    mem_limit: 4g
+    cpus: 10
     networks:
       - overpasss_network_production
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
-      interval: 30s
-      timeout: 30s 
-      retries: 3   
-      start_period: 14400s
 networks:
   overpasss_network_production:
     driver: bridge
