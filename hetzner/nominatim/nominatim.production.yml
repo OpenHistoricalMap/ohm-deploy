@@ -43,6 +43,7 @@ services:
       - /bin/sh
       - -c
       - |
+        set -x && \
         echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.openhistoricalmap.org/';" \
         >> /usr/share/nginx/html/ui/theme/config.theme.js && \
         nginx -g "daemon off;"
