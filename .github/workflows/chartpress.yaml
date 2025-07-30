@@ -100,6 +100,7 @@ jobs:
           STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
           STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
           STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
+
           ## tiler
           STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
@@ -107,16 +108,24 @@ jobs:
           STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
           STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
+
           ## tm
           STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
           STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
+
           ## nominatim
           STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          STAGING_NOMINATIM_HOST: ${{ secrets.STAGING_NOMINATIM_HOST }}
+
+          ## Overpass api external service
+          STAGING_OVERPASS_HOST: ${{ secrets.STAGING_OVERPASS_HOST }}
+
           ## osmcha
           STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
           STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+
           # ohm website
           STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
           STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
@@ -148,6 +157,7 @@ jobs:
           PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
           PRODUCTION_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.PRODUCTION_RAILS_CREDENTIALS_YML_ENC }}
           PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
+
           ## tiler
           PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_SERVER_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
@@ -155,24 +165,28 @@ jobs:
           PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
           PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+
           ## tm
-          # PRODUCTION_TM_API_CONSUMER_KEY: ${{ secrets.PRODUCTION_TM_API_CONSUMER_KEY }}
-          # PRODUCTION_TM_API_CONSUMER_SECRET: ${{ secrets.PRODUCTION_TM_API_CONSUMER_SECRET }}
           PRODUCTION_TM_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_DB_PASSWORD }}
           PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
-          # PRODUCTION_TM_CLIENT_ID: ${{secrets.PRODUCTION_TM_CLIENT_ID}}
-          # PRODUCTION_TM_CLIENT_SECRET: ${{secrets.PRODUCTION_TM_CLIENT_SECRET}}
-          ## nominatim
+
+          ## nominatim and nominatim external service ip
           PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_NOMINATIM_HOST: ${{ secrets.PRODUCTION_NOMINATIM_HOST }}
+
+          ## Overpass api external service
+          PRODUCTION_OVERPASS_HOST: ${{ secrets.PRODUCTION_OVERPASS_HOST }}
+
           ## osmcha
           PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+
           # ohm website
           PRODUCTION_OPENSTREETMAP_AUTH_ID: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_ID }}
           PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
-
+          
       - name: AWS Credentials
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
         uses: aws-actions/configure-aws-credentials@v1

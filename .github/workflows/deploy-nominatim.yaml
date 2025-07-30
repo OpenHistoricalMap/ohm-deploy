@@ -1,0 +1,130 @@
+name: Deploy nominatim in Hetzner Cloud
+
+on:
+  push:
+    branches:
+      - main
+      # - staging
+      # - deploy_nominatim
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
+
+    - name: Add EC2 host to known_hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Create .env file with all variables
+      run: |
+        # Get branch name
+        BRANCH_NAME="${GITHUB_REF##*/}"
+        echo "BRANCH_NAME=${BRANCH_NAME}" > .env
+        echo "REPO=${{ github.repository }}" >> .env
+
+        case "$BRANCH_NAME" in
+          staging|deploy_nominatim)
+            ENVIRONMENT="staging"
+            REMOTE_APP_DIR="/staging/nominatim"
+            echo "ENVIRONMENT=$ENVIRONMENT" >> .env
+            echo "REMOTE_APP_DIR=$REMOTE_APP_DIR" >> .env
+            echo "NOMINATIM_PASSWORD=${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}" >> .env
+            ;;
+          main)
+            ENVIRONMENT="production"
+            REMOTE_APP_DIR="/production/nominatim"
+            echo "ENVIRONMENT=$ENVIRONMENT" >> .env
+            echo "REMOTE_APP_DIR=$REMOTE_APP_DIR" >> .env
+            echo "NOMINATIM_PASSWORD=${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}" >> .env
+            ;;
+          *)
+            echo "Unknown branch: $BRANCH_NAME"
+            exit 1
+            ;;
+        esac
+        echo ".env file created for branch: $BRANCH_NAME"
+        echo "REMOTE_APP_DIR=$REMOTE_APP_DIR" >> $GITHUB_ENV
+        echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+        echo "------------------------------------------"
+
+    - name: Deploy nominatim app
+      run: |
+        scp -o StrictHostKeyChecking=no .env root@${{ secrets.HETZNER_HOST }}:/tmp/.env.nominatim
+        ssh root@${{ secrets.HETZNER_HOST }} <<'EOF'
+          set -e
+          echo "Starting app deployment..."
+
+          set -o allexport
+          source /tmp/.env.nominatim
+          set +o allexport
+
+          TARGET_DIR="$REMOTE_APP_DIR/hetzner/nominatim"
+          ENV_FILE="$TARGET_DIR/.env.nominatim"
+
+          echo "-----------------------------------------"
+          echo "Clone or update $BRANCH_NAME"
+          if [ ! -d "$REMOTE_APP_DIR/.git" ]; then
+            echo "Repo not found. Cloning..."
+            git clone -b $BRANCH_NAME https://github.com/$REPO.git $REMOTE_APP_DIR
+            cd $REMOTE_APP_DIR
+          else
+            cd $REMOTE_APP_DIR
+            git reset --hard HEAD
+            git fetch origin
+            git checkout $BRANCH_NAME
+            git pull origin $BRANCH_NAME
+          fi
+
+          echo "-----------------------------------------"
+          echo "Checking if $ENV_FILE has changed"
+
+          if [ -f "$ENV_FILE" ]; then
+            if cmp -s /tmp/.env.nominatim "$ENV_FILE"; then
+              echo "No changes in $ENV_FILE"
+              ENV_CHANGED=false
+            else
+              echo "$ENV_FILE has changed. Updating..."
+              cp /tmp/.env.nominatim "$ENV_FILE"
+              ENV_CHANGED=true
+            fi
+          else
+            echo "No existing $ENV_FILE found. Copying new one..."
+            cp /tmp/.env.nominatim "$ENV_FILE"
+            ENV_CHANGED=true
+          fi
+
+          echo "-----------------------------------------"
+          echo "Checking for changes in $TARGET_DIR/nominatim.$ENVIRONMENT.yml"
+
+          # Get list of changed files since last pull
+          CHANGED_FILES=$(git diff --name-only HEAD@{1} HEAD || echo "")
+          echo "Changed files since last update:"
+          echo "$CHANGED_FILES"
+
+          TARGET_FILE="hetzner/nominatim/nominatim.$ENVIRONMENT.yml"
+          if echo "$CHANGED_FILES" | grep -q "^$TARGET_FILE\$"; then
+            echo "$TARGET_FILE changed"
+            FILE_CHANGED=true
+          else
+            echo "No changes in $TARGET_FILE"
+            FILE_CHANGED=false
+          fi
+
+          echo "-----------------------------------------"
+          if [ "$ENV_CHANGED" = true ] || [ "$FILE_CHANGED" = true ]; then
+            echo "Changes detected. Building and redeploying..."
+            docker compose -f $TARGET_FILE build --pull --no-cache
+            docker compose -f $TARGET_FILE up -d --force-recreate
+            echo "Deployment finished in $REMOTE_APP_DIR"
+          else
+            echo "No relevant changes. Skipping Docker build and redeploy."
+          fi
+
+          echo "-----------------------------------------"
+          docker ps | grep nominatim || echo "Nominatim container not running"
+        EOF

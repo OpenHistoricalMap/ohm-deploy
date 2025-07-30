@@ -1,0 +1,58 @@
+services:
+  nominatim_production:
+    image: developmentseed/osmseed-nominatim:0.1.0-0.dev.git.956.h49d677b
+    container_name: nominatim_production
+    ports:
+      - '8083:8080'
+    volumes:
+      - nominatim_data:/var/lib/postgresql/16/main
+    environment:
+      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250716_0101.osm.pbf
+      REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
+      REPLICATION_UPDATE_INTERVAL: 60
+      REPLICATION_RECHECK_INTERVAL: 30
+      THREADS: 8
+      FREEZE: false
+      IMPORT_WIKIPEDIA: false
+      IMPORT_US_POSTCODES: false
+      IMPORT_GB_POSTCODES: false
+      IMPORT_TIGER_ADDRESSES: false
+      PGDATA: /var/lib/postgresql/16/main
+      OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
+      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
+      UPDATE_MODE: continuous
+      IMPORT_STYLE: extratags
+      EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edt"
+    env_file:
+      - /production/.env.nominatim
+    restart: always
+    mem_limit: 16g
+    cpus: 4.0
+    networks:
+      - nominatim_network_production
+
+  nominatim_ui_production:
+    image: ghcr.io/openhistoricalmap/nominatim-ui:a469b5e
+    container_name: nominatim_ui_production
+    ports:
+      - '8084:80'
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -x && \
+        echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.openhistoricalmap.org/';" \
+        >> /usr/share/nginx/html/ui/theme/config.theme.js && \
+        nginx -g "daemon off;"
+    restart: always
+    networks:
+      - nominatim_network_production
+
+networks:
+  nominatim_network_production:
+    driver: bridge
+volumes:
+  nominatim_data:
+    driver: local
+    name: nominatim_db_18_07_2025
+    

@@ -25,7 +25,7 @@ jobs:
         with:
           OVERPASS_API: overpass-api.openhistoricalmap.org
           OVERPASS_BUCKET: overpass-turbo-staging.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_OVERPASS_CLOUDFRONT_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: EK1WJAGU1DEAZ
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
@@ -33,7 +33,7 @@ jobs:
         with:
           OVERPASS_API: overpass-api.openhistoricalmap.org
           OVERPASS_BUCKET: overpass-turbo.openhistoricalmap.org
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PRODUCTION_OVERPASS_CLOUDFRONT_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: E24URY7SKM2LDD
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

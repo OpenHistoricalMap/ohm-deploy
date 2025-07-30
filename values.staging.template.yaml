@@ -667,6 +667,11 @@ osm-seed:
   # ====================================================================================================
     nominatimUI:
       enabled: true
+      ## Enable external service
+      externalService:
+        enabled: true
+        ip: {{STAGING_NOMINATIM_HOST}}
+        port: 8082
       image:
         name: ghcr.io/openhistoricalmap/nominatim-ui
         tag: a469b5e
@@ -674,7 +679,12 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: false
+      enabled: true
+      ## Enable external service
+      externalService:
+        enabled: true
+        ip: {{STAGING_NOMINATIM_HOST}}
+        port: 8081
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -715,7 +725,12 @@ osm-seed:
   # Variables for overpass-api
   # ====================================================================================================
     overpassApi:
-      enabled: false
+      enabled: true
+      ## Enable external service
+      externalService:
+        enabled: true
+        ip: {{STAGING_OVERPASS_HOST}}
+        port: 8085
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
