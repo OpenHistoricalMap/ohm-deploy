@@ -1,6 +1,7 @@
 services:
   overpass_staging:
     image: developmentseed/osmseed-overpass-api:0.1.0-0.dev.git.956.h49d677b
+    container_name: overpass_staging
     ports:
       - '8085:80'
     volumes:

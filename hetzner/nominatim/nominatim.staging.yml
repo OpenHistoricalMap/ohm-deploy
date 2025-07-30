@@ -1,6 +1,7 @@
 services:
   nominatim_staging:
     image: developmentseed/osmseed-nominatim:0.1.0-0.dev.git.956.h49d677b
+    container_name: nominatim_staging
     ports:
       - '8081:8080'
     volumes:
@@ -22,7 +23,6 @@ services:
       UPDATE_MODE: continuous
       IMPORT_STYLE: extratags
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edt"
-      NOMINATIM_PASSWORD: ${NOMINATIM_PASSWORD}
     env_file:
       - /staging/.env.nominatim
     restart: always
@@ -33,6 +33,7 @@ services:
 
   nominatim_ui_staging:
     image: ghcr.io/openhistoricalmap/nominatim-ui:a469b5e
+    container_name: nominatim_ui_staging
     ports:
       - '8082:80'
     command:

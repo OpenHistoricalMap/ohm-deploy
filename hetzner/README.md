@@ -75,7 +75,7 @@ In production, Nominatim is currently limited to:
 
 ```sh
 cd /production/nominatim
-docker compose -f hetzner/nominatim.production.yml up
+docker compose -f hetzner/nominatim/nominatim.production.yml up
 ```
 
 For the production environment, the exposed ports are:
@@ -105,8 +105,7 @@ For the staging environment, the exposed port is 8085
 
 ```sh
 cd /production/overpass
-docker compose -f hetzner/overpass/overpass.production.yml up -d
-
+docker compose -f hetzner/nominatim/nominatim.producion.yml up -d
 ```
 For the production environment, the exposed port is 8086
 
