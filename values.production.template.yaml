@@ -749,7 +749,7 @@ osm-seed:
     enabled: true
     ## Enable external service
     externalService:
-      enabled: false
+      enabled: true
       ip: {{PRODUCTION_NOMINATIM_HOST}}
       port: 8084
     image:
@@ -762,7 +762,7 @@ osm-seed:
     enabled: true
     ## Enable external service
     externalService:
-      enabled: false
+      enabled: true
       ip: {{PRODUCTION_NOMINATIM_HOST}}
       port: 8083
     priorityClass: 'medium-priority'
@@ -817,7 +817,7 @@ osm-seed:
     enabled: true
     ## Enable external service
     externalService:
-      enabled: false
+      enabled: true
       ip: {{PRODUCTION_OVERPASS_HOST}}
       port: 8086
     priorityClass: 'medium-priority'

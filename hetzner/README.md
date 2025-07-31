@@ -97,6 +97,9 @@ Overpass API is automatically deployed through GitHub Actions. However, you can 
 ```sh
 cd /staging/overpass
 docker compose -f hetzner/overpass/overpass.staging.yml up -d
+# Make sure you have the correct permissions for the database.
+# docker exec -it overpass_staging bash
+# chmod -R u+rwX,g+rX,o+rX /db
 
 ```
 For the staging environment, the exposed port is 8085
@@ -105,7 +108,7 @@ For the staging environment, the exposed port is 8085
 
 ```sh
 cd /production/overpass
-docker compose -f hetzner/nominatim/nominatim.producion.yml up -d
+docker compose -f hetzner/overpass/overpass.production.yml up -d
 ```
 For the production environment, the exposed port is 8086
 
