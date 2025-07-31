@@ -152,6 +152,9 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     apache2ctl configtest
 
+RUN echo '#!/bin/bash\nexec /usr/local/bin/ruby --yjit --yjit-mem-size=64 "$@"' > /usr/local/bin/ruby_yjit && \
+    chmod +x /usr/local/bin/ruby_yjit
+
 WORKDIR $workdir
 
 COPY --chown=www-data:www-data --from=builder /var/www /$workdir
