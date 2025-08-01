@@ -45,7 +45,7 @@ jobs:
           TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
           TM_REDIRECT_URI: https://tasks.staging.openhistoricalmap.org/authorized
           TM_APP_API_VERSION: v2
-          AWS_S3_BUCKET: tasks.staging.openhistoricalmap.org
+          AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: E38F009PE1FJVW
           REACT_APP_HOMEPAGE_STATS_API_URL: https://tm-api.staging.openhistoricalmap.org/api/v2/system/statistics/
 
