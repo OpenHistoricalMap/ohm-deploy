@@ -138,7 +138,7 @@ osm-seed:
       enabled: true
       priorityClass: "high-priority"
       nodeSelector:
-        enabled: false
+        enabled: true
         label_key: nodegroup_type
         label_value: web_medium
       replicaCount: 1
@@ -586,13 +586,13 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
         tag: "14-3.3"
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
       env:
@@ -616,7 +616,7 @@ osm-seed:
       enabled: true
       priorityClass: medium-priority
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
       replicaCount: 1
