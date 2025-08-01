@@ -32,8 +32,8 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v4.0.0
         with:
-          TM_ORG_URL: staging.openhistoricalmap.org
-          TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+          TM_ORG_URL: https://staging.openhistoricalmap.org
+          TM_ORG_PRIVACY_POLICY_URL: https://staging.openhistoricalmap.org/copyright
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
@@ -53,8 +53,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v4.0.0
         with:
-          TM_ORG_URL: www.openhistoricalmap.org
-          TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
+          TM_ORG_URL: https://www.openhistoricalmap.org
+          TM_ORG_PRIVACY_POLICY_URL: https://www.openhistoricalmap.org/copyright
           OSM_SERVER_URL: https://www.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
