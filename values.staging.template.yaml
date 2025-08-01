@@ -613,7 +613,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       nodeSelector:
         enabled: true
@@ -642,7 +642,7 @@ osm-seed:
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
         TM_DEFAULT_LOCALE: en
         TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
-        TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
+        TM_APP_BASE_URL: https://tasks.staging.openhistoricalmap.org
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
         TM_APP_API_VERSION: v2
@@ -650,7 +650,7 @@ osm-seed:
         TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
         TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
         TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
-        TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
+        TM_REDIRECT_URI: https://tasks.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
         TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
