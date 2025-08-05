@@ -1,0 +1,29 @@
+services:
+  ohmx-adiff:
+    # Nombre que le daremos a la imagen construida.
+    image: ohmx-adiff:v1
+    build:
+      # Ruta al directorio donde se encuentra tu Dockerfile.
+      context: ../images/ohmx-adiff-builder
+      dockerfile: Dockerfile
+    
+    # # Reiniciará el contenedor si falla, útil para un servicio continuo.
+    # restart: unless-stopped
+
+    environment:
+      - OSMX_DB_PATH=/data/db/database.osmx
+      - PLANET_PBF_URL=https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250801_0101.osm.pbf
+      - MINUTE_REPLICATION_URL=https://planet.openhistoricalmap.org/?prefix=replication/minute/
+      - RCLONE_CONFIG=/config/rclone.conf
+
+    volumes:
+      - ohmx_db:/data
+      - ./../images/ohmx-adiff-builder/start.sh:/app/start.sh
+      - ./../images/ohmx-adiff-builder/utils:/app/utils
+
+# Definición de los volúmenes nombrados que usamos arriba.
+volumes:
+  ohmx_db:
+    driver: local
+    # El nombre es opcional si coincide con la clave, pero es buena práctica.
+    name: ohmx_db
