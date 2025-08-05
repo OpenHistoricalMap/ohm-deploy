@@ -12,16 +12,18 @@ services:
     restart: always
     networks:
       - web_network
-
   web:
     image: ohm-web:v1
     build:
       context: ./../images/web
       dockerfile: Dockerfile
     volumes:
-      - ./../../ohm-website/:/var/www/
+      - ./../../ohm-website/:/var/www
+      - bundle_data:/usr/local/bundle
+      - node_modules_data:/var/www/node_modules
       - ./../images/web/config/settings.yml:/tmp/settings.yml:rw
       - ./../images/web/start.sh:/var/www/start.sh
+      - ./../images/web/dev.sh:/var/www/dev.sh
     env_file:
       - ./../envs/.env.web
     ports:
@@ -42,3 +44,7 @@ services:
 networks:
   web_network:
     driver: bridge
+volumes:
+  bundle_data:
+  node_modules_data:
+  

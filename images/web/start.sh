@@ -178,20 +178,5 @@ setup_production() {
   apachectl -k start -DFOREGROUND
 }
 
-setup_development() {
-  restore_db
-  cp "$workdir/config/example.storage.yml" "$workdir/config/storage.yml"
-  cp /tmp/settings.yml "$workdir/config/settings.yml"
-  setup_env_vars
-  bundle exec bin/yarn install
-  bundle exec rails db:migrate --trace
-  bundle exec rake jobs:work &
-  rails server --log-to-stdout
-}
-
-####################### Setting up Development or Production mode #######################
-if [ "$ENVIRONMENT" = "development" ]; then
-  setup_development
-else
-  setup_production
-fi
+# ####################### Start up Production mode #######################
+setup_production
