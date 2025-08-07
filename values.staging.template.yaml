@@ -586,7 +586,7 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
@@ -613,7 +613,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: false
@@ -848,12 +848,12 @@ osm-seed:
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
-        tag: f5cfe9c
+        tag: 0afaf0e
 # ====================================================================================================
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
@@ -884,7 +884,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: postgis/postgis
