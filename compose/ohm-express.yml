@@ -19,7 +19,8 @@ services:
     volumes:
       - ohmx_db:/data
       - ./../images/ohmx-adiff-builder/start.sh:/app/start.sh
-      - ./../images/ohmx-adiff-builder/utils:/app/utils
+      # - ./../images/ohmx-adiff-builder/utils:/app/utils
+      # - ./../../osmx-adiff-builder/:/app/osmx-adiff-builder
 
 # Definición de los volúmenes nombrados que usamos arriba.
 volumes:
