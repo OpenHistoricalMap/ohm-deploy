@@ -4,7 +4,8 @@
 WORKDIR=/data
 
 ## Database path
-OSMX_DB_PATH=$WORKDIR/db/osmx.db
+OSMX_DB_DIR=$WORKDIR/db/
+OSMX_DB_PATH=$OSMX_DB_DIR/osmx.db
 PLANET_FILE_PATH=$WORKDIR/planet.osm.pbf
 
 ## URLs services
@@ -24,7 +25,7 @@ OSMX_INITIAL_SEQNUM=${OSMX_INITIAL_SEQNUM:-0}
 ## Process diff files from the last 60 min
 FILTER_ADIFF_FILES=60
 
-mkdir -p $REPLICATION_ADIFFS_DIR $SPLIT_ADIFFS_DIR $CHANGESET_DIR $BUCKET_DIR
+mkdir -p $OSMX_DB_DIR $REPLICATION_ADIFFS_DIR $SPLIT_ADIFFS_DIR $CHANGESET_DIR $BUCKET_DIR
 
 create_database() {
   if [ ! -f "$OSMX_DB_PATH" ]; then
@@ -99,7 +100,7 @@ upload_diff_files() {
         echo "New file: $filename — uploading"
       fi
 
-      aws s3 cp "$filepath" "s3://$AWS_S3_BUCKET/osm-augmented-diffs/$filename" \
+      aws s3 cp "$filepath" "s3://$AWS_S3_BUCKET/ohm-augmented-diffs/changesets/$filename" \
         --content-type "application/xml" \
         --content-encoding "gzip"
 

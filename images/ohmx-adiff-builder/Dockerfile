@@ -2,9 +2,9 @@ FROM ghcr.io/bdon/osmexpress:latest
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-RUN apk add --no-cache python3 py3-pip git bash xmlstarlet curl
+RUN apk add --no-cache python3 py3-pip git bash xmlstarlet curl aws-cli
 
-RUN apk add --no-cache --virtual .build-deps build-base patch python3-dev cmake zlib-dev expat-dev bzip2-dev boost-dev rust cargo && \
+RUN apk add --no-cache --virtual .build-deps build-base patch python3-dev make cmake zlib-dev expat-dev bzip2-dev boost-dev rust cargo && \
     \
     pip install --break-system-packages osmx py3-requests osmium && \
     \
@@ -20,14 +20,15 @@ RUN apk add --no-cache --virtual .build-deps build-base patch python3-dev cmake 
     cd / && \
     rm -rf /tmp/osm-cli && \
     \
-    apk del .build-deps
+    apk del .build-deps && \
+    apk add make
 
 RUN curl https://mise.jdx.dev/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
 
-RUN echo "Update repo"
+RUN echo "Update repo 08/08/2025"
 
 RUN git clone https://github.com/OpenHistoricalMap/osmx-adiff-builder.git /app
 
