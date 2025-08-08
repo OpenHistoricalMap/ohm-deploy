@@ -12,7 +12,6 @@
 -- Parameters:
 --   view_name  TEXT                      - Name of the materialized view to be created.
 --   min_area   DOUBLE PRECISION          - Minimum polygon area (in m²) for inclusion.
---   types      TEXT[] DEFAULT ARRAY['*'] - Optional filter by 'type'. '*' includes all.
 --
 -- Notes:
 --   - Drops existing view using a temporary swap pattern.
@@ -25,8 +24,7 @@ DROP FUNCTION IF EXISTS create_transport_points_centroids_mview;
 
 CREATE OR REPLACE FUNCTION create_transport_points_centroids_mview(
     view_name TEXT,
-    min_area DOUBLE PRECISION DEFAULT 0,
-    types TEXT[] DEFAULT ARRAY['*']
+    min_area DOUBLE PRECISION DEFAULT 0
 )
 RETURNS void AS $$
 DECLARE 
@@ -34,13 +32,7 @@ DECLARE
     tmp_view_name TEXT := view_name || '_tmp';
     unique_columns TEXT := 'osm_id, type, class';
     sql_create TEXT;
-    type_filter TEXT := 'TRUE';
 BEGIN
-    -- Handle type filter
-    IF NOT (array_length(types, 1) = 1 AND types[1] = '*') THEN
-        type_filter := format('type = ANY (%L)', types);
-    END IF;
-
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
         SELECT
@@ -56,7 +48,7 @@ BEGIN
             ROUND(ST_Area(geometry)::numeric)::bigint AS area_m2,
             %s
         FROM osm_transport_areas
-        WHERE name IS NOT NULL AND name <> '' AND ST_Area(geometry) > %L AND %s
+        WHERE name IS NOT NULL AND name <> '' AND ST_Area(geometry) > %L
 
         UNION ALL
 
@@ -72,9 +64,8 @@ BEGIN
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             NULL AS area_m2, 
             %s
-        FROM osm_transport_points
-        WHERE name IS NOT NULL AND name <> '' AND %s;
-    $sql$, tmp_view_name, lang_columns, min_area, type_filter, lang_columns, type_filter);
+        FROM osm_transport_points;
+    $sql$, tmp_view_name, lang_columns, min_area, lang_columns);
 
     PERFORM finalize_materialized_view(
         tmp_view_name,
@@ -89,6 +80,6 @@ $$ LANGUAGE plpgsql;
 -- Create materialized views for transport points centroids
 -- ============================================================================
 -- We include aerodrome to start at zoom 10 from https://github.com/OpenHistoricalMap/issues/issues/1083
-SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z10_13', 0, ARRAY['aerodrome']);
+SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z10_13', 0);
 
-SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z14_20', 0, ARRAY['*']);
+SELECT create_transport_points_centroids_mview('mv_transport_points_centroids_z14_20', 0);
