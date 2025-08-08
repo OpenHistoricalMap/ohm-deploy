@@ -32,18 +32,18 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         uses: allenevans/set-env@v4.0.0
         with:
-          TM_ORG_URL: staging.openhistoricalmap.org
-          TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+          TM_ORG_URL: https://staging.openhistoricalmap.org
+          TM_ORG_PRIVACY_POLICY_URL: https://staging.openhistoricalmap.org/copyright
           OSM_SERVER_URL: https://staging.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.staging.openhistoricalmap.org
           OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
           ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
           POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
           TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
-          TM_APP_BASE_URL: https://tasks-staging.openhistoricalmap.org
+          TM_APP_BASE_URL: https://tasks.staging.openhistoricalmap.org
           TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
           TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
-          TM_REDIRECT_URI: https://tasks-staging.openhistoricalmap.org/authorized
+          TM_REDIRECT_URI: https://tasks.staging.openhistoricalmap.org/authorized
           TM_APP_API_VERSION: v2
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: E38F009PE1FJVW
@@ -53,8 +53,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v4.0.0
         with:
-          TM_ORG_URL: www.openhistoricalmap.org
-          TM_ORG_PRIVACY_POLICY_URL: www.openhistoricalmap.org/copyright
+          TM_ORG_URL: https://www.openhistoricalmap.org
+          TM_ORG_PRIVACY_POLICY_URL: https://www.openhistoricalmap.org/copyright
           OSM_SERVER_URL: https://www.openhistoricalmap.org
           OSM_NOMINATIM_SERVER_URL: https://nominatim-api.openhistoricalmap.org
           OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
