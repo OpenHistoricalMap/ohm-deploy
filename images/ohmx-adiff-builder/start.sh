@@ -53,7 +53,12 @@ create_database() {
 create_diff_files() {
   while true; do
     echo "Running update.sh at $(date)..."
-    ./update.sh "$OSMX_DB_PATH" "$REPLICATION_ADIFFS_DIR"
+    if ! ./update.sh "$OSMX_DB_PATH" "$REPLICATION_ADIFFS_DIR"; then
+      echo "update.sh failed at $(date), restarting..."
+    else
+      echo "update.sh completed successfully at $(date)"
+    fi
+
     sleep 60
   done
 }
@@ -61,13 +66,18 @@ create_diff_files() {
 process_diff_files() {
   while true; do
     echo "Processing diff files at $(date)..."
-    ./process.sh \
+    if ! ./process.sh \
       "$REPLICATION_ADIFFS_DIR" \
       "$SPLIT_ADIFFS_DIR" \
       "$CHANGESET_DIR" \
       "$BUCKET_DIR" \
       "$API_URL" \
-      "$FILTER_ADIFF_FILES"
+      "$FILTER_ADIFF_FILES"; then
+      echo "process.sh failed at $(date), restarting..."
+    else
+      echo "process.sh completed successfully at $(date)"
+    fi
+
     sleep 60
   done
 }
