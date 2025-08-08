@@ -1,0 +1,24 @@
+services:
+  ohmx-adiff:
+    image: rub21/ohmx-adiff:v6
+    container_name: ohmx-adiff
+    build:
+      context: ../images/ohmx-adiff-builder
+      dockerfile: Dockerfile
+    environment:
+      - API_URL=https://api.openhistoricalmap.org
+      - PLANET_PBF_URL=https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250807_0102.osm.pbf
+      - MINUTE_REPLICATION_URL=https://planet.openhistoricalmap.org/?prefix=replication/minute/
+      - OSMX_INITIAL_SEQNUM=1683000
+      - AWS_S3_BUCKET=planet.openhistoricalmap.org
+    env_file:
+      - ../envs/.env.ohmx_addif
+    volumes:
+      - ohmx_db:/data
+      - ./../images/ohmx-adiff-builder/start.sh:/app/start.sh
+      - ./../images/ohmx-adiff-builder/utils:/app/utils
+      - ./../../osmx-adiff-builder/:/app
+volumes:
+  ohmx_db:
+    driver: local
+    name: ohmx_db
