@@ -36,3 +36,8 @@ ohm:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  ohmxAdiffBuilder:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
+      

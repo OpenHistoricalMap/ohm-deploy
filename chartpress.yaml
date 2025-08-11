@@ -20,3 +20,5 @@ charts:
         valuesPath: ohm.tilerCache.image
       tiler-monitor:
         valuesPath: ohm.tilerMonitor.image
+      ohmx-adiff-builder:
+        valuesPath: ohm.ohmxAdiffBuilder.image
