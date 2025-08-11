@@ -33,6 +33,7 @@ RUN echo "Update repo 08/08/2025"
 RUN git clone https://github.com/OpenHistoricalMap/osmx-adiff-builder.git /app
 
 COPY start.sh .
+COPY update.sh .
 
 RUN chmod +x /app/*.sh && chmod +x /app/*.py
 

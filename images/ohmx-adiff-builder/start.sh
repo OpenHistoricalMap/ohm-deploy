@@ -18,6 +18,7 @@ SPLIT_ADIFFS_DIR=$WORKDIR/stage-data/split-adiffs
 CHANGESET_DIR=$WORKDIR/stage-data/changesets
 BUCKET_DIR=$WORKDIR/stage-data/bucket-data
 UPLOAD_TRACK_FILE=$WORKDIR/stage-data/uploaded_files.md5
+BAD_CHANGESETS_DIR=$WORKDIR/stage-data/bad_changesets
 
 ## Sequence number
 OSMX_INITIAL_SEQNUM=${OSMX_INITIAL_SEQNUM:-0}
@@ -25,7 +26,7 @@ OSMX_INITIAL_SEQNUM=${OSMX_INITIAL_SEQNUM:-0}
 ## Process diff files from the last 60 min
 FILTER_ADIFF_FILES=60
 
-mkdir -p $OSMX_DB_DIR $REPLICATION_ADIFFS_DIR $SPLIT_ADIFFS_DIR $CHANGESET_DIR $BUCKET_DIR
+mkdir -p $OSMX_DB_DIR $REPLICATION_ADIFFS_DIR $SPLIT_ADIFFS_DIR $CHANGESET_DIR $BUCKET_DIR $BAD_CHANGESETS_DIR
 
 create_database() {
   if [ ! -f "$OSMX_DB_PATH" ]; then
@@ -40,7 +41,7 @@ create_database() {
     echo "Database created successfully."
 
     ## Update database with initial sequence number and get adiff files, starts at OSMX_INITIAL_SEQNU
-    ./update.sh $OSMX_DB_PATH $REPLICATION_ADIFFS_DIR $OSMX_INITIAL_SEQNUM
+    ./update.sh $OSMX_DB_PATH $REPLICATION_ADIFFS_DIR $BAD_CHANGESETS_DIR $OSMX_INITIAL_SEQNUM
     ## Start generating files with no initial sequence number
     create_diff_files
 
@@ -53,7 +54,7 @@ create_database() {
 create_diff_files() {
   while true; do
     echo "Running update.sh at $(date)..."
-    if ! ./update.sh "$OSMX_DB_PATH" "$REPLICATION_ADIFFS_DIR"; then
+    if ! ./update.sh "$OSMX_DB_PATH" "$REPLICATION_ADIFFS_DIR" "$BAD_CHANGESETS_DIR"; then
       echo "update.sh failed at $(date), restarting..."
     else
       echo "update.sh completed successfully at $(date)"
