@@ -1,6 +1,6 @@
 services:
   ohmx_adiff_producion:
-    image: rub21/ohmx-adiff:v6
+    image: ghcr.io/openhistoricalmap/ohmx-adiff-builder:0.0.1-0.dev.git.2836.hbee0465
     container_name: ohmx_adiff_producion
     environment:
       - API_URL=https://api.openhistoricalmap.org
