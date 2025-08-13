@@ -30,6 +30,17 @@ max_connections = 150
 	###### PROVIDERS
 
 ####################################
+## OHM admin boundaries areas
+####################################
+
+[[providers]]
+name = "ohm_admin_areas"
+type = "mvt_postgis"
+uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+max_connections = 25
+	###### PROVIDERS_ADMIN_BOUNDARIES_AREAS
+
+####################################
 ## Natural Earth (ne) providers
 ####################################
 [[providers]]
@@ -111,6 +122,17 @@ name = "osm"
 attribution = "OpenHistoricalMap"
 center = [-42.31214, 70.00455, 10.0]
 	###### MAPS
+
+####################################
+## OHM admin boundaries areas maps
+####################################
+[[maps]]
+name = "ohm_admin_boundaries"
+type = "mvt_postgis"
+uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+attribution = "OHM Admin Boundaries Areas"
+center = [-42.31214, 70.00455, 10.0]
+	###### MAPS_ADMIN_BOUNDARIES_AREAS
 
 ####################################
 ## Natural Earth maps
