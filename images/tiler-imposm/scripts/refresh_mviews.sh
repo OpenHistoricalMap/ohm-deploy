@@ -134,6 +134,19 @@ routes_views=(
 )
 
 
+admin_boundaries_areas_views=(
+    mv_admin_boundaries_areas_z0_2
+    mv_admin_boundaries_areas_z3_5
+    mv_admin_boundaries_areas_z6_7
+    mv_admin_boundaries_areas_z8_9
+    mv_admin_boundaries_areas_z10_12
+    mv_admin_boundaries_areas_z13_15
+    mv_admin_boundaries_areas_z16_20
+)
+
+
+
+
 refresh_mviews_group "ADMIN_BOUNDARIES_CENTROIDS" 60 "${admin_boundaries_centroids_views[@]}" &
 refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 "${admin_boundaries_lines_views[@]}" &
 refresh_mviews_group "ADMIN_MARITIME_LINES" 300 "${admin_maritime_lines_views[@]}" &
@@ -145,3 +158,4 @@ refresh_mviews_group "PLACES" 180 "${places_views[@]}" &
 refresh_mviews_group "WATER" 180 "${water_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 "${buildings_views[@]}" &
 refresh_mviews_group "ROUTES" 180 "${routes_views[@]}" &
+refresh_mviews_group "ADMIN_BOUNDARIES_AREAS" 180 "${admin_boundaries_areas_views[@]}" &
