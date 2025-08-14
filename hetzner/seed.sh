@@ -12,30 +12,7 @@ echo "Building Tegola config..."
 python "${SCRIPTS_DIR}/build_config.py" \
   --template="${CONFIG_TEMPLATE_FILE}" \
   --output="${TEGOLA_CONFIG_FILE}" \
-  --providers="${PROVIDERS_DIR}" \
-  --provider_names "
-admin_boundaries_lines,
-admin_boundaries_centroids,
-admin_boundaries_maritime,
-place_areas,
-place_points_centroids,
-water_areas,
-water_areas_centroids,
-water_lines,
-transport_areas,
-transport_lines,
-route_lines,
-transport_points_centroids,
-amenity_areas,
-amenity_points_centroids,
-buildings_areas,
-buildings_points_centroids,
-landuse_areas,
-landuse_points_centroids,
-landuse_lines,
-other_areas,
-other_points_centroids,
-other_lines"
+  --providers="${PROVIDERS_DIR}"
 
 seed_global() {
   while true; do
