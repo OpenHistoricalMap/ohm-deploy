@@ -2,7 +2,7 @@
 name = "admin_boundaries_areas_z0_2"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -26,7 +26,7 @@ WHERE
 name = "admin_boundaries_areas_z3_5"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -51,7 +51,7 @@ WHERE
 name = "admin_boundaries_areas_z6_7"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -75,7 +75,7 @@ WHERE
 name = "admin_boundaries_areas_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -99,7 +99,7 @@ WHERE
 name = "admin_boundaries_areas_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -123,7 +123,7 @@ WHERE
 name = "admin_boundaries_areas_z13_15"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -148,7 +148,7 @@ WHERE
 name = "admin_boundaries_areas_z16_20"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
-id_fieldname = "id"
+id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -171,43 +171,43 @@ WHERE
 
 #######Maps
 [[maps.layers]]
-name = "land_ohm"
-provider_layer = "osm.admin_boundaries_areas_z0_2"
+name = "boundaries"
+provider_layer = "ohm_admin.admin_boundaries_areas_z0_2"
 min_zoom = 0
 max_zoom = 2
 
 [[maps.layers]]
-name = "land_ohm"
-provider_layer = "osm.admin_boundaries_areas_z3_5"
+name = "boundaries"
+provider_layer = "ohm_admin.admin_boundaries_areas_z3_5"
 min_zoom = 3
 max_zoom = 5
 
 [[maps.layers]]
-name = "land_ohm"
-provider_layer = "osm.admin_boundaries_areas_z6_7"
+name = "boundaries"
+provider_layer = "ohm_admin.admin_boundaries_areas_z6_7"
 min_zoom = 6
 max_zoom = 7
 
 [[maps.layers]]
-name = "land_ohm"
-provider_layer = "osm.admin_boundaries_areas_z8_9"
+name = "boundaries"
+provider_layer = "ohm_admin.admin_boundaries_areas_z8_9"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
-name = "land_ohm"
-provider_layer = "osm.admin_boundaries_areas_z10_12"
+name = "boundaries"
+provider_layer = "ohm_admin.admin_boundaries_areas_z10_12"
 min_zoom = 9
 max_zoom = 10
 
 [[maps.layers]]
-name = "land_ohm"
-provider_layer = "osm.admin_boundaries_areas_z13_15"
+name = "boundaries"
+provider_layer = "ohm_admin.admin_boundaries_areas_z13_15"
 min_zoom = 11
 max_zoom = 15
 
 [[maps.layers]]
-name = "land_ohm"
-provider_layer = "osm.admin_boundaries_areas_z16_20"
+name = "boundaries"
+provider_layer = "ohm_admin.admin_boundaries_areas_z16_20"
 min_zoom = 16
 max_zoom = 20

@@ -27,14 +27,14 @@ name = "osm"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 max_connections = 150
-	###### PROVIDERS
+	###### PROVIDERS_OSM
 
 ####################################
 ## OHM admin boundaries areas
 ####################################
 
 [[providers]]
-name = "ohm_admin_areas"
+name = "ohm_admin"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 max_connections = 25
@@ -121,17 +121,15 @@ max_connections = 25
 name = "osm"
 attribution = "OpenHistoricalMap"
 center = [-42.31214, 70.00455, 10.0]
-	###### MAPS
+	###### MAPS_OSM
 
 ####################################
 ## OHM admin boundaries areas maps
 ####################################
 [[maps]]
-name = "ohm_admin_boundaries"
-type = "mvt_postgis"
-uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-attribution = "OHM Admin Boundaries Areas"
-center = [-42.31214, 70.00455, 10.0]
+name = "ohm_admin"
+attribution = "OpenHistoricalMap"
+center = [0.0, 0.0, 0.0]
 	###### MAPS_ADMIN_BOUNDARIES_AREAS
 
 ####################################
