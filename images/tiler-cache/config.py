@@ -38,7 +38,7 @@ class Config:
         map(int, os.getenv("ZOOM_LEVELS_TO_DELETE", "18,19,20").split(","))
     )
     S3_BUCKET_CACHE_TILER = os.getenv("S3_BUCKET_CACHE_TILER", "tiler-cache-staging")
-    S3_BUCKET_PATH_FILES = os.getenv("S3_BUCKET_PATH_FILES", "mnt/data/osm,mnt/data/ohm_admin")
+    S3_BUCKET_PATH_FILES = os.getenv("S3_BUCKET_PATH_FILES", "mnt/data/osm,mnt/data/ohm_admin").split(",")
 
     # AWS S3 Credentials
     TILER_CACHE_CLOUD_INFRASTRUCTURE = os.getenv(

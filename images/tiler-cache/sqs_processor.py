@@ -73,13 +73,21 @@ def process_sqs_messages():
 
                     # Proceed with cleanup
                     s3_imposm3_exp_path = body["s3_path"]
-                    cleanup_zoom_levels(
-                        s3_imposm3_exp_path=s3_imposm3_exp_path,
-                        zoom_levels=Config.ZOOM_LEVELS_TO_DELETE,
-                        bucket_name=Config.S3_BUCKET_CACHE_TILER,
-                        path_file=Config.S3_BUCKET_PATH_FILES,
-                        cleanup_type="delayed"
-                    )
+
+                    logger.info(f"Executing delayed cleanup for S3 path: {s3_imposm3_exp_path}")
+                    for path_file in Config.S3_BUCKET_PATH_FILES:
+                        logger.info(f"Executing delayed cleanup for path: {path_file}")
+                        threading.Thread(
+                            target=cleanup_zoom_levels,
+                            args=(
+                                s3_imposm3_exp_path,
+                                Config.ZOOM_LEVELS_TO_DELETE,
+                                Config.S3_BUCKET_CACHE_TILER,
+                                path_file,
+                                "delayed",
+                            ),
+                        ).start()
+
                     logger.info("Delayed cleanup executed after 1 hour.")
                     
                 if "Records" in body and body["Records"][0]["eventSource"] == "aws:s3":
@@ -92,16 +100,17 @@ def process_sqs_messages():
                     # Cleanup only if the file is an imposm3 expiration file
                     logger.info("Cleaning up tiles from S3...")
                     # Immediate cleanup
-                    threading.Thread(
-                        target=cleanup_zoom_levels,
-                        args=(
-                            s3_imposm3_exp_path,
-                            Config.ZOOM_LEVELS_TO_DELETE,
-                            Config.S3_BUCKET_CACHE_TILER,
-                            Config.S3_BUCKET_PATH_FILES,
-                            "immediate",
-                        ),
-                    ).start()
+                    for path_file in Config.S3_BUCKET_PATH_FILES:
+                        threading.Thread(
+                            target=cleanup_zoom_levels,
+                            args=(
+                                s3_imposm3_exp_path,
+                                Config.ZOOM_LEVELS_TO_DELETE,
+                                Config.S3_BUCKET_CACHE_TILER,
+                                path_file,
+                                "immediate",
+                            ),
+                        ).start()
 
                     # Send delayed cleanup via SQS with 1 hour delay
                     sqs.send_message(
