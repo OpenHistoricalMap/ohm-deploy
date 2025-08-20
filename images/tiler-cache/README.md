@@ -1,114 +1,69 @@
-# Tiler Cache purging and seeding
+# Tiler Cache Management Container
 
-This is a container that includes scripts to perform purge and seed operations. Each script must run on a different instance.
+This repository contains a containerized application designed to manage the tile cache for a map server. It provides scripts to **purging** (deleting outdated tiles based on notifications).
 
-# Seeding Tiles
+The system is designed to run in a Kubernetes environment or Docker , leveraging AWS SQS for message queuing and interacting directly with S3 for efficient cache management.
 
-This script is designed to minimize latency when users interact with OHM tiles by efficiently generating and seeding tiles across specified zoom levels. Running the entire world dataset may take a significant amount of time to generate the tile cache due to the large volume of data. so that the reson we prioritize certain areas. 
+### Core Features
 
-The script processes a GeoJSON file containing areas where tile cache generation is required and seeds tiles for OHM, ensuring optimized performance.
+*   **Tile Purging**: Listens to an SQS queue for messages about expired tiles and deletes the corresponding cache tiles directly from S3 based on the expired data's coverage.
+*   **High-Zoom S3 Deletion**: Includes an optimized process to directly delete tiles from S3 for high zoom levels (18-20), which is significantly faster than traditional purging methods.
+*   **Multi-Cloud Support**: Configurable to work with both AWS S3 and other S3-compatible object storage services like Hetzner.
 
-Usage
+## Configuration
+
+The container is configured entirely through environment variables. All variables are optional and have default values.
+
+| Variable | Description | Default Value |
+| :--- | :--- | :--- |
+| **General & SQS** |
+| `ENVIRONMENT` | The operating environment (e.g., `development`, `staging`, `production`). | `development` |
+| `SQS_QUEUE_URL` | The URL of the AWS SQS queue to listen to for purge messages. | `default-queue-url` |
+| `AWS_REGION_NAME` | The AWS region for the SQS queue. | `us-east-1` |
+| **Tiler Cache Operations** |
+| `EXECUTE_PURGE` | Set to `"true"` to enable the tile purging process. | `true` |
+| **Zoom Levels** |
+| `PURGE_MIN_ZOOM` | The minimum zoom level to purge. | `8` |
+| `PURGE_MAX_ZOOM` | The maximum zoom level to purge. | `20` |
+| `ZOOM_LEVELS_TO_DELETE` | A comma-separated list of high zoom levels to delete directly from S3. | `18,19,20` |
+| **Concurrency** |
+| `PURGE_CONCURRENCY` | The number of parallel processes to use for purging tiles. | `16` |
+| **S3 Settings** |
+| `S3_BUCKET_CACHE_TILER` | The S3 bucket where the tile cache is stored. | `tiler-cache-staging` |
+| `S3_BUCKET_PATH_FILES` | The base path(s) in the S3 bucket for tiles to be deleted (comma-separated). | `mnt/data/osm,mnt/data/ohm_admin` |
+| **Cloud Infrastructure & Credentials** |
+| `TILER_CACHE_CLOUD_INFRASTRUCTURE` | The cloud provider for S3. Can be `aws` or `hetzner`. | `aws` |
+| `TILER_CACHE_AWS_ACCESS_KEY_ID` | The access key for your S3-compatible storage (required for `hetzner`). | `""` |
+| `TILER_CACHE_AWS_SECRET_ACCESS_KEY` | The secret key for your S3-compatible storage (required for `hetzner`). | `""` |
+| `TILER_CACHE_AWS_ENDPOINT` | The S3 endpoint URL. Use the default for AWS, or a custom one for `hetzner`. | `https://s3.amazonaws.com` |
+| `TILER_CACHE_REGION` | The region for the S3-compatible storage. | `us-east-1` |
+| `TILER_CACHE_BUCKET` | The name of the S3 bucket for the tiler cache. | `none` |
+| **PostgreSQL Database** |
+| `POSTGRES_HOST` | Hostname of the PostgreSQL database. | `localhost` |
+| `POSTGRES_PORT` | Port for the PostgreSQL database. | `5432` |
+| `POSTGRES_DB` | Name of the PostgreSQL database. | `postgres` |
+| `POSTGRES_USER` | Username for the PostgreSQL database. | `postgres` |
+| `POSTGRES_PASSWORD` | Password for the PostgreSQL database. | `password` |
+| **Cleanup** |
+| `DELAYED_CLEANUP_TIMER_SECONDS` | Delay in seconds before cleaning up resources after a job. | `3600` |
+
+## Usage
 
 ```sh
-# The URL of the GeoJSON file specifying the areas where tile seeding is required.
-export GEOJSON_URL: https://osmseed-dev.s3.us-east-1.amazonaws.com/tiler/wold-usa-eu.geojson
-export ZOOM_LEVELS: '7,8,9,10' # The zoom levels for which tiles need to be seeded.
-export CONCURRENCY: 32 # The number of parallel processes to use for generating cache tiles.
-export S3_BUCKET: osmseed-dev # The S3 bucket where output statistics (e.g., seeding duration) will be stored.
-export OUTPUT_FILE: /logs/tiler_benchmark.log #The path to a CSV file for logging benchmarking results and tracking database performance.
-
-python seed.py
+python sqs_processor.py
 ```
+This script  listens to an SQS queue for messages about expired map data. Upon receiving a message, it calculates the affected tile coverage and deletes the corresponding tiles directly from the S3 bucket.
 
-### Tiler Seed CronJob
+To run this script, you must configure all the required environment variables, especially those related to SQS and S3.
 
-Chart `ohm/templates/tiler-cache-seed/cronjob.yaml` CronJob is designed to execute scheduled tasks for seeding cache. It runs the script `seed.py`, primarily targeting zoom levels 7 to 10. Additionally, the job seeds tiles for zoom levels 0 to 6 every 24 hours to ensure that lower zoom levels remain updated, minimizing latency for users navigating the map.
+### Required Cloud Permissions (IAM)
+Since the script no longer creates Kubernetes jobs, it does not require RBAC permissions to manage cluster resources. Instead, the service account running the purge.py pod needs AWS IAM permissions to interact with SQS and S3.
 
-
-# Purging Tiles
-
-This script processes an AWS SQS queue and launches a container to handle the purging and seeding of the tiler cache for specific imposm expired files. The script efficiently purges cache tiles within zoom levels 8 to 17. Due to the significant time required to purge higher zoom levels (18, 19, and 20), the script includes a separate section to directly delete these tiles from S3. By following specific patterns, this method is far more efficient than using the tiler purge process for zoom levels 18, 19, and 20.
-
-
-```sh
-# Environment settings
-ENVIRONMENT = "staging"  # Environment where the script is executed (e.g., staging or production).
-NAMESPACE = "default"  # Kubernetes namespace where the tiler cache pods will be triggered.
-SQS_QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/123456789/tiler-imposm3-expired-files"  # AWS SQS queue URL for processing expired tiles.
-REGION_NAME = "us-east-1"  # AWS region where the deployment is hosted.
-DOCKER_IMAGE = "ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.1780.h62561a8"  # Docker image for the tiler server to handle cache purging and seeding.
-NODEGROUP_TYPE = "job_large"  # Node group label where the cache cleaning pods will be executed.
-MAX_ACTIVE_JOBS = 5  # Maximum number of jobs allowed to run in parallel.
-DELETE_OLD_JOBS_AGE = 3600  # Time in seconds after which old jobs will be deleted.
-
-# Tiler cache purge and seed settings
-EXECUTE_PURGE = "true"  # Whether to execute the purge process.
-EXECUTE_SEED = "true"  # Whether to execute the seed process.
-
-# Zoom level configurations for cache management
-PURGE_MIN_ZOOM = 8  # Minimum zoom level for cache purging.
-PURGE_MAX_ZOOM = 20  # Maximum zoom level for cache purging.
-SEED_MIN_ZOOM = 8  # Minimum zoom level for tile seeding.
-SEED_MAX_ZOOM = 14  # Maximum zoom level for tile seeding.
-
-# Concurrency settings
-SEED_CONCURRENCY = 16  # Number of parallel processes for seeding tiles.
-PURGE_CONCURRENCY = 16  # Number of parallel processes for purging tiles.
-
-# PostgreSQL settings for the tiler database
-POSTGRES_HOST = "localhost"  # Hostname of the PostgreSQL database.
-POSTGRES_PORT = 5432  # Port for the PostgreSQL database.
-POSTGRES_DB = "postgres"  # Name of the PostgreSQL database.
-POSTGRES_USER = "postgres"  # Username for the PostgreSQL database.
-POSTGRES_PASSWORD = "password"  # Password for the PostgreSQL database.
-
-# S3 settings for managing tile data
-ZOOM_LEVELS_TO_DELETE = "18,19,20"  # Zoom levels for which cache tiles will be deleted directly from S3.
-S3_BUCKET_CACHE_TILER = "tiler-cache-staging"  # S3 bucket where the tile cache is stored.
-S3_BUCKET_PATH_FILES = "mnt/data/osm"  # Path within the S3 bucket for tiles to be deleted.
-
-python purge.py
+Ensure the pod's service account has an associated IAM role with permissions for actions such as:
 
 ```
-
-
-### Tiler Purge Deployment
-
-Deployment ``ohm/templates/tiler-cache-purge/deployment.yaml` is responsible for running the script `purge.py`, which handles purging tiles across different zoom levels. To execute this deployment, it is necessary to create a service account and attach it to the deployment. For example:
-
-```yaml
-# Create a ServiceAccount for managing Jobs and associated Pods
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: job-service-account
-  namespace: default
----
-# Create a ClusterRole with permissions for Jobs and Pods
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: job-manager-role
-rules:
-- apiGroups: ["batch"]
-  resources: ["jobs"]
-  verbs: ["create", "list", "delete"]
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["list", "get"]
----
-# Bind the ClusterRole to the ServiceAccount
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: job-manager-role-binding
-subjects:
-- kind: ServiceAccount
-  name: job-service-account
-  namespace: default
-roleRef:
-  kind: ClusterRole
-  name: job-manager-role
-  apiGroup: rbac.authorization.k8s.io
+sqs:ReceiveMessage
+sqs:DeleteMessage
+s3:DeleteObject
+s3:ListBucket
 ```

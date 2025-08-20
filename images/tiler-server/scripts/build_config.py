@@ -138,10 +138,10 @@ if __name__ == "__main__":
             path = os.path.join(PROVIDERS_DIR, toml_file)
 
             if not os.path.exists(path):
-                print(f"⚠️  File not found: {toml_file}, skipping.")
+                print(f"File not found: {toml_file}, skipping.")
                 continue
 
-            print(f"📄 Processing {toml_file}...")
+            print(f"Processing {toml_file}...")
             with open(path, 'r') as f:
                 content = f.read()
 
@@ -165,4 +165,4 @@ if __name__ == "__main__":
     with open(OUTPUT_FILE, 'w') as f:
         f.write(template_content)
 
-    print(f"\n✅ Config file created: {OUTPUT_FILE}")
+    print(f"Config file created: {OUTPUT_FILE}")
