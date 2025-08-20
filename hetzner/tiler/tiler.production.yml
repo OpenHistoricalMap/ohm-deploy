@@ -26,7 +26,7 @@ services:
   # imposm3
   imposm_production:
     container_name: tiler_imposm_production
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2839.h6fc67d6
     volumes:
       - tiler_production_imposmdata:/mnt/data
     command:
@@ -147,11 +147,11 @@ services:
 volumes:
   tiler_production_pgdata:
     driver: local
-    name: tiler_db_29_07_2025_v2
-
+    name: tiler_db_21_08_2025
   tiler_production_imposmdata:
     driver: local
-    name: tiler_imposm_29_07_2025_v2
+    name: tiler_imposm_21_08_2025
+
 networks:
   tiler_network_production:
     driver: bridge
