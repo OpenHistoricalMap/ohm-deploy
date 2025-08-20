@@ -15,4 +15,4 @@ services:
 volumes:
   ohmx_db:
     driver: local
-    name: ohmx_db
+    name: ohmx_db_prod

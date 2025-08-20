@@ -1,32 +1,20 @@
 #!/usr/bin/env python3
-
 """
-This script generates a merged TOML configuration file for a tile server.
+Generates a TOML configuration file by merging a template and provider files.
 
-It reads a TOML template and merges provider/map configurations from per-layer files.
-For each layer SQL block, it detects the table/view name and dynamically replaces
-the `{{LENGUAGES}}` placeholder with the actual list of `name_*` columns found in the database.
-
-Requirements:
--------------
-- PostgreSQL database with views and `name_*` columns
-- DB credentials passed via environment variables:
-    POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
+- Supports grouping providers into different markers using dictionaries.
+- Template path, providers directory, and output path can be passed as arguments or use defaults.
 """
 
 import os
-import argparse
 import re
+import argparse
+from collections import defaultdict
 from utils import get_db_connection
 
-def fetch_all_languages() -> dict:
-    """
-    Fetch all 'name_*' columns from materialized views starting with 'mv_' (excluding 'mview_%').
 
-    Returns:
-        dict[str, str]: A dictionary where the key is the materialized view name
-                        and the value is a comma-separated string of name_* columns.
-    """
+def fetch_all_languages() -> dict:
+    """Fetches name_* columns from all materialized views mv_* (except mview_*)."""
     conn = get_db_connection()
     result = {}
     try:
@@ -58,15 +46,14 @@ def fetch_all_languages() -> dict:
         conn.close()
     return result
 
+
 def indent_block(block: str, indent: str = "\t") -> str:
-    """Indent every line of a block with the given string."""
+    """Indents every line in a block with the given indent string."""
     return "\n".join(indent + line for line in block.splitlines())
 
 
 def process_layer_blocks(raw_content: str, lang_map: dict) -> str:
-    """
-    Process and replace `{{LENGUAGES}}` in each [[providers.layers]] block.
-    """
+    """Replaces {{LENGUAGES}} in each [[providers.layers]] block."""
     parts = re.split(r'(\[\[providers\.layers\]\])', raw_content)
     final = []
     for i in range(1, len(parts), 2):
@@ -87,62 +74,95 @@ def process_layer_blocks(raw_content: str, lang_map: dict) -> str:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Merge TOML providers and inject language columns.')
-    parser.add_argument('--template', default='config/config.template.toml')
-    parser.add_argument('--providers', default='config/providers')
-    parser.add_argument('--output', default='config/config.osm.toml')
-    parser.add_argument('--provider_names', required=True)
+    parser = argparse.ArgumentParser(description='Generates config.toml by merging template and providers.')
+    parser.add_argument('--template', default="/app/config/config.template.toml", help='TOML template file')
+    parser.add_argument('--providers', default="/app/config/providers", help='Directory containing provider TOML files')
+    parser.add_argument('--output', default="/app/config/config.toml", help='Output TOML file')
 
     args = parser.parse_args()
 
-    with open(args.template, 'r') as f:
+    TEMPLATE_FILE = args.template
+    PROVIDERS_DIR = args.providers
+    OUTPUT_FILE = args.output
+
+    # Group definitions with their associated markers
+    provider_osm = {
+        "provider_marker": "###### PROVIDERS_OSM",
+        "map_marker": "###### MAPS_OSM",
+        "providers": [
+            "admin_boundaries_lines",
+            "admin_boundaries_centroids",
+            "admin_boundaries_maritime",
+            "place_areas",
+            "place_points_centroids",
+            "water_areas",
+            "water_areas_centroids",
+            "water_lines",
+            "transport_areas",
+            "transport_lines",
+            "route_lines",
+            "transport_points_centroids",
+            "amenity_areas",
+            "amenity_points_centroids",
+            "buildings_areas",
+            "buildings_points_centroids",
+            "landuse_areas",
+            "landuse_points_centroids",
+            "landuse_lines",
+            "other_areas",
+            "other_points_centroids",
+            "other_lines"
+        ]
+    }
+
+    provider_ohm_admin_boundary = {
+        "provider_marker": "###### PROVIDERS_ADMIN_BOUNDARIES_AREAS",
+        "map_marker": "###### MAPS_ADMIN_BOUNDARIES_AREAS",
+        "providers": [
+            "admin_boundaries_polygon"
+        ]
+    }
+
+    groups = [provider_osm, provider_ohm_admin_boundary]
+
+    with open(TEMPLATE_FILE, 'r') as f:
         template_content = f.read()
 
-    requested_providers = [
-        p.strip() for p in args.provider_names.split(',')
-        if p.strip()
-    ]
-
-    all_toml_files = [f for f in os.listdir(args.providers) if f.endswith('.toml')]
-    selected_files = [
-        p if p.endswith('.toml') else p + '.toml'
-        for p in requested_providers if p + '.toml' in all_toml_files
-    ]
-
     lang_map = fetch_all_languages()
+    marker_blocks = defaultdict(list)
 
-    providers_content = []
-    maps_content = []
+    # Process each provider file and split into provider/map sections
+    for group in groups:
+        for provider_name in group["providers"]:
+            toml_file = provider_name + ".toml"
+            path = os.path.join(PROVIDERS_DIR, toml_file)
 
-    for toml_file in selected_files:
-        path = os.path.join(args.providers, toml_file)
-        print(f"Processing {path}...")
-        with open(path, 'r') as f:
-            content = f.read()
+            if not os.path.exists(path):
+                print(f"File not found: {toml_file}, skipping.")
+                continue
 
-        updated = process_layer_blocks(content, lang_map)
+            print(f"Processing {toml_file}...")
+            with open(path, 'r') as f:
+                content = f.read()
 
-        if '#######Maps' in updated:
-            p_block, m_block = updated.split('#######Maps', 1)
-        else:
-            p_block, m_block = updated, ""
+            updated = process_layer_blocks(content, lang_map)
 
-        if p_block.strip():
-            providers_content.append(p_block.strip())
-        if m_block.strip():
-            maps_content.append(m_block.strip())
+            if '#######Maps' in updated:
+                p_block, m_block = updated.split('#######Maps', 1)
+            else:
+                p_block, m_block = updated, ""
 
-    template_content = template_content.replace(
-        "###### PROVIDERS",
-        "###### PROVIDERS\n" + indent_block("\n\n".join(providers_content))
-    )
-    template_content = template_content.replace(
-        "###### MAPS",
-        "###### MAPS\n" + indent_block("\n\n".join(maps_content))
-    )
+            if p_block.strip():
+                marker_blocks[group["provider_marker"]].append(p_block.strip())
+            if m_block.strip():
+                marker_blocks[group["map_marker"]].append(m_block.strip())
 
-    with open(args.output, 'w') as f:
+    # Replace markers in the template with indented merged blocks
+    for marker, blocks in marker_blocks.items():
+        joined_block = indent_block("\n\n".join(blocks))
+        template_content = template_content.replace(marker, "\n" + joined_block)
+
+    with open(OUTPUT_FILE, 'w') as f:
         f.write(template_content)
 
-    print(f"\nConfig created: {args.output}")
-    
+    print(f"Config file created: {OUTPUT_FILE}")

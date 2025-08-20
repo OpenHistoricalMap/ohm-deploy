@@ -1,6 +1,7 @@
 services:
   # Tiler db
   db_production:
+    container_name: tiler_db_production
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
       - tiler_production_pgdata:/var/lib/postgresql/data
@@ -24,6 +25,7 @@ services:
           
   # imposm3
   imposm_production:
+    container_name: tiler_imposm_production
     image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
     volumes:
       - tiler_production_imposmdata:/mnt/data
@@ -43,17 +45,11 @@ services:
     networks:
       - tiler_network_production
 
-  # imposm3 for materialized views creation
-  imposm_mv_production:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
-    env_file:
-      - .env.production
-    networks:
-      - tiler_network_production
 
   # Tiler server
   tiler_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2694.h5468129
+    container_name: tiler_server_production
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
     ports:
       - "9090:9090"
     env_file:
@@ -63,7 +59,8 @@ services:
       - tiler_network_production
 
   tiler_sqs_cleaner_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2706.h1b7db88
+    container_name: tiler_sqs_cleaner_production
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
     env_file:
       - .env.production
     restart: always
@@ -71,14 +68,16 @@ services:
       - tiler_network_production
 
   tiler_s3_cleaner_production:
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2706.h1b7db88
+    container_name: tiler_s3_cleaner_production
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
     env_file:
       - .env.production
     networks:
       - tiler_network_production
 
   tile_global_seeding_production:
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2694.h5468129
+      container_name: tiler_global_seeding_production
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
       env_file:
         - .env.production
       volumes:
@@ -97,7 +96,8 @@ services:
         - tiler_network_production
 
   tile_coverage_seeding_production:
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2694.h5468129
+    container_name: tiler_coverage_seeding_production
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
     env_file:
       - .env.production
     volumes:
@@ -116,6 +116,7 @@ services:
       - tiler_network_production
 
   tiler_monitor_production:
+    container_name: tiler_monitor_production
     image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2706.h1b7db88
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
