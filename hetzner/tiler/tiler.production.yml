@@ -49,7 +49,7 @@ services:
   # Tiler server
   tiler_production:
     container_name: tiler_server_production
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2840.h8206e4f
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
     ports:
       - "9090:9090"
     env_file:
@@ -77,7 +77,7 @@ services:
 
   tile_global_seeding_production:
       container_name: tiler_global_seeding_production
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2840.h8206e4f
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
       env_file:
         - .env.production
       volumes:
@@ -97,7 +97,7 @@ services:
 
   tile_coverage_seeding_production:
     container_name: tiler_coverage_seeding_production
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2840.h8206e4f
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
     env_file:
       - .env.production
     volumes:
