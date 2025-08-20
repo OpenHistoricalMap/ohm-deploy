@@ -1,5 +1,6 @@
 services:
   db_staging:
+    container_name: tiler_db_staging
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes:
       - tiler_staging_pgdata:/var/lib/postgresql/data
@@ -19,6 +20,7 @@ services:
       - tiler_network_staging
 
   imposm_staging:
+    container_name: tiler_imposm_staging
     image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
     volumes:
       - tiler_staging_imposmdata:/mnt/data
@@ -33,14 +35,9 @@ services:
     networks:
       - tiler_network_staging
 
-  imposm_mv_staging:
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2710.h5e17b92
-    env_file:
-      - .env.staging
-    networks:
-      - tiler_network_staging
 
   tiler_staging:
+    container_name: tiler_server_staging
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2840.h8206e4f
     ports:
       - "9091:9090"
@@ -56,6 +53,7 @@ services:
       - tiler_network_staging
 
   tiler_sqs_cleaner_staging:
+    container_name: tiler_sqs_cleaner_staging
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
     env_file:
       - .env.staging
@@ -71,6 +69,7 @@ services:
       - tiler_network_staging
 
   tiler_s3_cleaner_staging:
+    container_name: tiler_s3_cleaner_staging
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
     env_file:
       - .env.staging
@@ -78,6 +77,7 @@ services:
       - tiler_network_staging
 
   tiler_monitor_staging:
+    container_name: tiler_monitor_staging
     image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2706.h1b7db88
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -99,7 +99,7 @@ networks:
 volumes:
   tiler_staging_pgdata:
     driver: local
-    name: tiler_db_29_07_2025_v2
+    name: tiler_db_20_08_2025
   tiler_staging_imposmdata:
     driver: local
-    name: tiler_imposm_29_07_2025_v2
+    name: tiler_imposm_20_08_2025
