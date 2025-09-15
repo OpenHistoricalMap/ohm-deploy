@@ -83,7 +83,12 @@ EOF
   chmod 400 /var/www/private.pem
   export DOORKEEPER_SIGNING_KEY=$(cat /var/www/private.pem | sed -e '1d;$d' | tr -d '\n')
   sed -i "s#PRIVATE_KEY#${DOORKEEPER_SIGNING_KEY}#" $workdir/config/settings.yml
+
+  #### Setting up Wikimedia authentication
+  sed -i -e 's/^wikipedia_auth_id: ".*"/wikipedia_auth_id: "'$WIKIPEDIA_AUTH_ID'"/g' $workdir/config/settings.yml
+  sed -i -e 's/^wikipedia_auth_secret: ".*"/wikipedia_auth_secret: "'$WIKIPEDIA_AUTH_SECRET'"/g' $workdir/config/settings.yml
 }
+
 
 restore_db() {
   export PGPASSWORD="$POSTGRES_PASSWORD"
