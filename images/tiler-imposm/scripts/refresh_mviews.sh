@@ -123,14 +123,13 @@ buildings_views=(
 )
 
 routes_views=(
-    mv_route_lines_z5
-    mv_route_lines_z6
-    mv_route_lines_z7
-    mv_route_lines_z8
-    mv_route_lines_z9
-    mv_route_lines_z10_11
-    mv_route_lines_z12_13
-    mv_route_lines_z14_20
+    mv_routes_normalized
+    mv_routes_indexed
+    mv_routes_indexed_z5_6
+    mv_routes_indexed_z7_8
+    mv_routes_indexed_z9_10
+    mv_routes_indexed_z11_13
+    mv_routes_indexed_z14_20
 )
 
 
@@ -143,7 +142,6 @@ admin_boundaries_areas_views=(
     mv_admin_boundaries_areas_z13_15
     mv_admin_boundaries_areas_z16_20
 )
-
 
 
 
