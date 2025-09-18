@@ -10,20 +10,46 @@ BEGIN
 
         CREATE MATERIALIZED VIEW %I AS
         SELECT
-          way_id,
-          min_start_decdate, max_end_decdate,
-          min_start_date_iso, max_end_date_iso,
+          way_id AS osm_id,
+          min_start_decdate AS start_decdate, 
+          max_end_decdate AS end_decdate,
+          min_start_date_iso AS start_date,
+          max_end_date_iso AS end_date,
           CASE 
             WHEN %s > 0 THEN ST_Simplify(geometry, %s) 
             ELSE geometry 
           END AS geometry,
           num_routes,
-          route_1_ref, route_1_network, route_1_operator, route_1_type, route_1_name,
-          route_2_ref, route_2_network, route_2_operator, route_2_type, route_2_name,
-          route_3_ref, route_3_network, route_3_operator, route_3_type, route_3_name,
-          route_4_ref, route_4_network, route_4_operator, route_4_type, route_4_name,
-          route_5_ref, route_5_network, route_5_operator, route_5_type, route_5_name,
-          route_6_ref, route_6_network, route_6_operator, route_6_type, route_6_name,
+          NULLIF(route_1_ref, '') AS route_1_ref,
+          NULLIF(route_1_network, '') AS route_1_network,
+          NULLIF(route_1_operator, '') AS route_1_operator,
+          NULLIF(route_1_type, '') AS route_1_type,
+          NULLIF(route_1_name, '') AS route_1_name,
+          NULLIF(route_2_ref, '') AS route_2_ref,
+          NULLIF(route_2_network, '') AS route_2_network,
+          NULLIF(route_2_operator, '') AS route_2_operator,
+          NULLIF(route_2_type, '') AS route_2_type,
+          NULLIF(route_2_name, '') AS route_2_name,
+          NULLIF(route_3_ref, '') AS route_3_ref,
+          NULLIF(route_3_network, '') AS route_3_network,
+          NULLIF(route_3_operator, '') AS route_3_operator,
+          NULLIF(route_3_type, '') AS route_3_type,
+          NULLIF(route_3_name, '') AS route_3_name,
+          NULLIF(route_4_ref, '') AS route_4_ref,
+          NULLIF(route_4_network, '') AS route_4_network,
+          NULLIF(route_4_operator, '') AS route_4_operator,
+          NULLIF(route_4_type, '') AS route_4_type,
+          NULLIF(route_4_name, '') AS route_4_name,
+          NULLIF(route_5_ref, '') AS route_5_ref,
+          NULLIF(route_5_network, '') AS route_5_network,
+          NULLIF(route_5_operator, '') AS route_5_operator,
+          NULLIF(route_5_type, '') AS route_5_type,
+          NULLIF(route_5_name, '') AS route_5_name,
+          NULLIF(route_6_ref, '') AS route_6_ref,
+          NULLIF(route_6_network, '') AS route_6_network,
+          NULLIF(route_6_operator, '') AS route_6_operator,
+          NULLIF(route_6_type, '') AS route_6_type,
+          NULLIF(route_6_name, '') AS route_6_name,
           routes
         FROM mv_routes_indexed
         WHERE ST_Length(geometry) > %s
@@ -31,7 +57,7 @@ BEGIN
 
         -- Create unique index (required for concurrent refresh)
         CREATE UNIQUE INDEX %I_way_id_idx
-          ON %I (way_id, min_start_decdate, max_end_decdate, route_1_ref, route_2_ref, route_3_ref);
+          ON %I (osm_id, start_decdate, end_decdate, route_1_ref, route_2_ref, route_3_ref);
 
         -- Create spatial index
         CREATE INDEX %I_geom_idx
@@ -45,10 +71,6 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql;
-
--- ============================================================================
--- Create materialized views for routes by length ranges
--- ============================================================================
 
 SELECT create_mv_routes_by_length('mv_routes_indexed_z5_6', 10000, 500);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z7_8', 5000, 300);

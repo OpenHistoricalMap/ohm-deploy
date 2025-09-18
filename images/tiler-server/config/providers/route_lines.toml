@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "route_lines_z5"
+name = "route_lines_z5_6"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -7,30 +7,23 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
     osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
     start_decdate, 
     end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z5
+    start_date,
+    end_date,
+    num_routes,
+    route_1_ref, route_1_network, route_1_operator, route_1_type, route_1_name,
+    route_2_ref, route_2_network, route_2_operator, route_2_type, route_2_name,
+    route_3_ref, route_3_network, route_3_operator, route_3_type, route_3_name,
+    route_4_ref, route_4_network, route_4_operator, route_4_type, route_4_name,
+    route_5_ref, route_5_network, route_5_operator, route_5_type, route_5_name,
+    route_6_ref, route_6_network, route_6_operator, route_6_type, route_6_name
+FROM mv_routes_indexed_z5_6
 WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "route_lines_z6"
+name = "route_lines_z7_8"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -38,30 +31,23 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
     osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
     start_decdate, 
     end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z6
+    start_date,
+    end_date,
+    num_routes,
+    route_1_ref, route_1_network, route_1_operator, route_1_type, route_1_name,
+    route_2_ref, route_2_network, route_2_operator, route_2_type, route_2_name,
+    route_3_ref, route_3_network, route_3_operator, route_3_type, route_3_name,
+    route_4_ref, route_4_network, route_4_operator, route_4_type, route_4_name,
+    route_5_ref, route_5_network, route_5_operator, route_5_type, route_5_name,
+    route_6_ref, route_6_network, route_6_operator, route_6_type, route_6_name
+FROM mv_routes_indexed_z7_8
 WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "route_lines_z7"
+name = "route_lines_z9_10"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -69,30 +55,23 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
     osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
     start_decdate, 
     end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z7
+    start_date,
+    end_date,
+    num_routes,
+    route_1_ref, route_1_network, route_1_operator, route_1_type, route_1_name,
+    route_2_ref, route_2_network, route_2_operator, route_2_type, route_2_name,
+    route_3_ref, route_3_network, route_3_operator, route_3_type, route_3_name,
+    route_4_ref, route_4_network, route_4_operator, route_4_type, route_4_name,
+    route_5_ref, route_5_network, route_5_operator, route_5_type, route_5_name,
+    route_6_ref, route_6_network, route_6_operator, route_6_type, route_6_name
+FROM mv_routes_indexed_z9_10
 WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "route_lines_z8"
+name = "route_lines_z11_13"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -100,118 +79,18 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
     osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
     start_decdate, 
     end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z8
-WHERE geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "route_lines_z9"
-geometry_fieldname = "geometry"
-geometry_type = "LineString"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
-    osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z9
-WHERE geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "route_lines_z10_11"
-geometry_fieldname = "geometry"
-geometry_type = "LineString"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
-    osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z10_11
-WHERE geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "route_lines_z12_13"
-geometry_fieldname = "geometry"
-geometry_type = "LineString"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
-    osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z12_13
+    start_date,
+    end_date,
+    num_routes,
+    route_1_ref, route_1_network, route_1_operator, route_1_type, route_1_name,
+    route_2_ref, route_2_network, route_2_operator, route_2_type, route_2_name,
+    route_3_ref, route_3_network, route_3_operator, route_3_type, route_3_name,
+    route_4_ref, route_4_network, route_4_operator, route_4_type, route_4_name,
+    route_5_ref, route_5_network, route_5_operator, route_5_type, route_5_name,
+    route_6_ref, route_6_network, route_6_operator, route_6_type, route_6_name
+FROM mv_routes_indexed_z11_13
 WHERE geometry && !BBOX!
 """
 
@@ -224,69 +103,44 @@ sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
     osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    direction,
-    operator,
-    state,
-    symbol,
-    roundtrip,
-    interval,
-    duration,
-    tourism,
-    start_date, 
-    end_date, 
     start_decdate, 
     end_decdate,
-    {{LENGUAGES}}
-FROM mv_route_lines_z14_20
+    start_date,
+    end_date,
+    num_routes,
+    route_1_ref, route_1_network, route_1_operator, route_1_type, route_1_name,
+    route_2_ref, route_2_network, route_2_operator, route_2_type, route_2_name,
+    route_3_ref, route_3_network, route_3_operator, route_3_type, route_3_name,
+    route_4_ref, route_4_network, route_4_operator, route_4_type, route_4_name,
+    route_5_ref, route_5_network, route_5_operator, route_5_type, route_5_name,
+    route_6_ref, route_6_network, route_6_operator, route_6_type, route_6_name
+    FROM mv_routes_indexed_z14_20
 WHERE geometry && !BBOX!
 """
 
 #######Maps
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z5"
+provider_layer = "osm.route_lines_z5_6"
 min_zoom = 5
-max_zoom = 5
-
-[[maps.layers]]
-name = "route_lines"
-provider_layer = "osm.route_lines_z6"
-min_zoom = 6
 max_zoom = 6
 
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z7"
+provider_layer = "osm.route_lines_z7_8"
 min_zoom = 7
-max_zoom = 7
-
-[[maps.layers]]
-name = "route_lines"
-provider_layer = "osm.route_lines_z8"
-min_zoom = 8
 max_zoom = 8
 
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z9"
+provider_layer = "osm.route_lines_z9_10"
 min_zoom = 9
-max_zoom = 9
+max_zoom = 10
 
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z10_11"
-min_zoom = 10
-max_zoom = 11
-
-[[maps.layers]]
-name = "route_lines"
-provider_layer = "osm.route_lines_z12_13"
-min_zoom = 12
+provider_layer = "osm.route_lines_z11_13"
+min_zoom = 11
 max_zoom = 13
 
 [[maps.layers]]
