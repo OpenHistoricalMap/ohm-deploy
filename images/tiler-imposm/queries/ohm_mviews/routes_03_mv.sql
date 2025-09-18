@@ -72,12 +72,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_mv_routes_by_length('mv_routes_indexed_z5_6', 10000, 500);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z7_8', 5000, 300);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z9_10', 1500, 150);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z11_13', 500, 50);
+SELECT create_mv_routes_by_length('mv_routes_indexed_z5_6', 500, 500);
+SELECT create_mv_routes_by_length('mv_routes_indexed_z7_8', 200, 300);
+SELECT create_mv_routes_by_length('mv_routes_indexed_z9_10', 100, 150);
+SELECT create_mv_routes_by_length('mv_routes_indexed_z11_13', 1, 50);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z14_20', 0, 10);
-
 
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z5_6;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z7_8;
