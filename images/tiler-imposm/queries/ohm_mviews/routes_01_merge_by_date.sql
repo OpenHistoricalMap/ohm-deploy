@@ -57,17 +57,17 @@ SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TE
 WHERE ST_GeometryType(geometry) IN ('ST_LineString', 'ST_MultiLineString');
 
 
-
 -- ============================================================================
 -- STEP 4: Create Materialized View for merged routes per continuous temporal range
 -- ============================================================================
+
 SELECT log_notice('STEP 4: Merged routes materialized view');
 
 DROP MATERIALIZED VIEW IF EXISTS mv_routes_normalized CASCADE;
 
 CREATE MATERIALIZED VIEW mv_routes_normalized AS
 WITH union_sources AS (
-  -- 1) Get from multi-lines (osm_route_multilines)
+  -- 1) From multi-lines
   SELECT
     member::bigint AS way_id,
     osm_id,
@@ -87,7 +87,7 @@ WITH union_sources AS (
 
   UNION ALL
 
-  -- 2) Get from lines (osm_route_lines)
+  -- 2) From lines
   SELECT
     osm_id::bigint AS way_id,
     osm_id,
@@ -106,19 +106,18 @@ WITH union_sources AS (
   WHERE geometry IS NOT NULL
 ),
 dates AS (
-  -- Collect all the date cutoffs by way.
-  SELECT way_id, start_decdate AS d FROM union_sources
+  -- Collect cutoffs
+  SELECT way_id, start_decdate AS d FROM union_sources WHERE start_decdate IS NOT NULL
   UNION
   SELECT way_id, end_decdate FROM union_sources WHERE end_decdate IS NOT NULL
 ),
 ordered AS (
   SELECT way_id, d
   FROM dates
-  WHERE d IS NOT NULL
   GROUP BY way_id, d
 ),
 segments AS (
-  -- Form consecutive time segments
+  -- Consecutive segments
   SELECT 
     way_id,
     d AS seg_start,
@@ -126,7 +125,7 @@ segments AS (
   FROM ordered
 ),
 active AS (
-  -- Allocate active routes to each segment.
+  -- Relate active routes to each segment (check full overlap, not only seg_start!)
   SELECT
     s.way_id,
     s.seg_start,
@@ -144,60 +143,95 @@ active AS (
   FROM segments s
   JOIN union_sources u
     ON u.way_id = s.way_id
-   AND u.start_decdate <= COALESCE(s.seg_start, u.end_decdate)
-   AND (u.end_decdate IS NULL OR u.end_decdate > s.seg_start)
+   AND (u.start_decdate IS NULL OR u.start_decdate < COALESCE(s.seg_end, 9999))
+   AND (u.end_decdate   IS NULL OR u.end_decdate   > s.seg_start)
+),
+base AS (
+  SELECT
+    row_number() OVER () AS uid,
+    way_id,
+    seg_start AS min_start_decdate,
+    seg_end   AS max_end_decdate,
+    convert_decimal_to_iso_date(seg_start::NUMERIC) AS min_start_date_iso,
+    convert_decimal_to_iso_date(seg_end::NUMERIC)   AS max_end_date_iso,
+    (ARRAY_AGG(geometry))[1] AS geometry,
+    COUNT(DISTINCT osm_id) AS num_routes,
+    jsonb_agg(
+      jsonb_build_object(
+        'osm_id', osm_id,
+        'ref', ref,
+        'route', route,
+        'network', network,
+        'name', name,
+        'type', type,
+        'operator', operator,
+        'direction', direction,
+        'tags', tags
+      )
+      ORDER BY ref
+    ) AS routes,
+    -- Hash of the set of routes (ensures merge only if combination identical)
+    md5(
+      array_to_string(
+        ARRAY_AGG(DISTINCT osm_id ORDER BY osm_id),
+        ','
+      )
+    ) AS routeset_hash
+  FROM active
+  GROUP BY way_id, seg_start, seg_end
+),
+merged AS (
+  SELECT 
+    way_id,
+    MIN(min_start_decdate) AS min_start_decdate,
+    MAX(max_end_decdate)   AS max_end_decdate,
+    MIN(min_start_date_iso) AS min_start_date_iso,
+    MAX(max_end_date_iso)   AS max_end_date_iso,
+    (ARRAY_AGG(geometry))[1] AS geometry,
+    MAX(num_routes) AS num_routes,
+    ANY_VALUE(routes) AS routes,
+    routeset_hash
+  FROM (
+    SELECT t.*,
+           SUM(is_new_group) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) AS grp
+    FROM (
+      SELECT *,
+             CASE 
+               WHEN LAG(max_end_decdate) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) IS NULL THEN 1
+               WHEN min_start_decdate - LAG(max_end_decdate) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) > (1.0/365.0) THEN 1
+               ELSE 0
+             END AS is_new_group
+      FROM base
+    ) t
+  ) g
+  GROUP BY way_id, grp, routeset_hash
 )
-SELECT
+SELECT 
   row_number() OVER () AS uid,
   way_id,
-  seg_start AS min_start_decdate,
-  seg_end   AS max_end_decdate,
-  convert_decimal_to_iso_date(seg_start::NUMERIC) AS min_start_date_iso,
-  convert_decimal_to_iso_date(seg_end::NUMERIC)   AS max_end_date_iso,
-
-  -- Unique geometry (first one)
-  (ARRAY_AGG(geometry))[1] AS geometry,
-
-   -- Count of distinct routes (osm_id)
-  COUNT(DISTINCT osm_id) AS num_routes,
-  
-  -- Concurrent routes valid in that time range
-  jsonb_agg(
-    jsonb_build_object(
-      'osm_id', osm_id,
-      'ref', ref,
-      'route', route,
-      'network', network,
-      'name', name,
-      'type', type,
-      'operator', operator,
-      'direction', direction,
-      'tags', tags
-    )
-    ORDER BY ref
-  ) AS routes
-
-FROM active
-GROUP BY way_id, seg_start, seg_end
-ORDER BY way_id, seg_start
+  min_start_decdate,
+  max_end_decdate,
+  min_start_date_iso,
+  max_end_date_iso,
+  geometry,
+  num_routes,
+  routes
+FROM merged
+ORDER BY way_id, min_start_decdate
 WITH DATA;
-
 
 -- ===============================
 -- Indexes
 -- ===============================
 
--- Drop indexes if they exist
 DROP INDEX IF EXISTS mv_routes_normalized_unique_idx;
 DROP INDEX IF EXISTS mv_routes_normalized_way_idx;
 DROP INDEX IF EXISTS mv_routes_normalized_dates_idx;
 DROP INDEX IF EXISTS mv_routes_normalized_geom_idx;
 
--- Mandatory UNIQUE index (required by PostgreSQL for REFRESH CONCURRENTLY)
 CREATE UNIQUE INDEX mv_routes_normalized_unique_idx 
 ON mv_routes_normalized (uid);
 
--- Supporting indexes for faster queries
 CREATE INDEX mv_routes_normalized_way_idx 
 ON mv_routes_normalized (way_id);
 
