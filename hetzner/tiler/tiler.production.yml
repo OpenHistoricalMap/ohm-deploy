@@ -147,10 +147,10 @@ services:
 volumes:
   tiler_production_pgdata:
     driver: local
-    name: tiler_db_21_08_2025
+    name: tiler_db_20250925
   tiler_production_imposmdata:
     driver: local
-    name: tiler_imposm_21_08_2025
+    name: tiler_imposm_20250925
 
 networks:
   tiler_network_production:
