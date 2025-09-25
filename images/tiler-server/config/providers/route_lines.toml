@@ -20,6 +20,7 @@ SELECT
     route_road_6_ref,route_road_6_network,route_road_6_network_wikidata,route_road_6_operator,route_road_6_name,
 
     -- TRAIN
+    route_train_1_ref,route_train_1_network,route_train_1_network_wikidata,route_train_1_operator,route_train_1_name,
     route_train_2_ref,route_train_2_network,route_train_2_network_wikidata,route_train_2_operator,route_train_2_name,
     route_train_3_ref,route_train_3_network,route_train_3_network_wikidata,route_train_3_operator,route_train_3_name,
     route_train_4_ref,route_train_4_network,route_train_4_network_wikidata,route_train_4_operator,route_train_4_name,
@@ -27,30 +28,39 @@ SELECT
     route_train_6_ref,route_train_6_network,route_train_6_network_wikidata,route_train_6_operator,route_train_6_name,
 
     -- SUBWAY
+    route_subway_1_ref,route_subway_1_network,route_subway_1_network_wikidata,route_subway_1_operator,route_subway_1_name,
+    route_subway_2_ref,route_subway_2_network,route_subway_2_network_wikidata,route_subway_2_operator,route_subway_2_name,
     route_subway_3_ref,route_subway_3_network,route_subway_3_network_wikidata,route_subway_3_operator,route_subway_3_name,
     route_subway_4_ref,route_subway_4_network,route_subway_4_network_wikidata,route_subway_4_operator,route_subway_4_name,
     route_subway_5_ref,route_subway_5_network,route_subway_5_network_wikidata,route_subway_5_operator,route_subway_5_name,
     route_subway_6_ref,route_subway_6_network,route_subway_6_network_wikidata,route_subway_6_operator,route_subway_6_name,
 
     -- LIGHT_RAIL
+    route_light_rail_1_ref,route_light_rail_1_network,route_light_rail_1_network_wikidata,route_light_rail_1_operator,route_light_rail_1_name,
+    route_light_rail_2_ref,route_light_rail_2_network,route_light_rail_2_network_wikidata,route_light_rail_2_operator,route_light_rail_2_name,
     route_light_rail_3_ref,route_light_rail_3_network,route_light_rail_3_network_wikidata,route_light_rail_3_operator,route_light_rail_3_name,
     route_light_rail_4_ref,route_light_rail_4_network,route_light_rail_4_network_wikidata,route_light_rail_4_operator,route_light_rail_4_name,
     route_light_rail_5_ref,route_light_rail_5_network,route_light_rail_5_network_wikidata,route_light_rail_5_operator,route_light_rail_5_name,
     route_light_rail_6_ref,route_light_rail_6_network,route_light_rail_6_network_wikidata,route_light_rail_6_operator,route_light_rail_6_name,
 
     -- TRAM
+    route_tram_1_ref,route_tram_1_network,route_tram_1_network_wikidata,route_tram_1_operator,route_tram_1_name,
+    route_tram_2_ref,route_tram_2_network,route_tram_2_network_wikidata,route_tram_2_operator,route_tram_2_name,
     route_tram_3_ref,route_tram_3_network,route_tram_3_network_wikidata,route_tram_3_operator,route_tram_3_name,
     route_tram_4_ref,route_tram_4_network,route_tram_4_network_wikidata,route_tram_4_operator,route_tram_4_name,
     route_tram_5_ref,route_tram_5_network,route_tram_5_network_wikidata,route_tram_5_operator,route_tram_5_name,
     route_tram_6_ref,route_tram_6_network,route_tram_6_network_wikidata,route_tram_6_operator,route_tram_6_name,
 
     -- TROLLEYBUS
+    route_trolleybus_1_ref,route_trolleybus_1_network,route_trolleybus_1_network_wikidata,route_trolleybus_1_operator,route_trolleybus_1_name,
+    route_trolleybus_2_ref,route_trolleybus_2_network,route_trolleybus_2_network_wikidata,route_trolleybus_2_operator,route_trolleybus_2_name,
     route_trolleybus_3_ref,route_trolleybus_3_network,route_trolleybus_3_network_wikidata,route_trolleybus_3_operator,route_trolleybus_3_name,
     route_trolleybus_4_ref,route_trolleybus_4_network,route_trolleybus_4_network_wikidata,route_trolleybus_4_operator,route_trolleybus_4_name,
     route_trolleybus_5_ref,route_trolleybus_5_network,route_trolleybus_5_network_wikidata,route_trolleybus_5_operator,route_trolleybus_5_name,
     route_trolleybus_6_ref,route_trolleybus_6_network,route_trolleybus_6_network_wikidata,route_trolleybus_6_operator,route_trolleybus_6_name,
 
     -- BUS
+    route_bus_1_ref,route_bus_1_network,route_bus_1_network_wikidata,route_bus_1_operator,route_bus_1_name,
     route_bus_2_ref,route_bus_2_network,route_bus_2_network_wikidata,route_bus_2_operator,route_bus_2_name,
     route_bus_3_ref,route_bus_3_network,route_bus_3_network_wikidata,route_bus_3_operator,route_bus_3_name,
     route_bus_4_ref,route_bus_4_network,route_bus_4_network_wikidata,route_bus_4_operator,route_bus_4_name,
@@ -83,6 +93,7 @@ SELECT
     route_road_6_ref,route_road_6_network,route_road_6_network_wikidata,route_road_6_operator,route_road_6_name,
 
     -- TRAIN
+    route_train_1_ref,route_train_1_network,route_train_1_network_wikidata,route_train_1_operator,route_train_1_name,
     route_train_2_ref,route_train_2_network,route_train_2_network_wikidata,route_train_2_operator,route_train_2_name,
     route_train_3_ref,route_train_3_network,route_train_3_network_wikidata,route_train_3_operator,route_train_3_name,
     route_train_4_ref,route_train_4_network,route_train_4_network_wikidata,route_train_4_operator,route_train_4_name,
@@ -90,30 +101,39 @@ SELECT
     route_train_6_ref,route_train_6_network,route_train_6_network_wikidata,route_train_6_operator,route_train_6_name,
 
     -- SUBWAY
+    route_subway_1_ref,route_subway_1_network,route_subway_1_network_wikidata,route_subway_1_operator,route_subway_1_name,
+    route_subway_2_ref,route_subway_2_network,route_subway_2_network_wikidata,route_subway_2_operator,route_subway_2_name,
     route_subway_3_ref,route_subway_3_network,route_subway_3_network_wikidata,route_subway_3_operator,route_subway_3_name,
     route_subway_4_ref,route_subway_4_network,route_subway_4_network_wikidata,route_subway_4_operator,route_subway_4_name,
     route_subway_5_ref,route_subway_5_network,route_subway_5_network_wikidata,route_subway_5_operator,route_subway_5_name,
     route_subway_6_ref,route_subway_6_network,route_subway_6_network_wikidata,route_subway_6_operator,route_subway_6_name,
 
     -- LIGHT_RAIL
+    route_light_rail_1_ref,route_light_rail_1_network,route_light_rail_1_network_wikidata,route_light_rail_1_operator,route_light_rail_1_name,
+    route_light_rail_2_ref,route_light_rail_2_network,route_light_rail_2_network_wikidata,route_light_rail_2_operator,route_light_rail_2_name,
     route_light_rail_3_ref,route_light_rail_3_network,route_light_rail_3_network_wikidata,route_light_rail_3_operator,route_light_rail_3_name,
     route_light_rail_4_ref,route_light_rail_4_network,route_light_rail_4_network_wikidata,route_light_rail_4_operator,route_light_rail_4_name,
     route_light_rail_5_ref,route_light_rail_5_network,route_light_rail_5_network_wikidata,route_light_rail_5_operator,route_light_rail_5_name,
     route_light_rail_6_ref,route_light_rail_6_network,route_light_rail_6_network_wikidata,route_light_rail_6_operator,route_light_rail_6_name,
 
     -- TRAM
+    route_tram_1_ref,route_tram_1_network,route_tram_1_network_wikidata,route_tram_1_operator,route_tram_1_name,
+    route_tram_2_ref,route_tram_2_network,route_tram_2_network_wikidata,route_tram_2_operator,route_tram_2_name,
     route_tram_3_ref,route_tram_3_network,route_tram_3_network_wikidata,route_tram_3_operator,route_tram_3_name,
     route_tram_4_ref,route_tram_4_network,route_tram_4_network_wikidata,route_tram_4_operator,route_tram_4_name,
     route_tram_5_ref,route_tram_5_network,route_tram_5_network_wikidata,route_tram_5_operator,route_tram_5_name,
     route_tram_6_ref,route_tram_6_network,route_tram_6_network_wikidata,route_tram_6_operator,route_tram_6_name,
 
     -- TROLLEYBUS
+    route_trolleybus_1_ref,route_trolleybus_1_network,route_trolleybus_1_network_wikidata,route_trolleybus_1_operator,route_trolleybus_1_name,
+    route_trolleybus_2_ref,route_trolleybus_2_network,route_trolleybus_2_network_wikidata,route_trolleybus_2_operator,route_trolleybus_2_name,
     route_trolleybus_3_ref,route_trolleybus_3_network,route_trolleybus_3_network_wikidata,route_trolleybus_3_operator,route_trolleybus_3_name,
     route_trolleybus_4_ref,route_trolleybus_4_network,route_trolleybus_4_network_wikidata,route_trolleybus_4_operator,route_trolleybus_4_name,
     route_trolleybus_5_ref,route_trolleybus_5_network,route_trolleybus_5_network_wikidata,route_trolleybus_5_operator,route_trolleybus_5_name,
     route_trolleybus_6_ref,route_trolleybus_6_network,route_trolleybus_6_network_wikidata,route_trolleybus_6_operator,route_trolleybus_6_name,
 
     -- BUS
+    route_bus_1_ref,route_bus_1_network,route_bus_1_network_wikidata,route_bus_1_operator,route_bus_1_name,
     route_bus_2_ref,route_bus_2_network,route_bus_2_network_wikidata,route_bus_2_operator,route_bus_2_name,
     route_bus_3_ref,route_bus_3_network,route_bus_3_network_wikidata,route_bus_3_operator,route_bus_3_name,
     route_bus_4_ref,route_bus_4_network,route_bus_4_network_wikidata,route_bus_4_operator,route_bus_4_name,
@@ -146,6 +166,7 @@ SELECT
     route_road_6_ref,route_road_6_network,route_road_6_network_wikidata,route_road_6_operator,route_road_6_name,
 
     -- TRAIN
+    route_train_1_ref,route_train_1_network,route_train_1_network_wikidata,route_train_1_operator,route_train_1_name,
     route_train_2_ref,route_train_2_network,route_train_2_network_wikidata,route_train_2_operator,route_train_2_name,
     route_train_3_ref,route_train_3_network,route_train_3_network_wikidata,route_train_3_operator,route_train_3_name,
     route_train_4_ref,route_train_4_network,route_train_4_network_wikidata,route_train_4_operator,route_train_4_name,
@@ -153,30 +174,39 @@ SELECT
     route_train_6_ref,route_train_6_network,route_train_6_network_wikidata,route_train_6_operator,route_train_6_name,
 
     -- SUBWAY
+    route_subway_1_ref,route_subway_1_network,route_subway_1_network_wikidata,route_subway_1_operator,route_subway_1_name,
+    route_subway_2_ref,route_subway_2_network,route_subway_2_network_wikidata,route_subway_2_operator,route_subway_2_name,
     route_subway_3_ref,route_subway_3_network,route_subway_3_network_wikidata,route_subway_3_operator,route_subway_3_name,
     route_subway_4_ref,route_subway_4_network,route_subway_4_network_wikidata,route_subway_4_operator,route_subway_4_name,
     route_subway_5_ref,route_subway_5_network,route_subway_5_network_wikidata,route_subway_5_operator,route_subway_5_name,
     route_subway_6_ref,route_subway_6_network,route_subway_6_network_wikidata,route_subway_6_operator,route_subway_6_name,
 
     -- LIGHT_RAIL
+    route_light_rail_1_ref,route_light_rail_1_network,route_light_rail_1_network_wikidata,route_light_rail_1_operator,route_light_rail_1_name,
+    route_light_rail_2_ref,route_light_rail_2_network,route_light_rail_2_network_wikidata,route_light_rail_2_operator,route_light_rail_2_name,
     route_light_rail_3_ref,route_light_rail_3_network,route_light_rail_3_network_wikidata,route_light_rail_3_operator,route_light_rail_3_name,
     route_light_rail_4_ref,route_light_rail_4_network,route_light_rail_4_network_wikidata,route_light_rail_4_operator,route_light_rail_4_name,
     route_light_rail_5_ref,route_light_rail_5_network,route_light_rail_5_network_wikidata,route_light_rail_5_operator,route_light_rail_5_name,
     route_light_rail_6_ref,route_light_rail_6_network,route_light_rail_6_network_wikidata,route_light_rail_6_operator,route_light_rail_6_name,
 
     -- TRAM
+    route_tram_1_ref,route_tram_1_network,route_tram_1_network_wikidata,route_tram_1_operator,route_tram_1_name,
+    route_tram_2_ref,route_tram_2_network,route_tram_2_network_wikidata,route_tram_2_operator,route_tram_2_name,
     route_tram_3_ref,route_tram_3_network,route_tram_3_network_wikidata,route_tram_3_operator,route_tram_3_name,
     route_tram_4_ref,route_tram_4_network,route_tram_4_network_wikidata,route_tram_4_operator,route_tram_4_name,
     route_tram_5_ref,route_tram_5_network,route_tram_5_network_wikidata,route_tram_5_operator,route_tram_5_name,
     route_tram_6_ref,route_tram_6_network,route_tram_6_network_wikidata,route_tram_6_operator,route_tram_6_name,
 
     -- TROLLEYBUS
+    route_trolleybus_1_ref,route_trolleybus_1_network,route_trolleybus_1_network_wikidata,route_trolleybus_1_operator,route_trolleybus_1_name,
+    route_trolleybus_2_ref,route_trolleybus_2_network,route_trolleybus_2_network_wikidata,route_trolleybus_2_operator,route_trolleybus_2_name,
     route_trolleybus_3_ref,route_trolleybus_3_network,route_trolleybus_3_network_wikidata,route_trolleybus_3_operator,route_trolleybus_3_name,
     route_trolleybus_4_ref,route_trolleybus_4_network,route_trolleybus_4_network_wikidata,route_trolleybus_4_operator,route_trolleybus_4_name,
     route_trolleybus_5_ref,route_trolleybus_5_network,route_trolleybus_5_network_wikidata,route_trolleybus_5_operator,route_trolleybus_5_name,
     route_trolleybus_6_ref,route_trolleybus_6_network,route_trolleybus_6_network_wikidata,route_trolleybus_6_operator,route_trolleybus_6_name,
 
     -- BUS
+    route_bus_1_ref,route_bus_1_network,route_bus_1_network_wikidata,route_bus_1_operator,route_bus_1_name,
     route_bus_2_ref,route_bus_2_network,route_bus_2_network_wikidata,route_bus_2_operator,route_bus_2_name,
     route_bus_3_ref,route_bus_3_network,route_bus_3_network_wikidata,route_bus_3_operator,route_bus_3_name,
     route_bus_4_ref,route_bus_4_network,route_bus_4_network_wikidata,route_bus_4_operator,route_bus_4_name,
@@ -209,6 +239,7 @@ SELECT
     route_road_6_ref,route_road_6_network,route_road_6_network_wikidata,route_road_6_operator,route_road_6_name,
 
     -- TRAIN
+    route_train_1_ref,route_train_1_network,route_train_1_network_wikidata,route_train_1_operator,route_train_1_name,
     route_train_2_ref,route_train_2_network,route_train_2_network_wikidata,route_train_2_operator,route_train_2_name,
     route_train_3_ref,route_train_3_network,route_train_3_network_wikidata,route_train_3_operator,route_train_3_name,
     route_train_4_ref,route_train_4_network,route_train_4_network_wikidata,route_train_4_operator,route_train_4_name,
@@ -216,30 +247,39 @@ SELECT
     route_train_6_ref,route_train_6_network,route_train_6_network_wikidata,route_train_6_operator,route_train_6_name,
 
     -- SUBWAY
+    route_subway_1_ref,route_subway_1_network,route_subway_1_network_wikidata,route_subway_1_operator,route_subway_1_name,
+    route_subway_2_ref,route_subway_2_network,route_subway_2_network_wikidata,route_subway_2_operator,route_subway_2_name,
     route_subway_3_ref,route_subway_3_network,route_subway_3_network_wikidata,route_subway_3_operator,route_subway_3_name,
     route_subway_4_ref,route_subway_4_network,route_subway_4_network_wikidata,route_subway_4_operator,route_subway_4_name,
     route_subway_5_ref,route_subway_5_network,route_subway_5_network_wikidata,route_subway_5_operator,route_subway_5_name,
     route_subway_6_ref,route_subway_6_network,route_subway_6_network_wikidata,route_subway_6_operator,route_subway_6_name,
 
     -- LIGHT_RAIL
+    route_light_rail_1_ref,route_light_rail_1_network,route_light_rail_1_network_wikidata,route_light_rail_1_operator,route_light_rail_1_name,
+    route_light_rail_2_ref,route_light_rail_2_network,route_light_rail_2_network_wikidata,route_light_rail_2_operator,route_light_rail_2_name,
     route_light_rail_3_ref,route_light_rail_3_network,route_light_rail_3_network_wikidata,route_light_rail_3_operator,route_light_rail_3_name,
     route_light_rail_4_ref,route_light_rail_4_network,route_light_rail_4_network_wikidata,route_light_rail_4_operator,route_light_rail_4_name,
     route_light_rail_5_ref,route_light_rail_5_network,route_light_rail_5_network_wikidata,route_light_rail_5_operator,route_light_rail_5_name,
     route_light_rail_6_ref,route_light_rail_6_network,route_light_rail_6_network_wikidata,route_light_rail_6_operator,route_light_rail_6_name,
 
     -- TRAM
+    route_tram_1_ref,route_tram_1_network,route_tram_1_network_wikidata,route_tram_1_operator,route_tram_1_name,
+    route_tram_2_ref,route_tram_2_network,route_tram_2_network_wikidata,route_tram_2_operator,route_tram_2_name,
     route_tram_3_ref,route_tram_3_network,route_tram_3_network_wikidata,route_tram_3_operator,route_tram_3_name,
     route_tram_4_ref,route_tram_4_network,route_tram_4_network_wikidata,route_tram_4_operator,route_tram_4_name,
     route_tram_5_ref,route_tram_5_network,route_tram_5_network_wikidata,route_tram_5_operator,route_tram_5_name,
     route_tram_6_ref,route_tram_6_network,route_tram_6_network_wikidata,route_tram_6_operator,route_tram_6_name,
 
     -- TROLLEYBUS
+    route_trolleybus_1_ref,route_trolleybus_1_network,route_trolleybus_1_network_wikidata,route_trolleybus_1_operator,route_trolleybus_1_name,
+    route_trolleybus_2_ref,route_trolleybus_2_network,route_trolleybus_2_network_wikidata,route_trolleybus_2_operator,route_trolleybus_2_name,
     route_trolleybus_3_ref,route_trolleybus_3_network,route_trolleybus_3_network_wikidata,route_trolleybus_3_operator,route_trolleybus_3_name,
     route_trolleybus_4_ref,route_trolleybus_4_network,route_trolleybus_4_network_wikidata,route_trolleybus_4_operator,route_trolleybus_4_name,
     route_trolleybus_5_ref,route_trolleybus_5_network,route_trolleybus_5_network_wikidata,route_trolleybus_5_operator,route_trolleybus_5_name,
     route_trolleybus_6_ref,route_trolleybus_6_network,route_trolleybus_6_network_wikidata,route_trolleybus_6_operator,route_trolleybus_6_name,
 
     -- BUS
+    route_bus_1_ref,route_bus_1_network,route_bus_1_network_wikidata,route_bus_1_operator,route_bus_1_name,
     route_bus_2_ref,route_bus_2_network,route_bus_2_network_wikidata,route_bus_2_operator,route_bus_2_name,
     route_bus_3_ref,route_bus_3_network,route_bus_3_network_wikidata,route_bus_3_operator,route_bus_3_name,
     route_bus_4_ref,route_bus_4_network,route_bus_4_network_wikidata,route_bus_4_operator,route_bus_4_name,
@@ -272,6 +312,7 @@ SELECT
     route_road_6_ref,route_road_6_network,route_road_6_network_wikidata,route_road_6_operator,route_road_6_name,
 
     -- TRAIN
+    route_train_1_ref,route_train_1_network,route_train_1_network_wikidata,route_train_1_operator,route_train_1_name,
     route_train_2_ref,route_train_2_network,route_train_2_network_wikidata,route_train_2_operator,route_train_2_name,
     route_train_3_ref,route_train_3_network,route_train_3_network_wikidata,route_train_3_operator,route_train_3_name,
     route_train_4_ref,route_train_4_network,route_train_4_network_wikidata,route_train_4_operator,route_train_4_name,
@@ -279,30 +320,39 @@ SELECT
     route_train_6_ref,route_train_6_network,route_train_6_network_wikidata,route_train_6_operator,route_train_6_name,
 
     -- SUBWAY
+    route_subway_1_ref,route_subway_1_network,route_subway_1_network_wikidata,route_subway_1_operator,route_subway_1_name,
+    route_subway_2_ref,route_subway_2_network,route_subway_2_network_wikidata,route_subway_2_operator,route_subway_2_name,
     route_subway_3_ref,route_subway_3_network,route_subway_3_network_wikidata,route_subway_3_operator,route_subway_3_name,
     route_subway_4_ref,route_subway_4_network,route_subway_4_network_wikidata,route_subway_4_operator,route_subway_4_name,
     route_subway_5_ref,route_subway_5_network,route_subway_5_network_wikidata,route_subway_5_operator,route_subway_5_name,
     route_subway_6_ref,route_subway_6_network,route_subway_6_network_wikidata,route_subway_6_operator,route_subway_6_name,
 
     -- LIGHT_RAIL
+    route_light_rail_1_ref,route_light_rail_1_network,route_light_rail_1_network_wikidata,route_light_rail_1_operator,route_light_rail_1_name,
+    route_light_rail_2_ref,route_light_rail_2_network,route_light_rail_2_network_wikidata,route_light_rail_2_operator,route_light_rail_2_name,
     route_light_rail_3_ref,route_light_rail_3_network,route_light_rail_3_network_wikidata,route_light_rail_3_operator,route_light_rail_3_name,
     route_light_rail_4_ref,route_light_rail_4_network,route_light_rail_4_network_wikidata,route_light_rail_4_operator,route_light_rail_4_name,
     route_light_rail_5_ref,route_light_rail_5_network,route_light_rail_5_network_wikidata,route_light_rail_5_operator,route_light_rail_5_name,
     route_light_rail_6_ref,route_light_rail_6_network,route_light_rail_6_network_wikidata,route_light_rail_6_operator,route_light_rail_6_name,
 
     -- TRAM
+    route_tram_1_ref,route_tram_1_network,route_tram_1_network_wikidata,route_tram_1_operator,route_tram_1_name,
+    route_tram_2_ref,route_tram_2_network,route_tram_2_network_wikidata,route_tram_2_operator,route_tram_2_name,
     route_tram_3_ref,route_tram_3_network,route_tram_3_network_wikidata,route_tram_3_operator,route_tram_3_name,
     route_tram_4_ref,route_tram_4_network,route_tram_4_network_wikidata,route_tram_4_operator,route_tram_4_name,
     route_tram_5_ref,route_tram_5_network,route_tram_5_network_wikidata,route_tram_5_operator,route_tram_5_name,
     route_tram_6_ref,route_tram_6_network,route_tram_6_network_wikidata,route_tram_6_operator,route_tram_6_name,
 
     -- TROLLEYBUS
+    route_trolleybus_1_ref,route_trolleybus_1_network,route_trolleybus_1_network_wikidata,route_trolleybus_1_operator,route_trolleybus_1_name,
+    route_trolleybus_2_ref,route_trolleybus_2_network,route_trolleybus_2_network_wikidata,route_trolleybus_2_operator,route_trolleybus_2_name,
     route_trolleybus_3_ref,route_trolleybus_3_network,route_trolleybus_3_network_wikidata,route_trolleybus_3_operator,route_trolleybus_3_name,
     route_trolleybus_4_ref,route_trolleybus_4_network,route_trolleybus_4_network_wikidata,route_trolleybus_4_operator,route_trolleybus_4_name,
     route_trolleybus_5_ref,route_trolleybus_5_network,route_trolleybus_5_network_wikidata,route_trolleybus_5_operator,route_trolleybus_5_name,
     route_trolleybus_6_ref,route_trolleybus_6_network,route_trolleybus_6_network_wikidata,route_trolleybus_6_operator,route_trolleybus_6_name,
 
     -- BUS
+    route_bus_1_ref,route_bus_1_network,route_bus_1_network_wikidata,route_bus_1_operator,route_bus_1_name,
     route_bus_2_ref,route_bus_2_network,route_bus_2_network_wikidata,route_bus_2_operator,route_bus_2_name,
     route_bus_3_ref,route_bus_3_network,route_bus_3_network_wikidata,route_bus_3_operator,route_bus_3_name,
     route_bus_4_ref,route_bus_4_network,route_bus_4_network_wikidata,route_bus_4_operator,route_bus_4_name,

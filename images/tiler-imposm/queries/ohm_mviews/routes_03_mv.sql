@@ -27,6 +27,7 @@
 --   - This function drops the view if it already exists (DROP ... CASCADE).
 --   - No LIMIT or dynamic introspection is used: all columns are explicitly listed.
 -- ============================================================================
+DROP MATERIALIZED VIEW IF EXISTS create_mv_routes_by_length CASCADE;
 
 CREATE OR REPLACE FUNCTION create_mv_routes_by_length(
     full_view_name TEXT,
@@ -50,29 +51,6 @@ BEGIN
         WHEN %s > 0 THEN ST_Simplify(geometry, %s)
         ELSE geometry
       END AS geometry,
-CREATE OR REPLACE FUNCTION create_mv_routes_by_length(
-    full_view_name TEXT,
-    min_length DOUBLE PRECISION,
-    simplify_tol DOUBLE PRECISION
-) RETURNS void AS $$
-DECLARE
-  sql text;
-BEGIN
-  sql := format($f$
-    DROP MATERIALIZED VIEW IF EXISTS %I CASCADE;
-
-    CREATE MATERIALIZED VIEW %I AS
-    SELECT
-      way_id AS osm_id,
-      min_start_decdate AS start_decdate,
-      max_end_decdate AS end_decdate,
-      min_start_date_iso AS start_date,
-      max_end_date_iso AS end_date,
-      CASE
-        WHEN %s > 0 THEN ST_Simplify(geometry, %s)
-        ELSE geometry
-      END AS geometry,
-      num_routes,
       NULLIF(route_road_1_ref, '') AS route_road_1_ref,
       NULLIF(route_road_1_network, '') AS route_road_1_network,
       NULLIF(route_road_1_network_wikidata, '') AS route_road_1_network_wikidata,
@@ -110,7 +88,7 @@ BEGIN
       NULLIF(route_road_6_name, '') AS route_road_6_name,
 
       -- =========================================================================
-      -- TRAIN (up to 6)
+      -- TRAIN
       -- =========================================================================
       NULLIF(route_train_1_ref, '') AS route_train_1_ref,
       NULLIF(route_train_1_network, '') AS route_train_1_network,
@@ -149,14 +127,14 @@ BEGIN
       NULLIF(route_train_6_name, '') AS route_train_6_name,
 
       -- =========================================================================
-      -- SUBWAY (up to 6)
+      -- SUBWAY
       -- =========================================================================
       NULLIF(route_subway_1_ref, '') AS route_subway_1_ref,
       NULLIF(route_subway_1_network, '') AS route_subway_1_network,
       NULLIF(route_subway_1_network_wikidata, '') AS route_subway_1_network_wikidata,
       NULLIF(route_subway_1_operator, '') AS route_subway_1_operator,
       NULLIF(route_subway_1_name, '') AS route_subway_1_name,
-      -- ... repeat slots 2..6 for subway
+
       NULLIF(route_subway_2_ref, '') AS route_subway_2_ref,
       NULLIF(route_subway_2_network, '') AS route_subway_2_network,
       NULLIF(route_subway_2_network_wikidata, '') AS route_subway_2_network_wikidata,
@@ -188,14 +166,14 @@ BEGIN
       NULLIF(route_subway_6_name, '') AS route_subway_6_name,
 
       -- =========================================================================
-      -- LIGHT_RAIL (up to 6)
+      -- LIGHT_RAIL
       -- =========================================================================
       NULLIF(route_light_rail_1_ref, '') AS route_light_rail_1_ref,
       NULLIF(route_light_rail_1_network, '') AS route_light_rail_1_network,
       NULLIF(route_light_rail_1_network_wikidata, '') AS route_light_rail_1_network_wikidata,
       NULLIF(route_light_rail_1_operator, '') AS route_light_rail_1_operator,
       NULLIF(route_light_rail_1_name, '') AS route_light_rail_1_name,
-      -- ... repeat slots 2..6 for light_rail
+
       NULLIF(route_light_rail_2_ref, '') AS route_light_rail_2_ref,
       NULLIF(route_light_rail_2_network, '') AS route_light_rail_2_network,
       NULLIF(route_light_rail_2_network_wikidata, '') AS route_light_rail_2_network_wikidata,
@@ -227,14 +205,14 @@ BEGIN
       NULLIF(route_light_rail_6_name, '') AS route_light_rail_6_name,
 
       -- =========================================================================
-      -- TRAM (up to 6)
+      -- TRAM
       -- =========================================================================
       NULLIF(route_tram_1_ref, '') AS route_tram_1_ref,
       NULLIF(route_tram_1_network, '') AS route_tram_1_network,
       NULLIF(route_tram_1_network_wikidata, '') AS route_tram_1_network_wikidata,
       NULLIF(route_tram_1_operator, '') AS route_tram_1_operator,
       NULLIF(route_tram_1_name, '') AS route_tram_1_name,
-      -- ... repeat slots 2..6 for tram
+
       NULLIF(route_tram_2_ref, '') AS route_tram_2_ref,
       NULLIF(route_tram_2_network, '') AS route_tram_2_network,
       NULLIF(route_tram_2_network_wikidata, '') AS route_tram_2_network_wikidata,
@@ -266,14 +244,14 @@ BEGIN
       NULLIF(route_tram_6_name, '') AS route_tram_6_name,
 
       -- =========================================================================
-      -- TROLLEYBUS (up to 6)
+      -- TROLLEYBUS
       -- =========================================================================
       NULLIF(route_trolleybus_1_ref, '') AS route_trolleybus_1_ref,
       NULLIF(route_trolleybus_1_network, '') AS route_trolleybus_1_network,
       NULLIF(route_trolleybus_1_network_wikidata, '') AS route_trolleybus_1_network_wikidata,
       NULLIF(route_trolleybus_1_operator, '') AS route_trolleybus_1_operator,
       NULLIF(route_trolleybus_1_name, '') AS route_trolleybus_1_name,
-      -- ... repeat slots 2..6 for trolleybus
+
       NULLIF(route_trolleybus_2_ref, '') AS route_trolleybus_2_ref,
       NULLIF(route_trolleybus_2_network, '') AS route_trolleybus_2_network,
       NULLIF(route_trolleybus_2_network_wikidata, '') AS route_trolleybus_2_network_wikidata,
@@ -305,7 +283,7 @@ BEGIN
       NULLIF(route_trolleybus_6_name, '') AS route_trolleybus_6_name,
 
       -- =========================================================================
-      -- BUS (up to 6 concurrent bus routes)
+      -- BUS
       -- =========================================================================
       NULLIF(route_bus_1_ref, '') AS route_bus_1_ref,
       NULLIF(route_bus_1_network, '') AS route_bus_1_network,
