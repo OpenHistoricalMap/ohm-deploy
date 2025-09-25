@@ -89,7 +89,7 @@ SELECT
   num_routes,
 
   -- =========================================================================
-  -- ROAD (up to 6 concurrent routes of type = 'road')
+  -- ROAD
   -- For each slot we store: ref, network, network_wikidata, operator, name.
   -- Rationale: roads often have multiple concurrent refs (I-5, US-101, etc.)
   -- and rendering needs explicit columns for each slot.
@@ -131,7 +131,7 @@ SELECT
   MAX(CASE WHEN type = 'road' AND type_rnk = 6 THEN name             END) AS route_road_6_name,
 
   -- =========================================================================
-  -- TRAIN (up to 6)
+  -- TRAIN
   -- =========================================================================
   MAX(CASE WHEN type = 'train' AND type_rnk = 1 THEN ref              END) AS route_train_1_ref,
   MAX(CASE WHEN type = 'train' AND type_rnk = 1 THEN network          END) AS route_train_1_network,
@@ -170,7 +170,7 @@ SELECT
   MAX(CASE WHEN type = 'train' AND type_rnk = 6 THEN name             END) AS route_train_6_name,
 
   -- =========================================================================
-  -- SUBWAY (up to 6)
+  -- SUBWAY
   -- =========================================================================
   MAX(CASE WHEN type = 'subway' AND type_rnk = 1 THEN ref              END) AS route_subway_1_ref,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 1 THEN network          END) AS route_subway_1_network,
@@ -209,7 +209,7 @@ SELECT
   MAX(CASE WHEN type = 'subway' AND type_rnk = 6 THEN name             END) AS route_subway_6_name,
 
   -- =========================================================================
-  -- LIGHT_RAIL (up to 6)
+  -- LIGHT_RAIL
   -- =========================================================================
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 1 THEN ref              END) AS route_light_rail_1_ref,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 1 THEN network          END) AS route_light_rail_1_network,
@@ -248,7 +248,7 @@ SELECT
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 6 THEN name             END) AS route_light_rail_6_name,
 
   -- =========================================================================
-  -- TRAM (up to 6)
+  -- TRAM
   -- =========================================================================
   MAX(CASE WHEN type = 'tram' AND type_rnk = 1 THEN ref              END) AS route_tram_1_ref,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 1 THEN network          END) AS route_tram_1_network,
@@ -287,7 +287,7 @@ SELECT
   MAX(CASE WHEN type = 'tram' AND type_rnk = 6 THEN name             END) AS route_tram_6_name,
 
   -- =========================================================================
-  -- TROLLEYBUS (up to 6)
+  -- TROLLEYBUS
   -- =========================================================================
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 1 THEN ref              END) AS route_trolleybus_1_ref,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 1 THEN network          END) AS route_trolleybus_1_network,
@@ -326,7 +326,7 @@ SELECT
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 6 THEN name             END) AS route_trolleybus_6_name,
 
   -- =========================================================================
-  -- BUS (up to 6 concurrent bus routes)
+  -- BUS
   -- =========================================================================
   MAX(CASE WHEN type = 'bus' AND type_rnk = 1 THEN ref              END) AS route_bus_1_ref,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 1 THEN network          END) AS route_bus_1_network,
@@ -370,6 +370,7 @@ SELECT
   routes
 
 FROM ranked
+WHERE type IN ('road', 'train', 'subway', 'light_rail', 'tram', 'trolleybus', 'bus')
 GROUP BY
   way_id, min_start_decdate, max_end_decdate,
   min_start_date_iso, max_end_date_iso,
@@ -392,3 +393,4 @@ CREATE INDEX mv_routes_indexed_dates_idx
 CREATE INDEX mv_routes_indexed_geom_idx
   ON mv_routes_indexed USING GIST (geometry);
 
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed;

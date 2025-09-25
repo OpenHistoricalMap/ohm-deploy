@@ -227,4 +227,5 @@ ON mv_routes_normalized (min_start_decdate, max_end_decdate);
 
 CREATE INDEX mv_routes_normalized_geom_idx 
 ON mv_routes_normalized USING GIST (geometry);
+
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_normalized;
