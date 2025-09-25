@@ -70,16 +70,7 @@ WITH union_sources AS (
   -- 1) From multi-lines
   SELECT
     member::bigint AS way_id,
-    osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    operator,
-    direction,
-    tags,
-    geometry,
+    osm_id, name, type, route, ref, network, operator, direction, tags, geometry,
     start_decdate,
     end_decdate
   FROM osm_route_multilines
@@ -90,138 +81,134 @@ WITH union_sources AS (
   -- 2) From lines
   SELECT
     osm_id::bigint AS way_id,
-    osm_id,
-    name,
-    type,
-    route,
-    ref,
-    network,
-    operator,
-    direction,
-    tags,
-    geometry,
+    osm_id, name, type, route, ref, network, operator, direction, tags, geometry,
     start_decdate,
     end_decdate
   FROM osm_route_lines
   WHERE geometry IS NOT NULL
 ),
-dates AS (
-  -- Collect cutoffs
-  SELECT way_id, start_decdate AS d FROM union_sources WHERE start_decdate IS NOT NULL
-  UNION
-  SELECT way_id, end_decdate FROM union_sources WHERE end_decdate IS NOT NULL
+-- CTE para identificar los ways que SÍ tienen al menos una fecha
+ways_with_dates AS (
+  SELECT DISTINCT way_id
+  FROM union_sources
+  WHERE start_decdate IS NOT NULL OR end_decdate IS NOT NULL
 ),
-ordered AS (
-  SELECT way_id, d
-  FROM dates
-  GROUP BY way_id, d
-),
-segments AS (
-  -- Consecutive segments
-  SELECT 
-    way_id,
-    d AS seg_start,
-    LEAD(d) OVER (PARTITION BY way_id ORDER BY d) AS seg_end
-  FROM ordered
-),
-active AS (
-  -- Relate active routes to each segment (check full overlap, not only seg_start!)
+-- CASO 1: Procesar los ways que NO tienen fechas. Se asume un único período "infinito".
+data_for_null_dates AS (
   SELECT
-    s.way_id,
-    s.seg_start,
-    s.seg_end,
-    u.osm_id,
-    u.ref,
-    u.route,
-    u.network,
-    u.name,
-    u.type,
-    u.operator,
-    u.direction,
-    u.tags,
-    u.geometry
-  FROM segments s
-  JOIN union_sources u
-    ON u.way_id = s.way_id
-   AND (u.start_decdate IS NULL OR u.start_decdate < COALESCE(s.seg_end, 9999))
-   AND (u.end_decdate   IS NULL OR u.end_decdate   > s.seg_start)
-),
-base AS (
-  SELECT
-    row_number() OVER () AS uid,
-    way_id,
-    seg_start AS min_start_decdate,
-    seg_end   AS max_end_decdate,
-    convert_decimal_to_iso_date(seg_start::NUMERIC) AS min_start_date_iso,
-    convert_decimal_to_iso_date(seg_end::NUMERIC)   AS max_end_date_iso,
-    (ARRAY_AGG(geometry))[1] AS geometry,
-    COUNT(DISTINCT osm_id) AS num_routes,
+    u.way_id,
+    NULL::double precision AS min_start_decdate,
+    NULL::double precision AS max_end_decdate,
+    NULL::text AS min_start_date_iso,
+    NULL::text AS max_end_date_iso,
+    (ARRAY_AGG(u.geometry))[1] AS geometry,
+    COUNT(DISTINCT u.osm_id) AS num_routes,
     jsonb_agg(
       jsonb_build_object(
-        'osm_id', osm_id,
-        'ref', ref,
-        'route', route,
-        'network', network,
-        'name', name,
-        'type', type,
-        'operator', operator,
-        'direction', direction,
-        'tags', tags
+        'osm_id', u.osm_id, 'ref', u.ref, 'route', u.route, 'network', u.network,
+        'name', u.name, 'type', u.type, 'operator', u.operator, 'direction', u.direction, 'tags', u.tags
       )
-      ORDER BY ref
-    ) AS routes,
-    -- Hash of the set of routes (ensures merge only if combination identical)
-    md5(
-      array_to_string(
-        ARRAY_AGG(DISTINCT osm_id ORDER BY osm_id),
-        ','
-      )
-    ) AS routeset_hash
-  FROM active
-  GROUP BY way_id, seg_start, seg_end
+      ORDER BY u.ref
+    ) AS routes
+  FROM union_sources u
+  WHERE u.way_id NOT IN (SELECT way_id FROM ways_with_dates)
+  GROUP BY u.way_id
 ),
-merged AS (
-  SELECT 
-    way_id,
-    MIN(min_start_decdate) AS min_start_decdate,
-    MAX(max_end_decdate)   AS max_end_decdate,
-    MIN(min_start_date_iso) AS min_start_date_iso,
-    MAX(max_end_date_iso)   AS max_end_date_iso,
-    (ARRAY_AGG(geometry))[1] AS geometry,
-    MAX(num_routes) AS num_routes,
-    ANY_VALUE(routes) AS routes,
-    routeset_hash
-  FROM (
-    SELECT t.*,
-           SUM(is_new_group) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) AS grp
+-- CASO 2: Procesar los ways que SÍ tienen fechas, usando la lógica de segmentación.
+data_for_dated_ways AS (
+  WITH dates AS (
+    -- Collect cutoffs only from ways that have dates
+    SELECT way_id, start_decdate AS d FROM union_sources WHERE way_id IN (SELECT way_id FROM ways_with_dates) AND start_decdate IS NOT NULL
+    UNION
+    SELECT way_id, end_decdate FROM union_sources WHERE way_id IN (SELECT way_id FROM ways_with_dates) AND end_decdate IS NOT NULL
+  ),
+  ordered AS (
+    SELECT way_id, d FROM dates GROUP BY way_id, d
+  ),
+  segments AS (
+    -- Consecutive segments
+    SELECT 
+      way_id,
+      d AS seg_start,
+      LEAD(d) OVER (PARTITION BY way_id ORDER BY d) AS seg_end
+    FROM ordered
+  ),
+  active AS (
+    -- Relate active routes to each segment
+    SELECT
+      s.way_id, s.seg_start, s.seg_end,
+      u.osm_id, u.ref, u.route, u.network, u.name, u.type, u.operator, u.direction, u.tags, u.geometry
+    FROM segments s
+    JOIN union_sources u
+      ON u.way_id = s.way_id
+     AND (u.start_decdate IS NULL OR u.start_decdate < COALESCE(s.seg_end, 9999))
+     AND (u.end_decdate   IS NULL OR u.end_decdate   > s.seg_start)
+  ),
+  base AS (
+    SELECT
+      way_id,
+      seg_start AS min_start_decdate,
+      seg_end   AS max_end_decdate,
+      convert_decimal_to_iso_date(seg_start::NUMERIC) AS min_start_date_iso,
+      convert_decimal_to_iso_date(seg_end::NUMERIC)   AS max_end_date_iso,
+      (ARRAY_AGG(geometry))[1] AS geometry,
+      COUNT(DISTINCT osm_id) AS num_routes,
+      jsonb_agg(
+        jsonb_build_object(
+          'osm_id', osm_id, 'ref', ref, 'route', route, 'network', network, 'name', name,
+          'type', type, 'operator', operator, 'direction', direction, 'tags', tags
+        )
+        ORDER BY ref
+      ) AS routes,
+      md5(array_to_string(ARRAY_AGG(DISTINCT osm_id ORDER BY osm_id), ',')) AS routeset_hash
+    FROM active
+    GROUP BY way_id, seg_start, seg_end
+  ),
+  merged AS (
+    SELECT 
+      way_id,
+      MIN(min_start_decdate) AS min_start_decdate,
+      MAX(max_end_decdate)   AS max_end_decdate,
+      MIN(min_start_date_iso) AS min_start_date_iso,
+      MAX(max_end_date_iso)   AS max_end_date_iso,
+      (ARRAY_AGG(geometry))[1] AS geometry,
+      MAX(num_routes) AS num_routes,
+      (ARRAY_AGG(routes))[1] AS routes, -- Reemplazo de ANY_VALUE para compatibilidad con PostgreSQL
+      routeset_hash
     FROM (
-      SELECT *,
-             CASE 
-               WHEN LAG(max_end_decdate) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) IS NULL THEN 1
-               WHEN min_start_decdate - LAG(max_end_decdate) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) > (1.0/365.0) THEN 1
-               ELSE 0
-             END AS is_new_group
-      FROM base
-    ) t
-  ) g
-  GROUP BY way_id, grp, routeset_hash
+      SELECT t.*,
+             SUM(is_new_group) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) AS grp
+      FROM (
+        SELECT *,
+               CASE 
+                 WHEN LAG(max_end_decdate) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) IS NULL THEN 1
+                 WHEN min_start_decdate - LAG(max_end_decdate) OVER (PARTITION BY way_id, routeset_hash ORDER BY min_start_decdate) > (1.0/365.0) THEN 1
+                 ELSE 0
+               END AS is_new_group
+        FROM base
+      ) t
+    ) g
+    GROUP BY way_id, grp, routeset_hash
+  )
+  SELECT 
+    way_id, min_start_decdate, max_end_decdate, min_start_date_iso, max_end_date_iso,
+    geometry, num_routes, routes
+  FROM merged
 )
+-- Unir los dos conjuntos de resultados
 SELECT 
   row_number() OVER () AS uid,
-  way_id,
-  min_start_decdate,
-  max_end_decdate,
-  min_start_date_iso,
-  max_end_date_iso,
-  geometry,
-  num_routes,
-  routes
-FROM merged
+  t.*
+FROM (
+  SELECT * FROM data_for_dated_ways
+  UNION ALL
+  SELECT * FROM data_for_null_dates
+) t
 ORDER BY way_id, min_start_decdate
 WITH DATA;
 
 -- ===============================
--- Indexes
+-- Indexes (sin cambios)
 -- ===============================
 
 DROP INDEX IF EXISTS mv_routes_normalized_unique_idx;
@@ -240,5 +227,4 @@ ON mv_routes_normalized (min_start_decdate, max_end_decdate);
 
 CREATE INDEX mv_routes_normalized_geom_idx 
 ON mv_routes_normalized USING GIST (geometry);
-
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_normalized;
