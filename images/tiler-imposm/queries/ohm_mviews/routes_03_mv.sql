@@ -47,6 +47,7 @@ BEGIN
       max_end_decdate AS end_decdate,
       min_start_date_iso AS start_date,
       max_end_date_iso AS end_date,
+      direction,
       CASE
         WHEN %s > 0 THEN ST_Simplify(geometry, %s)
         ELSE geometry
@@ -330,7 +331,8 @@ BEGIN
       ON %I (
         osm_id,
         start_decdate,
-        end_decdate
+        end_decdate,
+        direction
       );
 
     -- Índice espacial

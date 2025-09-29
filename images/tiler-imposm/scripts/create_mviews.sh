@@ -32,6 +32,8 @@ if [[ "$ALL" == true ]]; then
   execute_sql_file queries/utils/create_generic_mview.sql 
   # This will populate languages
   execute_sql_file queries/utils/fetch_db_languages.sql
+  # Route priority
+  execute_sql_file queries/utils/route_priority.sql
 
   ##################### NE #####################
   log_message "Creating materialized views for NE data"

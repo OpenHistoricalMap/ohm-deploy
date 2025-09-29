@@ -11,6 +11,7 @@ SELECT
     end_decdate,
     start_date,
     end_date,
+    direction,
     -- ROAD
     route_road_1_ref,route_road_1_network,route_road_1_network_wikidata,route_road_1_operator,route_road_1_name,
     route_road_2_ref,route_road_2_network,route_road_2_network_wikidata,route_road_2_operator,route_road_2_name,
@@ -84,6 +85,7 @@ SELECT
     end_decdate,
     start_date,
     end_date,
+    direction,
     -- ROAD
     route_road_1_ref,route_road_1_network,route_road_1_network_wikidata,route_road_1_operator,route_road_1_name,
     route_road_2_ref,route_road_2_network,route_road_2_network_wikidata,route_road_2_operator,route_road_2_name,
@@ -157,6 +159,7 @@ SELECT
     end_decdate,
     start_date,
     end_date,
+    direction,
     -- ROAD
     route_road_1_ref,route_road_1_network,route_road_1_network_wikidata,route_road_1_operator,route_road_1_name,
     route_road_2_ref,route_road_2_network,route_road_2_network_wikidata,route_road_2_operator,route_road_2_name,
@@ -230,6 +233,7 @@ SELECT
     end_decdate,
     start_date,
     end_date,
+    direction,
     -- ROAD
     route_road_1_ref,route_road_1_network,route_road_1_network_wikidata,route_road_1_operator,route_road_1_name,
     route_road_2_ref,route_road_2_network,route_road_2_network_wikidata,route_road_2_operator,route_road_2_name,
@@ -303,6 +307,7 @@ SELECT
     end_decdate,
     start_date,
     end_date,
+    direction,
     -- ROAD
     route_road_1_ref,route_road_1_network,route_road_1_network_wikidata,route_road_1_operator,route_road_1_name,
     route_road_2_ref,route_road_2_network,route_road_2_network_wikidata,route_road_2_operator,route_road_2_name,

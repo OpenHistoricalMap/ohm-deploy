@@ -46,7 +46,8 @@ BEGIN
   net_bonus := CASE 
                  WHEN network = 'US:I'            THEN 1000000 -- Interstates come first
                  WHEN network = 'US:US'           THEN  900000 -- then US Highways
-                 WHEN network LIKE 'US:CA%'       THEN  800000 -- then State Highways
+                 WHEN network ~ '^US:[A-Z]{2}$'       THEN 800000 -- US state highways
+                 WHEN network ~ '^US:[A-Z]{2}:.+'     THEN 700000 -- subdivisions of state highways
                  WHEN network LIKE '%:national'   THEN  700000 -- then national routes
                  WHEN network LIKE '%:regional'   THEN  600000 -- then regional routes
                  ELSE 0

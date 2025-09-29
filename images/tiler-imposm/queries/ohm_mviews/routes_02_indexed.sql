@@ -34,6 +34,7 @@ WITH exploded AS (
     n.max_end_date_iso,
     n.geometry,
     n.num_routes,
+    n.direction,
     r.value ->> 'ref'                      AS ref,
     r.value ->> 'network'                  AS network,
     r.value ->> 'network:wikidata'         AS network_wikidata,
@@ -71,6 +72,7 @@ ranked AS (
     operator,
     type,
     name,
+    direction,
     prio,
     ROW_NUMBER() OVER (
       PARTITION BY way_id, min_start_decdate, max_end_decdate, type
@@ -87,7 +89,7 @@ SELECT
   max_end_date_iso,
   geometry,
   num_routes,
-
+  direction,
   -- =========================================================================
   -- ROAD
   -- For each slot we store: ref, network, network_wikidata, operator, name.
@@ -374,7 +376,7 @@ WHERE type IN ('road', 'train', 'subway', 'light_rail', 'tram', 'trolleybus', 'b
 GROUP BY
   way_id, min_start_decdate, max_end_decdate,
   min_start_date_iso, max_end_date_iso,
-  geometry, num_routes, routes
+  geometry, num_routes, routes, direction
 WITH DATA;
 
 -- ============================================================================
@@ -385,7 +387,7 @@ WITH DATA;
 --  - Date index helps queries filtering by validity interval.
 --  - GIST geometry index is essential for spatial queries (bounding boxes, joins).
 CREATE UNIQUE INDEX mv_routes_indexed_uidx
-  ON mv_routes_indexed (way_id, min_start_decdate, max_end_decdate);
+  ON mv_routes_indexed (way_id, min_start_decdate, max_end_decdate, direction);
 
 CREATE INDEX mv_routes_indexed_dates_idx
   ON mv_routes_indexed (min_start_decdate, max_end_decdate);
@@ -393,4 +395,4 @@ CREATE INDEX mv_routes_indexed_dates_idx
 CREATE INDEX mv_routes_indexed_geom_idx
   ON mv_routes_indexed USING GIST (geometry);
 
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed;
+--  REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed;
