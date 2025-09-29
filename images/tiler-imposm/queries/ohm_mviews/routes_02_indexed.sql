@@ -34,13 +34,13 @@ WITH exploded AS (
     n.max_end_date_iso,
     n.geometry,
     n.num_routes,
-    n.direction,
     r.value ->> 'ref'                      AS ref,
     r.value ->> 'network'                  AS network,
     r.value ->> 'network:wikidata'         AS network_wikidata,
     r.value ->> 'operator'                 AS operator,
     r.value ->> 'type'                     AS type,
     r.value ->> 'name'                     AS name,
+    r.value ->> 'direction'                AS direction,
     -- prio uses the function that considers type, network, ref.
     -- Larger prio = more important (we will ORDER BY prio DESC)
     route_priority(r.value ->> 'type', r.value ->> 'network', r.value ->> 'ref') AS prio,
@@ -89,7 +89,7 @@ SELECT
   max_end_date_iso,
   geometry,
   num_routes,
-  direction,
+  -- direction,
   -- =========================================================================
   -- ROAD
   -- For each slot we store: ref, network, network_wikidata, operator, name.
@@ -101,36 +101,42 @@ SELECT
   MAX(CASE WHEN type = 'road' AND type_rnk = 1 THEN network_wikidata END) AS route_road_1_network_wikidata,
   MAX(CASE WHEN type = 'road' AND type_rnk = 1 THEN operator         END) AS route_road_1_operator,
   MAX(CASE WHEN type = 'road' AND type_rnk = 1 THEN name             END) AS route_road_1_name,
+  MAX(CASE WHEN type = 'road' AND type_rnk = 1 THEN direction        END) AS route_road_1_direction,
 
   MAX(CASE WHEN type = 'road' AND type_rnk = 2 THEN ref              END) AS route_road_2_ref,
   MAX(CASE WHEN type = 'road' AND type_rnk = 2 THEN network          END) AS route_road_2_network,
   MAX(CASE WHEN type = 'road' AND type_rnk = 2 THEN network_wikidata END) AS route_road_2_network_wikidata,
   MAX(CASE WHEN type = 'road' AND type_rnk = 2 THEN operator         END) AS route_road_2_operator,
   MAX(CASE WHEN type = 'road' AND type_rnk = 2 THEN name             END) AS route_road_2_name,
+  MAX(CASE WHEN type = 'road' AND type_rnk = 2 THEN direction        END) AS route_road_2_direction,
 
   MAX(CASE WHEN type = 'road' AND type_rnk = 3 THEN ref              END) AS route_road_3_ref,
   MAX(CASE WHEN type = 'road' AND type_rnk = 3 THEN network          END) AS route_road_3_network,
   MAX(CASE WHEN type = 'road' AND type_rnk = 3 THEN network_wikidata END) AS route_road_3_network_wikidata,
   MAX(CASE WHEN type = 'road' AND type_rnk = 3 THEN operator         END) AS route_road_3_operator,
   MAX(CASE WHEN type = 'road' AND type_rnk = 3 THEN name             END) AS route_road_3_name,
+  MAX(CASE WHEN type = 'road' AND type_rnk = 3 THEN direction        END) AS route_road_3_direction,
 
   MAX(CASE WHEN type = 'road' AND type_rnk = 4 THEN ref              END) AS route_road_4_ref,
   MAX(CASE WHEN type = 'road' AND type_rnk = 4 THEN network          END) AS route_road_4_network,
   MAX(CASE WHEN type = 'road' AND type_rnk = 4 THEN network_wikidata END) AS route_road_4_network_wikidata,
   MAX(CASE WHEN type = 'road' AND type_rnk = 4 THEN operator         END) AS route_road_4_operator,
   MAX(CASE WHEN type = 'road' AND type_rnk = 4 THEN name             END) AS route_road_4_name,
+  MAX(CASE WHEN type = 'road' AND type_rnk = 4 THEN direction        END) AS route_road_4_direction,
 
   MAX(CASE WHEN type = 'road' AND type_rnk = 5 THEN ref              END) AS route_road_5_ref,
   MAX(CASE WHEN type = 'road' AND type_rnk = 5 THEN network          END) AS route_road_5_network,
   MAX(CASE WHEN type = 'road' AND type_rnk = 5 THEN network_wikidata END) AS route_road_5_network_wikidata,
   MAX(CASE WHEN type = 'road' AND type_rnk = 5 THEN operator         END) AS route_road_5_operator,
   MAX(CASE WHEN type = 'road' AND type_rnk = 5 THEN name             END) AS route_road_5_name,
+  MAX(CASE WHEN type = 'road' AND type_rnk = 5 THEN direction        END) AS route_road_5_direction,
 
   MAX(CASE WHEN type = 'road' AND type_rnk = 6 THEN ref              END) AS route_road_6_ref,
   MAX(CASE WHEN type = 'road' AND type_rnk = 6 THEN network          END) AS route_road_6_network,
   MAX(CASE WHEN type = 'road' AND type_rnk = 6 THEN network_wikidata END) AS route_road_6_network_wikidata,
   MAX(CASE WHEN type = 'road' AND type_rnk = 6 THEN operator         END) AS route_road_6_operator,
   MAX(CASE WHEN type = 'road' AND type_rnk = 6 THEN name             END) AS route_road_6_name,
+  MAX(CASE WHEN type = 'road' AND type_rnk = 6 THEN direction        END) AS route_road_6_direction,
 
   -- =========================================================================
   -- TRAIN
@@ -140,36 +146,42 @@ SELECT
   MAX(CASE WHEN type = 'train' AND type_rnk = 1 THEN network_wikidata END) AS route_train_1_network_wikidata,
   MAX(CASE WHEN type = 'train' AND type_rnk = 1 THEN operator         END) AS route_train_1_operator,
   MAX(CASE WHEN type = 'train' AND type_rnk = 1 THEN name             END) AS route_train_1_name,
+  MAX(CASE WHEN type = 'train' AND type_rnk = 1 THEN direction       END) AS route_train_1_direction,
 
   MAX(CASE WHEN type = 'train' AND type_rnk = 2 THEN ref              END) AS route_train_2_ref,
   MAX(CASE WHEN type = 'train' AND type_rnk = 2 THEN network          END) AS route_train_2_network,
   MAX(CASE WHEN type = 'train' AND type_rnk = 2 THEN network_wikidata END) AS route_train_2_network_wikidata,
   MAX(CASE WHEN type = 'train' AND type_rnk = 2 THEN operator         END) AS route_train_2_operator,
   MAX(CASE WHEN type = 'train' AND type_rnk = 2 THEN name             END) AS route_train_2_name,
+  MAX(CASE WHEN type = 'train' AND type_rnk = 2 THEN direction       END) AS route_train_2_direction,
 
   MAX(CASE WHEN type = 'train' AND type_rnk = 3 THEN ref              END) AS route_train_3_ref,
   MAX(CASE WHEN type = 'train' AND type_rnk = 3 THEN network          END) AS route_train_3_network,
   MAX(CASE WHEN type = 'train' AND type_rnk = 3 THEN network_wikidata END) AS route_train_3_network_wikidata,
   MAX(CASE WHEN type = 'train' AND type_rnk = 3 THEN operator         END) AS route_train_3_operator,
   MAX(CASE WHEN type = 'train' AND type_rnk = 3 THEN name             END) AS route_train_3_name,
+  MAX(CASE WHEN type = 'train' AND type_rnk = 3 THEN direction       END) AS route_train_3_direction,
 
   MAX(CASE WHEN type = 'train' AND type_rnk = 4 THEN ref              END) AS route_train_4_ref,
   MAX(CASE WHEN type = 'train' AND type_rnk = 4 THEN network          END) AS route_train_4_network,
   MAX(CASE WHEN type = 'train' AND type_rnk = 4 THEN network_wikidata END) AS route_train_4_network_wikidata,
   MAX(CASE WHEN type = 'train' AND type_rnk = 4 THEN operator         END) AS route_train_4_operator,
   MAX(CASE WHEN type = 'train' AND type_rnk = 4 THEN name             END) AS route_train_4_name,
+  MAX(CASE WHEN type = 'train' AND type_rnk = 4 THEN direction       END) AS route_train_4_direction,
 
   MAX(CASE WHEN type = 'train' AND type_rnk = 5 THEN ref              END) AS route_train_5_ref,
   MAX(CASE WHEN type = 'train' AND type_rnk = 5 THEN network          END) AS route_train_5_network,
   MAX(CASE WHEN type = 'train' AND type_rnk = 5 THEN network_wikidata END) AS route_train_5_network_wikidata,
   MAX(CASE WHEN type = 'train' AND type_rnk = 5 THEN operator         END) AS route_train_5_operator,
   MAX(CASE WHEN type = 'train' AND type_rnk = 5 THEN name             END) AS route_train_5_name,
+  MAX(CASE WHEN type = 'train' AND type_rnk = 5 THEN direction       END) AS route_train_5_direction,
 
   MAX(CASE WHEN type = 'train' AND type_rnk = 6 THEN ref              END) AS route_train_6_ref,
   MAX(CASE WHEN type = 'train' AND type_rnk = 6 THEN network          END) AS route_train_6_network,
   MAX(CASE WHEN type = 'train' AND type_rnk = 6 THEN network_wikidata END) AS route_train_6_network_wikidata,
   MAX(CASE WHEN type = 'train' AND type_rnk = 6 THEN operator         END) AS route_train_6_operator,
   MAX(CASE WHEN type = 'train' AND type_rnk = 6 THEN name             END) AS route_train_6_name,
+  MAX(CASE WHEN type = 'train' AND type_rnk = 6 THEN direction       END) AS route_train_6_direction,
 
   -- =========================================================================
   -- SUBWAY
@@ -179,36 +191,42 @@ SELECT
   MAX(CASE WHEN type = 'subway' AND type_rnk = 1 THEN network_wikidata END) AS route_subway_1_network_wikidata,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 1 THEN operator         END) AS route_subway_1_operator,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 1 THEN name             END) AS route_subway_1_name,
-  -- ... repeat slots 2..6 for subway
+  MAX(CASE WHEN type = 'subway' AND type_rnk = 1 THEN direction             END) AS route_subway_1_direction,
+
   MAX(CASE WHEN type = 'subway' AND type_rnk = 2 THEN ref              END) AS route_subway_2_ref,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 2 THEN network          END) AS route_subway_2_network,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 2 THEN network_wikidata END) AS route_subway_2_network_wikidata,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 2 THEN operator         END) AS route_subway_2_operator,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 2 THEN name             END) AS route_subway_2_name,
+  MAX(CASE WHEN type = 'subway' AND type_rnk = 2 THEN direction        END) AS route_subway_2_direction,
 
   MAX(CASE WHEN type = 'subway' AND type_rnk = 3 THEN ref              END) AS route_subway_3_ref,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 3 THEN network          END) AS route_subway_3_network,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 3 THEN network_wikidata END) AS route_subway_3_network_wikidata,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 3 THEN operator         END) AS route_subway_3_operator,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 3 THEN name             END) AS route_subway_3_name,
+  MAX(CASE WHEN type = 'subway' AND type_rnk = 3 THEN direction        END) AS route_subway_3_direction,
 
   MAX(CASE WHEN type = 'subway' AND type_rnk = 4 THEN ref              END) AS route_subway_4_ref,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 4 THEN network          END) AS route_subway_4_network,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 4 THEN network_wikidata END) AS route_subway_4_network_wikidata,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 4 THEN operator         END) AS route_subway_4_operator,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 4 THEN name             END) AS route_subway_4_name,
+  MAX(CASE WHEN type = 'subway' AND type_rnk = 4 THEN direction        END) AS route_subway_4_direction,
 
   MAX(CASE WHEN type = 'subway' AND type_rnk = 5 THEN ref              END) AS route_subway_5_ref,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 5 THEN network          END) AS route_subway_5_network,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 5 THEN network_wikidata END) AS route_subway_5_network_wikidata,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 5 THEN operator         END) AS route_subway_5_operator,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 5 THEN name             END) AS route_subway_5_name,
+  MAX(CASE WHEN type = 'subway' AND type_rnk = 5 THEN direction        END) AS route_subway_5_direction,
 
   MAX(CASE WHEN type = 'subway' AND type_rnk = 6 THEN ref              END) AS route_subway_6_ref,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 6 THEN network          END) AS route_subway_6_network,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 6 THEN network_wikidata END) AS route_subway_6_network_wikidata,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 6 THEN operator         END) AS route_subway_6_operator,
   MAX(CASE WHEN type = 'subway' AND type_rnk = 6 THEN name             END) AS route_subway_6_name,
+  MAX(CASE WHEN type = 'subway' AND type_rnk = 6 THEN direction        END) AS route_subway_6_direction,
 
   -- =========================================================================
   -- LIGHT_RAIL
@@ -218,36 +236,42 @@ SELECT
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 1 THEN network_wikidata END) AS route_light_rail_1_network_wikidata,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 1 THEN operator         END) AS route_light_rail_1_operator,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 1 THEN name             END) AS route_light_rail_1_name,
-  -- ... repeat slots 2..6 for light_rail
+  MAX(CASE WHEN type = 'light_rail' AND type_rnk = 1 THEN direction             END) AS route_light_rail_1_direction,
+
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 2 THEN ref              END) AS route_light_rail_2_ref,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 2 THEN network          END) AS route_light_rail_2_network,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 2 THEN network_wikidata END) AS route_light_rail_2_network_wikidata,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 2 THEN operator         END) AS route_light_rail_2_operator,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 2 THEN name             END) AS route_light_rail_2_name,
+  MAX(CASE WHEN type = 'light_rail' AND type_rnk = 2 THEN direction        END) AS route_light_rail_2_direction,
 
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 3 THEN ref              END) AS route_light_rail_3_ref,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 3 THEN network          END) AS route_light_rail_3_network,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 3 THEN network_wikidata END) AS route_light_rail_3_network_wikidata,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 3 THEN operator         END) AS route_light_rail_3_operator,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 3 THEN name             END) AS route_light_rail_3_name,
+  MAX(CASE WHEN type = 'light_rail' AND type_rnk = 3 THEN direction        END) AS route_light_rail_3_direction,
 
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 4 THEN ref              END) AS route_light_rail_4_ref,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 4 THEN network          END) AS route_light_rail_4_network,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 4 THEN network_wikidata END) AS route_light_rail_4_network_wikidata,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 4 THEN operator         END) AS route_light_rail_4_operator,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 4 THEN name             END) AS route_light_rail_4_name,
+  MAX(CASE WHEN type = 'light_rail' AND type_rnk = 4 THEN direction        END) AS route_light_rail_4_direction,
 
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 5 THEN ref              END) AS route_light_rail_5_ref,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 5 THEN network          END) AS route_light_rail_5_network,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 5 THEN network_wikidata END) AS route_light_rail_5_network_wikidata,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 5 THEN operator         END) AS route_light_rail_5_operator,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 5 THEN name             END) AS route_light_rail_5_name,
+  MAX(CASE WHEN type = 'light_rail' AND type_rnk = 5 THEN direction        END) AS route_light_rail_5_direction,
 
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 6 THEN ref              END) AS route_light_rail_6_ref,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 6 THEN network          END) AS route_light_rail_6_network,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 6 THEN network_wikidata END) AS route_light_rail_6_network_wikidata,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 6 THEN operator         END) AS route_light_rail_6_operator,
   MAX(CASE WHEN type = 'light_rail' AND type_rnk = 6 THEN name             END) AS route_light_rail_6_name,
+  MAX(CASE WHEN type = 'light_rail' AND type_rnk = 6 THEN direction        END) AS route_light_rail_6_direction,
 
   -- =========================================================================
   -- TRAM
@@ -257,36 +281,42 @@ SELECT
   MAX(CASE WHEN type = 'tram' AND type_rnk = 1 THEN network_wikidata END) AS route_tram_1_network_wikidata,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 1 THEN operator         END) AS route_tram_1_operator,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 1 THEN name             END) AS route_tram_1_name,
-  -- ... repeat slots 2..6 for tram
+  MAX(CASE WHEN type = 'tram' AND type_rnk = 1 THEN direction        END) AS route_tram_1_direction,
+
   MAX(CASE WHEN type = 'tram' AND type_rnk = 2 THEN ref              END) AS route_tram_2_ref,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 2 THEN network          END) AS route_tram_2_network,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 2 THEN network_wikidata END) AS route_tram_2_network_wikidata,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 2 THEN operator         END) AS route_tram_2_operator,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 2 THEN name             END) AS route_tram_2_name,
+  MAX(CASE WHEN type = 'tram' AND type_rnk = 2 THEN direction        END) AS route_tram_2_direction,
 
   MAX(CASE WHEN type = 'tram' AND type_rnk = 3 THEN ref              END) AS route_tram_3_ref,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 3 THEN network          END) AS route_tram_3_network,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 3 THEN network_wikidata END) AS route_tram_3_network_wikidata,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 3 THEN operator         END) AS route_tram_3_operator,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 3 THEN name             END) AS route_tram_3_name,
+  MAX(CASE WHEN type = 'tram' AND type_rnk = 3 THEN direction        END) AS route_tram_3_direction,
 
   MAX(CASE WHEN type = 'tram' AND type_rnk = 4 THEN ref              END) AS route_tram_4_ref,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 4 THEN network          END) AS route_tram_4_network,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 4 THEN network_wikidata END) AS route_tram_4_network_wikidata,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 4 THEN operator         END) AS route_tram_4_operator,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 4 THEN name             END) AS route_tram_4_name,
+  MAX(CASE WHEN type = 'tram' AND type_rnk = 4 THEN direction             END) AS route_tram_4_direction,
 
   MAX(CASE WHEN type = 'tram' AND type_rnk = 5 THEN ref              END) AS route_tram_5_ref,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 5 THEN network          END) AS route_tram_5_network,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 5 THEN network_wikidata END) AS route_tram_5_network_wikidata,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 5 THEN operator         END) AS route_tram_5_operator,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 5 THEN name             END) AS route_tram_5_name,
+  MAX(CASE WHEN type = 'tram' AND type_rnk = 5 THEN direction             END) AS route_tram_5_direction,
 
   MAX(CASE WHEN type = 'tram' AND type_rnk = 6 THEN ref              END) AS route_tram_6_ref,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 6 THEN network          END) AS route_tram_6_network,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 6 THEN network_wikidata END) AS route_tram_6_network_wikidata,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 6 THEN operator         END) AS route_tram_6_operator,
   MAX(CASE WHEN type = 'tram' AND type_rnk = 6 THEN name             END) AS route_tram_6_name,
+  MAX(CASE WHEN type = 'tram' AND type_rnk = 6 THEN direction        END) AS route_tram_6_direction,
 
   -- =========================================================================
   -- TROLLEYBUS
@@ -296,36 +326,42 @@ SELECT
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 1 THEN network_wikidata END) AS route_trolleybus_1_network_wikidata,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 1 THEN operator         END) AS route_trolleybus_1_operator,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 1 THEN name             END) AS route_trolleybus_1_name,
-  -- ... repeat slots 2..6 for trolleybus
+  MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 1 THEN direction        END) AS route_trolleybus_1_direction,
+
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 2 THEN ref              END) AS route_trolleybus_2_ref,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 2 THEN network          END) AS route_trolleybus_2_network,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 2 THEN network_wikidata END) AS route_trolleybus_2_network_wikidata,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 2 THEN operator         END) AS route_trolleybus_2_operator,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 2 THEN name             END) AS route_trolleybus_2_name,
+  MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 2 THEN direction        END) AS route_trolleybus_2_direction,
 
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 3 THEN ref              END) AS route_trolleybus_3_ref,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 3 THEN network          END) AS route_trolleybus_3_network,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 3 THEN network_wikidata END) AS route_trolleybus_3_network_wikidata,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 3 THEN operator         END) AS route_trolleybus_3_operator,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 3 THEN name             END) AS route_trolleybus_3_name,
+  MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 3 THEN direction        END) AS route_trolleybus_3_direction,
 
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 4 THEN ref              END) AS route_trolleybus_4_ref,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 4 THEN network          END) AS route_trolleybus_4_network,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 4 THEN network_wikidata END) AS route_trolleybus_4_network_wikidata,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 4 THEN operator         END) AS route_trolleybus_4_operator,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 4 THEN name             END) AS route_trolleybus_4_name,
+  MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 4 THEN direction        END) AS route_trolleybus_4_direction,
 
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 5 THEN ref              END) AS route_trolleybus_5_ref,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 5 THEN network          END) AS route_trolleybus_5_network,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 5 THEN network_wikidata END) AS route_trolleybus_5_network_wikidata,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 5 THEN operator         END) AS route_trolleybus_5_operator,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 5 THEN name             END) AS route_trolleybus_5_name,
+  MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 5 THEN direction        END) AS route_trolleybus_5_direction,
 
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 6 THEN ref              END) AS route_trolleybus_6_ref,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 6 THEN network          END) AS route_trolleybus_6_network,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 6 THEN network_wikidata END) AS route_trolleybus_6_network_wikidata,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 6 THEN operator         END) AS route_trolleybus_6_operator,
   MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 6 THEN name             END) AS route_trolleybus_6_name,
+  MAX(CASE WHEN type = 'trolleybus' AND type_rnk = 6 THEN direction        END) AS route_trolleybus_6_direction,
 
   -- =========================================================================
   -- BUS
@@ -335,36 +371,42 @@ SELECT
   MAX(CASE WHEN type = 'bus' AND type_rnk = 1 THEN network_wikidata END) AS route_bus_1_network_wikidata,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 1 THEN operator         END) AS route_bus_1_operator,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 1 THEN name             END) AS route_bus_1_name,
+  MAX(CASE WHEN type = 'bus' AND type_rnk = 1 THEN direction        END) AS route_bus_1_direction,
 
   MAX(CASE WHEN type = 'bus' AND type_rnk = 2 THEN ref              END) AS route_bus_2_ref,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 2 THEN network          END) AS route_bus_2_network,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 2 THEN network_wikidata END) AS route_bus_2_network_wikidata,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 2 THEN operator         END) AS route_bus_2_operator,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 2 THEN name             END) AS route_bus_2_name,
+  MAX(CASE WHEN type = 'bus' AND type_rnk = 2 THEN direction        END) AS route_bus_2_direction,
 
   MAX(CASE WHEN type = 'bus' AND type_rnk = 3 THEN ref              END) AS route_bus_3_ref,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 3 THEN network          END) AS route_bus_3_network,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 3 THEN network_wikidata END) AS route_bus_3_network_wikidata,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 3 THEN operator         END) AS route_bus_3_operator,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 3 THEN name             END) AS route_bus_3_name,
+  MAX(CASE WHEN type = 'bus' AND type_rnk = 3 THEN direction        END) AS route_bus_3_direction,
 
   MAX(CASE WHEN type = 'bus' AND type_rnk = 4 THEN ref              END) AS route_bus_4_ref,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 4 THEN network          END) AS route_bus_4_network,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 4 THEN network_wikidata END) AS route_bus_4_network_wikidata,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 4 THEN operator         END) AS route_bus_4_operator,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 4 THEN name             END) AS route_bus_4_name,
+  MAX(CASE WHEN type = 'bus' AND type_rnk = 4 THEN direction        END) AS route_bus_4_direction,
 
   MAX(CASE WHEN type = 'bus' AND type_rnk = 5 THEN ref              END) AS route_bus_5_ref,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 5 THEN network          END) AS route_bus_5_network,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 5 THEN network_wikidata END) AS route_bus_5_network_wikidata,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 5 THEN operator         END) AS route_bus_5_operator,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 5 THEN name             END) AS route_bus_5_name,
+  MAX(CASE WHEN type = 'bus' AND type_rnk = 5 THEN direction        END) AS route_bus_5_direction,
 
   MAX(CASE WHEN type = 'bus' AND type_rnk = 6 THEN ref              END) AS route_bus_6_ref,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 6 THEN network          END) AS route_bus_6_network,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 6 THEN network_wikidata END) AS route_bus_6_network_wikidata,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 6 THEN operator         END) AS route_bus_6_operator,
   MAX(CASE WHEN type = 'bus' AND type_rnk = 6 THEN name             END) AS route_bus_6_name,
+  MAX(CASE WHEN type = 'bus' AND type_rnk = 6 THEN direction        END) AS route_bus_6_direction,
 
   -- =========================================================================
   -- keep the original JSON array as fallback (useful for edge-cases and debug)
@@ -376,7 +418,7 @@ WHERE type IN ('road', 'train', 'subway', 'light_rail', 'tram', 'trolleybus', 'b
 GROUP BY
   way_id, min_start_decdate, max_end_decdate,
   min_start_date_iso, max_end_date_iso,
-  geometry, num_routes, routes, direction
+  geometry, num_routes, routes
 WITH DATA;
 
 -- ============================================================================
@@ -387,7 +429,7 @@ WITH DATA;
 --  - Date index helps queries filtering by validity interval.
 --  - GIST geometry index is essential for spatial queries (bounding boxes, joins).
 CREATE UNIQUE INDEX mv_routes_indexed_uidx
-  ON mv_routes_indexed (way_id, min_start_decdate, max_end_decdate, direction);
+  ON mv_routes_indexed (way_id, min_start_decdate, max_end_decdate);
 
 CREATE INDEX mv_routes_indexed_dates_idx
   ON mv_routes_indexed (min_start_decdate, max_end_decdate);
@@ -395,4 +437,4 @@ CREATE INDEX mv_routes_indexed_dates_idx
 CREATE INDEX mv_routes_indexed_geom_idx
   ON mv_routes_indexed USING GIST (geometry);
 
---  REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed;
+--REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed;

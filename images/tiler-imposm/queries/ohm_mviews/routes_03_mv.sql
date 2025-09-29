@@ -47,7 +47,6 @@ BEGIN
       max_end_decdate AS end_decdate,
       min_start_date_iso AS start_date,
       max_end_date_iso AS end_date,
-      direction,
       CASE
         WHEN %s > 0 THEN ST_Simplify(geometry, %s)
         ELSE geometry
@@ -57,36 +56,42 @@ BEGIN
       NULLIF(route_road_1_network_wikidata, '') AS route_road_1_network_wikidata,
       NULLIF(route_road_1_operator, '') AS route_road_1_operator,
       NULLIF(route_road_1_name, '') AS route_road_1_name,
+      NULLIF(route_road_1_direction, '') AS route_road_1_direction,
 
       NULLIF(route_road_2_ref, '') AS route_road_2_ref,
       NULLIF(route_road_2_network, '') AS route_road_2_network,
       NULLIF(route_road_2_network_wikidata, '') AS route_road_2_network_wikidata,
       NULLIF(route_road_2_operator, '') AS route_road_2_operator,
       NULLIF(route_road_2_name, '') AS route_road_2_name,
+      NULLIF(route_road_2_direction, '') AS route_road_2_direction,
 
       NULLIF(route_road_3_ref, '') AS route_road_3_ref,
       NULLIF(route_road_3_network, '') AS route_road_3_network,
       NULLIF(route_road_3_network_wikidata, '') AS route_road_3_network_wikidata,
       NULLIF(route_road_3_operator, '') AS route_road_3_operator,
       NULLIF(route_road_3_name, '') AS route_road_3_name,
+      NULLIF(route_road_3_direction, '') AS route_road_3_direction,
 
       NULLIF(route_road_4_ref, '') AS route_road_4_ref,
       NULLIF(route_road_4_network, '') AS route_road_4_network,
       NULLIF(route_road_4_network_wikidata, '') AS route_road_4_network_wikidata,
       NULLIF(route_road_4_operator, '') AS route_road_4_operator,
       NULLIF(route_road_4_name, '') AS route_road_4_name,
+      NULLIF(route_road_4_direction, '') AS route_road_4_direction,
 
       NULLIF(route_road_5_ref, '') AS route_road_5_ref,
       NULLIF(route_road_5_network, '') AS route_road_5_network,
       NULLIF(route_road_5_network_wikidata, '') AS route_road_5_network_wikidata,
       NULLIF(route_road_5_operator, '') AS route_road_5_operator,
       NULLIF(route_road_5_name, '') AS route_road_5_name,
+      NULLIF(route_road_5_direction, '') AS route_road_5_direction,
 
       NULLIF(route_road_6_ref, '') AS route_road_6_ref,
       NULLIF(route_road_6_network, '') AS route_road_6_network,
       NULLIF(route_road_6_network_wikidata, '') AS route_road_6_network_wikidata,
       NULLIF(route_road_6_operator, '') AS route_road_6_operator,
       NULLIF(route_road_6_name, '') AS route_road_6_name,
+      NULLIF(route_road_6_direction, '') AS route_road_6_direction,
 
       -- =========================================================================
       -- TRAIN
@@ -96,36 +101,42 @@ BEGIN
       NULLIF(route_train_1_network_wikidata, '') AS route_train_1_network_wikidata,
       NULLIF(route_train_1_operator, '') AS route_train_1_operator,
       NULLIF(route_train_1_name, '') AS route_train_1_name,
+      NULLIF(route_train_1_direction, '') AS route_train_1_direction,
 
       NULLIF(route_train_2_ref, '') AS route_train_2_ref,
       NULLIF(route_train_2_network, '') AS route_train_2_network,
       NULLIF(route_train_2_network_wikidata, '') AS route_train_2_network_wikidata,
       NULLIF(route_train_2_operator, '') AS route_train_2_operator,
       NULLIF(route_train_2_name, '') AS route_train_2_name,
+      NULLIF(route_train_2_direction, '') AS route_train_2_direction,
 
       NULLIF(route_train_3_ref, '') AS route_train_3_ref,
       NULLIF(route_train_3_network, '') AS route_train_3_network,
       NULLIF(route_train_3_network_wikidata, '') AS route_train_3_network_wikidata,
       NULLIF(route_train_3_operator, '') AS route_train_3_operator,
       NULLIF(route_train_3_name, '') AS route_train_3_name,
+      NULLIF(route_train_3_direction, '') AS route_train_3_direction,
 
       NULLIF(route_train_4_ref, '') AS route_train_4_ref,
       NULLIF(route_train_4_network, '') AS route_train_4_network,
       NULLIF(route_train_4_network_wikidata, '') AS route_train_4_network_wikidata,
       NULLIF(route_train_4_operator, '') AS route_train_4_operator,
       NULLIF(route_train_4_name, '') AS route_train_4_name,
+      NULLIF(route_train_4_direction, '') AS route_train_4_direction,
 
       NULLIF(route_train_5_ref, '') AS route_train_5_ref,
       NULLIF(route_train_5_network, '') AS route_train_5_network,
       NULLIF(route_train_5_network_wikidata, '') AS route_train_5_network_wikidata,
       NULLIF(route_train_5_operator, '') AS route_train_5_operator,
       NULLIF(route_train_5_name, '') AS route_train_5_name,
+      NULLIF(route_train_5_direction, '') AS route_train_5_direction,
 
       NULLIF(route_train_6_ref, '') AS route_train_6_ref,
       NULLIF(route_train_6_network, '') AS route_train_6_network,
       NULLIF(route_train_6_network_wikidata, '') AS route_train_6_network_wikidata,
       NULLIF(route_train_6_operator, '') AS route_train_6_operator,
       NULLIF(route_train_6_name, '') AS route_train_6_name,
+      NULLIF(route_train_6_direction, '') AS route_train_6_direction,
 
       -- =========================================================================
       -- SUBWAY
@@ -135,36 +146,42 @@ BEGIN
       NULLIF(route_subway_1_network_wikidata, '') AS route_subway_1_network_wikidata,
       NULLIF(route_subway_1_operator, '') AS route_subway_1_operator,
       NULLIF(route_subway_1_name, '') AS route_subway_1_name,
+      NULLIF(route_subway_1_direction, '') AS route_subway_1_direction,
 
       NULLIF(route_subway_2_ref, '') AS route_subway_2_ref,
       NULLIF(route_subway_2_network, '') AS route_subway_2_network,
       NULLIF(route_subway_2_network_wikidata, '') AS route_subway_2_network_wikidata,
       NULLIF(route_subway_2_operator, '') AS route_subway_2_operator,
       NULLIF(route_subway_2_name, '') AS route_subway_2_name,
+      NULLIF(route_subway_2_direction, '') AS route_subway_2_direction,
 
       NULLIF(route_subway_3_ref, '') AS route_subway_3_ref,
       NULLIF(route_subway_3_network, '') AS route_subway_3_network,
       NULLIF(route_subway_3_network_wikidata, '') AS route_subway_3_network_wikidata,
       NULLIF(route_subway_3_operator, '') AS route_subway_3_operator,
       NULLIF(route_subway_3_name, '') AS route_subway_3_name,
+      NULLIF(route_subway_3_direction, '') AS route_subway_3_direction,
 
       NULLIF(route_subway_4_ref, '') AS route_subway_4_ref,
       NULLIF(route_subway_4_network, '') AS route_subway_4_network,
       NULLIF(route_subway_4_network_wikidata, '') AS route_subway_4_network_wikidata,
       NULLIF(route_subway_4_operator, '') AS route_subway_4_operator,
       NULLIF(route_subway_4_name, '') AS route_subway_4_name,
+      NULLIF(route_subway_4_direction, '') AS route_subway_4_direction,
 
       NULLIF(route_subway_5_ref, '') AS route_subway_5_ref,
       NULLIF(route_subway_5_network, '') AS route_subway_5_network,
       NULLIF(route_subway_5_network_wikidata, '') AS route_subway_5_network_wikidata,
       NULLIF(route_subway_5_operator, '') AS route_subway_5_operator,
       NULLIF(route_subway_5_name, '') AS route_subway_5_name,
+      NULLIF(route_subway_5_direction, '') AS route_subway_5_direction,
 
       NULLIF(route_subway_6_ref, '') AS route_subway_6_ref,
       NULLIF(route_subway_6_network, '') AS route_subway_6_network,
       NULLIF(route_subway_6_network_wikidata, '') AS route_subway_6_network_wikidata,
       NULLIF(route_subway_6_operator, '') AS route_subway_6_operator,
       NULLIF(route_subway_6_name, '') AS route_subway_6_name,
+      NULLIF(route_subway_6_direction, '') AS route_subway_6_direction,
 
       -- =========================================================================
       -- LIGHT_RAIL
@@ -174,36 +191,42 @@ BEGIN
       NULLIF(route_light_rail_1_network_wikidata, '') AS route_light_rail_1_network_wikidata,
       NULLIF(route_light_rail_1_operator, '') AS route_light_rail_1_operator,
       NULLIF(route_light_rail_1_name, '') AS route_light_rail_1_name,
+      NULLIF(route_light_rail_1_direction, '') AS route_light_rail_1_direction,
 
       NULLIF(route_light_rail_2_ref, '') AS route_light_rail_2_ref,
       NULLIF(route_light_rail_2_network, '') AS route_light_rail_2_network,
       NULLIF(route_light_rail_2_network_wikidata, '') AS route_light_rail_2_network_wikidata,
       NULLIF(route_light_rail_2_operator, '') AS route_light_rail_2_operator,
       NULLIF(route_light_rail_2_name, '') AS route_light_rail_2_name,
+      NULLIF(route_light_rail_2_direction, '') AS route_light_rail_2_direction,
 
       NULLIF(route_light_rail_3_ref, '') AS route_light_rail_3_ref,
       NULLIF(route_light_rail_3_network, '') AS route_light_rail_3_network,
       NULLIF(route_light_rail_3_network_wikidata, '') AS route_light_rail_3_network_wikidata,
       NULLIF(route_light_rail_3_operator, '') AS route_light_rail_3_operator,
       NULLIF(route_light_rail_3_name, '') AS route_light_rail_3_name,
+      NULLIF(route_light_rail_3_direction, '') AS route_light_rail_3_direction,
 
       NULLIF(route_light_rail_4_ref, '') AS route_light_rail_4_ref,
       NULLIF(route_light_rail_4_network, '') AS route_light_rail_4_network,
       NULLIF(route_light_rail_4_network_wikidata, '') AS route_light_rail_4_network_wikidata,
       NULLIF(route_light_rail_4_operator, '') AS route_light_rail_4_operator,
       NULLIF(route_light_rail_4_name, '') AS route_light_rail_4_name,
+      NULLIF(route_light_rail_4_direction, '') AS route_light_rail_4_direction,
 
       NULLIF(route_light_rail_5_ref, '') AS route_light_rail_5_ref,
       NULLIF(route_light_rail_5_network, '') AS route_light_rail_5_network,
       NULLIF(route_light_rail_5_network_wikidata, '') AS route_light_rail_5_network_wikidata,
       NULLIF(route_light_rail_5_operator, '') AS route_light_rail_5_operator,
       NULLIF(route_light_rail_5_name, '') AS route_light_rail_5_name,
+      NULLIF(route_light_rail_5_direction, '') AS route_light_rail_5_direction,
 
       NULLIF(route_light_rail_6_ref, '') AS route_light_rail_6_ref,
       NULLIF(route_light_rail_6_network, '') AS route_light_rail_6_network,
       NULLIF(route_light_rail_6_network_wikidata, '') AS route_light_rail_6_network_wikidata,
       NULLIF(route_light_rail_6_operator, '') AS route_light_rail_6_operator,
       NULLIF(route_light_rail_6_name, '') AS route_light_rail_6_name,
+      NULLIF(route_light_rail_6_direction, '') AS route_light_rail_6_direction,
 
       -- =========================================================================
       -- TRAM
@@ -213,36 +236,42 @@ BEGIN
       NULLIF(route_tram_1_network_wikidata, '') AS route_tram_1_network_wikidata,
       NULLIF(route_tram_1_operator, '') AS route_tram_1_operator,
       NULLIF(route_tram_1_name, '') AS route_tram_1_name,
+      NULLIF(route_tram_1_direction, '') AS route_tram_1_direction,
 
       NULLIF(route_tram_2_ref, '') AS route_tram_2_ref,
       NULLIF(route_tram_2_network, '') AS route_tram_2_network,
       NULLIF(route_tram_2_network_wikidata, '') AS route_tram_2_network_wikidata,
       NULLIF(route_tram_2_operator, '') AS route_tram_2_operator,
       NULLIF(route_tram_2_name, '') AS route_tram_2_name,
+      NULLIF(route_tram_2_direction, '') AS route_tram_2_direction,
 
       NULLIF(route_tram_3_ref, '') AS route_tram_3_ref,
       NULLIF(route_tram_3_network, '') AS route_tram_3_network,
       NULLIF(route_tram_3_network_wikidata, '') AS route_tram_3_network_wikidata,
       NULLIF(route_tram_3_operator, '') AS route_tram_3_operator,
       NULLIF(route_tram_3_name, '') AS route_tram_3_name,
+      NULLIF(route_tram_3_direction, '') AS route_tram_3_direction,
 
       NULLIF(route_tram_4_ref, '') AS route_tram_4_ref,
       NULLIF(route_tram_4_network, '') AS route_tram_4_network,
       NULLIF(route_tram_4_network_wikidata, '') AS route_tram_4_network_wikidata,
       NULLIF(route_tram_4_operator, '') AS route_tram_4_operator,
       NULLIF(route_tram_4_name, '') AS route_tram_4_name,
+      NULLIF(route_tram_4_direction, '') AS route_tram_4_direction,
 
       NULLIF(route_tram_5_ref, '') AS route_tram_5_ref,
       NULLIF(route_tram_5_network, '') AS route_tram_5_network,
       NULLIF(route_tram_5_network_wikidata, '') AS route_tram_5_network_wikidata,
       NULLIF(route_tram_5_operator, '') AS route_tram_5_operator,
       NULLIF(route_tram_5_name, '') AS route_tram_5_name,
+      NULLIF(route_tram_5_direction, '') AS route_tram_5_direction,
 
       NULLIF(route_tram_6_ref, '') AS route_tram_6_ref,
       NULLIF(route_tram_6_network, '') AS route_tram_6_network,
       NULLIF(route_tram_6_network_wikidata, '') AS route_tram_6_network_wikidata,
       NULLIF(route_tram_6_operator, '') AS route_tram_6_operator,
       NULLIF(route_tram_6_name, '') AS route_tram_6_name,
+      NULLIF(route_tram_6_direction, '') AS route_tram_6_direction,
 
       -- =========================================================================
       -- TROLLEYBUS
@@ -252,36 +281,42 @@ BEGIN
       NULLIF(route_trolleybus_1_network_wikidata, '') AS route_trolleybus_1_network_wikidata,
       NULLIF(route_trolleybus_1_operator, '') AS route_trolleybus_1_operator,
       NULLIF(route_trolleybus_1_name, '') AS route_trolleybus_1_name,
+      NULLIF(route_trolleybus_1_direction, '') AS route_trolleybus_1_direction,
 
       NULLIF(route_trolleybus_2_ref, '') AS route_trolleybus_2_ref,
       NULLIF(route_trolleybus_2_network, '') AS route_trolleybus_2_network,
       NULLIF(route_trolleybus_2_network_wikidata, '') AS route_trolleybus_2_network_wikidata,
       NULLIF(route_trolleybus_2_operator, '') AS route_trolleybus_2_operator,
       NULLIF(route_trolleybus_2_name, '') AS route_trolleybus_2_name,
+      NULLIF(route_trolleybus_2_direction, '') AS route_trolleybus_2_direction,
 
       NULLIF(route_trolleybus_3_ref, '') AS route_trolleybus_3_ref,
       NULLIF(route_trolleybus_3_network, '') AS route_trolleybus_3_network,
       NULLIF(route_trolleybus_3_network_wikidata, '') AS route_trolleybus_3_network_wikidata,
       NULLIF(route_trolleybus_3_operator, '') AS route_trolleybus_3_operator,
       NULLIF(route_trolleybus_3_name, '') AS route_trolleybus_3_name,
+      NULLIF(route_trolleybus_3_direction, '') AS route_trolleybus_3_direction,
 
       NULLIF(route_trolleybus_4_ref, '') AS route_trolleybus_4_ref,
       NULLIF(route_trolleybus_4_network, '') AS route_trolleybus_4_network,
       NULLIF(route_trolleybus_4_network_wikidata, '') AS route_trolleybus_4_network_wikidata,
       NULLIF(route_trolleybus_4_operator, '') AS route_trolleybus_4_operator,
       NULLIF(route_trolleybus_4_name, '') AS route_trolleybus_4_name,
+      NULLIF(route_trolleybus_4_direction, '') AS route_trolleybus_4_direction,
 
       NULLIF(route_trolleybus_5_ref, '') AS route_trolleybus_5_ref,
       NULLIF(route_trolleybus_5_network, '') AS route_trolleybus_5_network,
       NULLIF(route_trolleybus_5_network_wikidata, '') AS route_trolleybus_5_network_wikidata,
       NULLIF(route_trolleybus_5_operator, '') AS route_trolleybus_5_operator,
       NULLIF(route_trolleybus_5_name, '') AS route_trolleybus_5_name,
+      NULLIF(route_trolleybus_5_direction, '') AS route_trolleybus_5_direction,
 
       NULLIF(route_trolleybus_6_ref, '') AS route_trolleybus_6_ref,
       NULLIF(route_trolleybus_6_network, '') AS route_trolleybus_6_network,
       NULLIF(route_trolleybus_6_network_wikidata, '') AS route_trolleybus_6_network_wikidata,
       NULLIF(route_trolleybus_6_operator, '') AS route_trolleybus_6_operator,
       NULLIF(route_trolleybus_6_name, '') AS route_trolleybus_6_name,
+      NULLIF(route_trolleybus_6_direction, '') AS route_trolleybus_6_direction,
 
       -- =========================================================================
       -- BUS
@@ -291,36 +326,42 @@ BEGIN
       NULLIF(route_bus_1_network_wikidata, '') AS route_bus_1_network_wikidata,
       NULLIF(route_bus_1_operator, '') AS route_bus_1_operator,
       NULLIF(route_bus_1_name, '') AS route_bus_1_name,
+      NULLIF(route_bus_1_direction, '') AS route_bus_1_direction,
 
       NULLIF(route_bus_2_ref, '') AS route_bus_2_ref,
       NULLIF(route_bus_2_network, '') AS route_bus_2_network,
       NULLIF(route_bus_2_network_wikidata, '') AS route_bus_2_network_wikidata,
       NULLIF(route_bus_2_operator, '') AS route_bus_2_operator,
       NULLIF(route_bus_2_name, '') AS route_bus_2_name,
+      NULLIF(route_bus_2_direction, '') AS route_bus_2_direction,
 
       NULLIF(route_bus_3_ref, '') AS route_bus_3_ref,
       NULLIF(route_bus_3_network, '') AS route_bus_3_network,
       NULLIF(route_bus_3_network_wikidata, '') AS route_bus_3_network_wikidata,
       NULLIF(route_bus_3_operator, '') AS route_bus_3_operator,
       NULLIF(route_bus_3_name, '') AS route_bus_3_name,
+      NULLIF(route_bus_3_direction, '') AS route_bus_3_direction,
 
       NULLIF(route_bus_4_ref, '') AS route_bus_4_ref,
       NULLIF(route_bus_4_network, '') AS route_bus_4_network,
       NULLIF(route_bus_4_network_wikidata, '') AS route_bus_4_network_wikidata,
       NULLIF(route_bus_4_operator, '') AS route_bus_4_operator,
       NULLIF(route_bus_4_name, '') AS route_bus_4_name,
+      NULLIF(route_bus_4_direction, '') AS route_bus_4_direction,
 
       NULLIF(route_bus_5_ref, '') AS route_bus_5_ref,
       NULLIF(route_bus_5_network, '') AS route_bus_5_network,
       NULLIF(route_bus_5_network_wikidata, '') AS route_bus_5_network_wikidata,
       NULLIF(route_bus_5_operator, '') AS route_bus_5_operator,
       NULLIF(route_bus_5_name, '') AS route_bus_5_name,
+      NULLIF(route_bus_5_direction, '') AS route_bus_5_direction,
 
       NULLIF(route_bus_6_ref, '') AS route_bus_6_ref,
       NULLIF(route_bus_6_network, '') AS route_bus_6_network,
       NULLIF(route_bus_6_network_wikidata, '') AS route_bus_6_network_wikidata,
       NULLIF(route_bus_6_operator, '') AS route_bus_6_operator,
-      NULLIF(route_bus_6_name, '') AS route_bus_6_name
+      NULLIF(route_bus_6_name, '') AS route_bus_6_name,
+      NULLIF(route_bus_6_direction, '') AS route_bus_6_direction
 
     FROM mv_routes_indexed
     WHERE ST_Length(geometry) > %s
@@ -331,8 +372,7 @@ BEGIN
       ON %I (
         osm_id,
         start_decdate,
-        end_decdate,
-        direction
+        end_decdate
       );
 
     -- Índice espacial
