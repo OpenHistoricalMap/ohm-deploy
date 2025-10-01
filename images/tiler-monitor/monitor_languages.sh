@@ -27,30 +27,30 @@ log_message "  EVALUATION_INTERVAL:     $EVALUATION_INTERVAL seconds"
 
 function restart_production_containers() {
   log_message "Running create_mviews.sh for production..."
-  docker compose -f hetzner/tiler.production.yml run --no-TTY imposm_mv_production /osm/scripts/create_mviews.sh
+  docker compose -f hetzner/tiler/tiler.production.yml run --no-TTY imposm_mv_production /osm/scripts/create_mviews.sh
 
   log_message "Restarting tiler_production..."
-  docker compose -f hetzner/tiler.production.yml up tiler_production -d --force-recreate
+  docker compose -f hetzner/tiler/tiler.production.yml up tiler_production -d --force-recreate
 
   log_message "Cleaning tiles with tiler_s3_cleaner_production..."
-  docker compose -f hetzner/tiler.production.yml run --no-TTY tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix 
+  docker compose -f hetzner/tiler/tiler.production.yml run --no-TTY tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix 
 
   log_message "Restarting global_seeding_production..."
-  docker compose -f hetzner/tiler.production.yml up global_seeding_production -d --force-recreate
+  docker compose -f hetzner/tiler/tiler.production.yml up global_seeding_production -d --force-recreate
 
   log_message "Restarting tile_coverage_seeding_production..."
-  docker compose -f hetzner/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
+  docker compose -f hetzner/tiler/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
 }
 
 function restart_staging_containers() {
   log_message "Running create_mviews.sh for staging..."
-  docker compose -f hetzner/tiler.staging.yml run --no-TTY imposm_mv_staging /osm/scripts/create_mviews.sh
+  docker compose -f hetzner/tiler/tiler.staging.yml run --no-TTY imposm_mv_staging /osm/scripts/create_mviews.sh
 
   log_message "Restarting tiler_staging..."
-  docker compose -f hetzner/tiler.staging.yml up tiler_staging -d --force-recreate
+  docker compose -f hetzner/tiler/tiler.staging.yml up tiler_staging -d --force-recreate
 
   log_message "Cleaning tiles with tiler_s3_cleaner_staging..."
-  docker compose -f hetzner/tiler.staging.yml run --no-TTY tiler_s3_cleaner_staging tiler-cache-cleaner clean_by_prefix
+  docker compose -f hetzner/tiler/tiler.staging.yml run --no-TTY tiler_s3_cleaner_staging tiler-cache-cleaner clean_by_prefix
 }
 
 log_message "Waiting for PostgreSQL to be ready..."
