@@ -78,11 +78,11 @@ services:
 
   tiler_monitor_staging:
     container_name: tiler_monitor_staging
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2706.h1b7db88
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2874.ha9bff68
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../images/tiler-monitor:/app
-      - ../hetzner:/app/hetzner
+      - ../../images/tiler-monitor:/app
+      - ../../hetzner:/app/hetzner
     environment:
       - DOCKER_CONFIG_ENVIRONMENT=staging
     env_file:
