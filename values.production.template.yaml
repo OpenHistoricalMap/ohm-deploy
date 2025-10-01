@@ -47,7 +47,7 @@ osm-seed:
 
   # Admin Email address used when generating Lets Encrypt certificates.
   # You will be notified of expirations, etc. on this email address.
-  adminEmail: ohm-admins@googlegroups.com
+  adminEmail: admin@openhistoricalmap.org
 
   # ====================================================================================================
   # Variables for osm-seed database
@@ -142,7 +142,7 @@ osm-seed:
       OSM_id_key: {{PRODUCTION_ID_APPLICATION}}
       OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
       OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
-      MAILER_FROM: ohm-admins@googlegroups.com
+      MAILER_FROM: web@noreply.penhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
       NEW_RELIC_LICENSE_KEY: 'none'
@@ -710,8 +710,8 @@ osm-seed:
       ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
       TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
-      TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
-      TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+      TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
+      TM_EMAIL_CONTACT_ADDRESS: admin@openhistoricalmap.org
       TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
       TM_SMTP_PORT: 25
       TM_SMTP_USER: {{MAILER_USERNAME}}
