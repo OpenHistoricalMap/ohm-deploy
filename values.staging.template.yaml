@@ -39,6 +39,7 @@ osm-seed:
     # SSL separately. 
     serviceType: ClusterIP
     createClusterIssuer: true
+    ingressClassName: nginx-nlb
     # Domain that is pointed to the clusterIP
     # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
     # Then, the cluster configuration will setup services at their respective subdomains:
@@ -144,7 +145,6 @@ osm-seed:
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressClassName: nginx-nlb
       ingressDomain: www.staging.openhistoricalmap.org
       env:
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
@@ -533,7 +533,6 @@ osm-seed:
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressClassName: nginx-nlb
       ingressDomain: vtiles.staging.openhistoricalmap.org
       env:
         TILER_SERVER_PORT: 9090
@@ -626,7 +625,6 @@ osm-seed:
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
-      ingressClassName: nginx-nlb
       ingressDomain: tm-api.staging.openhistoricalmap.org
       env:
         TM_ORG_NAME: OpenHistoricalMap
@@ -693,7 +691,6 @@ osm-seed:
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
-      ingressClassName: nginx-nlb
       ingressDomain: nominatim.staging.openhistoricalmap.org
       replicaCount: 1
       env:
@@ -740,7 +737,6 @@ osm-seed:
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressClassName: nginx-nlb
       ingressDomain: overpass-api.staging.openhistoricalmap.org
       env:
         OVERPASS_META: 'attic'
@@ -770,7 +766,6 @@ osm-seed:
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressClassName: nginx-nlb
       ingressDomain: taginfo.staging.openhistoricalmap.org
       env:
         URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
@@ -866,7 +861,6 @@ osm-seed:
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
         tag: 1bd58e1
-      ingressClassName: nginx-nlb
       ingressDomain: osmcha.staging.openhistoricalmap.org
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
