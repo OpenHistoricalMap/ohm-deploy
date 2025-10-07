@@ -36,7 +36,7 @@ services:
       - staging_network
 
 
-  tiler_staging:
+  tiler_server_staging:
     container_name: tiler_server_staging
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2882.h33a1b01
     ports:
@@ -102,4 +102,4 @@ volumes:
     
 networks:
   staging_network:
-    driver: bridge
+    external: true

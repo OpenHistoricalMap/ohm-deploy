@@ -8,17 +8,17 @@ services:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
     volumes:
-      - ./compose/traefik/traefik.staging.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - traefik_acme:/etc/traefik/acme
     restart: unless-stopped
     networks:
-      - staging_network
+      - ohm_network
 
 volumes:
   traefik_acme:
     driver: local
-    name: staging-certificates
+    name: ohm-certificates
 
 networks:
-  staging_network:
-    driver: bridge
+  ohm_network:
+    external: true

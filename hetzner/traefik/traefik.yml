@@ -1,0 +1,86 @@
+log:
+  level: DEBUG
+
+entryPoints:
+  port:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: port-secure
+  port-secure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: dev@openhistoricalmap.org
+      storage: /etc/traefik/acme/acme.json
+      httpChallenge:
+        entryPoint: port
+
+http:
+  middlewares:
+    secure-headers:
+      headers:
+        # Protects against clickjacking
+        frameDeny: true
+        # Enables XSS protection in older browsers
+        browserXssFilter: true
+        # Prevents browsers from MIME-sniffing (forces declared Content-Type)
+        contentTypeNosniff: true
+        # Enforces HTTPS via HSTS
+        forceSTSHeader: true
+        stsSeconds: 31536000  # 1 year
+        stsIncludeSubdomains: true
+        stsPreload: true
+        # # Trust only known proxy headers (adjust based on your infrastructure)
+        # hostsProxyHeaders: ["X-Forwarded-Host"]
+    csrf:
+      headers:
+        hostsProxyHeaders: ["X-CSRFToken"]
+
+  routers:
+    #################### Production ####################
+    vtiles-production-router:
+      rule: Host(`vtiles.openhistoricalmap.org`)
+      entryPoints:
+        - vtiles-secure
+      service: tiler_server_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+    #################### Staging ####################
+    vtiles-staging-router:
+      rule: Host(`vtiles.staging.openhistoricalmap.org`)
+      entryPoints:
+        - vtiles-secure
+      service: tiler_server_staging
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+    #################### Production Services ####################
+
+  services:
+    tiler_server_production:
+      loadBalancer:
+        servers:
+          - url: http://tiler_server_production:9090
+
+    #################### Staging services ####################
+
+    tiler_server_staging:
+      loadBalancer:
+        servers:
+          - url: http://tiler_server_staging:9090
+
+providers:
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true

@@ -47,7 +47,7 @@ services:
 
 
   # Tiler server
-  tiler_production:
+  tiler_server_production:
     container_name: tiler_server_production
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
     ports:
