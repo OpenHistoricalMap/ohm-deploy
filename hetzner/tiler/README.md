@@ -11,14 +11,14 @@ Ensure you are using the correct Docker images for production deployment, https:
 
 ```sh
 docker compose -f hetzner/tiler/tiler.production.yml up -d
-# docker compose -f hetzner/tiler/tiler.production.yml up db_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up imposm_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tiler_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tiler_sqs_cleaner_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tile_global_seeding_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.production.yml up db_production -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.production.yml up imposm_production -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.production.yml up tiler_server_production -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.production.yml up tiler_sqs_cleaner_production -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.production.yml up tile_global_seeding_production -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate --remove-orphans
 # docker compose -f hetzner/tiler/tiler.production.yml run tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix
-# docker compose -f hetzner/tiler/tiler.production.yml up tiler_monitor_production -d --force-recreate 
+# docker compose -f hetzner/tiler/tiler.production.yml up tiler_monitor_production -d --force-recreate --remove-orphans 
 ```
 
 🛠 Deploying to Staging
@@ -27,12 +27,12 @@ To deploy the staging environment, use the following commands:
 
 ```sh
 docker compose -f hetzner/tiler/tiler.staging.yml up -d
-# docker compose -f hetzner/tiler/tiler.staging.yml up db_staging -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.staging.yml up imposm_staging -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_staging -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_sqs_cleaner_staging -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.staging.yml up db_staging -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.staging.yml up imposm_staging -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_server_staging -d --force-recreate --remove-orphans
+# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_sqs_cleaner_staging -d --force-recreate --remove-orphans
 # docker compose -f hetzner/tiler/tiler.staging.yml up tiler_s3_cleaner_staging tiler-cache-cleaner clean_by_prefix
-# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_monitor_staging -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_monitor_staging -d --force-recreate --remove-orphans
 ```
 
 📌 Notes

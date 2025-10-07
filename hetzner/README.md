@@ -20,3 +20,11 @@ docker inspect $(docker ps -q) --format='{{.Name}} => {{range .Mounts}}{{.Name}}
 ## not used volumes
 docker volume ls --filter "dangling=true"
 ```
+
+
+## Start routing for the services
+
+```sh
+docker compose -f hetzner/router.yml up -d --remove-orphans
+```
+

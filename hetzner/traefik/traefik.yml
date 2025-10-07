@@ -45,7 +45,7 @@ http:
     # vtiles-production-router:
     #   rule: Host(`vtiles.openhistoricalmap.org`)
     #   entryPoints:
-    #     - vtiles-secure
+    #     - port-secure
     #   service: tiler_server_production
     #   tls:
     #     certResolver: letsencrypt
@@ -57,7 +57,7 @@ http:
     vtiles-staging-router:
       rule: Host(`vtiles.staging.openhistoricalmap.org`)
       entryPoints:
-        - vtiles-secure
+        - port-secure
       service: tiler_server_staging
       tls:
         certResolver: letsencrypt
@@ -67,7 +67,8 @@ http:
 
     #################### Production Services ####################
 
-  # services:
+  services:
+
   #   tiler_server_production:
   #     loadBalancer:
   #       servers:
@@ -84,3 +85,4 @@ providers:
   file:
     filename: /etc/traefik/traefik.yml
     watch: true
+    
