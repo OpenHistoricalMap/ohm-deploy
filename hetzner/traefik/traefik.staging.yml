@@ -23,7 +23,7 @@ certificatesResolvers:
 http:
   routers:
     vtiles-secure-router:
-      rule: 'Host(`vtiles.dev.staging.openhistoricalmap.org`)'
+      rule: 'Host(`vtiles.staging.openhistoricalmap.org`)'
       entryPoints:
         - vtiles-secure
       middlewares:
