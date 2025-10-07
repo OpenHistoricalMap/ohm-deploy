@@ -1,0 +1,51 @@
+log:
+  level: INFO
+
+entryPoints:
+  ## Vtiles
+  vtiles:
+    address: ':80'
+    http:
+      redirections:
+        entryPoint:
+          to: vtiles-secure
+  vtiles-secure:
+    address: ':443'
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: 'dev@openhistoricalmap.org'
+      storage: /etc/traefik/acme/acme.json
+      httpChallenge:
+        entryPoint: vtiles
+
+http:
+  routers:
+    vtiles-secure-router:
+      rule: 'Host(`vtiles.dev.staging.openhistoricalmap.org`)'
+      entryPoints:
+        - vtiles-secure
+      middlewares:
+        - csrf
+      service: vtiles_service
+      tls:
+        certResolver: letsencrypt
+
+
+  middlewares:
+    csrf:
+      headers:
+        hostsProxyHeaders: ['X-CSRFToken']
+
+  services:
+    vtiles_service:
+      loadBalancer:
+        servers:
+          - url: http://tiler_staging:9090
+
+
+providers:
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true

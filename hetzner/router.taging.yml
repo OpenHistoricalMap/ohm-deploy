@@ -1,0 +1,25 @@
+services:
+  traefik:
+    container_name: traefik
+    image: docker.io/traefik:3.4.3
+    command:
+    - "--configFile=/etc/traefik/traefik.yml"
+    depends_on:
+      - django_prod
+    volumes:
+      - ./compose/traefik/traefik.staging.yml:/etc/traefik/traefik.yml:ro
+      - traefik_data:/etc/traefik/acme
+    ports:
+      - '0.0.0.0:80:80'
+      - '0.0.0.0:443:443'
+    restart: unless-stopped
+    networks:
+      - staging_network
+
+volumes:
+  traefik_data:
+    driver: local
+    name: staging-certificates
+networks:
+  staging_network:
+    driver: bridge
