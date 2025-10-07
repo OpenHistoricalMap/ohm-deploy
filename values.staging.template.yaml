@@ -38,7 +38,7 @@ osm-seed:
     # as the SSL certificate for your services. Else, you will need to configure
     # SSL separately. 
     serviceType: ClusterIP
-    createClusterIssuer: true
+    createClusterIssuer: false
 
     ingressClassNameType: "alb"
     ingressClassName: alb
