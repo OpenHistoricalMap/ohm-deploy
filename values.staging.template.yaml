@@ -22,7 +22,7 @@ osm-seed:
     # AWS: Specify ARN for SSL certificate, currently assumes a single wildcard cert
     # ====================================================
   
-    AWS_SSL_ARN: {{AWS_SSL_ARN}}
+    AWS_SSL_ARN: {{STAGING_AWS_SSL_ARN}}
   
     # Specify serviceType.
     #
@@ -39,7 +39,12 @@ osm-seed:
     # SSL separately. 
     serviceType: ClusterIP
     createClusterIssuer: true
-    ingressClassName: nginx-nlb
+
+    ingressClassNameType: "alb"
+    ingressClassName: alb
+    alb:
+      certificateArn: {{STAGING_AWS_SSL_ARN}}
+
     # Domain that is pointed to the clusterIP
     # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
     # Then, the cluster configuration will setup services at their respective subdomains:
@@ -520,7 +525,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       externalService:
         enabled: true

@@ -15,7 +15,7 @@ osm-seed:
   AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
 
   # AWS SSL ARN
-  AWS_SSL_ARN: {{AWS_SSL_ARN}}
+  AWS_SSL_ARN: {{PRODUCTION_AWS_SSL_ARN}}
 
   # Specify serviceType.
   #
@@ -32,6 +32,11 @@ osm-seed:
   # SSL separately. 
   serviceType: ClusterIP
   createClusterIssuer: true
+  ingressClassNameType: "alb"
+  ingressClassName: alb
+  alb:
+    certificateArn: {{PRODUCTION_AWS_SSL_ARN}}
+
   # Domain that is pointed to the clusterIP
   # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
   # Then, the cluster configuration will setup services at their respective subdomains:
