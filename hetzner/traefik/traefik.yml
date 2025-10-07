@@ -1,5 +1,5 @@
 log:
-  level: DEBUG
+  level: INFO
 
 entryPoints:
   port:
@@ -42,16 +42,16 @@ http:
 
   routers:
     #################### Production ####################
-    vtiles-production-router:
-      rule: Host(`vtiles.openhistoricalmap.org`)
-      entryPoints:
-        - vtiles-secure
-      service: tiler_server_production
-      tls:
-        certResolver: letsencrypt
-      middlewares:
-        - secure-headers
-        - csrf
+    # vtiles-production-router:
+    #   rule: Host(`vtiles.openhistoricalmap.org`)
+    #   entryPoints:
+    #     - vtiles-secure
+    #   service: tiler_server_production
+    #   tls:
+    #     certResolver: letsencrypt
+    #   middlewares:
+    #     - secure-headers
+    #     - csrf
 
     #################### Staging ####################
     vtiles-staging-router:
@@ -67,11 +67,11 @@ http:
 
     #################### Production Services ####################
 
-  services:
-    tiler_server_production:
-      loadBalancer:
-        servers:
-          - url: http://tiler_server_production:9090
+  # services:
+  #   tiler_server_production:
+  #     loadBalancer:
+  #       servers:
+  #         - url: http://tiler_server_production:9090
 
     #################### Staging services ####################
 

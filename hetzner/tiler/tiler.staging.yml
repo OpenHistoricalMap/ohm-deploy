@@ -17,7 +17,7 @@ services:
     env_file:
       - .env.staging
     networks:
-      - staging_network
+      - ohm_network
 
   imposm_staging:
     container_name: tiler_imposm_staging
@@ -33,7 +33,7 @@ services:
       - .env.staging
     restart: always
     networks:
-      - staging_network
+      - ohm_network
 
 
   tiler_server_staging:
@@ -50,7 +50,7 @@ services:
           cpus: '0.2'
           memory: 128MiB
     networks:
-      - staging_network
+      - ohm_network
 
   tiler_sqs_cleaner_staging:
     container_name: tiler_sqs_cleaner_staging
@@ -66,7 +66,7 @@ services:
           cpus: '0.2'
           memory: 128MiB
     networks:
-      - staging_network
+      - ohm_network
 
   tiler_s3_cleaner_staging:
     container_name: tiler_s3_cleaner_staging
@@ -74,7 +74,7 @@ services:
     env_file:
       - .env.staging
     networks:
-      - staging_network
+      - ohm_network
 
   tiler_monitor_staging:
     container_name: tiler_monitor_staging
@@ -90,7 +90,7 @@ services:
     stdin_open: true
     tty: true
     networks:
-      - staging_network
+      - ohm_network
 
 volumes:
   tiler_staging_pgdata:
@@ -101,5 +101,5 @@ volumes:
     name: tiler_imposm_21_08_2025_staging
     
 networks:
-  staging_network:
+  ohm_network:
     external: true

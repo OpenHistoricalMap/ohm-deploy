@@ -16,7 +16,7 @@ services:
       - .env.production
     restart: always
     networks:
-      - tiler_network_production
+      - ohm_network
     deploy:
       resources:
         limits:
@@ -43,7 +43,7 @@ services:
       - .env.production
     restart: always
     networks:
-      - tiler_network_production
+      - ohm_network
 
 
   # Tiler server
@@ -56,7 +56,7 @@ services:
       - .env.production
     restart: always
     networks:
-      - tiler_network_production
+      - ohm_network
 
   tiler_sqs_cleaner_production:
     container_name: tiler_sqs_cleaner_production
@@ -65,7 +65,7 @@ services:
       - .env.production
     restart: always
     networks:
-      - tiler_network_production
+      - ohm_network
 
   tiler_s3_cleaner_production:
     container_name: tiler_s3_cleaner_production
@@ -73,7 +73,7 @@ services:
     env_file:
       - .env.production
     networks:
-      - tiler_network_production
+      - ohm_network
 
   tile_global_seeding_production:
       container_name: tiler_global_seeding_production
@@ -93,7 +93,7 @@ services:
             cpus: '1'
             memory: 1G
       networks:
-        - tiler_network_production
+        - ohm_network
 
   tile_coverage_seeding_production:
     container_name: tiler_coverage_seeding_production
@@ -113,7 +113,7 @@ services:
           cpus: '1'
           memory: 1G
     networks:
-      - tiler_network_production
+      - ohm_network
 
   tiler_monitor_production:
     container_name: tiler_monitor_production
@@ -129,7 +129,7 @@ services:
     stdin_open: true
     tty: true
     networks:
-      - tiler_network_production
+      - ohm_network
 
   node_exporter:
     image: quay.io/prometheus/node-exporter
@@ -138,7 +138,7 @@ services:
     ports:
       - "9100:9100"
     networks:
-      - tiler_network_production
+      - ohm_network
     deploy:
       resources:
         limits:
@@ -153,5 +153,6 @@ volumes:
     name: tiler_imposm_20250925
 
 networks:
-  tiler_network_production:
-    driver: bridge
+  ohm_network:
+    external: true
+    
