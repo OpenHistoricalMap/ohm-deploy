@@ -520,7 +520,7 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       externalService:
         enabled: true
