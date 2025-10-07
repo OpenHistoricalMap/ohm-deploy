@@ -674,7 +674,7 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimUI:
-      enabled: true
+      enabled: false
       ## Enable external service
       externalService:
         enabled: true
@@ -687,7 +687,7 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
     nominatimApi:
-      enabled: true
+      enabled: false
       ## Enable external service
       externalService:
         enabled: true
@@ -733,7 +733,7 @@ osm-seed:
   # Variables for overpass-api
   # ====================================================================================================
     overpassApi:
-      enabled: true
+      enabled: false
       ## Enable external service
       externalService:
         enabled: true
