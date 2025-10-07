@@ -4,8 +4,6 @@ services:
     container_name: traefik
     command:
       - --configFile=/etc/traefik/traefik.yml
-    depends_on:
-      - django_prod
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
