@@ -27,10 +27,10 @@ services:
     mem_limit: 16g
     cpus: 8
     networks:
-      - overpasss_network_production
+      - ohm_network
 networks:
-  overpasss_network_production:
-    driver: bridge
+  ohm_network:
+    external: true
 volumes:
   overpass_data_production:
     driver: local
