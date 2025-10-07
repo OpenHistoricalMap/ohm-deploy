@@ -525,10 +525,10 @@ osm-seed:
     # ====================================================================================================
   
     tilerServer:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       externalService:
-        enabled: true
+        enabled: false
         ip: {{STAGING_TILER_SERVER_HOST}}
         port: 9091
       nodeSelector:
