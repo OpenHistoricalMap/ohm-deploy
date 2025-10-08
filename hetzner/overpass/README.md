@@ -19,7 +19,7 @@ For the staging environment, the exposed port is 8085
 
 ```sh
 cd /production/overpass
-docker compose -f hetzner/overpass/overpass.production.yml up -d
+docker compose -f hetzner/overpass/overpass.production.yml up -d --remove-orphans  --force-recreate
 ```
 For the production environment, the exposed port is 8086
 

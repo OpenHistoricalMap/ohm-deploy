@@ -17,11 +17,11 @@ services:
     env_file:
       - .env.staging
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   imposm_staging:
     container_name: tiler_imposm_staging
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2839.h6fc67d6
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.2883.hce2c795
     volumes:
       - tiler_staging_imposmdata:/mnt/data
     command:
@@ -33,12 +33,12 @@ services:
       - .env.staging
     restart: always
     networks:
-      - tiler_network_staging
+      - ohm_network
 
 
-  tiler_staging:
+  tiler_server_staging:
     container_name: tiler_server_staging
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2845.h6cb2c43
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2882.h33a1b01
     ports:
       - "9091:9090"
     env_file:
@@ -50,7 +50,7 @@ services:
           cpus: '0.2'
           memory: 128MiB
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   tiler_sqs_cleaner_staging:
     container_name: tiler_sqs_cleaner_staging
@@ -66,7 +66,7 @@ services:
           cpus: '0.2'
           memory: 128MiB
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   tiler_s3_cleaner_staging:
     container_name: tiler_s3_cleaner_staging
@@ -74,15 +74,15 @@ services:
     env_file:
       - .env.staging
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   tiler_monitor_staging:
     container_name: tiler_monitor_staging
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2874.ha9bff68
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2706.h1b7db88
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../../images/tiler-monitor:/app
-      - ../../hetzner:/app/hetzner
+      - ../images/tiler-monitor:/app
+      - ../hetzner:/app/hetzner
     environment:
       - DOCKER_CONFIG_ENVIRONMENT=staging
     env_file:
@@ -90,7 +90,7 @@ services:
     stdin_open: true
     tty: true
     networks:
-      - tiler_network_staging
+      - ohm_network
 
 volumes:
   tiler_staging_pgdata:
@@ -101,5 +101,5 @@ volumes:
     name: tiler_imposm_21_08_2025_staging
     
 networks:
-  tiler_network_staging:
-    driver: bridge
+  ohm_network:
+    external: true

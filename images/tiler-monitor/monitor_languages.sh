@@ -29,8 +29,8 @@ function restart_production_containers() {
   log_message "Running create_mviews.sh for production..."
   docker compose -f hetzner/tiler/tiler.production.yml run --no-TTY imposm_mv_production /osm/scripts/create_mviews.sh
 
-  log_message "Restarting tiler_production..."
-  docker compose -f hetzner/tiler/tiler.production.yml up tiler_production -d --force-recreate
+  log_message "Restarting tiler_server_production..."
+  docker compose -f hetzner/tiler/tiler.production.yml up tiler_server_production -d --force-recreate
 
   log_message "Cleaning tiles with tiler_s3_cleaner_production..."
   docker compose -f hetzner/tiler/tiler.production.yml run --no-TTY tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix 

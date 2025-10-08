@@ -3,9 +3,7 @@ name: Deploy nominatim in Hetzner Cloud
 on:
   push:
     branches:
-      - main
-      # - staging
-      # - deploy_nominatim
+      - testing ## Disable for now
 jobs:
   deploy:
     runs-on: ubuntu-latest
