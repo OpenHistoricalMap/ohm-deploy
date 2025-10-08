@@ -25,6 +25,7 @@ docker volume ls --filter "dangling=true"
 ## Start routing for the services
 
 ```sh
-docker compose -f hetzner/router.yml up -d --remove-orphans
+docker compose -f hetzner/router.yml up -d --remove-orphans  --force-recreate
 ```
+
 

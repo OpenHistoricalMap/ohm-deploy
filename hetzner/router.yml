@@ -2,6 +2,8 @@ services:
   traefik:
     image: docker.io/traefik:3.4.3
     container_name: traefik
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - --configFile=/etc/traefik/traefik.yml
     ports:

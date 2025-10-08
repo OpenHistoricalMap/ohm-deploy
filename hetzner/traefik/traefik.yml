@@ -1,5 +1,5 @@
 log:
-  level: INFO
+  level: DEBUG
 
 entryPoints:
   port:
@@ -65,6 +65,40 @@ http:
         - secure-headers
         - csrf
 
+    overpass-api-staging-router:
+      rule: Host(`overpass-api.staging.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: overpass_api_staging
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+    nominatim-staging-router:
+      rule: Host(`nominatim.staging.openhistoricalmap.org`) && !PathPrefix(`/ui`)
+      entryPoints:
+        - port-secure
+      service: nominatim_staging
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+    nominatim-ui-staging-router:
+      rule: Host(`nominatim.staging.openhistoricalmap.org`) && PathPrefix(`/ui`)
+      entryPoints:
+        - port-secure
+      service: nominatim_ui_staging
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+
     #################### Production Services ####################
 
   services:
@@ -79,7 +113,22 @@ http:
     tiler_server_staging:
       loadBalancer:
         servers:
-          - url: http://tiler_server_staging:9090
+          - url: http://tiler_server_staging:9090 #8083 comes from production
+
+    nominatim_staging:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:8083 # 8083 comes from production
+
+    nominatim_ui_staging:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:8084  # 8084 comes from production
+
+    overpass_api_staging:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:8086 # 8086 comes from production
 
 providers:
   file:
