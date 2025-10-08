@@ -1,0 +1,108 @@
+name: Update WAF IP blacklists
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+      - 'waf_block_ip'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  SCOPE: REGIONAL
+  IPSET_NAME_STAGING: ipset-block-ohm-staging
+  IPSET_NAME_PROD: ipset-block-ohm-production
+  FILE_STAGING: firewall/ip-blacklist-staging.txt
+  FILE_PROD: firewall/ip-blacklist-production.txt
+
+jobs:
+  update-waf-ipset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials from secrets (access keys)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Resolve target env, IP set and file
+        id: target
+        run: |
+          ENV_IN="${{ inputs.environment }}"
+          if [[ "$ENV_IN" == "main" ]]; then
+            echo "IPSET_NAME=${IPSET_NAME_PROD}" >> $GITHUB_OUTPUT
+            echo "IP_FILE=${FILE_PROD}" >> $GITHUB_OUTPUT
+          else
+            echo "IPSET_NAME=${IPSET_NAME_STAGING}" >> $GITHUB_OUTPUT
+            echo "IP_FILE=${FILE_STAGING}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build IP list
+        id: iplist
+        shell: bash
+        run: |
+          TMP=$(mktemp)
+          if [[ -n "${{ inputs.ips }}" ]]; then
+            # Convert space/newline-separated input to one-per-line
+            echo "${{ inputs.ips }}" | tr ' ' '\n' | sed '/^\s*$/d' > "$TMP"
+          else
+            FILE="${{ steps.target.outputs.IP_FILE }}"
+            if [[ ! -f "$FILE" ]]; then
+              echo "File $FILE not found" >&2
+              exit 1
+            fi
+            # Remove comments and blank lines
+            sed '/^\s*#/d;/^\s*$/d' "$FILE" > "$TMP"
+          fi
+
+          # Basic validation for IPv4/IPv6 with optional CIDR
+          INVALID=$(grep -Ev '^([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]{1,2})?$|^([0-9a-fA-F:]+)(/[0-9]{1,3})?$' "$TMP" || true)
+          if [[ -n "$INVALID" ]]; then
+            echo "Invalid entries:"; echo "$INVALID"; exit 1
+          fi
+
+          # Unique and sorted list
+          sort -u "$TMP" > "${TMP}.uniq"
+          LIST=$(paste -sd' ' "${TMP}.uniq")
+          echo "addresses=$LIST" >> $GITHUB_OUTPUT
+          echo "Addresses to apply:"; cat "${TMP}.uniq"
+
+      - name: Get IP set Id and LockToken
+        id: getipset
+        run: |
+          NAME="${{ steps.target.outputs.IPSET_NAME }}"
+          DATA=$(aws wafv2 list-ip-sets --scope $SCOPE --region $AWS_REGION --query "IPSets[?Name=='${NAME}'].[Id,ARN]" --output json)
+          if [[ "$DATA" == "[]" ]]; then
+            echo "IP set ${NAME} not found in ${AWS_REGION}" >&2; exit 1
+          fi
+          ID=$(echo "$DATA" | jq -r '.[0][0]')
+          LOCK=$(aws wafv2 get-ip-set --scope $SCOPE --region $AWS_REGION --id "$ID" --name "$NAME" --query "LockToken" --output text)
+          echo "IPSET_ID=$ID" >> $GITHUB_OUTPUT
+          echo "LOCK_TOKEN=$LOCK" >> $GITHUB_OUTPUT
+
+      - name: Update IP set (replace full list)
+        run: |
+          aws wafv2 update-ip-set \
+            --scope $SCOPE \
+            --region $AWS_REGION \
+            --id "${{ steps.getipset.outputs.IPSET_ID }}" \
+            --name "${{ steps.target.outputs.IPSET_NAME }}" \
+            --lock-token "${{ steps.getipset.outputs.LOCK_TOKEN }}" \
+            --addresses ${{ steps.iplist.outputs.addresses }}
+
+      - name: Summary
+        run: |
+          echo "Updated IP set: ${{ steps.target.outputs.IPSET_NAME }}"
