@@ -592,7 +592,7 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
@@ -619,7 +619,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       nodeSelector:
         enabled: false
@@ -629,7 +629,7 @@ osm-seed:
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
       ingressDomain: tm-api.staging.openhistoricalmap.org
-      healthCheckPath: /api/docs
+      healthCheckPath: /health
       env:
         TM_ORG_NAME: OpenHistoricalMap
         TM_ORG_CODE: OHM
@@ -766,7 +766,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -851,7 +851,7 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
     osmchaWeb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-frontend
@@ -860,7 +860,7 @@ osm-seed:
 # Variables for osmcha Api, We hard code the container id.
 # ====================================================================================================
     osmchaApi:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
@@ -891,7 +891,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
     osmchaDb:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       image:
         name: postgis/postgis
