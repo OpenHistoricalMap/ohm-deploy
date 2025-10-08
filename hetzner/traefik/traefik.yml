@@ -36,9 +36,6 @@ http:
         stsPreload: true
         # # Trust only known proxy headers (adjust based on your infrastructure)
         # hostsProxyHeaders: ["X-Forwarded-Host"]
-    csrf:
-      headers:
-        hostsProxyHeaders: ["X-CSRFToken"]
 
   routers:
     #################### Production ####################
@@ -51,18 +48,6 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-        - csrf
-
-    overpass-api-production-router:
-      rule: Host(`overpass-api.openhistoricalmap.org`)
-      entryPoints:
-        - port-secure
-      service: overpass_api_production
-      tls:
-        certResolver: letsencrypt
-      middlewares:
-        - secure-headers
-        - csrf
 
     nominatim-production-router:
       rule: Host(`nominatim.openhistoricalmap.org`) && !PathPrefix(`/ui`)
@@ -73,7 +58,6 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-        - csrf
 
     nominatim-ui-production-router:
       rule: Host(`nominatim.openhistoricalmap.org`) && PathPrefix(`/ui`)
@@ -84,7 +68,16 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-        - csrf
+
+    overpass-api-production-router:
+      rule: Host(`overpass-api.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: overpass_api_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
 
     #################### Staging ####################
     vtiles-staging-router:
@@ -96,7 +89,6 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-        - csrf
 
     overpass-api-staging-router:
       rule: Host(`overpass-api.staging.openhistoricalmap.org`)
@@ -107,7 +99,6 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-        - csrf
 
     nominatim-staging-router:
       rule: Host(`nominatim.staging.openhistoricalmap.org`) && !PathPrefix(`/ui`)
@@ -118,7 +109,6 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-        - csrf
 
     nominatim-ui-staging-router:
       rule: Host(`nominatim.staging.openhistoricalmap.org`) && PathPrefix(`/ui`)
@@ -129,7 +119,6 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-        - csrf
 
 
     #################### Production Services ####################
@@ -144,7 +133,7 @@ http:
     nominatim_production:
       loadBalancer:
         servers:
-          - url: http://nominatim_production:80
+          - url: http://nominatim_production:8080
 
     nominatim_ui_production:
       loadBalancer:

@@ -23,7 +23,7 @@ In production, Nominatim is currently limited to:
 
 ```sh
 cd /production/nominatim
-docker compose -f hetzner/nominatim/nominatim.production.yml up
+docker compose -f hetzner/nominatim/nominatim.production.yml up -d --remove-orphans  --force-recreate
 ```
 
 For the production environment, the exposed ports are:
