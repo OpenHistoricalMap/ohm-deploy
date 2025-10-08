@@ -30,4 +30,3 @@ This is important because this is charged to serve the site through the setup IP
 ```sh
 docker compose -f hetzner/services.yml up -d --remove-orphans  --force-recreate
 ```
-
