@@ -1,4 +1,21 @@
 services:
+  traefik:
+    image: docker.io/traefik:3.4.3
+    container_name: traefik
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - traefik_acme:/etc/traefik/acme
+    restart: unless-stopped
+    networks:
+      - ohm_network
+
   node_exporter:
     image: quay.io/prometheus/node-exporter
     container_name: node-exporter
@@ -12,6 +29,7 @@ services:
         limits:
           cpus: "0.5"
           memory: 512M
+          
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
@@ -41,8 +59,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-      networks:
-        - ohm_network
+
+volumes:
+  traefik_acme:
+    driver: local
+    name: ohm-certificates
+
 networks:
   ohm_network:
     external: true
+    

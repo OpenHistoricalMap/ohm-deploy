@@ -22,17 +22,12 @@ docker volume ls --filter "dangling=true"
 ```
 
 
-## Set up routing for services
+## Set up routing and exporter for services
 
-This is important because this is charged to serve the site through the setup IP.
+This is important because this is charged to serve the site through the setup IP and also start up the node-exporter and cadvisor
 
-
-```sh
-docker compose -f hetzner/router.yml up -d --remove-orphans  --force-recreate
-```
-
-## Set up exporter for services
 
 ```sh
-docker compose -f hetzner/exporter.yml up -d --remove-orphans  --force-recreate
+docker compose -f hetzner/services.yml up -d --remove-orphans  --force-recreate
 ```
+
