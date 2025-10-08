@@ -574,10 +574,10 @@ osm-seed:
   # ====================================================================================================
 
   tilerServer:
-    enabled: true
+    enabled: false
     priorityClass: 'medium-priority'
     externalService:
-      enabled: true
+      enabled: false
       ip: {{PRODUCTION_TILER_SERVER_HOST}}
       port: 9090
     nodeSelector:
@@ -752,10 +752,10 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
   nominatimUI:
-    enabled: true
+    enabled: false
     ## Enable external service
     externalService:
-      enabled: true
+      enabled: false
       ip: {{PRODUCTION_NOMINATIM_HOST}}
       port: 8084
     image:
@@ -765,10 +765,10 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
   nominatimApi:
-    enabled: true
+    enabled: false
     ## Enable external service
     externalService:
-      enabled: true
+      enabled: false
       ip: {{PRODUCTION_NOMINATIM_HOST}}
       port: 8083
     priorityClass: 'medium-priority'
@@ -820,10 +820,10 @@ osm-seed:
 # Variables for overpass-api
 # ====================================================================================================
   overpassApi:
-    enabled: true
+    enabled: false
     ## Enable external service
     externalService:
-      enabled: true
+      enabled: false
       ip: {{PRODUCTION_OVERPASS_HOST}}
       port: 8086
     priorityClass: 'medium-priority'
