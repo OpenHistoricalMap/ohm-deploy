@@ -42,16 +42,49 @@ http:
 
   routers:
     #################### Production ####################
-    # vtiles-production-router:
-    #   rule: Host(`vtiles.openhistoricalmap.org`)
-    #   entryPoints:
-    #     - port-secure
-    #   service: tiler_server_production
-    #   tls:
-    #     certResolver: letsencrypt
-    #   middlewares:
-    #     - secure-headers
-    #     - csrf
+    vtiles-production-router:
+      rule: Host(`vtiles.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: tiler_server_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+    overpass-api-production-router:
+      rule: Host(`overpass-api.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: overpass_api_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+    nominatim-production-router:
+      rule: Host(`nominatim.openhistoricalmap.org`) && !PathPrefix(`/ui`)
+      entryPoints:
+        - port-secure
+      service: nominatim_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
+
+    nominatim-ui-production-router:
+      rule: Host(`nominatim.openhistoricalmap.org`) && PathPrefix(`/ui`)
+      entryPoints:
+        - port-secure
+      service: nominatim_ui_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - csrf
 
     #################### Staging ####################
     vtiles-staging-router:
@@ -103,10 +136,25 @@ http:
 
   services:
 
-  #   tiler_server_production:
-  #     loadBalancer:
-  #       servers:
-  #         - url: http://tiler_server_production:9090
+    tiler_server_production:
+      loadBalancer:
+        servers:
+          - url: http://tiler_server_production:9090
+
+    nominatim_production:
+      loadBalancer:
+        servers:
+          - url: http://nominatim_production:80
+
+    nominatim_ui_production:
+      loadBalancer:
+        servers:
+          - url: http://nominatim_ui_production:80
+
+    overpass_api_production:
+      loadBalancer:
+        servers:
+          - url: http://overpass_production:80
 
     #################### Staging services ####################
 
