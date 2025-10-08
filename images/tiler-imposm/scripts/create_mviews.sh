@@ -32,6 +32,8 @@ if [[ "$ALL" == true ]]; then
   execute_sql_file queries/utils/create_generic_mview.sql 
   # This will populate languages
   execute_sql_file queries/utils/fetch_db_languages.sql
+  # Route priority
+  execute_sql_file queries/utils/route_priority.sql
 
   ##################### NE #####################
   log_message "Creating materialized views for NE data"
@@ -58,5 +60,8 @@ execute_sql_file queries/ohm_mviews/transport_areas.sql
 execute_sql_file queries/ohm_mviews/transport_lines.sql
 execute_sql_file queries/ohm_mviews/transport_points_centroids.sql
 execute_sql_file queries/ohm_mviews/water.sql
-execute_sql_file queries/ohm_mviews/routes_lines.sql
 execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql
+## routes
+execute_sql_file queries/ohm_mviews/routes_03_mv.sql
+execute_sql_file queries/ohm_mviews/routes_02_indexed.sql
+execute_sql_file queries/ohm_mviews/routes_01_merge_by_date.sql
