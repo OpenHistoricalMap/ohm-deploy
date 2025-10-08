@@ -3,8 +3,7 @@ name: Deploy ohm adiff generator in Hetzner Cloud
 on:
   push:
     branches:
-      - main
-      - ohmexpress 
+      - testing ## Disable for now
 jobs:
   deploy:
     runs-on: ubuntu-latest

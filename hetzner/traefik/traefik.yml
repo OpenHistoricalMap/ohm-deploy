@@ -1,5 +1,5 @@
 log:
-  level: DEBUG
+  level: INFO
 
 entryPoints:
   port:
@@ -37,6 +37,12 @@ http:
         # # Trust only known proxy headers (adjust based on your infrastructure)
         # hostsProxyHeaders: ["X-Forwarded-Host"]
 
+    redirect-nominatim:
+      redirectRegex:
+        regex: "^https://(nominatim(?:\\.staging)?\\.openhistoricalmap\\.org)/?$"
+        replacement: "https://${1}/ui/search.html"
+        permanent: true
+
   routers:
     #################### Production ####################
     vtiles-production-router:
@@ -58,6 +64,7 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
+        - redirect-nominatim
 
     nominatim-ui-production-router:
       rule: Host(`nominatim.openhistoricalmap.org`) && PathPrefix(`/ui`)
@@ -109,7 +116,8 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers
-
+        - redirect-nominatim
+        
     nominatim-ui-staging-router:
       rule: Host(`nominatim.staging.openhistoricalmap.org`) && PathPrefix(`/ui`)
       entryPoints:
