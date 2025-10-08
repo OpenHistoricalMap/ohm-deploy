@@ -702,6 +702,7 @@ osm-seed:
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
     ingressDomain: tm-api.openhistoricalmap.org
+    healthCheckPath: /api/docs
     env:
       TM_ORG_NAME: OpenHistoricalMap
       TM_ORG_CODE: OHM
