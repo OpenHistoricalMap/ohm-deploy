@@ -16,8 +16,9 @@ env:
   SCOPE: REGIONAL
   IPSET_NAME_STAGING: ipset-block-ohm-staging
   IPSET_NAME_PROD: ipset-block-ohm-production
-  FILE_STAGING: firewall/ip-blacklist-staging.txt
-  FILE_PROD: firewall/ip-blacklist-production.txt
+  # --- Archivos actualizados a .yaml ---
+  FILE_STAGING: firewall/ip-blacklist-staging.yaml
+  FILE_PROD: firewall/ip-blacklist-production.yaml
 
 jobs:
   update-waf-ipset:
@@ -27,7 +28,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Configure AWS credentials from secrets (access keys)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -35,14 +35,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Install jq and yq
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
 
       - name: Resolve target env, IP set and file
         id: target
         run: |
-          ENV_IN="${{ inputs.environment }}"
-          if [[ "$ENV_IN" == "main" ]]; then
+          # This logic remains the same, but will now point to .yaml files
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
             echo "IPSET_NAME=${IPSET_NAME_PROD}" >> $GITHUB_OUTPUT
             echo "IP_FILE=${FILE_PROD}" >> $GITHUB_OUTPUT
           else
@@ -50,31 +53,26 @@ jobs:
             echo "IP_FILE=${FILE_STAGING}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build IP list
+      - name: Build IP list from YAML
         id: iplist
         shell: bash
         run: |
           TMP=$(mktemp)
-          if [[ -n "${{ inputs.ips }}" ]]; then
-            # Convert space/newline-separated input to one-per-line
-            echo "${{ inputs.ips }}" | tr ' ' '\n' | sed '/^\s*$/d' > "$TMP"
-          else
-            FILE="${{ steps.target.outputs.IP_FILE }}"
-            if [[ ! -f "$FILE" ]]; then
-              echo "File $FILE not found" >&2
-              exit 1
-            fi
-            # Remove comments and blank lines
-            sed '/^\s*#/d;/^\s*$/d' "$FILE" > "$TMP"
+          FILE="${{ steps.target.outputs.IP_FILE }}"
+          if [[ ! -f "$FILE" ]]; then
+            echo "File $FILE not found" >&2
+            exit 1
           fi
+          # --- Cambio principal: Usar yq para leer el YAML ---
+          # Extrae cada IP de la lista 'block_ips' y la pone en una nueva línea
+          yq '.block_ips[]' "$FILE" > "$TMP"
 
-          # Basic validation for IPv4/IPv6 with optional CIDR
+          # La validación y el resto del script no necesitan cambios
           INVALID=$(grep -Ev '^([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]{1,2})?$|^([0-9a-fA-F:]+)(/[0-9]{1,3})?$' "$TMP" || true)
           if [[ -n "$INVALID" ]]; then
             echo "Invalid entries:"; echo "$INVALID"; exit 1
           fi
 
-          # Unique and sorted list
           sort -u "$TMP" > "${TMP}.uniq"
           LIST=$(paste -sd' ' "${TMP}.uniq")
           echo "addresses=$LIST" >> $GITHUB_OUTPUT
