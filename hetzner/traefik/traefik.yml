@@ -86,6 +86,16 @@ http:
       middlewares:
         - secure-headers
 
+    osmcha-production-router:
+      rule: Host(`osmcha.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: osmcha_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
     #################### Staging ####################
     vtiles-staging-router:
       rule: Host(`vtiles.staging.openhistoricalmap.org`)
@@ -153,6 +163,10 @@ http:
         servers:
           - url: http://overpass_production:80
 
+    osmcha_production:
+      loadBalancer:
+        servers:
+          - url: http://frontend-nginx:80
     #################### Staging services ####################
 
     tiler_server_staging:
