@@ -967,7 +967,7 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
   osmchaWeb:
-    enabled: true
+    enabled: false
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
@@ -976,7 +976,7 @@ osm-seed:
 # Variables for osmcha Api
 # ====================================================================================================
   osmchaApi:
-    enabled: true
+    enabled: false
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-django
@@ -1013,7 +1013,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
   osmchaDb:
-    enabled: true
+    enabled: false
     priorityClass: 'medium-priority'
     image:
       name: postgis/postgis
