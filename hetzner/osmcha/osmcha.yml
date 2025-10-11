@@ -3,7 +3,7 @@ services:
     image: postgis/postgis:17-3.5
     container_name: osmcha-db
     restart: always
-    env_file: .env.staging
+    env_file: .env.osmcha
     volumes:
       - osmcha_db_data:/var/lib/postgresql/data
       - ./data_backup:/data_backup
@@ -14,21 +14,23 @@ services:
       retries: 10
       start_period: 10s
     networks:
-      - osmcha_network
+      - ohm_network
 
   osmcha-redis:
+    container_name: osmcha-redis
     image: redis:latest
     networks:
-      - osmcha_network
+      - ohm_network
 
   osmcha-init:
+    container_name: osmcha-init
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
     command: >
       sh -c "
         python manage.py migrate &&
         python manage.py collectstatic --noinput
       "
-    env_file: .env.staging
+    env_file: .env.osmcha
     volumes:
       - staticfiles:/app/staticfiles
     depends_on:
@@ -37,14 +39,15 @@ services:
       osmcha-redis:
         condition: service_started
     networks:
-      - osmcha_network
+      - ohm_network
 
   osmcha-api:
+    container_name: osmcha-api
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
     command: gunicorn config.wsgi -b 0.0.0.0:5000 --access-logfile - --timeout 120 --workers 4 --threads 16
-    ports:
-      - "5100:5000"
-    env_file: .env.staging
+    # ports:
+    #   - "5100:5000"
+    env_file: .env.osmcha
     volumes:
       - staticfiles:/staticfiles
     depends_on:
@@ -53,51 +56,49 @@ services:
       osmcha-redis:
         condition: service_started
     networks:
-      - osmcha_network
+      - ohm_network
 
   frontend-nginx:
+    container_name: frontend-nginx
     image: ghcr.io/openhistoricalmap/osmcha-frontend:df5e9b5
-    ports:
-      - "8100:80"
+    # ports:
+    #   - "8100:80"
     environment:
       - BACKEND_URL=http://osmcha-api:5000
     volumes:
       - staticfiles:/srv/www/static/django:ro
-      - /staging/ohm-deploy/hetzner/osmcha/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${PWD}/hetzner/osmcha/config/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - osmcha-api
 
     networks:
-      - osmcha_network
+      - ohm_network
 
   osmcha-cron:
+    container_name: osmcha-cron
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
-    env_file: .env.staging
+    env_file: .env.osmcha
     depends_on:
       osmcha-db:
         condition: service_healthy
       osmcha-redis:
         condition: service_started
     networks:
-      - osmcha_network
-    command: >
-        sh -c "
-          set -x;
-          while true; do
-            python manage.py fetchchangesets;
-            python manage.py backfill_changesets_id --start_id=100000;
-            sleep 1800;
-          done
-        "
+      - ohm_network
+    volumes:
+      - staticfiles:/srv/www/static/django:ro
+      - ${PWD}/hetzner/osmcha/script/update.sh:/app/update.sh
+    command: sh /app/update.sh
 
 volumes:
   osmcha_db_data:
     driver: local
-    name: osmcha_db_2025
+    name: osmcha_db_11102025
   staticfiles:
     driver: local
-    name: osmcha_staticfiles_2025
+    name: osmcha_staticfiles_11102025
 
 networks:
-  osmcha_network:
-    driver: bridge
+  ohm_network:
+    external: true
+    
