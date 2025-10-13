@@ -28,10 +28,11 @@ services:
     mem_limit: 16g
     cpus: 8
     networks:
-      - overpasss_network_staging
+      - ohm_network
 networks:
-  overpasss_network_staging:
-    driver: bridge
+  ohm_network:
+    external: true
+
 volumes:
   overpass_data_staging:
     driver: local

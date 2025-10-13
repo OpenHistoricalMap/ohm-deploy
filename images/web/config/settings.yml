@@ -15,7 +15,7 @@ legal_email: "legal@openhistoricalmap.org"
 # Support email address
 support_email: "admin@openhistoricalmap.org"
 # Sender addresses for emails
-email_from: "OpenHistoricalMap <admin@openhistoricalmap.org>"
+email_from: "OpenHistoricalMap <web@noreply.openhistoricalmap.org>"
 email_return_path: "bounces@openhistoricalmap.org"
 
 # API version

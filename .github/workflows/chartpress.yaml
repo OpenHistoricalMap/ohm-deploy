@@ -83,7 +83,7 @@ jobs:
           _input-file: 'values.staging.template.yaml'
           _format-key: '{{key}}'
           _output-file: 'values.staging.yaml'
-          AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
+          STAGING_AWS_SSL_ARN: ${{ secrets.STAGING_AWS_SSL_ARN }}
           ## web
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
@@ -141,7 +141,7 @@ jobs:
           _input-file: 'values.production.template.yaml'
           _format-key: '{{key}}'
           _output-file: 'values.production.yaml'
-          AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
+          PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
           ## web
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}

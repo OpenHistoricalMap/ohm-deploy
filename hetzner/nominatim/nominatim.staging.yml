@@ -35,7 +35,7 @@ services:
       retries: 3   
       start_period: 120m
     networks:
-      - nominatim_network_staging
+      - ohm_network
 
   nominatim_ui_staging:
     image: ghcr.io/openhistoricalmap/nominatim-ui:a469b5e
@@ -58,11 +58,11 @@ services:
       retries: 3   
       start_period: 20s
     networks:
-      - nominatim_network_staging
+      - ohm_network
 
 networks:
-  nominatim_network_staging:
-    driver: bridge
+  ohm_network:
+    external: true
 volumes:
   nominatim_data:
     driver: local

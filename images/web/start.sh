@@ -173,8 +173,8 @@ setup_production() {
   fi
 
   echo "Logging and tailing logs..."
-  log_and_tail /var/www/log/production.log
-  log_and_tail /var/www/log/jobs_work.log
+  # log_and_tail /var/www/log/production.log
+  # log_and_tail /var/www/log/jobs_work.log
   log_and_tail /var/log/apache2/error.log
   log_and_tail /var/log/apache2/access.log
 

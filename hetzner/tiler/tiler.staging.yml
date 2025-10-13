@@ -17,7 +17,7 @@ services:
     env_file:
       - .env.staging
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   imposm_staging:
     container_name: tiler_imposm_staging
@@ -33,10 +33,10 @@ services:
       - .env.staging
     restart: always
     networks:
-      - tiler_network_staging
+      - ohm_network
 
 
-  tiler_staging:
+  tiler_server_staging:
     container_name: tiler_server_staging
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.2870.h066122c
     ports:
@@ -50,7 +50,7 @@ services:
           cpus: '0.2'
           memory: 128MiB
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   tiler_sqs_cleaner_staging:
     container_name: tiler_sqs_cleaner_staging
@@ -66,7 +66,7 @@ services:
           cpus: '0.2'
           memory: 128MiB
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   tiler_s3_cleaner_staging:
     container_name: tiler_s3_cleaner_staging
@@ -74,7 +74,7 @@ services:
     env_file:
       - .env.staging
     networks:
-      - tiler_network_staging
+      - ohm_network
 
   tiler_monitor_staging:
     container_name: tiler_monitor_staging
@@ -90,7 +90,7 @@ services:
     stdin_open: true
     tty: true
     networks:
-      - tiler_network_staging
+      - ohm_network
 
 volumes:
   tiler_staging_pgdata:
@@ -101,5 +101,5 @@ volumes:
     name: tiler_imposm_21_08_2025_staging
     
 networks:
-  tiler_network_staging:
-    driver: bridge
+  ohm_network:
+    external: true
