@@ -107,7 +107,9 @@ services:
       - ohmx_db:/data
     networks:
       - ohm_network
-      
+    cpus: '4.0'
+    mem_limit: 10G
+
 volumes:
   osmcha_db_data:
     driver: local

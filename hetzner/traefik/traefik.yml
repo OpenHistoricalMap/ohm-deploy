@@ -96,6 +96,26 @@ http:
       middlewares:
         - secure-headers
 
+    node-exporter-router:
+      rule: Host(`node-exporter.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: node_exporter_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
+    cadvisor-router:
+      rule: Host(`cadvisor.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: cadvisor_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
     #################### Staging ####################
     vtiles-staging-router:
       rule: Host(`vtiles.staging.openhistoricalmap.org`)
@@ -167,6 +187,17 @@ http:
       loadBalancer:
         servers:
           - url: http://frontend-nginx:80
+
+    node_exporter_production:
+      loadBalancer:
+        servers:
+          - url: http://node-exporter:9100
+
+    cadvisor_production:
+      loadBalancer:
+        servers:
+          - url: http://cadvisor:8080
+          
     #################### Staging services ####################
 
     tiler_server_staging:
