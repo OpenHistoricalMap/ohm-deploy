@@ -63,8 +63,6 @@ SELECT log_notice('STEP 4: Merged routes materialized view');
 
 DROP MATERIALIZED VIEW IF EXISTS mv_routes_normalized CASCADE;
 
-DROP MATERIALIZED VIEW IF EXISTS mv_routes_normalized CASCADE;
-
 CREATE MATERIALIZED VIEW mv_routes_normalized AS
 WITH union_sources AS (
   -- 1) From multi-lines (relations with members)
@@ -156,6 +154,14 @@ data_for_dated_ways AS (
      AND (u.start_decdate IS NULL OR u.start_decdate < COALESCE(s.seg_end, 9999)) -- active before segment end
      AND (u.end_decdate   IS NULL OR u.end_decdate   > s.seg_start)              -- active after segment start
   ),
+  -- Create a clean source by removing duplicate routes
+  -- within the same time segment.
+  distinct_active_routes AS (
+    SELECT DISTINCT ON (way_id, seg_start, seg_end, ref, network, direction)
+      *
+    FROM active
+  ),
+
   base AS (
     -- Group active routes by way_id, segment and direction to build base records
     SELECT
@@ -181,8 +187,17 @@ data_for_dated_ways AS (
         )
         ORDER BY ref
       ) AS routes,
-      md5(array_to_string(ARRAY_AGG(DISTINCT osm_id ORDER BY osm_id), ',')) AS routeset_hash
-    FROM active
+      md5(
+            jsonb_agg(
+              jsonb_build_object(
+                -- Lets ignore direction for now https://github.com/OpenHistoricalMap/ohm-deploy/pull/600#discussion_r2389319594
+                'ref',     TRIM(UPPER(COALESCE(ref, ''))),
+                'network', TRIM(UPPER(COALESCE(network, '')))
+              ) 
+              ORDER BY ref, network
+            )::text
+          ) AS routeset_hash
+    FROM distinct_active_routes
     GROUP BY way_id, seg_start, seg_end
   ),
   merged AS (
