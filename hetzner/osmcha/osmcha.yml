@@ -107,11 +107,8 @@ services:
       - ohmx_db:/data
     networks:
       - ohm_network
-    deploy:
-      resources:
-        limits:
-          cpus: '4.0'
-          memory: 10G
+    cpus: '4.0'
+    mem_limit: 10G
 
 volumes:
   osmcha_db_data:
