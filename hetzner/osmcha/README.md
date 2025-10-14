@@ -13,6 +13,7 @@ docker compose -f hetzner/osmcha/osmcha.yml up -d --force-recreate --remove-orph
 # docker compose -f hetzner/osmcha/osmcha.yml up osmcha-api -d --force-recreate
 # docker compose -f hetzner/osmcha/osmcha.yml up frontend-nginx -d --force-recreate
 # docker compose -f hetzner/osmcha/osmcha.yml up osmcha-cron -d --force-recreate
+# docker compose -f hetzner/osmcha/osmcha.yml up osmcha_ohmx_adiff -d --force-recreate
 ```
 
 ## Restore Database from Backup
@@ -37,10 +38,3 @@ docker compose -f hetzner/osmcha/osmcha.yml up -d --force-recreate --remove-orph
    psql -U postgres -d osmcha -c "\dt"
    ```
 
----
-
-## Deploy OHMX
-
-```sh
-docker compose -f hetzner/osmcha/ohmx_adiff.yml up ohmx_adiff_producion -d --force-recreate
-```
