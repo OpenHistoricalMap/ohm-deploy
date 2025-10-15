@@ -43,7 +43,7 @@ osm-seed:
     alb:
       certificateArn: {{STAGING_AWS_SSL_ARN}}
       enableWaf:
-        enabled: false
+        enabled: true
         wafAclArn: {{STAGING_AWS_WAF_WEBACL_ARN}}
     # Domain that is pointed to the clusterIP
     # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
