@@ -142,6 +142,7 @@ jobs:
           _format-key: '{{key}}'
           _output-file: 'values.production.yaml'
           PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
+          PRODUCTION_AWS_WAF_WEBACL_ARN: ${{ secrets.PRODUCTION_AWS_WAF_WEBACL_ARN }}
           ## web
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
