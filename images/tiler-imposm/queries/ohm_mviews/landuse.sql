@@ -13,8 +13,9 @@
 --   are generated using the `isodatetodecimaldate` function.
 --
 -- Parameters:
---   view_name     TEXT              - Name of the materialized view to create.
---   min_area      DOUBLE PRECISION - Minimum area (in m²) to include landuse areas.
+--   view_name       TEXT              - Name of the materialized view to create.
+--   include_points  BOOLEAN           - If TRUE, includes features from 'osm_landuse_points'.
+--   min_area        DOUBLE PRECISION  - Minimum area (in m²) to include landuse areas.
 --
 -- Notes:
 --   - Only features with a non-empty "name" are included.
@@ -27,6 +28,7 @@
 DROP FUNCTION IF EXISTS create_landuse_points_centroids_mview;
 CREATE OR REPLACE FUNCTION create_landuse_points_centroids_mview(
     view_name TEXT,
+    include_points BOOLEAN,
     min_area DOUBLE PRECISION DEFAULT 0
 )
 RETURNS void AS $$
@@ -52,23 +54,29 @@ BEGIN
             %s
         FROM osm_landuse_areas
         WHERE name IS NOT NULL AND name <> '' AND area > %L
+    $sql$, tmp_view_name, lang_columns, min_area);
 
-        UNION ALL
+    -- Only add the UNION ALL block if 'include_points' is true.
+    IF include_points THEN
+        sql_create := sql_create || format($sql$
+            UNION ALL
+            SELECT 
+                geometry,
+                osm_id, 
+                NULLIF(name, '') AS name, 
+                type, 
+                class, 
+                NULLIF(start_date, '') AS start_date,
+                NULLIF(end_date, '') AS end_date,
+                isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
+                isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+                NULL AS area_m2, 
+                %s
+            FROM osm_landuse_points
+        $sql$, lang_columns);
+    END IF;
 
-        SELECT 
-            geometry,
-            osm_id, 
-            NULLIF(name, '') AS name, 
-            type, 
-            class, 
-            NULLIF(start_date, '') AS start_date,
-            NULLIF(end_date, '') AS end_date,
-            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-            NULL AS area_m2, 
-            %s
-        FROM osm_landuse_points;
-    $sql$, tmp_view_name, lang_columns, min_area, lang_columns);
+    sql_create := sql_create || ';';
 
     PERFORM finalize_materialized_view(
         tmp_view_name,
@@ -82,10 +90,10 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Create materialized views for landuse points centroids
 -- ============================================================================
-SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z10_11', 500);
-SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z12_13', 100);
-SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20', 0);
-
+SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z8_9', FALSE, 25000000);
+SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z10_11', FALSE, 1000000);
+SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z12_13', FALSE, 10000);
+SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20', TRUE, 0);
 -- ============================================================================
 -- Create materialized views for landuse areas
 -- ============================================================================

@@ -44,7 +44,14 @@ BEGIN
         ) AS id,
         ABS(osm_id) AS osm_id,
         geometry,
-        type,
+        --  Detect highways in construcion https://github.com/OpenHistoricalMap/issues/issues/1151
+        CASE
+            WHEN highway = 'construction' THEN
+                -- If the 'construction' tag has a value, append '_construction'. Otherwise, use 'road_construction'.
+                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
+            ELSE type
+        END AS type,
+        NULLIF(tags->'construction', '') AS construction,
         class,
         NULLIF(name, '') AS name,
         tunnel,
@@ -84,7 +91,13 @@ BEGIN
         ) AS id,
         ABS(osm_id) AS osm_id,
         geometry,
-        type,
+        CASE
+            WHEN highway = 'construction' THEN
+                -- If the 'construction' tag has a value, append '_construction'. Otherwise, use 'road_construction'.
+                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
+            ELSE type
+        END AS type,
+        NULLIF(tags->'construction', '') AS construction,
         class,
         NULLIF(name, '') AS name,
         tunnel,
