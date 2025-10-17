@@ -76,6 +76,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -144,9 +148,15 @@ osm-seed:
       enabled: true
       priorityClass: "high-priority"
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
+      podAntiAffinity: # To set that no two pods are scheduled on the same node
+        enabled: true
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -219,6 +229,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       resources:
         enabled: false
 
@@ -243,6 +257,10 @@ osm-seed:
           cpu: "1200m"
       nodeSelector:
         enabled: false
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       autoscaling:
         enabled: true
         minReplicas: 1
@@ -259,6 +277,10 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job_xlarge
+      nodeAffinity:
+        enabled: false
+        key: "nodegroup_type"
+        values: ["bash"]
       schedule: '* * * * *'
       env:
         OVERWRITE_PLANET_FILE: false
@@ -276,9 +298,13 @@ osm-seed:
       enabled: false
       priorityClass: medium-priority
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: job_xlarge
+      nodeAffinity:
+        enabled: false
+        key: "nodegroup_type"
+        values: ["bash"]
       schedule: '0 4 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -299,6 +325,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -315,6 +345,10 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       env:
         URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
       resources:
@@ -359,9 +393,13 @@ osm-seed:
         resources:
           enabled: false
         nodeSelector:
-          enabled: true
+          enabled: false
           label_key: nodegroup_type
           label_value: job_xlarge
+        nodeAffinity:
+          enabled: true
+          key: "nodegroup_type"
+          values: ["bash"]
       - name: tm-db
         enabled: false
         schedule: '0 1 * * *'
@@ -376,9 +414,13 @@ osm-seed:
         resources:
           enabled: false
         nodeSelector:
-          enabled: true
+          enabled: false
           label_key: nodegroup_type
           label_value: web_medium
+        nodeAffinity:
+          enabled: true
+          key: "nodegroup_type"
+          values: ["bash"]
       - name: osmcha-db
         enabled: false
         schedule: '0 1 * * *'
@@ -426,9 +468,13 @@ osm-seed:
       resources:
         enabled: false
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       postgresqlConfig:
         enabled: false
         values: |
@@ -520,6 +566,10 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
     # ====================================================================================================
     # Variables for tiler-server
     # ====================================================================================================
@@ -532,9 +582,13 @@ osm-seed:
         ip: {{STAGING_TILER_SERVER_HOST}}
         port: 9091
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -573,9 +627,13 @@ osm-seed:
       enabled: false
       priorityClass: medium-priority
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       replicaCount: 1
       command: './cache_cleaner.sh' 
       resources:
@@ -589,7 +647,7 @@ osm-seed:
         minReplicas: 1
         maxReplicas: 1
         cpuUtilization: 90
-  
+
     # ====================================================================================================
     # Variables for Tasking Manager DB
     # ====================================================================================================
@@ -603,6 +661,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       env:
         POSTGRES_DB: tm
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
@@ -627,6 +689,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -730,6 +796,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
@@ -764,6 +834,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
@@ -789,9 +863,13 @@ osm-seed:
       resources:
         enabled: false
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       cronjob:
         enabled: false
         schedule: "0 2 */3 * *"
@@ -817,10 +895,13 @@ osm-seed:
       resources:
         enabled: false
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: job
-
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
   # ====================================================================================================
   # Variables for replication nomitoring task
   # ====================================================================================================
@@ -834,9 +915,13 @@ osm-seed:
       resources:
         enabled: false
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
 # ====================================================================================================
 # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
 # ====================================================================================================
@@ -846,9 +931,13 @@ osm-seed:
       resources:
         enabled: false
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: web
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
 # ====================================================================================================
 # Variables for osmcha web
 # ====================================================================================================
@@ -887,6 +976,10 @@ osm-seed:
         enabled: false
         label_key: nodegroup_type
         label_value: web
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
       fetch_changesets_cronjob: '*/2 * * * *'
       process_changesets_cronjob: '0 * * * *'
 # ====================================================================================================
@@ -912,6 +1005,10 @@ osm-seed:
         AWS_ElasticBlockStore_size: 10Gi
       nodeSelector:
         enabled: false
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
 # ====================================================================================================
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
