@@ -72,14 +72,6 @@ osm-seed:
     db:
       enabled: true
       priorityClass: "high-priority"
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web_medium
-      nodeAffinity:
-        enabled: true
-        key: "nodegroup_type"
-        values: ["web"]
       env:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
@@ -141,12 +133,6 @@ osm-seed:
           min_parallel_index_scan_size = 512kB
           session_preload_libraries = 'auto_explain'
           auto_explain.log_min_duration = '3s'
-    # ====================================================================================================
-    # Variables for osm-seed website
-    # ====================================================================================================
-    web:
-      enabled: true
-      priorityClass: "high-priority"
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -155,8 +141,12 @@ osm-seed:
         enabled: true
         key: "nodegroup_type"
         values: ["web"]
-      podAntiAffinity: # To set that no two pods are scheduled on the same node
-        enabled: true
+    # ====================================================================================================
+    # Variables for osm-seed website
+    # ====================================================================================================
+    web:
+      enabled: true
+      priorityClass: "high-priority"
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -204,10 +194,10 @@ osm-seed:
         minReplicas: 1
         maxReplicas: 2
         cpuUtilization:
-          enable: true
+          enabled: true
           value: 85
         memoryUtilization:
-          enable: false
+          enabled: false
           value: 85
         behavior:
           scaleUp:
@@ -219,12 +209,6 @@ osm-seed:
             policyValue: 50                      # Allow up to 50% decrease in replicas at once (e.g., 6 → 3).
             periodSeconds: 60                    # This decrease limit applies within a 60-second window.
       sharedMemorySize: 16Mi
-    # ====================================================================================================
-    # Variables for memcached. Memcached is used to store session cookies
-    # ====================================================================================================
-    memcached:
-      enabled: true
-      priorityClass: "high-priority"
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -233,9 +217,24 @@ osm-seed:
         enabled: true
         key: "nodegroup_type"
         values: ["web"]
+      podAntiAffinity: # To set that no two pods are scheduled on the same node
+        enabled: true
+    # ====================================================================================================
+    # Variables for memcached. Memcached is used to store session cookies
+    # ====================================================================================================
+    memcached:
+      enabled: true
+      priorityClass: "high-priority"
       resources:
         enabled: false
-
+      nodeSelector:
+        enabled: false
+        label_key: nodegroup_type
+        label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
     # ====================================================================================================
     # Cgimap
     # ====================================================================================================
@@ -255,32 +254,24 @@ osm-seed:
           enabled: false
           memory: "4Gi"
           cpu: "1200m"
-      nodeSelector:
-        enabled: false
-      nodeAffinity:
-        enabled: true
-        key: "nodegroup_type"
-        values: ["web"]
       autoscaling:
         enabled: true
         minReplicas: 1
         maxReplicas: 2
         cpuUtilization: 90
         memoryUtilization: 90
+      nodeSelector:
+        enabled: false
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
     # ====================================================================================================
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
-      nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: job_xlarge
-      nodeAffinity:
-        enabled: false
-        key: "nodegroup_type"
-        values: ["bash"]
       schedule: '* * * * *'
       env:
         OVERWRITE_PLANET_FILE: false
@@ -290,13 +281,6 @@ osm-seed:
         PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
       resources:
         enabled: false
-  
-    # ====================================================================================================
-    # Variables for full-history container
-    # ====================================================================================================
-    fullHistory:
-      enabled: false
-      priorityClass: medium-priority
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -305,6 +289,12 @@ osm-seed:
         enabled: false
         key: "nodegroup_type"
         values: ["bash"]
+    # ====================================================================================================
+    # Variables for full-history container
+    # ====================================================================================================
+    fullHistory:
+      enabled: false
+      priorityClass: medium-priority
       schedule: '0 4 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -314,13 +304,25 @@ osm-seed:
         PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
       resources:
         enabled: false
-
+      nodeSelector:
+        enabled: false
+        label_key: nodegroup_type
+        label_value: job_xlarge
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["bash"]
     # ====================================================================================================
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
+      env:
+        ENABLE_SEND_SLACK_MESSAGE: "true"
+        SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
+      resources:
+        enabled: false
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -329,18 +331,16 @@ osm-seed:
         enabled: true
         key: "nodegroup_type"
         values: ["web"]
-      env:
-        ENABLE_SEND_SLACK_MESSAGE: "true"
-        SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
-      resources:
-        enabled: false
-  
     # ====================================================================================================
     # Variables for osm-seed to pupulate the apidb
     # ====================================================================================================
     populateApidb:
       enabled: false
       priorityClass: medium-priority
+      env:
+        URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
+      resources:
+        enabled: false
       nodeSelector:
         enabled: true
         label_key: nodegroup_type
@@ -349,11 +349,6 @@ osm-seed:
         enabled: true
         key: "nodegroup_type"
         values: ["web"]
-      env:
-        URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
-      resources:
-        enabled: false
-
     # ====================================================================================================
     # Variables to start a pod to process osm files
     # ====================================================================================================
@@ -376,7 +371,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: false
+        enabled: true
         schedule: '0 0 * * *'
         env:
           # backup/restore
@@ -401,7 +396,7 @@ osm-seed:
           key: "nodegroup_type"
           values: ["bash"]
       - name: tm-db
-        enabled: false
+        enabled: true
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -467,14 +462,6 @@ osm-seed:
         AWS_ElasticBlockStore_size: 100Gi
       resources:
         enabled: false
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web_medium
-      nodeAffinity:
-        enabled: true
-        key: "nodegroup_type"
-        values: ["web"]
       postgresqlConfig:
         enabled: false
         values: |
@@ -535,8 +522,14 @@ osm-seed:
           # pg_stat_statements Settings
           pg_stat_statements.max = 10000  # Maximum number of queries tracked in pg_stat_statements
           pg_stat_statements.track = all  # Track all queries (DDL, DML, etc.)
-
-
+      nodeSelector:
+        enabled: false
+        label_key: nodegroup_type
+        label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
     # ====================================================================================================
     # Variables for tiler-imposm
     # ====================================================================================================
@@ -581,14 +574,6 @@ osm-seed:
         enabled: false
         ip: {{STAGING_TILER_SERVER_HOST}}
         port: 9091
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web_medium
-      nodeAffinity:
-        enabled: true
-        key: "nodegroup_type"
-        values: ["web"]
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -620,12 +605,6 @@ osm-seed:
         minReplicas: 1
         maxReplicas: 2
         cpuUtilization: 60
-    # ====================================================================================================
-    # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
-    # ====================================================================================================
-    tilerServerCacheCleaner:
-      enabled: false
-      priorityClass: medium-priority
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -634,6 +613,12 @@ osm-seed:
         enabled: true
         key: "nodegroup_type"
         values: ["web"]
+    # ====================================================================================================
+    # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
+    # ====================================================================================================
+    tilerServerCacheCleaner:
+      enabled: false
+      priorityClass: medium-priority
       replicaCount: 1
       command: './cache_cleaner.sh' 
       resources:
@@ -647,16 +632,6 @@ osm-seed:
         minReplicas: 1
         maxReplicas: 1
         cpuUtilization: 90
-
-    # ====================================================================================================
-    # Variables for Tasking Manager DB
-    # ====================================================================================================
-    tmDb:
-      enabled: false
-      priorityClass: medium-priority
-      image:
-        name: "postgis/postgis"
-        tag: "14-3.3"
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -665,6 +640,15 @@ osm-seed:
         enabled: true
         key: "nodegroup_type"
         values: ["web"]
+    # ====================================================================================================
+    # Variables for Tasking Manager DB
+    # ====================================================================================================
+    tmDb:
+      enabled: true
+      priorityClass: medium-priority
+      image:
+        name: "postgis/postgis"
+        tag: "14-3.3"
       env:
         POSTGRES_DB: tm
         POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
@@ -678,13 +662,6 @@ osm-seed:
         AWS_ElasticBlockStore_size: 20Gi
       resources:
         enabled: false
-    # ====================================================================================================
-    # Variables for Tasking Manager API
-    # ====================================================================================================
-  
-    tmApi:
-      enabled: false
-      priorityClass: medium-priority
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -693,6 +670,13 @@ osm-seed:
         enabled: true
         key: "nodegroup_type"
         values: ["web"]
+    # ====================================================================================================
+    # Variables for Tasking Manager API
+    # ====================================================================================================
+  
+    tmApi:
+      enabled: true
+      priorityClass: medium-priority
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -736,7 +720,14 @@ osm-seed:
 
       resources:
         enabled: false
-  
+      nodeSelector:
+        enabled: false
+        label_key: nodegroup_type
+        label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
   # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
@@ -842,7 +833,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -862,14 +853,6 @@ osm-seed:
         INTERVAL_DOWNLOAD_DATA: 7d
       resources:
         enabled: false
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: web_medium
-      nodeAffinity:
-        enabled: true
-        key: "nodegroup_type"
-        values: ["web"]
       cronjob:
         enabled: false
         schedule: "0 2 */3 * *"
@@ -885,6 +868,14 @@ osm-seed:
           limits:
             memory: "14Gi"
             cpu: "3800m"
+      nodeSelector:
+        enabled: false
+        label_key: nodegroup_type
+        label_value: web_medium
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
