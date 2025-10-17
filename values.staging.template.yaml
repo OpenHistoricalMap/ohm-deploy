@@ -147,6 +147,9 @@ osm-seed:
     web:
       enabled: true
       priorityClass: "high-priority"
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging    
       replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -272,6 +275,9 @@ osm-seed:
     planetDump:
       enabled: true
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       schedule: '* * * * *'
       env:
         OVERWRITE_PLANET_FILE: false
@@ -286,15 +292,18 @@ osm-seed:
         label_key: nodegroup_type
         label_value: job_xlarge
       nodeAffinity:
-        enabled: false
+        enabled: true
         key: "nodegroup_type"
-        values: ["bash"]
+        values: ["web"]
     # ====================================================================================================
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       schedule: '0 4 * * *'
       env:
         OVERWRITE_FHISTORY_FILE: false
@@ -311,13 +320,16 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["bash"]
+        values: ["batch"]
     # ====================================================================================================
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
       enabled: true
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       env:
         ENABLE_SEND_SLACK_MESSAGE: "true"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -330,13 +342,16 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["web"]
+        values: ["batch"]
     # ====================================================================================================
     # Variables for osm-seed to pupulate the apidb
     # ====================================================================================================
     populateApidb:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       env:
         URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
       resources:
@@ -372,6 +387,9 @@ osm-seed:
       cronjobs:
       - name: web-db
         enabled: true
+        serviceAccount:
+          enabled: true
+          name: ohm-s3-database-backup-access-staging
         schedule: '0 0 * * *'
         env:
           # backup/restore
@@ -394,9 +412,12 @@ osm-seed:
         nodeAffinity:
           enabled: true
           key: "nodegroup_type"
-          values: ["bash"]
+          values: ["batch"]
       - name: tm-db
         enabled: true
+        serviceAccount:
+          enabled: true
+          name: ohm-s3-database-backup-access-staging
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -415,9 +436,12 @@ osm-seed:
         nodeAffinity:
           enabled: true
           key: "nodegroup_type"
-          values: ["bash"]
+          values: ["batch"]
       - name: osmcha-db
         enabled: false
+        serviceAccount:
+          enabled: true
+          name: ohm-s3-database-backup-access-staging
         schedule: '0 1 * * *'
         env:
           # backup/restore
@@ -537,6 +561,9 @@ osm-seed:
     tilerImposm:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       env:
         TILER_IMPORT_FROM: osm
         TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250207_0001.osm.pbf
@@ -570,6 +597,9 @@ osm-seed:
     tilerServer:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       externalService:
         enabled: false
         ip: {{STAGING_TILER_SERVER_HOST}}
@@ -619,6 +649,9 @@ osm-seed:
     tilerServerCacheCleaner:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       replicaCount: 1
       command: './cache_cleaner.sh' 
       resources:
@@ -644,7 +677,7 @@ osm-seed:
     # Variables for Tasking Manager DB
     # ====================================================================================================
     tmDb:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       image:
         name: "postgis/postgis"
@@ -658,7 +691,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-d
-        AWS_ElasticBlockStore_volumeID: vol-025e56094aa8e705b
+        AWS_ElasticBlockStore_volumeID: vol-0169f38dca95874a0
         AWS_ElasticBlockStore_size: 20Gi
       resources:
         enabled: false
@@ -675,7 +708,7 @@ osm-seed:
     # ====================================================================================================
   
     tmApi:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       replicaCount: 1
       serviceAnnotations:
@@ -833,8 +866,11 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: taginfo.staging.openhistoricalmap.org
@@ -882,6 +918,9 @@ osm-seed:
     osmSimpleMetrics:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       schedule: '0 2 * * *'
       resources:
         enabled: false
@@ -899,6 +938,9 @@ osm-seed:
     monitoringReplication:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       schedule: '*/30 * * * *'
       env:
         CREATE_MISSING_FILES: "empty"
@@ -919,6 +961,9 @@ osm-seed:
     changesetReplicationJob:
       enabled: false
       priorityClass: medium-priority
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging 
       resources:
         enabled: false
       nodeSelector:
