@@ -294,7 +294,7 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["bash"]
+        values: ["job"]
     # ====================================================================================================
     # Variables for full-history container
     # ====================================================================================================
@@ -320,7 +320,7 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["batch"]
+        values: ["job"]
     # ====================================================================================================
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
@@ -412,7 +412,7 @@ osm-seed:
         nodeAffinity:
           enabled: true
           key: "nodegroup_type"
-          values: ["batch"]
+          values: ["job"]
       - name: tm-db
         enabled: true
         serviceAccount:
@@ -436,7 +436,7 @@ osm-seed:
         nodeAffinity:
           enabled: true
           key: "nodegroup_type"
-          values: ["batch"]
+          values: ["job"]
       - name: osmcha-db
         enabled: false
         serviceAccount:
