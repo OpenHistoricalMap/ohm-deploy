@@ -185,17 +185,17 @@ osm-seed:
       resources:
         enabled: true
         requests:
-          enabled: false
-          memory: "0.5Gi"
-          cpu: "200m"
+          enabled: true
+          memory: "3Gi"
+          cpu: "1500m"
         limits:
           enabled: false
           memory: "6Gi"
           cpu: "1700m"
       autoscaling:
         enabled: true
-        minReplicas: 1
-        maxReplicas: 2
+        minReplicas: 3
+        maxReplicas: 4
         cpuUtilization:
           enabled: true
           value: 85
@@ -259,8 +259,8 @@ osm-seed:
           cpu: "1200m"
       autoscaling:
         enabled: true
-        minReplicas: 1
-        maxReplicas: 2
+        minReplicas: 2
+        maxReplicas: 3
         cpuUtilization: 90
         memoryUtilization: 90
       nodeSelector:
