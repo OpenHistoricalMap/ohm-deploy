@@ -35,7 +35,9 @@ osm-seed:
   ingressClassName: alb
   alb:
     certificateArn: {{PRODUCTION_AWS_SSL_ARN}}
-
+    enableWaf:
+      enabled: true
+      wafAclArn: {{PRODUCTION_AWS_WAF_WEBACL_ARN}}
   # Domain that is pointed to the clusterIP
   # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
   # Then, the cluster configuration will setup services at their respective subdomains:
@@ -967,7 +969,7 @@ osm-seed:
 # Variables for osmcha web
 # ====================================================================================================
   osmchaWeb:
-    enabled: true
+    enabled: false
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
@@ -976,7 +978,7 @@ osm-seed:
 # Variables for osmcha Api
 # ====================================================================================================
   osmchaApi:
-    enabled: true
+    enabled: false
     priorityClass: 'medium-priority'
     image:
       name: ghcr.io/openhistoricalmap/osmcha-django
@@ -1013,7 +1015,7 @@ osm-seed:
 # Variables for osmcha DB
 # ====================================================================================================
   osmchaDb:
-    enabled: true
+    enabled: false
     priorityClass: 'medium-priority'
     image:
       name: postgis/postgis
