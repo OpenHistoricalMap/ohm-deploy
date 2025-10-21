@@ -183,7 +183,7 @@ osm-seed:
         WIKIPEDIA_AUTH_ID: {{STAGING_WIKIPEDIA_AUTH_ID}}
         WIKIPEDIA_AUTH_SECRET: {{STAGING_WIKIPEDIA_AUTH_SECRET}}
       resources:
-        enabled: true
+        enabled: false
         requests:
           enabled: true
           memory: "3Gi"
@@ -194,8 +194,8 @@ osm-seed:
           cpu: "1700m"
       autoscaling:
         enabled: true
-        minReplicas: 3
-        maxReplicas: 4
+        minReplicas: 1
+        maxReplicas: 2
         cpuUtilization:
           enabled: true
           value: 85
@@ -248,7 +248,7 @@ osm-seed:
         tag: 0.0.1-0.dev.git.2463.hb0e1e7f
       priorityClass: "high-priority"
       resources:
-        enabled: true
+        enabled: false
         requests:
           enabled: true
           memory: "0.2Gi"
@@ -259,8 +259,8 @@ osm-seed:
           cpu: "1200m"
       autoscaling:
         enabled: true
-        minReplicas: 2
-        maxReplicas: 3
+        minReplicas: 1
+        maxReplicas: 2
         cpuUtilization: 90
         memoryUtilization: 90
       nodeSelector:
@@ -273,7 +273,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
@@ -325,7 +325,7 @@ osm-seed:
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
