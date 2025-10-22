@@ -60,7 +60,7 @@ osm-seed:
   
     # Admin Email address used when generating Lets Encrypt certificates.
     # You will be notified of expirations, etc. on this email address.
-    adminEmail: ohm-admins@googlegroups.com
+    adminEmail: admin@openhistoricalmap.org
     # ====================================================================================================
     # ====================================================================================================
     # ==================================Pods Configurations===============================================
@@ -162,7 +162,7 @@ osm-seed:
         OSM_id_key: {{STAGING_ID_APPLICATION}}
         OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
         OAUTH_KEY: {{STAGING_OAUTH_KEY}}
-        MAILER_FROM: ohm-admins@googlegroups.com
+        MAILER_FROM: web@noreply.openhistoricalmap.org
         NOMINATIM_URL: nominatim.staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
         NEW_RELIC_LICENSE_KEY: "none"
@@ -727,7 +727,7 @@ osm-seed:
         ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
         POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
         TM_SECRET: {{STAGING_TM_API_SECRET}}
-        TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
+        TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
         TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
         TM_SMTP_PORT: 25
         TM_SMTP_USER: {{MAILER_USERNAME}}
@@ -745,7 +745,7 @@ osm-seed:
         TM_REDIRECT_URI: https://tasks.staging.openhistoricalmap.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
-        TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+        TM_EMAIL_CONTACT_ADDRESS: admin@openhistoricalmap.org
         TM_ORG_FB: https://www.facebook.com/openhistoricalmap
         TM_ORG_INSTAGRAM: https://www.openhistoricalmap.org
         TM_ORG_TWITTER: https://x.com/OpenHistoricalMap

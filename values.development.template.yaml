@@ -8,7 +8,7 @@ osm-seed:
 
   domain: staging.openhistoricalmap.org
 
-  adminEmail: ohm-admins@googlegroups.com
+  adminEmail: admin@openhistoricalmap.org
 
   db:
     enabled: false
@@ -109,8 +109,8 @@ osm-seed:
       TM_SECRET: {{DEVELOPMENT_TM_API_SECRET}}
       # TM_CONSUMER_KEY: {{STAGING_TM_API_CONSUMER_KEY}}
       # TM_CONSUMER_SECRET: {{STAGING_TM_API_CONSUMER_SECRET}}
-      TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
-      TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+      TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
+      TM_EMAIL_CONTACT_ADDRESS: admin@openhistoricalmap.org
       TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
       TM_SMTP_PORT: 25
       TM_SMTP_USER: {{MAILER_USERNAME}}
