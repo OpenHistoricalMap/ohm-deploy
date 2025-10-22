@@ -53,18 +53,14 @@ osm-seed:
 
   # Admin Email address used when generating Lets Encrypt certificates.
   # You will be notified of expirations, etc. on this email address.
-  adminEmail: ohm-admins@googlegroups.com
+  adminEmail: admin@openhistoricalmap.org
 
   # ====================================================================================================
   # Variables for osm-seed database
   # ====================================================================================================
   db:
     enabled: true
-    priorityClass: 'high-priority'
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: api_db_xlarge
+    priorityClass: high-priority
     env:
       POSTGRES_DB: {{PRODUCTION_DB}}
       POSTGRES_USER: {{PRODUCTION_DB_USER}}
@@ -81,8 +77,8 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "12Gi"
-        cpu: "3500m"
+        memory: "14Gi"
+        cpu: "1000m"
       limits:
         enabled: false
         memory: "6Gi"
@@ -126,20 +122,28 @@ osm-seed:
         min_parallel_index_scan_size = 256kB
         session_preload_libraries = 'auto_explain'
         auto_explain.log_min_duration = '3s'
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: api_db_xlarge
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["database"]
+
   # ====================================================================================================
   # Variables for osm-seed website
   # ====================================================================================================
   web:
     enabled: true
-    priorityClass: 'high-priority'
+    priorityClass: high-priority
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
     replicaCount: 2
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: www.openhistoricalmap.org
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_medium
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: openhistoricalmap.org
@@ -148,7 +152,7 @@ osm-seed:
       OSM_id_key: {{PRODUCTION_ID_APPLICATION}}
       OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
       OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
-      MAILER_FROM: ohm-admins@googlegroups.com
+      MAILER_FROM: web@noreply.penhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
       NEW_RELIC_LICENSE_KEY: 'none'
@@ -172,7 +176,7 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "3Gi"
+        memory: "2.5Gi"
         cpu: "1500m"
       limits:
         enabled: false
@@ -183,10 +187,10 @@ osm-seed:
       minReplicas: 2
       maxReplicas: 6
       cpuUtilization:
-        enable: true
+        enabled: true
         value: 80
       memoryUtilization:
-        enable: false
+        enabled: false
         value: 80
       behavior:
         scaleUp:
@@ -199,16 +203,22 @@ osm-seed:
           periodSeconds: 60                    # This decrease limit applies within a 60-second window.
     sharedMemorySize: 512Mi
     livenessProbeExec: true
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web_medium
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
+    podAntiAffinity: # To set that no two pods are scheduled on the same node
+      enabled: true
   # ====================================================================================================
   # Variables for memcached. Memcached is used to store session cookies
   # ====================================================================================================
   memcached:
     enabled: true
-    priorityClass: 'high-priority'
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_helpers_medium
+    priorityClass: high-priority
     resources:
       enabled: false
       requests:
@@ -219,7 +229,14 @@ osm-seed:
         enabled: false
         memory: "8Gi"
         cpu: "2"
-
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web_helpers_medium
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
     # ====================================================================================================
     # Cgimap
     # ====================================================================================================
@@ -239,28 +256,30 @@ osm-seed:
         enabled: false
         memory: "1Gi"
         cpu: "500m"
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_helpers_medium
     autoscaling:
       enabled: true
       minReplicas: 2
       maxReplicas: 10
       cpuUtilization: 50
       memoryUtilization: 50
-
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web_helpers_medium
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
   # ====================================================================================================
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
   # ====================================================================================================
   planetDump:
     enabled: true
-    priorityClass: 'medium-priority'
-    schedule: '0 1 * * *'
-    nodeSelector:
+    priorityClass: medium-priority
+    serviceAccount:
       enabled: true
-      label_key: nodegroup_type
-      label_value: job_xlarge
+      name: ohm-s3-bucket-access-production
+    schedule: '0 1 * * *'
     env:
       OVERWRITE_PLANET_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
@@ -277,18 +296,24 @@ osm-seed:
         enabled: false
         memory: "8Gi"
         cpu: "4"
-
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: job_xlarge
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["job"]
   # ====================================================================================================
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
     enabled: true
-    priorityClass: 'low-priority'
-    schedule: '0 2 * * 0'
-    nodeSelector:
+    priorityClass: low-priority
+    serviceAccount:
       enabled: true
-      label_key: nodegroup_type
-      label_value: job_xlarge
+      name: ohm-s3-bucket-access-production
+    schedule: '0 2 * * 0'
     env:
       OVERWRITE_FHISTORY_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
@@ -305,17 +330,23 @@ osm-seed:
         enabled: false
         memory: "8Gi"
         cpu: "4"
-        
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: job_xlarge
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["job"]
   # ====================================================================================================
   # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   replicationJob:
     enabled: true
-    priorityClass: 'high-priority'
-    nodeSelector:
+    priorityClass: high-priority
+    serviceAccount:
       enabled: true
-      label_key: nodegroup_type
-      label_value: web_helpers_medium
+      name: ohm-s3-bucket-access-production
     env:
       ENABLE_SEND_SLACK_MESSAGE: "true"
       SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
@@ -329,13 +360,23 @@ osm-seed:
         enabled: false
         memory: "24Gi"
         cpu: "10"
-
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web_helpers_medium
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
   # ====================================================================================================
   # Variables for osm-seed to pupulate the apidb
   # ====================================================================================================
   populateApidb:
     enabled: false
-    priorityClass: 'low-priority'
+    priorityClass: low-priority
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
     env:
       URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
     resources:
@@ -348,13 +389,20 @@ osm-seed:
         enabled: false
         memory: "2Gi"
         cpu: "2.5"
-
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web_helpers_medium
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
   # ====================================================================================================
   # Variables to start a pod to process osm files
   # ====================================================================================================
   osmProcessor:
     enabled: false
-    priorityClass: 'low-priority'
+    priorityClass: low-priority
     env: 
       URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
       OSM_FILE_ACTION: simple_pbf
@@ -375,6 +423,9 @@ osm-seed:
     cronjobs:
     - name: web-db
       enabled: true
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-database-backup-access-production
       schedule: '0 0 * * *'
       env:
         # backup/restore
@@ -390,11 +441,18 @@ osm-seed:
       resources:
         enabled: false
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: job_xlarge
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["job"]
     - name: tm-db
       enabled: true
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-database-backup-access-production
       schedule: '0 1 * * *'
       env:
         # backup/restore
@@ -413,11 +471,18 @@ osm-seed:
           memory: '400Mi'
           cpu: '0.6'
       nodeSelector:
-        enabled: true
+        enabled: false
         label_key: nodegroup_type
         label_value: job
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["job"]
     - name: osmcha-db
       enabled: false
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-database-backup-access-production
       schedule: '0 0 * * *'
       env:
         # backup/restore
@@ -436,20 +501,19 @@ osm-seed:
         enabled: true
         label_key: nodegroup_type
         label_value: job
-
+      nodeAffinity:
+        enabled: false
+        key: "nodegroup_type"
+        values: ["job"]
   # ====================================================================================================
   # Variables for tiler-db
   # ====================================================================================================
 
   tilerDb:
     enabled: false
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
     useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
       enabled: true
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_large
     env:
       POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
       POSTGRES_DB: tiler_osm_production
@@ -533,18 +597,24 @@ osm-seed:
         # pg_stat_statements settings
         pg_stat_statements.max = 15000
         pg_stat_statements.track = none
-        
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: tiler_db
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["tiler_db"]
   # ====================================================================================================
   # Variables for tiler-imposm
   # ====================================================================================================
 
   tilerImposm:
     enabled: false
-    priorityClass: 'medium-priority'
-    nodeSelector:
+    priorityClass: medium-priority
+    serviceAccount:
       enabled: true
-      label_key: nodegroup_type
-      label_value: web_large
+      name: ohm-s3-bucket-access-production
     env:
       TILER_IMPORT_FROM: osm
       TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
@@ -571,21 +641,28 @@ osm-seed:
         enabled: false
         memory: "2Gi"
         cpu: "1"
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: tiler_db
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["tiler_db"]
   # ====================================================================================================
   # Variables for tiler-server
   # ====================================================================================================
 
   tilerServer:
     enabled: false
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
     externalService:
       enabled: false
       ip: {{PRODUCTION_TILER_SERVER_HOST}}
       port: 9090
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_large
     replicaCount: 4
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -622,17 +699,24 @@ osm-seed:
       enabled: true
       minReplicas: 4
       maxReplicas: 6
-      cpuUtilization: 60  
+      cpuUtilization: 60 
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: tiler_db
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["tiler_db"] 
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
     enabled: false
-    priorityClass: 'medium-priority'
-    nodeSelector:
+    priorityClass: medium-priority
+    serviceAccount:
       enabled: true
-      label_key: nodegroup_type
-      label_value: web_large
+      name: ohm-s3-bucket-access-production
     replicaCount: 1
     command: './cache_cleaner.sh'
     resources:
@@ -654,20 +738,23 @@ osm-seed:
       minReplicas: 1
       maxReplicas: 1
       cpuUtilization: 90
-
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: tiler_db
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["tiler_db"] 
   # ====================================================================================================
   # Variables for Tasking Manager DB
   # ====================================================================================================
   tmDb:
     enabled: true
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
     image:
       name: "postgis/postgis"
       tag: "14-3.3"
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: downstream_apps_medium
     env:
       POSTGRES_DB: tm
       POSTGRES_PASSWORD: {{PRODUCTION_TM_DB_PASSWORD}}
@@ -689,17 +776,21 @@ osm-seed:
         enabled: false
         memory: "2Gi"
         cpu: "2"
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"] 
   # ====================================================================================================
   # Variables for Tasking Manager API
   # ====================================================================================================
 
   tmApi:
     enabled: true
-    priorityClass: 'medium-priority'
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: downstream_apps_medium
+    priorityClass: medium-priority
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
@@ -717,8 +808,8 @@ osm-seed:
       ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
       TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
-      TM_EMAIL_FROM_ADDRESS: ohm-admins@googlegroups.com
-      TM_EMAIL_CONTACT_ADDRESS: ohm-admins@googlegroups.com
+      TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
+      TM_EMAIL_CONTACT_ADDRESS: admin@openhistoricalmap.org
       TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
       TM_SMTP_PORT: 25
       TM_SMTP_USER: {{MAILER_USERNAME}}
@@ -750,7 +841,14 @@ osm-seed:
         enabled: false
         memory: 2Gi
         cpu: '2'
-
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"] 
  # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
@@ -774,7 +872,7 @@ osm-seed:
       enabled: false
       ip: {{PRODUCTION_NOMINATIM_HOST}}
       port: 8083
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: nominatim.openhistoricalmap.org
@@ -815,10 +913,13 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: vol-012355ce0247b5ccc
       AWS_ElasticBlockStore_size: 50Gi
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: nominatim_medium
-
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
 # ====================================================================================================
 # Variables for overpass-api
 # ====================================================================================================
@@ -829,11 +930,7 @@ osm-seed:
       enabled: false
       ip: {{PRODUCTION_OVERPASS_HOST}}
       port: 8086
-    priorityClass: 'medium-priority'
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: overpass_small
+    priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: overpass-api.openhistoricalmap.org
@@ -861,12 +958,23 @@ osm-seed:
         enabled: false
         memory: '2Gi'
         cpu: '2'
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
 # ====================================================================================================
 # Variables for taginfo
 # ====================================================================================================
   taginfo:
     enabled: true
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: taginfo.openhistoricalmap.org
@@ -885,10 +993,6 @@ osm-seed:
       INTERVAL_DOWNLOAD_DATA: 7d
     resources:
       enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: downstream_apps_medium
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
@@ -898,12 +1002,23 @@ osm-seed:
         label_value: job_xlarge
       resources:
         enabled: true
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
 # ====================================================================================================
 # Variables for osm-simple-metrics
 # ====================================================================================================
   osmSimpleMetrics:
     enabled: true
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
     schedule: '0 2 * * *'
     resources:
       enabled: false
@@ -916,16 +1031,22 @@ osm-seed:
         memory: '2Gi'
         cpu: '2'
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: web_helpers_medium
-      
+      label_value: web
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
   # ====================================================================================================
   # Variables for replication nomitoring task
   # ====================================================================================================
   monitoringReplication:
     enabled: true
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
     schedule: '*/30 * * * *'
     env:
       CREATE_MISSING_FILES: "empty"
@@ -941,15 +1062,22 @@ osm-seed:
         memory: '2Gi'
         cpu: '2'
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: web
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
   # ====================================================================================================
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   changesetReplicationJob:
     enabled: true
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
     resources:
       enabled: false
       requests:
@@ -961,16 +1089,19 @@ osm-seed:
         memory: '24Gi'
         cpu: '10'
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: web_helpers_medium
-
+      label_value: web
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["web"]
 # ====================================================================================================
 # Variables for osmcha web
 # ====================================================================================================
   osmchaWeb:
     enabled: false
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
       tag: df5e9b5
@@ -979,7 +1110,7 @@ osm-seed:
 # ====================================================================================================
   osmchaApi:
     enabled: false
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-django
       tag: 1bd58e1
@@ -1008,15 +1139,19 @@ osm-seed:
         memory: "512Mi"
         cpu: "1"
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: downstream_apps_medium
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
   osmchaDb:
     enabled: false
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
     image:
       name: postgis/postgis
       tag: 17-3.5
@@ -1041,15 +1176,19 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: vol-033e4150d0378c45e
       AWS_ElasticBlockStore_size: 10Gi
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: downstream_apps_medium
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
 # ====================================================================================================
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
   adiffService:
     enabled: false
-    priorityClass: 'medium-priority'
+    priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osm-adiff-service
       tag: a343422497bb2ad4735ca7eada921b60eeb19e20
@@ -1058,7 +1197,7 @@ osm-seed:
 # ====================================================================================================
   planetFiles:
     enabled: false
-    priorityClass: 'low-priority'
+    priorityClass: low-priority
 
 # ====================================================================================================
 # Tiles cache SQS processor
@@ -1094,9 +1233,13 @@ ohm:
     resources:
       enabled: false
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
 
   tilerCacheSeedGlobal:
     enabled: false
@@ -1108,9 +1251,13 @@ ohm:
     resources:
       enabled: false
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
 
   tilerCacheSeedCoverage:
     enabled: false
@@ -1123,7 +1270,11 @@ ohm:
     resources:
       enabled: false
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
-      label_value: web_large
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
       
