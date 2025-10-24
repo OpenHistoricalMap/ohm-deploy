@@ -5,6 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'staging_deploy'
+      - 'db_migration_p17'
 jobs:
   build:
     runs-on: ubuntu-22.04
