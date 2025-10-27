@@ -996,10 +996,10 @@ osm-seed:
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
-      nodeSelector:
+      nodeAffinity:
         enabled: true
-        label_key: nodegroup_type
-        label_value: job_xlarge
+        key: "nodegroup_type"
+        values: ["job"]
       resources:
         enabled: true
     nodeSelector:
