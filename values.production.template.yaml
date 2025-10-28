@@ -177,11 +177,11 @@ osm-seed:
       requests:
         enabled: true
         memory: "2.5Gi"
-        cpu: "1500m"
+        cpu: "1200m"
       limits:
-        enabled: false
-        memory: "3.5Gi"
-        cpu: "1800m"
+        enabled: true
+        memory: "3Gi"
+        cpu: "1500m"
     autoscaling:
       enabled: true
       minReplicas: 2
@@ -253,9 +253,9 @@ osm-seed:
         memory: "0.5Gi"
         cpu: "100m"
       limits:
-        enabled: false
+        enabled: true
         memory: "1Gi"
-        cpu: "500m"
+        cpu: "300m"
     autoscaling:
       enabled: true
       minReplicas: 2
@@ -783,7 +783,7 @@ osm-seed:
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["web"] 
+      values: ["database"] 
   # ====================================================================================================
   # Variables for Tasking Manager API
   # ====================================================================================================
@@ -996,10 +996,10 @@ osm-seed:
     cronjob:
       enabled: true
       schedule: "0 2 */3 * *"
-      nodeSelector:
+      nodeAffinity:
         enabled: true
-        label_key: nodegroup_type
-        label_value: job_xlarge
+        key: "nodegroup_type"
+        values: ["job"]
       resources:
         enabled: true
     nodeSelector:
