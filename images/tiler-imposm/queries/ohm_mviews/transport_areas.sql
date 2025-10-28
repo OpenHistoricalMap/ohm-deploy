@@ -70,6 +70,7 @@ $$ LANGUAGE plpgsql;
 -- Create materialized views for transport areas
 -- ============================================================================
 -- We include aerodrome to start at zoom 10 from https://github.com/OpenHistoricalMap/issues/issues/1083
-SELECT create_transport_areas_mview('mv_transport_areas_z10_11', ARRAY['aerodrome']);
+ -- From https://github.com/OpenHistoricalMap/issues/issues/1141 add 'apron', 'terminal' 
+SELECT create_transport_areas_mview('mv_transport_areas_z10_11', ARRAY['aerodrome', 'apron', 'terminal' ]);
 
 SELECT create_transport_areas_mview('mv_transport_areas_z12_20', ARRAY['*']);
