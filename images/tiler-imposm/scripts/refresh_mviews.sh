@@ -62,6 +62,7 @@ landuse_views=(
     mv_landuse_areas_z8_9
     mv_landuse_areas_z10_12
     mv_landuse_areas_z13_15
+    mv_landuse_points_centroids_z8_9
     mv_landuse_points_centroids_z10_11
     mv_landuse_points_centroids_z12_13
     mv_landuse_points_centroids_z14_20

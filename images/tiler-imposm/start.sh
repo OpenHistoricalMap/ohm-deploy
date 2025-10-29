@@ -202,7 +202,6 @@ EOF
 
 function importData() {
     ### Import the PBF  and Natural Earth files to the DB
-    # log_message "Execute the missing functions"
     execute_sql_file ./queries/utils/postgis_helpers.sql
 
     if [ "$IMPORT_NATURAL_EARTH" = "true" ]; then

@@ -62,6 +62,6 @@ execute_sql_file queries/ohm_mviews/transport_points_centroids.sql
 execute_sql_file queries/ohm_mviews/water.sql
 execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql
 ## routes
-execute_sql_file queries/ohm_mviews/routes_03_mv.sql
-execute_sql_file queries/ohm_mviews/routes_02_indexed.sql
 execute_sql_file queries/ohm_mviews/routes_01_merge_by_date.sql
+execute_sql_file queries/ohm_mviews/routes_02_indexed.sql
+execute_sql_file queries/ohm_mviews/routes_03_mv.sql
