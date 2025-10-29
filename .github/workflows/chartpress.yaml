@@ -203,10 +203,11 @@ jobs:
           sudo chmod +x /usr/bin/kubectl
           sudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator
           sudo chmod +x /usr/bin/aws-iam-authenticator
-          wget https://get.helm.sh/helm-v3.5.0-linux-amd64.tar.gz --no-check-certificate -O helm.tar.gz
+          wget https://osmseed-staging.s3.us-east-1.amazonaws.com/helm-v3.5.0-linux-amd64.tar.gz --no-check-certificate -O helm.tar.gz
           tar -xvzf helm.tar.gz
           sudo mv linux-amd64/helm /usr/local/bin/
           sudo chmod +x /usr/local/bin/helm
+
       - name: Update kube-config staging 
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/staging_deploy'
         run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
