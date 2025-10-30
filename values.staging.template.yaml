@@ -161,9 +161,9 @@ osm-seed:
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
         # MAILER_PORT: "587"
-        OSM_id_key: {{STAGING_ID_APPLICATION}}
-        OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
-        OAUTH_KEY: {{STAGING_OAUTH_KEY}}
+        OSM_id_key: 7E0Rn-ZjZpEW5cjM-CheEQAbp8nDiCuyB_UmIZOHysA
+        OAUTH_CLIENT_ID: CiBBpurbtUj1np_QZOTngIePlS7K9uGvKDW2Pcw5O7Y
+        OAUTH_KEY: 1O8WtBWivoefehDMT6sbm9TNUU_h_EXznI4cM5XMyJw
         MAILER_FROM: web@noreply.openhistoricalmap.org
         NOMINATIM_URL: nominatim.staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
@@ -327,7 +327,7 @@ osm-seed:
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
