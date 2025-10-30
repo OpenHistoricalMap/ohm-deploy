@@ -388,7 +388,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: true
+        enabled: false
         serviceAccount:
           enabled: true
           name: ohm-s3-database-backup-access-staging
