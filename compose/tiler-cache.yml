@@ -13,7 +13,7 @@ services:
       - -c
       - |
         set -x
-        # python sqs_processor.py
+        python sqs_processor.py &
         python main.py
     env_file:
       - ../envs/.env.tiler

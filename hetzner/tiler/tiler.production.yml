@@ -60,16 +60,30 @@ services:
 
   tiler_sqs_cleaner_production:
     container_name: tiler_sqs_cleaner_production
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3027.hb928b7e
     env_file:
       - .env.production
     restart: always
+    environment:
+      - PORT=8000
+    command:
+      - /bin/sh
+      - -c
+      - |
+        python sqs_processor.py &
+        python main.py
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - ohm_network
 
   tiler_s3_cleaner_production:
     container_name: tiler_s3_cleaner_production
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3027.hb928b7e
     env_file:
       - .env.production
     networks:
