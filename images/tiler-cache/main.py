@@ -163,12 +163,9 @@ def health():
     
     heartbeat_file = "/tmp/sqs_processor_heartbeat"
     heartbeat_timeout = 60
-    startup_grace_period = 120  # Allow 2 minutes for SQS processor to start
     
-    # Check if SQS processor is alive
-    sqs_healthy = False
-    sqs_last_heartbeat = None
     sqs_status = "unknown"
+    sqs_last_heartbeat = None
     
     try:
         if os.path.exists(heartbeat_file):
@@ -178,25 +175,18 @@ def health():
                 time_since_heartbeat = current_time - last_heartbeat_time
                 
                 if time_since_heartbeat <= heartbeat_timeout:
-                    sqs_healthy = True
-                    sqs_last_heartbeat = time_since_heartbeat
                     sqs_status = "alive"
+                    sqs_last_heartbeat = time_since_heartbeat
                 else:
                     logger.warning(f"SQS processor heartbeat too old: {time_since_heartbeat:.1f} seconds")
                     sqs_status = f"stale ({time_since_heartbeat:.1f}s ago)"
         else:
-            # Check if we're still in startup grace period
-            # Get container start time from /proc/1/stat or use a simple heuristic
-            # For now, just allow missing heartbeat during first 2 minutes
             logger.info("SQS processor heartbeat file not found - may still be starting")
             sqs_status = "starting"
-            # Don't fail health check immediately - give it time to start
-            sqs_healthy = True  # Assume healthy during startup
     except Exception as e:
         logger.error(f"Error checking SQS processor heartbeat: {e}")
         sqs_status = f"error: {str(e)}"
     
-    # Return health status (don't fail during startup grace period)
     return {
         "status": "healthy",
         "sqs_processor": sqs_status,
@@ -240,7 +230,6 @@ def clean_cache_by_changeset(
                 detail="When using 'lat' and 'lon', must provide 'buffer_meters'"
             )
         
-        # Determine zoom levels - use default Config.ZOOM_LEVELS_TO_DELETE if not provided
         if zoom_levels:
             zoom_list = [int(z.strip()) for z in zoom_levels.split(',')]
             # Validate zoom levels - max 20 to prevent memory issues
@@ -258,9 +247,7 @@ def clean_cache_by_changeset(
                     detail="No valid zoom levels (all zoom levels exceeded 20)"
                 )
         else:
-            # Use default from Config.ZOOM_LEVELS_TO_DELETE
-            zoom_list = list(Config.ZOOM_LEVELS_TO_DELETE)  # Create a copy to avoid modifying the original
-            # Ensure default doesn't exceed 20 (safety check)
+            zoom_list = list(Config.ZOOM_LEVELS_TO_DELETE)
             zoom_list = [z for z in zoom_list if z <= 20]
             logger.info(f"Using default zoom levels from Config.ZOOM_LEVELS_TO_DELETE: {zoom_list}")
         
