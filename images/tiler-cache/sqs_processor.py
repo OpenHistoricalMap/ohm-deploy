@@ -14,6 +14,19 @@ logger = get_logger()
 # Initialize SQS Client
 sqs = boto3.client("sqs", region_name=Config.AWS_REGION_NAME)
 
+# Heartbeat file path for health checks
+HEARTBEAT_FILE = "/tmp/sqs_processor_heartbeat"
+HEARTBEAT_TIMEOUT_SECONDS = 60
+
+
+def update_heartbeat():
+    """Update heartbeat file to signal that SQS processor is alive."""
+    try:
+        with open(HEARTBEAT_FILE, 'w') as f:
+            f.write(str(time.time()))
+    except Exception as e:
+        logger.warning(f"Failed to update heartbeat file: {e}")
+
 
 def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file, cleanup_type="immediate"):
     """Executes the S3 cleanup process for specific zoom levels with improved logging and error handling."""
@@ -31,7 +44,13 @@ def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file
 
 def process_sqs_messages():
     """Unified function to process SQS messages and create jobs based on infrastructure."""
+    # Initialize heartbeat file
+    update_heartbeat()
+    
     while True:
+        # Update heartbeat at the start of each iteration
+        update_heartbeat()
+        
         logger.info("Requesting SQS messages...")
         response = sqs.receive_message(
             QueueUrl=Config.SQS_QUEUE_URL,
