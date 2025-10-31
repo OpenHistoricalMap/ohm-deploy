@@ -16,38 +16,21 @@ logger = get_logger()
 
 def fetch_changeset(changeset_id: int, api_base_url: str = "https://www.openhistoricalmap.org") -> dict:
     """Fetches the changeset from the API and extracts the bbox."""
-    url = f"{api_base_url}/api/0.6/changeset/{changeset_id}"
-    
     try:
-        response = requests.get(url, timeout=30)
+        response = requests.get(f"{api_base_url}/api/0.6/changeset/{changeset_id}", timeout=30)
         response.raise_for_status()
-        
-        root = ET.fromstring(response.content)
-        changeset_elem = root.find('changeset')
-        
-        if changeset_elem is None:
+        cs = ET.fromstring(response.content).find('changeset')
+        if cs is None:
             raise HTTPException(status_code=404, detail=f"Changeset {changeset_id} not found")
-        
-        bbox_str = (
-            changeset_elem.get('min_lon'),
-            changeset_elem.get('min_lat'),
-            changeset_elem.get('max_lon'),
-            changeset_elem.get('max_lat')
-        )
-        
-        if None in bbox_str:
-            raise HTTPException(status_code=400, detail=f"Changeset {changeset_id} does not have a valid bbox")
-        
         bbox = {
-            'min_lon': float(bbox_str[0]),
-            'min_lat': float(bbox_str[1]),
-            'max_lon': float(bbox_str[2]),
-            'max_lat': float(bbox_str[3])
+            'min_lon': float(cs.get('min_lon')),
+            'min_lat': float(cs.get('min_lat')),
+            'max_lon': float(cs.get('max_lon')),
+            'max_lat': float(cs.get('max_lat'))
         }
-        
-        logger.info(f"Changeset {changeset_id} bbox: {bbox}")
+        if None in bbox.values():
+            raise HTTPException(status_code=400, detail=f"Changeset {changeset_id} does not have a valid bbox")
         return bbox
-        
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error fetching changeset: {str(e)}")
     except (ET.ParseError, ValueError) as e:
@@ -55,104 +38,46 @@ def fetch_changeset(changeset_id: int, api_base_url: str = "https://www.openhist
 
 
 def calculate_bbox_from_point(lat: float, lon: float, buffer_meters: float) -> dict:
-    """
-    Calculates a bbox from a point with a buffer in meters.
-    
-    Args:
-        lat: Point latitude
-        lon: Point longitude
-        buffer_meters: Buffer in meters
-        
-    Returns:
-        Dict with 'min_lon', 'min_lat', 'max_lon', 'max_lat'
-    """
-    EARTH_RADIUS_M = 6371000.0
-    lat_rad = math.radians(lat)
-    lon_rad = math.radians(lon)
-    # Calculate displacement in degrees for latitude (approximately constant)
-    lat_delta = math.degrees(buffer_meters / EARTH_RADIUS_M)
-    # Calculate displacement in degrees for longitude (depends on latitude)
-    lon_delta = math.degrees(buffer_meters / (EARTH_RADIUS_M * math.cos(lat_rad)))
-    
-    bbox = {
+    """Calculates a bbox from a point with a buffer in meters."""
+    r = 6371000.0
+    lat_delta = math.degrees(buffer_meters / r)
+    lon_delta = math.degrees(buffer_meters / (r * math.cos(math.radians(lat))))
+    return {
         'min_lon': lon - lon_delta,
         'min_lat': lat - lat_delta,
         'max_lon': lon + lon_delta,
         'max_lat': lat + lat_delta
     }
-    
-    logger.info(f"Bbox from point ({lat}, {lon}) with {buffer_meters}m buffer: {bbox}")
-    return bbox
 
 
 def get_tiles_in_bbox(bbox: dict, zoom_levels: List[int]) -> List[mercantile.Tile]:
     """Calculates all tiles that intersect with the bbox for the specified zoom levels."""
     tiles = []
     for zoom in zoom_levels:
-        bbox_tiles = mercantile.tiles(
-            bbox['min_lon'], bbox['min_lat'],
-            bbox['max_lon'], bbox['max_lat'],
-            zooms=zoom
-        )
-        tiles.extend(list(bbox_tiles))
-    
-    logger.info(f"Found {len(tiles)} tiles in bbox for zoom levels {zoom_levels}")
+        tiles.extend(mercantile.tiles(bbox['min_lon'], bbox['min_lat'], bbox['max_lon'], bbox['max_lat'], zooms=zoom))
     return tiles
 
 
 def delete_tiles_from_s3(tiles: List[mercantile.Tile], path_files: List[str]) -> dict:
     """Deletes tiles from S3 in batches of 1000 objects."""
-    s3_client = Config.get_s3_client()
-    bucket_name = Config.S3_BUCKET_CACHE_TILER
+    s3 = Config.get_s3_client()
+    bucket = Config.S3_BUCKET_CACHE_TILER
+    keys = [f"{pf}/{t.z}/{t.x}/{t.y}{ext}" for t in tiles for pf in path_files for ext in ['.pbf', '']]
     
-    tile_extensions = ['.pbf', '']
-    keys_to_delete = []
-    
-    for tile in tiles:
-        for path_file in path_files:
-            for ext in tile_extensions:
-                keys_to_delete.append(f"{path_file}/{tile.z}/{tile.x}/{tile.y}{ext}")
-    
-    if not keys_to_delete:
+    if not keys:
         return {'deleted': 0, 'errors': 0, 'total_tiles_processed': 0}
     
-    logger.info(f"Prepared {len(keys_to_delete)} tile keys to delete from S3")
-    
-    batch_size = 1000
-    total_deleted = 0
-    total_errors = 0
-    
-    for i in range(0, len(keys_to_delete), batch_size):
-        batch = keys_to_delete[i:i + batch_size]
-        delete_objects = [{'Key': key} for key in batch]
-        
+    deleted = errors = 0
+    for i in range(0, len(keys), 1000):
         try:
-            response = s3_client.delete_objects(
-                Bucket=bucket_name,
-                Delete={'Objects': delete_objects, 'Quiet': False}
-            )
-            
-            deleted = response.get('Deleted', [])
-            errors = response.get('Errors', [])
-            
-            total_deleted += len(deleted)
-            total_errors += len(errors)
-            
-            if errors:
-                for error in errors:
-                    logger.warning(f"Error deleting {error.get('Key')}: {error.get('Message')}")
-            
-            logger.info(f"Batch {i // batch_size + 1}: Deleted {len(deleted)}, Errors {len(errors)}")
-            
+            r = s3.delete_objects(Bucket=bucket, Delete={'Objects': [{'Key': k} for k in keys[i:i+1000]], 'Quiet': False})
+            deleted += len(r.get('Deleted', []))
+            errors += len(r.get('Errors', []))
         except Exception as e:
-            logger.error(f"Error deleting batch {i // batch_size + 1}: {e}")
-            total_errors += len(batch)
+            logger.error(f"Error deleting batch: {e}")
+            errors += len(keys[i:i+1000])
     
-    return {
-        'deleted': total_deleted,
-        'errors': total_errors,
-        'total_tiles_processed': len(keys_to_delete)
-    }
+    return {'deleted': deleted, 'errors': errors, 'total_tiles_processed': len(keys)}
 
 
 @app.get("/health")
@@ -161,36 +86,25 @@ def health():
     import time
     import os
     
-    heartbeat_file = "/tmp/sqs_processor_heartbeat"
-    heartbeat_timeout = 60
-    
-    sqs_status = "unknown"
-    sqs_last_heartbeat = None
+    hb_file = "/tmp/sqs_processor_heartbeat"
+    sqs_status = "starting"
+    sqs_last = None
     
     try:
-        if os.path.exists(heartbeat_file):
-            with open(heartbeat_file, 'r') as f:
-                last_heartbeat_time = float(f.read().strip())
-                current_time = time.time()
-                time_since_heartbeat = current_time - last_heartbeat_time
-                
-                if time_since_heartbeat <= heartbeat_timeout:
-                    sqs_status = "alive"
-                    sqs_last_heartbeat = time_since_heartbeat
-                else:
-                    logger.warning(f"SQS processor heartbeat too old: {time_since_heartbeat:.1f} seconds")
-                    sqs_status = f"stale ({time_since_heartbeat:.1f}s ago)"
-        else:
-            logger.info("SQS processor heartbeat file not found - may still be starting")
-            sqs_status = "starting"
+        if os.path.exists(hb_file):
+            t = time.time() - float(open(hb_file).read().strip())
+            if t <= 60:
+                sqs_status = "alive"
+                sqs_last = t
+            else:
+                sqs_status = f"stale ({t:.1f}s ago)"
     except Exception as e:
-        logger.error(f"Error checking SQS processor heartbeat: {e}")
         sqs_status = f"error: {str(e)}"
     
     return {
         "status": "healthy",
         "sqs_processor": sqs_status,
-        "sqs_last_heartbeat_seconds_ago": round(sqs_last_heartbeat, 1) if sqs_last_heartbeat else None
+        "sqs_last_heartbeat_seconds_ago": round(sqs_last, 1) if sqs_last else None
     }
 
 
@@ -203,85 +117,31 @@ def clean_cache_by_changeset(
     zoom_levels: Optional[str] = Query("16,17,18,19,20", description="Zoom levels separated by comma (e.g., 18,19,20)"),
     api_base_url: str = Query("https://www.openhistoricalmap.org", description="OpenHistoricalMap API base URL")
 ):
-    """
-    Cleans tile cache in S3.
-    
-    Can use:
-    1. changeset_id: Gets the bbox from the changeset
-    2. lat/lon/buffer_meters: Calculates a bbox from a point with buffer
-    """
+    """Cleans tile cache in S3 based on changeset or point with buffer."""
     try:
-        # Validate parameters
-        if not changeset_id and not (lat is not None and lon is not None):
-            raise HTTPException(
-                status_code=400,
-                detail="Must provide 'changeset_id' or 'lat' and 'lon'"
-            )
-        
-        if changeset_id and (lat is not None or lon is not None):
-            raise HTTPException(
-                status_code=400,
-                detail="Must provide 'changeset_id' OR 'lat/lon', not both"
-            )
-        
-        if lat is not None and lon is not None and buffer_meters is None:
-            raise HTTPException(
-                status_code=400,
-                detail="When using 'lat' and 'lon', must provide 'buffer_meters'"
-            )
+        if not changeset_id and not (lat and lon):
+            raise HTTPException(status_code=400, detail="Must provide 'changeset_id' or 'lat' and 'lon'")
+        if changeset_id and (lat or lon):
+            raise HTTPException(status_code=400, detail="Must provide 'changeset_id' OR 'lat/lon', not both")
+        if lat and lon and not buffer_meters:
+            raise HTTPException(status_code=400, detail="When using 'lat' and 'lon', must provide 'buffer_meters'")
         
         if zoom_levels:
             zoom_list = [int(z.strip()) for z in zoom_levels.split(',')]
-            # Validate zoom levels - max 20 to prevent memory issues
-            max_zoom = max(zoom_list) if zoom_list else 20
-            if max_zoom > 20:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Zoom level cannot exceed 20 (requested: {max_zoom}). Higher zoom levels consume too much memory."
-                )
-            # Filter out any zoom levels above 20
+            if max(zoom_list) > 20:
+                raise HTTPException(status_code=400, detail="Zoom level cannot exceed 20")
             zoom_list = [z for z in zoom_list if z <= 20]
-            if not zoom_list:
-                raise HTTPException(
-                    status_code=400,
-                    detail="No valid zoom levels (all zoom levels exceeded 20)"
-                )
         else:
-            zoom_list = list(Config.ZOOM_LEVELS_TO_DELETE)
-            zoom_list = [z for z in zoom_list if z <= 20]
-            logger.info(f"Using default zoom levels from Config.ZOOM_LEVELS_TO_DELETE: {zoom_list}")
+            zoom_list = [z for z in Config.ZOOM_LEVELS_TO_DELETE if z <= 20]
         
-        # Get bbox based on method used
-        if changeset_id:
-            logger.info(f"Processing changeset {changeset_id} with zoom levels {zoom_list}")
-            bbox = fetch_changeset(changeset_id, api_base_url)
-            source_info = {"type": "changeset", "changeset_id": changeset_id}
-        else:
-            logger.info(f"Processing point ({lat}, {lon}) with {buffer_meters}m buffer, zoom levels {zoom_list}")
-            bbox = calculate_bbox_from_point(lat, lon, buffer_meters)
-            source_info = {"type": "point", "lat": lat, "lon": lon, "buffer_meters": buffer_meters}
-        
-        # Calculate tiles and delete
+        bbox = fetch_changeset(changeset_id, api_base_url) if changeset_id else calculate_bbox_from_point(lat, lon, buffer_meters)
         tiles = get_tiles_in_bbox(bbox, zoom_list)
         
         if not tiles:
-            return {
-                "success": True,
-                "source": source_info,
-                "bbox": bbox,
-                "tiles_count": 0,
-                "deleted": 0
-            }
+            return {"success": True, "tiles_count": 0, "deleted": 0}
         
-        delete_stats = delete_tiles_from_s3(tiles, Config.S3_BUCKET_PATH_FILES)
-        
-        return {
-            "success": True,
-            "source": source_info,
-            "bbox": bbox,
-            "tiles_count": len(tiles),
-            "delete_stats": delete_stats
-        }
+        stats = delete_tiles_from_s3(tiles, Config.S3_BUCKET_PATH_FILES)
+        return {"success": True, "tiles_count": len(tiles), "delete_stats": stats}
         
     except HTTPException:
         raise
