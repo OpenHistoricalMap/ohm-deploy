@@ -6,6 +6,7 @@ on:
       - 'staging'
       - 'staging_deploy'
       - 'db_migration_p17'
+      - 'enpoint-tiler-cache'
 jobs:
   build:
     runs-on: ubuntu-22.04

@@ -1,0 +1,35 @@
+services:
+  tiler-cache:
+    image: rub21/tiler-cache:latest
+    build:
+      context: ../images/tiler-cache
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-cache:/app
+    ports:
+      - "8000:8000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -x
+        # python sqs_processor.py
+        python main.py
+    env_file:
+      - ../envs/.env.tiler
+    environment:
+      - PORT=8000
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - tiler_network
+
+networks:
+  tiler_network:
+    driver: bridge
+
