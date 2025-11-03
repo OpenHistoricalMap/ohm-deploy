@@ -97,12 +97,12 @@ SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20
 -- ============================================================================
 -- Create materialized views for landuse areas
 -- ============================================================================
-SELECT create_generic_mview( 'osm_landuse_areas_z3_5', 'mv_landuse_areas_z3_5', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z6_7', 'mv_landuse_areas_z6_7', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z8_9', 'mv_landuse_areas_z8_9', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z10_12', 'mv_landuse_areas_z10_12', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z13_15', 'mv_landuse_areas_z13_15', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas', 'mv_landuse_areas_z16_20', ARRAY['osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z3_5', 'mv_landuse_areas_z3_5', ARRAY['id', 'osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z6_7', 'mv_landuse_areas_z6_7', ARRAY['id', 'osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z8_9', 'mv_landuse_areas_z8_9', ARRAY['id', 'osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z10_12', 'mv_landuse_areas_z10_12', ARRAY['id', 'osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas_z13_15', 'mv_landuse_areas_z13_15', ARRAY['id', 'osm_id', 'type']);
+SELECT create_generic_mview( 'osm_landuse_areas', 'mv_landuse_areas_z16_20', ARRAY['id', 'osm_id', 'type']);
 
 -- ============================================================================
 -- Create materialized views for landuse lines
