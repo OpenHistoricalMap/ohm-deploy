@@ -30,6 +30,12 @@ if [[ "$ALL" == true ]]; then
   log_message "Creating utility functions and generic materialized views"
   execute_sql_file queries/utils/utils.sql 
   execute_sql_file queries/utils/create_generic_mview.sql 
+
+  ## Funtions  to create simplified areas and centroids
+  execute_sql_file queries/utils/create_01_area_simplified_mview.sql
+  execute_sql_file queries/utils/create_02_point_view.sql
+  execute_sql_file queries/utils/create_03_centroids_mview.sql
+
   # This will populate languages
   execute_sql_file queries/utils/fetch_db_languages.sql
   # Route priority
