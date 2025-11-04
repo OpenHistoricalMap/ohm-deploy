@@ -57,7 +57,7 @@ amenity_views=(
 ) # TODO , missing amenity lines
 
 landuse_views=(
-    mv_landuse_areas_z3_5
+    # mv_landuse_areas_z3_5
     mv_landuse_areas_z6_7
     mv_landuse_areas_z8_9
     mv_landuse_areas_z10_11
@@ -65,7 +65,7 @@ landuse_views=(
     mv_landuse_areas_z14_15
     mv_landuse_areas_z16_20
     mv_landuse_points
-    mv_landuse_points_centroids_z3_5
+    # mv_landuse_points_centroids_z3_5
     mv_landuse_points_centroids_z6_7
     mv_landuse_points_centroids_z8_9
     mv_landuse_points_centroids_z10_11
