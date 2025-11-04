@@ -34,6 +34,8 @@ DECLARE
     tmp_mview_name TEXT := mview_name || '_tmp';
     all_cols TEXT;
     quoted_unique_cols TEXT;
+    name_filter TEXT;
+    name_columns TEXT;
 BEGIN
     -- Get ALL columns from polygons_mview (which comes from create_simplified_mview)
     -- Use pg_attribute which is more reliable for materialized views than information_schema
@@ -53,15 +55,38 @@ BEGIN
       AND a.attnum > 0
       AND NOT a.attisdropped;
 
+    -- Get all name_* columns to build filter condition
+    SELECT COALESCE(string_agg(
+        format('%I IS NOT NULL', a.attname),
+        ' OR '
+    ), '')
+    INTO name_columns
+    FROM pg_attribute a
+    JOIN pg_class c ON a.attrelid = c.oid
+    JOIN pg_namespace n ON c.relnamespace = n.oid
+    WHERE n.nspname = 'public'
+      AND c.relname = polygons_mview
+      AND a.attname LIKE 'name_%'
+      AND a.attnum > 0
+      AND NOT a.attisdropped;
+
+    -- Build name filter: must have name OR at least one name_* column
+    IF name_columns IS NOT NULL AND name_columns <> '' THEN
+        name_filter := format('AND ((name IS NOT NULL AND name <> '''') OR (%s))', name_columns);
+    ELSE
+        name_filter := 'AND (name IS NOT NULL AND name <> '''')';
+    END IF;
+
     -- Use id, source and osm_id for DISTINCT ON (will always exist in polygons_mview and points_mview)
     quoted_unique_cols := 'id, source, osm_id';
 
-    -- Build areas query (centroids)
+    -- Build areas query (centroids) - only include polygons with names
     union_query := format($sql$
         SELECT %s
         FROM %I
         WHERE geometry IS NOT NULL
-    $sql$, all_cols, polygons_mview);
+        %s
+    $sql$, all_cols, polygons_mview, name_filter);
     
     -- Add UNION ALL with points materialized view only if provided
     IF points_mview IS NOT NULL THEN
