@@ -19,7 +19,6 @@
 --   - Only converts polygons to centroids and merges with points
 -- ============================================================================
 DROP FUNCTION IF EXISTS create_centroids_mview(TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS create_centroids_mview(TEXT, TEXT);
 
 -- Function with all parameters (polygons, mview_name, optional points)
 CREATE OR REPLACE FUNCTION create_centroids_mview(
@@ -105,14 +104,16 @@ BEGIN
     -- PERFORM set_config('enable_parallel_append', 'on', true);
     
     -- Create materialized view with DISTINCT ON
+    -- Use explicit column list instead of * to avoid issues with DISTINCT ON
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS
-        SELECT DISTINCT ON (%s) *
+        SELECT DISTINCT ON (%s) %s
         FROM (%s) AS combined
         ORDER BY %s;
     $sql$,
         tmp_mview_name,
         quoted_unique_cols,
+        all_cols,
         union_query,
         quoted_unique_cols
     );

@@ -47,7 +47,7 @@ BEGIN
     lang_columns := get_language_columns();
     
     -- Build SQL - get all columns from points_table and add calculated ones
-    -- Exclude start_decdate and end_decdate because they will be recalculated
+    -- Exclude start_decdate, end_decdate, and area columns because they will be recalculated/added
     SELECT COALESCE(string_agg(
         CASE 
             WHEN column_name = 'name' THEN 'NULLIF(name, '''') AS name'
@@ -61,13 +61,14 @@ BEGIN
     FROM information_schema.columns
     WHERE table_schema = 'public'
       AND table_name = points_table
-      AND column_name NOT IN ('start_decdate', 'end_decdate');
+      AND column_name NOT IN ('start_decdate', 'end_decdate', 'area', 'area_m2', 'area_km2');
     
     -- Always add calculated date columns
     all_cols := all_cols || ', public.isodatetodecimaldate(public.pad_date(start_date, ''start''), FALSE) AS start_decdate';
     all_cols := all_cols || ', public.isodatetodecimaldate(public.pad_date(end_date, ''end''), FALSE) AS end_decdate';
     
-    -- Add area columns (NULL for points)
+    -- Add area columns (NULL for points) - must match create_simplified_mview structure
+    all_cols := all_cols || ', NULL::numeric AS area';
     all_cols := all_cols || ', NULL::numeric AS area_m2';
     all_cols := all_cols || ', NULL::numeric AS area_km2';
     

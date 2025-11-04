@@ -44,7 +44,7 @@ SELECT prepare_points_mview('osm_landuse_points', 'mv_landuse_points');
 -- Zoom 12-13: Low simplification (10m), small areas (>10K m² = 0.01 km²)
 -- ============================================================================
 SELECT create_simplified_mview('osm_landuse_areas', 'mv_landuse_areas_z12_13', 10, 10000, 'id, osm_id, type');
-SELECT create_centroids_mview('mv_landuse_areas_z12_13', 'mv_landuse_points_centroids_z12_13', 'osm_landuse_points');
+SELECT create_centroids_mview('mv_landuse_areas_z12_13', 'mv_landuse_points_centroids_z12_13', 'mv_landuse_points');
 
 
 -- ============================================================================
