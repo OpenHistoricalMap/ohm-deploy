@@ -26,7 +26,7 @@ services:
   # imposm3
   imposm_production:
     container_name: tiler_imposm_production
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3035.hf1b8620
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3040.ha5561ae
     volumes:
       - tiler_production_imposmdata:/mnt/data
     command:

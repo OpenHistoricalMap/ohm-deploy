@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -y postgresql-client && \
 RUN wget -c https://dl.google.com/go/go1.21.0.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
 ENV PATH $PATH:/usr/local/go/bin
 
-RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git /usr/local/datefunctions
+ENV DATEFUNCTIONS_GITSHA=90d8d0f0daea4c8c5aa62edf440f26e9eb0ab950
+RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git /usr/local/datefunctions && cd /usr/local/datefunctions && git checkout $DATEFUNCTIONS_GITSHA 
 
 WORKDIR /go
 ENV GOPATH /go
