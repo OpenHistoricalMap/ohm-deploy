@@ -67,11 +67,11 @@ BEGIN
   --       - "I-495" is more local → lower priority.
   --     If no numeric found, we default to a large value (999999).
   --     e.g
-  --       I	0	A pure top-level network (rare coding)
-  --       US:I	1	US Interstate
-  --       US:US	1	US Highway
-  --       US:CA	1	California State Highways
-  --       US:CA:XX	2	Subnetwork of CA (more specific)
+  --       I  0 A pure top-level network (rare coding)
+  --       US:I 1 US Interstate
+  --       US:US  1 US Highway
+  --       US:CA  1 California State Highways
+  --       US:CA:XX 2 Subnetwork of CA (more specific)
   --
   -- For non-road types:
   --   We don't have similarly strong global rules.
@@ -83,12 +83,10 @@ BEGIN
     colon_count := length(COALESCE(network,'')) - length(replace(COALESCE(network,''), ':',''));
 
     -- try to extract numeric part of ref
-    BEGIN
-      ref_num := NULLIF(regexp_replace(ref, '\D','','g'), '')::INT;
-    EXCEPTION WHEN others THEN
-      ref_num := 999999; -- fallback if parsing fails
-    END;
-    IF ref_num IS NULL THEN
+    -- Validación previa evita errores y warnings:
+    IF ref ~ '\d' THEN
+      ref_num := regexp_replace(ref, '\D','','g')::INT;
+    ELSE
       ref_num := 999999;
     END IF;
 
