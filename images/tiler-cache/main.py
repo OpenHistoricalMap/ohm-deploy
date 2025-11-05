@@ -89,6 +89,7 @@ def health():
     hb_file = "/tmp/sqs_processor_heartbeat"
     sqs_status = "starting"
     sqs_last = None
+    is_healthy = True
     
     try:
         if os.path.exists(hb_file):
@@ -98,14 +99,24 @@ def health():
                 sqs_last = t
             else:
                 sqs_status = f"stale ({t:.1f}s ago)"
+                is_healthy = False
+        else:
+            sqs_status = "no heartbeat file"
+            is_healthy = False
     except Exception as e:
         sqs_status = f"error: {str(e)}"
+        is_healthy = False
     
-    return {
-        "status": "healthy",
+    response_data = {
+        "status": "healthy" if is_healthy else "unhealthy",
         "sqs_processor": sqs_status,
         "sqs_last_heartbeat_seconds_ago": round(sqs_last, 1) if sqs_last else None
     }
+    
+    if not is_healthy:
+        raise HTTPException(status_code=503, detail=response_data)
+    
+    return response_data
 
 
 @app.get("/clean-cache")

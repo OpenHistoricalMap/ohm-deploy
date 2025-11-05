@@ -71,9 +71,12 @@ services:
       - -c
       - |
         python sqs_processor.py &
+        SQS_PID=$!
+        # Monitor sqs_processor - if it dies, kill main.py to trigger container restart
+        (while kill -0 $SQS_PID 2>/dev/null; do sleep 10; done; echo "sqs_processor.py exited, terminating container"; pkill -f "python main.py"; exit 1) &
         python main.py
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      test: ["CMD", "python", "-c", "import urllib.request; r=urllib.request.urlopen('http://localhost:8000/health'); exit(0) if r.getcode()==200 else exit(1)"]
       interval: 30s
       timeout: 10s
       retries: 3
