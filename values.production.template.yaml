@@ -279,7 +279,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    schedule: '0 1 * * *'
+    schedule: '0 3 * * *'
     env:
       OVERWRITE_PLANET_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
@@ -313,7 +313,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    schedule: '0 2 * * 0'
+    schedule: '0 4 * * 0'
     env:
       OVERWRITE_FHISTORY_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
