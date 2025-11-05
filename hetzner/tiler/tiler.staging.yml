@@ -38,7 +38,7 @@ services:
 
   tiler_server_staging:
     container_name: tiler_server_staging
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3034.h2396bab
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3043.h18ca5aa
     ports:
       - "9091:9090"
     env_file:
