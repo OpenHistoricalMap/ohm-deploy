@@ -1,30 +1,60 @@
 # Layer configuration for buildings
 [[providers.layers]]
-name = "buildings"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
+name = "buildings_z14_15"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
     osm_id, 
     name,
     NULLIF(as_numeric(height), -1) AS height, 
-    type, 
+    type,
+    area,
     start_date, 
     end_date, 
-    area,  
     start_decdate, 
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_osm_buildings_areas_z14_20
+    mv_buildings_areas_z14_15
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+name = "buildings_z16_20"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name,
+    NULLIF(as_numeric(height), -1) AS height, 
+    type,
+    area,
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_buildings_areas_z16_20
 WHERE 
     geometry && !BBOX!
 """
 #######Maps
 [[maps.layers]]
 name = "buildings"
-provider_layer = "osm.buildings"
+provider_layer = "osm.buildings_z14_15"
 min_zoom = 14
+max_zoom = 15
+
+[[maps.layers]]
+name = "buildings"
+provider_layer = "osm.buildings_z16_20"
+min_zoom = 16
 max_zoom = 20

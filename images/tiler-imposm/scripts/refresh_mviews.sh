@@ -156,8 +156,14 @@ water_views=(
 )
 
 buildings_views=(
-    mv_buildings_points_centroids_z14_20
-    mv_osm_buildings_areas_z14_20
+    # areas
+    mv_buildings_areas_z14_15
+    mv_buildings_areas_z16_20
+    # points
+    mv_buildings_points
+    # points centroids
+    mv_buildings_points_centroids_z14_15
+    mv_buildings_points_centroids_z16_20
 )
 
 routes_views=(
