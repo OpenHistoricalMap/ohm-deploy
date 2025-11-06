@@ -1,5 +1,5 @@
 -- ============================================================================
--- Function: create_simplified_mview
+-- Function: create_areas_mview
 -- Description:
 --   Creates a materialized view from a source table with configurable geometry
 --   simplification and minimum area filtering.
@@ -22,9 +22,9 @@
 --   - Adds a spatial index (GiST) on geometry and a unique index on unique_columns
 --   - Useful for creating views at different zoom levels with variable simplification
 -- ============================================================================
-DROP FUNCTION IF EXISTS create_simplified_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT);
+DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT);
 
-CREATE OR REPLACE FUNCTION create_simplified_mview(
+CREATE OR REPLACE FUNCTION create_areas_mview(
     source_table TEXT,
     view_name TEXT,
     simplify_tol DOUBLE PRECISION DEFAULT 0,

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Function: prepare_points_mview
+-- Function: create_points_mview
 -- Description:
 --   Creates a points materialized view by adding necessary columns:
 --   - start_decdate: calculated from start_date
@@ -25,11 +25,9 @@
 --   - Adds a spatial index (GiST) on geometry and a unique index on unique_columns
 --   - Follows the same structure as create_simplified_mview
 -- ============================================================================
-DROP FUNCTION IF EXISTS prepare_points_mview(TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS prepare_points_table(TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS prepare_points_table(TEXT, TEXT);
+DROP FUNCTION IF EXISTS create_points_mview(TEXT, TEXT, TEXT);
 
-CREATE OR REPLACE FUNCTION prepare_points_mview(
+CREATE OR REPLACE FUNCTION create_points_mview(
     points_table TEXT,
     mview_name TEXT,
     unique_columns TEXT DEFAULT 'id, source, osm_id'

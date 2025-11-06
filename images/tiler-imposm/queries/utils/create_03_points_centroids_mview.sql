@@ -1,6 +1,6 @@
 
 -- ============================================================================
--- Function: create_centroids_mview
+-- Function: create_points_centroids_mview
 -- Description:
 --   Creates a materialized view with centroids from a polygons materialized view
 --   and optionally merges with a points materialized view.
@@ -18,10 +18,10 @@
 --   - points_mview must be prepared beforehand with prepare_points_mview() (with the same columns as polygons_mview)
 --   - Only converts polygons to centroids and merges with points
 -- ============================================================================
-DROP FUNCTION IF EXISTS create_centroids_mview(TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS create_points_centroids_mview(TEXT, TEXT, TEXT);
 
 -- Function with all parameters (polygons, mview_name, optional points)
-CREATE OR REPLACE FUNCTION create_centroids_mview(
+CREATE OR REPLACE FUNCTION create_points_centroids_mview(
     polygons_mview TEXT,
     mview_name TEXT,
     points_mview TEXT DEFAULT NULL
