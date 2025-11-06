@@ -8,19 +8,19 @@
 -- Exclude water areas and natural areas, which are handled by the water_areas view
 -- Create centroids view from simplified areas (no points at this zoom level)
 -- ============================================================================
-SELECT create_areas_mview(
-    'osm_landuse_areas',
-    'mv_landuse_areas_z3_5',
-    200,
-    50000000,
-    'id, osm_id, type',
-    'NOT (type = ''water'' AND class = ''natural'')'
-);
-SELECT create_points_centroids_mview(
-    'mv_landuse_areas_z3_5',
-    'mv_landuse_points_centroids_z3_5',
-    NULL
-);
+-- SELECT create_areas_mview(
+--     'osm_landuse_areas',
+--     'mv_landuse_areas_z3_5',
+--     200,
+--     50000000,
+--     'id, osm_id, type',
+--     'NOT (type = ''water'' AND class = ''natural'')'
+-- );
+-- SELECT create_points_centroids_mview(
+--     'mv_landuse_areas_z3_5',
+--     'mv_landuse_points_centroids_z3_5',
+--     NULL
+-- );
 
 -- ============================================================================
 -- Zoom 6-7:

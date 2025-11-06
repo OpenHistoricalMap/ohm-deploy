@@ -35,9 +35,9 @@ if [[ "$ALL" == true ]]; then
 
   ## Funtions  to create simplified areas and centroids
   execute_sql_file queries/utils/create_generic_mview.sql 
-  execute_sql_file queries/utils/create_01_area_simplified_mview.sql
-  execute_sql_file queries/utils/create_02_point_view.sql
-  execute_sql_file queries/utils/create_03_centroids_mview.sql
+  execute_sql_file queries/utils/create_01_areas_mview.sql 
+  execute_sql_file queries/utils/create_02_points_mview.sql
+  execute_sql_file queries/utils/create_03_points_centroids_mview.sql
 
   # Route priority
   execute_sql_file queries/utils/route_priority.sql
