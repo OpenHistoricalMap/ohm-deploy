@@ -16,20 +16,23 @@
 --   simplify_tol    DOUBLE PRECISION  - Simplification tolerance (0 = no simplification)
 --   min_area        DOUBLE PRECISION  - Minimum area in m² to include (0 = no filter)
 --   unique_columns  TEXT              - Comma-separated columns for unique index (default: 'id, osm_id, type')
+--   where_filter    TEXT              - Optional WHERE clause filter (e.g., "type != 'barrier'" or "class NOT IN ('power', 'military')"). NULL = no filter
 --
 -- Notes:
 --   - Creates the materialized view using a temporary swap mechanism
 --   - Adds a spatial index (GiST) on geometry and a unique index on unique_columns
 --   - Useful for creating views at different zoom levels with variable simplification
+--   - where_filter is appended to WHERE clause with AND, so use conditions like "type != 'barrier'" not "AND type != 'barrier'"
 -- ============================================================================
-DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT);
+DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
 
 CREATE OR REPLACE FUNCTION create_areas_mview(
     source_table TEXT,
     view_name TEXT,
     simplify_tol DOUBLE PRECISION DEFAULT 0,
     min_area DOUBLE PRECISION DEFAULT 0,
-    unique_columns TEXT DEFAULT 'id, osm_id, type'
+    unique_columns TEXT DEFAULT 'id, osm_id, type',
+    where_filter TEXT DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE 
@@ -38,6 +41,7 @@ DECLARE
     sql_create TEXT;
     simplify_expr TEXT;
     area_filter TEXT;
+    custom_filter TEXT;
     all_cols TEXT;
 BEGIN
     -- Language columns will always be available
@@ -55,6 +59,14 @@ BEGIN
         area_filter := format('AND ST_Area(geometry) > %s', min_area);
     ELSE
         area_filter := '';
+    END IF;
+    
+    -- Build custom WHERE filter (if provided)
+    -- Note: custom_filter includes leading space and AND, so it can be concatenated directly
+    IF where_filter IS NOT NULL AND where_filter <> '' THEN
+        custom_filter := format(' AND (%s)', where_filter);
+    ELSE
+        custom_filter := '';
     END IF;
     
     -- Build SQL - get all columns from source table and replace geometry, handle special columns
@@ -94,8 +106,8 @@ BEGIN
             %s
         FROM %I
         WHERE geometry IS NOT NULL
-        %s;
-    $sql$, tmp_view_name, all_cols, source_table, area_filter);
+        %s%s;
+    $sql$, tmp_view_name, all_cols, source_table, area_filter, custom_filter);
 
     PERFORM finalize_materialized_view(
         tmp_view_name,
