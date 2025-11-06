@@ -43,6 +43,7 @@ BEGIN
         CREATE MATERIALIZED VIEW %I AS
         SELECT
             geometry,
+            id,
             ABS(osm_id) AS osm_id, 
             NULLIF(name, '') AS name, 
             class, 
@@ -52,9 +53,36 @@ BEGIN
             isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
             area,
+            ROUND(CAST(area AS numeric), 1)::numeric(20,1) AS area_m2,
+            ROUND(CAST(area AS numeric) / 1000000, 1)::numeric(20,1) AS area_km2,
+            'polygon' as source, 
             %s
         FROM osm_transport_areas
-        WHERE %s;
+        WHERE %s
+            -- From https://github.com/OpenHistoricalMap/issues/issues/1194
+          AND NOT (class = 'highway' AND type IN ('motorway', 
+                                                'motorway_link', 
+                                                'trunk', 
+                                                'trunk_link', 
+                                                'primary', 
+                                                'primary_link', 
+                                                'secondary', 
+                                                'secondary_link', 
+                                                'tertiary', 
+                                                'tertiary_link', 
+                                                'unclassified', 
+                                                'residential', 
+                                                'service', 
+                                                'living_street', 
+                                                -- 'pedestrian', 
+                                                -- 'track', 
+                                                -- 'path', 
+                                                -- 'footway', 
+                                                'cycleway', 
+                                                'bridleway'
+                                                -- 'steps'
+                                                )
+                    );
     $sql$, tmp_view_name, lang_columns, type_filter_areas);
 
     PERFORM finalize_materialized_view(

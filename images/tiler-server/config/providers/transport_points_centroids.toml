@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "transport_points_centroids_z10_13"
+name = "transport_points_centroids_z10_11"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
@@ -17,13 +17,13 @@ SELECT
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_points_centroids_z10_13 
+    mv_transport_points_centroids_z10_11 
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "transport_points_centroids_z14_20"
+name = "transport_points_centroids_z12_20"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
@@ -41,19 +41,19 @@ SELECT
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_points_centroids_z14_20 
+    mv_transport_points_centroids_z12_20 
 WHERE 
     geometry && !BBOX!
 """
 #######Maps
 [[maps.layers]]
 name = "transport_points_centroids"
-provider_layer = "osm.transport_points_centroids_z10_13"
+provider_layer = "osm.transport_points_centroids_z10_11"
 min_zoom = 10
-max_zoom = 13
+max_zoom = 11
 
 [[maps.layers]]
 name = "transport_points_centroids"
-provider_layer = "osm.transport_points_centroids_z14_20"
-min_zoom = 14
+provider_layer = "osm.transport_points_centroids_z12_20"
+min_zoom = 12
 max_zoom = 20

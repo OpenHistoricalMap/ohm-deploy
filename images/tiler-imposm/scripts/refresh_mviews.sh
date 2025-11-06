@@ -99,9 +99,11 @@ transport_views=(
     mv_transport_lines_z14_20
     mv_transport_areas_z10_11
     mv_transport_areas_z12_20
-    mv_transport_points_centroids_z10_13
-    mv_transport_points_centroids_z14_20
+    mv_transport_points
+    mv_transport_points_centroids_z10_11
+    mv_transport_points_centroids_z12_20
 )
+
 
 water_views=(
     mv_water_areas_centroids_z0_2
