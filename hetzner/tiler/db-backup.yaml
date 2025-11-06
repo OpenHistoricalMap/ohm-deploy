@@ -1,0 +1,54 @@
+services:
+  db_backup:
+    container_name: db_backup
+    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
+    volumes:
+      - ./db-backup/:/mnt
+    command:
+      - /bin/sh
+      - -c
+      - |
+        BACKUP_FILE="/mnt/db_backup.dump"
+        echo "Creating compressed backup: ${BACKUP_FILE}"
+        PGPASSWORD=${POSTGRES_PASSWORD} pg_dump \
+          -h ${POSTGRES_HOST} \
+          -p ${POSTGRES_PORT:-5432} \
+          -U ${POSTGRES_USER} \
+          -d ${POSTGRES_DB} \
+          -Fc \
+          -f "${BACKUP_FILE}"
+        echo "Backup completed: ${BACKUP_FILE}"
+    env_file:
+      - .env.production
+    networks:
+      - ohm_network
+
+  db_restore:
+    container_name: db_restore
+    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
+    volumes:
+      - ./db-backup/:/mnt
+    command:
+      - /bin/sh
+      - -c
+      - |
+        RESTORE_FILE="/mnt/db_backup.dump"
+        echo "Restoring from: ${RESTORE_FILE}"
+        PGPASSWORD=${POSTGRES_PASSWORD} pg_restore \
+          -h ${POSTGRES_HOST} \
+          -p ${POSTGRES_PORT:-5432} \
+          -U ${POSTGRES_USER} \
+          -d ${POSTGRES_DB} \
+          -c \
+          -v \
+          "${RESTORE_FILE}"
+        echo "Restore completed"
+    env_file:
+      - .env.production
+    networks:
+      - ohm_network
+
+networks:
+  ohm_network:
+    external: true
+    
