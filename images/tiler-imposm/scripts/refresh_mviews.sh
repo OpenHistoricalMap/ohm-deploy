@@ -52,9 +52,15 @@ admin_maritime_lines_views=(
 )
 
 amenity_views=(
-    mv_amenity_areas_z14_20
-    mv_amenity_points_centroids_z14_20
-) # TODO , missing amenity lines
+    # areas
+    mv_amenity_areas_z14_15
+    mv_amenity_areas_z16_20
+    # points
+    mv_amenity_points
+    # points centroids
+    mv_amenity_points_centroids_z14_15
+    mv_amenity_points_centroids_z16_20
+)
 
 landuse_views=(
     # areas
