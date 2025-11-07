@@ -27,6 +27,7 @@
 -- Medium-high simplification (100m)
 -- Medium-large areas (>10M m² = 10 km²)
 -- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_landuse_areas',
@@ -47,6 +48,7 @@ SELECT create_points_centroids_mview(
 -- Medium simplification (50m)
 -- Medium areas (>1M m² = 1 km²)
 -- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_landuse_areas',
@@ -67,6 +69,7 @@ SELECT create_points_centroids_mview(
 -- Medium-low simplification (15m)
 -- Medium areas (>50K m² = 0.05 km²)
 -- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_landuse_areas',
