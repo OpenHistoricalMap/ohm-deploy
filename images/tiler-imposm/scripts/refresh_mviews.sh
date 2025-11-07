@@ -85,11 +85,11 @@ landuse_views=(
 
 others_views=(
     # areas
-    mv_other_areas_z8_9,
-    mv_other_areas_z10_11,
-    mv_other_areas_z12_13,
-    mv_other_areas_z14_15,
-    mv_other_areas_z16_20,
+    mv_other_areas_z8_9
+    mv_other_areas_z10_11
+    mv_other_areas_z12_13
+    mv_other_areas_z14_15
+    mv_other_areas_z16_20
     # points
     mv_other_points
     # points centroids
