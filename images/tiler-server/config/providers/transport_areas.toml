@@ -1,8 +1,8 @@
 [[providers.layers]]
-name = "transport_areas_z10_11"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
+name = "transport_areas_z10_11"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -10,7 +10,7 @@ SELECT
     name, 
     class, 
     type, 
-    area, 
+    area_m2,
     start_date, 
     end_date, 
     start_decdate, 
@@ -23,10 +23,10 @@ WHERE
 """
 
 [[providers.layers]]
-name = "transport_areas_z12_20"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
+name = "transport_areas_z12_13"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -34,14 +34,62 @@ SELECT
     name, 
     class, 
     type, 
-    area, 
+
     start_date, 
     end_date, 
     start_decdate, 
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_areas_z12_20 
+    mv_transport_areas_z12_13 
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+name = "transport_areas_z14_15"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name, 
+    class, 
+    type, 
+
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_transport_areas_z14_15 
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+geometry_fieldname = "geometry"
+geometry_type = "multipolygon"
+id_fieldname = "osm_id"
+name = "transport_areas_z16_20"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name, 
+    class, 
+    type, 
+
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}}
+FROM 
+    mv_transport_areas_z16_20 
 WHERE 
     geometry && !BBOX!
 """
@@ -54,6 +102,18 @@ max_zoom = 11
 
 [[maps.layers]]
 name = "transport_areas"
-provider_layer = "osm.transport_areas_z12_20"
+provider_layer = "osm.transport_areas_z12_13"
 min_zoom = 12
+max_zoom = 13
+
+[[maps.layers]]
+name = "transport_areas"
+provider_layer = "osm.transport_areas_z14_15"
+min_zoom = 14
+max_zoom = 15
+
+[[maps.layers]]
+name = "transport_areas"
+provider_layer = "osm.transport_areas_z16_20"
+min_zoom = 16
 max_zoom = 20

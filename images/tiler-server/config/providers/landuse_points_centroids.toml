@@ -1,28 +1,3 @@
-
-[[providers.layers]]
-name = "landuse_points_centroids_z3_5"
-geometry_fieldname = "geometry"
-geometry_type = "point"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
-    name, 
-    class, 
-    type, 
-    area_m2, 
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}} 
-FROM 
-    mv_landuse_points_centroids_z3_5
-WHERE 
-    geometry && !BBOX!
-"""
-
 [[providers.layers]]
 name = "landuse_points_centroids_z6_7"
 geometry_fieldname = "geometry"
@@ -170,12 +145,6 @@ WHERE
 """
 
 #######Maps
-
-[[maps.layers]]
-name = "landuse_points_centroids"
-provider_layer = "osm.landuse_points_centroids_z3_5"
-min_zoom = 3
-max_zoom = 5
 
 [[maps.layers]]
 name = "landuse_points_centroids"
