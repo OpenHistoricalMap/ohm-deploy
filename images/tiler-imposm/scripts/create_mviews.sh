@@ -65,7 +65,6 @@ execute_sql_file queries/ohm_mviews/others.sql
 execute_sql_file queries/ohm_mviews/places.sql
 execute_sql_file queries/ohm_mviews/transport_areas.sql
 execute_sql_file queries/ohm_mviews/transport_lines.sql
-execute_sql_file queries/ohm_mviews/transport_points_centroids.sql
 execute_sql_file queries/ohm_mviews/water.sql
 execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql
 ## routes

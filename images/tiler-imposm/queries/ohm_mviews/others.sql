@@ -109,3 +109,7 @@ SELECT create_points_centroids_mview(
     'mv_other_points'
 );
 
+-- ============================================================================
+-- Create materialized views for other lines
+-- ============================================================================
+SELECT create_generic_mview('osm_other_lines', 'mv_other_lines_z14_20', ARRAY['osm_id', 'type', 'class']);
