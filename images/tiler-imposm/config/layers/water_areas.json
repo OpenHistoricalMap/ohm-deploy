@@ -63,6 +63,11 @@
           "key": null
         },
         {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
           "type": "pseudoarea",
           "name": "area",
           "key": null
