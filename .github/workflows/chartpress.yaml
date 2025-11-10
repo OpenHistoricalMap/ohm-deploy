@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'staging_deploy'
-      - 'staging_tiles'
+      - 'transport_lines'
 jobs:
   build:
     runs-on: ubuntu-22.04
