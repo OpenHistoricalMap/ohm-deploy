@@ -27,6 +27,11 @@
           "key": "name"
         },
         {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
           "type": "mapping_value",
           "name": "type",
           "key": null
@@ -34,11 +39,6 @@
         {
           "type": "pseudoarea",
           "name": "area",
-          "key": null
-        },
-        {
-          "type": "mapping_key",
-          "name": "class",
           "key": null
         },
         {

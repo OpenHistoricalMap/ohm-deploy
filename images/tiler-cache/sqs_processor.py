@@ -14,6 +14,43 @@ logger = get_logger()
 # Initialize SQS Client
 sqs = boto3.client("sqs", region_name=Config.AWS_REGION_NAME)
 
+# Heartbeat file path for health checks
+HEARTBEAT_FILE = "/tmp/sqs_processor_heartbeat"
+HEARTBEAT_TIMEOUT_SECONDS = 60
+
+
+def update_heartbeat():
+    """Update heartbeat file to signal that SQS processor is alive."""
+    try:
+        with open(HEARTBEAT_FILE, 'w') as f:
+            f.write(str(time.time()))
+    except Exception as e:
+        logger.warning(f"Failed to update heartbeat file: {e}")
+
+
+def check_postgres_with_retries(max_retries=3, retry_delay=5):
+    """
+    Check PostgreSQL database status with retry logic.
+    
+    Args:
+        max_retries (int): Maximum number of retry attempts (default: 3)
+        retry_delay (int): Delay in seconds between retries (default: 5)
+    
+    Returns:
+        bool: True if PostgreSQL is available, False otherwise
+    """
+    for attempt in range(max_retries):
+        if check_tiler_db_postgres_status():
+            return True
+        else:
+            if attempt < max_retries - 1:
+                logger.warning(f"PostgreSQL database is down. Retrying in {retry_delay} seconds... (attempt {attempt + 1}/{max_retries})")
+                time.sleep(retry_delay)
+            else:
+                logger.error("PostgreSQL database is down after all retries.")
+    
+    return False
+
 
 def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file, cleanup_type="immediate"):
     """Executes the S3 cleanup process for specific zoom levels with improved logging and error handling."""
@@ -31,7 +68,13 @@ def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file
 
 def process_sqs_messages():
     """Unified function to process SQS messages and create jobs based on infrastructure."""
+    # Initialize heartbeat file
+    update_heartbeat()
+    
     while True:
+        # Update heartbeat at the start of each iteration
+        update_heartbeat()
+        
         logger.info("Requesting SQS messages...")
         response = sqs.receive_message(
             QueueUrl=Config.SQS_QUEUE_URL,
@@ -53,10 +96,12 @@ def process_sqs_messages():
             logger.info(f"{'==' * 40}")
             logger.info(f"Processing message ID {message['MessageId']} created at {sent_time.strftime('%Y-%m-%d %H:%M:%S')} UTC")
             try:
-                # Check PostgreSQL status
-                if not check_tiler_db_postgres_status():
-                    logger.error("PostgreSQL database is down. Exiting.")
-                    exit(1)
+                # Check PostgreSQL status with retry logic
+                if not check_postgres_with_retries():
+                    logger.error("PostgreSQL database is down after all retries. Terminating process to trigger container restart.")
+                    # Terminate the process so the container can be restarted
+                    # This will stop the heartbeat updates, causing the health check to fail
+                    os._exit(1)
 
                 # Parse the SQS message
                 body = json.loads(message["Body"])

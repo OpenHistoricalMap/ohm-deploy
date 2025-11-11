@@ -1,4 +1,29 @@
 [[providers.layers]]
+name = "landuse_points_centroids_z6_7"
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name, 
+    class, 
+    type, 
+    area_m2, 
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}} 
+FROM 
+    mv_landuse_points_centroids_z6_7
+WHERE 
+    geometry && !BBOX!
+"""
+
+
+[[providers.layers]]
 name = "landuse_points_centroids_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "point"
@@ -21,6 +46,7 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
+
 
 [[providers.layers]]
 name = "landuse_points_centroids_z10_11"
@@ -71,7 +97,7 @@ WHERE
 """
 
 [[providers.layers]]
-name = "landuse_points_centroids_z14_20"
+name = "landuse_points_centroids_z14_15"
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
@@ -89,12 +115,42 @@ SELECT
     end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mv_landuse_points_centroids_z14_20
+    mv_landuse_points_centroids_z14_15
+WHERE 
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "landuse_points_centroids_z16_20"
+geometry_fieldname = "geometry"
+geometry_type = "point"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
+    osm_id, 
+    name, 
+    class, 
+    type, 
+    area_m2, 
+    start_date, 
+    end_date, 
+    start_decdate, 
+    end_decdate,
+    {{LENGUAGES}} 
+FROM 
+    mv_landuse_points_centroids_z16_20
 WHERE 
     geometry && !BBOX!
 """
 
 #######Maps
+
+[[maps.layers]]
+name = "landuse_points_centroids"
+provider_layer = "osm.landuse_points_centroids_z6_7"
+min_zoom = 6
+max_zoom = 7
 
 [[maps.layers]]
 name = "landuse_points_centroids"
@@ -106,16 +162,22 @@ max_zoom = 9
 name = "landuse_points_centroids"
 provider_layer = "osm.landuse_points_centroids_z10_11"
 min_zoom = 10
-max_zoom = 12
+max_zoom = 11
 
 [[maps.layers]]
 name = "landuse_points_centroids"
 provider_layer = "osm.landuse_points_centroids_z12_13"
-min_zoom = 13
-max_zoom = 14
+min_zoom = 12
+max_zoom = 13
 
 [[maps.layers]]
 name = "landuse_points_centroids"
-provider_layer = "osm.landuse_points_centroids_z14_20"
-min_zoom = 15
+provider_layer = "osm.landuse_points_centroids_z14_15"
+min_zoom = 14
+max_zoom = 15
+
+[[maps.layers]]
+name = "landuse_points_centroids"
+provider_layer = "osm.landuse_points_centroids_z16_20"
+min_zoom = 16
 max_zoom = 20

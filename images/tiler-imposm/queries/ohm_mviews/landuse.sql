@@ -1,110 +1,172 @@
--- ============================================================================
--- Function: create_landuse_points_centroids_mview
--- Description:
---   Creates a materialized view that merges named centroids from polygonal 
---   landuse areas and named landuse points into a unified layer.
---
---   For polygonal features, centroids are calculated using ST_MaximumInscribedCircle,
---   and area is stored in square meters (as integer). Point features are included 
---   directly with area set to NULL.
---
---   Temporal fields `start_date` and `end_date` are included as-is, and 
---   additional precalculated columns `start_decdate` and `end_decdate` 
---   are generated using the `isodatetodecimaldate` function.
---
--- Parameters:
---   view_name       TEXT              - Name of the materialized view to create.
---   include_points  BOOLEAN           - If TRUE, includes features from 'osm_landuse_points'.
---   min_area        DOUBLE PRECISION  - Minimum area (in m²) to include landuse areas.
---
--- Notes:
---   - Only features with a non-empty "name" are included.
---   - Geometry is indexed using GiST.
---   - Uniqueness is enforced on the combination of (osm_id, type, class).
---   - Language-specific name columns are added dynamically from the `languages` table.
---   - Uses finalize_materialized_view() for safety and reusability.
--- ============================================================================
-
-DROP FUNCTION IF EXISTS create_landuse_points_centroids_mview;
-CREATE OR REPLACE FUNCTION create_landuse_points_centroids_mview(
-    view_name TEXT,
-    include_points BOOLEAN,
-    min_area DOUBLE PRECISION DEFAULT 0
-)
-RETURNS void AS $$
-DECLARE 
-    tmp_view_name TEXT := view_name || '_tmp';
-    sql_create TEXT;
-    lang_columns TEXT := get_language_columns();
-    unique_columns TEXT := 'osm_id, type, class';
-BEGIN
-    sql_create := format($sql$
-        CREATE MATERIALIZED VIEW %I AS
-        SELECT
-            (ST_MaximumInscribedCircle(geometry)).center AS geometry,
-            osm_id, 
-            NULLIF(name, '') AS name, 
-            type, 
-            class, 
-            NULLIF(start_date, '') AS start_date,
-            NULLIF(end_date, '') AS end_date,
-            isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
-            isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-            ROUND(area)::bigint AS area_m2,
-            %s
-        FROM osm_landuse_areas
-        WHERE name IS NOT NULL AND name <> '' AND area > %L
-    $sql$, tmp_view_name, lang_columns, min_area);
-
-    -- Only add the UNION ALL block if 'include_points' is true.
-    IF include_points THEN
-        sql_create := sql_create || format($sql$
-            UNION ALL
-            SELECT 
-                geometry,
-                osm_id, 
-                NULLIF(name, '') AS name, 
-                type, 
-                class, 
-                NULLIF(start_date, '') AS start_date,
-                NULLIF(end_date, '') AS end_date,
-                isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
-                isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-                NULL AS area_m2, 
-                %s
-            FROM osm_landuse_points
-        $sql$, lang_columns);
-    END IF;
-
-    sql_create := sql_create || ';';
-
-    PERFORM finalize_materialized_view(
-        tmp_view_name,
-        view_name,
-        unique_columns,
-        sql_create
-    );
-END;
-$$ LANGUAGE plpgsql;
+-- Create materialized views for landuse areas with different simplification levels
+-- Using the generalized create_areas_mview function
 
 -- ============================================================================
--- Create materialized views for landuse points centroids
+-- Zoom 3-5:
+-- High simplification (200m)
+-- Large areas only (>50M m² = 50 km²)
+-- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Create centroids view from simplified areas (no points at this zoom level)
 -- ============================================================================
-SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z8_9', FALSE, 25000000);
-SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z10_11', FALSE, 1000000);
-SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z12_13', FALSE, 10000);
-SELECT create_landuse_points_centroids_mview('mv_landuse_points_centroids_z14_20', TRUE, 0);
+-- SELECT create_areas_mview(
+--     'osm_landuse_areas',
+--     'mv_landuse_areas_z3_5',
+--     200,
+--     50000000,
+--     'id, osm_id, type',
+--     'NOT (type = ''water'' AND class = ''natural'')'
+-- );
+-- SELECT create_points_centroids_mview(
+--     'mv_landuse_areas_z3_5',
+--     'mv_landuse_points_centroids_z3_5',
+--     NULL
+-- );
+
 -- ============================================================================
--- Create materialized views for landuse areas
+-- Zoom 6-7:
+-- Medium-high simplification (100m)
+-- Medium-large areas (>10M m² = 10 km²)
+-- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
 -- ============================================================================
-SELECT create_generic_mview( 'osm_landuse_areas_z3_5', 'mv_landuse_areas_z3_5', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z6_7', 'mv_landuse_areas_z6_7', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z8_9', 'mv_landuse_areas_z8_9', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z10_12', 'mv_landuse_areas_z10_12', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas_z13_15', 'mv_landuse_areas_z13_15', ARRAY['osm_id', 'type']);
-SELECT create_generic_mview( 'osm_landuse_areas', 'mv_landuse_areas_z16_20', ARRAY['osm_id', 'type']);
+SELECT create_areas_mview(
+    'osm_landuse_areas',
+    'mv_landuse_areas_z6_7',
+    100,
+    10000000,
+    'id, osm_id, type',
+    'NOT (type = ''water'' AND class = ''natural'')'
+);
+SELECT create_points_centroids_mview(
+    'mv_landuse_areas_z6_7',
+    'mv_landuse_points_centroids_z6_7',
+    NULL
+);
+
+-- ============================================================================
+-- Zoom 8-9:
+-- Medium simplification (50m)
+-- Medium areas (>1M m² = 1 km²)
+-- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
+-- ============================================================================
+SELECT create_areas_mview(
+    'osm_landuse_areas',
+    'mv_landuse_areas_z8_9',
+    50,
+    1000000,
+    'id, osm_id, type',
+    'NOT (type = ''water'' AND class = ''natural'')'
+);
+SELECT create_points_centroids_mview(
+    'mv_landuse_areas_z8_9',
+    'mv_landuse_points_centroids_z8_9',
+    NULL
+);
+
+-- ============================================================================
+-- Zoom 10-11:
+-- Medium-low simplification (15m)
+-- Medium areas (>50K m² = 0.05 km²)
+-- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
+-- ============================================================================
+SELECT create_areas_mview(
+    'osm_landuse_areas',
+    'mv_landuse_areas_z10_11',
+    15,
+    50000,
+    'id, osm_id, type',
+    'NOT (type = ''water'' AND class = ''natural'')'
+);
+SELECT create_points_centroids_mview(
+    'mv_landuse_areas_z10_11',
+    'mv_landuse_points_centroids_z10_11',
+    NULL
+);
+
+
+-- ============================================================================
+-- Prepare points materialized view for higher zoom levels (12+)
+-- ============================================================================
+-- Prepare points table with necessary columns (start_decdate, end_decdate, area_m2, area_km2, etc.)
+-- This must be done before creating centroids views that include points
+SELECT create_points_mview(
+    'osm_landuse_points',
+    'mv_landuse_points'
+);
+
+
+-- ============================================================================
+-- Zoom 12-13:
+-- Low simplification (10m)
+-- Small areas (>10K m² = 0.01 km²)
+-- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Include landuse points
+-- ============================================================================
+SELECT create_areas_mview(
+    'osm_landuse_areas',
+    'mv_landuse_areas_z12_13',
+    10,
+    10000,
+    'id, osm_id, type',
+    'NOT (type = ''water'' AND class = ''natural'')'
+);
+SELECT create_points_centroids_mview(
+    'mv_landuse_areas_z12_13',
+    'mv_landuse_points_centroids_z12_13',
+    'mv_landuse_points'
+);
+
+
+-- ============================================================================
+-- Zoom 14-15:
+-- Very low simplification (5m)
+-- Very small areas (>5K m² = 0.005 km²)
+-- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Include landuse points
+-- ============================================================================
+SELECT create_areas_mview(
+    'osm_landuse_areas',
+    'mv_landuse_areas_z14_15',
+    5,
+    5000,
+    'id, osm_id, type',
+    'NOT (type = ''water'' AND class = ''natural'')'
+);
+SELECT create_points_centroids_mview(
+    'mv_landuse_areas_z14_15',
+    'mv_landuse_points_centroids_z14_15',
+    'mv_landuse_points'
+);
+
+-- ============================================================================
+-- Zoom 16-20:
+-- No simplification
+-- All areas
+-- Exclude water areas and natural areas, which are handled by the water_areas view
+-- Include landuse points
+-- ============================================================================
+SELECT create_areas_mview(
+    'osm_landuse_areas',
+    'mv_landuse_areas_z16_20',
+    0,
+    0,
+    'id, osm_id, type',
+    'NOT (type = ''water'' AND class = ''natural'')'
+);
+SELECT create_points_centroids_mview(
+    'mv_landuse_areas_z16_20',
+    'mv_landuse_points_centroids_z16_20',
+    'mv_landuse_points'
+);
+
 
 -- ============================================================================
 -- Create materialized views for landuse lines
 -- ============================================================================
-SELECT create_generic_mview( 'osm_landuse_lines', 'mv_landuse_lines_z14_20', ARRAY['osm_id', 'type', 'class']);
+SELECT create_generic_mview(
+    'osm_landuse_lines',
+    'mv_landuse_lines_z14_20',
+    ARRAY['osm_id', 'type', 'class']
+);

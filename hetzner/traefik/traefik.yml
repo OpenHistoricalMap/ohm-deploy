@@ -55,6 +55,16 @@ http:
       middlewares:
         - secure-headers
 
+    tiler_cache-production-router:
+      rule: Host(`tiler-cache.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: tiler_cache_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
     nominatim-production-router:
       rule: Host(`nominatim.openhistoricalmap.org`) && !PathPrefix(`/ui`)
       entryPoints:
@@ -167,6 +177,11 @@ http:
       loadBalancer:
         servers:
           - url: http://tiler_server_production:9090
+
+    tiler_cache_production:
+      loadBalancer:
+        servers:
+          - url: http://tiler_sqs_cleaner_production:8000
 
     nominatim_production:
       loadBalancer:

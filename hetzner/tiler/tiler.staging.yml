@@ -21,7 +21,7 @@ services:
 
   imposm_staging:
     container_name: tiler_imposm_staging
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3011.he7e605a
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3060.h27bc0c6
     volumes:
       - tiler_staging_imposmdata:/mnt/data
     command:
@@ -38,7 +38,7 @@ services:
 
   tiler_server_staging:
     container_name: tiler_server_staging
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3011.he7e605a
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3061.h8fd5171
     ports:
       - "9091:9090"
     env_file:
@@ -49,24 +49,35 @@ services:
         limits:
           cpus: '0.2'
           memory: 128MiB
+    volumes:
+      - /staging/ohm-deploy/images/tiler-server/start.sh:/app/start.sh
     networks:
       - ohm_network
 
+
   tiler_sqs_cleaner_staging:
     container_name: tiler_sqs_cleaner_staging
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3075.h121e4d9
     env_file:
       - .env.staging
-    # volumes:
-    #   - ../images/tiler-cache:/app
+    environment:
+      - PORT=8000
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -x
+        python sqs_processor.py &
+        python main.py
     restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 128MiB
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
     networks:
       - ohm_network
+  
 
   tiler_s3_cleaner_staging:
     container_name: tiler_s3_cleaner_staging
@@ -95,11 +106,12 @@ services:
 volumes:
   tiler_staging_pgdata:
     driver: local
-    name: tiler_db_29_10_2025_staging
+    name: tiler_db_07_11_v1
   tiler_staging_imposmdata:
     driver: local
-    name: tiler_imposm_29_10_2025_staging
-    
+    name: tiler_imposm_07_11_v1
+
 networks:
   ohm_network:
     external: true
+    

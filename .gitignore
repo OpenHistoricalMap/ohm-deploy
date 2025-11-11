@@ -24,3 +24,4 @@ values.dev.staging.yaml
 images/tiler-server/utils/exec.sh
 __pycache__/
 **/.env.*
+images/tiler-server/vtiles_languages.geojson
