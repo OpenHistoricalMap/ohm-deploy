@@ -1,6 +1,8 @@
 """Endpoint to clean tile cache in S3 based on OpenHistoricalMap changeset or point with buffer."""
 
 import os
+import sys
+import threading
 import requests
 import xml.etree.ElementTree as ET
 import mercantile
@@ -81,11 +83,18 @@ def delete_tiles_from_s3(tiles: List[mercantile.Tile], path_files: List[str]) ->
     return {'deleted': deleted, 'errors': errors, 'total_tiles_processed': len(keys)}
 
 
+def terminate_process_after_delay(delay=1):
+    """Terminate the process after a short delay to allow HTTP response to be sent."""
+    import time
+    time.sleep(delay)
+    logger.error("SQS processor is unhealthy. Terminating main.py process.")
+    os._exit(0)
+
+
 @app.get("/health")
 def health():
     """Health check that validates both HTTP server and SQS processor."""
     import time
-    import os
     
     hb_file = "/tmp/sqs_processor_heartbeat"
     sqs_status = "starting"
@@ -107,7 +116,7 @@ def health():
     except Exception as e:
         sqs_status = f"error: {str(e)}"
         is_healthy = False
-    
+        
     response_data = {
         "status": "healthy" if is_healthy else "unhealthy",
         "sqs_processor": sqs_status,
@@ -115,6 +124,8 @@ def health():
     }
     
     if not is_healthy:
+        # Terminate process after sending response
+        threading.Thread(target=terminate_process_after_delay, daemon=True).start()
         return JSONResponse(status_code=503, content=response_data)
     
     return response_data

@@ -98,9 +98,10 @@ def process_sqs_messages():
             try:
                 # Check PostgreSQL status with retry logic
                 if not check_postgres_with_retries():
-                    logger.error("PostgreSQL database is down after all retries. Skipping message and will retry later.")
-                    # Don't delete the message so it can be retried, The message will become visible again after visibility timeout
-                    continue
+                    logger.error("PostgreSQL database is down after all retries. Terminating process to trigger container restart.")
+                    # Terminate the process so the container can be restarted
+                    # This will stop the heartbeat updates, causing the health check to fail
+                    os._exit(1)
 
                 # Parse the SQS message
                 body = json.loads(message["Body"])
