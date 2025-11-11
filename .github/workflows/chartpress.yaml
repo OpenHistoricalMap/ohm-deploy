@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'staging_deploy'
-      - 'transport_lines'
+      - 'tiler_cache_health_check'
 jobs:
   build:
     runs-on: ubuntu-22.04
