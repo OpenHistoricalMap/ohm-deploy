@@ -54,32 +54,30 @@ services:
     networks:
       - ohm_network
 
-  tiler_sqs_cleaner_production:
-    container_name: tiler_sqs_cleaner_production
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3027.hb928b7e
+
+  tiler_sqs_cleaner_staging:
+    container_name: tiler_sqs_cleaner_staging
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3075.h121e4d9
     env_file:
-      - .env.production
-    restart: always
+      - .env.staging
     environment:
       - PORT=8000
     command:
       - /bin/sh
       - -c
       - |
+        set -x
         python sqs_processor.py &
-        SQS_PID=$!
-        # Monitor sqs_processor - if it dies, kill main.py to trigger container restart
-        (while kill -0 $SQS_PID 2>/dev/null; do sleep 10; done; echo "sqs_processor.py exited, terminating container"; pkill -f "python main.py"; exit 1) &
         python main.py
+    restart: always
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; r=urllib.request.urlopen('http://localhost:8000/health'); exit(0) if r.getcode()==200 else exit(1)"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
       retries: 3
-      start_period: 40s
+      timeout: 5s
     networks:
       - ohm_network
-      
+  
 
   tiler_s3_cleaner_staging:
     container_name: tiler_s3_cleaner_staging
