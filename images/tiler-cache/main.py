@@ -7,6 +7,7 @@ import mercantile
 import math
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import JSONResponse
 from config import Config
 from utils.utils import get_logger
 
@@ -114,7 +115,7 @@ def health():
     }
     
     if not is_healthy:
-        raise HTTPException(status_code=503, detail=response_data)
+        return JSONResponse(status_code=503, content=response_data)
     
     return response_data
 
