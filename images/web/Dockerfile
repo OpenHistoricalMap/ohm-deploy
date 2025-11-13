@@ -24,7 +24,7 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download OHM Website using gitsha, faster than cloning
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=498272cd3817931a6367b171ea77ee4baa569ef3
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=7fbaa1effeef8c088960e2a6b4dad729df3f0bfa
 ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
 RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
     unzip /tmp/ohm-website.zip -d /tmp && \

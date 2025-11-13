@@ -60,7 +60,7 @@ services:
 
   tiler_sqs_cleaner_production:
     container_name: tiler_sqs_cleaner_production
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3061.h8fd5171
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3075.h121e4d9
     env_file:
       - .env.production
     environment:
@@ -83,7 +83,7 @@ services:
 
   tiler_s3_cleaner_production:
     container_name: tiler_s3_cleaner_production
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3061.h8fd5171
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3075.h121e4d9
     env_file:
       - .env.production
     networks:
