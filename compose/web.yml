@@ -13,31 +13,31 @@ services:
     networks:
       - web_network
 
-  web:
-    image: ohm-web:v1
-    build:
-      context: ./../images/web
-      dockerfile: Dockerfile
-    volumes:
-      - ./../../ohm-website/:/var/www/
-      - ./../images/web/config/settings.yml:/tmp/settings.yml:rw
-      - ./../images/web/start.sh:/var/www/start.sh
-    env_file:
-      - ./../envs/.env.web
-    ports:
-      - '3000:3000'
-    networks:
-      - web_network
-    depends_on:
-      - db
-      - memcached
+  # web:
+  #   image: ohm-web:v1
+  #   build:
+  #     context: ./../images/web
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./../../ohm-website/:/var/www/
+  #     - ./../images/web/config/settings.yml:/tmp/settings.yml:rw
+  #     - ./../images/web/start.sh:/var/www/start.sh
+  #   env_file:
+  #     - ./../envs/.env.web
+  #   ports:
+  #     - '3000:3000'
+  #   networks:
+  #     - web_network
+  #   depends_on:
+  #     - db
+  #     - memcached
 
-  memcached:
-    image: memcached:latest
-    ports:
-      - '11211:11211'
-    networks:
-      - web_network
+  # memcached:
+  #   image: memcached:latest
+  #   ports:
+  #     - '11211:11211'
+  #   networks:
+  #     - web_network
 
 networks:
   web_network:
