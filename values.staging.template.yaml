@@ -76,12 +76,13 @@ osm-seed:
         POSTGRES_DB: {{STAGING_DB}}
         POSTGRES_USER: {{STAGING_DB_USER}}
         POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
+        PGDATA: /var/lib/postgresql/data/pgdata
       persistenceDisk:
         enabled: true
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
-        AWS_ElasticBlockStore_volumeID : vol-0d644eb9ea4e8fccf
+        AWS_ElasticBlockStore_volumeID : vol-0194ec25276217c55
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: true
@@ -133,6 +134,9 @@ osm-seed:
           min_parallel_index_scan_size = 512kB
           session_preload_libraries = 'auto_explain'
           auto_explain.log_min_duration = '3s'
+          shared_preload_libraries = 'osm-logical'
+          wal_level=logical
+          max_replication_slots=1
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
@@ -160,9 +164,9 @@ osm-seed:
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
         # MAILER_PORT: "587"
-        OSM_id_key: {{STAGING_ID_APPLICATION}}
-        OAUTH_CLIENT_ID: {{STAGING_OAUTH_CLIENT_ID}}
-        OAUTH_KEY: {{STAGING_OAUTH_KEY}}
+        OSM_id_key: 7E0Rn-ZjZpEW5cjM-CheEQAbp8nDiCuyB_UmIZOHysA
+        OAUTH_CLIENT_ID: CiBBpurbtUj1np_QZOTngIePlS7K9uGvKDW2Pcw5O7Y
+        OAUTH_KEY: 1O8WtBWivoefehDMT6sbm9TNUU_h_EXznI4cM5XMyJw
         MAILER_FROM: web@noreply.openhistoricalmap.org
         NOMINATIM_URL: nominatim.staging.openhistoricalmap.org
         OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
@@ -326,7 +330,7 @@ osm-seed:
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: false
+      enabled: true
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
@@ -387,7 +391,7 @@ osm-seed:
     dbBackupRestore:
       cronjobs:
       - name: web-db
-        enabled: true
+        enabled: false
         serviceAccount:
           enabled: true
           name: ohm-s3-database-backup-access-staging
