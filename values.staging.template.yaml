@@ -283,7 +283,7 @@ osm-seed:
       serviceAccount:
         enabled: true
         name: ohm-s3-bucket-access-staging 
-      schedule: '* * * * *'
+      schedule: '0 * * * *'
       env:
         OVERWRITE_PLANET_FILE: false
         PLANET_EXPORT_METHOD: planet-dump-ng
