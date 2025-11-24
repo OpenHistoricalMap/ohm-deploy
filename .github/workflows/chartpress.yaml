@@ -5,7 +5,6 @@ on:
       - 'main'
       - 'staging'
       - 'staging_deploy'
-      - 'tiler_cache_health_check'
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -218,7 +217,7 @@ jobs:
       - name: Install helm dependencies for
         if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging_deploy'
         run: cd ohm && helm dep up
-      # # Staging
+      # Staging
       - name: Staging - helm deploy
         # if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/staging_deploy'
         if: github.ref == 'refs/heads/staging'
