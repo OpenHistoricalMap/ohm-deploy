@@ -66,6 +66,7 @@ osm-seed:
       POSTGRES_USER: {{PRODUCTION_DB_USER}}
       POSTGRES_PASSWORD: {{PRODUCTION_DB_PASSWORD}}
       LOG_STATEMENT: "none"
+      PGDATA: /var/lib/postgresql/data/pgdata
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
