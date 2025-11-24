@@ -82,7 +82,7 @@ osm-seed:
         accessMode: ReadWriteOnce
         mountPath: /var/lib/postgresql/data
         subPath: postgresql-db
-        AWS_ElasticBlockStore_volumeID : vol-0194ec25276217c55
+        AWS_ElasticBlockStore_volumeID : vol-05ffbd749907e949f
         AWS_ElasticBlockStore_size: 200Gi
       resources:
         enabled: true
@@ -173,7 +173,7 @@ osm-seed:
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
-        WEBSITE_STATUS: "online"
+        WEBSITE_STATUS: "api_readonly"
         RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
         RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
         RAILS_ENV: production

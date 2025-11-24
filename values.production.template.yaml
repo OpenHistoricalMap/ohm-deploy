@@ -71,7 +71,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-db
-      AWS_ElasticBlockStore_volumeID : vol-08b85b3e370f2d690
+      AWS_ElasticBlockStore_volumeID : vol-0595bcb6ac2ba84a3
       AWS_ElasticBlockStore_size: 600Gi
     resources:
       enabled: true
@@ -140,7 +140,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    replicaCount: 2
+    replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     ingressDomain: www.openhistoricalmap.org
@@ -184,8 +184,8 @@ osm-seed:
         cpu: "1500m"
     autoscaling:
       enabled: true
-      minReplicas: 2
-      maxReplicas: 6
+      minReplicas: 1
+      maxReplicas: 1
       cpuUtilization:
         enabled: true
         value: 80
@@ -308,7 +308,7 @@ osm-seed:
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: true
+    enabled: false
     priorityClass: low-priority
     serviceAccount:
       enabled: true
