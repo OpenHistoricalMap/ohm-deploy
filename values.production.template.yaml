@@ -279,7 +279,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    schedule: '0 1 * * *'
+    schedule: '0 3 * * *'
     env:
       OVERWRITE_PLANET_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
@@ -287,19 +287,19 @@ osm-seed:
       PLANET_EPOCH_DATE: '1970-01-01'
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
     resources:
-      enabled: false
+      enabled: true
       requests:
-        enabled: false
-        memory: "4Gi"
-        cpu: "2"
+        enabled: true
+        memory: "6Gi"
+        cpu: "3500m"
       limits:
         enabled: false
         memory: "8Gi"
-        cpu: "4"
+        cpu: "4000m"
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
-      label_value: job_xlarge
+      label_value: job
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -313,7 +313,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    schedule: '0 2 * * 0'
+    schedule: '0 4 * * 0'
     env:
       OVERWRITE_FHISTORY_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
@@ -321,15 +321,15 @@ osm-seed:
       PLANET_EPOCH_DATE: '1970-01-01'
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
     resources:
-      enabled: false
+      enabled: true
       requests:
-        enabled: false
-        memory: "4Gi"
-        cpu: "2"
+        enabled: true
+        memory: "6Gi"
+        cpu: "3500m"
       limits:
         enabled: false
         memory: "8Gi"
-        cpu: "4"
+        cpu: "4000m"
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
