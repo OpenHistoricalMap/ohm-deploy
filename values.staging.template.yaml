@@ -144,7 +144,7 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["database"]
+        values: ["web"]
     # ====================================================================================================
     # Variables for osm-seed website
     # ====================================================================================================
@@ -154,7 +154,7 @@ osm-seed:
       serviceAccount:
         enabled: true
         name: ohm-s3-bucket-access-staging    
-      replicaCount: 2
+      replicaCount: 1
       serviceAnnotations:
         service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
       ingressDomain: www.staging.openhistoricalmap.org
@@ -199,8 +199,8 @@ osm-seed:
           cpu: "1700m"
       autoscaling:
         enabled: true
-        minReplicas: 2
-        maxReplicas: 4
+        minReplicas: 1
+        maxReplicas: 2
         cpuUtilization:
           enabled: true
           value: 85
@@ -264,8 +264,8 @@ osm-seed:
           cpu: "1200m"
       autoscaling:
         enabled: true
-        minReplicas: 2
-        maxReplicas: 4
+        minReplicas: 1
+        maxReplicas: 2
         cpuUtilization: 90
         memoryUtilization: 90
       nodeSelector:
