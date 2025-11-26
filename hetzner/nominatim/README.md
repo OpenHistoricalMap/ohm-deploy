@@ -1,35 +1,26 @@
 # Nominatim Deployment
 
-Nominatim API and UI are automatically deployed through GitHub Actions. However, you can also deploy it manually:
+Nominatim API and UI are automatically deployed through GitHub Actions. However, you can also deploy it manually.
 
+## Architecture
 
-### Staging
+The deployment uses a **base + override** pattern with Docker Compose:
+- `nominatim.base.yml` - Shared configuration for both environments
+- `nominatim.staging.yml` - Staging-specific overrides
+- `nominatim.production.yml` - Production-specific overrides
 
-```sh
-cd /staging/nominatim
-docker compose -f hetzner/nominatim/nominatim.staging.yml up -d
+This approach reduces duplication and makes configuration management easier.
 
-```
-For the staging environment, the exposed ports are:
-	•	API: 8081
-	•	Nominatim UI: 8082
+## Quick Start with Script
 
-
-### Production
-
-In production, Nominatim is currently limited to:
-	•	Memory: 10g (mem_limit)
-	•	CPUs: 4.0 (cpus)
+The easiest way to deploy is using the `start.sh` script from the parent directory:
 
 ```sh
-cd /production/nominatim
-docker compose -f hetzner/nominatim/nominatim.production.yml up -d --remove-orphans  --force-recreate
+
+# Deploy to staging explicitly
+./hetzner/start.sh nominatim staging
+
+# Deploy to production
+./hetzner/start.sh nominatim production
+
 ```
-
-For the production environment, the exposed ports are:
-	•	API: 8083
-	•	Nominatim UI: 8084
-
-
-Since both environments run on the same server, these ports must be configured correctly in the values.staging.template.yaml and values.production.template.yaml file to avoid conflicts.
-

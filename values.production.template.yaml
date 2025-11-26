@@ -317,7 +317,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    schedule: '0 4 * * 0'
+    schedule: '0 5 */3 * *'
     env:
       OVERWRITE_FHISTORY_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
@@ -974,7 +974,7 @@ osm-seed:
 # Variables for taginfo
 # ====================================================================================================
   taginfo:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     serviceAccount:
       enabled: true
@@ -993,8 +993,10 @@ osm-seed:
       DOWNLOAD_DB: 'languages wiki'
       CREATE_DB: 'db projects chronology'
       ENVIRONMENT: production
-      AWS_S3_BUCKET: taginfo
+      AWS_S3_BUCKET: planet.openhistoricalmap.org
       INTERVAL_DOWNLOAD_DATA: 7d
+      FETCH_DB_FILES: false
+      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
     resources:
       enabled: false
     cronjob:

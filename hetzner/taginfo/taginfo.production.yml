@@ -1,0 +1,15 @@
+services:
+  taginfo:
+    container_name: taginfo_production
+    ports:
+      - '8088:80'
+    environment:
+      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo/production
+    volumes:
+      -  ${HOME}/data/production/taginfo_data:/usr/src/app/data
+  taginfo_db_processor:
+    container_name: taginfo_db_processor_production
+    environment:
+      AWS_S3_BUCKET: planet.openhistoricalmap.org
+    volumes:
+      - ${HOME}/data/production/taginfo_data:/usr/src/app/data

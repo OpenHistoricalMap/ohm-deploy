@@ -419,7 +419,7 @@ osm-seed:
           key: "nodegroup_type"
           values: ["job"]
       - name: tm-db
-        enabled: true
+        enabled: false
         serviceAccount:
           enabled: true
           name: ohm-s3-database-backup-access-staging
@@ -890,8 +890,10 @@ osm-seed:
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
         ENVIRONMENT: staging
-        AWS_S3_BUCKET: planet-staging.openhistoricalmap
+        AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
         INTERVAL_DOWNLOAD_DATA: 7d
+        FETCH_DB_FILES: false
+        TAGINFO_DB_BASE_URL: https://planet-staging.openhistoricalmap.org.s3.amazonaws.com/taginfo
       resources:
         enabled: false
       cronjob:
