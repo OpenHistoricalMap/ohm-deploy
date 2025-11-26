@@ -419,7 +419,7 @@ osm-seed:
           key: "nodegroup_type"
           values: ["job"]
       - name: tm-db
-        enabled: true
+        enabled: false
         serviceAccount:
           enabled: true
           name: ohm-s3-database-backup-access-staging
