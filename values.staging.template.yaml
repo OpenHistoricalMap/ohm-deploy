@@ -871,7 +871,7 @@ osm-seed:
   # Variables for taginfo
   # ====================================================================================================
     taginfo:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
@@ -890,7 +890,7 @@ osm-seed:
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
         ENVIRONMENT: staging
-        AWS_S3_BUCKET: planet-staging.openhistoricalmap
+        AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
         INTERVAL_DOWNLOAD_DATA: 7d
         TAGINFO_DB_BASE_URL: https://planet-staging.openhistoricalmap.org.s3.amazonaws.com/taginfo
       resources:
