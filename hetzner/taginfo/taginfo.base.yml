@@ -1,0 +1,41 @@
+services:
+  taginfo:
+    container_name: taginfo_staging
+    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.980.hd903533
+    volumes:
+      -  ${HOME}/data/staging/taginfo_data:/usr/src/app/data
+      # - ./start.sh:/usr/src/app/start.sh
+    command: >
+      /bin/bash -c "/usr/src/app/start.sh web"
+    env_file:
+      - ./.env
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8088:80"
+    networks:
+      - ohm_network
+
+  taginfo_db_processor:
+    container_name: taginfo_db_processor_staging
+    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.980.hd903533
+    volumes:
+      - ${HOME}/data/staging/taginfo_data:/usr/src/app/data
+      # - ./start.sh:/usr/src/app/start.sh
+    command: >
+      /bin/bash -c "while true; do /usr/src/app/start.sh data; sleep 72h; done"
+    env_file:
+      - ./.env
+    restart: always
+    networks:
+      - ohm_network
+
+networks:
+  ohm_network:
+    external: true
+    
