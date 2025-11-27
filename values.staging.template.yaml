@@ -85,7 +85,7 @@ osm-seed:
         AWS_ElasticBlockStore_volumeID : vol-05ffbd749907e949f
         AWS_ElasticBlockStore_size: 200Gi
       resources:
-        enabled: true
+        enabled: false
         requests:
           enabled: true
           memory: "3Gi"
@@ -188,7 +188,7 @@ osm-seed:
         WIKIPEDIA_AUTH_ID: {{STAGING_WIKIPEDIA_AUTH_ID}}
         WIKIPEDIA_AUTH_SECRET: {{STAGING_WIKIPEDIA_AUTH_SECRET}}
       resources:
-        enabled: true
+        enabled: false
         requests:
           enabled: true
           memory: "3Gi"
