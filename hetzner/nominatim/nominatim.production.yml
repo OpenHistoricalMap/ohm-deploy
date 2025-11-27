@@ -9,9 +9,14 @@ services:
     container_name: nominatim_ui_production
     ports:
       - '8084:80'
-    environment:
-      NOMINATIM_API_ENDPOINT: https://nominatim.openhistoricalmap.org/
-
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -x && \
+        echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.openhistoricalmap.org/';" \
+        >> /usr/share/nginx/html/ui/theme/config.theme.js && \
+        nginx -g "daemon off;"
 volumes:
   nominatim_data:
     name: nominatim_db_production_18_07_2025
