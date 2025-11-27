@@ -892,6 +892,7 @@ osm-seed:
         ENVIRONMENT: staging
         AWS_S3_BUCKET: taginfo
         INTERVAL_DOWNLOAD_DATA: 7d
+        FETCH_DB_FILES: false
       resources:
         enabled: false
       cronjob:

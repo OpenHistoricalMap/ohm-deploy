@@ -1,12 +1,11 @@
 services:
   taginfo:
     container_name: taginfo_staging
-    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.980.hd903533
+    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.982.h5544c91
     volumes:
       -  ${HOME}/data/staging/taginfo_data:/usr/src/app/data
-      # - ./start.sh:/usr/src/app/start.sh
     command: >
-      /bin/bash -c "/usr/src/app/start.sh web"
+      /bin/bash -c "while true; do /usr/src/app/start.sh web || sleep 5; done"
     env_file:
       - ./.env
     restart: always
@@ -23,10 +22,11 @@ services:
 
   taginfo_db_processor:
     container_name: taginfo_db_processor_staging
-    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.980.hd903533
+    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.982.h5544c91
     volumes:
       - ${HOME}/data/staging/taginfo_data:/usr/src/app/data
       - ${HOME}/.aws:/root/.aws:ro
+      - ./taginfo-cron.log:/var/log/taginfo-cron.log
     # command: >
     #   /bin/bash -c "/usr/src/app/start.sh data"
     command: >
@@ -42,5 +42,3 @@ services:
 networks:
   ohm_network:
     external: true
-    
-    
