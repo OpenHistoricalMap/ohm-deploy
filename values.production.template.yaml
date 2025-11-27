@@ -974,7 +974,7 @@ osm-seed:
 # Variables for taginfo
 # ====================================================================================================
   taginfo:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     serviceAccount:
       enabled: true
