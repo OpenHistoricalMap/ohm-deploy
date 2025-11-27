@@ -106,6 +106,16 @@ http:
       middlewares:
         - secure-headers
 
+    taginfo-production-router:
+      rule: Host(`taginfo.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: taginfo_production
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
     node-exporter-router:
       rule: Host(`node-exporter.openhistoricalmap.org`)
       entryPoints:
@@ -168,7 +178,15 @@ http:
       middlewares:
         - secure-headers
 
-
+    taginfo-staging-router:
+      rule: Host(`taginfo.staging.openhistoricalmap.org`)
+      entryPoints:
+        - port-secure
+      service: taginfo_staging
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - secure-headers
     #################### Production Services ####################
 
   services:
@@ -203,6 +221,11 @@ http:
         servers:
           - url: http://frontend-nginx:80
 
+    taginfo_production:
+      loadBalancer:
+        servers:
+          - url: http://taginfo_production:80
+
     node_exporter_production:
       loadBalancer:
         servers:
@@ -234,6 +257,11 @@ http:
       loadBalancer:
         servers:
           - url: http://host.docker.internal:8086 # 8086 comes from production
+
+    taginfo_staging:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:8088 # 8088 comes from production
 
 providers:
   file:
