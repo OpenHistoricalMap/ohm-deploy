@@ -17,7 +17,7 @@ services:
       retries: 3
       start_period: 60s
     ports:
-      - "8088:80"
+      - "8087:80"
     networks:
       - ohm_network
 
@@ -26,11 +26,15 @@ services:
     image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.980.hd903533
     volumes:
       - ${HOME}/data/staging/taginfo_data:/usr/src/app/data
-      # - ./start.sh:/usr/src/app/start.sh
+      - ${HOME}/.aws:/root/.aws:ro
+    # command: >
+    #   /bin/bash -c "/usr/src/app/start.sh data"
     command: >
-      /bin/bash -c "while true; do /usr/src/app/start.sh data; sleep 72h; done"
+      /bin/bash -c "echo \"${TAGINFO_CRON_SCHEDULE:-0 7 */3 * *} /usr/src/app/start.sh data >> /var/log/taginfo-cron.log 2>&1\" | crontab - && exec cron -f"
     env_file:
       - ./.env
+    environment:
+      - TAGINFO_CRON_SCHEDULE=0 7 */3 * *
     restart: always
     networks:
       - ohm_network
@@ -38,4 +42,5 @@ services:
 networks:
   ohm_network:
     external: true
+    
     

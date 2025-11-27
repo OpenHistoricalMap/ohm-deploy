@@ -21,6 +21,7 @@ The easiest way to deploy is using the `start.sh` script from the parent directo
 ./hetzner/start.sh taginfo staging
 docker compose  -f hetzner/taginfo/taginfo.base.yml up taginfo
 # docker compose  -f hetzner/taginfo/taginfo.base.yml run taginfo_db_processor  bash
+# docker compose -f hetzner/taginfo/taginfo.base.yml -f hetzner/taginfo/taginfo.production.yml run taginfo_db_processor bash
 
 # Deploy to production
 ./hetzner/start.sh taginfo production
