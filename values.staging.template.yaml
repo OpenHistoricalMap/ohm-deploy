@@ -330,7 +330,7 @@ osm-seed:
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
@@ -419,7 +419,7 @@ osm-seed:
           key: "nodegroup_type"
           values: ["job"]
       - name: tm-db
-        enabled: true
+        enabled: false
         serviceAccount:
           enabled: true
           name: ohm-s3-database-backup-access-staging
@@ -890,14 +890,15 @@ osm-seed:
         DOWNLOAD_DB: 'languages wiki'
         CREATE_DB: 'db projects chronology'
         ENVIRONMENT: staging
-        AWS_S3_BUCKET: taginfo
+        AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
         INTERVAL_DOWNLOAD_DATA: 7d
         FETCH_DB_FILES: false
+        TAGINFO_DB_BASE_URL: https://planet-staging.openhistoricalmap.org.s3.amazonaws.com/taginfo
       resources:
         enabled: false
       cronjob:
-        enabled: false
-        schedule: "0 2 */3 * *"
+        enabled: true
+        schedule: "* * * * *"
         nodeAffinity:
           enabled: true
           key: "nodegroup_type"
@@ -913,7 +914,7 @@ osm-seed:
       nodeSelector:
         enabled: false
         label_key: nodegroup_type
-        label_value: web_medium
+        label_value: web
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"

@@ -993,9 +993,13 @@ osm-seed:
       DOWNLOAD_DB: 'languages wiki'
       CREATE_DB: 'db projects chronology'
       ENVIRONMENT: production
-      AWS_S3_BUCKET: taginfo
+      AWS_S3_BUCKET: planet.openhistoricalmap.org
       INTERVAL_DOWNLOAD_DATA: 7d
+<<<<<<< HEAD
       FETCH_DB_FILES: false
+=======
+      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
+>>>>>>> staging
     resources:
       enabled: false
     cronjob:
