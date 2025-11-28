@@ -22,7 +22,7 @@ The easiest way to deploy is using the `start.sh` script from the parent directo
 ./hetzner/start.sh nominatim staging
 
 # Deploy to production
-# cp /hetzner/nominatim/.env.sample /hetzner/nominatim/.envs.nominatim.production
+# cp ./hetzner/nominatim/.env.sample ./hetzner/nominatim/.env.nominatim.production
 ./hetzner/start.sh nominatim production
 
 ```
