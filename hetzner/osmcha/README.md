@@ -1,6 +1,6 @@
 # OSMCha Deployment
 
-Deploy  OSMCha
+OSMCha (OpenStreetMap Changeset Analyzer) deployment is handled manually using Docker Compose.
 
 ## Architecture
 
@@ -13,14 +13,25 @@ This approach reduces duplication and makes configuration management easier.
 
 ## Prerequisites
 
-Before deploying, ensure the environment file exists:
+Before deploying, ensure the environment files exist:
+
+### For Staging
 
 ```sh
 # Copy the example environment file
-cp hetzner/osmcha/env.osmcha.example hetzner/osmcha/.env.osmcha
+cp hetzner/osmcha/.env.sample hetzner/osmcha/.env.osmcha
 ```
 
 Edit `.env.osmcha` and fill in all the required values.
+
+### For Production
+
+```sh
+# Copy the example environment file for production
+cp hetzner/osmcha/.env.sample hetzner/osmcha/.env.osmcha.production
+```
+
+Edit `.env.osmcha.production` and fill in all the required production values.
 
 ## Quick Start with Script
 

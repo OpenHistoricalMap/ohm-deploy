@@ -3,7 +3,7 @@ services:
     image: postgis/postgis:17-3.5
     container_name: osmcha-db_staging
     restart: always
-    env_file: .env.osmcha
+    env_file: ./.env.osmcha.staging
     volumes:
       - osmcha_db_data:/var/lib/postgresql/data
       - ./data_backup:/data_backup
@@ -30,7 +30,7 @@ services:
         python manage.py migrate &&
         python manage.py collectstatic --noinput
       "
-    env_file: .env.osmcha
+    env_file: ./.env.osmcha.staging
     volumes:
       - staticfiles:/app/staticfiles
     depends_on:
@@ -47,7 +47,7 @@ services:
     command: gunicorn config.wsgi -b 0.0.0.0:5000 --access-logfile - --timeout 120 --workers 4 --threads 16
     # ports:
     #   - "5100:5000"
-    env_file: .env.osmcha
+    env_file: ./.env.osmcha.staging
     volumes:
       - staticfiles:/staticfiles
     depends_on:
@@ -76,7 +76,7 @@ services:
   osmcha-cron:
     container_name: osmcha-cron_staging
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
-    env_file: .env.osmcha
+    env_file: ./.env.osmcha.staging
     depends_on:
       osmcha-db:
         condition: service_healthy
@@ -100,10 +100,11 @@ services:
       # - OSMX_INITIAL_SEQNUM=1810000
       - AWS_S3_BUCKET=planet.openhistoricalmap.org
     env_file:
-      - .env.osmcha
+      - ./.env.osmcha.staging
     restart: always
     volumes:
       - ohmx_db:/data
+      - ${HOME}/.aws:/root/.aws:ro
     networks:
       - ohm_network
     cpus: '4.0'
@@ -123,4 +124,3 @@ volumes:
 networks:
   ohm_network:
     external: true
-

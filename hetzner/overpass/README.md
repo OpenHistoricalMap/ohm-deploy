@@ -1,6 +1,6 @@
 # Overpass API Deployment
 
-Overpass API is automatically deployed through GitHub Actions. However, you can also deploy it manually.
+Overpass API deployment is handled manually using Docker Compose.
 
 ## Architecture
 
@@ -57,4 +57,4 @@ For the production environment, the exposed port is **8086**
 
 - Make sure you set the right ports in values.staging.template.yaml and values.production.template.yaml file to avoid conflicts.
 
-- Staging containers may be disabled by default. To stop deployments for staging or production, comment out or disable the corresponding branch in the relevant GitHub Actions workflow file.
+- Staging and production environments are managed independently through Docker Compose.

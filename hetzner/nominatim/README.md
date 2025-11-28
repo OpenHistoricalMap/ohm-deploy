@@ -1,6 +1,6 @@
 # Nominatim Deployment
 
-Nominatim API and UI are automatically deployed through GitHub Actions. However, you can also deploy it manually.
+Nominatim API and UI deployment is handled manually using Docker Compose.
 
 ## Architecture
 
