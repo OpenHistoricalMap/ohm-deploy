@@ -1,12 +1,11 @@
 services:
-  overpass_staging:
+  overpass:
     image: developmentseed/osmseed-overpass-api:0.1.0-0.dev.git.956.h49d677b
     container_name: overpass_staging
-    # user: "root"
     ports:
       - '8085:80'
     volumes:
-      - overpass_data_staging:/db
+      - overpass_data:/db
     environment:
       OVERPASS_META: attic
       OVERPASS_MODE: init
@@ -16,8 +15,11 @@ services:
       OVERPASS_PLANET_PREPROCESS: "mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf"
       OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1796000
       OVERPASS_ALLOW_DUPLICATE_QUERIES: yes
-    env_file:
-      - .env.overpass
+      # Need to overwrite
+      BRANCH_NAME: main
+      REPO: OpenHistoricalMap/ohm-deploy
+      ENVIRONMENT: production
+      REMOTE_APP_DIR: /production/overpass
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
@@ -29,11 +31,13 @@ services:
     cpus: 8
     networks:
       - ohm_network
+
 networks:
   ohm_network:
     external: true
 
 volumes:
-  overpass_data_staging:
+  overpass_data:
     driver: local
-    name: overpass_db_31_07_2025_v3
+    name: overpass_db
+

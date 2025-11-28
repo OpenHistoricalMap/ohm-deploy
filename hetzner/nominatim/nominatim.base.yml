@@ -1,5 +1,6 @@
 services:
   nominatim:
+    container_name: nominatim_staging
     image: developmentseed/osmseed-nominatim:0.1.0-0.dev.git.956.h49d677b
     volumes:
       - nominatim_data:/var/lib/postgresql/16/main
@@ -30,15 +31,20 @@ services:
       start_period: 120m
     networks:
       - ohm_network
-
+    ports:
+      - '8081:8080'
+    env_file:
+      - ./.env.sample
+      
   nominatim_ui:
+    container_name: nominatim_ui_staging
     image: ghcr.io/openhistoricalmap/nominatim-ui:a469b5e
     command:
       - /bin/sh
       - -c
       - |
         set -x && \
-        echo "Nominatim_Config.Nominatim_API_Endpoint = '${NOMINATIM_API_ENDPOINT}';" \
+        echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.staging.openhistoricalmap.org/';" \
         >> /usr/share/nginx/html/ui/theme/config.theme.js && \
         nginx -g "daemon off;"
     restart: always
@@ -50,10 +56,14 @@ services:
       start_period: 20s
     networks:
       - ohm_network
+    ports:
+      - '8082:80'
 
 networks:
   ohm_network:
     external: true
+    
 volumes:
   nominatim_data:
     driver: local
+    name: nominatim_db

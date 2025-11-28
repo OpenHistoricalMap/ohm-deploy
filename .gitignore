@@ -25,3 +25,7 @@ images/tiler-server/utils/exec.sh
 __pycache__/
 **/.env.*
 images/tiler-server/vtiles_languages.geojson
+
+!hetzner/*/.*.sample
+
+hetzner/*/.envs.*.production

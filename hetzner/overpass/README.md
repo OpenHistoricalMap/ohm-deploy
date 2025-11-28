@@ -1,31 +1,60 @@
 # Overpass API Deployment
 
-Overpass API is automatically deployed through GitHub Actions. However, you can also deploy it manually.
+Overpass API deployment is handled manually using Docker Compose.
 
+## Architecture
+
+The deployment uses a **base + override** pattern with Docker Compose:
+- `overpass.base.yml` - Shared configuration for both environments
+- `overpass.staging.yml` - Staging-specific overrides (minimal, uses base config)
+- `overpass.production.yml` - Production-specific overrides
+
+This approach reduces duplication and makes configuration management easier.
+
+## Quick Start with Script
+
+The easiest way to deploy is using the `deploy.sh` script from the parent directory:
+
+```sh
+# Deploy to staging
+./hetzner/deploy.sh start overpass staging
+
+# Deploy to production
+./hetzner/deploy.sh start overpass production
+
+# Stop service
+./hetzner/deploy.sh stop overpass staging
+
+# Restart service
+./hetzner/deploy.sh restart overpass production
+```
+
+## Manual Deployment
 
 ### Staging
 
 ```sh
-cd /staging/overpass
-docker compose -f hetzner/overpass/overpass.staging.yml up -d
-# Make sure you have the correct permissions for the database.
-# docker exec -it overpass_staging bash
-# chmod -R u+rwX,g+rX,o+rX /db
-
+docker compose -f hetzner/overpass/overpass.base.yml up -d
 ```
-For the staging environment, the exposed port is 8085
+
+For the staging environment, the exposed port is **8085**
 
 ### Production
 
 ```sh
-cd /production/overpass
-docker compose -f hetzner/overpass/overpass.production.yml up -d --remove-orphans  --force-recreate
+docker compose -f hetzner/overpass/overpass.base.yml -f hetzner/overpass/overpass.production.yml up -d
 ```
-For the production environment, the exposed port is 8086
 
-Make sure you set the right ports in values.staging.template.yaml and values.production.template.yaml file to avoid conflicts.
+For the production environment, the exposed port is **8086**
 
+## Notes
 
-**Note:** 
+- Make sure you have the correct permissions for the database if needed:
+  ```sh
+  docker exec -it overpass_staging bash
+  chmod -R u+rwX,g+rX,o+rX /db
+  ```
 
-Staging containers may be disabled by default. To stop deployments for staging or production, comment out or disable the corresponding branch in the relevant GitHub Actions workflow file.
+- Make sure you set the right ports in values.staging.template.yaml and values.production.template.yaml file to avoid conflicts.
+
+- Staging and production environments are managed independently through Docker Compose.
