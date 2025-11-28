@@ -173,7 +173,7 @@ osm-seed:
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
-        WEBSITE_STATUS: "api_readonly"
+        WEBSITE_STATUS: "online"
         RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
         RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
         RAILS_ENV: production
