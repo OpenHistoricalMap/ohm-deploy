@@ -34,7 +34,7 @@ services:
     ports:
       - '8081:8080'
     env_file:
-      - ./envs.sample
+      - ./.env.sample
       
   nominatim_ui:
     container_name: nominatim_ui_staging
@@ -66,4 +66,4 @@ networks:
 volumes:
   nominatim_data:
     driver: local
-    name: nominatim_db_18_07_2025
+    name: nominatim_db

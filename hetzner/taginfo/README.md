@@ -1,6 +1,6 @@
 # Taginfo Deployment
 
-Taginfo is automatically deployed through GitHub Actions. However, you can also deploy it manually.
+Taginfo deployment is handled manually using Docker Compose.
 
 ## Architecture
 

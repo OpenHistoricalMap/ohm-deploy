@@ -44,8 +44,75 @@ echo "================================================"
 
 case "$ACTION" in
     start)
+        # Show merged configuration before deploying
+        echo ""
+        echo "Preview of merged configuration:"
+        echo "================================================"
+        
+        # Try to use colored output if available
+        if command -v bat &> /dev/null; then
+            $COMPOSE_CMD config | bat --language yaml --style=plain
+        elif command -v pygmentize &> /dev/null; then
+            $COMPOSE_CMD config | pygmentize -l yaml
+        elif command -v highlight &> /dev/null; then
+            $COMPOSE_CMD config | highlight --out-format=ansi --syntax=yaml
+        else
+            # Fallback: use basic colors with grep/awk
+            $COMPOSE_CMD config | while IFS= read -r line; do
+                if [[ "$line" =~ ^[[:space:]]*# ]]; then
+                    # Comments in gray
+                    echo -e "\033[0;90m$line\033[0m"
+                elif [[ "$line" =~ ^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*: ]]; then
+                    # Keys in yellow
+                    key=$(echo "$line" | sed 's/:.*//')
+                    rest=$(echo "$line" | sed 's/^[^:]*://')
+                    echo -e "\033[0;33m$key\033[0m:\033[0;36m$rest\033[0m"
+                elif [[ "$line" =~ ^[[:space:]]*- ]]; then
+                    # List items in cyan
+                    echo -e "\033[0;36m$line\033[0m"
+                else
+                    echo "$line"
+                fi
+            done
+        fi
+        
+        echo "================================================"
+        echo ""
+        
+        # Ask for confirmation, especially for production
+        if [ "$ENVIRONMENT" = "production" ]; then
+            echo "⚠️  WARNING: You are about to deploy to PRODUCTION"
+            echo ""
+            read -p "Do you want to continue? (yes/no): " confirm
+            if [ "$confirm" != "yes" ]; then
+                echo "Deployment cancelled."
+                exit 0
+            fi
+        else
+            read -p "Do you want to continue with deployment? (yes/no): " confirm
+            if [ "$confirm" != "yes" ]; then
+                echo "Deployment cancelled."
+                exit 0
+            fi
+        fi
+        
+        echo ""
+        echo "Starting deployment..."
         $COMPOSE_CMD up -d
-        echo "Service started: $SERVICE ($ENVIRONMENT)"
+        echo ""
+        echo "✓ Service started: $SERVICE ($ENVIRONMENT)"
+        echo ""
+        echo "================================================"
+        echo "Useful commands:"
+        echo "================================================"
+        echo ""
+        echo "# List running containers for this service:"
+        echo "docker ps | grep ${SERVICE}"
+        echo "docker exec -it ${SERVICE}_${ENVIRONMENT} bash"
+        echo ""
+        echo "# View logs:"
+        echo "$COMPOSE_CMD logs -f"
+        echo ""
         ;;
     stop)
         $COMPOSE_CMD down
