@@ -39,5 +39,5 @@ networks:
 volumes:
   overpass_data:
     driver: local
-    name: overpass_db_31_07_2025_v3
+    name: overpass_db
 
