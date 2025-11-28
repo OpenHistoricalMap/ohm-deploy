@@ -4,7 +4,9 @@ services:
     ports:
       - '8083:8080'
     mem_limit: 16g
-
+    env_file:
+      - ./.env.nominatim.production
+      
   nominatim_ui:
     container_name: nominatim_ui_production
     ports:
@@ -17,8 +19,6 @@ services:
         echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.openhistoricalmap.org/';" \
         >> /usr/share/nginx/html/ui/theme/config.theme.js && \
         nginx -g "daemon off;"
-    env_file:
-      - ./.envs.nominatim.production
 volumes:
   nominatim_data:
-    name: nominatim_db_production_18_07_2025
+    name: nominatim_db_18_07_2025
