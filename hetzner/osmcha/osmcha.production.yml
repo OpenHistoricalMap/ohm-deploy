@@ -1,0 +1,33 @@
+services:
+  osmcha-db:
+    container_name: osmcha-db_production
+
+  osmcha-redis:
+    container_name: osmcha-redis_production
+
+  osmcha-init:
+    container_name: osmcha-init_production
+
+  osmcha-api:
+    container_name: osmcha-api_production
+
+  frontend-nginx:
+    container_name: frontend-nginx_production
+
+  osmcha-cron:
+    container_name: osmcha-cron_production
+
+  osmcha_ohmx_adiff:
+    container_name: osmcha_ohmx_adiff_production
+
+volumes:
+  osmcha_db_data:
+    driver: local
+    name: osmcha_db_11102025
+  staticfiles:
+    driver: local
+    name: osmcha_staticfiles_11102025
+  ohmx_db:
+    driver: local
+    name: ohmx_db
+

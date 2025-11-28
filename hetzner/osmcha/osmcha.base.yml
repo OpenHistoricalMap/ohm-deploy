@@ -1,7 +1,7 @@
 services:
   osmcha-db:
     image: postgis/postgis:17-3.5
-    container_name: osmcha-db
+    container_name: osmcha-db_staging
     restart: always
     env_file: .env.osmcha
     volumes:
@@ -17,13 +17,13 @@ services:
       - ohm_network
 
   osmcha-redis:
-    container_name: osmcha-redis
+    container_name: osmcha-redis_staging
     image: redis:latest
     networks:
       - ohm_network
 
   osmcha-init:
-    container_name: osmcha-init
+    container_name: osmcha-init_staging
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
     command: >
       sh -c "
@@ -42,7 +42,7 @@ services:
       - ohm_network
 
   osmcha-api:
-    container_name: osmcha-api
+    container_name: osmcha-api_staging
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
     command: gunicorn config.wsgi -b 0.0.0.0:5000 --access-logfile - --timeout 120 --workers 4 --threads 16
     # ports:
@@ -59,7 +59,7 @@ services:
       - ohm_network
 
   frontend-nginx:
-    container_name: frontend-nginx
+    container_name: frontend-nginx_staging
     image: ghcr.io/openhistoricalmap/osmcha-frontend:df5e9b5
     # ports:
     #   - "8100:80"
@@ -70,12 +70,11 @@ services:
       - ${PWD}/hetzner/osmcha/config/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - osmcha-api
-
     networks:
       - ohm_network
 
   osmcha-cron:
-    container_name: osmcha-cron
+    container_name: osmcha-cron_staging
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
     env_file: .env.osmcha
     depends_on:
@@ -92,7 +91,7 @@ services:
 
   osmcha_ohmx_adiff:
     image: ghcr.io/openhistoricalmap/ohmx-adiff-builder:0.0.1-0.dev.git.2836.hbee0465
-    container_name: osmcha_ohmx_adiff
+    container_name: osmcha_ohmx_adiff_staging
     environment:
       - API_URL=https://api.openhistoricalmap.org
       - PLANET_PBF_URL=https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250807_0102.osm.pbf
@@ -113,15 +112,15 @@ services:
 volumes:
   osmcha_db_data:
     driver: local
-    name: osmcha_db_11102025
+    name: osmcha_db
   staticfiles:
     driver: local
-    name: osmcha_staticfiles_11102025
+    name: osmcha_staticfiles
   ohmx_db:
     driver: local
-    name: ohmx_db
+    name: ohmx_db_staging
 
 networks:
   ohm_network:
     external: true
-    
+
