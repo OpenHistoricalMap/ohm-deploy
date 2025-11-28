@@ -17,10 +17,12 @@ The easiest way to deploy is using the `start.sh` script from the parent directo
 
 ```sh
 
+
 # Deploy to staging explicitly
 ./hetzner/start.sh nominatim staging
 
 # Deploy to production
+# cp /hetzner/nominatim/.env.sample /hetzner/nominatim/.envs.nominatim.production
 ./hetzner/start.sh nominatim production
 
 ```

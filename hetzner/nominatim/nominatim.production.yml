@@ -17,6 +17,8 @@ services:
         echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.openhistoricalmap.org/';" \
         >> /usr/share/nginx/html/ui/theme/config.theme.js && \
         nginx -g "daemon off;"
+    env_file:
+      - ./.envs.nominatim.production
 volumes:
   nominatim_data:
     name: nominatim_db_production_18_07_2025

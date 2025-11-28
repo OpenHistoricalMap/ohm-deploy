@@ -33,7 +33,9 @@ services:
       - ohm_network
     ports:
       - '8081:8080'
-
+    env_file:
+      - ./envs.sample
+      
   nominatim_ui:
     container_name: nominatim_ui_staging
     image: ghcr.io/openhistoricalmap/nominatim-ui:a469b5e
