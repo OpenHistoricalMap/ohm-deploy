@@ -30,8 +30,12 @@ EOF
     echo "S3 storage configuration set successfully."
   fi
 
+
   #### Initializing an empty $workdir/config/settings.local.yml file, typically used for development settings
   echo "" > $workdir/config/settings.local.yml
+
+  #### Fix translation files: replace {مجتمع} with {community} to prevent KeyError
+  find "$workdir/node_modules/osm-community-index/i18n" -name "*.yaml" -type f -exec sed -i 's/{مجتمع}/{community}/g' {} \;
 
   #### Setting up server_url and server_protocol
   sed -i -e 's/^server_protocol: ".*"/server_protocol: "'$SERVER_PROTOCOL'"/g' $workdir/config/settings.yml
@@ -173,8 +177,8 @@ setup_production() {
   fi
 
   echo "Logging and tailing logs..."
-  # log_and_tail /var/www/log/production.log
-  # log_and_tail /var/www/log/jobs_work.log
+  log_and_tail /var/www/log/production.log
+  log_and_tail /var/www/log/jobs_work.log
   log_and_tail /var/log/apache2/error.log
   log_and_tail /var/log/apache2/access.log
 

@@ -29,3 +29,4 @@ images/tiler-server/vtiles_languages.geojson
 !hetzner/*/.*.sample
 
 hetzner/*/.envs.*.production
+.vscode
