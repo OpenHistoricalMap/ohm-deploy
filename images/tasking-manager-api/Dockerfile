@@ -103,7 +103,7 @@ COPY --from=build --chown=appuser:appuser --chmod=755 /opt/python /opt/python
 RUN echo "Update TM version 094704cd2f4611de2f7c7ef0daba520ac58bce01"
 USER root
 RUN git clone https://github.com/OpenHistoricalMap/tasking-manager.git /usr/src/app && \
-    git checkout -f 094704cd2f4611de2f7c7ef0daba520ac58bce01
+    git checkout -f 1978264fb1c7158b63a8345c2477a1cd8dce3829
 
 RUN chown -R appuser:appuser ./
 

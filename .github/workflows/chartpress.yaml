@@ -5,6 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'staging_deploy'
+      - 'tm_api'
 jobs:
   build:
     runs-on: ubuntu-22.04
