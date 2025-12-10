@@ -813,7 +813,7 @@ osm-seed:
       POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
       TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
       TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
-      TM_EMAIL_CONTACT_ADDRESS: admin@openhistoricalmap.org
+      TM_EMAIL_CONTACT_ADDRESS: dev@openhistoricalmap.org
       TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
       TM_SMTP_PORT: 25
       TM_SMTP_USER: {{MAILER_USERNAME}}
