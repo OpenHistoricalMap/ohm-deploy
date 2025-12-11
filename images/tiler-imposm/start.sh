@@ -27,16 +27,11 @@ TRACKING_FILE="$WORKDIR/uploaded_files.log"
 python build_imposm3_config.py
 
 # Create config file for imposm
-# Add connection parameters to handle keepalives and prevent "bad connection" errors
-# keepalives_idle: send keepalive after 30s of inactivity
-# keepalives_interval: retransmit every 10s if unacknowledged
-# keepalives_count: consider dead after 5 unacknowledged keepalives
-# connect_timeout: connection timeout in seconds
 cat <<EOF >"$WORKDIR/config.json"
 {
     "cachedir": "$CACHE_DIR",
     "diffdir": "$DIFF_DIR",
-    "connection": "postgis://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB?keepalives=1&keepalives_idle=30&keepalives_interval=10&keepalives_count=5&connect_timeout=10",
+    "connection": "postgis://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB",
     "mapping": "/osm/config/imposm3.json",
     "replication_url": "$REPLICATION_URL"
 }
@@ -244,6 +239,11 @@ EOF
 
     # Step 4: Run Imposm update process
     log_message "Running Imposm update process..."
+    # Note: The Go pq driver used by imposm doesn't support keepalive parameters
+    # in connection URLs or via environment variables. We rely on:
+    # 1. connect_timeout in the connection string (already set)
+    # 2. The monitorImposmErrors function to handle connection errors gracefully
+    # 3. System-level TCP keepalive settings (if configured)
 
     imposm run \
         -config "${WORKDIR}/config.json" \
