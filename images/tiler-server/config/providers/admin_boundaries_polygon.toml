@@ -15,6 +15,8 @@ SELECT
     area_km2,  
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_areas_z0_2

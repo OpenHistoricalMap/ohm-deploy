@@ -15,6 +15,8 @@ SELECT
     area_km2, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z0_2
@@ -38,6 +40,8 @@ SELECT
     area_km2, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z3_5
@@ -61,6 +65,8 @@ SELECT
     area_km2, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z6_7
@@ -84,6 +90,8 @@ SELECT
     area_km2, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z8_9
@@ -107,6 +115,8 @@ SELECT
     area_km2, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z10_12
@@ -130,6 +140,8 @@ SELECT
     area_km2, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z13_15
@@ -153,6 +165,8 @@ SELECT
     area_km2, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_centroids_z16_20

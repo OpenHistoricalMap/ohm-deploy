@@ -15,6 +15,8 @@ SELECT
     end_date, 
     start_decdate, 
     end_decdate,
+    short_name,
+    official_name,
     {{LENGUAGES}}
 FROM 
     mv_admin_maritime_lines_z0_5
@@ -39,6 +41,7 @@ SELECT
     end_date, 
     start_decdate, 
     end_decdate,
+
     {{LENGUAGES}}
 FROM 
     mv_admin_maritime_lines_z6_9 
@@ -63,6 +66,7 @@ SELECT
     end_date, 
     start_decdate, 
     end_decdate,
+
     {{LENGUAGES}}
 FROM 
     mv_admin_maritime_lines_z10_15

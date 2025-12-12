@@ -105,6 +105,13 @@ BEGIN
     INTO result
     FROM languages;
 
+    -- Add short_name and official_name columns
+    IF result IS NOT NULL AND result <> '' THEN
+        result := result || ', tags -> ''short_name'' AS short_name, tags -> ''official_name'' AS official_name';
+    ELSE
+        result := 'tags -> ''short_name'' AS short_name, tags -> ''official_name'' AS official_name';
+    END IF;
+
     RETURN COALESCE(result, '');
 END;
 $$ LANGUAGE plpgsql;
