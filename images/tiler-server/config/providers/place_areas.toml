@@ -15,6 +15,8 @@ SELECT
     start_decdate, 
     end_decdate, 
     capital,
+    short_name,
+    official_name,
     {{LENGUAGES}}
 FROM 
     mv_place_areas_z14_20 

@@ -21,7 +21,7 @@ services:
 
   imposm_staging:
     container_name: tiler_imposm_staging
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3060.h27bc0c6
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3175.hbdd6021
     volumes:
       - tiler_staging_imposmdata:/mnt/data
     command:
@@ -38,7 +38,7 @@ services:
 
   tiler_server_staging:
     container_name: tiler_server_staging
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3061.h8fd5171
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3175.hbdd6021
     ports:
       - "9091:9090"
     env_file:
@@ -106,10 +106,10 @@ services:
 volumes:
   tiler_staging_pgdata:
     driver: local
-    name: tiler_db_07_11_v1
+    name: tiler_db_1512
   tiler_staging_imposmdata:
     driver: local
-    name: tiler_imposm_07_11_v1
+    name: tiler_imposm_11512
 
 networks:
   ohm_network:

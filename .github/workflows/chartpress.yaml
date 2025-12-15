@@ -5,6 +5,7 @@ on:
       - 'main'
       - 'staging'
       - 'staging_deploy'
+      - 'tiler_refresh'
 jobs:
   build:
     runs-on: ubuntu-22.04
