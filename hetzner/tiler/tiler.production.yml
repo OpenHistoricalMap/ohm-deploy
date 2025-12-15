@@ -26,7 +26,7 @@ services:
   # imposm3
   imposm_production:
     container_name: tiler_imposm_production
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3060.h27bc0c6
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3175.hbdd6021
     volumes:
       - tiler_production_imposmdata:/mnt/data
     command:
@@ -49,7 +49,7 @@ services:
   # Tiler server
   tiler_server_production:
     container_name: tiler_server_production
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3061.h8fd5171
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3175.hbdd6021
     ports:
       - "9090:9090"
     env_file:
@@ -148,10 +148,10 @@ services:
 volumes:
   tiler_production_pgdata:
     driver: local
-    name: tiler_db_07_11_v1
+    name: tiler_db_1212_v2
   tiler_production_imposmdata:
     driver: local
-    name: tiler_imposm_07_11_v1
+    name: tiler_imposm_1212_v2
 
 networks:
   ohm_network:

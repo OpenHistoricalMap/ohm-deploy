@@ -137,6 +137,67 @@ function uploadLastState() {
     fi
 }
 
+# Function to monitor imposm process and handle connection errors
+# Parameters:
+#   $1: IMPOSM_PID - Process ID of the imposm process
+#   $2: UPLOADER_PID - Process ID of the uploader background process
+function monitorImposmErrors() {
+    local IMPOSM_PID=$1
+    local UPLOADER_PID=$2
+    local ERROR_COUNT=0
+    local MAX_ERRORS=3
+    local LOG_FILE="/tmp/imposm.log"
+    
+    while true; do
+        log_message "Checking for errors during minute replication import into the database"
+        
+        # Check for connection errors specifically
+        if grep -q "driver: bad connection" "$LOG_FILE" || grep -q "\[error\] Importing.*bad connection" "$LOG_FILE"; then
+            ERROR_COUNT=$((ERROR_COUNT + 1))
+            log_message "Detected bad connection error (count: $ERROR_COUNT/$MAX_ERRORS). Waiting before retry..."
+            
+            # Check if imposm process is still running
+            if ! kill -0 $IMPOSM_PID 2>/dev/null; then
+                log_message "Imposm process has died. Restarting container..."
+                kill $UPLOADER_PID 2>/dev/null
+                exit 1
+            fi
+            
+            # If we've hit max errors, restart
+            if [ $ERROR_COUNT -ge $MAX_ERRORS ]; then
+                log_message "Max connection errors reached ($MAX_ERRORS). Restarting container..."
+                kill $UPLOADER_PID 2>/dev/null
+                kill $IMPOSM_PID 2>/dev/null
+                exit 1
+            fi
+            
+            # Wait a bit and check if connection recovers
+            sleep 30
+            # Clear the error from log to avoid immediate re-trigger
+            sed -i '/driver: bad connection/d' "$LOG_FILE" 2>/dev/null || true
+        elif grep -q "\[error\] Importing" "$LOG_FILE"; then
+            # Other import errors - log but don't immediately restart
+            log_message "Detected [error] Importing in Imposm log. Monitoring..."
+            ERROR_COUNT=$((ERROR_COUNT + 1))
+            
+            if [ $ERROR_COUNT -ge $MAX_ERRORS ]; then
+                log_message "Max errors reached ($MAX_ERRORS). Restarting container..."
+                kill $UPLOADER_PID 2>/dev/null
+                kill $IMPOSM_PID 2>/dev/null
+                exit 1
+            fi
+        else
+            # Reset error count if no errors found
+            if [ $ERROR_COUNT -gt 0 ]; then
+                log_message "No errors detected. Resetting error count."
+                ERROR_COUNT=0
+            fi
+        fi
+        
+        sleep 10
+    done
+}
+
 function updateData() {
     log_message "Starting database update process..."
 
@@ -178,6 +239,11 @@ EOF
 
     # Step 4: Run Imposm update process
     log_message "Running Imposm update process..."
+    # Note: The Go pq driver used by imposm doesn't support keepalive parameters
+    # in connection URLs or via environment variables. We rely on:
+    # 1. connect_timeout in the connection string (already set)
+    # 2. The monitorImposmErrors function to handle connection errors gracefully
+    # 3. System-level TCP keepalive settings (if configured)
 
     imposm run \
         -config "${WORKDIR}/config.json" \
@@ -187,17 +253,8 @@ EOF
         -quiet 2>&1 | tee /tmp/imposm.log &
     IMPOSM_PID=$!
 
-    # Step 5: Check update process and restart
-    while true; do
-        log_message "Checking for errors during minute replication import into the database"
-        if grep -q "\[error\] Importing" /tmp/imposm.log; then
-            log_message "Detected [error] Importing in Imposm log. Restarting container..."
-            kill $UPLOADER_PID 2>/dev/null
-            kill $IMPOSM_PID 2>/dev/null
-            exit 1
-        fi
-        sleep 10
-    done
+    # Step 5: Monitor imposm process and handle errors
+    monitorImposmErrors $IMPOSM_PID $UPLOADER_PID
 }
 
 function importData() {
