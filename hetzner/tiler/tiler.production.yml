@@ -91,7 +91,7 @@ services:
 
   tile_global_seeding_production:
       container_name: tiler_global_seeding_production
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3061.h8fd5171
+      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3175.hbdd6021
       env_file:
         - .env.production
       volumes:
@@ -111,7 +111,7 @@ services:
 
   tile_coverage_seeding_production:
     container_name: tiler_coverage_seeding_production
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3061.h8fd5171
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3175.hbdd6021
     env_file:
       - .env.production
     volumes:
