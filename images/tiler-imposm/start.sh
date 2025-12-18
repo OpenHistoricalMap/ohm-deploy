@@ -149,7 +149,7 @@ function monitorImposmErrors() {
     local LOG_FILE="/tmp/imposm.log"
     
     while true; do
-        log_message "Checking for errors during minute replication import into the database"
+        log_message "Checking minute replication import into the database"
         
         # Check for connection errors specifically
         if grep -q "driver: bad connection" "$LOG_FILE" || grep -q "\[error\] Importing.*bad connection" "$LOG_FILE"; then
