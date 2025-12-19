@@ -2,19 +2,21 @@
 -- Function: create_transport_lines_mview
 -- Description:
 --   Creates a materialized view that merges transport lines from:
---     - `lines_table` (ways: e.g. highway, railway),
---     - `multilines_table` (relations: e.g. route relations).
+--     - `osm_transport_lines` (ways: e.g. highway, railway),
+--     - `osm_transport_multilines` (relations: e.g. route relations).
 --
---   Each row gets a hash-based `id` and is marked with a `source_type`
---   ('way' or 'relation'). Multilingual name columns are added.
+--   Each row gets a concatenated `id` (id + osm_id) and is marked with a 
+--   `source_type` ('way' or 'relation'). Multilingual name columns are added.
+--   Supports geometry simplification and filtering by type/class.
 --
 -- Parameters:
---   lines_table       TEXT - Table with way-based transport lines.
---   multilines_table  TEXT - Table with relation-based transport lines.
---   view_name         TEXT - Final materialized view name.
+--   view_name            TEXT    - Final materialized view name.
+--   simplified_tolerance INTEGER - Tolerance for ST_Simplify (0 = no simplification).
+--   types                TEXT[]  - Array of types to include (use ARRAY['*'] for all).
+--   classes              TEXT[]  - Array of classes to include (use ARRAY['*'] for all).
 --
 -- Notes:
---   - Input tables must include geometry, osm_id, type, class, name, and transport tags.
+--   - Filtering uses OR logic: (type IN types) OR (class IN classes).
 --   - Only valid geometries (LineString) are included from relation sources.
 --   - View uses GiST index on geometry and unique index on `id`.
 -- ============================================================================
@@ -22,28 +24,44 @@
 DROP FUNCTION IF EXISTS create_transport_lines_mview;
 
 CREATE OR REPLACE FUNCTION create_transport_lines_mview(
-  lines_table TEXT,
-  multilines_table TEXT,
-  view_name TEXT
+  view_name TEXT,
+  simplified_tolerance INTEGER,
+  types TEXT[],
+  classes TEXT[]
 )
 RETURNS void AS $$
 DECLARE
   lang_columns TEXT := get_language_columns();
   tmp_view_name TEXT := view_name || '_tmp';
   unique_columns TEXT := 'id';
+  type_filter TEXT;
+  class_filter TEXT;
   sql_create TEXT;
 BEGIN
+  -- Build type filter: '*' means all types
+  IF types @> ARRAY['*'] THEN
+    type_filter := '1=1';
+  ELSE
+    type_filter := format('type = ANY(%L)', types);
+  END IF;
+
+  -- Build class filter: '*' means all classes
+  IF classes @> ARRAY['*'] THEN
+    class_filter := '1=1';
+  ELSE
+    class_filter := format('class = ANY(%L)', classes);
+  END IF;
+
   sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
     WITH combined AS (
       SELECT
-        md5(
-          COALESCE(CAST(osm_id AS TEXT), '') || '_' ||
-          COALESCE(type, '') || '_' ||
-          COALESCE(class, '')
-        ) AS id,
+        (COALESCE(CAST(id AS TEXT), '') || '_' || COALESCE(CAST(osm_id AS TEXT), '')) AS id,
         ABS(osm_id) AS osm_id,
-        geometry,
+        CASE 
+          WHEN %s > 0 THEN ST_Simplify(geometry, %s)
+          ELSE geometry
+        END AS geometry,
         --  Detect highways in construcion https://github.com/OpenHistoricalMap/issues/issues/1151
         CASE
             WHEN highway = 'construction' THEN
@@ -77,20 +95,20 @@ BEGIN
         NULL AS member,
         'way' AS source_type,
         %s
-      FROM %I
+      FROM osm_transport_lines
       WHERE geometry IS NOT NULL
+        AND ( %s
+        OR %s)
 
       UNION ALL
 
       SELECT
-        md5(
-          COALESCE(CAST(osm_id AS TEXT), '') || '_' ||
-          COALESCE(CAST(member AS TEXT), '') || '_' ||
-          COALESCE(type, '') || '_' ||
-          COALESCE(class, '')
-        ) AS id,
+        (COALESCE(CAST(id AS TEXT), '') || '_' || COALESCE(CAST(osm_id AS TEXT), '')) AS id,
         ABS(osm_id) AS osm_id,
-        geometry,
+        CASE 
+          WHEN %s > 0 THEN ST_Simplify(geometry, %s)
+          ELSE geometry
+        END AS geometry,
         CASE
             WHEN highway = 'construction' THEN
                 -- If the 'construction' tag has a value, append '_construction'. Otherwise, use 'road_construction'.
@@ -123,12 +141,16 @@ BEGIN
         member,
         'relation' AS source_type,
         %s
-      FROM %I
+      FROM osm_transport_multilines
       WHERE ST_GeometryType(geometry) = 'ST_LineString' AND geometry IS NOT NULL
+        AND (%s
+        OR %s)
     )
     SELECT DISTINCT ON (id) *
     FROM combined;
-  $sql$, tmp_view_name, lang_columns, lines_table, lang_columns, multilines_table);
+  $sql$, tmp_view_name, 
+         simplified_tolerance, simplified_tolerance, lang_columns, type_filter, class_filter,
+         simplified_tolerance, simplified_tolerance, lang_columns, type_filter, class_filter);
 
   PERFORM finalize_materialized_view(
     tmp_view_name,
@@ -142,11 +164,11 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Create materialized views for  transport lines
 -- ============================================================================
-SELECT create_transport_lines_mview('osm_transport_lines_z5', 'osm_transport_multilines_z5', 'mv_transport_lines_z5');
-SELECT create_transport_lines_mview('osm_transport_lines_z6', 'osm_transport_multilines_z6', 'mv_transport_lines_z6');
-SELECT create_transport_lines_mview('osm_transport_lines_z7', 'osm_transport_multilines_z7', 'mv_transport_lines_z7');
-SELECT create_transport_lines_mview('osm_transport_lines_z8', 'osm_transport_multilines_z8', 'mv_transport_lines_z8');
-SELECT create_transport_lines_mview('osm_transport_lines_z9', 'osm_transport_multilines_z9', 'mv_transport_lines_z9');
-SELECT create_transport_lines_mview('osm_transport_lines_z10_11', 'osm_transport_multilines_z10_11', 'mv_transport_lines_z10_11');
-SELECT create_transport_lines_mview('osm_transport_lines_z12_13', 'osm_transport_multilines_z12_13', 'mv_transport_lines_z12_13');
-SELECT create_transport_lines_mview('osm_transport_lines', 'osm_transport_multilines', 'mv_transport_lines_z14_20');
+SELECT create_transport_lines_mview('mv_transport_lines_z5', 2000, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail'], ARRAY['railway']);
+SELECT create_transport_lines_mview('mv_transport_lines_z6', 1500, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail'], ARRAY['railway']);
+SELECT create_transport_lines_mview('mv_transport_lines_z7', 1000, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail'], ARRAY['railway']);
+SELECT create_transport_lines_mview('mv_transport_lines_z8', 500, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link'], ARRAY['railway']);
+SELECT create_transport_lines_mview('mv_transport_lines_z9', 200, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link'], ARRAY['railway']);
+SELECT create_transport_lines_mview('mv_transport_lines_z10_11', 100, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'taxiway', 'runway'], ARRAY['railway']);
+SELECT create_transport_lines_mview('mv_transport_lines_z12_13', 50, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified'], ARRAY['railway']);
+SELECT create_transport_lines_mview('mv_transport_lines_z14_20', 0, ARRAY['*'], ARRAY['railway','route']);
