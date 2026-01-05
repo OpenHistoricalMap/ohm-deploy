@@ -54,7 +54,7 @@
       ],
       "type": "linestring",
       "filters": {
-        "exclude_tags": [
+        "reject": [
           [
             "area",
             "yes"
