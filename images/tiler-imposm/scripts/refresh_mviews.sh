@@ -5,58 +5,61 @@ set -e
 # Script: refresh_mviews.sh
 # Description:
 #   Optimized script to refresh materialized views efficiently
-#   WITHOUT competing with tile generation.
+#   WITHOUT competing with Imposm imports or tile generation.
 #
-#   Optimization strategy:
-#   - Conservative parallelism: Maximum 2 simultaneous refreshes globally
-#   - Reduced parallelism per group: 1-2 views in parallel within each group
-#   - Optional load monitoring: Can pause if there's high tile generation load
+#   KEY OPTIMIZATION: Minimize database locks to allow Imposm to write freely
+#   - ONLY 1 refresh at a time globally (no parallelism)
+#   - Longer intervals between refresh cycles (5+ minutes)
+#   - Load monitoring enabled by default
+#   - Automatic detection and termination of idle transactions blocking Imposm
 #   - Dependency respect: Updates base views before dependent ones
 #
 #   Implemented improvements:
-#   1. Controlled parallelization: Updates multiple views in parallel within
-#      each group, but with conservative limits to avoid competing with tiles
+#   1. SEQUENTIAL refreshes: Only 1 view refreshes at a time to minimize locks
 #   2. Dependency handling: Respects update order for views that depend on
 #      others (e.g., routes, admin_boundaries)
-#   3. Concurrency control: Limits the number of simultaneous refreshes
-#      to avoid saturating the database (default: 2, vs previous 3)
-#   4. Time tracking: Measures and reports execution time for each
-#      update and complete cycle
+#   3. Strict concurrency control: Maximum 1 simultaneous refresh globally
+#   4. Time tracking: Measures and reports execution time for each update
 #   5. Lock cleanup: Automatically removes locks from terminated processes
-#   6. Smart pause: Option to pause refreshes during high load
+#   6. Smart pause: Pauses refreshes during high load or when Imposm is importing
+#   7. Idle transaction killer: Detects and terminates transactions blocking Imposm
 #
 # Environment variables:
-#   MAX_CONCURRENT_REFRESHES: Maximum number of simultaneous refreshes (default: 2)
-#   PAUSE_ON_HIGH_LOAD: Pause refreshes if there's high load (default: false)
-#   HIGH_LOAD_THRESHOLD: Active connections threshold to pause (default: 180)
+#   MAX_CONCURRENT_REFRESHES: Maximum number of simultaneous refreshes (default: 1)
+#   PAUSE_ON_HIGH_LOAD: Pause refreshes if there's high load (default: true)
+#   HIGH_LOAD_THRESHOLD: Active connections threshold to pause (default: 50)
+#   KILL_IDLE_TRANSACTIONS: Kill idle transactions > 5min (default: true)
+#   IDLE_TRANSACTION_TIMEOUT: Minutes before killing idle transaction (default: 5)
 #
 # Usage:
 #   ./refresh_mviews.sh
-#   MAX_CONCURRENT_REFRESHES=2 ./refresh_mviews.sh
-#   PAUSE_ON_HIGH_LOAD=true HIGH_LOAD_THRESHOLD=170 ./refresh_mviews.sh
+#   MAX_CONCURRENT_REFRESHES=1 ./refresh_mviews.sh
+#   PAUSE_ON_HIGH_LOAD=true HIGH_LOAD_THRESHOLD=50 ./refresh_mviews.sh
 #
-# IMPORTANT: 
-#   - Tegola uses ~150 connections to generate tiles
-#   - DB has ~200 max_connections
-#   - This script uses maximum 2 simultaneous refreshes to leave margin
-#   - CONCURRENTLY refreshes don't block reads, but consume resources
-#   - If you notice tiles generate slower, reduce MAX_CONCURRENT_REFRESHES to 1
+# IMPORTANT:
+#   - Imposm needs EXCLUSIVE write access to osm_* tables
+#   - REFRESH MATERIALIZED VIEW CONCURRENTLY can still acquire SHARE locks
+#   - This script prioritizes Imposm over view freshness
+#   - Views refresh every 5-10 minutes instead of constantly
 # ============================================================================
 
 source ./scripts/utils.sh
 
 # Global concurrency configuration
-# IMPORTANT: Adjust according to DB capacity and tile load
-# Tegola uses ~150 connections, DB has ~200 max_connections
-# We leave margin for other operations
-MAX_CONCURRENT_REFRESHES=${MAX_CONCURRENT_REFRESHES:-2}
+# CRITICAL: Only 1 refresh at a time to minimize locks on Imposm tables
+MAX_CONCURRENT_REFRESHES=${MAX_CONCURRENT_REFRESHES:-1}
 REFRESH_LOCK_DIR="/tmp/mview_refresh_locks"
 mkdir -p "$REFRESH_LOCK_DIR"
 
-# Priority configuration: pause refreshes if there's high tile load
-# You can monitor active connections and pause automatically
-PAUSE_ON_HIGH_LOAD=${PAUSE_ON_HIGH_LOAD:-false}
-HIGH_LOAD_THRESHOLD=${HIGH_LOAD_THRESHOLD:-180}  # Pause if there are more than 180 connections
+# Priority configuration: pause refreshes if there's high DB load or Imposm is importing
+# Load monitoring ENABLED by default to protect Imposm writes
+PAUSE_ON_HIGH_LOAD=${PAUSE_ON_HIGH_LOAD:-true}
+HIGH_LOAD_THRESHOLD=${HIGH_LOAD_THRESHOLD:-50}  # Pause if there are more than 50 active connections
+
+# Idle transaction killer configuration
+# Automatically terminates idle transactions that may be blocking Imposm
+KILL_IDLE_TRANSACTIONS=${KILL_IDLE_TRANSACTIONS:-true}
+IDLE_TRANSACTION_TIMEOUT=${IDLE_TRANSACTION_TIMEOUT:-5}  # Minutes before killing
 
 # Function to acquire a concurrency lock
 acquire_refresh_lock() {
@@ -97,21 +100,62 @@ cleanup_stale_locks() {
     done
 }
 
+# Function to kill idle transactions that may be blocking Imposm
+kill_idle_transactions() {
+    if [ "$KILL_IDLE_TRANSACTIONS" != "true" ]; then
+        return 0
+    fi
+
+    local killed_pids=$(psql "$PG_CONNECTION" -t -A -c \
+        "SELECT pg_terminate_backend(pid)
+         FROM pg_stat_activity
+         WHERE state = 'idle in transaction'
+           AND NOW() - state_change > interval '${IDLE_TRANSACTION_TIMEOUT} minutes'
+           AND pid != pg_backend_pid()
+           AND usename != 'imposm';" 2>/dev/null)
+
+    if [ -n "$killed_pids" ] && [ "$killed_pids" != "f" ]; then
+        log_message "[CLEANUP] ⚠️  Terminated idle transaction(s) blocking database"
+    fi
+}
+
+# Function to check if Imposm is actively importing
+check_imposm_activity() {
+    # Check if there are active queries from Imposm user
+    local imposm_active=$(psql "$PG_CONNECTION" -t -A -c \
+        "SELECT count(*) FROM pg_stat_activity
+         WHERE state = 'active'
+           AND usename = 'imposm'
+           AND pid != pg_backend_pid();" 2>/dev/null | tr -d ' \n')
+
+    if [ -n "$imposm_active" ] && [ "$imposm_active" -gt "0" ]; then
+        return 1  # Imposm is importing, pause refreshes
+    fi
+    return 0  # Imposm not active
+}
+
 # Function to check database load
 check_db_load() {
     if [ "$PAUSE_ON_HIGH_LOAD" != "true" ]; then
         return 0  # Don't check if disabled
     fi
-    
+
+    # First, check if Imposm is actively importing
+    if ! check_imposm_activity; then
+        log_message "[LOAD] ⏸️  Imposm is importing, pausing refreshes..."
+        return 1
+    fi
+
     local active_connections=$(psql "$PG_CONNECTION" -t -A -c \
         "SELECT count(*) FROM pg_stat_activity WHERE state = 'active' AND pid != pg_backend_pid();" 2>/dev/null | tr -d ' \n')
-    
+
     if [ -z "$active_connections" ]; then
         # If we can't get the count, assume it's okay (don't block)
         return 0
     fi
-    
+
     if [ "$active_connections" -gt "$HIGH_LOAD_THRESHOLD" ]; then
+        log_message "[LOAD] ⏸️  High DB load ($active_connections active connections, threshold: $HIGH_LOAD_THRESHOLD)"
         return 1  # High load, pause
     fi
     return 0  # Normal load, continue
@@ -174,13 +218,16 @@ refresh_mviews_group() {
     cleanup_stale_locks
     
     while true; do
+        # Kill idle transactions before starting cycle
+        kill_idle_transactions
+
         # Check load before starting cycle
         local retries=0
         while ! check_db_load && [ $retries -lt 10 ]; do
             sleep 30  # Wait 30 seconds if there's high load
             retries=$((retries + 1))
         done
-        
+
         local group_start_time=$(date +%s)
         log_message "[$group_name] Starting update cycle (${#materialized_views[@]} views)"
         
@@ -440,9 +487,12 @@ refresh_dependent_group() {
     eval "dependent_views=(\"\${${dependent_array_name}[@]}\")"
     
     while true; do
+        # Kill idle transactions before starting cycle
+        kill_idle_transactions
+
         local cycle_start=$(date +%s)
         log_message "[$group_name] Starting update cycle with dependencies"
-        
+
         # Step 1: Refresh base views first (sequentially)
         if [ ${#base_views[@]} -gt 0 ]; then
             for mview in "${base_views[@]}"; do
@@ -495,36 +545,45 @@ refresh_dependent_group() {
     done
 }
 
+
 # Start update groups
-# NOTE: Reduced parallelism to avoid competing with tile generation
-# Tegola needs ~150 connections, we leave margin for other operations
+# CRITICAL OPTIMIZATION: All refreshes are SEQUENTIAL (parallelism = 1)
+# This minimizes locks on Imposm tables and allows Imposm to write freely
+#
+# Strategy:
+#   - Only 1 background process per group (10 groups total)
+#   - MAX_CONCURRENT_REFRESHES=1 ensures only 1 view refreshes at a time globally
+#   - Longer intervals (5-10 minutes) between refresh cycles
+#   - Load monitoring enabled by default to pause during Imposm imports
+#   - Idle transaction killer runs before each cycle
 
 # Groups with dependencies (must be refreshed in order)
-# Reduced to 1-2 in parallel to minimize impact on tiles
-refresh_dependent_group "ADMIN_BOUNDARIES_LINES" 1 \
+# ADMIN_BOUNDARIES_LINES: Increased from 1s to 300s to reduce lock contention
+refresh_dependent_group "ADMIN_BOUNDARIES_LINES" 300 \
     "admin_boundaries_lines_base_views" \
     "admin_boundaries_lines_intermediate_views" \
     "admin_boundaries_lines_views" \
-    1 &  # Reduced to 1 for this critical group
+    1 &  # Sequential refresh only
 
-refresh_dependent_group "ROUTES" 180 \
+# ROUTES: Keep 300s interval, sequential refresh
+refresh_dependent_group "ROUTES" 300 \
     "routes_base_views" \
     "routes_intermediate_views" \
     "routes_views" \
-    2 &  # Reduced to 2
+    1 &  # Sequential refresh only
 
-# Independent groups - conservative parallelism
-# We reduce parallelism within each group to leave resources for tiles
-refresh_mviews_group "ADMIN_BOUNDARIES_CENTROIDS" 60 2 "${admin_boundaries_centroids_views[@]}" &
-refresh_mviews_group "ADMIN_MARITIME_LINES" 300 1 "${admin_maritime_lines_views[@]}" &
-refresh_mviews_group "TRANSPORTS" 180 2 "${transport_views[@]}" &
-refresh_mviews_group "AMENITY" 180 2 "${amenity_views[@]}" &
-refresh_mviews_group "LANDUSE" 180 2 "${landuse_views[@]}" &
-refresh_mviews_group "OTHERS" 180 2 "${others_views[@]}" &
-refresh_mviews_group "PLACES" 180 2 "${places_views[@]}" &
-refresh_mviews_group "WATER" 180 2 "${water_views[@]}" &
-refresh_mviews_group "BUILDINGS" 180 1 "${buildings_views[@]}" &
-refresh_mviews_group "ADMIN_BOUNDARIES_AREAS" 180 2 "${admin_boundaries_areas_views[@]}" &
+# Independent groups - ALL SEQUENTIAL (parallelism = 1)
+# Increased intervals from 60-180s to 300-600s to reduce lock frequency
+refresh_mviews_group "ADMIN_BOUNDARIES_CENTROIDS" 300 1 "${admin_boundaries_centroids_views[@]}" &
+refresh_mviews_group "ADMIN_MARITIME_LINES" 600 1 "${admin_maritime_lines_views[@]}" &
+refresh_mviews_group "TRANSPORTS" 300 1 "${transport_views[@]}" &
+refresh_mviews_group "AMENITY" 300 1 "${amenity_views[@]}" &
+refresh_mviews_group "LANDUSE" 300 1 "${landuse_views[@]}" &
+refresh_mviews_group "OTHERS" 300 1 "${others_views[@]}" &
+refresh_mviews_group "PLACES" 300 1 "${places_views[@]}" &
+refresh_mviews_group "WATER" 300 1 "${water_views[@]}" &
+refresh_mviews_group "BUILDINGS" 300 1 "${buildings_views[@]}" &
+refresh_mviews_group "ADMIN_BOUNDARIES_AREAS" 300 1 "${admin_boundaries_areas_views[@]}" &
 
 # Wait for all processes to finish (should never happen in an infinite loop)
 wait
