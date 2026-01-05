@@ -129,12 +129,9 @@
       ],
       "type": "linestring",
       "filters": {
-        "reject": [
-          [
-            "area",
-            "yes"
-          ]
-        ]
+        "reject": {
+          "area": ["yes"]
+        }
       },
       "mappings": {
         "railway": {

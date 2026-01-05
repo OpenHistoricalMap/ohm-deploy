@@ -143,12 +143,9 @@
       ],
       "type": "relation_member",
       "filters": {
-        "reject": [
-          [
-            "area",
-            "yes"
-          ]
-        ]
+        "reject": {
+          "area": ["yes"]
+        }
       },
       "mappings": {
         "railway": {

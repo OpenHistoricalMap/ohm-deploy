@@ -47,12 +47,9 @@
         ]
       },
       "filters": {
-        "reject": [
-          [
-            "boundary",
-            "administrative"
-          ]
-        ]
+        "reject": {
+          "boundary": ["administrative"]
+        }
       }
     }
   }

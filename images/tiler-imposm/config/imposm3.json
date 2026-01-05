@@ -339,12 +339,9 @@
       ],
       "type": "relation_member",
       "filters": {
-        "reject": [
-          [
-            "area",
-            "yes"
-          ]
-        ]
+        "reject": {
+          "area": ["yes"]
+        }
       },
       "mappings": {
         "railway": {
@@ -557,12 +554,9 @@
         ]
       },
       "filters": {
-        "reject": [
-          [
-            "boundary",
-            "administrative"
-          ]
-        ]
+        "reject": {
+          "boundary": ["administrative"]
+        }
       }
     },
     "water_areas": {
@@ -1534,12 +1528,9 @@
       ],
       "type": "linestring",
       "filters": {
-        "reject": [
-          [
-            "area",
-            "yes"
-          ]
-        ]
+        "reject": {
+          "area": ["yes"]
+        }
       },
       "mappings": {
         "railway": {
@@ -1817,20 +1808,11 @@
       ],
       "type": "linestring",
       "filters": {
-        "reject": [
-          [
-            "area",
-            "yes"
-          ],
-          [
-            "natural",
-            "coastline"
-          ],
-          [
-            "boundary",
-            "administrative"
-          ]
-        ]
+        "reject": {
+          "area": ["yes"],
+          "natural": ["coastline"],
+          "boundary": ["administrative"]
+        }
       },
       "mappings": {
         "landuse": {
