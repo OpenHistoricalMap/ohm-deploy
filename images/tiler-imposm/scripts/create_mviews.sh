@@ -38,6 +38,7 @@ if [[ "$ALL" == true ]]; then
   execute_sql_file queries/utils/create_01_areas_mview.sql 
   execute_sql_file queries/utils/create_02_points_mview.sql
   execute_sql_file queries/utils/create_03_points_centroids_mview.sql
+  execute_sql_file queries/utils/create_04_lines_mviews.sql
 
   # Route priority
   execute_sql_file queries/utils/route_priority.sql
