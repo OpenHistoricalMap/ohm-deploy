@@ -107,8 +107,8 @@ services:
       - ${HOME}/.aws:/root/.aws:ro
     networks:
       - ohm_network
-    cpus: '4.0'
-    mem_limit: 10G
+    cpus: '8.0'
+    mem_limit: 20G
 
 volumes:
   osmcha_db_data:
