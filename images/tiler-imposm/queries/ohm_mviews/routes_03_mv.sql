@@ -388,9 +388,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_mv_routes_by_length('mv_routes_indexed_z5_6', 1000);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z7_8', 300);
+SELECT create_mv_routes_by_length('mv_routes_indexed_z5_8', 500);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z9_10', 100);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z11_12', 10);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z13_14', 1);
+SELECT create_mv_routes_by_length('mv_routes_indexed_z11_12', 25);
+SELECT create_mv_routes_by_length('mv_routes_indexed_z13_14', 2);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z15_20', 0);

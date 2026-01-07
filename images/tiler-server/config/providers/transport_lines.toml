@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "transport_lines_z5"
+name = "transport_lines_z5_8"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -26,79 +26,13 @@ SELECT
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_lines_z5
+    mv_transport_lines_z5_8
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "transport_lines_z6"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id,
-    class,
-    member,
-    type,
-    ref,
-    service,
-    name,
-    electrified,
-    highspeed,
-    usage,
-    railway,
-    aeroway,
-    highway,
-    route,
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}}
-FROM 
-    mv_transport_lines_z6
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "transport_lines_z7"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id,
-    class,
-    member,
-    type,
-    ref,
-    service,
-    name,
-    electrified,
-    highspeed,
-    usage,
-    railway,
-    aeroway,
-    highway,
-    route,
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}}
-FROM 
-    mv_transport_lines_z7
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "transport_lines_z8"
+name = "transport_lines_z9_10"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -127,13 +61,15 @@ SELECT
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_lines_z8
+    mv_transport_lines_z9_10
 WHERE 
     geometry && !BBOX!
 """
 
+
+
 [[providers.layers]]
-name = "transport_lines_z9"
+name = "transport_lines_z11_12"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -162,14 +98,14 @@ SELECT
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_lines_z9
+    mv_transport_lines_z11_12
 WHERE 
     geometry && !BBOX!
 """
 
 
 [[providers.layers]]
-name = "transport_lines_z10_11"
+name = "transport_lines_z13_14"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -198,14 +134,13 @@ SELECT
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_lines_z10_11
+    mv_transport_lines_z13_14
 WHERE 
     geometry && !BBOX!
 """
 
-
 [[providers.layers]]
-name = "transport_lines_z12_13"
+name = "transport_lines_z15_20"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -234,42 +169,7 @@ SELECT
     end_decdate,
     {{LENGUAGES}}
 FROM 
-    mv_transport_lines_z12_13
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "transport_lines_z14_20"
-geometry_fieldname = "geometry"
-geometry_type = "linestring"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id,
-    class,
-    member,
-    type,
-    tunnel, 
-    bridge, 
-    ref,
-    service,
-    name,
-    electrified,
-    highspeed,
-    usage,
-    railway,
-    aeroway,
-    highway,
-    route,
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}}
-FROM 
-    mv_transport_lines_z14_20
+    mv_transport_lines_z15_20
 WHERE 
     geometry && !BBOX!
 """
@@ -277,48 +177,30 @@ WHERE
 #######Maps
 [[maps.layers]]
 name = "transport_lines"
-provider_layer = "osm.transport_lines_z5"
+provider_layer = "osm.transport_lines_z5_8"
 min_zoom = 5
-max_zoom = 5
-
-[[maps.layers]]
-name = "transport_lines"
-provider_layer = "osm.transport_lines_z6"
-min_zoom = 6
-max_zoom = 6
-
-[[maps.layers]]
-name = "transport_lines"
-provider_layer = "osm.transport_lines_z7"
-min_zoom = 7
-max_zoom = 7
-
-[[maps.layers]]
-name = "transport_lines"
-provider_layer = "osm.transport_lines_z8"
-min_zoom = 8
 max_zoom = 8
 
 [[maps.layers]]
 name = "transport_lines"
-provider_layer = "osm.transport_lines_z9"
+provider_layer = "osm.transport_lines_z9_10"
 min_zoom = 9
-max_zoom = 9
+max_zoom = 10
 
 [[maps.layers]]
 name = "transport_lines"
-provider_layer = "osm.transport_lines_z10_11"
-min_zoom = 10
-max_zoom = 11
+provider_layer = "osm.transport_lines_z11_12"
+min_zoom = 11
+max_zoom = 12
 
 [[maps.layers]]
 name = "transport_lines"
-provider_layer = "osm.transport_lines_z12_13"
-min_zoom = 12
-max_zoom = 13
+provider_layer = "osm.transport_lines_z13_14"
+min_zoom = 13
+max_zoom = 14
 
 [[maps.layers]]
 name = "transport_lines"
-provider_layer = "osm.transport_lines_z14_20"
-min_zoom = 14
+provider_layer = "osm.transport_lines_z15_20"
+min_zoom = 15
 max_zoom = 20

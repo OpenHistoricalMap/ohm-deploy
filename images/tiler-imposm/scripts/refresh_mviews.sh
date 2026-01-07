@@ -373,14 +373,11 @@ places_views=(
 
 transport_views=(
     # lines
-    mv_transport_lines_z5
-    mv_transport_lines_z6
-    mv_transport_lines_z7
-    mv_transport_lines_z8
-    mv_transport_lines_z9
-    mv_transport_lines_z10_11
-    mv_transport_lines_z12_13
-    mv_transport_lines_z14_20
+    mv_transport_lines_z5_8
+    mv_transport_lines_z9_10
+    mv_transport_lines_z11_12
+    mv_transport_lines_z13_14
+    mv_transport_lines_z15_20
     # areas
     mv_transport_areas_z10_11
     mv_transport_areas_z12_13
@@ -394,7 +391,6 @@ transport_views=(
     mv_transport_points_centroids_z14_15
     mv_transport_points_centroids_z16_20
 )
-
 
 water_views=(
     mv_water_areas_centroids_z0_2
@@ -437,13 +433,12 @@ routes_intermediate_views=(
 )
 
 routes_views=(
-    mv_routes_indexed_z5_6
-    mv_routes_indexed_z7_8
+    mv_routes_indexed_z5_8
     mv_routes_indexed_z9_10
-    mv_routes_indexed_z11_13
-    mv_routes_indexed_z14_20
+    mv_routes_indexed_z11_12
+    mv_routes_indexed_z13_14
+    mv_routes_indexed_z15_20
 )
-
 
 admin_boundaries_areas_views=(
     mv_admin_boundaries_areas_z0_2
