@@ -330,7 +330,7 @@ osm-seed:
     # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
     # ====================================================================================================
     replicationJob:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
