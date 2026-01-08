@@ -31,16 +31,13 @@ SELECT create_points_mview(
 );
 
 -- ============================================================================
--- Zoom 12-13:
--- Low simplification (10m)
--- Small areas (>10K m² = 0.01 km²)
--- Include other points
+-- Zoom 13-15:
 -- Exclude closed highways from https://github.com/OpenHistoricalMap/issues/issues/1194
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_transport_areas',
     'mv_transport_areas_z13_15',
-    10,
+    5,
     10000,
     'id, osm_id, type',
     'NOT (class = ''highway'' AND type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''primary'', ''primary_link'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''unclassified'', ''residential'', ''service'', ''living_street'', ''cycleway'', ''bridleway''))'
@@ -48,27 +45,6 @@ SELECT create_areas_mview(
 SELECT create_points_centroids_mview(
     'mv_transport_areas_z13_15',
     'mv_transport_points_centroids_z13_15',
-    'mv_transport_points'
-);
-
--- ============================================================================
--- Zoom 14-15:
--- Very low simplification (5m)
--- Very small areas (>5K m² = 0.005 km²)
--- Include transport points
--- Exclude closed highways from https://github.com/OpenHistoricalMap/issues/issues/1194
--- ============================================================================
-SELECT create_areas_mview(
-    'osm_transport_areas',
-    'mv_transport_areas_z14_15',
-    5,
-    5000,
-    'id, osm_id, type',
-    'NOT (class = ''highway'' AND type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''primary'', ''primary_link'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''unclassified'', ''residential'', ''service'', ''living_street'', ''cycleway'', ''bridleway''))'
-);
-SELECT create_points_centroids_mview(
-    'mv_transport_areas_z14_15',
-    'mv_transport_points_centroids_z14_15',
     'mv_transport_points'
 );
 
