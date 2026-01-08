@@ -71,7 +71,7 @@ WHERE
 geometry_fieldname = "geometry"
 geometry_type = "point"
 id_fieldname = "osm_id"
-name = "water_areas_centroid_z14_20"
+name = "water_areas_centroid_z16_20"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
@@ -112,6 +112,6 @@ max_zoom = 15
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z14_20"
-min_zoom = 14
+provider_layer = "osm.water_areas_centroid_z16_20"
+min_zoom = 16
 max_zoom = 20

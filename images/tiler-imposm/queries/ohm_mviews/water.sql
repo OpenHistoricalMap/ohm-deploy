@@ -45,7 +45,6 @@ SELECT create_mview_line_from_mview('mv_water_lines_z16_20', 'mv_water_lines_z13
 SELECT create_mview_line_from_mview('mv_water_lines_z13_15', 'mv_water_lines_z10_12', 20, 'type IN (''river'', ''canal'', ''cliff'', ''dam'')');
 SELECT create_mview_line_from_mview('mv_water_lines_z10_12', 'mv_water_lines_z8_9', 100, 'type IN (''river'', ''canal'')');
 
-
 -- Refresh areas views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY  mv_water_areas_z16_20;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY  mv_water_areas_z13_15;
