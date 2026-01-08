@@ -18,6 +18,7 @@ FROM
 WHERE 
     geometry && !BBOX!
 """
+
 [[providers.layers]]
 name = "admin_boundaries_lines_z3_5"
 geometry_fieldname = "geometry"

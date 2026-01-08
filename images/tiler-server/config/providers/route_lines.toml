@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "route_lines_z5_8"
+name = "route_lines_z5"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -67,13 +67,86 @@ SELECT
     route_bus_5_ref,route_bus_5_network,route_bus_5_network_wikidata,route_bus_5_operator,route_bus_5_name,route_bus_5_direction,
     route_bus_6_ref,route_bus_6_network,route_bus_6_network_wikidata,route_bus_6_operator,route_bus_6_name,route_bus_6_direction
 
-FROM mv_routes_indexed_z5_8
+FROM mv_routes_indexed_z5
+WHERE geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "route_lines_z6_7"
+geometry_fieldname = "geometry"
+geometry_type = "LineString"
+id_fieldname = "osm_id"
+sql = """
+SELECT 
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    start_decdate, 
+    end_decdate,
+    start_date,
+    end_date,
+    -- ROAD
+    route_road_1_ref,route_road_1_network,route_road_1_network_wikidata,route_road_1_operator,route_road_1_name,route_road_1_direction,
+    route_road_2_ref,route_road_2_network,route_road_2_network_wikidata,route_road_2_operator,route_road_2_name,route_road_2_direction,
+    route_road_3_ref,route_road_3_network,route_road_3_network_wikidata,route_road_3_operator,route_road_3_name,route_road_3_direction,
+    route_road_4_ref,route_road_4_network,route_road_4_network_wikidata,route_road_4_operator,route_road_4_name,route_road_4_direction,
+    route_road_5_ref,route_road_5_network,route_road_5_network_wikidata,route_road_5_operator,route_road_5_name,route_road_5_direction,
+    route_road_6_ref,route_road_6_network,route_road_6_network_wikidata,route_road_6_operator,route_road_6_name,route_road_6_direction,
+
+    -- TRAIN
+    route_train_1_ref,route_train_1_network,route_train_1_network_wikidata,route_train_1_operator,route_train_1_name,route_train_1_direction,
+    route_train_2_ref,route_train_2_network,route_train_2_network_wikidata,route_train_2_operator,route_train_2_name,route_train_2_direction,
+    route_train_3_ref,route_train_3_network,route_train_3_network_wikidata,route_train_3_operator,route_train_3_name,route_train_3_direction,
+    route_train_4_ref,route_train_4_network,route_train_4_network_wikidata,route_train_4_operator,route_train_4_name,route_train_4_direction,
+    route_train_5_ref,route_train_5_network,route_train_5_network_wikidata,route_train_5_operator,route_train_5_name,route_train_5_direction,
+    route_train_6_ref,route_train_6_network,route_train_6_network_wikidata,route_train_6_operator,route_train_6_name,route_train_6_direction,
+
+    -- SUBWAY
+    route_subway_1_ref,route_subway_1_network,route_subway_1_network_wikidata,route_subway_1_operator,route_subway_1_name,route_subway_1_direction,
+    route_subway_2_ref,route_subway_2_network,route_subway_2_network_wikidata,route_subway_2_operator,route_subway_2_name,route_subway_2_direction,
+    route_subway_3_ref,route_subway_3_network,route_subway_3_network_wikidata,route_subway_3_operator,route_subway_3_name,route_subway_3_direction,
+    route_subway_4_ref,route_subway_4_network,route_subway_4_network_wikidata,route_subway_4_operator,route_subway_4_name,route_subway_4_direction,
+    route_subway_5_ref,route_subway_5_network,route_subway_5_network_wikidata,route_subway_5_operator,route_subway_5_name,route_subway_5_direction,
+    route_subway_6_ref,route_subway_6_network,route_subway_6_network_wikidata,route_subway_6_operator,route_subway_6_name,route_subway_6_direction,
+
+    -- LIGHT_RAIL
+    route_light_rail_1_ref,route_light_rail_1_network,route_light_rail_1_network_wikidata,route_light_rail_1_operator,route_light_rail_1_name,route_light_rail_1_direction,
+    route_light_rail_2_ref,route_light_rail_2_network,route_light_rail_2_network_wikidata,route_light_rail_2_operator,route_light_rail_2_name,route_light_rail_2_direction,
+    route_light_rail_3_ref,route_light_rail_3_network,route_light_rail_3_network_wikidata,route_light_rail_3_operator,route_light_rail_3_name,route_light_rail_3_direction,
+    route_light_rail_4_ref,route_light_rail_4_network,route_light_rail_4_network_wikidata,route_light_rail_4_operator,route_light_rail_4_name,route_light_rail_4_direction,
+    route_light_rail_5_ref,route_light_rail_5_network,route_light_rail_5_network_wikidata,route_light_rail_5_operator,route_light_rail_5_name,route_light_rail_5_direction,
+    route_light_rail_6_ref,route_light_rail_6_network,route_light_rail_6_network_wikidata,route_light_rail_6_operator,route_light_rail_6_name,route_light_rail_6_direction,
+
+    -- TRAM
+    route_tram_1_ref,route_tram_1_network,route_tram_1_network_wikidata,route_tram_1_operator,route_tram_1_name,route_tram_1_direction,
+    route_tram_2_ref,route_tram_2_network,route_tram_2_network_wikidata,route_tram_2_operator,route_tram_2_name,route_tram_2_direction,
+    route_tram_3_ref,route_tram_3_network,route_tram_3_network_wikidata,route_tram_3_operator,route_tram_3_name,route_tram_3_direction,
+    route_tram_4_ref,route_tram_4_network,route_tram_4_network_wikidata,route_tram_4_operator,route_tram_4_name,route_tram_4_direction,
+    route_tram_5_ref,route_tram_5_network,route_tram_5_network_wikidata,route_tram_5_operator,route_tram_5_name,route_tram_5_direction,
+    route_tram_6_ref,route_tram_6_network,route_tram_6_network_wikidata,route_tram_6_operator,route_tram_6_name,route_tram_6_direction,
+
+    -- TROLLEYBUS
+    route_trolleybus_1_ref,route_trolleybus_1_network,route_trolleybus_1_network_wikidata,route_trolleybus_1_operator,route_trolleybus_1_name,route_trolleybus_1_direction,
+    route_trolleybus_2_ref,route_trolleybus_2_network,route_trolleybus_2_network_wikidata,route_trolleybus_2_operator,route_trolleybus_2_name,route_trolleybus_2_direction,
+    route_trolleybus_3_ref,route_trolleybus_3_network,route_trolleybus_3_network_wikidata,route_trolleybus_3_operator,route_trolleybus_3_name,route_trolleybus_3_direction,
+    route_trolleybus_4_ref,route_trolleybus_4_network,route_trolleybus_4_network_wikidata,route_trolleybus_4_operator,route_trolleybus_4_name,route_trolleybus_4_direction,
+    route_trolleybus_5_ref,route_trolleybus_5_network,route_trolleybus_5_network_wikidata,route_trolleybus_5_operator,route_trolleybus_5_name,route_trolleybus_5_direction,
+    route_trolleybus_6_ref,route_trolleybus_6_network,route_trolleybus_6_network_wikidata,route_trolleybus_6_operator,route_trolleybus_6_name,route_trolleybus_6_direction,
+
+    -- BUS
+    route_bus_1_ref,route_bus_1_network,route_bus_1_network_wikidata,route_bus_1_operator,route_bus_1_name,route_bus_1_direction,
+    route_bus_2_ref,route_bus_2_network,route_bus_2_network_wikidata,route_bus_2_operator,route_bus_2_name,route_bus_2_direction,
+    route_bus_3_ref,route_bus_3_network,route_bus_3_network_wikidata,route_bus_3_operator,route_bus_3_name,route_bus_3_direction,
+    route_bus_4_ref,route_bus_4_network,route_bus_4_network_wikidata,route_bus_4_operator,route_bus_4_name,route_bus_4_direction,
+    route_bus_5_ref,route_bus_5_network,route_bus_5_network_wikidata,route_bus_5_operator,route_bus_5_name,route_bus_5_direction,
+    route_bus_6_ref,route_bus_6_network,route_bus_6_network_wikidata,route_bus_6_operator,route_bus_6_name,route_bus_6_direction
+
+FROM mv_routes_indexed_z6_7
 WHERE geometry && !BBOX!
 """
 
 
 [[providers.layers]]
-name = "route_lines_z9_10"
+name = "route_lines_z8_9"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -141,12 +214,12 @@ SELECT
     route_bus_5_ref,route_bus_5_network,route_bus_5_network_wikidata,route_bus_5_operator,route_bus_5_name,route_bus_5_direction,
     route_bus_6_ref,route_bus_6_network,route_bus_6_network_wikidata,route_bus_6_operator,route_bus_6_name,route_bus_6_direction
 
-FROM mv_routes_indexed_z9_10
+FROM mv_routes_indexed_z8_9
 WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "route_lines_z11_12"
+name = "route_lines_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -214,12 +287,12 @@ SELECT
     route_bus_5_ref,route_bus_5_network,route_bus_5_network_wikidata,route_bus_5_operator,route_bus_5_name,route_bus_5_direction,
     route_bus_6_ref,route_bus_6_network,route_bus_6_network_wikidata,route_bus_6_operator,route_bus_6_name,route_bus_6_direction
 
-FROM mv_routes_indexed_z11_12
+FROM mv_routes_indexed_z10_12
 WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "route_lines_z13_14"
+name = "route_lines_z13_15"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -287,12 +360,12 @@ SELECT
     route_bus_5_ref,route_bus_5_network,route_bus_5_network_wikidata,route_bus_5_operator,route_bus_5_name,route_bus_5_direction,
     route_bus_6_ref,route_bus_6_network,route_bus_6_network_wikidata,route_bus_6_operator,route_bus_6_name,route_bus_6_direction
 
-    FROM mv_routes_indexed_z13_14
+    FROM mv_routes_indexed_z13_15
 WHERE geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "route_lines_z15_20"
+name = "route_lines_z16_20"
 geometry_fieldname = "geometry"
 geometry_type = "LineString"
 id_fieldname = "osm_id"
@@ -360,37 +433,43 @@ SELECT
     route_bus_5_ref,route_bus_5_network,route_bus_5_network_wikidata,route_bus_5_operator,route_bus_5_name,route_bus_5_direction,
     route_bus_6_ref,route_bus_6_network,route_bus_6_network_wikidata,route_bus_6_operator,route_bus_6_name,route_bus_6_direction
 
-    FROM mv_routes_indexed_z15_20
+    FROM mv_routes_indexed_z16_20
 WHERE geometry && !BBOX!
 """
 
 #######Maps
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z5_8"
+provider_layer = "osm.route_lines_z5"
 min_zoom = 5
-max_zoom = 8
+max_zoom = 5
 
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z9_10"
-min_zoom = 9
-max_zoom = 10
+provider_layer = "osm.route_lines_z6_7"
+min_zoom = 6
+max_zoom = 7
 
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z11_12"
-min_zoom = 11
+provider_layer = "osm.route_lines_z8_9"
+min_zoom = 8
+max_zoom = 9
+
+[[maps.layers]]
+name = "route_lines"
+provider_layer = "osm.route_lines_z10_12"
+min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z13_14"
+provider_layer = "osm.route_lines_z13_15"
 min_zoom = 13
-max_zoom = 14
+max_zoom = 15
 
 [[maps.layers]]
 name = "route_lines"
-provider_layer = "osm.route_lines_z15_20"
-min_zoom = 15
+provider_layer = "osm.route_lines_z16_20"
+min_zoom = 16
 max_zoom = 20
