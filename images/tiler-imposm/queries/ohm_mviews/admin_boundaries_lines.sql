@@ -415,3 +415,12 @@ ON mv_admin_boundaries_lines_z16_20 (admin_level, member, group_id);
 
 CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_geometry_idx 
 ON mv_admin_boundaries_lines_z16_20 USING GIST (geometry);
+
+-- Refresh lines views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z0_2;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z3_5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z16_20;

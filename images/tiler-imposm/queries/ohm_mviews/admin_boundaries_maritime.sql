@@ -28,4 +28,8 @@ SELECT create_lines_mview(
     'id, osm_id, type',
     'maritime = ''yes'''
   );
-  
+
+-- Refresh maritime lines views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_maritime_lines_z0_5_v2;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_maritime_lines_z6_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_maritime_lines_z10_15;

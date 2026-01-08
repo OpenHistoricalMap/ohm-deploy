@@ -394,3 +394,11 @@ SELECT create_mv_routes_by_length('mv_routes_indexed_z8_9', 100);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z10_12', 20);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z13_15', 5);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
+
+-- Refresh routes views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z16_20;

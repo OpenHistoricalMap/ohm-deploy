@@ -69,3 +69,13 @@ SELECT create_points_centroids_mview(
     'mv_transport_points_centroids_z16_20',
     'mv_transport_points'
 );
+
+-- Refresh areas views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_areas_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_areas_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_areas_z16_20;
+
+-- Refresh centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_points_centroids_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_points_centroids_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_points_centroids_z16_20;

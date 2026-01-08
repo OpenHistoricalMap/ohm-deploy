@@ -85,3 +85,12 @@ SELECT create_admin_boundaries_centroids_mview('osm_admin_areas', 'mv_admin_boun
 SELECT create_admin_boundaries_centroids_mview('osm_admin_areas', 'mv_admin_boundaries_centroids_z10_12', 'id, osm_id, type', 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
 SELECT create_admin_boundaries_centroids_mview('osm_admin_areas', 'mv_admin_boundaries_centroids_z13_15', 'id, osm_id, type', 'admin_level IN (1,2,3,4,5,6,7,8,9,10,11)');
 SELECT create_admin_boundaries_centroids_mview('osm_admin_areas', 'mv_admin_boundaries_centroids_z16_20', 'id, osm_id, type', 'admin_level IN (1,2,3,4,5,6,7,8,9,10,11)');
+
+-- Refresh centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z0_2;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z3_5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z16_20;

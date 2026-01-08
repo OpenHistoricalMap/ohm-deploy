@@ -89,5 +89,21 @@ SELECT create_points_centroids_mview(
 -- Create materialized views for other lines
 -- ============================================================================
 SELECT create_lines_mview('osm_other_lines', 'mv_other_lines_z16_20', 0, 0, 'id, osm_id, type');
-SELECT create_mview_line_from_mview('mv_other_lines_z16_20', 'mv_water_lines_z14_15', 5);
+SELECT create_mview_line_from_mview('mv_other_lines_z16_20', 'mv_other_lines_z14_15', 5);
+
+-- Refresh areas views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z16_20;
+
+-- Refresh centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z16_20;
+
+-- Refresh lines views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_lines_z16_20;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_lines_z14_15;
 
