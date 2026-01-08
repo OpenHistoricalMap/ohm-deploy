@@ -49,7 +49,7 @@ WHERE
 """
 
 [[providers.layers]]
-name = "landuse_areas_z10_11"
+name = "landuse_areas_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
@@ -68,13 +68,13 @@ SELECT
     end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mv_landuse_areas_z10_11
+    mv_landuse_areas_z10_12
 WHERE 
     geometry && !BBOX!
 """
 
 [[providers.layers]]
-name = "landuse_areas_z12_13"
+name = "landuse_areas_z13_15"
 geometry_fieldname = "geometry"
 geometry_type = "multipolygon"
 id_fieldname = "osm_id"
@@ -93,32 +93,7 @@ SELECT
     end_decdate,
     {{LENGUAGES}} 
 FROM 
-    mv_landuse_areas_z12_13
-WHERE 
-    geometry && !BBOX!
-"""
-
-[[providers.layers]]
-name = "landuse_areas_z14_15"
-geometry_fieldname = "geometry"
-geometry_type = "multipolygon"
-id_fieldname = "osm_id"
-sql = """
-SELECT 
-    ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    osm_id, 
-    name, 
-    class, 
-    type,
-    area_m2,
-    area,
-    start_date, 
-    end_date, 
-    start_decdate, 
-    end_decdate,
-    {{LENGUAGES}} 
-FROM 
-    mv_landuse_areas_z14_15 
+    mv_landuse_areas_z13_15 
 WHERE 
     geometry && !BBOX!
 """
@@ -165,20 +140,14 @@ max_zoom = 9
 
 [[maps.layers]]
 name = "landuse_areas"
-provider_layer = "osm.landuse_areas_z10_11"
+provider_layer = "osm.landuse_areas_z10_12"
 min_zoom = 10
-max_zoom = 11
+max_zoom = 12
 
 [[maps.layers]]
 name = "landuse_areas"
-provider_layer = "osm.landuse_areas_z12_13"
-min_zoom = 12
-max_zoom = 13
-
-[[maps.layers]]
-name = "landuse_areas"
-provider_layer = "osm.landuse_areas_z14_15"
-min_zoom = 14
+provider_layer = "osm.landuse_areas_z13_15"
+min_zoom = 13
 max_zoom = 15
 
 [[maps.layers]]
