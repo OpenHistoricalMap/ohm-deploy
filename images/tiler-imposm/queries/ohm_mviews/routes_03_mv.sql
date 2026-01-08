@@ -390,8 +390,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
 
+
+DROP MATERIALIZED VIEW IF EXISTS mv_routes_indexed_z16_20 CASCADE;
+
+SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
 SELECT create_mview_line_from_mview('mv_routes_indexed_z16_20', 'mv_routes_indexed_z13_15', 5, NULL);
 SELECT create_mview_line_from_mview('mv_routes_indexed_z13_15', 'mv_routes_indexed_z10_12', 20, NULL);
 SELECT create_mview_line_from_mview('mv_routes_indexed_z10_12', 'mv_routes_indexed_z8_9', 100, NULL);
