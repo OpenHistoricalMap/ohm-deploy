@@ -1,4 +1,4 @@
-FROM osgeo/gdal:ubuntu-small-3.2.3
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.9.3
 
 RUN apt-get -y update && apt-get install -y \
     g++ \
@@ -18,21 +18,22 @@ RUN apt-get -y update && apt-get install -y \
     curl \
     wget \
     unzip \
-    software-properties-common && \
+    ca-certificates \
+    software-properties-common \
+    python3-pip \
+    postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y python3.9 python3.9-dev python3-pip && \
-    rm -rf /var/lib/apt/lists/* && \
-    python3 -m pip install pip --upgrade && \
-    python3 -m pip install wheel
+RUN python3 -m pip install --no-cache-dir \
+    --break-system-packages \
+    awscli psycopg2-binary setuptools && \
+    rm -rf /root/.cache /var/cache/apk/*
 
 RUN apt-get update && apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget -c https://dl.google.com/go/go1.21.0.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
-ENV PATH $PATH:/usr/local/go/bin
+RUN wget -c https://dl.google.com/go/go1.21.9.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
+ENV PATH="${PATH}:/usr/local/go/bin"
 
 ENV DATEFUNCTIONS_GITSHA=90d8d0f0daea4c8c5aa62edf440f26e9eb0ab950
 RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git /usr/local/datefunctions && cd /usr/local/datefunctions && git checkout $DATEFUNCTIONS_GITSHA 
@@ -45,14 +46,11 @@ RUN git clone https://github.com/omniscale/imposm3.git $GOPATH/src/github.com/om
 WORKDIR $GOPATH/src/github.com/omniscale/imposm3
 RUN git checkout v0.14.2
 
-
 # Apply fixes or patches (if necessary)
 RUN sed -i '/setMaxFileSize/d' cache/ldb_pre_121.go
 RUN go install github.com/omniscale/imposm3/cmd/imposm
 ENV PATH $PATH:$GOPATH/bin
 
-# Install AWS CLI for downloading files
-RUN pip3 install -U setuptools awscli psycopg2
 WORKDIR /osm
 COPY . .
 CMD ["./start.sh"]
