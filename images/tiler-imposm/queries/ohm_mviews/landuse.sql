@@ -11,7 +11,7 @@
 SELECT create_areas_mview(
     'osm_landuse_areas',
     'mv_landuse_areas_z6_7',
-    100,
+    200,
     10000000,
     'id, osm_id, type',
     'NOT (type = ''water'' AND class = ''natural'')'
@@ -32,7 +32,7 @@ SELECT create_points_centroids_mview(
 SELECT create_areas_mview(
     'osm_landuse_areas',
     'mv_landuse_areas_z8_9',
-    50,
+    100,
     1000000,
     'id, osm_id, type',
     'NOT (type = ''water'' AND class = ''natural'')'

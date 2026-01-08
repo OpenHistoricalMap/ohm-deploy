@@ -7,7 +7,7 @@
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_transport_areas',
-    'mv_transport_areas_z10_11',
+    'mv_transport_areas_z10_12',
     15,
     50000,
     'id, osm_id, type',
@@ -15,8 +15,8 @@ SELECT create_areas_mview(
 );
 
 SELECT create_points_centroids_mview(
-    'mv_transport_areas_z10_11',
-    'mv_transport_points_centroids_z10_11',
+    'mv_transport_areas_z10_12',
+    'mv_transport_points_centroids_z10_12',
     NULL
 );
 
@@ -39,15 +39,15 @@ SELECT create_points_mview(
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_transport_areas',
-    'mv_transport_areas_z12_13',
+    'mv_transport_areas_z13_15',
     10,
     10000,
     'id, osm_id, type',
     'NOT (class = ''highway'' AND type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''primary'', ''primary_link'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''unclassified'', ''residential'', ''service'', ''living_street'', ''cycleway'', ''bridleway''))'
 );
 SELECT create_points_centroids_mview(
-    'mv_transport_areas_z12_13',
-    'mv_transport_points_centroids_z12_13',
+    'mv_transport_areas_z13_15',
+    'mv_transport_points_centroids_z13_15',
     'mv_transport_points'
 );
 

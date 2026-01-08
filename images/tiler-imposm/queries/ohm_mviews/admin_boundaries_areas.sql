@@ -50,7 +50,7 @@ SELECT create_areas_mview(
 SELECT create_areas_mview(
     'osm_admin_areas',
     'mv_admin_boundaries_areas_z13_15',
-    10,
+    5,
     0,
     'id, osm_id, type',
     'admin_level IN (1,2,3,4,5,6,7,8,9,10,11)'
