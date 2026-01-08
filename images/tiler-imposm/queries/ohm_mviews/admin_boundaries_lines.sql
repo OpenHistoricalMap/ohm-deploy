@@ -4,31 +4,84 @@
 --STEP 1: Add New Columns in osm_relation_members_boundaries and osm_admin_lines
 -- ============================================================================
 SELECT log_notice('STEP 1: Adding new columns in osm_relation_members_boundaries and osm_admin_lines table');
-ALTER TABLE osm_relation_members_boundaries 
-ADD COLUMN start_decdate DOUBLE PRECISION,
-ADD COLUMN end_decdate DOUBLE PRECISION;
 
-ALTER TABLE osm_admin_lines 
-ADD COLUMN start_decdate DOUBLE PRECISION,
-ADD COLUMN end_decdate DOUBLE PRECISION;
+-- osm_relation_members_boundaries
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_relation_members_boundaries' 
+    AND column_name = 'start_decdate'
+  ) THEN
+    ALTER TABLE osm_relation_members_boundaries ADD COLUMN start_decdate DOUBLE PRECISION;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_relation_members_boundaries' 
+    AND column_name = 'end_decdate'
+  ) THEN
+    ALTER TABLE osm_relation_members_boundaries ADD COLUMN end_decdate DOUBLE PRECISION;
+  END IF;
+END $$;
+
+-- osm_admin_lines
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_admin_lines' 
+    AND column_name = 'start_decdate'
+  ) THEN
+    ALTER TABLE osm_admin_lines ADD COLUMN start_decdate DOUBLE PRECISION;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_admin_lines' 
+    AND column_name = 'end_decdate'
+  ) THEN
+    ALTER TABLE osm_admin_lines ADD COLUMN end_decdate DOUBLE PRECISION;
+  END IF;
+END $$;
 
 
 -- ============================================================================
 -- STEP 2: Create the Trigger, which will call the function above
 -- ============================================================================
 SELECT log_notice('STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_relation_members_boundaries and osm_admin_lines table');
-CREATE TRIGGER trigger_decimal_dates_osm_relation_members_boundaries 
-BEFORE INSERT OR UPDATE 
-ON osm_relation_members_boundaries
-FOR EACH ROW
-EXECUTE FUNCTION convert_dates_to_decimal();
 
+-- osm_relation_members_boundaries trigger
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_decimal_dates_osm_relation_members_boundaries'
+  ) THEN
+    CREATE TRIGGER trigger_decimal_dates_osm_relation_members_boundaries 
+    BEFORE INSERT OR UPDATE 
+    ON osm_relation_members_boundaries
+    FOR EACH ROW
+    EXECUTE FUNCTION convert_dates_to_decimal();
+  END IF;
+END $$;
 
-CREATE TRIGGER trigger_decimal_dates_osm_admin_lines
-BEFORE INSERT OR UPDATE 
-ON osm_admin_lines
-FOR EACH ROW
-EXECUTE FUNCTION convert_dates_to_decimal();
+-- osm_admin_lines trigger
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_decimal_dates_osm_admin_lines'
+  ) THEN
+    CREATE TRIGGER trigger_decimal_dates_osm_admin_lines
+    BEFORE INSERT OR UPDATE 
+    ON osm_admin_lines
+    FOR EACH ROW
+    EXECUTE FUNCTION convert_dates_to_decimal();
+  END IF;
+END $$;
 
 -- ============================================================================
 -- STEP 3: Backfill Existing Data, Set timeout to 40 minutes (2400000 milliseconds) for the current session, this takes quite a while, sincecurrnelty thrre are ~5 million rows in the table
