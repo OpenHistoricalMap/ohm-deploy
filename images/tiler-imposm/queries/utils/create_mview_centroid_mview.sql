@@ -46,8 +46,6 @@ BEGIN
     END IF;
 
     -- 2) Build the CREATE MATERIALIZED VIEW statement
-    --    Creates the view with a temporary name first to avoid downtime
-    --    Converts area geometries to point centroids using ST_Centroid()
     sql := format(
         'CREATE MATERIALIZED VIEW %I AS
          SELECT %s, ST_Centroid(geometry) AS geometry

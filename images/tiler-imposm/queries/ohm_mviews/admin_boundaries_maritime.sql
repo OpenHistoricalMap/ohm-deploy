@@ -10,7 +10,6 @@ SELECT create_lines_mview(
     'maritime = ''yes'''
 );
 
-
 SELECT create_lines_mview(
     'osm_admin_lines',
     'mv_admin_maritime_lines_z6_9',

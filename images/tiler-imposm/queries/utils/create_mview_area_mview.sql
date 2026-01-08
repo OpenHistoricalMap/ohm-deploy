@@ -14,24 +14,23 @@ DROP FUNCTION IF EXISTS create_area_mview_from_mview(TEXT, TEXT, DOUBLE PRECISIO
  * @param custom_filter - Additional WHERE clause filter (e.g., "type IN ('water', 'pond')")
  */
 CREATE OR REPLACE FUNCTION create_area_mview_from_mview(
-    source_mview      text,              -- source materialized view
-    target_mview      text,              -- target materialized view to create
-    tolerance_meters  double precision,  -- geometry simplification tolerance
-    min_area          double precision,  -- area filter (0 = no filter)
-    custom_filter     text DEFAULT NULL  -- extra WHERE filter (e.g. "type IN (...)")
+    source_mview      text,
+    target_mview      text,
+    tolerance_meters  double precision,
+    min_area          double precision,
+    custom_filter     text DEFAULT NULL
 )
 RETURNS void AS
 $$
 DECLARE
-    cols_no_geom text;  -- List of all columns except 'geometry'
-    sql          text;  -- Dynamic SQL statement being built
-    tmp_mview    text;  -- Temporary view name (target_mview + '_tmp')
+    cols_no_geom text;
+    sql          text;
+    tmp_mview    text;
 BEGIN
     -- Generate temporary view name to avoid conflicts during creation
     tmp_mview := target_mview || '_tmp';
     
     -- 1) Get all columns from the source mview except 'geometry'
-    --    Uses pg_attribute to query the system catalog directly (works with materialized views)
     SELECT string_agg(quote_ident(attname), ', ' ORDER BY attnum)
     INTO cols_no_geom
     FROM pg_attribute a
@@ -48,8 +47,6 @@ BEGIN
     END IF;
 
     -- 2) Build the CREATE MATERIALIZED VIEW statement
-    --    Creates the view with a temporary name first to avoid downtime
-    --    Applies geometry simplification if tolerance_meters > 0
     sql := format(
         'CREATE MATERIALIZED VIEW %I AS
          SELECT %s, %s AS geometry
@@ -76,11 +73,9 @@ BEGIN
     END IF;
 
     -- 5) Execute the CREATE MATERIALIZED VIEW statement
-    --    This creates the view with the temporary name
     EXECUTE sql;
 
     -- 6) Create indexes on the temporary view
-    --    These will be renamed later to match the final view name
     EXECUTE format(
         'CREATE UNIQUE INDEX IF NOT EXISTS %I_id_osm_id_uidx
          ON %I (id, osm_id)',
@@ -94,15 +89,12 @@ BEGIN
     );
 
     -- 7) Drop the old materialized view if it exists
-    --    This is safe because we've already created the new one with a different name
     EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS %I', target_mview);
 
     -- 8) Atomically rename the temporary view to the final name
-    --    This ensures zero downtime - the view is available immediately after rename
     EXECUTE format('ALTER MATERIALIZED VIEW %I RENAME TO %I', tmp_mview, target_mview);
 
     -- 9) Rename indexes to match the final view name
-    --    This keeps index names consistent with the view name
     EXECUTE format(
         'ALTER INDEX IF EXISTS %I_id_osm_id_uidx RENAME TO %I_id_osm_id_uidx',
         tmp_mview, target_mview

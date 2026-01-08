@@ -10,6 +10,7 @@
 --   applying NULLIF(..., '') to avoid empty string values.
 --
 --   Automatically creates:
+--     - Sequential ID column (ROW_NUMBER)
 --     - Unique index on (osm_id, start_decdate, end_decdate)
 --     - Spatial GIST index on the geometry column
 --
@@ -40,6 +41,7 @@ BEGIN
 
     CREATE MATERIALIZED VIEW %I AS
     SELECT
+      ROW_NUMBER() OVER (ORDER BY way_id, min_start_decdate, max_end_decdate) AS id,
       way_id AS osm_id,
       min_start_decdate AS start_decdate,
       max_end_decdate AS end_decdate,
@@ -388,12 +390,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_mv_routes_by_length('mv_routes_indexed_z5', 1000);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z6_7', 200);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z8_9', 100);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z10_12', 20);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z13_15', 5);
 SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
+
+SELECT create_mview_line_from_mview('mv_routes_indexed_z16_20', 'mv_routes_indexed_z13_15', 5, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z13_15', 'mv_routes_indexed_z10_12', 20, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z10_12', 'mv_routes_indexed_z8_9', 100, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z8_9', 'mv_routes_indexed_z6_7', 200, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z6_7', 'mv_routes_indexed_z5', 1000, NULL);
+
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z5', 1000);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z6_7', 200);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z8_9', 100);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z10_12', 20);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z13_15', 5);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
 
 -- Refresh routes views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z5;
