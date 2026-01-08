@@ -2,27 +2,6 @@
 -- Using the generalized create_areas_mview function
 
 -- ============================================================================
--- Zoom 3-5:
--- High simplification (200m)
--- Large areas only (>50M m² = 50 km²)
--- Exclude water areas and natural areas, which are handled by the water_areas view
--- Create centroids view from simplified areas (no points at this zoom level)
--- ============================================================================
--- SELECT create_areas_mview(
---     'osm_landuse_areas',
---     'mv_landuse_areas_z3_5',
---     200,
---     50000000,
---     'id, osm_id, type',
---     'NOT (type = ''water'' AND class = ''natural'')'
--- );
--- SELECT create_points_centroids_mview(
---     'mv_landuse_areas_z3_5',
---     'mv_landuse_points_centroids_z3_5',
---     NULL
--- );
-
--- ============================================================================
 -- Zoom 6-7:
 -- Medium-high simplification (100m)
 -- Medium-large areas (>10M m² = 10 km²)
@@ -73,15 +52,15 @@ SELECT create_points_centroids_mview(
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_landuse_areas',
-    'mv_landuse_areas_z10_11',
-    15,
+    'mv_landuse_areas_z10_12',
+    20,
     50000,
     'id, osm_id, type',
     'NOT (type = ''water'' AND class = ''natural'')'
 );
 SELECT create_points_centroids_mview(
-    'mv_landuse_areas_z10_11',
-    'mv_landuse_points_centroids_z10_11',
+    'mv_landuse_areas_z10_12',
+    'mv_landuse_points_centroids_z10_12',
     NULL
 );
 
@@ -98,7 +77,7 @@ SELECT create_points_mview(
 
 
 -- ============================================================================
--- Zoom 12-13:
+-- Zoom 13-15:
 -- Low simplification (10m)
 -- Small areas (>10K m² = 0.01 km²)
 -- Exclude water areas and natural areas, which are handled by the water_areas view
@@ -106,37 +85,15 @@ SELECT create_points_mview(
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_landuse_areas',
-    'mv_landuse_areas_z12_13',
-    10,
+    'mv_landuse_areas_z13_15',
+    5,
     10000,
     'id, osm_id, type',
     'NOT (type = ''water'' AND class = ''natural'')'
 );
 SELECT create_points_centroids_mview(
-    'mv_landuse_areas_z12_13',
-    'mv_landuse_points_centroids_z12_13',
-    'mv_landuse_points'
-);
-
-
--- ============================================================================
--- Zoom 14-15:
--- Very low simplification (5m)
--- Very small areas (>5K m² = 0.005 km²)
--- Exclude water areas and natural areas, which are handled by the water_areas view
--- Include landuse points
--- ============================================================================
-SELECT create_areas_mview(
-    'osm_landuse_areas',
-    'mv_landuse_areas_z14_15',
-    5,
-    5000,
-    'id, osm_id, type',
-    'NOT (type = ''water'' AND class = ''natural'')'
-);
-SELECT create_points_centroids_mview(
-    'mv_landuse_areas_z14_15',
-    'mv_landuse_points_centroids_z14_15',
+    'mv_landuse_areas_z13_15',
+    'mv_landuse_points_centroids_z13_15',
     'mv_landuse_points'
 );
 
@@ -163,10 +120,28 @@ SELECT create_points_centroids_mview(
 
 
 -- ============================================================================
--- Create materialized views for landuse lines
+-- Create materialized views for landuse lines, TODO fix right zoom to the standard
 -- ============================================================================
 SELECT create_generic_mview(
     'osm_landuse_lines',
     'mv_landuse_lines_z14_20',
     ARRAY['osm_id', 'type', 'class']
 );
+
+-- Refresh areas views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_areas_z16_20;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_areas_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_areas_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_areas_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_areas_z6_7;
+
+-- Refresh points centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_points_centroids_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_points_centroids_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_points_centroids_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_points;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_points_centroids_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_points_centroids_z16_20;
+
+-- Refresh lines views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_lines_z14_20;

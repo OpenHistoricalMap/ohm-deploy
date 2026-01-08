@@ -34,9 +34,6 @@ select create_mview_centroid_from_mview('mv_water_areas_z16_20','mv_water_areas_
 select create_mview_centroid_from_mview('mv_water_areas_z13_15','mv_water_areas_centroids_z13_15', 'name IS NOT NULL AND name <> ''''');
 select create_mview_centroid_from_mview('mv_water_areas_z10_12','mv_water_areas_centroids_z10_12', 'name IS NOT NULL AND name <> ''''');
 select create_mview_centroid_from_mview('mv_water_areas_z8_9','mv_water_areas_centroids_z8_9', 'name IS NOT NULL AND name <> ''''');
-select create_mview_centroid_from_mview('mv_water_areas_z6_7','mv_water_areas_centroids_z6_7', 'name IS NOT NULL AND name <> ''''');
-select create_mview_centroid_from_mview('mv_water_areas_z3_5','mv_water_areas_centroids_z3_5', 'name IS NOT NULL AND name <> ''''');
-select create_mview_centroid_from_mview('mv_water_areas_z0_2','mv_water_areas_centroids_z0_2', 'name IS NOT NULL AND name <> ''''');
 
 
 -- ============================================================================
@@ -63,9 +60,6 @@ SELECT create_mview_line_from_mview('mv_water_lines_z10_12', 'mv_water_lines_z8_
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_water_areas_centroids_z13_15;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_water_areas_centroids_z10_12;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_water_areas_centroids_z8_9;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_water_areas_centroids_z6_7;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_water_areas_centroids_z3_5;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_water_areas_centroids_z0_2;
 
 -- Refresh lines views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_water_lines_z16_20
