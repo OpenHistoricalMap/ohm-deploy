@@ -6,7 +6,7 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    member as osm_id, 
+    osm_id, 
     admin_level, 
     type,
     start_date,
@@ -27,7 +27,7 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    member as osm_id, 
+    osm_id, 
     admin_level, 
     type,
     start_date,
@@ -49,7 +49,7 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    member as osm_id, 
+    osm_id, 
     admin_level, 
     type,
     start_date,
@@ -70,7 +70,7 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    member as osm_id, 
+    osm_id, 
     admin_level, 
     type,
     start_date,
@@ -91,7 +91,7 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    member as osm_id, 
+    osm_id, 
     admin_level, 
     type,
     start_date,
@@ -112,7 +112,7 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    member as osm_id, 
+    osm_id, 
     admin_level, 
     type,
     start_date,
@@ -133,7 +133,7 @@ id_fieldname = "osm_id"
 sql = """
 SELECT 
     ST_AsMVTGeom(geometry, !BBOX!) AS geometry, 
-    member as osm_id, 
+    osm_id, 
     admin_level, 
     type,
     start_date,
