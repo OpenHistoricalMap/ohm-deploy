@@ -206,3 +206,12 @@ SELECT create_place_areas_mview(
   'mv_place_areas_z14_20',
   ARRAY['plot', 'square', 'islet']
 );
+
+-- Refresh centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_place_points_centroids_z0_2;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_place_points_centroids_z3_5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_place_points_centroids_z6_10;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_place_points_centroids_z11_20;
+
+-- Refresh areas views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_place_areas_z14_20;

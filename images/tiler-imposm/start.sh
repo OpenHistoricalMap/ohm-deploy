@@ -272,21 +272,17 @@ function importData() {
     fi
     
     log_message "Import PBF file..."
-    if [ -z "$TILER_IMPORT_LIMIT" ]; then
-        imposm import \
-            -config $WORKDIR/config.json \
-            -read $PBFFILE \
-            -write \
-            -diff -cachedir $CACHE_DIR -overwritecache -diffdir $DIFF_DIR
-    else
-        wget $TILER_IMPORT_LIMIT -O $WORKDIR/$LIMITFILE
-        imposm import \
-            -config $WORKDIR/config.json \
-            -read $PBFFILE \
-            -write \
-            -diff -cachedir $CACHE_DIR -overwritecache -diffdir $DIFF_DIR \
-            -limitto $WORKDIR/$LIMITFILE
-    fi
+
+    imposm import \
+        -config $WORKDIR/config.json \
+        -read $PBFFILE \
+        -write \
+        -diff \
+        -cachedir $CACHE_DIR \
+        -overwritecache \
+        -diffdir $DIFF_DIR \
+        -optimize 
+
 
     imposm import \
         -config $WORKDIR/config.json \

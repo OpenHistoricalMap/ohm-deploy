@@ -7,27 +7,7 @@
       "source:datetime"
     ]
   },
-  "generalized_tables": {
-    "admin_lines_z0_5": {
-      "source": "admin_lines_z6_9",
-      "sql_filter": "maritime='yes'",
-      "tolerance": 2000
-    },
-    "admin_lines_z6_9": {
-      "source": "admin_lines_z10_15",
-      "sql_filter": "maritime='yes'",
-      "tolerance": 500
-    },
-    "admin_lines_z10_15": {
-      "source": "admin_lines_z16_20",
-      "sql_filter": "maritime='yes'",
-      "tolerance": 10
-    },
-    "admin_lines_z16_20": {
-      "source": "admin_lines",
-      "sql_filter": "maritime='yes'"
-    }
-  },
+  "generalized_tables": {},
   "tables": {
     "admin_lines": {
       "fields": [

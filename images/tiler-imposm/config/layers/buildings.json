@@ -52,7 +52,7 @@
           "key": "end_date"
         },
         {
-          "type": "pseudoarea",
+          "type": "area",
           "name": "area",
           "key": null
         },

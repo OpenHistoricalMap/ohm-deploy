@@ -19,7 +19,7 @@ SELECT
     official_name,
     {{LENGUAGES}}
 FROM 
-    mv_admin_maritime_lines_z0_5
+    mv_admin_maritime_lines_z0_5_v2
 WHERE 
     geometry && !BBOX!
 """

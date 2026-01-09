@@ -38,6 +38,12 @@ if [[ "$ALL" == true ]]; then
   execute_sql_file queries/utils/create_01_areas_mview.sql 
   execute_sql_file queries/utils/create_02_points_mview.sql
   execute_sql_file queries/utils/create_03_points_centroids_mview.sql
+  execute_sql_file queries/utils/create_04_lines_mviews.sql
+
+  ## Functions to create simplified areas, lines and centroids from existing materialized views
+  execute_sql_file queries/utils/create_mview_line_mview.sql
+  execute_sql_file queries/utils/create_mview_centroid_mview.sql
+  execute_sql_file queries/utils/create_mview_area_mview.sql
 
   # Route priority
   execute_sql_file queries/utils/route_priority.sql
@@ -57,7 +63,10 @@ fi
 ##################### OHM #####################
 log_message "Creating materialized views for OSM data"
 
-execute_sql_file queries/ohm_mviews/admin_boundaries_centroids.sql &
+## Admin boundaries areas
+execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql
+execute_sql_file queries/ohm_mviews/admin_boundaries_centroids.sql
+
 execute_sql_file queries/ohm_mviews/landuse.sql &
 execute_sql_file queries/ohm_mviews/admin_boundaries_maritime.sql
 
@@ -69,10 +78,10 @@ execute_sql_file queries/ohm_mviews/places.sql &
 execute_sql_file queries/ohm_mviews/transport_areas.sql  &
 execute_sql_file queries/ohm_mviews/transport_lines.sql 
 
-execute_sql_file queries/ohm_mviews/water.sql &
-execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql
+execute_sql_file queries/ohm_mviews/water.sql 
 
 ## routes
 execute_sql_file queries/ohm_mviews/routes_01_merge_by_date.sql
 execute_sql_file queries/ohm_mviews/routes_02_indexed.sql
 execute_sql_file queries/ohm_mviews/routes_03_mv.sql
+
