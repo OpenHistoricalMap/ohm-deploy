@@ -111,7 +111,8 @@ landuse_views=(
     mv_landuse_points_centroids_z13_15
     mv_landuse_points_centroids_z16_20
     # lines
-    mv_landuse_lines_z14_20
+    mv_landuse_lines_z14_15
+    mv_landuse_lines_z16_20
 )
 
 others_views=(
