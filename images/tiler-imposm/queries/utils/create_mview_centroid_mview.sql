@@ -28,6 +28,8 @@ DECLARE
     sql          text;
     tmp_mview    text;
 BEGIN
+
+    RAISE NOTICE '==> [MVIEW CENTROID] Creating % ===> % (custom_filter: %s)', source_mview, target_mview, custom_filter;
     -- Generate temporary view name to avoid conflicts during creation
     tmp_mview := target_mview || '_tmp';
     

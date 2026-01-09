@@ -27,6 +27,8 @@ DECLARE
     sql          text;
     tmp_mview    text;
 BEGIN
+
+    RAISE NOTICE '==> [MVIEW AREA] Creating % ===> % (simplification: %m, min_area: %s, custom_filter: %s)', source_mview, target_mview, tolerance_meters, min_area, custom_filter;
     -- Generate temporary view name to avoid conflicts during creation
     tmp_mview := target_mview || '_tmp';
     
