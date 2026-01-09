@@ -4,8 +4,10 @@ DROP FUNCTION IF EXISTS create_mview_centroid_from_mview(TEXT, TEXT, TEXT);
  * Creates a new materialized view with point centroids from an existing materialized view
  * containing area geometries (polygons/multipolygons).
  * 
- * Converts area geometries to their centroid points, useful for point-based rendering
- * at lower zoom levels or when displaying areas as points.
+ * Converts area geometries to their centroid points using ST_MaximumInscribedCircle,
+ * which provides a better centroid position (center of the largest inscribed circle)
+ * compared to ST_Centroid. Useful for point-based rendering at lower zoom levels
+ * or when displaying areas as points.
  * 
  * Uses a temporary view pattern to avoid downtime: creates the new view with a _tmp suffix,
  * then atomically replaces the old view by dropping it and renaming the temporary one.
@@ -48,7 +50,7 @@ BEGIN
     -- 2) Build the CREATE MATERIALIZED VIEW statement
     sql := format(
         'CREATE MATERIALIZED VIEW %I AS
-         SELECT %s, ST_Centroid(geometry) AS geometry
+         SELECT %s, (ST_MaximumInscribedCircle(geometry)).center AS geometry
          FROM %I
          WHERE geometry IS NOT NULL
            AND ST_GeometryType(geometry) IN (''ST_Polygon'', ''ST_MultiPolygon'')',

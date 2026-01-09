@@ -137,12 +137,12 @@ TODO: fix according to schema
 
 # Land Use - Lines (landuse_lines)
 
-TODO: fix according to schema
-
-
-   | MView | Zoom Levels | Simplification (m) | Min Area (m²) | Function | Notes |
+   - Filtering only tree_row, since this is the only one used in the mapstyles
+   
+   | MView | Zoom Levels | Simplification (m) | Min Length (m) | Function | Notes |
    |-------|-------------|-------------------|---------------|---------|-------|
-   | `mv_landuse_lines_z14_20` | 14-20 ⚠️ | - | - | create_generic_mview | Should be z14_15 + z16_20 |
+   | `mv_landuse_lines_z16_20` | 16-20 | 5 | 0 | create_lines_mview | Filter: type IN ('tree_row') |
+   | `mv_landuse_lines_z14_15` | 14-15 | 5 | - | create_mview_line_from_mview | Derived from z16_20 |
 
 # Transport - Areas (transport_areas)
 

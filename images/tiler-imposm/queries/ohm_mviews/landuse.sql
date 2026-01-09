@@ -119,14 +119,40 @@ SELECT create_points_centroids_mview(
 );
 
 
+
+-- Parameters:
+--   source_table    TEXT              - Name of the source table or materialized view
+--   view_name       TEXT              - Name of the materialized view to create
+--   simplify_tol    DOUBLE PRECISION  - Simplification tolerance (0 = no simplification)
+--   min_length      DOUBLE PRECISION  - Minimum length in m to include (0 = no filter)
+--   unique_columns  TEXT              - Comma-separated columns for unique index (default: 'id, osm_id, type')
+--   where_filter    TEXT              - Optional WHERE clause filter (e.g., "highway != 'abandoned'"). NULL = no filter
+--
+-- Notes:
+--   - Creates the materialized view using a temporary swap mechanism
+--   - Adds a spatial index (GiST) on geometry and a unique index on unique_columns
+--   - Useful for creating views at different zoom levels with variable simplification
+--   - where_filter is appended to WHERE clause with AND
+-- -- ============================================================================
+-- DROP FUNCTION IF EXISTS create_lines_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
+
+-- CREATE OR REPLACE FUNCTION create_lines_mview(
+--     source_table TEXT,
+--     view_name TEXT,
+--     simplify_tol DOUBLE PRECISION DEFAULT 0,
+--     min_length DOUBLE PRECISION DEFAULT 0,
+--     unique_columns TEXT DEFAULT 'id, osm_id, type',
+--     where_filter TEXT DEFAULT NULL
+-- )
+
+
 -- ============================================================================
--- Create materialized views for landuse lines, TODO fix right zoom to the standard
+-- Create materialized views for landuse lines, 
+-- Only tree_row type is used in the map style
 -- ============================================================================
-SELECT create_generic_mview(
-    'osm_landuse_lines',
-    'mv_landuse_lines_z14_20',
-    ARRAY['osm_id', 'type', 'class']
-);
+SELECT create_lines_mview('osm_landuse_lines', 'mv_landuse_lines_z16_20', 5, 0, 'id, osm_id, type', 'type IN (''tree_row'')');
+SELECT create_mview_line_from_mview('mv_landuse_lines_z16_20', 'mv_landuse_lines_z14_15', 5, NULL);
+
 
 -- Refresh areas views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_landuse_areas_z16_20;
