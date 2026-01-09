@@ -37,6 +37,20 @@ http:
         # # Trust only known proxy headers (adjust based on your infrastructure)
         # hostsProxyHeaders: ["X-Forwarded-Host"]
 
+    secure-headers-allow-iframe:
+      headers:
+        # Allows iframe embedding (for comparison tools)
+        frameDeny: false
+        # Enables XSS protection in older browsers
+        browserXssFilter: true
+        # Prevents browsers from MIME-sniffing (forces declared Content-Type)
+        contentTypeNosniff: true
+        # Enforces HTTPS via HSTS
+        forceSTSHeader: true
+        stsSeconds: 31536000  # 1 year
+        stsIncludeSubdomains: true
+        stsPreload: true
+
     redirect-nominatim:
       redirectRegex:
         regex: "^https://(nominatim(?:\\.staging)?\\.openhistoricalmap\\.org)/?$"
@@ -53,7 +67,7 @@ http:
       tls:
         certResolver: letsencrypt
       middlewares:
-        - secure-headers
+        - secure-headers-allow-iframe
 
     tiler_cache-production-router:
       rule: Host(`tiler-cache.openhistoricalmap.org`)
@@ -145,7 +159,7 @@ http:
       tls:
         certResolver: letsencrypt
       middlewares:
-        - secure-headers
+        - secure-headers-allow-iframe
 
     overpass-api-staging-router:
       rule: Host(`overpass-api.staging.openhistoricalmap.org`)
