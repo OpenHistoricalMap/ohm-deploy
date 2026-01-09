@@ -47,16 +47,17 @@ function refresh_mviews_group() {
     done
 }
 
+
 admin_boundaries_lines_views=(
     mv_relation_members_boundaries
     mv_admin_boundaries_relations_ways
-    mv_admin_boundaries_lines_z0_2
-    mv_admin_boundaries_lines_z3_5
-    mv_admin_boundaries_lines_z6_7
-    mv_admin_boundaries_lines_z8_9
-    mv_admin_boundaries_lines_z10_12
-    mv_admin_boundaries_lines_z13_15
     mv_admin_boundaries_lines_z16_20
+    mv_admin_boundaries_lines_z13_15
+    mv_admin_boundaries_lines_z10_12
+    mv_admin_boundaries_lines_z8_9
+    mv_admin_boundaries_lines_z6_7
+    mv_admin_boundaries_lines_z3_5
+    mv_admin_boundaries_lines_z0_2
 )
 
 admin_boundaries_areas_centroids_views=(
@@ -140,6 +141,7 @@ places_views=(
     mv_place_points_centroids_z11_20
     mv_place_areas_z14_20
 )
+
 
 transport_views=(
     # lines

@@ -23,6 +23,7 @@ SELECT create_points_mview('osm_landuse_points','mv_landuse_points' );
 -- Create points centroids materialized views, add points  only for higher zoom levels
 SELECT create_points_centroids_mview('mv_landuse_areas_z16_20','mv_landuse_points_centroids_z16_20','mv_landuse_points');
 SELECT create_points_centroids_mview( 'mv_landuse_areas_z13_15', 'mv_landuse_points_centroids_z13_15', 'mv_landuse_points');
+SELECT create_points_centroids_mview( 'mv_landuse_areas_z10_12', 'mv_landuse_points_centroids_z10_12', NULL);
 SELECT create_points_centroids_mview( 'mv_landuse_areas_z8_9', 'mv_landuse_points_centroids_z8_9', NULL);
 SELECT create_points_centroids_mview( 'mv_landuse_areas_z6_7', 'mv_landuse_points_centroids_z6_7', NULL);
 

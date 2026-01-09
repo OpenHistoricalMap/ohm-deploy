@@ -295,164 +295,15 @@ ON mv_admin_boundaries_relations_ways USING GIST (geometry);
 SELECT log_notice('STEP 6: Create a materialized view for zoom levels');
 
 -- ==========================================
--- MViews for admin lines zoom 0-2
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z0_2 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z0_2 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 5000) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z0_2_idx 
-ON mv_admin_boundaries_lines_z0_2 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z0_2_geometry_idx 
-ON mv_admin_boundaries_lines_z0_2 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 3-5
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z3_5 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z3_5 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 1000) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z3_5_idx 
-ON mv_admin_boundaries_lines_z3_5 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z3_5_geometry_idx 
-ON mv_admin_boundaries_lines_z3_5 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 6-7
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z6_7 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z6_7 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 200) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z6_7_idx 
-ON mv_admin_boundaries_lines_z6_7 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z6_7_geometry_idx 
-ON mv_admin_boundaries_lines_z6_7 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 8-9
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z8_9 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z8_9 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 100) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z8_9_idx 
-ON mv_admin_boundaries_lines_z8_9 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z8_9_geometry_idx 
-ON mv_admin_boundaries_lines_z8_9 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 10-12
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z10_12 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z10_12 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 20) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z10_12_idx 
-ON mv_admin_boundaries_lines_z10_12 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z10_12_geometry_idx 
-ON mv_admin_boundaries_lines_z10_12 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 13-15
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z13_15 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z13_15 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 5) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z13_15_idx 
-ON mv_admin_boundaries_lines_z13_15 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z13_15_geometry_idx 
-ON mv_admin_boundaries_lines_z13_15 USING GIST (geometry);
-
--- ==========================================
 -- MViews for admin lines zoom 16-20
 -- ==========================================
 DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z16_20 CASCADE;
 CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z16_20 AS
 SELECT 
+    ROW_NUMBER() OVER (ORDER BY admin_level, member, group_id) AS id,
     type,
     admin_level,
-    member,
+    member as osm_id,
     ST_SimplifyPreserveTopology(geometry, 1) AS geometry,
     group_id,
     start_decdate,
@@ -460,20 +311,32 @@ SELECT
     start_date,
     end_date
 FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
+WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10,11)
 WITH DATA;
 
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_idx 
-ON mv_admin_boundaries_lines_z16_20 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_id_idx 
+ON mv_admin_boundaries_lines_z16_20 (id);
+
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_admin_level_idx 
+ON mv_admin_boundaries_lines_z16_20 (admin_level);
 
 CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_geometry_idx 
 ON mv_admin_boundaries_lines_z16_20 USING GIST (geometry);
 
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z16_20', 'mv_admin_boundaries_lines_z13_15', 5, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z13_15', 'mv_admin_boundaries_lines_z10_12', 20, NULL);
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z10_12', 'mv_admin_boundaries_lines_z8_9', 100, 'admin_level IN (1,2,3,4,5,6,7,8,9)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z8_9', 'mv_admin_boundaries_lines_z6_7', 200, 'admin_level IN (1,2,3,4,5,6)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z6_7', 'mv_admin_boundaries_lines_z3_5', 1000, 'admin_level IN (1,2,3,4)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z3_5', 'mv_admin_boundaries_lines_z0_2', 5000, 'admin_level IN (1,2)');
+
 -- Refresh lines views
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z0_2;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z3_5;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z6_7;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z8_9;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z10_12;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_relation_members_boundaries;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_relations_ways;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z16_20;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z3_5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z0_2;
