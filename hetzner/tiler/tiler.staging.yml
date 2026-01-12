@@ -21,7 +21,11 @@ services:
 
   imposm_staging:
     container_name: tiler_imposm_staging
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3183.h59d5a56
+    # image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3183.h59d5a56
+    image: tiler-imposm:staging
+    build: 
+      context: ../../images/tiler-imposm
+      dockerfile: Dockerfile
     volumes:
       - tiler_staging_imposmdata:/mnt/data
     command:
@@ -34,7 +38,6 @@ services:
     restart: always
     networks:
       - ohm_network
-
 
   tiler_server_staging:
     container_name: tiler_server_staging
@@ -106,10 +109,10 @@ services:
 volumes:
   tiler_staging_pgdata:
     driver: local
-    name: tiler_db_1212_v2
+    name: tiler_db_05_01_v9
   tiler_staging_imposmdata:
     driver: local
-    name: tiler_imposm_1212_v2
+    name: tiler_imposm_05_01_v9
 
 networks:
   ohm_network:

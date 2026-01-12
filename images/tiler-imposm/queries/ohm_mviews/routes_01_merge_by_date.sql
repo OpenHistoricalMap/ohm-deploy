@@ -1,18 +1,52 @@
 -- ============================================================================
--- STEP 1: Add New Columns
+-- STEP 1: Add New Columns (only if they don't exist)
 -- ============================================================================
 
 --- osm_route_multilines
 SELECT log_notice('STEP 1: Adding new columns in osm_route_multilines table');
-ALTER TABLE osm_route_multilines
-ADD COLUMN start_decdate DOUBLE PRECISION,
-ADD COLUMN end_decdate DOUBLE PRECISION;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_route_multilines' 
+    AND column_name = 'start_decdate'
+  ) THEN
+    ALTER TABLE osm_route_multilines ADD COLUMN start_decdate DOUBLE PRECISION;
+  END IF;
+  
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_route_multilines' 
+    AND column_name = 'end_decdate'
+  ) THEN
+    ALTER TABLE osm_route_multilines ADD COLUMN end_decdate DOUBLE PRECISION;
+  END IF;
+END $$;
 
 --- osm_route_lines
 SELECT log_notice('STEP 1: Adding new columns in osm_route_lines table');
-ALTER TABLE osm_route_lines
-ADD COLUMN start_decdate DOUBLE PRECISION,
-ADD COLUMN end_decdate DOUBLE PRECISION;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_route_lines' 
+    AND column_name = 'start_decdate'
+  ) THEN
+    ALTER TABLE osm_route_lines ADD COLUMN start_decdate DOUBLE PRECISION;
+  END IF;
+  
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_route_lines' 
+    AND column_name = 'end_decdate'
+  ) THEN
+    ALTER TABLE osm_route_lines ADD COLUMN end_decdate DOUBLE PRECISION;
+  END IF;
+END $$;
 
 
 -- ============================================================================
@@ -21,18 +55,34 @@ ADD COLUMN end_decdate DOUBLE PRECISION;
 -- ============================================================================
 
 --- osm_route_multilines
-CREATE TRIGGER trigger_decimal_dates_osm_route_multilines
-BEFORE INSERT OR UPDATE 
-ON osm_route_multilines
-FOR EACH ROW
-EXECUTE FUNCTION convert_dates_to_decimal();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_decimal_dates_osm_route_multilines'
+  ) THEN
+    CREATE TRIGGER trigger_decimal_dates_osm_route_multilines
+    BEFORE INSERT OR UPDATE 
+    ON osm_route_multilines
+    FOR EACH ROW
+    EXECUTE FUNCTION convert_dates_to_decimal();
+  END IF;
+END $$;
 
 --- osm_route_lines
-CREATE TRIGGER trigger_decimal_dates_osm_route_lines
-BEFORE INSERT OR UPDATE 
-ON osm_route_lines
-FOR EACH ROW
-EXECUTE FUNCTION convert_dates_to_decimal();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_decimal_dates_osm_route_lines'
+  ) THEN
+    CREATE TRIGGER trigger_decimal_dates_osm_route_lines
+    BEFORE INSERT OR UPDATE 
+    ON osm_route_lines
+    FOR EACH ROW
+    EXECUTE FUNCTION convert_dates_to_decimal();
+  END IF;
+END $$;
 
 
 -- ============================================================================

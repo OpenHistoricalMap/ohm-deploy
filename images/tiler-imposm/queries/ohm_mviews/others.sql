@@ -9,7 +9,7 @@
 SELECT create_areas_mview(
     'osm_other_areas',
     'mv_other_areas_z8_9',
-    50,
+    100,
     1000000,
     'id, osm_id, type',
     NULL
@@ -21,21 +21,19 @@ SELECT create_points_centroids_mview(
 );
 
 -- ============================================================================
--- Zoom 10-11:
--- Medium-low simplification (15m)
--- Medium areas (>50K m² = 0.05 km²)
+-- Zoom 10-12
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_other_areas',
-    'mv_other_areas_z10_11',
-    15,
+    'mv_other_areas_z10_12',
+    20,
     50000,
     'id, osm_id, type',
     NULL
 );
 SELECT create_points_centroids_mview(
-    'mv_other_areas_z10_11',
-    'mv_other_points_centroids_z10_11',
+    'mv_other_areas_z10_12',
+    'mv_other_points_centroids_z10_12',
     NULL
 );
 
@@ -49,43 +47,21 @@ SELECT create_points_mview(
     'mv_other_points'
 );
 
--- ============================================================================
--- Zoom 12-13:
--- Low simplification (10m)
--- Small areas (>10K m² = 0.01 km²)
--- Include other points
--- ============================================================================
-SELECT create_areas_mview(
-    'osm_other_areas',
-    'mv_other_areas_z12_13',
-    10,
-    10000,
-    'id, osm_id, type',
-    NULL
-);
-SELECT create_points_centroids_mview(
-    'mv_other_areas_z12_13',
-    'mv_other_points_centroids_z12_13',
-    'mv_other_points'
-);
 
 -- ============================================================================
--- Zoom 14-15:
--- Very low simplification (5m)
--- Very small areas (>5K m² = 0.005 km²)
--- Include other points
+-- Zoom 13-15:
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_other_areas',
-    'mv_other_areas_z14_15',
+    'mv_other_areas_z13_15',
     5,
     5000,
     'id, osm_id, type',
     NULL
 );
 SELECT create_points_centroids_mview(
-    'mv_other_areas_z14_15',
-    'mv_other_points_centroids_z14_15',
+    'mv_other_areas_z13_15',
+    'mv_other_points_centroids_z13_15',
     'mv_other_points'
 );
 
@@ -112,4 +88,22 @@ SELECT create_points_centroids_mview(
 -- ============================================================================
 -- Create materialized views for other lines
 -- ============================================================================
-SELECT create_generic_mview('osm_other_lines', 'mv_other_lines_z14_20', ARRAY['osm_id', 'type', 'class']);
+SELECT create_lines_mview('osm_other_lines', 'mv_other_lines_z16_20', 0, 0, 'id, osm_id, type');
+SELECT create_mview_line_from_mview('mv_other_lines_z16_20', 'mv_other_lines_z14_15', 5);
+
+-- Refresh areas views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_areas_z16_20;
+
+-- Refresh centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_points_centroids_z16_20;
+
+-- Refresh lines views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_lines_z16_20;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_other_lines_z14_15;
+

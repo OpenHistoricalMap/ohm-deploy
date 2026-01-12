@@ -4,31 +4,84 @@
 --STEP 1: Add New Columns in osm_relation_members_boundaries and osm_admin_lines
 -- ============================================================================
 SELECT log_notice('STEP 1: Adding new columns in osm_relation_members_boundaries and osm_admin_lines table');
-ALTER TABLE osm_relation_members_boundaries 
-ADD COLUMN start_decdate DOUBLE PRECISION,
-ADD COLUMN end_decdate DOUBLE PRECISION;
 
-ALTER TABLE osm_admin_lines 
-ADD COLUMN start_decdate DOUBLE PRECISION,
-ADD COLUMN end_decdate DOUBLE PRECISION;
+-- osm_relation_members_boundaries
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_relation_members_boundaries' 
+    AND column_name = 'start_decdate'
+  ) THEN
+    ALTER TABLE osm_relation_members_boundaries ADD COLUMN start_decdate DOUBLE PRECISION;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_relation_members_boundaries' 
+    AND column_name = 'end_decdate'
+  ) THEN
+    ALTER TABLE osm_relation_members_boundaries ADD COLUMN end_decdate DOUBLE PRECISION;
+  END IF;
+END $$;
+
+-- osm_admin_lines
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_admin_lines' 
+    AND column_name = 'start_decdate'
+  ) THEN
+    ALTER TABLE osm_admin_lines ADD COLUMN start_decdate DOUBLE PRECISION;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'osm_admin_lines' 
+    AND column_name = 'end_decdate'
+  ) THEN
+    ALTER TABLE osm_admin_lines ADD COLUMN end_decdate DOUBLE PRECISION;
+  END IF;
+END $$;
 
 
 -- ============================================================================
 -- STEP 2: Create the Trigger, which will call the function above
 -- ============================================================================
 SELECT log_notice('STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_relation_members_boundaries and osm_admin_lines table');
-CREATE TRIGGER trigger_decimal_dates_osm_relation_members_boundaries 
-BEFORE INSERT OR UPDATE 
-ON osm_relation_members_boundaries
-FOR EACH ROW
-EXECUTE FUNCTION convert_dates_to_decimal();
 
+-- osm_relation_members_boundaries trigger
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_decimal_dates_osm_relation_members_boundaries'
+  ) THEN
+    CREATE TRIGGER trigger_decimal_dates_osm_relation_members_boundaries 
+    BEFORE INSERT OR UPDATE 
+    ON osm_relation_members_boundaries
+    FOR EACH ROW
+    EXECUTE FUNCTION convert_dates_to_decimal();
+  END IF;
+END $$;
 
-CREATE TRIGGER trigger_decimal_dates_osm_admin_lines
-BEFORE INSERT OR UPDATE 
-ON osm_admin_lines
-FOR EACH ROW
-EXECUTE FUNCTION convert_dates_to_decimal();
+-- osm_admin_lines trigger
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_decimal_dates_osm_admin_lines'
+  ) THEN
+    CREATE TRIGGER trigger_decimal_dates_osm_admin_lines
+    BEFORE INSERT OR UPDATE 
+    ON osm_admin_lines
+    FOR EACH ROW
+    EXECUTE FUNCTION convert_dates_to_decimal();
+  END IF;
+END $$;
 
 -- ============================================================================
 -- STEP 3: Backfill Existing Data, Set timeout to 40 minutes (2400000 milliseconds) for the current session, this takes quite a while, sincecurrnelty thrre are ~5 million rows in the table
@@ -242,164 +295,15 @@ ON mv_admin_boundaries_relations_ways USING GIST (geometry);
 SELECT log_notice('STEP 6: Create a materialized view for zoom levels');
 
 -- ==========================================
--- MViews for admin lines zoom 0-2
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z0_2 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z0_2 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 5000) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z0_2_idx 
-ON mv_admin_boundaries_lines_z0_2 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z0_2_geometry_idx 
-ON mv_admin_boundaries_lines_z0_2 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 3-5
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z3_5 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z3_5 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 1000) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z3_5_idx 
-ON mv_admin_boundaries_lines_z3_5 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z3_5_geometry_idx 
-ON mv_admin_boundaries_lines_z3_5 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 6-7
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z6_7 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z6_7 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 200) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z6_7_idx 
-ON mv_admin_boundaries_lines_z6_7 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z6_7_geometry_idx 
-ON mv_admin_boundaries_lines_z6_7 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 8-9
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z8_9 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z8_9 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 100) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z8_9_idx 
-ON mv_admin_boundaries_lines_z8_9 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z8_9_geometry_idx 
-ON mv_admin_boundaries_lines_z8_9 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 10-12
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z10_12 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z10_12 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 20) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z10_12_idx 
-ON mv_admin_boundaries_lines_z10_12 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z10_12_geometry_idx 
-ON mv_admin_boundaries_lines_z10_12 USING GIST (geometry);
-
--- ==========================================
--- MViews for admin lines zoom 13-15
--- ==========================================
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z13_15 CASCADE;
-CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z13_15 AS
-SELECT 
-    type,
-    admin_level,
-    member,
-    ST_SimplifyPreserveTopology(geometry, 5) AS geometry,
-    group_id,
-    start_decdate,
-    end_decdate,
-    start_date,
-    end_date
-FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
-WITH DATA;
-
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z13_15_idx 
-ON mv_admin_boundaries_lines_z13_15 (admin_level, member, group_id);
-
-CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z13_15_geometry_idx 
-ON mv_admin_boundaries_lines_z13_15 USING GIST (geometry);
-
--- ==========================================
 -- MViews for admin lines zoom 16-20
 -- ==========================================
 DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z16_20 CASCADE;
 CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z16_20 AS
 SELECT 
+    ROW_NUMBER() OVER (ORDER BY admin_level, member, group_id) AS id,
     type,
     admin_level,
-    member,
+    member as osm_id,
     ST_SimplifyPreserveTopology(geometry, 1) AS geometry,
     group_id,
     start_decdate,
@@ -407,11 +311,32 @@ SELECT
     start_date,
     end_date
 FROM mv_admin_boundaries_relations_ways
-WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10)
+WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10,11)
 WITH DATA;
 
-CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_idx 
-ON mv_admin_boundaries_lines_z16_20 (admin_level, member, group_id);
+CREATE UNIQUE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_id_idx 
+ON mv_admin_boundaries_lines_z16_20 (id);
+
+CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_admin_level_idx 
+ON mv_admin_boundaries_lines_z16_20 (admin_level);
 
 CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_geometry_idx 
 ON mv_admin_boundaries_lines_z16_20 USING GIST (geometry);
+
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z16_20', 'mv_admin_boundaries_lines_z13_15', 5, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z13_15', 'mv_admin_boundaries_lines_z10_12', 20, NULL);
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z10_12', 'mv_admin_boundaries_lines_z8_9', 100, 'admin_level IN (1,2,3,4,5,6,7,8,9)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z8_9', 'mv_admin_boundaries_lines_z6_7', 200, 'admin_level IN (1,2,3,4,5,6)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z6_7', 'mv_admin_boundaries_lines_z3_5', 1000, 'admin_level IN (1,2,3,4)');
+SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z3_5', 'mv_admin_boundaries_lines_z0_2', 5000, 'admin_level IN (1,2)');
+
+-- Refresh lines views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_relation_members_boundaries;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_relations_ways;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z16_20;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z3_5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_lines_z0_2;
