@@ -143,12 +143,9 @@
       ],
       "type": "relation_member",
       "filters": {
-        "exclude_tags": [
-          [
-            "area",
-            "yes"
-          ]
-        ]
+        "reject": {
+          "area": ["yes"]
+        }
       },
       "mappings": {
         "railway": {

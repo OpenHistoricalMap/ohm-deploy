@@ -47,12 +47,9 @@
         ]
       },
       "filters": {
-        "exclude_tags": [
-          [
-            "boundary",
-            "administrative"
-          ]
-        ]
+        "reject": {
+          "boundary": ["administrative"]
+        }
       }
     }
   }

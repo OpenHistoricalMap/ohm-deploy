@@ -54,20 +54,11 @@
       ],
       "type": "linestring",
       "filters": {
-        "exclude_tags": [
-          [
-            "area",
-            "yes"
-          ],
-          [
-            "natural",
-            "coastline"
-          ],
-          [
-            "boundary",
-            "administrative"
-          ]
-        ]
+        "reject": {
+          "area": ["yes"],
+          "natural": ["coastline"],
+          "boundary": ["administrative"]
+        }
       },
       "mappings": {
         "landuse": {

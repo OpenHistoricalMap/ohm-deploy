@@ -43,3 +43,11 @@ SELECT create_points_centroids_mview(
     'mv_amenity_points_centroids_z16_20',
     'mv_amenity_points'
 );
+
+-- Refresh areas views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_amenity_areas_z14_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_amenity_areas_z16_20;
+
+-- Refresh centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_amenity_points_centroids_z14_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_amenity_points_centroids_z16_20;

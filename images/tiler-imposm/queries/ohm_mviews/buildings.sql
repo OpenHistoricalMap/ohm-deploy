@@ -51,3 +51,11 @@ SELECT create_points_centroids_mview(
     'mv_buildings_points_centroids_z16_20',
     'mv_buildings_points'
 );
+
+-- Refresh areas views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_areas_z14_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_areas_z16_20;
+
+-- Refresh centroids views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_points_centroids_z14_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_points_centroids_z16_20;

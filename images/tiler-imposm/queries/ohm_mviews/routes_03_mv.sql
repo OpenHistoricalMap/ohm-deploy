@@ -2,25 +2,25 @@
 -- FUNCTION: create_mv_routes_by_length
 -- ============================================================================
 -- Purpose:
---   Creates a materialized view filtered by minimum geometry length and
---   optionally simplified geometry, based on the source view mv_routes_indexed.
+--   Creates a materialized view with optionally simplified geometry,
+--   based on the source view mv_routes_indexed.
 --
 --   Includes all route_* columns generated in mv_routes_indexed
 --   (up to 6 slots per type: road, train, subway, light_rail, tram, trolleybus, bus),
 --   applying NULLIF(..., '') to avoid empty string values.
 --
 --   Automatically creates:
+--     - Sequential ID column (ROW_NUMBER)
 --     - Unique index on (osm_id, start_decdate, end_decdate)
 --     - Spatial GIST index on the geometry column
 --
 -- Parameters:
 --   full_view_name TEXT         - Name of the new materialized view
---   min_length DOUBLE PRECISION - Minimum geometry length (ST_Length filter)
 --   simplify_tol DOUBLE PRECISION - Simplification tolerance (ST_Simplify)
 --
 -- Typical usage:
---   SELECT create_mv_routes_by_length('mv_routes_indexed_z5_6', 500, 500);
---   SELECT create_mv_routes_by_length('mv_routes_indexed_z11_13', 1, 50);
+--   SELECT create_mv_routes_by_length('mv_routes_indexed_z5_6', 500);
+--   SELECT create_mv_routes_by_length('mv_routes_indexed_z11_13', 50);
 --
 -- Notes:
 --   - mv_routes_indexed must exist before calling this function.
@@ -31,7 +31,6 @@ DROP MATERIALIZED VIEW IF EXISTS create_mv_routes_by_length CASCADE;
 
 CREATE OR REPLACE FUNCTION create_mv_routes_by_length(
     full_view_name TEXT,
-    min_length DOUBLE PRECISION,
     simplify_tol DOUBLE PRECISION
 ) RETURNS void AS $$
 DECLARE
@@ -42,6 +41,7 @@ BEGIN
 
     CREATE MATERIALIZED VIEW %I AS
     SELECT
+      ROW_NUMBER() OVER (ORDER BY way_id, min_start_decdate, max_end_decdate) AS id,
       way_id AS osm_id,
       min_start_decdate AS start_decdate,
       max_end_decdate AS end_decdate,
@@ -364,7 +364,6 @@ BEGIN
       NULLIF(route_bus_6_direction, '') AS route_bus_6_direction
 
     FROM mv_routes_indexed
-    WHERE ST_Length(geometry) > %s
     WITH DATA;
 
     -- Índice único (con todas las columnas *_ref)
@@ -381,7 +380,6 @@ BEGIN
   $f$,
     full_view_name, full_view_name,
     simplify_tol::text, simplify_tol::text,
-    min_length::text,
     full_view_name, full_view_name,
     full_view_name, full_view_name
   );
@@ -393,14 +391,27 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-SELECT create_mv_routes_by_length('mv_routes_indexed_z5_6', 500, 100);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z7_8', 200, 50);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z9_10', 100, 20);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z11_13', 1, 5);
-SELECT create_mv_routes_by_length('mv_routes_indexed_z14_20', 0, 0);
 
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z5_6;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z7_8;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z9_10;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z11_13;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z14_20;
+DROP MATERIALIZED VIEW IF EXISTS mv_routes_indexed_z16_20 CASCADE;
+
+SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z16_20', 'mv_routes_indexed_z13_15', 5, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z13_15', 'mv_routes_indexed_z10_12', 20, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z10_12', 'mv_routes_indexed_z8_9', 100, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z8_9', 'mv_routes_indexed_z6_7', 200, NULL);
+SELECT create_mview_line_from_mview('mv_routes_indexed_z6_7', 'mv_routes_indexed_z5', 1000, NULL);
+
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z5', 1000);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z6_7', 200);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z8_9', 100);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z10_12', 20);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z13_15', 5);
+-- SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
+
+-- Refresh routes views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_routes_indexed_z16_20;

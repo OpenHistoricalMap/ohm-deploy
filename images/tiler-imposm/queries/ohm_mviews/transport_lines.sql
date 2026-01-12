@@ -164,11 +164,20 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Create materialized views for  transport lines
 -- ============================================================================
-SELECT create_transport_lines_mview('mv_transport_lines_z5', 1000, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail'], ARRAY['railway']);
-SELECT create_transport_lines_mview('mv_transport_lines_z6', 500, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail'], ARRAY['railway']);
-SELECT create_transport_lines_mview('mv_transport_lines_z7', 300, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail'], ARRAY['railway']);
-SELECT create_transport_lines_mview('mv_transport_lines_z8', 200, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link'], ARRAY['railway']);
-SELECT create_transport_lines_mview('mv_transport_lines_z9', 100, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link'], ARRAY['railway']);
-SELECT create_transport_lines_mview('mv_transport_lines_z10_11', 80, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'taxiway', 'runway'], ARRAY['railway']);
-SELECT create_transport_lines_mview('mv_transport_lines_z12_13', 50, ARRAY['motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified'], ARRAY['railway']);
-SELECT create_transport_lines_mview('mv_transport_lines_z14_20', 0, ARRAY['*'], ARRAY['railway','route']);
+DROP MATERIALIZED VIEW IF EXISTS mv_transport_lines_z16_20 CASCADE;
+SELECT create_transport_lines_mview('mv_transport_lines_z16_20', 0, ARRAY['*'], ARRAY['railway','route']);
+SELECT create_mview_line_from_mview('mv_transport_lines_z16_20', 'mv_transport_lines_z13_15', 5, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'') OR class IN (''railway'')');
+SELECT create_mview_line_from_mview('mv_transport_lines_z13_15', 'mv_transport_lines_z10_12', 20, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'') OR class IN (''railway'')');
+SELECT create_mview_line_from_mview('mv_transport_lines_z10_12', 'mv_transport_lines_z8_9', 100, NULL);
+SELECT create_mview_line_from_mview('mv_transport_lines_z8_9', 'mv_transport_lines_z6_7', 200 , 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'') OR class IN (''railway'')');
+SELECT create_mview_line_from_mview('mv_transport_lines_z6_7', 'mv_transport_lines_z5', 1000 , NULL);
+
+
+
+-- Refresh lines views
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z16_20;
