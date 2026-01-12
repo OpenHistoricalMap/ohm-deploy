@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.10
 
 # Install kubectl
 ARG KUBECTL_VERSION=v1.30.1
