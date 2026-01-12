@@ -336,7 +336,7 @@ osm-seed:
         enabled: true
         name: ohm-s3-bucket-access-staging 
       env:
-        ENABLE_SEND_SLACK_MESSAGE: "true"
+        ENABLE_SEND_SLACK_MESSAGE: "false"
         SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
       resources:
         enabled: false
