@@ -76,6 +76,6 @@ fi
 
 # Start Tegola
 echo "Starting Tegola server..."
-tegola serve --config="${TEGOLA_CONFIG_FILE}"
+tegola serve --config="${TEGOLA_CONFIG_FILE}" --log-level=INFO
 # start with debug mode
 # TEGOLA_SQL_DEBUG=LAYER_SQL:EXECUTE_SQL tegola serve --config="${TEGOLA_CONFIG_FILE}" --log-level=TRACE
