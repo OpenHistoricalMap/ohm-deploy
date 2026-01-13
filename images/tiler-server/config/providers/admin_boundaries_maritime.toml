@@ -76,18 +76,18 @@ WHERE
 #######Maps
 [[maps.layers]]
 name = "land_ohm_maritime"
-provider_layer = "osm.admin_lines_z0_5"
+provider_layer = "ohm.admin_lines_z0_5"
 min_zoom = 0
 max_zoom = 5
 
 [[maps.layers]]
 name = "land_ohm_maritime"
-provider_layer = "osm.admin_lines_z6_9"
+provider_layer = "ohm.admin_lines_z6_9"
 min_zoom = 6
 max_zoom = 9
 
 [[maps.layers]]
 name = "land_ohm_maritime"
-provider_layer = "osm.admin_lines_z10_15"
+provider_layer = "ohm.admin_lines_z10_15"
 min_zoom = 10
 max_zoom = 12

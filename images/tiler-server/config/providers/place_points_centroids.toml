@@ -101,24 +101,24 @@ WHERE
 #######Maps
 [[maps.layers]]
 name = "place_points_centroids"
-provider_layer = "osm.place_points_centroids_z3_5"
+provider_layer = "ohm.place_points_centroids_z3_5"
 min_zoom = 0
 max_zoom = 2
 
 [[maps.layers]]
 name = "place_points_centroids"
-provider_layer = "osm.place_points_centroids_z3_5"
+provider_layer = "ohm.place_points_centroids_z3_5"
 min_zoom = 3
 max_zoom = 5
 
 [[maps.layers]]
 name = "place_points_centroids"
-provider_layer = "osm.place_points_centroids_z6_10"
+provider_layer = "ohm.place_points_centroids_z6_10"
 min_zoom = 6
 max_zoom = 10
 
 [[maps.layers]]
 name = "place_points_centroids"
-provider_layer = "osm.place_points_centroids_z11_20"
+provider_layer = "ohm.place_points_centroids_z11_20"
 min_zoom = 11
 max_zoom = 20

@@ -94,24 +94,24 @@ WHERE
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z8_9"
+provider_layer = "ohm.water_areas_centroid_z8_9"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z10_12"
+provider_layer = "ohm.water_areas_centroid_z10_12"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z13_15"
+provider_layer = "ohm.water_areas_centroid_z13_15"
 min_zoom = 13
 max_zoom = 15
 
 [[maps.layers]]
 name = "water_areas_centroids"
-provider_layer = "osm.water_areas_centroid_z16_20"
+provider_layer = "ohm.water_areas_centroid_z16_20"
 min_zoom = 16
 max_zoom = 20
