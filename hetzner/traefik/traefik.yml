@@ -57,6 +57,16 @@ http:
         replacement: "https://${1}/ui/search.html"
         permanent: true
 
+    replace-osm-to-ohm:
+      replacePathRegex:
+        regex: "^/capabilities/osm\\.json$"
+        replacement: "/capabilities/ohm.json"
+
+    replace-osm-tiles-to-ohm:
+      replacePathRegex:
+        regex: "^/maps/osm/(.*)$"
+        replacement: "/maps/ohm/${1}"
+
   routers:
     #################### Production ####################
     vtiles-production-router:
@@ -160,6 +170,8 @@ http:
         certResolver: letsencrypt
       middlewares:
         - secure-headers-allow-iframe
+        - replace-osm-to-ohm
+        - replace-osm-tiles-to-ohm
 
     overpass-api-staging-router:
       rule: Host(`overpass-api.staging.openhistoricalmap.org`)
