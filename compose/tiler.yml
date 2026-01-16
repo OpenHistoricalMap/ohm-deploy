@@ -38,7 +38,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../hetzner:/hetzner
-      - ../images/tiler-server:/app
+      # - ../images/tiler-server:/app
     ports:
       - "9090:9090"
     env_file:

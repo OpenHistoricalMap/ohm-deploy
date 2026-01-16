@@ -1,4 +1,24 @@
--- This script creates materialized views for admin boundaries (lines) conbined from tables osm_relation_members_boundaries and osm_admin_lines
+/**
+layers: admin_boundaries_lines
+tegola_config: config/providers/admin_boundaries_lines.toml
+filters_per_zoom_level:
+- z16-20: mv_admin_boundaries_lines_z16_20 | tolerance=1m | filter=admin_level IN (1,2,3,4,5,6,7,8,9,10,11) | source=mv_admin_boundaries_relations_ways
+- z13-15: mv_admin_boundaries_lines_z13_15 | tolerance=5m | filter=admin_level IN (1,2,3,4,5,6,7,8,9,10) | source=mv_admin_boundaries_lines_z16_20
+- z10-12: mv_admin_boundaries_lines_z10_12 | tolerance=20m | filter=(inherited from z13-15) | source=mv_admin_boundaries_lines_z13_15
+- z8-9:   mv_admin_boundaries_lines_z8_9   | tolerance=100m | filter=admin_level IN (1,2,3,4,5,6,7,8,9) | source=mv_admin_boundaries_lines_z10_12
+- z6-7:   mv_admin_boundaries_lines_z6_7   | tolerance=200m | filter=admin_level IN (1,2,3,4,5,6) | source=mv_admin_boundaries_lines_z8_9
+- z3-5:   mv_admin_boundaries_lines_z3_5   | tolerance=1000m | filter=admin_level IN (1,2,3,4) | source=mv_admin_boundaries_lines_z6_7
+- z0-2:   mv_admin_boundaries_lines_z0_2   | tolerance=5000m | filter=admin_level IN (1,2) | source=mv_admin_boundaries_lines_z3_5
+
+## description:
+OpenhistoricalMap admin boundaries lines, contains administrative boundary lines (country borders, state/province boundaries, etc.) with temporal information
+
+## details:
+- Combines data from relations (osm_relation_members_boundaries) and ways (osm_admin_lines)
+- Merges adjacent lines with overlapping or continuous date ranges (start_decdate/end_decdate) grouped by admin_level, member, and type
+- Uses admin_level to filter boundaries by administrative level (higher levels shown at lower zooms)
+**/
+
 
 -- ============================================================================
 --STEP 1: Add New Columns in osm_relation_members_boundaries and osm_admin_lines

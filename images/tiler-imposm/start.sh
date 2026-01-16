@@ -312,6 +312,10 @@ log_message "PostgreSQL is ready! Proceeding with setup..."
 # Run date functions
 execute_sql_file /usr/local/datefunctions/datefunctions.sql
 
+# Compile SQL info and upload to S3
+log_message "Compiling SQL layer information..."
+python3 compile_sql_info.py
+
 # Check the number of tables in the database
 table_count=$(countTables)
 

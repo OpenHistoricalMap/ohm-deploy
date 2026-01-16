@@ -1,3 +1,20 @@
+/**
+layers: transport_areas, transport_points_centroids
+tegola_config: config/providers/transport_areas.toml, config/providers/transport_points_centroids.toml
+filters_per_zoom_level:
+- z16-20: mv_transport_areas_z16_20 | tolerance=0m | min_area=0 | filter=NOT (class = 'highway' AND type IN (...))
+- z13-15: mv_transport_areas_z13_15 | tolerance=5m | min_area=0 | filter=(all from parent)
+- z10-12: mv_transport_areas_z10_12 | tolerance=20m | min_area=100 | filter=type IN ('aerodrome','apron','terminal')
+
+## description:
+OpenhistoricalMap transport areas, contains transportation infrastructure areas (airports, terminals, aprons, railway stations, etc.)
+
+## details:
+- Excludes closed highways (see https://github.com/OpenHistoricalMap/issues/issues/1194)
+- Includes aerodrome, apron, and terminal types (see https://github.com/OpenHistoricalMap/issues/issues/1083, https://github.com/OpenHistoricalMap/issues/issues/1141)
+- Points centroids are created from areas and points for higher zoom levels
+**/
+
 -- Create areas materialized views
 -- Exclude closed highways from https://github.com/OpenHistoricalMap/issues/issues/1194
 -- -- We include aerodrome to start at zoom 10 from https://github.com/OpenHistoricalMap/issues/issues/1083

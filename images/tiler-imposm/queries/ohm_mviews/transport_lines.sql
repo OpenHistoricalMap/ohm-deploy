@@ -1,3 +1,23 @@
+/**
+layers: transport_lines
+tegola_config: config/providers/transport_lines.toml
+filters_per_zoom_level:
+- z16-20: mv_transport_lines_z16_20 | tolerance=0m | filter=type IN ('*') OR class IN ('railway','route')
+- z13-15: mv_transport_lines_z13_15 | tolerance=5m | filter=type IN (multiple) OR class IN ('railway')
+- z10-12: mv_transport_lines_z10_12 | tolerance=20m | filter=type IN (multiple) OR class IN ('railway')
+- z8-9:   mv_transport_lines_z8_9   | tolerance=100m | filter=(all)
+- z6-7:   mv_transport_lines_z6_7   | tolerance=200m | filter=type IN (major roads) OR class IN ('railway')
+- z5:     mv_transport_lines_z5     | tolerance=1000m | filter=(all)
+
+## description:
+OpenhistoricalMap transport lines, contains transportation network lines (roads, highways, railways, tramways, runways, etc.) with route relations support
+
+## details:
+- Combines ways and relations (route relations)
+- Supports highway construction tag handling (converts 'construction' tag to type)
+- Includes multilingual name columns dynamically from languages table
+**/
+
 -- ============================================================================
 -- Function: create_transport_lines_mview
 -- Description:

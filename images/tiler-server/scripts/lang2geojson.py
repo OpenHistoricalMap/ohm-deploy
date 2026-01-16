@@ -24,6 +24,8 @@ import argparse
 from utils import get_db_connection, write_json_and_upload
 
 def export_languages_to_geojson(output_file, s3_key):
+    conn = None
+    cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -68,9 +70,11 @@ def export_languages_to_geojson(output_file, s3_key):
 
     except Exception as e:
         print(f"Error: {e}")
+        raise
     finally:
-        if conn:
+        if cursor:
             cursor.close()
+        if conn:
             conn.close()
 
 if __name__ == "__main__":

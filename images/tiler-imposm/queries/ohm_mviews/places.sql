@@ -1,3 +1,22 @@
+/**
+layers: place_areas, place_points_centroids
+tegola_config: config/providers/place_areas.toml, config/providers/place_points_centroids.toml
+filters_per_zoom_level:
+- z14-20: mv_place_areas_z14_20 | tolerance=0m | min_area=0 | filter=type IN ('plot','square','islet')
+- z11-20: mv_place_points_centroids_z11_20 | filter=type IN ('plot','square','islet') from areas, multiple types from points
+- z6-10:  mv_place_points_centroids_z6_10  | filter=type IN ('island') from areas, multiple types from points
+- z3-5:   mv_place_points_centroids_z3_5   | filter=type IN ('island') from areas, multiple types from points
+- z0-2:   mv_place_points_centroids_z0_2   | filter=type IN ('island') from areas, multiple types from points
+
+## description:
+OpenhistoricalMap places points centroids, contains named geographic places as points (cities, towns, villages, countries, islands, etc.) combining polygons and point features
+
+## details:
+- Combines polygons (areas) and points into centroids
+- Includes multilingual name columns dynamically from languages table
+- Only features with names are included
+**/
+
 -- ============================================================================
 -- Function: create_place_points_centroids_mview
 -- Description:
@@ -202,6 +221,19 @@ SELECT create_place_points_centroids_mview (
 -- ============================================================================
 -- Create materialized views for place areas
 -- ============================================================================
+/**
+layers: place_areas
+tegola_config: config/providers/place_areas.toml
+filters_per_zoom_level:
+- z14-20: mv_place_areas_z14_20 | tolerance=0m | min_area=0 | filter=type IN ('plot', 'square', 'islet')
+
+## description:
+OpenhistoricalMap place areas, contains named place polygons (squares, plots, islets, etc.)
+
+## details:
+- Only features with names are included
+**/
+
 SELECT create_place_areas_mview(
   'mv_place_areas_z14_20',
   ARRAY['plot', 'square', 'islet']

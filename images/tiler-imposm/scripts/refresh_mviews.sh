@@ -69,14 +69,15 @@ admin_boundaries_areas_centroids_views=(
     mv_admin_boundaries_areas_z6_7
     mv_admin_boundaries_areas_z3_5
     mv_admin_boundaries_areas_z0_2
+
     # centroids
-    mv_admin_boundaries_centroids_z0_2
-    mv_admin_boundaries_centroids_z3_5
-    mv_admin_boundaries_centroids_z6_7
-    mv_admin_boundaries_centroids_z8_9
-    mv_admin_boundaries_centroids_z10_12
-    mv_admin_boundaries_centroids_z13_15
     mv_admin_boundaries_centroids_z16_20
+    mv_admin_boundaries_centroids_z13_15
+    mv_admin_boundaries_centroids_z10_12
+    mv_admin_boundaries_centroids_z8_9
+    mv_admin_boundaries_centroids_z6_7
+    mv_admin_boundaries_centroids_z3_5
+    mv_admin_boundaries_centroids_z0_2  
 )
 
 admin_maritime_lines_views=(    

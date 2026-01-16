@@ -1,3 +1,26 @@
+/**
+layers: routes_lines
+tegola_config: config/providers/routes_lines.toml
+filters_per_zoom_level:
+- z16-20: mv_routes_indexed_z16_20 | tolerance=0m | filter=(all) | source=mv_routes_indexed
+- z13-15: mv_routes_indexed_z13_15 | tolerance=5m | filter=(all from parent) | source=mv_routes_indexed_z16_20
+- z10-12: mv_routes_indexed_z10_12 | tolerance=20m | filter=(all from parent) | source=mv_routes_indexed_z13_15
+- z8-9:   mv_routes_indexed_z8_9   | tolerance=100m | filter=(all from parent) | source=mv_routes_indexed_z10_12
+- z6-7:   mv_routes_indexed_z6_7   | tolerance=200m | filter=(all from parent) | source=mv_routes_indexed_z8_9
+- z5:     mv_routes_indexed_z5     | tolerance=1000m | filter=(all from parent) | source=mv_routes_indexed_z6_7
+
+## description:
+OpenhistoricalMap routes lines, contains route relation lines.
+
+## details:
+- Combines route relations and ways objects
+- Merges routes by date ranges (start_decdate/end_decdate) and groups by way_id and route type
+- Supports multiple route types per way: road, train, subway, light_rail, tram, trolleybus, bus (up to 6 slots per type)
+- Routes are ranked by priority and stored in fixed slots (route_<type>_<1-6>_ref, route_<type>_<1-6>_network, etc.)
+- Includes route metadata: ref, network, network_wikidata, operator, name, direction
+- Pyramid structure: each zoom level is created from the previous one with increasing simplification tolerance
+**/
+
 -- ============================================================================
 -- FUNCTION: create_mv_routes_by_length
 -- ============================================================================

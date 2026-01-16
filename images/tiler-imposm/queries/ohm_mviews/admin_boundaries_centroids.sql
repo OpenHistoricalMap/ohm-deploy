@@ -1,3 +1,24 @@
+/**
+layers: admin_boundaries_centroids
+tegola_config: config/providers/admin_boundaries_centroids.toml
+filters_per_zoom_level:
+- z16-20: mv_admin_boundaries_centroids_z16_20 | filter=(all from parent mv_admin_boundaries_areas_z16_20)
+- z13-15: mv_admin_boundaries_centroids_z13_15 | filter=(all from parent mv_admin_boundaries_areas_z13_15)
+- z10-12: mv_admin_boundaries_centroids_z10_12 | filter=(all from parent mv_admin_boundaries_areas_z10_12)
+- z8-9:   mv_admin_boundaries_centroids_z8_9   | filter=(all from parent mv_admin_boundaries_areas_z8_9)
+- z6-7:   mv_admin_boundaries_centroids_z6_7   | filter=(all from parent mv_admin_boundaries_areas_z6_7)
+- z3-5:   mv_admin_boundaries_centroids_z3_5   | filter=(all from parent mv_admin_boundaries_areas_z3_5)
+- z0-2:   mv_admin_boundaries_centroids_z0_2   | filter=(all from parent mv_admin_boundaries_areas_z0_2)
+
+## description:
+OpenhistoricalMap admin boundaries centroids, contains point representations of administrative boundaries (centroids from polygons) for labeling
+
+## details:
+- Only features with names are included
+- Excludes boundaries with role='label' from relation members
+- Created from admin boundary areas using ST_MaximumInscribedCircle to calculate centroids
+**/
+
 -- ============================================================================
 -- Function: create_admin_boundaries_centroids_mview
 -- Description:
