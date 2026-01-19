@@ -1,5 +1,5 @@
 /**
-layers: admin_boundaries_lines
+layers: land_ohm_lines
 tegola_config: config/providers/admin_boundaries_lines.toml
 filters_per_zoom_level:
 - z16-20: mv_admin_boundaries_lines_z16_20 | tolerance=1m | filter=admin_level IN (1,2,3,4,5,6,7,8,9,10,11) | source=mv_admin_boundaries_relations_ways

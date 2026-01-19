@@ -1,5 +1,5 @@
 /**
-layers: admin_boundaries_maritime
+layers: land_ohm_maritime
 tegola_config: config/providers/admin_boundaries_maritime.toml
 filters_per_zoom_level:
 - z10-15: mv_admin_maritime_lines_z10_15 | tolerance=10m | filter=maritime = 'yes'

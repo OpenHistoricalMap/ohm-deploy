@@ -1,5 +1,5 @@
 /**
-layers: admin_boundaries_centroids
+layers: land_ohm_centroids
 tegola_config: config/providers/admin_boundaries_centroids.toml
 filters_per_zoom_level:
 - z16-20: mv_admin_boundaries_centroids_z16_20 | filter=(all from parent mv_admin_boundaries_areas_z16_20)

@@ -2,12 +2,12 @@
 layers: transport_lines
 tegola_config: config/providers/transport_lines.toml
 filters_per_zoom_level:
-- z16-20: mv_transport_lines_z16_20 | tolerance=0m | filter=type IN ('*') OR class IN ('railway','route')
-- z13-15: mv_transport_lines_z13_15 | tolerance=5m | filter=type IN (multiple) OR class IN ('railway')
-- z10-12: mv_transport_lines_z10_12 | tolerance=20m | filter=type IN (multiple) OR class IN ('railway')
-- z8-9:   mv_transport_lines_z8_9   | tolerance=100m | filter=(all)
-- z6-7:   mv_transport_lines_z6_7   | tolerance=200m | filter=type IN (major roads) OR class IN ('railway')
-- z5:     mv_transport_lines_z5     | tolerance=1000m | filter=(all)
+- z16-20: mv_transport_lines_z16_20 | tolerance=0m | filter=all types OR class IN ('railway', 'route')
+- z13-15: mv_transport_lines_z13_15 | tolerance=5m | filter=type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway', 'raceway', 'residential', 'service', 'unclassified') OR class IN ('railway')
+- z10-12: mv_transport_lines_z10_12 | tolerance=20m | filter=type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'miniature', 'narrow_gauge', 'dismantled', 'abandoned', 'disused', 'razed', 'light_rail', 'preserved', 'proposed', 'tram', 'funicular', 'monorail', 'taxiway', 'runway') OR class IN ('railway')
+- z8-9:   mv_transport_lines_z8_9   | tolerance=100m | filter=(Inherited from z10-12)
+- z6-7:   mv_transport_lines_z6_7   | tolerance=200m | filter=type IN ('motorway', 'motorway_link', 'trunk', 'trunk_link', 'construction', 'primary', 'primary_link', 'rail', 'secondary', 'secondary_link') OR class IN ('railway')
+- z5:     mv_transport_lines_z5     | tolerance=1000m | filter=(Inherited from z6-7)
 
 ## description:
 OpenhistoricalMap transport lines, contains transportation network lines (roads, highways, railways, tramways, runways, etc.) with route relations support
@@ -185,7 +185,7 @@ $$ LANGUAGE plpgsql;
 -- Create materialized views for  transport lines
 -- ============================================================================
 DROP MATERIALIZED VIEW IF EXISTS mv_transport_lines_z16_20 CASCADE;
-SELECT create_transport_lines_mview('mv_transport_lines_z16_20', 0, ARRAY['*'], ARRAY['railway','route']);
+SELECT create_transport_lines_mview('mv_transport_lines_z16_20', 0, ARRAY['*'], ARRAY['railway', 'route']);
 SELECT create_mview_line_from_mview('mv_transport_lines_z16_20', 'mv_transport_lines_z13_15', 5, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z13_15', 'mv_transport_lines_z10_12', 20, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z10_12', 'mv_transport_lines_z8_9', 100, NULL);

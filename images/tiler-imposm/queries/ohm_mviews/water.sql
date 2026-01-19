@@ -2,13 +2,13 @@
 layers: water_areas
 tegola_config: config/providers/water_areas.toml
 filters_per_zoom_level:
-- z16-20: mv_water_areas_z16_20 | tolerance=0m | min_area=0 | filter=(all) | source=osm_water_areas
-- z13-15: mv_water_areas_z13_15 | tolerance=5m | min_area=0 | filter=(inherited from z16-20) | source=mv_water_areas_z16_20
-- z10-12: mv_water_areas_z10_12 | tolerance=20m | min_area=100 | filter=type IN ('water','pond','basin','canal','mill_pond','riverbank') | source=mv_water_areas_z13_15
-- z8-9:   mv_water_areas_z8_9   | tolerance=100m | min_area=10000 | filter=(inherited from z10-12) | source=mv_water_areas_z10_12
-- z6-7:   mv_water_areas_z6_7   | tolerance=200m | min_area=1000000 | filter=(inherited from z8-9) | source=mv_water_areas_z8_9
-- z3-5:   mv_water_areas_z3_5   | tolerance=1000m | min_area=50000000 | filter=(inherited from z6-7) | source=mv_water_areas_z6_7
-- z0-2:   mv_water_areas_z0_2   | tolerance=5000m | min_area=100000000 | filter=type IN ('water','riverbank') | source=mv_water_areas_z3_5
+- z16-20: mv_water_areas_z16_20 | tolerance=0m | min_area=0 | all | source=osm_water_areas
+- z13-15: mv_water_areas_z13_15 | tolerance=5m | min_area=0 | inherited from z16-20) | source=mv_water_areas_z16_20
+- z10-12: mv_water_areas_z10_12 | tolerance=20m | min_area=100 | type IN ('water','pond','basin','canal','mill_pond','riverbank') | source=mv_water_areas_z13_15
+- z8-9:   mv_water_areas_z8_9   | tolerance=100m | min_area=10000 | inherited from z10-12) | source=mv_water_areas_z10_12
+- z6-7:   mv_water_areas_z6_7   | tolerance=200m | min_area=1000000 | inherited from z8-9) | source=mv_water_areas_z8_9
+- z3-5:   mv_water_areas_z3_5   | tolerance=1000m | min_area=50000000 | inherited from z6-7) | source=mv_water_areas_z6_7
+- z0-2:   mv_water_areas_z0_2   | tolerance=5000m | min_area=100000000 | type IN ('water','riverbank') | source=mv_water_areas_z3_5
 
 ## description:
 OpenhistoricalMap water areas, contains water body polygons (lakes, ponds, rivers, canals, etc.)
