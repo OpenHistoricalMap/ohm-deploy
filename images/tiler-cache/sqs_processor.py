@@ -197,12 +197,20 @@ def process_sqs_messages():
                 body = json.loads(message["Body"])
 
                 # Process delayed cleanup messages
+                is_delayed_message = False
+                should_skip_delete = False
                 for action_name, delay_seconds in DELAYED_CLEANUPS:
                     if body.get("action") == action_name:
+                        is_delayed_message = True
                         if not process_delayed_cleanup(body, sent_time, action_name, delay_seconds):
-                            continue
-                    
-                if "Records" in body and body["Records"][0]["eventSource"] == "aws:s3":
+                            should_skip_delete = True
+                        break
+
+                # Skip deleting message if it's not ready yet
+                if should_skip_delete:
+                    continue
+
+                if not is_delayed_message and "Records" in body and body["Records"][0]["eventSource"] == "aws:s3":
                     record = body["Records"][0]
                     eventTime = record["eventTime"]
                     bucket_name = record["s3"]["bucket"]["name"]
