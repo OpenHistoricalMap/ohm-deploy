@@ -45,7 +45,8 @@ The container is configured entirely through environment variables. All variable
 | `POSTGRES_USER` | Username for the PostgreSQL database. | `postgres` |
 | `POSTGRES_PASSWORD` | Password for the PostgreSQL database. | `password` |
 | **Cleanup** |
-| `DELAYED_CLEANUP_TIMER_SECONDS` | Delay in seconds before cleaning up resources after a job. | `3600` |
+| `ENABLE_DELAYED_CLEANUP` | Enable delayed cleanup operations (15 minutes and 1 hour). Set to `"true"` to enable. | `true` |
+| `DELAYED_CLEANUP_TIMER_SECONDS` | Delay in seconds before cleaning up resources after a job (legacy, kept for backward compatibility). | `3600` |
 
 ## Usage
 
@@ -55,6 +56,18 @@ python sqs_processor.py
 This script  listens to an SQS queue for messages about expired map data. Upon receiving a message, it calculates the affected tile coverage and deletes the corresponding tiles directly from the S3 bucket.
 
 To run this script, you must configure all the required environment variables, especially those related to SQS and S3.
+
+### Delayed Cleanup System
+
+The system implements a three-phase cleanup strategy:
+
+1. **Immediate Cleanup**: Executed immediately when an S3 expiration file is detected
+2. **15-Minute Delayed Cleanup**: Scheduled via SQS with a 15-minute delay (using SQS `DelaySeconds`)
+3. **1-Hour Delayed Cleanup**: Scheduled via SQS with a 1-hour delay (using timestamp-based checking since SQS max delay is 15 minutes)
+
+The delayed cleanups can be enabled/disabled using the `ENABLE_DELAYED_CLEANUP` environment variable. When enabled, both delayed cleanups are automatically scheduled after the immediate cleanup completes.
+
+**Note**: The 1-hour cleanup uses a timestamp in the message body to track when it was originally scheduled. When the message is processed (after the 15-minute SQS delay), the system checks if 1 hour has actually passed before executing the cleanup.
 
 ### Required Cloud Permissions (IAM)
 Since the script no longer creates Kubernetes jobs, it does not require RBAC permissions to manage cluster resources. Instead, the service account running the purge.py pod needs AWS IAM permissions to interact with SQS and S3.

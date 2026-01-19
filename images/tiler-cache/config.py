@@ -35,9 +35,10 @@ class Config:
 
     # S3 settings
     ZOOM_LEVELS_TO_DELETE = list(
-        map(int, os.getenv("ZOOM_LEVELS_TO_DELETE", "18,19,20").split(","))
+        map(int, os.getenv("ZOOM_LEVELS_TO_DELETE", "10,11,12,13,14,15,16,17,18,19,20").split(","))
     )
     S3_BUCKET_CACHE_TILER = os.getenv("S3_BUCKET_CACHE_TILER", "tiler-cache-staging")
+    # TODO , Replace mnt/data/osm to mnt/data/ohm
     S3_BUCKET_PATH_FILES = os.getenv("S3_BUCKET_PATH_FILES", "mnt/data/osm,mnt/data/ohm_admin").split(",")
 
     # AWS S3 Credentials
@@ -59,6 +60,9 @@ class Config:
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
 
     DELAYED_CLEANUP_TIMER_SECONDS = int(os.getenv("DELAYED_CLEANUP_TIMER_SECONDS", 3600))
+    ENABLE_DELAYED_CLEANUP = os.getenv("ENABLE_DELAYED_CLEANUP", "true").lower() == "true"
+    DELAYED_CLEANUP_15MIN_SECONDS = 900  # 15 minutes
+    DELAYED_CLEANUP_1HOUR_SECONDS = 3600  # 1 hour
 
     @staticmethod
     def get_s3_client():
