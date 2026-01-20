@@ -34,6 +34,7 @@ RUN git clone https://github.com/OpenHistoricalMap/osmx-adiff-builder.git /app
 
 COPY start.sh .
 COPY update.sh .
+COPY split_adiff.py .
 
 RUN chmod +x /app/*.sh && chmod +x /app/*.py
 
