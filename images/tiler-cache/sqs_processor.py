@@ -92,8 +92,7 @@ SQS_MAX_DELAY_SECONDS = 900
 # To add a new delay, just add a tuple here
 DELAYED_CLEANUPS = [
     ("delayed_cleanup_15min", 900),   # 15 minutes
-    ("delayed_cleanup_1hour", 3600),  # 1 hour
-    ("delayed_cleanup_12hour", 43200),  # 12 hours
+    ("delayed_cleanup_1hour", 7200),  # 2 hour
 ]
 
 
