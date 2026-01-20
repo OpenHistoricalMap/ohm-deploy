@@ -2,7 +2,7 @@ FROM ghcr.io/bdon/osmexpress:latest
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-RUN apk add --no-cache python3 py3-pip git bash xmlstarlet curl aws-cli
+RUN apk add --no-cache python3 py3-pip git bash xmlstarlet curl aws-cli py3-lxml
 
 RUN apk add --no-cache --virtual .build-deps build-base patch python3-dev make cmake zlib-dev expat-dev bzip2-dev boost-dev rust cargo && \
     \
