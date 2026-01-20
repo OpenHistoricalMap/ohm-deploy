@@ -28,7 +28,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
 
-RUN echo "Update repo 08/08/2025"
+RUN echo "Update repo 20/01/2025"
 
 RUN git clone https://github.com/OpenHistoricalMap/osmx-adiff-builder.git /app
 
