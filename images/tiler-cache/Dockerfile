@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.10
 
 # Install kubectl
 ARG KUBECTL_VERSION=v1.30.1
@@ -7,7 +7,7 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/${KUBECTL
     && mv kubectl /usr/local/bin/
 RUN kubectl version --client
 WORKDIR /app
-
+RUN echo "installing requirements"
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
