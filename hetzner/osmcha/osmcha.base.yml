@@ -105,6 +105,11 @@ services:
     volumes:
       - ohmx_db:/data
       - ${HOME}/.aws:/root/.aws:ro
+      - /production/services/images/ohmx-adiff-builder/config.sh:/app/config.sh
+      - /production/services/images/ohmx-adiff-builder/functions.sh:/app/functions.sh
+      - /production/services/images/ohmx-adiff-builder/start.sh:/app/start.sh
+      - /production/services/images/ohmx-adiff-builder/process_min_range.sh:/app/process_min_range.sh
+      - /production/services/images/ohmx-adiff-builder/update.sh:/app/update.sh
     networks:
       - ohm_network
     cpus: '8.0'

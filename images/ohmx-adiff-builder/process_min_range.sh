@@ -2,7 +2,6 @@
 # Usage: ./process_min_range.sh SEQNO_START SEQNO_END [generate_adiffs|process_adiffs|both]
 # Example: ./process_min_range.sh 1884610 1884615 generate_adiffs
 #          ./process_min_range.sh 1884610 1884615 process_adiffs
-#          ./process_min_range.sh 1884610 1884615 (default: both)
 
 source "config.sh"
 source "functions.sh"
