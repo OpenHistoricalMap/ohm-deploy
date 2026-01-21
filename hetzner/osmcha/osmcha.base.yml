@@ -90,7 +90,7 @@ services:
     command: sh /app/update.sh
 
   osmcha_ohmx_adiff:
-    image: ghcr.io/openhistoricalmap/ohmx-adiff-builder:0.0.1-0.dev.git.2836.hbee0465
+    image: ghcr.io/openhistoricalmap/ohmx-adiff-builder:0.0.1-0.dev.git.3256.h4c03a3a
     container_name: osmcha_ohmx_adiff_staging
     environment:
       - API_URL=https://api.openhistoricalmap.org
@@ -105,6 +105,11 @@ services:
     volumes:
       - ohmx_db:/data
       - ${HOME}/.aws:/root/.aws:ro
+      - /production/services/images/ohmx-adiff-builder/config.sh:/app/config.sh
+      - /production/services/images/ohmx-adiff-builder/functions.sh:/app/functions.sh
+      - /production/services/images/ohmx-adiff-builder/start.sh:/app/start.sh
+      - /production/services/images/ohmx-adiff-builder/process_min_range.sh:/app/process_min_range.sh
+      - /production/services/images/ohmx-adiff-builder/update.sh:/app/update.sh
     networks:
       - ohm_network
     cpus: '8.0'
