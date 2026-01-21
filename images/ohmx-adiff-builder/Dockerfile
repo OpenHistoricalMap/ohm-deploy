@@ -6,7 +6,7 @@ RUN apk add --no-cache python3 py3-pip git bash xmlstarlet curl aws-cli py3-lxml
 
 RUN apk add --no-cache --virtual .build-deps build-base patch python3-dev make cmake zlib-dev expat-dev bzip2-dev boost-dev rust cargo && \
     \
-    pip install --break-system-packages osmx py3-requests osmium && \
+    pip install --break-system-packages osmx requests osmium && \
     \
     echo "--- Clonando y modificando osm-cli para OpenHistoricalMap ---" && \
     git clone https://github.com/jake-low/osm-cli.git /tmp/osm-cli && \
@@ -28,7 +28,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
 
-RUN echo "Update repo 20/01/2025"
+# RUN echo "Update repo 08/08/2025"
 
 RUN git clone https://github.com/OpenHistoricalMap/osmx-adiff-builder.git /app
 
