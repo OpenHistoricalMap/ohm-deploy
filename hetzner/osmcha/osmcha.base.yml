@@ -90,7 +90,7 @@ services:
     command: sh /app/update.sh
 
   osmcha_ohmx_adiff:
-    image: ghcr.io/openhistoricalmap/ohmx-adiff-builder:0.0.1-0.dev.git.2836.hbee0465
+    image: ghcr.io/openhistoricalmap/ohmx-adiff-builder:0.0.1-0.dev.git.3256.h4c03a3a
     container_name: osmcha_ohmx_adiff_staging
     environment:
       - API_URL=https://api.openhistoricalmap.org
