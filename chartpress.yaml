@@ -14,8 +14,8 @@ charts:
         valuesPath: osm-seed.tilerServer.image
       tasking-manager-api:
         valuesPath: osm-seed.tmApi.image
-      # cgimap:
-      #   valuesPath: osm-seed.osm.cgimap.image
+      cgimap:
+        valuesPath: osm-seed.osm.cgimap.image
       tiler-cache:
         valuesPath: ohm.tilerCache.image
       tiler-monitor:
