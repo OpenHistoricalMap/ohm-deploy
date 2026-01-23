@@ -10,7 +10,8 @@ RUN apk add --no-cache \
 
 # Clone and build tegola from fork
 WORKDIR /build
-RUN git clone https://github.com/OpenHistoricalMap/tegola.git . && git checkout update/tilejson3
+ENV TEGOLA_GITSHA=b7245bb58f22d8e75076cabe444a445a3798a9b2
+RUN git clone https://github.com/OpenHistoricalMap/tegola.git . && git checkout $TEGOLA_GITSHA
 
 # Build arguments for version information
 ARG BUILD_PKG="github.com/go-spatial/tegola/internal/build"
