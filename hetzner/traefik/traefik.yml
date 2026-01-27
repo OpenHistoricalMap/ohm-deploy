@@ -250,7 +250,7 @@ http:
     taginfo_production:
       loadBalancer:
         servers:
-          - url: http://taginfo_production:80
+          - url: http://taginfo_production:4567
 
     node_exporter_production:
       loadBalancer:
@@ -287,7 +287,7 @@ http:
     taginfo_staging:
       loadBalancer:
         servers:
-          - url: http://host.docker.internal:8088 # 8088 comes from production
+          - url: http://taginfo_production:4567
 
 providers:
   file:
