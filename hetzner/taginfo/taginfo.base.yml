@@ -1,40 +1,24 @@
 services:
-  taginfo:
-    container_name: taginfo_staging
-    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.983.h6eb40e7
-    volumes:
-      -  ${HOME}/data/staging/taginfo_data:/usr/src/app/data
-    command: >
-      /bin/bash -c "while true; do /usr/src/app/start.sh web; sleep 5m; done"
-    env_file:
-      - ./.env.sample # Sample file contains the required environment variables for production and staging
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    ports:
-      - "8087:80"
-    networks:
-      - ohm_network
 
-  taginfo_db_processor:
-    container_name: taginfo_db_processor_staging
-    image: developmentseed/osmseed-taginfo:0.1.0-0.dev.git.983.h6eb40e7
+  taginfo_data:
+    container_name: taginfo_data_staging
+    image: ghcr.io/osm-seed/taginfo:0.1.0-0.dev.git.989.h60325d0
     volumes:
       - ${HOME}/data/staging/taginfo_data:/usr/src/app/data
       - ${HOME}/.aws:/root/.aws:ro
-      - ./taginfo-cron.log:/var/log/taginfo-cron.log
-    # command: >
-    #   /bin/bash -c "/usr/src/app/start.sh data"
-    command: >
-      /bin/bash -c "echo \"${TAGINFO_CRON_SCHEDULE:-0 7 */3 * *} /usr/src/app/start.sh data >> /var/log/taginfo-cron.log 2>&1\" | crontab - && exec cron -f"
     env_file:
       - ./.env.sample
-    environment:
-      - TAGINFO_CRON_SCHEDULE=0 7 */3 * *
+    restart: always
+    networks:
+      - ohm_network
+
+  taginfo_web:
+    container_name: taginfo_web_staging
+    image:  ghcr.io/osm-seed/taginfo-web:0.1.0-0.dev.git.989.h60325d0
+    volumes:
+      -  ${HOME}/data/staging/taginfo_data:/usr/src/app/data
+    env_file:
+      - ./.env.sample
     restart: always
     networks:
       - ohm_network
