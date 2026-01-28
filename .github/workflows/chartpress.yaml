@@ -6,7 +6,6 @@ on:
       - 'staging'
       - 'staging_deploy'
       - 'vtiles_admin'
-      - '1249_fix_split_adiff'
 jobs:
   build:
     runs-on: ubuntu-22.04

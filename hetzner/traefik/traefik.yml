@@ -250,7 +250,7 @@ http:
     taginfo_production:
       loadBalancer:
         servers:
-          - url: http://taginfo_production:80
+          - url: http://taginfo_production:4567
 
     node_exporter_production:
       loadBalancer:
