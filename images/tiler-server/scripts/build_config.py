@@ -13,7 +13,20 @@ from collections import defaultdict
 from utils import get_db_connection
 
 
-def fetch_all_languages() -> dict:
+def fetch_languages_map() -> dict:
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT alias, key_name
+                FROM languages;
+            """)
+            return {alias: key_name for alias, key_name in cur.fetchall()}
+    finally:
+        conn.close()
+
+
+def fetch_all_languages(alias_to_key_name: dict) -> dict:
     """Fetches name_* columns from all materialized views mv_* (except mview_*)."""
     conn = get_db_connection()
     result = {}
@@ -21,8 +34,11 @@ def fetch_all_languages() -> dict:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT
-                  c.relname AS mview_name,
-                  string_agg(a.attname, ', ' ORDER BY a.attname) AS name_columns
+                  c.relname AS keyname,
+                  string_agg(
+                    a.attname,
+                    ', ' ORDER BY a.attname
+                  ) AS name_columns
                 FROM
                   pg_class c
                 JOIN
@@ -40,8 +56,19 @@ def fetch_all_languages() -> dict:
                 ORDER BY
                   c.relname;
             """)
-            for view_name, name_columns in cur.fetchall():
-                result[view_name] = name_columns
+            for keyname, name_columns in cur.fetchall():
+                if not name_columns:
+                    continue
+                columns = [c.strip() for c in name_columns.split(',') if c.strip()]
+                expressions = []
+                for col in columns:
+                    key_name = alias_to_key_name.get(col)
+                    if not key_name and col.startswith('name_'):
+                        key_name = col.replace('name_', 'name:', 1)
+                    if key_name:
+                        expressions.append(f'{col} AS "{key_name}"')
+                if expressions:
+                    result[keyname] = ', '.join(expressions)
     finally:
         conn.close()
     return result
@@ -128,7 +155,8 @@ if __name__ == "__main__":
     with open(TEMPLATE_FILE, 'r') as f:
         template_content = f.read()
 
-    lang_map = fetch_all_languages()
+    alias_to_key_name = fetch_languages_map()
+    lang_map = fetch_all_languages(alias_to_key_name)
     marker_blocks = defaultdict(list)
 
     # Process each provider file and split into provider/map sections

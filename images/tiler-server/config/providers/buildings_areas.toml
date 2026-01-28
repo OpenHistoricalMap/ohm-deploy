@@ -49,12 +49,12 @@ WHERE
 #######Maps
 [[maps.layers]]
 name = "buildings"
-provider_layer = "osm.buildings_z14_15"
+provider_layer = "ohm.buildings_z14_15"
 min_zoom = 14
 max_zoom = 15
 
 [[maps.layers]]
 name = "buildings"
-provider_layer = "osm.buildings_z16_20"
+provider_layer = "ohm.buildings_z16_20"
 min_zoom = 16
 max_zoom = 20
