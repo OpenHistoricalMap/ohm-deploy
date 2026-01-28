@@ -21,7 +21,7 @@ services:
 
   imposm_staging:
     container_name: tiler_imposm_staging
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3226.h9da5253
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
     # image: tiler-imposm:staging
     # build: 
     #   context: ../../images/tiler-imposm
