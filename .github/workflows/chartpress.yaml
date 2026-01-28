@@ -4,8 +4,6 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'staging_deploy'
-      - 'vtiles_admin'
       - '1247_tilejson'
 jobs:
   build:
@@ -73,7 +71,7 @@ jobs:
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
       ################ Staging secrets ################ 
       - name: Staging - substitute secrets
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/staging_deploy'
+        if: github.ref == 'refs/heads/staging' 
         uses: bluwy/substitute-string-action@v1
         with:
           _input-file: 'values.staging.template.yaml'
@@ -191,37 +189,43 @@ jobs:
           PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
           
       - name: AWS Credentials
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging_deploy'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' 
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       - name: Setup Kubectl and Helm Dependencies
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging_deploy'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' 
         run: |
           sudo pip install awscli --ignore-installed six
           sudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl
           sudo chmod +x /usr/bin/kubectl
           sudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator
           sudo chmod +x /usr/bin/aws-iam-authenticator
-          wget https://osmseed-staging.s3.us-east-1.amazonaws.com/helm-v3.5.0-linux-amd64.tar.gz --no-check-certificate -O helm.tar.gz
+          curl -L https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz -o helm.tar.gz
           tar -xvzf helm.tar.gz
           sudo mv linux-amd64/helm /usr/local/bin/
           sudo chmod +x /usr/local/bin/helm
+          helm version
 
       - name: Update kube-config staging 
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/staging_deploy'
+        if: github.ref == 'refs/heads/staging' 
         run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
       - name: Update kube-config prod
         if: github.ref == 'refs/heads/main'
         run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
+      - name: Add Helm repository
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' 
+        run: |
+          helm repo add osm-seed https://osm-seed.github.io/osm-seed-chart/
+          helm repo update
       - name: Install helm dependencies for
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging_deploy'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' 
         run: cd ohm && helm dep up
       # Staging
       - name: Staging - helm deploy
-        # if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/staging_deploy'
+        # if: github.ref == 'refs/heads/staging' 
         if: github.ref == 'refs/heads/staging'
         run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
       # Production

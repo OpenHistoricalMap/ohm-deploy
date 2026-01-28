@@ -21,7 +21,7 @@ services:
 
   imposm_staging:
     container_name: tiler_imposm_staging
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3226.h9da5253
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
     # image: tiler-imposm:staging
     # build: 
     #   context: ../../images/tiler-imposm
@@ -64,7 +64,7 @@ services:
 
   tiler_sqs_cleaner_staging:
     container_name: tiler_sqs_cleaner_staging
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3075.h121e4d9
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3245.hffaf924
     env_file:
       - .env.staging
     environment:
@@ -88,7 +88,7 @@ services:
 
   tiler_s3_cleaner_staging:
     container_name: tiler_s3_cleaner_staging
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.2846.h88a0cab
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3245.hffaf924
     env_file:
       - .env.staging
     networks:
