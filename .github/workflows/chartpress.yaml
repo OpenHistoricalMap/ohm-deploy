@@ -6,6 +6,7 @@ on:
       - 'staging'
       - 'staging_deploy'
       - 'vtiles_admin'
+      - 'pg_tiler_statement_timeout'
 jobs:
   build:
     runs-on: ubuntu-22.04
