@@ -65,7 +65,7 @@
       "type": "linestring",
       "mapping": {
         "boundary": [
-          "administrative"
+          "__any__"
         ]
       }
     }
