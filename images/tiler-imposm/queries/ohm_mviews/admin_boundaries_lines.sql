@@ -1,28 +1,37 @@
--- This script creates materialized views for admin boundaries (lines) conbined from tables osm_relation_members_boundaries and osm_admin_lines
+-- This script creates materialized views for admin boundaries (lines) combined from tables osm_admin_relation_members and osm_admin_lines
 
 -- ============================================================================
---STEP 1: Add New Columns in osm_relation_members_boundaries and osm_admin_lines
+-- STEP 0: Create indexes on type and role columns for query performance
 -- ============================================================================
-SELECT log_notice('STEP 1: Adding new columns in osm_relation_members_boundaries and osm_admin_lines table');
+SELECT log_notice('STEP 0: Create indexes on type (osm_admin_relation_members, osm_admin_lines) and role (osm_relation_members)');
 
--- osm_relation_members_boundaries
+CREATE INDEX IF NOT EXISTS osm_admin_relation_members_type_idx ON osm_admin_relation_members (type);
+CREATE INDEX IF NOT EXISTS osm_admin_lines_type_idx ON osm_admin_lines (type);
+CREATE INDEX IF NOT EXISTS osm_relation_members_role_idx ON osm_admin_relation_members (role);
+
+-- ============================================================================
+-- STEP 1: Add New Columns in osm_admin_relation_members and osm_admin_lines
+-- ============================================================================
+SELECT log_notice('STEP 1: Adding new columns in osm_admin_relation_members and osm_admin_lines table');
+
+-- osm_admin_relation_members
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_schema = 'public' 
-    AND table_name = 'osm_relation_members_boundaries' 
+    AND table_name = 'osm_admin_relation_members' 
     AND column_name = 'start_decdate'
   ) THEN
-    ALTER TABLE osm_relation_members_boundaries ADD COLUMN start_decdate DOUBLE PRECISION;
+    ALTER TABLE osm_admin_relation_members ADD COLUMN start_decdate DOUBLE PRECISION;
   END IF;
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_schema = 'public' 
-    AND table_name = 'osm_relation_members_boundaries' 
+    AND table_name = 'osm_admin_relation_members' 
     AND column_name = 'end_decdate'
   ) THEN
-    ALTER TABLE osm_relation_members_boundaries ADD COLUMN end_decdate DOUBLE PRECISION;
+    ALTER TABLE osm_admin_relation_members ADD COLUMN end_decdate DOUBLE PRECISION;
   END IF;
 END $$;
 
@@ -51,18 +60,18 @@ END $$;
 -- ============================================================================
 -- STEP 2: Create the Trigger, which will call the function above
 -- ============================================================================
-SELECT log_notice('STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_relation_members_boundaries and osm_admin_lines table');
+SELECT log_notice('STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_admin_relation_members and osm_admin_lines table');
 
--- osm_relation_members_boundaries trigger
+-- osm_admin_relation_members trigger
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_trigger 
-    WHERE tgname = 'trigger_decimal_dates_osm_relation_members_boundaries'
+    WHERE tgname = 'trigger_decimal_dates_osm_admin_relation_members'
   ) THEN
-    CREATE TRIGGER trigger_decimal_dates_osm_relation_members_boundaries 
+    CREATE TRIGGER trigger_decimal_dates_osm_admin_relation_members 
     BEFORE INSERT OR UPDATE 
-    ON osm_relation_members_boundaries
+    ON osm_admin_relation_members
     FOR EACH ROW
     EXECUTE FUNCTION convert_dates_to_decimal();
   END IF;
@@ -86,9 +95,9 @@ END $$;
 -- ============================================================================
 -- STEP 3: Backfill Existing Data, Set timeout to 40 minutes (2400000 milliseconds) for the current session, this takes quite a while, sincecurrnelty thrre are ~5 million rows in the table
 -- ============================================================================
-SELECT log_notice('STEP 3: Backfill existing data for osm_relation_members_boundaries table');
+SELECT log_notice('STEP 3: Backfill existing data for osm_admin_relation_members table');
 SET statement_timeout = 2400000;
-UPDATE osm_relation_members_boundaries
+UPDATE osm_admin_relation_members
 SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
     end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
 WHERE ST_GeometryType(geometry) = 'ST_LineString';
@@ -105,7 +114,7 @@ WHERE ST_GeometryType(geometry) = 'ST_LineString';
 -- ============================================================================
 -- STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate, admin_level, member and type
 -- ============================================================================
-SELECT log_notice('STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate using osm_relation_members_boundaries table');
+SELECT log_notice('STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate using osm_admin_relation_members table');
 
 DROP MATERIALIZED VIEW IF EXISTS mv_relation_members_boundaries CASCADE;
 
@@ -122,8 +131,9 @@ WITH ordered AS (
       PARTITION BY admin_level, member, type  
       ORDER BY start_decdate NULLS FIRST
     ) AS prev_end
-  FROM osm_relation_members_boundaries
+  FROM osm_admin_relation_members
   WHERE ST_GeometryType(geometry) = 'ST_LineString'
+    AND type = 'administrative'
     AND geometry IS NOT NULL
 ),
 

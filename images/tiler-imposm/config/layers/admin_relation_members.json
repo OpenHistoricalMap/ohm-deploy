@@ -61,6 +61,10 @@
           "type": "member_id"
         },
         {
+          "name": "role",
+          "type": "member_role"
+        },
+        {
           "name": "me_maritime",
           "type": "string",
           "key": "maritime",
