@@ -26,7 +26,7 @@ type = "prometheus"
 name = "osm"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 150
+max_connections = 120
 	###### PROVIDERS_OSM
 
 ####################################
@@ -39,6 +39,17 @@ type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 max_connections = 25
 	###### PROVIDERS_ADMIN_BOUNDARIES_AREAS
+
+####################################
+## OHM non admin boundaries areas
+####################################
+
+[[providers]]
+name = "ohm_non_admin"
+type = "mvt_postgis"
+uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+max_connections = 25
+	###### PROVIDERS_NON_ADMIN_BOUNDARIES_AREAS
 
 ####################################
 ## Natural Earth (ne) providers
@@ -131,6 +142,15 @@ name = "ohm_admin"
 attribution = "OpenHistoricalMap"
 center = [0.0, 0.0, 0.0]
 	###### MAPS_ADMIN_BOUNDARIES_AREAS
+
+####################################
+## OHM non admin boundaries areas maps
+####################################
+[[maps]]
+name = "ohm_non_admin"
+attribution = "OpenHistoricalMap"
+center = [0.0, 0.0, 0.0]
+	###### MAPS_NON_ADMIN_BOUNDARIES_AREAS
 
 ####################################
 ## Natural Earth maps
