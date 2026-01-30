@@ -1,28 +1,28 @@
--- This script creates materialized views for admin boundaries (lines) conbined from tables osm_relation_members_boundaries and osm_admin_lines
+-- This script creates materialized views for admin boundaries (lines) combined from tables osm_admin_relation_members and osm_admin_lines
 
 -- ============================================================================
---STEP 1: Add New Columns in osm_relation_members_boundaries and osm_admin_lines
+-- STEP 1: Add New Columns in osm_admin_relation_members and osm_admin_lines
 -- ============================================================================
-SELECT log_notice('STEP 1: Adding new columns in osm_relation_members_boundaries and osm_admin_lines table');
+SELECT log_notice('STEP 1: Adding new columns in osm_admin_relation_members and osm_admin_lines table');
 
--- osm_relation_members_boundaries
+-- osm_admin_relation_members
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_schema = 'public' 
-    AND table_name = 'osm_relation_members_boundaries' 
+    AND table_name = 'osm_admin_relation_members' 
     AND column_name = 'start_decdate'
   ) THEN
-    ALTER TABLE osm_relation_members_boundaries ADD COLUMN start_decdate DOUBLE PRECISION;
+    ALTER TABLE osm_admin_relation_members ADD COLUMN start_decdate DOUBLE PRECISION;
   END IF;
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_schema = 'public' 
-    AND table_name = 'osm_relation_members_boundaries' 
+    AND table_name = 'osm_admin_relation_members' 
     AND column_name = 'end_decdate'
   ) THEN
-    ALTER TABLE osm_relation_members_boundaries ADD COLUMN end_decdate DOUBLE PRECISION;
+    ALTER TABLE osm_admin_relation_members ADD COLUMN end_decdate DOUBLE PRECISION;
   END IF;
 END $$;
 
@@ -49,20 +49,184 @@ END $$;
 
 
 -- ============================================================================
--- STEP 2: Create the Trigger, which will call the function above
+-- STEP 2: Backfill Existing Data using temp table + disabled indexes
 -- ============================================================================
-SELECT log_notice('STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_relation_members_boundaries and osm_admin_lines table');
 
--- osm_relation_members_boundaries trigger
+-- Configuracion temporal para mejor rendimiento
+SET LOCAL work_mem = '512MB';
+SET LOCAL maintenance_work_mem = '1GB';
+
+-- ============================================
+-- 2.1 Backfill osm_admin_relation_members
+-- ============================================
+SELECT log_notice('STEP 2.1: Backfill existing data for osm_admin_relation_members table');
+
+-- Guardar definiciones de indices antes de dropearlos
+CREATE TEMP TABLE saved_indexes_relation_members AS
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE tablename = 'osm_admin_relation_members'
+  AND indexname NOT LIKE '%_pkey';
+
+-- Dropear indices temporalmente (excepto PK)
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN
+    SELECT indexname FROM pg_indexes
+    WHERE tablename = 'osm_admin_relation_members'
+      AND indexname NOT LIKE '%_pkey'
+  LOOP
+    EXECUTE 'DROP INDEX IF EXISTS ' || idx.indexname;
+    RAISE NOTICE 'Dropped index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+-- Crear tabla temporal con valores pre-calculados
+SELECT log_notice('STEP 2.1: Creating temp table with pre-calculated values for osm_admin_relation_members');
+CREATE TEMP TABLE temp_admin_relation_members_backfill AS
+SELECT
+  ctid AS row_ctid,
+  isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE) AS start_decdate,
+  isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE) AS end_decdate
+FROM osm_admin_relation_members
+WHERE ST_GeometryType(geometry) = 'ST_LineString'
+  AND type = 'administrative'
+  AND (start_decdate IS NULL OR end_decdate IS NULL);
+
+CREATE INDEX ON temp_admin_relation_members_backfill(row_ctid);
+
+-- UPDATE masivo con JOIN
+SELECT log_notice('STEP 2.1: Updating osm_admin_relation_members with pre-calculated values');
+UPDATE osm_admin_relation_members t
+SET start_decdate = tmp.start_decdate,
+    end_decdate = tmp.end_decdate
+FROM temp_admin_relation_members_backfill tmp
+WHERE t.ctid = tmp.row_ctid;
+
+DROP TABLE temp_admin_relation_members_backfill;
+
+-- Recrear todos los indices guardados
+SELECT log_notice('STEP 2.1: Recreating indexes for osm_admin_relation_members');
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN SELECT indexname, indexdef FROM saved_indexes_relation_members
+  LOOP
+    EXECUTE idx.indexdef;
+    RAISE NOTICE 'Recreated index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+DROP TABLE saved_indexes_relation_members;
+SELECT log_notice('STEP 2.1: osm_admin_relation_members backfill complete');
+
+
+-- ============================================
+-- 2.2 Backfill osm_admin_lines
+-- ============================================
+SELECT log_notice('STEP 2.2: Backfill existing data for osm_admin_lines table');
+
+-- Guardar definiciones de indices antes de dropearlos
+CREATE TEMP TABLE saved_indexes_admin_lines AS
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE tablename = 'osm_admin_lines'
+  AND indexname NOT LIKE '%_pkey';
+
+-- Dropear indices temporalmente (excepto PK)
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN
+    SELECT indexname FROM pg_indexes
+    WHERE tablename = 'osm_admin_lines'
+      AND indexname NOT LIKE '%_pkey'
+  LOOP
+    EXECUTE 'DROP INDEX IF EXISTS ' || idx.indexname;
+    RAISE NOTICE 'Dropped index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+-- Crear tabla temporal con valores pre-calculados
+SELECT log_notice('STEP 2.2: Creating temp table with pre-calculated values for osm_admin_lines');
+CREATE TEMP TABLE temp_admin_lines_backfill AS
+SELECT
+  ctid AS row_ctid,
+  isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE) AS start_decdate,
+  isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE) AS end_decdate
+FROM osm_admin_lines
+WHERE ST_GeometryType(geometry) = 'ST_LineString'
+  AND type = 'administrative'
+  AND (start_decdate IS NULL OR end_decdate IS NULL);
+
+CREATE INDEX ON temp_admin_lines_backfill(row_ctid);
+
+-- UPDATE masivo con JOIN
+SELECT log_notice('STEP 2.2: Updating osm_admin_lines with pre-calculated values');
+UPDATE osm_admin_lines t
+SET start_decdate = tmp.start_decdate,
+    end_decdate = tmp.end_decdate
+FROM temp_admin_lines_backfill tmp
+WHERE t.ctid = tmp.row_ctid;
+
+DROP TABLE temp_admin_lines_backfill;
+
+-- Recrear todos los indices guardados
+SELECT log_notice('STEP 2.2: Recreating indexes for osm_admin_lines');
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN SELECT indexname, indexdef FROM saved_indexes_admin_lines
+  LOOP
+    EXECUTE idx.indexdef;
+    RAISE NOTICE 'Recreated index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+DROP TABLE saved_indexes_admin_lines;
+SELECT log_notice('STEP 2.2: osm_admin_lines backfill complete');
+
+
+-- ============================================================================
+-- STEP 2.3: Create additional indexes for query performance (after backfill)
+-- ============================================================================
+SELECT log_notice('STEP 2.3: Creating additional indexes for query performance');
+
+CREATE INDEX IF NOT EXISTS osm_admin_relation_members_type_idx ON osm_admin_relation_members (type);
+CREATE INDEX IF NOT EXISTS osm_admin_lines_type_idx ON osm_admin_lines (type);
+CREATE INDEX IF NOT EXISTS osm_relation_members_role_idx ON osm_admin_relation_members (role);
+
+CREATE INDEX IF NOT EXISTS osm_admin_relation_members_linestring_idx
+ON osm_admin_relation_members (admin_level, member, type)
+WHERE ST_GeometryType(geometry) = 'ST_LineString';
+
+CREATE INDEX IF NOT EXISTS osm_admin_lines_linestring_idx
+ON osm_admin_lines (type)
+WHERE ST_GeometryType(geometry) = 'ST_LineString';
+
+SELECT log_notice('STEP 2.3: Indexes created successfully');
+
+
+-- ============================================================================
+-- STEP 3: Create the Trigger, which will call the function above
+-- ============================================================================
+SELECT log_notice('STEP 3: Create trigger to convert date to decimal for new/updated objects in osm_admin_relation_members and osm_admin_lines table');
+
+-- osm_admin_relation_members trigger
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_trigger 
-    WHERE tgname = 'trigger_decimal_dates_osm_relation_members_boundaries'
+    WHERE tgname = 'trigger_decimal_dates_osm_admin_relation_members'
   ) THEN
-    CREATE TRIGGER trigger_decimal_dates_osm_relation_members_boundaries 
+    CREATE TRIGGER trigger_decimal_dates_osm_admin_relation_members 
     BEFORE INSERT OR UPDATE 
-    ON osm_relation_members_boundaries
+    ON osm_admin_relation_members
     FOR EACH ROW
     EXECUTE FUNCTION convert_dates_to_decimal();
   END IF;
@@ -83,29 +247,11 @@ BEGIN
   END IF;
 END $$;
 
--- ============================================================================
--- STEP 3: Backfill Existing Data, Set timeout to 40 minutes (2400000 milliseconds) for the current session, this takes quite a while, sincecurrnelty thrre are ~5 million rows in the table
--- ============================================================================
-SELECT log_notice('STEP 3: Backfill existing data for osm_relation_members_boundaries table');
-SET statement_timeout = 2400000;
-UPDATE osm_relation_members_boundaries
-SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
-    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
-WHERE ST_GeometryType(geometry) = 'ST_LineString';
-
-
-SELECT log_notice('STEP 3: Backfill existing data for osm_admin_lines table');
-SET statement_timeout = 2400000;
-UPDATE osm_admin_lines
-SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
-    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
-WHERE ST_GeometryType(geometry) = 'ST_LineString';
-
 
 -- ============================================================================
 -- STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate, admin_level, member and type
 -- ============================================================================
-SELECT log_notice('STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate using osm_relation_members_boundaries table');
+SELECT log_notice('STEP 4: Create a materialized view that merges lines based on start_decdate and end_decdate using osm_admin_relation_members table');
 
 DROP MATERIALIZED VIEW IF EXISTS mv_relation_members_boundaries CASCADE;
 
@@ -122,8 +268,9 @@ WITH ordered AS (
       PARTITION BY admin_level, member, type  
       ORDER BY start_decdate NULLS FIRST
     ) AS prev_end
-  FROM osm_relation_members_boundaries
+  FROM osm_admin_relation_members
   WHERE ST_GeometryType(geometry) = 'ST_LineString'
+    AND type = 'administrative'
     AND geometry IS NOT NULL
 ),
 

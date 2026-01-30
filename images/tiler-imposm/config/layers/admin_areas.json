@@ -65,7 +65,7 @@
       "type": "polygon",
       "mapping": {
         "boundary": [
-          "administrative"
+          "__any__"
         ]
       }
     }
