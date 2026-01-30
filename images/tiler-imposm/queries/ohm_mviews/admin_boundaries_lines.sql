@@ -1,15 +1,6 @@
 -- This script creates materialized views for admin boundaries (lines) combined from tables osm_admin_relation_members and osm_admin_lines
 
 -- ============================================================================
--- STEP 0: Create indexes on type and role columns for query performance
--- ============================================================================
-SELECT log_notice('STEP 0: Create indexes on type (osm_admin_relation_members, osm_admin_lines) and role (osm_relation_members)');
-
-CREATE INDEX IF NOT EXISTS osm_admin_relation_members_type_idx ON osm_admin_relation_members (type);
-CREATE INDEX IF NOT EXISTS osm_admin_lines_type_idx ON osm_admin_lines (type);
-CREATE INDEX IF NOT EXISTS osm_relation_members_role_idx ON osm_admin_relation_members (role);
-
--- ============================================================================
 -- STEP 1: Add New Columns in osm_admin_relation_members and osm_admin_lines
 -- ============================================================================
 SELECT log_notice('STEP 1: Adding new columns in osm_admin_relation_members and osm_admin_lines table');
@@ -58,9 +49,173 @@ END $$;
 
 
 -- ============================================================================
--- STEP 2: Create the Trigger, which will call the function above
+-- STEP 2: Backfill Existing Data using temp table + disabled indexes
 -- ============================================================================
-SELECT log_notice('STEP 2: Create trigger to convert date to decimal for new/updated objects in osm_admin_relation_members and osm_admin_lines table');
+
+-- Configuracion temporal para mejor rendimiento
+SET LOCAL work_mem = '512MB';
+SET LOCAL maintenance_work_mem = '1GB';
+
+-- ============================================
+-- 2.1 Backfill osm_admin_relation_members
+-- ============================================
+SELECT log_notice('STEP 2.1: Backfill existing data for osm_admin_relation_members table');
+
+-- Guardar definiciones de indices antes de dropearlos
+CREATE TEMP TABLE saved_indexes_relation_members AS
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE tablename = 'osm_admin_relation_members'
+  AND indexname NOT LIKE '%_pkey';
+
+-- Dropear indices temporalmente (excepto PK)
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN
+    SELECT indexname FROM pg_indexes
+    WHERE tablename = 'osm_admin_relation_members'
+      AND indexname NOT LIKE '%_pkey'
+  LOOP
+    EXECUTE 'DROP INDEX IF EXISTS ' || idx.indexname;
+    RAISE NOTICE 'Dropped index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+-- Crear tabla temporal con valores pre-calculados
+SELECT log_notice('STEP 2.1: Creating temp table with pre-calculated values for osm_admin_relation_members');
+CREATE TEMP TABLE temp_admin_relation_members_backfill AS
+SELECT
+  ctid AS row_ctid,
+  isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE) AS start_decdate,
+  isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE) AS end_decdate
+FROM osm_admin_relation_members
+WHERE ST_GeometryType(geometry) = 'ST_LineString'
+  AND type = 'administrative'
+  AND (start_decdate IS NULL OR end_decdate IS NULL);
+
+CREATE INDEX ON temp_admin_relation_members_backfill(row_ctid);
+
+-- UPDATE masivo con JOIN
+SELECT log_notice('STEP 2.1: Updating osm_admin_relation_members with pre-calculated values');
+UPDATE osm_admin_relation_members t
+SET start_decdate = tmp.start_decdate,
+    end_decdate = tmp.end_decdate
+FROM temp_admin_relation_members_backfill tmp
+WHERE t.ctid = tmp.row_ctid;
+
+DROP TABLE temp_admin_relation_members_backfill;
+
+-- Recrear todos los indices guardados
+SELECT log_notice('STEP 2.1: Recreating indexes for osm_admin_relation_members');
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN SELECT indexname, indexdef FROM saved_indexes_relation_members
+  LOOP
+    EXECUTE idx.indexdef;
+    RAISE NOTICE 'Recreated index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+DROP TABLE saved_indexes_relation_members;
+SELECT log_notice('STEP 2.1: osm_admin_relation_members backfill complete');
+
+
+-- ============================================
+-- 2.2 Backfill osm_admin_lines
+-- ============================================
+SELECT log_notice('STEP 2.2: Backfill existing data for osm_admin_lines table');
+
+-- Guardar definiciones de indices antes de dropearlos
+CREATE TEMP TABLE saved_indexes_admin_lines AS
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE tablename = 'osm_admin_lines'
+  AND indexname NOT LIKE '%_pkey';
+
+-- Dropear indices temporalmente (excepto PK)
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN
+    SELECT indexname FROM pg_indexes
+    WHERE tablename = 'osm_admin_lines'
+      AND indexname NOT LIKE '%_pkey'
+  LOOP
+    EXECUTE 'DROP INDEX IF EXISTS ' || idx.indexname;
+    RAISE NOTICE 'Dropped index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+-- Crear tabla temporal con valores pre-calculados
+SELECT log_notice('STEP 2.2: Creating temp table with pre-calculated values for osm_admin_lines');
+CREATE TEMP TABLE temp_admin_lines_backfill AS
+SELECT
+  ctid AS row_ctid,
+  isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE) AS start_decdate,
+  isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE) AS end_decdate
+FROM osm_admin_lines
+WHERE ST_GeometryType(geometry) = 'ST_LineString'
+  AND type = 'administrative'
+  AND (start_decdate IS NULL OR end_decdate IS NULL);
+
+CREATE INDEX ON temp_admin_lines_backfill(row_ctid);
+
+-- UPDATE masivo con JOIN
+SELECT log_notice('STEP 2.2: Updating osm_admin_lines with pre-calculated values');
+UPDATE osm_admin_lines t
+SET start_decdate = tmp.start_decdate,
+    end_decdate = tmp.end_decdate
+FROM temp_admin_lines_backfill tmp
+WHERE t.ctid = tmp.row_ctid;
+
+DROP TABLE temp_admin_lines_backfill;
+
+-- Recrear todos los indices guardados
+SELECT log_notice('STEP 2.2: Recreating indexes for osm_admin_lines');
+DO $$
+DECLARE
+  idx RECORD;
+BEGIN
+  FOR idx IN SELECT indexname, indexdef FROM saved_indexes_admin_lines
+  LOOP
+    EXECUTE idx.indexdef;
+    RAISE NOTICE 'Recreated index: %', idx.indexname;
+  END LOOP;
+END $$;
+
+DROP TABLE saved_indexes_admin_lines;
+SELECT log_notice('STEP 2.2: osm_admin_lines backfill complete');
+
+
+-- ============================================================================
+-- STEP 2.3: Create additional indexes for query performance (after backfill)
+-- ============================================================================
+SELECT log_notice('STEP 2.3: Creating additional indexes for query performance');
+
+CREATE INDEX IF NOT EXISTS osm_admin_relation_members_type_idx ON osm_admin_relation_members (type);
+CREATE INDEX IF NOT EXISTS osm_admin_lines_type_idx ON osm_admin_lines (type);
+CREATE INDEX IF NOT EXISTS osm_relation_members_role_idx ON osm_admin_relation_members (role);
+
+CREATE INDEX IF NOT EXISTS osm_admin_relation_members_linestring_idx
+ON osm_admin_relation_members (admin_level, member, type)
+WHERE ST_GeometryType(geometry) = 'ST_LineString';
+
+CREATE INDEX IF NOT EXISTS osm_admin_lines_linestring_idx
+ON osm_admin_lines (type)
+WHERE ST_GeometryType(geometry) = 'ST_LineString';
+
+SELECT log_notice('STEP 2.3: Indexes created successfully');
+
+
+-- ============================================================================
+-- STEP 3: Create the Trigger, which will call the function above
+-- ============================================================================
+SELECT log_notice('STEP 3: Create trigger to convert date to decimal for new/updated objects in osm_admin_relation_members and osm_admin_lines table');
 
 -- osm_admin_relation_members trigger
 DO $$
@@ -91,24 +246,6 @@ BEGIN
     EXECUTE FUNCTION convert_dates_to_decimal();
   END IF;
 END $$;
-
--- ============================================================================
--- STEP 3: Backfill Existing Data, Set timeout to 40 minutes (2400000 milliseconds) for the current session, this takes quite a while, sincecurrnelty thrre are ~5 million rows in the table
--- ============================================================================
-SELECT log_notice('STEP 3: Backfill existing data for osm_admin_relation_members table');
-SET statement_timeout = 2400000;
-UPDATE osm_admin_relation_members
-SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
-    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
-WHERE ST_GeometryType(geometry) = 'ST_LineString';
-
-
-SELECT log_notice('STEP 3: Backfill existing data for osm_admin_lines table');
-SET statement_timeout = 2400000;
-UPDATE osm_admin_lines
-SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
-    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
-WHERE ST_GeometryType(geometry) = 'ST_LineString';
 
 
 -- ============================================================================
