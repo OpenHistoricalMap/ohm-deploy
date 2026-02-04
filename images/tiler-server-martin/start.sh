@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== Martin Tile Server Setup ==="
+
+# Wait for PostgreSQL
+echo "Waiting for PostgreSQL to be ready..."
+until pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT}" > /dev/null 2>&1; do
+  sleep 1
+done
+echo "PostgreSQL is ready."
+
+# Generate Martin config + Nginx config
+echo "Generating configuration..."
+python3 /app/scripts/build_config.py
+
+# Ensure nginx dirs exist
+mkdir -p /run/nginx /var/log/nginx
+
+# Start Martin in background on internal port
+MARTIN_INTERNAL_PORT="${MARTIN_INTERNAL_PORT:-3001}"
+echo "Starting Martin on internal port ${MARTIN_INTERNAL_PORT}..."
+martin --config /app/config/config.yaml &
+MARTIN_PID=$!
+
+# Wait for Martin to be ready
+until curl -sf "http://127.0.0.1:${MARTIN_INTERNAL_PORT}/health" > /dev/null 2>&1; do
+  sleep 1
+done
+echo "Martin is ready."
+
+# Start Nginx in foreground
+echo "Starting Nginx on port ${NGINX_PORT:-80}..."
+nginx -c /app/config/nginx.conf -g 'daemon off;' &
+NGINX_PID=$!
+
+echo "=== Ready ==="
+echo "  Nginx  :${NGINX_PORT:-80} → Martin :${MARTIN_INTERNAL_PORT}"
+
+# Wait for either process to exit
+wait -n $MARTIN_PID $NGINX_PID
+exit $?
