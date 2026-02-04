@@ -2,7 +2,7 @@ services:
   taginfo:
     container_name: taginfo_production
     ports: !override
-      - '8088:80'
+      - '8088:4567'
     environment:
       TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo/production
     volumes:

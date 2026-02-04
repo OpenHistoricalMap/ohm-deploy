@@ -16,7 +16,7 @@ services:
       retries: 3
       start_period: 60s
     ports:
-      - "8087:80"
+      - "8087:4567"
     networks:
       - ohm_network
 
