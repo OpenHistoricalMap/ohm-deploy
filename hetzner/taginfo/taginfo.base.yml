@@ -1,5 +1,4 @@
 services:
-
   taginfo_data:
     container_name: taginfo_data_staging
     image: ghcr.io/osm-seed/taginfo:0.1.0-0.dev.git.989.h60325d0

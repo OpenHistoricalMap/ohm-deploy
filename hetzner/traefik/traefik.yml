@@ -162,7 +162,7 @@ http:
 
     #################### Staging ####################
     vtiles-staging-router:
-      rule: Host(`vtiles.staging.openhistoricalmap.org`)
+      rule: Host(`vtiles.staging.openhistoricalmap.org`) || Host(`vtiles.openhistoricalmap.net`)
       entryPoints:
         - port-secure
       service: tiler_server_staging
@@ -174,7 +174,7 @@ http:
         - replace-osm-tiles-to-ohm
 
     overpass-api-staging-router:
-      rule: Host(`overpass-api.staging.openhistoricalmap.org`)
+      rule: Host(`overpass-api.staging.openhistoricalmap.org`) || Host(`overpass-api.openhistoricalmap.net`)
       entryPoints:
         - port-secure
       service: overpass_api_staging
@@ -184,7 +184,7 @@ http:
         - secure-headers
 
     nominatim-staging-router:
-      rule: Host(`nominatim.staging.openhistoricalmap.org`) && !PathPrefix(`/ui`)
+      rule: (Host(`nominatim.staging.openhistoricalmap.org`) || Host(`nominatim.openhistoricalmap.net`)) && !PathPrefix(`/ui`)
       entryPoints:
         - port-secure
       service: nominatim_staging
@@ -195,7 +195,7 @@ http:
         - redirect-nominatim
         
     nominatim-ui-staging-router:
-      rule: Host(`nominatim.staging.openhistoricalmap.org`) && PathPrefix(`/ui`)
+      rule: (Host(`nominatim.staging.openhistoricalmap.org`) || Host(`nominatim.openhistoricalmap.net`)) && PathPrefix(`/ui`)
       entryPoints:
         - port-secure
       service: nominatim_ui_staging
@@ -205,7 +205,7 @@ http:
         - secure-headers
 
     taginfo-staging-router:
-      rule: Host(`taginfo.staging.openhistoricalmap.org`)
+      rule: Host(`taginfo.staging.openhistoricalmap.org`) || Host(`taginfo.openhistoricalmap.net`)
       entryPoints:
         - port-secure
       service: taginfo_staging
