@@ -10,6 +10,7 @@ services:
       - |
         set -ex
         # Run every 3 days at 3:00 AM
+        /usr/src/app/start.sh
         echo "0 3 1-31/3 * * /usr/src/app/start.sh >> /var/log/taginfo-cron.log 2>&1" > /tmp/cron_logs
         crontab /tmp/cron_logs
         touch /var/log/taginfo-cron.log
@@ -18,4 +19,5 @@ services:
   taginfo_web:
     container_name: taginfo_production
     volumes:
-      - ${HOME}/data/production/taginfo_data_proceced:/usr/src/app/data
+      - ${HOME}/data/production/taginfo_data:/usr/src/app/data
+      - ${HOME}/data/production/taginfo_data_planet:/osm/planet/var
