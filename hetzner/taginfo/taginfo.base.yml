@@ -20,9 +20,10 @@ services:
     restart: always
     networks:
       - ohm_network
-    volumes:
-      - ${HOME}/data/staging/taginfo_data:/usr/src/app/data
-      - ${HOME}/data/staging/taginfo_data_planet:/osm/planet/var
+    ## TODO: Write a script to download fresh db files
+    # volumes:
+    #   - ${HOME}/data/staging/taginfo_data:/usr/src/app/data
+    #   - ${HOME}/data/staging/taginfo_data_planet:/osm/planet/var
 networks:
   ohm_network:
     external: true

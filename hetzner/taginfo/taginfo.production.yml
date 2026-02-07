@@ -18,6 +18,6 @@ services:
   
   taginfo_web:
     container_name: taginfo_production
-    volumes:
-      - ${HOME}/data/production/taginfo_data:/usr/src/app/data
-      - ${HOME}/data/production/taginfo_data_planet:/osm/planet/var
+    # volumes:
+    #   - ${HOME}/data/production/taginfo_data:/usr/src/app/data
+    #   - ${HOME}/data/production/taginfo_data_planet:/osm/planet/var
