@@ -36,13 +36,32 @@
     #right-panel-close { cursor: pointer; background: none; border: 1px solid #555; color: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
     #right-panel-close:hover { background: #0f3460; }
     #right-panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
+    .feature-card { margin-bottom: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
+    .feature-card:last-child { margin-bottom: 0; }
+    .feature-card-header { padding: 8px 10px; font-size: 12px; font-weight: 600; color: #4fc3f7; background: rgba(15,52,96,0.4); display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+    .feature-card-header-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .feature-card-header-left span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .feature-card-osmid { font-size: 11px; color: #888; font-weight: 400; }
+    .ohm-link { color: #4fc3f7; text-decoration: none; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+    .ohm-link:hover { text-decoration: underline; color: #81d4fa; }
+    .feature-card-color { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .feature-card-body { max-height: 210px; overflow-y: auto; padding: 6px 10px; }
     .prop { margin: 2px 0; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; gap: 8px; align-items: baseline; }
     .prop-key { color: #888; font-size: 11px; white-space: nowrap; min-width: 0; flex-shrink: 0; }
     .prop-val { color: #eee; font-size: 13px; word-break: break-all; }
     #right-panel.hidden { display: none; }
 
-    .group-header { padding: 8px 4px; margin-top: 8px; font-size: 12px; font-weight: 600; color: #4fc3f7; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(79,195,247,0.2); }
-    .group-header:first-child { margin-top: 0; }
+    .group-item { padding: 12px 14px; margin-bottom: 6px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: space-between; }
+    .group-item:hover { background: rgba(255,255,255,0.08); }
+    .group-item.active { background: #0f3460; border-color: #4fc3f7; }
+    .group-name { font-size: 15px; font-weight: 600; }
+    .group-arrow { color: #888; font-size: 16px; }
+    .group-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+
+    #sidebar-back { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
+    #sidebar-back:hover { background: rgba(255,255,255,0.05); }
+    #sidebar-back .back-arrow { font-size: 18px; color: #4fc3f7; }
+    #sidebar-back .back-label { font-size: 15px; font-weight: 600; }
 
     .loading { padding: 16px; color: #888; }
     .error { padding: 16px; color: #e57373; }
@@ -51,7 +70,11 @@
 <body>
   <div id="sidebar">
     <div id="sidebar-header">
-      <h2>Martin Sources</h2>
+      <h2>Martin</h2>
+    </div>
+    <div id="sidebar-back" style="display:none" onclick="showGroupList()">
+      <span class="back-arrow">&#8592;</span>
+      <span class="back-label" id="sidebar-back-label">Maps</span>
     </div>
     <div id="sidebar-content"><div class="loading">Loading catalog...</div></div>
   </div>
@@ -77,6 +100,8 @@
 
     let activeSources = {};
     const sourceColors = {};
+    let groupsData = [];       // parsed groups with filtered function names
+    let activeGroupIdx = null;  // which group is currently selected
 
     const map = new maplibregl.Map({
       container: 'map',
@@ -95,7 +120,6 @@
     async function init() {
       const content = document.getElementById('sidebar-content');
       try {
-        // Fetch catalog and group config in parallel
         const [catalogResp, configResp] = await Promise.all([
           fetch(MARTIN_BASE + '/catalog'),
           fetch(MARTIN_BASE + '/config/functions.json').catch(() => null)
@@ -109,7 +133,6 @@
           return;
         }
 
-        // Try to load group config, fallback to flat list
         let groups;
         if (configResp && configResp.ok) {
           const config = await configResp.json();
@@ -118,44 +141,72 @@
           groups = [{ name: 'sources', functions: [...availableSources].map(n => ({ function_name: n })) }];
         }
 
-        content.innerHTML = '';
+        // Build groupsData and assign colors
         let colorIdx = 0;
-        const allNames = [];
-
+        groupsData = [];
         groups.forEach(group => {
-          const groupFunctions = group.functions
+          const fns = group.functions
             .map(f => f.function_name)
             .filter(n => availableSources.has(n));
-
-          if (!groupFunctions.length) return;
-
-          // Group header
-          const header = document.createElement('div');
-          header.className = 'group-header';
-          header.textContent = group.name;
-          content.appendChild(header);
-
-          // Layer items
-          groupFunctions.forEach(name => {
-            const color = COLORS[colorIdx % COLORS.length];
+          if (!fns.length) return;
+          fns.forEach(name => {
+            sourceColors[name] = COLORS[colorIdx % COLORS.length];
             colorIdx++;
-            sourceColors[name] = color;
-
-            const item = document.createElement('div');
-            item.className = 'source-item';
-            item.id = `src-item-${name}`;
-            item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
-            item.onclick = () => toggleSource(name);
-            content.appendChild(item);
-            allNames.push(name);
           });
+          groupsData.push({ name: group.name, functions: fns });
         });
 
-        // Auto-activate all sources by default
-        allNames.forEach(name => toggleSource(name));
+        showGroupList();
       } catch (e) {
         content.innerHTML = `<div class="error">Failed to load catalog: ${e.message}</div>`;
       }
+    }
+
+    function showGroupList() {
+      // Remove all active sources from map
+      Object.keys(activeSources).forEach(name => removeSource(name));
+      activeGroupIdx = null;
+
+      const content = document.getElementById('sidebar-content');
+      document.getElementById('sidebar-back').style.display = 'none';
+      document.getElementById('map-title').textContent = 'Select a map';
+      content.innerHTML = '';
+
+      groupsData.forEach((group, idx) => {
+        const item = document.createElement('div');
+        item.className = 'group-item';
+        item.innerHTML = `<div><div class="group-name">Maps/ ${group.name}</div><div class="group-subtitle">${group.functions.length} layers</div></div><span class="group-arrow">&#8594;</span>`;
+        item.onclick = () => selectGroup(idx);
+        content.appendChild(item);
+      });
+    }
+
+    function selectGroup(idx) {
+      // Remove sources from previous group
+      Object.keys(activeSources).forEach(name => removeSource(name));
+
+      activeGroupIdx = idx;
+      const group = groupsData[idx];
+      const content = document.getElementById('sidebar-content');
+
+      // Show back button
+      document.getElementById('sidebar-back').style.display = 'flex';
+      document.getElementById('sidebar-back-label').textContent = `Maps/ ${group.name}`;
+      document.getElementById('map-title').textContent = `Maps/ ${group.name}`;
+
+      content.innerHTML = '';
+      group.functions.forEach(name => {
+        const color = sourceColors[name];
+        const item = document.createElement('div');
+        item.className = 'source-item';
+        item.id = `src-item-${name}`;
+        item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
+        item.onclick = () => toggleSource(name);
+        content.appendChild(item);
+      });
+
+      // Auto-activate all layers in this group
+      group.functions.forEach(name => addSource(name));
     }
 
     function toggleSource(name) {
@@ -305,15 +356,33 @@
         return;
       }
 
-      const f = features[0];
-      const entries = Object.entries(f.properties)
-        .filter(([k, v]) => v !== null && v !== '' && v !== undefined);
-
-      document.getElementById('right-panel-title').textContent = f.sourceLayer;
+      document.getElementById('right-panel-title').textContent = `${features.length} feature${features.length > 1 ? 's' : ''}`;
 
       let html = '';
-      entries.forEach(([k, v]) => {
-        html += `<div class="prop"><div class="prop-key">${k}</div><div class="prop-val">${v}</div></div>`;
+      features.forEach(f => {
+        const entries = Object.entries(f.properties)
+          .filter(([k, v]) => v !== null && v !== '' && v !== undefined);
+        const srcName = f.layer.id.replace(/^lyr-/, '').replace(/-\d+$/, '');
+        const color = sourceColors[srcName] || '#4fc3f7';
+        const osmId = f.properties.osm_id;
+
+        // Build OHM link: negative osm_id = relation, positive = way
+        let ohmLink = '';
+        if (osmId) {
+          const absId = Math.abs(osmId);
+          const osmType = osmId < 0 ? 'relation' : 'way';
+          ohmLink = `<a class="ohm-link" href="https://www.openhistoricalmap.org/${osmType}/${absId}" target="_blank" rel="noopener">OHM</a>`;
+        }
+
+        const osmIdLabel = osmId ? `<span class="feature-card-osmid">#${osmId}</span>` : '';
+
+        html += `<div class="feature-card">`;
+        html += `<div class="feature-card-header"><div class="feature-card-header-left"><div class="feature-card-color" style="background:${color}"></div><span>${f.sourceLayer}</span>${osmIdLabel}</div>${ohmLink}</div>`;
+        html += `<div class="feature-card-body">`;
+        entries.forEach(([k, v]) => {
+          html += `<div class="prop"><div class="prop-key">${k}</div><div class="prop-val">${v}</div></div>`;
+        });
+        html += `</div></div>`;
       });
 
       document.getElementById('right-panel-body').innerHTML = html;
