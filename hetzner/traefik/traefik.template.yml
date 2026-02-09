@@ -1,0 +1,250 @@
+log:
+  level: INFO
+
+entryPoints:
+  port-web:  # HTTP para Cloudflare Tunnel (no expuesto públicamente)
+    address: ":80"
+    forwardedHeaders:
+      trustedIPs:
+        # Redes privadas (Docker, red local)
+        - "172.16.0.0/12"
+        - "192.168.0.0/16"
+        - "10.0.0.0/8"
+        # Cloudflare IPs - Actualizado 2024 (https://www.cloudflare.com/ips-v4)
+        - "173.245.48.0/20"
+        - "103.21.244.0/22"
+        - "103.22.200.0/22"
+        - "103.31.4.0/22"
+        - "141.101.64.0/18"
+        - "108.162.192.0/18"
+        - "190.93.240.0/20"
+        - "188.114.96.0/20"
+        - "197.234.240.0/22"
+        - "198.41.128.0/17"
+        - "162.158.0.0/15"
+        - "104.16.0.0/13"
+        - "104.24.0.0/14"
+        - "172.64.0.0/13"
+        - "131.0.72.0/22"
+        # Cloudflare IPv6 (https://www.cloudflare.com/ips-v6)
+        - "2400:cb00::/32"
+        - "2606:4700::/32"
+        - "2803:f800::/32"
+        - "2405:b500::/32"
+        - "2405:8100::/32"
+        - "2a06:98c0::/29"
+        - "2c0f:f248::/32"
+
+# Certificates NOT needed - Cloudflare Tunnel handles SSL termination
+# If you want end-to-end encryption with Let's Encrypt, uncomment below:
+# certificatesResolvers:
+#   letsencrypt:
+#     acme:
+#       email: dev@openhistoricalmap.net
+#       storage: /etc/traefik/acme/acme.json
+#       dnsChallenge:
+#         provider: cloudflare
+#       env:
+#         - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+        
+http:
+  middlewares:
+    secure-headers:
+      headers:
+        # Protects against clickjacking
+        frameDeny: true
+        # Enables XSS protection in older browsers
+        browserXssFilter: true
+        # Prevents browsers from MIME-sniffing (forces declared Content-Type)
+        contentTypeNosniff: true
+        # Enforces HTTPS via HSTS
+        forceSTSHeader: true
+        stsSeconds: 31536000  # 1 year
+        stsIncludeSubdomains: true
+        stsPreload: true
+        # # Trust only known proxy headers (adjust based on your infrastructure)
+        # hostsProxyHeaders: ["X-Forwarded-Host"]
+
+    secure-headers-allow-iframe:
+      headers:
+        # Allows iframe embedding (for comparison tools)
+        frameDeny: false
+        # Enables XSS protection in older browsers
+        browserXssFilter: true
+        # Prevents browsers from MIME-sniffing (forces declared Content-Type)
+        contentTypeNosniff: true
+        # Enforces HTTPS via HSTS
+        forceSTSHeader: true
+        stsSeconds: 31536000  # 1 year
+        stsIncludeSubdomains: true
+        stsPreload: true
+
+    redirect-nominatim:
+      redirectRegex:
+        regex: "^https://(nominatim\\.{{OHM_DOMAIN}})/?$"
+        replacement: "https://${1}/ui/search.html"
+        permanent: true
+
+    # replace-osm-to-ohm:
+    #   replacePathRegex:
+    #     regex: "^/capabilities/osm\\.json$"
+    #     replacement: "/capabilities/ohm.json"
+
+    # replace-osm-tiles-to-ohm:
+    #   replacePathRegex:
+    #     regex: "^/maps/osm/(.*)$"
+    #     replacement: "/maps/ohm/${1}"
+
+  routers:
+    vtiles-router:
+      rule: Host(`vtiles.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: tiler_server
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers-allow-iframe
+        # Note: Removed replace-osm-to-ohm middleware because Tegola map is named "osm"
+        # - replace-osm-to-ohm
+        # - replace-osm-tiles-to-ohm
+
+    # tiler_cache-router:
+    #   rule: Host(`tiler-cache.{{OHM_DOMAIN}}`)
+    #   entryPoints:
+    #     - port-secure
+    #   service: tiler_cache
+    #   tls:
+    #     certResolver: letsencrypt
+    #   middlewares:
+    #     - secure-headers
+
+    nominatim-router:
+      rule: Host(`nominatim.{{OHM_DOMAIN}}`) && !PathPrefix(`/ui`)
+      entryPoints:
+        - port-web
+      service: nominatim
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+        - redirect-nominatim
+
+    nominatim-ui-router:
+      rule: Host(`nominatim.{{OHM_DOMAIN}}`) && PathPrefix(`/ui`)
+      entryPoints:
+        - port-web
+      service: nominatim_ui
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
+    overpass-api-router:
+      rule: Host(`overpass-api.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: overpass_api
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
+    osmcha-router:
+      rule: Host(`osmcha.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: osmcha
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
+    taginfo-router:
+      rule: Host(`taginfo.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: taginfo
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
+    node-exporter-router:
+      rule: Host(`node-exporter.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: node_exporter
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
+    cadvisor-router:
+      rule: Host(`cadvisor.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: cadvisor
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
+
+  services:
+    tiler_server:
+      loadBalancer:
+        servers:
+          - url: http://tiler_server:9090
+
+    # tiler_cache:
+    #   loadBalancer:
+    #     servers:
+    #       - url: http://tiler_cache:8000
+
+    nominatim:
+      loadBalancer:
+        servers:
+          - url: http://nominatim:8080
+
+    nominatim_ui:
+      loadBalancer:
+        servers:
+          - url: http://nominatim_ui:80
+
+    overpass_api:
+      loadBalancer:
+        servers:
+          - url: http://overpass_api:80
+
+    osmcha:
+      loadBalancer:
+        servers:
+          - url: http://osmcha:80
+
+    taginfo:
+      loadBalancer:
+        servers:
+          - url: http://taginfo:4567
+
+    node_exporter:
+      loadBalancer:
+        servers:
+          - url: http://node_exporter:9100
+
+    cadvisor:
+      loadBalancer:
+        servers:
+          - url: http://cadvisor:8080
+
+providers:
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true

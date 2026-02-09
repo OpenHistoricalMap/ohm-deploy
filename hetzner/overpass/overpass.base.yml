@@ -1,9 +1,9 @@
 services:
   overpass:
     image: developmentseed/osmseed-overpass-api:0.1.0-0.dev.git.956.h49d677b
-    container_name: overpass_staging
-    ports:
-      - '8085:80'
+    container_name: overpass
+    # ports:
+    #   - '8085:80'
     volumes:
       - overpass_data:/db
     environment:
@@ -27,8 +27,6 @@ services:
       timeout: 30s 
       retries: 3
       start_period: 180m
-    mem_limit: 16g
-    cpus: 8
     networks:
       - ohm_network
 
@@ -39,5 +37,5 @@ networks:
 volumes:
   overpass_data:
     driver: local
-    name: overpass_db
+    name: overpass_db_31_07_2025_v3
 

@@ -1,6 +1,6 @@
 services:
   nominatim:
-    container_name: nominatim_staging
+    container_name: nominatim
     image: developmentseed/osmseed-nominatim:0.1.0-0.dev.git.956.h49d677b
     volumes:
       - nominatim_data:/var/lib/postgresql/16/main
@@ -16,13 +16,12 @@ services:
       IMPORT_GB_POSTCODES: false
       IMPORT_TIGER_ADDRESSES: false
       PGDATA: /var/lib/postgresql/16/main
-      OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
+      OSMSEED_WEB_API_DOMAIN: www.${OHM_DOMAIN}
       NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
       UPDATE_MODE: continuous
       IMPORT_STYLE: extratags
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edt"
     restart: always
-    cpus: 4.0
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/status || exit 1"]
       interval: 30s
@@ -31,20 +30,20 @@ services:
       start_period: 120m
     networks:
       - ohm_network
-    ports:
-      - '8081:8080'
+    # ports:
+    #   - '8081:8080'
     env_file:
       - ./.env.sample
       
   nominatim_ui:
-    container_name: nominatim_ui_staging
+    container_name: nominatim_ui
     image: ghcr.io/openhistoricalmap/nominatim-ui:a469b5e
     command:
       - /bin/sh
       - -c
       - |
         set -x && \
-        echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.staging.openhistoricalmap.org/';" \
+        echo "Nominatim_Config.Nominatim_API_Endpoint = 'https://nominatim.${OHM_DOMAIN}/';" \
         >> /usr/share/nginx/html/ui/theme/config.theme.js && \
         nginx -g "daemon off;"
     restart: always
@@ -56,8 +55,8 @@ services:
       start_period: 20s
     networks:
       - ohm_network
-    ports:
-      - '8082:80'
+    # ports:
+    #   - '8082:80'
 
 networks:
   ohm_network:
@@ -65,5 +64,5 @@ networks:
     
 volumes:
   nominatim_data:
-    driver: local
-    name: nominatim_db
+    name: nominatim_db_18_07_2025
+    
