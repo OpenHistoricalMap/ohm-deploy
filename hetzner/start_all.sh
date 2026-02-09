@@ -11,17 +11,17 @@ else
     export OHM_DOMAIN="openhistoricalmap.net"
 fi
 
-###################### Tiler ######################
-./hetzner/deploy.sh start tiler $ENVIRONMENT -y
+# ###################### Tiler ######################
+# ./hetzner/deploy.sh start tiler $ENVIRONMENT -y
 
-###################### Nominatim ######################
-./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
+# ###################### Nominatim ######################
+# ./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
 
-###################### Osmcha ######################
-./hetzner/deploy.sh start osmcha $ENVIRONMENT  -y 
+# ###################### Osmcha ######################
+# ./hetzner/deploy.sh start osmcha $ENVIRONMENT  -y 
 
-###################### Overpass ####################
-./hetzner/deploy.sh start overpass $ENVIRONMENT -y
+# ###################### Overpass ####################
+# ./hetzner/deploy.sh start overpass $ENVIRONMENT -y
 
 #################### Taginfo ####################
 ./hetzner/deploy.sh start taginfo $ENVIRONMENT -y
