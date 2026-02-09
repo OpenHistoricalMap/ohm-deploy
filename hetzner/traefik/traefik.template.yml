@@ -81,7 +81,8 @@ http:
 
     redirect-nominatim:
       redirectRegex:
-        regex: "^https://(nominatim\\.{{OHM_DOMAIN}})/?$"
+        # Match both http and https: behind Cloudflare Tunnel, Traefik sees the request as http
+        regex: "^https?://(nominatim\\.{{OHM_DOMAIN}})/?$"
         replacement: "https://${1}/ui/search.html"
         permanent: true
 
@@ -176,27 +177,27 @@ http:
       middlewares:
         - secure-headers
 
-    node-exporter-router:
-      rule: Host(`node-exporter.{{OHM_DOMAIN}}`)
-      entryPoints:
-        - port-web
-      service: node_exporter
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
-      middlewares:
-        - secure-headers
+    # node-exporter-router:
+    #   rule: Host(`node-exporter.{{OHM_DOMAIN}}`)
+    #   entryPoints:
+    #     - port-web
+    #   service: node_exporter
+    #   # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+    #   # tls:
+    #   #   certResolver: letsencrypt
+    #   middlewares:
+    #     - secure-headers
 
-    cadvisor-router:
-      rule: Host(`cadvisor.{{OHM_DOMAIN}}`)
-      entryPoints:
-        - port-web
-      service: cadvisor
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
-      middlewares:
-        - secure-headers
+    # cadvisor-router:
+    #   rule: Host(`cadvisor.{{OHM_DOMAIN}}`)
+    #   entryPoints:
+    #     - port-web
+    #   service: cadvisor
+    #   # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+    #   # tls:
+    #   #   certResolver: letsencrypt
+    #   middlewares:
+    #     - secure-headers
 
   services:
     tiler_server:
