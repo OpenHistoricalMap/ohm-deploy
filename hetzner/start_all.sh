@@ -12,16 +12,16 @@ else
 fi
 
 # ###################### Tiler ######################
-# ./hetzner/deploy.sh start tiler $ENVIRONMENT -y
+./hetzner/deploy.sh start tiler $ENVIRONMENT -y
 
 # ###################### Osmcha ######################
-# ./hetzner/deploy.sh start osmcha $ENVIRONMENT  -y 
+./hetzner/deploy.sh start osmcha $ENVIRONMENT -y 
 
 # ###################### Nominatim ######################
-# ./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
+./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
 
 # ###################### Overpass ####################
-# ./hetzner/deploy.sh start overpass $ENVIRONMENT -y
+./hetzner/deploy.sh start overpass $ENVIRONMENT -y
 
 #################### Taginfo ####################
 ./hetzner/deploy.sh start taginfo $ENVIRONMENT -y

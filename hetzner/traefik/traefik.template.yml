@@ -177,27 +177,27 @@ http:
       middlewares:
         - secure-headers
 
-    # node-exporter-router:
-    #   rule: Host(`node-exporter.{{OHM_DOMAIN}}`)
-    #   entryPoints:
-    #     - port-web
-    #   service: node_exporter
-    #   # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-    #   # tls:
-    #   #   certResolver: letsencrypt
-    #   middlewares:
-    #     - secure-headers
+    node-exporter-router:
+      rule: Host(`node-exporter.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: node_exporter
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
 
-    # cadvisor-router:
-    #   rule: Host(`cadvisor.{{OHM_DOMAIN}}`)
-    #   entryPoints:
-    #     - port-web
-    #   service: cadvisor
-    #   # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-    #   # tls:
-    #   #   certResolver: letsencrypt
-    #   middlewares:
-    #     - secure-headers
+    cadvisor-router:
+      rule: Host(`cadvisor.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: cadvisor
+      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
+      # tls:
+      #   certResolver: letsencrypt
+      middlewares:
+        - secure-headers
 
   services:
     tiler_server:
@@ -235,15 +235,15 @@ http:
         servers:
           - url: http://taginfo_web:4567
 
-    # node_exporter:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://node_exporter:9100
+    node_exporter:
+      loadBalancer:
+        servers:
+          - url: http://node_exporter:9100
 
-    # cadvisor:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://cadvisor:8080
+    cadvisor:
+      loadBalancer:
+        servers:
+          - url: http://cadvisor:8080
 
 providers:
   file:
