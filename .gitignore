@@ -30,3 +30,5 @@ images/tiler-server/vtiles_languages.geojson
 
 hetzner/*/.envs.*.production
 .vscode
+
+images/tiler-server-martin/pg_functions

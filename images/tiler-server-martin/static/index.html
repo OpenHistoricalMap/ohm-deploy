@@ -41,6 +41,9 @@
     .prop-val { color: #eee; font-size: 13px; word-break: break-all; }
     #right-panel.hidden { display: none; }
 
+    .group-header { padding: 8px 4px; margin-top: 8px; font-size: 12px; font-weight: 600; color: #4fc3f7; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(79,195,247,0.2); }
+    .group-header:first-child { margin-top: 0; }
+
     .loading { padding: 16px; color: #888; }
     .error { padding: 16px; color: #e57373; }
   </style>
@@ -69,7 +72,8 @@
 
   <script>
     const MARTIN_BASE = window.location.origin;
-    const COLORS = ['#4fc3f7','#e91e63','#ffa726','#66bb6a','#ab47bc','#ef5350','#26c6da','#fdd835'];
+    const COLORS = ['#4fc3f7','#e91e63','#ffa726','#66bb6a','#ab47bc','#ef5350','#26c6da','#fdd835',
+                     '#78909c','#ff7043','#9ccc65','#5c6bc0','#ec407a','#29b6f6','#d4e157','#8d6e63'];
 
     let activeSources = {};
     const sourceColors = {};
@@ -91,30 +95,64 @@
     async function init() {
       const content = document.getElementById('sidebar-content');
       try {
-        const resp = await fetch(MARTIN_BASE + '/catalog');
-        const catalog = await resp.json();
+        // Fetch catalog and group config in parallel
+        const [catalogResp, configResp] = await Promise.all([
+          fetch(MARTIN_BASE + '/catalog'),
+          fetch(MARTIN_BASE + '/config/functions.json').catch(() => null)
+        ]);
+        const catalog = await catalogResp.json();
         const tiles = catalog.tiles || {};
-        const sourceNames = Object.keys(tiles);
+        const availableSources = new Set(Object.keys(tiles));
 
-        if (!sourceNames.length) {
+        if (!availableSources.size) {
           content.innerHTML = '<div class="error">No sources found in catalog</div>';
           return;
         }
 
+        // Try to load group config, fallback to flat list
+        let groups;
+        if (configResp && configResp.ok) {
+          const config = await configResp.json();
+          groups = config.groups || [];
+        } else {
+          groups = [{ name: 'sources', functions: [...availableSources].map(n => ({ function_name: n })) }];
+        }
+
         content.innerHTML = '';
-        sourceNames.forEach((name, i) => {
-          const color = COLORS[i % COLORS.length];
-          sourceColors[name] = color;
-          const item = document.createElement('div');
-          item.className = 'source-item';
-          item.id = `src-item-${name}`;
-          item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
-          item.onclick = () => toggleSource(name);
-          content.appendChild(item);
+        let colorIdx = 0;
+        const allNames = [];
+
+        groups.forEach(group => {
+          const groupFunctions = group.functions
+            .map(f => f.function_name)
+            .filter(n => availableSources.has(n));
+
+          if (!groupFunctions.length) return;
+
+          // Group header
+          const header = document.createElement('div');
+          header.className = 'group-header';
+          header.textContent = group.name;
+          content.appendChild(header);
+
+          // Layer items
+          groupFunctions.forEach(name => {
+            const color = COLORS[colorIdx % COLORS.length];
+            colorIdx++;
+            sourceColors[name] = color;
+
+            const item = document.createElement('div');
+            item.className = 'source-item';
+            item.id = `src-item-${name}`;
+            item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
+            item.onclick = () => toggleSource(name);
+            content.appendChild(item);
+            allNames.push(name);
+          });
         });
 
         // Auto-activate all sources by default
-        sourceNames.forEach(name => toggleSource(name));
+        allNames.forEach(name => toggleSource(name));
       } catch (e) {
         content.innerHTML = `<div class="error">Failed to load catalog: ${e.message}</div>`;
       }
