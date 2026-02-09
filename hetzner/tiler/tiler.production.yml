@@ -13,16 +13,16 @@ services:
     image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
     volumes:
       - tiler_imposm_data:/mnt/data
-    command:
-      - sh
-      - -c
-      - |
-        while true; do
-          # make sure you disable this for importing the data, for update it shule b eenable
-          ./liveness.sh || exit 1
-          sleep 60
-        done &
-        ./start.sh
+    # command:
+    #   - sh
+    #   - -c
+    #   - |
+    #     while true; do
+    #       # make sure you disable this for importing the data, for update it shule b eenable
+    #       ./liveness.sh || exit 1
+    #       sleep 60
+    #     done &
+    #     ./start.sh
     env_file:
       - .env.production
     restart: always
