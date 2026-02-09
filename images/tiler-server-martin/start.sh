@@ -13,14 +13,9 @@ until pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT
 done
 echo "PostgreSQL is ready."
 
-# Create the function source in PostgreSQL
-echo "Creating function sources..."
-for sql_file in /app/sql_functions/*.sql; do
-  echo "  Executing: $(basename "$sql_file")"
-  PGPASSWORD="${POSTGRES_PASSWORD}" psql -v ON_ERROR_STOP=1 -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" \
-    -f "$sql_file"
-done
-echo "Function sources created."
+# Generate and create function sources in PostgreSQL
+echo "Generating function sources..."
+python3 /app/scripts/generate_functions.py
 
 # Generate config.yaml from environment variables
 echo "Generating Martin config..."
