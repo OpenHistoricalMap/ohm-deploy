@@ -7,6 +7,7 @@
           "function_name": "land_ohm_lines",
           "source_layer": "land_ohm_lines",
           "exclude_columns": ["geometry"],
+          "min_zoom": 0,
           "zoom_mapping": [
             [2, "mv_admin_boundaries_lines_z0_2"],
             [5, "mv_admin_boundaries_lines_z3_5"],
@@ -21,6 +22,7 @@
           "function_name": "land_ohm_centroids",
           "source_layer": "land_ohm_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 0,
           "zoom_mapping": [
             [2, "mv_admin_boundaries_centroids_z0_2"],
             [5, "mv_admin_boundaries_centroids_z3_5"],
@@ -35,6 +37,7 @@
           "function_name": "land_ohm_maritime",
           "source_layer": "land_ohm_maritime",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 0,
           "zoom_mapping": [
             [5, "mv_admin_maritime_lines_z0_5_v2"],
             [9, "mv_admin_maritime_lines_z6_9"],
@@ -45,6 +48,7 @@
           "function_name": "place_areas",
           "source_layer": "place_areas",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 14,
           "zoom_mapping": [
             [null, "mv_place_areas_z14_20"]
           ]
@@ -53,6 +57,7 @@
           "function_name": "place_points_centroids",
           "source_layer": "place_points_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 0,
           "zoom_mapping": [
             [2, "mv_place_points_centroids_z0_2"],
             [5, "mv_place_points_centroids_z3_5"],
@@ -64,6 +69,7 @@
           "function_name": "water_areas",
           "source_layer": "water_areas",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 0,
           "zoom_mapping": [
             [2, "mv_water_areas_z0_2"],
             [5, "mv_water_areas_z3_5"],
@@ -78,6 +84,7 @@
           "function_name": "water_areas_centroids",
           "source_layer": "water_areas_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 8,
           "zoom_mapping": [
             [9, "mv_water_areas_centroids_z8_9"],
             [12, "mv_water_areas_centroids_z10_12"],
@@ -89,6 +96,7 @@
           "function_name": "water_lines",
           "source_layer": "water_lines",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 8,
           "zoom_mapping": [
             [9, "mv_water_lines_z8_9"],
             [12, "mv_water_lines_z10_12"],
@@ -100,6 +108,7 @@
           "function_name": "transport_areas",
           "source_layer": "transport_areas",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 10,
           "zoom_mapping": [
             [12, "mv_transport_areas_z10_12"],
             [15, "mv_transport_areas_z13_15"],
@@ -110,6 +119,7 @@
           "function_name": "transport_lines",
           "source_layer": "transport_lines",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 5,
           "zoom_mapping": [
             [5, "mv_transport_lines_z5"],
             [7, "mv_transport_lines_z6_7"],
@@ -123,6 +133,7 @@
           "function_name": "route_lines",
           "source_layer": "route_lines",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 5,
           "zoom_mapping": [
             [5, "mv_routes_indexed_z5"],
             [7, "mv_routes_indexed_z6_7"],
@@ -136,6 +147,7 @@
           "function_name": "transport_points_centroids",
           "source_layer": "transport_points_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 10,
           "zoom_mapping": [
             [12, "mv_transport_points_centroids_z10_12"],
             [15, "mv_transport_points_centroids_z13_15"],
@@ -146,6 +158,7 @@
           "function_name": "amenity_areas",
           "source_layer": "amenity_areas",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 14,
           "zoom_mapping": [
             [15, "mv_amenity_areas_z14_15"],
             [null, "mv_amenity_areas_z16_20"]
@@ -155,6 +168,7 @@
           "function_name": "amenity_points_centroids",
           "source_layer": "amenity_points_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 14,
           "zoom_mapping": [
             [15, "mv_amenity_points_centroids_z14_15"],
             [null, "mv_amenity_points_centroids_z16_20"]
@@ -164,6 +178,7 @@
           "function_name": "buildings",
           "source_layer": "buildings",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 14,
           "zoom_mapping": [
             [15, "mv_buildings_areas_z14_15"],
             [null, "mv_buildings_areas_z16_20"]
@@ -173,6 +188,7 @@
           "function_name": "buildings_points_centroids",
           "source_layer": "buildings_points_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 14,
           "zoom_mapping": [
             [15, "mv_buildings_points_centroids_z14_15"],
             [null, "mv_buildings_points_centroids_z16_20"]
@@ -182,6 +198,7 @@
           "function_name": "landuse_areas",
           "source_layer": "landuse_areas",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 6,
           "zoom_mapping": [
             [7, "mv_landuse_areas_z6_7"],
             [9, "mv_landuse_areas_z8_9"],
@@ -194,6 +211,7 @@
           "function_name": "landuse_points_centroids",
           "source_layer": "landuse_points_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 6,
           "zoom_mapping": [
             [7, "mv_landuse_points_centroids_z6_7"],
             [9, "mv_landuse_points_centroids_z8_9"],
@@ -206,6 +224,7 @@
           "function_name": "landuse_lines",
           "source_layer": "landuse_lines",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 14,
           "zoom_mapping": [
             [15, "mv_landuse_lines_z14_15"],
             [null, "mv_landuse_lines_z16_20"]
@@ -215,6 +234,7 @@
           "function_name": "other_areas",
           "source_layer": "other_areas",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 8,
           "zoom_mapping": [
             [9, "mv_other_areas_z8_9"],
             [12, "mv_other_areas_z10_12"],
@@ -226,6 +246,7 @@
           "function_name": "other_points_centroids",
           "source_layer": "other_points_centroids",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 8,
           "zoom_mapping": [
             [9, "mv_other_points_centroids_z8_9"],
             [12, "mv_other_points_centroids_z10_12"],
@@ -237,6 +258,7 @@
           "function_name": "other_lines",
           "source_layer": "other_lines",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 14,
           "zoom_mapping": [
             [15, "mv_other_lines_z14_15"],
             [null, "mv_other_lines_z16_20"]
@@ -251,6 +273,7 @@
           "function_name": "boundaries",
           "source_layer": "boundaries",
           "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 0,
           "zoom_mapping": [
             [2, "mv_admin_boundaries_areas_z0_2"],
             [5, "mv_admin_boundaries_areas_z3_5"],
