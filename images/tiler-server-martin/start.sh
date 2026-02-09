@@ -3,8 +3,8 @@ set -euo pipefail
 
 echo "=== Martin Tile Server Setup ==="
 
-MARTIN_INTERNAL_PORT="${MARTIN_INTERNAL_PORT:-3001}"
-NGINX_PORT="${NGINX_PORT:-80}"
+export MARTIN_INTERNAL_PORT="${MARTIN_INTERNAL_PORT:-3001}"
+export NGINX_PORT="${NGINX_PORT:-80}"
 
 # Wait for PostgreSQL
 echo "Waiting for PostgreSQL to be ready..."
@@ -34,6 +34,10 @@ postgres:
 EOF
 echo "Martin config written."
 
+# Generate nginx.conf with composite routes from functions.json
+echo "Generating nginx config..."
+python3 /app/scripts/generate_nginx_conf.py
+
 # Ensure nginx dirs exist
 mkdir -p /run/nginx /var/log/nginx
 
@@ -55,8 +59,9 @@ NGINX_PID=$!
 
 echo "=== Ready ==="
 echo "  Nginx  :${NGINX_PORT} -> Martin :${MARTIN_INTERNAL_PORT}"
-echo "  Layer:  /land_ohm_lines/{z}/{x}/{y}"
-echo "  Tegola: /maps/osm/land_ohm_lines/{z}/{x}/{y}.pbf"
+echo "  Composite: /maps/osm/{z}/{x}/{y}.pbf (all layers)"
+echo "  Per-layer: /maps/osm/land_ohm_lines/{z}/{x}/{y}.pbf"
+echo "  Direct:    /land_ohm_lines/{z}/{x}/{y}"
 
 # Wait for either process to exit
 wait -n $MARTIN_PID $NGINX_PID

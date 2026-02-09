@@ -1,0 +1,60 @@
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /run/nginx/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    access_log off;
+    sendfile on;
+    keepalive_timeout 65;
+
+    upstream martin {
+        server 127.0.0.1:${MARTIN_INTERNAL_PORT};
+        keepalive 32;
+    }
+
+    server {
+        listen ${NGINX_PORT};
+
+        # Health and catalog
+        location /catalog {
+            proxy_set_header Host $http_host;
+            proxy_pass http://martin;
+        }
+        location /health {
+            proxy_set_header Host $http_host;
+            proxy_pass http://martin;
+        }
+
+        # Composite tile routes (one per group, Tegola-compatible)
+        # /maps/{group}/{z}/{x}/{y}.pbf -> all layers in one tile
+        ##COMPOSITE_ROUTES##
+
+        # Per-layer routes: /maps/{group}/{layer}/{z}/{x}/{y}.pbf
+        ##PERLAYER_ROUTES##
+
+        # Serve config files (functions.json for the viewer)
+        location /config/ {
+            alias /app/config/;
+            add_header Content-Type application/json;
+        }
+
+        # Viewer
+        location = / {
+            default_type text/html;
+            root /app/static;
+            try_files /index.html =404;
+        }
+
+        # Fallback
+        location / {
+            proxy_set_header Host $http_host;
+            proxy_pass http://martin;
+        }
+    }
+}
