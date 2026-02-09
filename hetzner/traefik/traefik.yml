@@ -6,11 +6,9 @@ entryPoints:
     address: ":80"
     forwardedHeaders:
       trustedIPs:
-        # Redes privadas (Docker, red local)
         - "172.16.0.0/12"
         - "192.168.0.0/16"
         - "10.0.0.0/8"
-        # Cloudflare IPs - Actualizado 2024 (https://www.cloudflare.com/ips-v4)
         - "173.245.48.0/20"
         - "103.21.244.0/22"
         - "103.22.200.0/22"
@@ -26,7 +24,6 @@ entryPoints:
         - "104.24.0.0/14"
         - "172.64.0.0/13"
         - "131.0.72.0/22"
-        # Cloudflare IPv6 (https://www.cloudflare.com/ips-v6)
         - "2400:cb00::/32"
         - "2606:4700::/32"
         - "2803:f800::/32"
@@ -81,7 +78,7 @@ http:
 
     redirect-nominatim:
       redirectRegex:
-        regex: "^https://(nominatim\\.{{OHM_DOMAIN}})/?$"
+        regex: "^https://(nominatim\\.openhistoricalmap.net)/?$"
         replacement: "https://${1}/ui/search.html"
         permanent: true
 
@@ -97,7 +94,7 @@ http:
 
   routers:
     vtiles-router:
-      rule: Host(`vtiles.{{OHM_DOMAIN}}`)
+      rule: Host(`vtiles.openhistoricalmap.net`)
       entryPoints:
         - port-web
       service: tiler_server
@@ -111,7 +108,7 @@ http:
         # - replace-osm-tiles-to-ohm
 
     # tiler_cache-router:
-    #   rule: Host(`tiler-cache.{{OHM_DOMAIN}}`)
+    #   rule: Host(`tiler-cache.openhistoricalmap.net`)
     #   entryPoints:
     #     - port-secure
     #   service: tiler_cache
@@ -121,7 +118,7 @@ http:
     #     - secure-headers
 
     nominatim-router:
-      rule: Host(`nominatim.{{OHM_DOMAIN}}`) && !PathPrefix(`/ui`)
+      rule: Host(`nominatim.openhistoricalmap.net`) && !PathPrefix(`/ui`)
       entryPoints:
         - port-web
       service: nominatim
@@ -133,7 +130,7 @@ http:
         - redirect-nominatim
 
     nominatim-ui-router:
-      rule: Host(`nominatim.{{OHM_DOMAIN}}`) && PathPrefix(`/ui`)
+      rule: Host(`nominatim.openhistoricalmap.net`) && PathPrefix(`/ui`)
       entryPoints:
         - port-web
       service: nominatim_ui
@@ -144,7 +141,7 @@ http:
         - secure-headers
 
     overpass-api-router:
-      rule: Host(`overpass-api.{{OHM_DOMAIN}}`)
+      rule: Host(`overpass-api.openhistoricalmap.net`)
       entryPoints:
         - port-web
       service: overpass_api
@@ -155,7 +152,7 @@ http:
         - secure-headers
 
     osmcha-router:
-      rule: Host(`osmcha.{{OHM_DOMAIN}}`)
+      rule: Host(`osmcha.openhistoricalmap.net`)
       entryPoints:
         - port-web
       service: osmcha
@@ -166,7 +163,7 @@ http:
         - secure-headers
 
     taginfo-router:
-      rule: Host(`taginfo.{{OHM_DOMAIN}}`)
+      rule: Host(`taginfo.openhistoricalmap.net`)
       entryPoints:
         - port-web
       service: taginfo
@@ -177,7 +174,7 @@ http:
         - secure-headers
 
     node-exporter-router:
-      rule: Host(`node-exporter.{{OHM_DOMAIN}}`)
+      rule: Host(`node-exporter.openhistoricalmap.net`)
       entryPoints:
         - port-web
       service: node_exporter
@@ -188,7 +185,7 @@ http:
         - secure-headers
 
     cadvisor-router:
-      rule: Host(`cadvisor.{{OHM_DOMAIN}}`)
+      rule: Host(`cadvisor.openhistoricalmap.net`)
       entryPoints:
         - port-web
       service: cadvisor
@@ -234,15 +231,15 @@ http:
         servers:
           - url: http://taginfo_web:4567
 
-    # node_exporter:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://node_exporter:9100
+    node_exporter:
+      loadBalancer:
+        servers:
+          - url: http://node_exporter:9100
 
-    # cadvisor:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://cadvisor:8080
+    cadvisor:
+      loadBalancer:
+        servers:
+          - url: http://cadvisor:8080
 
 providers:
   file:

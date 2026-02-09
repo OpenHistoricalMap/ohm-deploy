@@ -58,3 +58,24 @@ This is important because this is charged to serve the site through the setup IP
 ```sh
 docker compose -f hetzner/services.yml up -d --remove-orphans  --force-recreate
 ```
+
+
+## Deploy all services
+
+1. **Create a `.env` file** in the `hetzner/` directory with:
+
+   - `CLOUDFLARED_TOKEN` – your Cloudflare Tunnel token (see `CLOUDFLARE_TUNNEL_SETUP.md`)
+   - `OHM_DOMAIN` – `openhistoricalmap.net` (staging) or `openhistoricalmap.org` (production)
+   - `TRAEFIK_CONFIG_PATH` – optional; defaults to `./traefik/traefik.yml`
+
+2. **Start routing and core services** (Traefik, Cloudflare Tunnel, node-exporter, cadvisor):
+
+   ```sh
+   docker compose -f hetzner/services.yml up -d --remove-orphans --force-recreate
+   ```
+
+3. **Deploy application services** using the startup script (updates Cloudflare IPs, generates Traefik config, and starts the services defined in the script):
+
+   ```sh
+   ENVIRONMENT=staging ./hetzner/start_all.sh   # or ENVIRONMENT=production
+   ```

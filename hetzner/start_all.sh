@@ -14,11 +14,11 @@ fi
 # ###################### Tiler ######################
 # ./hetzner/deploy.sh start tiler $ENVIRONMENT -y
 
-# ###################### Nominatim ######################
-# ./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
-
 # ###################### Osmcha ######################
 # ./hetzner/deploy.sh start osmcha $ENVIRONMENT  -y 
+
+# ###################### Nominatim ######################
+# ./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
 
 # ###################### Overpass ####################
 # ./hetzner/deploy.sh start overpass $ENVIRONMENT -y
