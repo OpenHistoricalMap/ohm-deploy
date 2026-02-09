@@ -15,8 +15,11 @@ echo "PostgreSQL is ready."
 
 # Create the function source in PostgreSQL
 echo "Creating function sources..."
-PGPASSWORD="${POSTGRES_PASSWORD}" psql -v ON_ERROR_STOP=1 -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" \
-  -f /app/sql_functions/land_ohm_lines.sql
+for sql_file in /app/sql_functions/*.sql; do
+  echo "  Executing: $(basename "$sql_file")"
+  PGPASSWORD="${POSTGRES_PASSWORD}" psql -v ON_ERROR_STOP=1 -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" \
+    -f "$sql_file"
+done
 echo "Function sources created."
 
 # Generate config.yaml from environment variables

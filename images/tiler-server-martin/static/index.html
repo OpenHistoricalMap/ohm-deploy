@@ -35,9 +35,9 @@
     #right-panel-close { cursor: pointer; background: none; border: 1px solid #555; color: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
     #right-panel-close:hover { background: #0f3460; }
     #right-panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
-    .prop { margin: 4px 0; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .prop-key { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .prop-val { color: #eee; font-size: 13px; word-break: break-all; margin-top: 2px; }
+    .prop { margin: 2px 0; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; gap: 8px; align-items: baseline; }
+    .prop-key { color: #888; font-size: 11px; white-space: nowrap; min-width: 0; flex-shrink: 0; }
+    .prop-val { color: #eee; font-size: 13px; word-break: break-all; }
     #right-panel.hidden { display: none; }
 
     .loading { padding: 16px; color: #888; }
@@ -106,19 +106,13 @@
           const item = document.createElement('div');
           item.className = 'source-item';
           item.id = `src-item-${name}`;
-          item.innerHTML = `
-            <div class="source-name">${name}</div>
-            <div class="source-meta">${info.content_type || 'vector'}</div>
-            <div class="source-url">/${name}/{z}/{x}/{y}</div>
-          `;
+          item.innerHTML = `<div class="source-name">${name}</div>`;
           item.onclick = () => toggleSource(name);
           content.appendChild(item);
         });
 
-        // Auto-activate the first source
-        if (sourceNames.length > 0) {
-          toggleSource(sourceNames[0]);
-        }
+        // Auto-activate all sources by default
+        sourceNames.forEach(name => toggleSource(name));
       } catch (e) {
         content.innerHTML = `<div class="error">Failed to load catalog: ${e.message}</div>`;
       }
