@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Martin Tile Server</title>
+  <title>Martin - Admin Boundaries Lines</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <link href="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.js"></script>
@@ -10,86 +10,76 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; display: flex; height: 100vh; }
 
-    /* Sidebar */
     #sidebar { width: 320px; background: #16213e; display: flex; flex-direction: column; border-right: 1px solid #0f3460; flex-shrink: 0; }
-    #sidebar-header { padding: 16px; border-bottom: 1px solid #0f3460; display: flex; align-items: center; gap: 10px; }
+    #sidebar-header { padding: 16px; border-bottom: 1px solid #0f3460; }
     #sidebar-header h2 { font-size: 18px; font-weight: 600; }
-    #back-btn { display: none; cursor: pointer; background: none; border: 1px solid #555; color: #eee; padding: 4px 10px; border-radius: 4px; font-size: 13px; }
-    #back-btn:hover { background: #0f3460; }
-    #sidebar-content { flex: 1; overflow-y: auto; }
+    #sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
 
-    .list-item { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.15s; }
-    .list-item:hover { background: rgba(255,255,255,0.08); }
-    .list-item.active { background: #0f3460; }
-    .list-item .name { font-size: 14px; }
-    .list-item .meta { font-size: 11px; color: #888; }
-    .list-item .arrow { color: #555; font-size: 18px; }
-    .list-item .toggle { display: flex; align-items: center; gap: 8px; }
-    .list-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .source-item { padding: 12px; margin-bottom: 8px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.15s; }
+    .source-item:hover { background: rgba(255,255,255,0.08); }
+    .source-item.active { background: #0f3460; border-color: #4fc3f7; }
+    .source-name { font-size: 14px; font-weight: 500; }
+    .source-meta { font-size: 11px; color: #888; margin-top: 4px; }
+    .source-url { font-size: 10px; color: #555; margin-top: 4px; word-break: break-all; font-family: monospace; }
 
-    .cache-badge { font-size: 10px; background: #2ecc71; color: #000; padding: 1px 6px; border-radius: 3px; margin-left: 6px; }
-    .count-badge { font-size: 11px; color: #888; }
-
-    /* Map */
     #map-container { flex: 1; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    /* Info panel - right side */
-    #info-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 320px; background: #16213e; font-size: 12px; overflow-y: auto; display: none; border-left: 1px solid #0f3460; z-index: 10; }
-    #info-panel-header { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; justify-content: space-between; align-items: center; }
-    #info-panel-header strong { color: #4fc3f7; font-size: 13px; }
-    #info-close { cursor: pointer; background: none; border: 1px solid #555; color: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
-    #info-close:hover { background: #0f3460; }
-    #info-panel-body { padding: 12px 16px; }
-    #info-panel strong { color: #4fc3f7; }
-    #info-panel .prop { margin: 4px 0; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    #info-panel .prop-key { color: #888; font-size: 11px; }
-    #info-panel .prop-val { color: #eee; word-break: break-all; }
-
-    /* Header bar on map */
     #map-header { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 8px; z-index: 5; pointer-events: none; }
     #map-title { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: auto; }
     #zoom-level { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; pointer-events: auto; margin-left: auto; }
+
+    #right-panel { width: 320px; background: #16213e; display: flex; flex-direction: column; border-left: 1px solid #0f3460; flex-shrink: 0; }
+    #right-panel-header { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; justify-content: space-between; align-items: center; }
+    #right-panel-header strong { color: #4fc3f7; font-size: 14px; }
+    #right-panel-close { cursor: pointer; background: none; border: 1px solid #555; color: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+    #right-panel-close:hover { background: #0f3460; }
+    #right-panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
+    .prop { margin: 4px 0; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .prop-key { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .prop-val { color: #eee; font-size: 13px; word-break: break-all; margin-top: 2px; }
+    #right-panel.hidden { display: none; }
+
+    .loading { padding: 16px; color: #888; }
+    .error { padding: 16px; color: #e57373; }
   </style>
 </head>
 <body>
   <div id="sidebar">
     <div id="sidebar-header">
-      <button id="back-btn" onclick="showGroups()">&#8592; Back</button>
-      <h2 id="sidebar-title">Maps</h2>
+      <h2>Martin Sources</h2>
     </div>
-    <div id="sidebar-content"></div>
+    <div id="sidebar-content"><div class="loading">Loading catalog...</div></div>
   </div>
   <div id="map-container">
     <div id="map"></div>
     <div id="map-header">
-      <div id="map-title">Select a layer to view</div>
+      <div id="map-title">Select a source</div>
       <div id="zoom-level">z0</div>
     </div>
-    <div id="info-panel"></div>
+  </div>
+  <div id="right-panel" class="hidden">
+    <div id="right-panel-header">
+      <strong id="right-panel-title">Properties</strong>
+      <button id="right-panel-close" onclick="closeRightPanel()">&#10005;</button>
+    </div>
+    <div id="right-panel-body"></div>
   </div>
 
   <script>
     const MARTIN_BASE = window.location.origin;
+    const COLORS = ['#4fc3f7','#e91e63','#ffa726','#66bb6a','#ab47bc','#ef5350','#26c6da','#fdd835'];
 
-    const LAYER_COLORS = [
-      '#4fc3f7','#e91e63','#ffa726','#66bb6a','#ab47bc',
-      '#ef5350','#26c6da','#fdd835','#8d6e63','#78909c',
-      '#7e57c2','#29b6f6','#ff7043','#9ccc65','#ec407a',
-      '#5c6bc0','#26a69a','#ffca28','#d4e157','#42a5f5',
-      '#ff5722','#00bcd4',
-    ];
-
-    let layerGroups = {};
-    let compositeLayers = {};
-    let currentGroup = null;
-    let activeLayers = new Set();
+    let activeSources = {};
     let colorIdx = 0;
-    let layerColorMap = {};
 
     const map = new maplibregl.Map({
       container: 'map',
-      style: { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#1a1a2e' } }] },
+      style: {
+        version: 8,
+        sources: {},
+        layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#1a1a2e' } }]
+      },
       center: [0, 20], zoom: 3, hash: true,
     });
     map.addControl(new maplibregl.NavigationControl());
@@ -97,226 +87,204 @@
       document.getElementById('zoom-level').textContent = 'z' + Math.floor(map.getZoom());
     });
 
-    // Load config files
     async function init() {
+      const content = document.getElementById('sidebar-content');
       try {
-        const [lgResp, clResp] = await Promise.all([
-          fetch(MARTIN_BASE + '/config/layer_groups.json'),
-          fetch(MARTIN_BASE + '/config/composite_layers.json'),
-        ]);
-        layerGroups = await lgResp.json();
-        compositeLayers = await clResp.json();
-      } catch (e) {
-        // Fallback: try relative paths
-        try {
-          const [lgResp, clResp] = await Promise.all([
-            fetch('/config/layer_groups.json'),
-            fetch('/config/composite_layers.json'),
-          ]);
-          layerGroups = await lgResp.json();
-          compositeLayers = await clResp.json();
-        } catch (e2) {
-          document.getElementById('sidebar-content').innerHTML =
-            '<div style="padding:16px;color:#e57373">Failed to load config files</div>';
+        const resp = await fetch(MARTIN_BASE + '/catalog');
+        const catalog = await resp.json();
+        const tiles = catalog.tiles || {};
+        const sourceNames = Object.keys(tiles);
+
+        if (!sourceNames.length) {
+          content.innerHTML = '<div class="error">No sources found in catalog</div>';
           return;
         }
-      }
-      showGroups();
-    }
 
-    function removeAllMapLayers() {
-      for (const key of [...activeLayers]) {
-        const sourceId = `src-${key}`;
-        map.getStyle().layers.forEach(l => {
-          if (l.id.startsWith(`lyr-${key}`)) map.removeLayer(l.id);
+        content.innerHTML = '';
+        sourceNames.forEach(name => {
+          const info = tiles[name];
+          const item = document.createElement('div');
+          item.className = 'source-item';
+          item.id = `src-item-${name}`;
+          item.innerHTML = `
+            <div class="source-name">${name}</div>
+            <div class="source-meta">${info.content_type || 'vector'}</div>
+            <div class="source-url">/${name}/{z}/{x}/{y}</div>
+          `;
+          item.onclick = () => toggleSource(name);
+          content.appendChild(item);
         });
-        if (map.getSource(sourceId)) map.removeSource(sourceId);
-      }
-      activeLayers.clear();
-      document.getElementById('info-panel').style.display = 'none';
-    }
 
-    function activateGroupLayers(groupName) {
-      const groupCfg = layerGroups[groupName];
-      const layers = groupCfg.layers || groupCfg;
-      for (const [tegolaName, compositeName] of Object.entries(layers)) {
-        if (!layerColorMap[tegolaName]) {
-          layerColorMap[tegolaName] = LAYER_COLORS[colorIdx % LAYER_COLORS.length];
-          colorIdx++;
+        // Auto-activate the first source
+        if (sourceNames.length > 0) {
+          toggleSource(sourceNames[0]);
         }
-        const color = layerColorMap[tegolaName];
-        const key = `${groupName}/${tegolaName}`;
-        if (!activeLayers.has(key)) {
-          toggleMapLayer(groupName, tegolaName, compositeName, color, true);
-        }
-      }
-      document.getElementById('map-title').textContent = groupName;
-    }
-
-    function showGroups() {
-      currentGroup = null;
-      removeAllMapLayers();
-      document.getElementById('sidebar-title').textContent = 'Maps';
-      document.getElementById('back-btn').style.display = 'none';
-      document.getElementById('map-title').textContent = 'Select a group';
-      const content = document.getElementById('sidebar-content');
-      content.innerHTML = '';
-
-      for (const [groupName, groupCfg] of Object.entries(layerGroups)) {
-        const layers = groupCfg.layers || groupCfg;
-        const count = Object.keys(layers).length;
-        const hasCache = groupCfg.cache;
-
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-          <div>
-            <div class="name">${groupName}${hasCache ? '<span class="cache-badge">cached ' + groupCfg.cache + '</span>' : ''}</div>
-            <div class="meta">${count} layer${count !== 1 ? 's' : ''}</div>
-          </div>
-          <span class="arrow">&#8250;</span>
-        `;
-        item.onclick = () => showLayers(groupName);
-        content.appendChild(item);
+      } catch (e) {
+        content.innerHTML = `<div class="error">Failed to load catalog: ${e.message}</div>`;
       }
     }
 
-    function renderLayerList(groupName) {
-      const groupCfg = layerGroups[groupName];
-      const layers = groupCfg.layers || groupCfg;
-      const content = document.getElementById('sidebar-content');
-      content.innerHTML = '';
-
-      for (const [tegolaName, compositeName] of Object.entries(layers)) {
-        const compInfo = compositeLayers[compositeName];
-        const zoomRanges = compInfo ? compInfo.zoom_ranges : [];
-        const minZ = zoomRanges.length ? zoomRanges[0].minzoom : '?';
-        const maxZ = zoomRanges.length ? zoomRanges[zoomRanges.length - 1].maxzoom : '?';
-
-        if (!layerColorMap[tegolaName]) {
-          layerColorMap[tegolaName] = LAYER_COLORS[colorIdx % LAYER_COLORS.length];
-          colorIdx++;
-        }
-        const color = layerColorMap[tegolaName];
-        const isActive = activeLayers.has(`${groupName}/${tegolaName}`);
-
-        const item = document.createElement('div');
-        item.className = 'list-item' + (isActive ? ' active' : '');
-        item.innerHTML = `
-          <div class="toggle">
-            <span class="dot" style="background:${isActive ? color : '#444'}"></span>
-            <div>
-              <div class="name">${tegolaName}</div>
-              <div class="meta">z${minZ}-${maxZ} &middot; ${zoomRanges.length} source${zoomRanges.length !== 1 ? 's' : ''}</div>
-            </div>
-          </div>
-        `;
-        item.onclick = () => toggleMapLayer(groupName, tegolaName, compositeName, color);
-        content.appendChild(item);
-      }
-    }
-
-    function refreshLayerList(groupName) {
-      renderLayerList(groupName);
-    }
-
-    function showLayers(groupName) {
-      currentGroup = groupName;
-
-      // Remove previous group layers and activate this group
-      removeAllMapLayers();
-      activateGroupLayers(groupName);
-
-      document.getElementById('sidebar-title').textContent = groupName;
-      document.getElementById('back-btn').style.display = 'inline-block';
-      renderLayerList(groupName);
-    }
-
-    function toggleMapLayer(groupName, tegolaName, compositeName, color, skipRefresh) {
-      const key = `${groupName}/${tegolaName}`;
-      const sourceId = `src-${key}`;
-
-      if (activeLayers.has(key)) {
-        // Remove
-        activeLayers.delete(key);
-        map.getStyle().layers.forEach(l => {
-          if (l.id.startsWith(`lyr-${key}`)) map.removeLayer(l.id);
-        });
-        if (map.getSource(sourceId)) map.removeSource(sourceId);
+    function toggleSource(name) {
+      if (activeSources[name]) {
+        removeSource(name);
       } else {
-        // Add via TileJSON URL
-        activeLayers.add(key);
-        const tileJsonUrl = `${MARTIN_BASE}/maps/${groupName}/${tegolaName}`;
-
-        map.addSource(sourceId, { type: 'vector', url: tileJsonUrl });
-
-        // Fetch TileJSON to get source-layer IDs
-        fetch(tileJsonUrl)
-          .then(r => r.json())
-          .then(tj => {
-            // Verify source still exists (may have been removed by group switch)
-            if (!map.getSource(sourceId)) return;
-            const vectorLayers = tj.vector_layers || [];
-            vectorLayers.forEach((vl, i) => {
-              const name = vl.id.toLowerCase();
-              let type, paint;
-              if (name.includes('centroids') || name.includes('points')) {
-                type = 'circle';
-                paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
-              } else if (name.includes('lines') || name.includes('routes') || name.includes('maritime')) {
-                type = 'line';
-                paint = { 'line-color': color, 'line-width': 1.5 };
-              } else {
-                type = 'fill';
-                paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
-              }
-
-              map.addLayer({
-                id: `lyr-${key}-${i}`,
-                type: type,
-                source: sourceId,
-                'source-layer': vl.id,
-                paint: paint,
-              });
-            });
-          })
-          .catch(() => {});
+        addSource(name);
       }
+    }
 
-      if (!skipRefresh) {
-        // Refresh sidebar to show active state
-        if (currentGroup === groupName) refreshLayerList(groupName);
-        if (activeLayers.size === 0) {
-          document.getElementById('map-title').textContent = 'Select a group';
+    function removeSource(name) {
+      const info = activeSources[name];
+      if (!info) return;
+      info.layerIds.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+      if (map.getSource(info.sourceId)) map.removeSource(info.sourceId);
+      delete activeSources[name];
+      const el = document.getElementById(`src-item-${name}`);
+      if (el) el.classList.remove('active');
+      if (!Object.keys(activeSources).length) {
+        document.getElementById('map-title').textContent = 'Select a source';
+      }
+    }
+
+    // Parse MVT protobuf to extract layer names from a tile
+    async function detectMvtLayers(tileUrl) {
+      try {
+        const resp = await fetch(tileUrl);
+        if (!resp.ok) return null;
+        let buf = new Uint8Array(await resp.arrayBuffer());
+        // Decompress gzip if needed
+        if (buf.length > 2 && buf[0] === 0x1f && buf[1] === 0x8b) {
+          buf = new Uint8Array(await new Response(
+            new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))
+          ).arrayBuffer());
         }
-      }
+        const names = [];
+        let p = 0;
+        function readVarint() {
+          let r = 0, s = 0;
+          while (p < buf.length) {
+            const b = buf[p++];
+            r |= (b & 0x7f) << s;
+            if (!(b & 0x80)) return r;
+            s += 7;
+          }
+          return r;
+        }
+        // Top-level Tile message: field 3 = Layer (length-delimited)
+        while (p < buf.length) {
+          const tag = readVarint();
+          const field = tag >> 3, wire = tag & 7;
+          if (wire === 2) {
+            const len = readVarint();
+            if (field === 3) {
+              // Inside Layer message: field 1 = name (string)
+              const end = p + len;
+              if (p < end) {
+                const innerTag = readVarint();
+                if ((innerTag >> 3) === 1 && (innerTag & 7) === 2) {
+                  const nameLen = readVarint();
+                  names.push(new TextDecoder().decode(buf.slice(p, p + nameLen)));
+                }
+              }
+              p = end;
+            } else {
+              p += len;
+            }
+          } else if (wire === 0) { readVarint(); }
+          else if (wire === 5) { p += 4; }
+          else if (wire === 1) { p += 8; }
+          else { break; }
+        }
+        return names.length ? names : null;
+      } catch (e) { return null; }
     }
 
-    function closeInfoPanel() {
-      document.getElementById('info-panel').style.display = 'none';
+    async function addSource(name) {
+      const color = COLORS[colorIdx % COLORS.length];
+      colorIdx++;
+      const sourceId = `src-${name}`;
+      const tileJsonUrl = `${MARTIN_BASE}/${name}`;
+
+      map.addSource(sourceId, { type: 'vector', url: tileJsonUrl });
+
+      const layerIds = [];
+      try {
+        const resp = await fetch(tileJsonUrl);
+        const tj = await resp.json();
+        if (!map.getSource(sourceId)) return;
+
+        // Get layer names from TileJSON, or detect from a sample tile for bytea functions
+        let layers = (tj.vector_layers || []).map(vl => vl.id);
+        if (!layers.length) {
+          // Bytea functions have no vector_layers metadata - detect from actual tile
+          const tiles = tj.tiles || [];
+          if (tiles.length) {
+            const sampleUrl = tiles[0].replace('{z}', '0').replace('{x}', '0').replace('{y}', '0');
+            const detected = await detectMvtLayers(sampleUrl);
+            layers = detected || [name];
+          } else {
+            layers = [name];
+          }
+        }
+
+        layers.forEach((sourceLayer, i) => {
+          const slName = sourceLayer.toLowerCase();
+          let type, paint;
+          if (slName.includes('centroids') || slName.includes('points')) {
+            type = 'circle';
+            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
+          } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime')) {
+            type = 'line';
+            paint = { 'line-color': color, 'line-width': 1.5 };
+          } else {
+            type = 'fill';
+            paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
+          }
+
+          const layerId = `lyr-${name}-${i}`;
+          map.addLayer({
+            id: layerId,
+            type: type,
+            source: sourceId,
+            'source-layer': sourceLayer,
+            paint: paint,
+          });
+          layerIds.push(layerId);
+        });
+      } catch (e) {}
+
+      activeSources[name] = { sourceId, layerIds, color };
+      const el = document.getElementById(`src-item-${name}`);
+      if (el) el.classList.add('active');
+      document.getElementById('map-title').textContent = name;
     }
 
-    // Click to inspect
+    function closeRightPanel() {
+      document.getElementById('right-panel').classList.add('hidden');
+    }
+
     map.on('click', (e) => {
       const features = map.queryRenderedFeatures(e.point)
         .filter(f => f.layer.id.startsWith('lyr-'));
-      const panel = document.getElementById('info-panel');
-      if (!features.length) { panel.style.display = 'none'; return; }
+      const panel = document.getElementById('right-panel');
+
+      if (!features.length) {
+        panel.classList.add('hidden');
+        return;
+      }
 
       const f = features[0];
       const entries = Object.entries(f.properties)
         .filter(([k, v]) => v !== null && v !== '' && v !== undefined);
 
-      const layerLabel = f.layer.id.replace('lyr-','');
-      let html = `<div id="info-panel-header"><div><strong>${layerLabel}</strong><br><span style="color:#888;font-size:11px">${f.sourceLayer}</span></div><button id="info-close" onclick="closeInfoPanel()">&#10005;</button></div>`;
-      html += `<div id="info-panel-body">`;
+      document.getElementById('right-panel-title').textContent = f.sourceLayer;
+
+      let html = '';
       entries.forEach(([k, v]) => {
         html += `<div class="prop"><div class="prop-key">${k}</div><div class="prop-val">${v}</div></div>`;
       });
-      html += `</div>`;
 
-      panel.innerHTML = html;
-      panel.style.display = 'block';
+      document.getElementById('right-panel-body').innerHTML = html;
+      panel.classList.remove('hidden');
     });
 
     map.on('load', init);

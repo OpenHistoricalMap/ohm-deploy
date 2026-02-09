@@ -8,14 +8,13 @@ services:
       - ../images/tiler-server-martin:/app
     ports:
       - "3020:80"
-      - "3021:3001"
     env_file:
       - ../envs/.env.tiler
     environment:
-      - MARTIN_INTERNAL_PORT=3001
+      - MARTIN_INTERNAL_PORT=3000
       - MARTIN_POOL_SIZE=20
       - MARTIN_WORKER_PROCESSES=8
-    restart: always
+    # restart: always
     networks:
       - ohm_network
 

@@ -1,0 +1,11 @@
+listen_addresses: '0.0.0.0:3000'
+worker_processes: 8
+
+postgres:
+  connection_string: 'postgresql://postgres:5NnsUZZ_uWAXeN3ft_HtfPXH_AGrejap4m_6Pd8HO@37.27.96.98:54321/tiler_osm_production'
+  pool_size: 20
+  default_srid: 3857
+  auto_publish:
+    tables: false
+    functions:
+      from_schemas: public
