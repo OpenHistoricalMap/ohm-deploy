@@ -34,7 +34,7 @@ docker compose -f $SCRIPT_DIR/services.yml up -d --force-recreate
 
 ## Stop services that is not requiered for staging
 if [ "$ENVIRONMENT" = "staging" ]; then
-    docker stop taginfo_data_staging
+    docker stop taginfo_data
     docker stop tiler_imposm
     docker stop node_exporter
     docker stop cadvisor

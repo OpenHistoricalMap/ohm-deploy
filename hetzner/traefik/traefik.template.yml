@@ -232,7 +232,7 @@ http:
     taginfo:
       loadBalancer:
         servers:
-          - url: http://taginfo:4567
+          - url: http://taginfo_web:4567
 
     node_exporter:
       loadBalancer:
