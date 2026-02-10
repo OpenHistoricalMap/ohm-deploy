@@ -15,7 +15,7 @@ services:
         crontab /tmp/cron_logs
         touch /var/log/taginfo-cron.log
         cron -f
-  
+
   taginfo_web:
     volumes:
       - ${HOME}/data/production/taginfo_data_proceced:/usr/src/app/data

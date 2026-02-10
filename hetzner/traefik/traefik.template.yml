@@ -2,15 +2,15 @@ log:
   level: INFO
 
 entryPoints:
-  port-web:  # HTTP para Cloudflare Tunnel (no expuesto públicamente)
+  port-web:
     address: ":80"
     forwardedHeaders:
       trustedIPs:
-        # Redes privadas (Docker, red local)
+        # Docker, red local
         - "172.16.0.0/12"
         - "192.168.0.0/16"
         - "10.0.0.0/8"
-        # Cloudflare IPs - Actualizado 2024 (https://www.cloudflare.com/ips-v4)
+        # From Cloudflare IPv4 (https://www.cloudflare.com/ips-v4)
         - "173.245.48.0/20"
         - "103.21.244.0/22"
         - "103.22.200.0/22"
@@ -26,7 +26,7 @@ entryPoints:
         - "104.24.0.0/14"
         - "172.64.0.0/13"
         - "131.0.72.0/22"
-        # Cloudflare IPv6 (https://www.cloudflare.com/ips-v6)
+        # From Cloudflare IPv6 (https://www.cloudflare.com/ips-v6)
         - "2400:cb00::/32"
         - "2606:4700::/32"
         - "2803:f800::/32"
@@ -34,18 +34,6 @@ entryPoints:
         - "2405:8100::/32"
         - "2a06:98c0::/29"
         - "2c0f:f248::/32"
-
-# Certificates NOT needed - Cloudflare Tunnel handles SSL termination
-# If you want end-to-end encryption with Let's Encrypt, uncomment below:
-# certificatesResolvers:
-#   letsencrypt:
-#     acme:
-#       email: dev@openhistoricalmap.net
-#       storage: /etc/traefik/acme/acme.json
-#       dnsChallenge:
-#         provider: cloudflare
-#       env:
-#         - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
         
 http:
   middlewares:
@@ -102,33 +90,17 @@ http:
       entryPoints:
         - port-web
       service: tiler_server
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers-allow-iframe
         # Note: Removed replace-osm-to-ohm middleware because Tegola map is named "osm"
         # - replace-osm-to-ohm
         # - replace-osm-tiles-to-ohm
 
-    # tiler_cache-router:
-    #   rule: Host(`tiler-cache.{{OHM_DOMAIN}}`)
-    #   entryPoints:
-    #     - port-secure
-    #   service: tiler_cache
-    #   tls:
-    #     certResolver: letsencrypt
-    #   middlewares:
-    #     - secure-headers
-
     nominatim-router:
       rule: Host(`nominatim.{{OHM_DOMAIN}}`) && !PathPrefix(`/ui`)
       entryPoints:
         - port-web
       service: nominatim
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers
         - redirect-nominatim
@@ -138,9 +110,6 @@ http:
       entryPoints:
         - port-web
       service: nominatim_ui
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers
 
@@ -149,9 +118,6 @@ http:
       entryPoints:
         - port-web
       service: overpass_api
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers
 
@@ -160,9 +126,6 @@ http:
       entryPoints:
         - port-web
       service: osmcha_web
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers
 
@@ -171,9 +134,6 @@ http:
       entryPoints:
         - port-web
       service: taginfo
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers
 
@@ -182,9 +142,6 @@ http:
       entryPoints:
         - port-web
       service: node_exporter
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers
 
@@ -193,9 +150,6 @@ http:
       entryPoints:
         - port-web
       service: cadvisor
-      # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
-      # tls:
-      #   certResolver: letsencrypt
       middlewares:
         - secure-headers
 
@@ -204,11 +158,6 @@ http:
       loadBalancer:
         servers:
           - url: http://tiler_server:9090
-
-    # tiler_cache:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://tiler_cache:8000
 
     nominatim:
       loadBalancer:
