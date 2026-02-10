@@ -41,11 +41,10 @@ SERVICE_DIR="$(cd "$(dirname "$0")" && pwd)/$SERVICE"
 BASE_FILE="$SERVICE_DIR/$SERVICE.base.yml"
 ENV_FILE="$SERVICE_DIR/$SERVICE.$ENVIRONMENT.yml"
 
-# Domain per environment (used by e.g. nominatim OSMSEED_WEB_API_DOMAIN)
-if [ "$ENVIRONMENT" = "production" ]; then
-    export OHM_DOMAIN="openhistoricalmap.org"
-else
-    export OHM_DOMAIN="openhistoricalmap.net"
+# Load environment variables from .env
+HETZNER_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$HETZNER_DIR/.env" ]; then
+    export $(grep -v '^#' "$HETZNER_DIR/.env" | xargs)
 fi
 
 # For staging, only use base file. For production, use base + environment file

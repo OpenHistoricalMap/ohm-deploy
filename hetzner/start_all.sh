@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
+set -e
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Environment (so OHM_DOMAIN is correct for traefik/nominatim when using deploy.sh)
 ENVIRONMENT=${ENVIRONMENT:-staging}
 
-# Set domain based on environment (Docker Compose substitutes ${OHM_DOMAIN} in traefik.yml)
-if [ "$ENVIRONMENT" = "production" ]; then
-    export OHM_DOMAIN="openhistoricalmap.org"
-else
-    export OHM_DOMAIN="openhistoricalmap.net"
-fi
-
+# Load environment variables from .env
+source "$SCRIPT_DIR/.env"
+echo "########################## OHM_DOMAIN -> $OHM_DOMAIN ##########################"
 # ###################### Tiler ######################
 ./hetzner/deploy.sh start tiler $ENVIRONMENT -y
 
 # ###################### Osmcha ######################
-./hetzner/deploy.sh start osmcha $ENVIRONMENT -y 
+# ./hetzner/deploy.sh start osmcha $ENVIRONMENT -y 
 
 # ###################### Nominatim ######################
 ./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
@@ -27,6 +24,7 @@ fi
 ./hetzner/deploy.sh start taginfo $ENVIRONMENT -y
 
 #################### Traefik ####################
+
 ###### Update Cloudflare IPs and generate config file from template
 cd "$SCRIPT_DIR/traefik" && ./update-cloudflare-ips.sh && cd "$SCRIPT_DIR"
 
