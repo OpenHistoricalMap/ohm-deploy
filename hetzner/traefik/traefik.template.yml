@@ -155,11 +155,11 @@ http:
       middlewares:
         - secure-headers
 
-    osmcha-router:
+    osmcha-web-router:
       rule: Host(`osmcha.{{OHM_DOMAIN}}`)
       entryPoints:
         - port-web
-      service: osmcha
+      service: osmcha_web
       # TLS handled by Cloudflare Tunnel - uncomment if using Let's Encrypt:
       # tls:
       #   certResolver: letsencrypt
@@ -225,10 +225,10 @@ http:
         servers:
           - url: http://overpass_api:80
 
-    osmcha:
+    osmcha_web:
       loadBalancer:
         servers:
-          - url: http://osmcha:80
+          - url: http://osmcha-web:80
 
     taginfo:
       loadBalancer:
