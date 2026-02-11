@@ -1,32 +1,51 @@
 #!/bin/bash
 set -e
 
-ACTION=$1
-SERVICE=$2
-ENVIRONMENT=${3:-staging}
+# Parse --yes / -y so script can run non-interactively
+AUTO_YES=false
+ARGS=()
+for a in "$@"; do
+    if [[ "$a" == "--yes" || "$a" == "-y" ]]; then
+        AUTO_YES=true
+    else
+        ARGS+=("$a")
+    fi
+done
+
+ACTION=${ARGS[0]}
+SERVICE=${ARGS[1]}
+ENVIRONMENT=${ARGS[2]:-staging}
 
 # Check if first arg is an action (start/stop/restart)
 if [ "$ACTION" = "start" ] || [ "$ACTION" = "stop" ] || [ "$ACTION" = "restart" ]; then
     # First arg is an action, so SERVICE is $2
     if [ -z "$SERVICE" ]; then
-        echo "Usage: $0 start|stop|restart <service> [staging|production]"
+        echo "Usage: $0 [--yes|-y] start|stop|restart <service> [staging|production]"
         echo "Example: $0 start taginfo staging"
         exit 1
     fi
 fi
 
 if [ -z "$SERVICE" ]; then
-    echo "Usage: $0 [start|stop|restart] <service> [staging|production]"
+    echo "Usage: $0 [--yes|-y] [start|stop|restart] <service> [staging|production]"
+    echo "  --yes, -y    Skip confirmation prompts"
     echo "Examples:"
     echo "  $0 taginfo staging          # Start service"
+    echo "  $0 --yes start taginfo production   # Start without prompting"
     echo "  $0 stop taginfo staging     # Stop service"
-    echo "  $0 restart taginfo staging # Restart service"
+    echo "  $0 restart taginfo staging  # Restart service"
     exit 1
 fi
 
 SERVICE_DIR="$(cd "$(dirname "$0")" && pwd)/$SERVICE"
 BASE_FILE="$SERVICE_DIR/$SERVICE.base.yml"
 ENV_FILE="$SERVICE_DIR/$SERVICE.$ENVIRONMENT.yml"
+
+# Load environment variables from .env
+HETZNER_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$HETZNER_DIR/.env" ]; then
+    export $(grep -v '^#' "$HETZNER_DIR/.env" | xargs)
+fi
 
 # For staging, only use base file. For production, use base + environment file
 if [ "$ENVIRONMENT" = "staging" ]; then
@@ -79,20 +98,22 @@ case "$ACTION" in
         echo "================================================"
         echo ""
         
-        # Ask for confirmation, especially for production
-        if [ "$ENVIRONMENT" = "production" ]; then
-            echo "⚠️  WARNING: You are about to deploy to PRODUCTION"
-            echo ""
-            read -p "Do you want to continue? (yes/no): " confirm
-            if [ "$confirm" != "yes" ]; then
-                echo "Deployment cancelled."
-                exit 0
-            fi
-        else
-            read -p "Do you want to continue with deployment? (yes/no): " confirm
-            if [ "$confirm" != "yes" ]; then
-                echo "Deployment cancelled."
-                exit 0
+        # Ask for confirmation (skip if --yes/-y)
+        if [ "$AUTO_YES" != "true" ]; then
+            if [ "$ENVIRONMENT" = "production" ]; then
+                echo "⚠️  WARNING: You are about to deploy to PRODUCTION"
+                echo ""
+                read -p "Do you want to continue? (yes/no): " confirm
+                if [ "$confirm" != "yes" ]; then
+                    echo "Deployment cancelled."
+                    exit 0
+                fi
+            else
+                read -p "Do you want to continue with deployment? (yes/no): " confirm
+                if [ "$confirm" != "yes" ]; then
+                    echo "Deployment cancelled."
+                    exit 0
+                fi
             fi
         fi
         

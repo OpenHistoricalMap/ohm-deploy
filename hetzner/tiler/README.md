@@ -9,31 +9,35 @@ Ensure you are using the correct Docker images for production deployment, https:
 
 📌 Deploy Production Services
 
-```sh
-docker compose -f hetzner/tiler/tiler.production.yml up -d
-# docker compose -f hetzner/tiler/tiler.production.yml up db_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up imposm_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tiler_server_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tiler_sqs_cleaner_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tile_global_seeding_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml up tile_coverage_seeding_production -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.production.yml run tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix
-# docker compose -f hetzner/tiler/tiler.production.yml up tiler_monitor_production -d --force-recreate 
-```
 
 🛠 Deploying to Staging
 
 To deploy the staging environment, use the following commands:
 
 ```sh
-docker compose -f hetzner/tiler/tiler.staging.yml up -d
-# docker compose -f hetzner/tiler/tiler.staging.yml up db_staging -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.staging.yml up imposm_staging -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_server_staging -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_sqs_cleaner_staging -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.staging.yml run tiler_s3_cleaner_staging tiler-cache-cleaner clean_by_prefix
-# docker compose -f hetzner/tiler/tiler.staging.yml up tiler_monitor_staging -d --force-recreate
+docker compose -f hetzner/tiler/tiler.base.yml up -d
+# docker compose -f hetzner/tiler/tiler.base.yml up tiler_db -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml up tiler_imposm -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml up tiler_server -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml up tiler_sqs_cleaner -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml run tiler_s3_cleaner tiler-cache-cleaner clean_by_prefix
+# docker compose -f hetzner/tiler/tiler.base.yml up tiler_monitor -d --force-recreate
 ```
+
+
+```sh
+docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml up -d
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  up db_production -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  up imposm_production -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  up tiler_server_production -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  up tiler_sqs_cleaner_production -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  up tile_global_seeding_production -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  up tile_coverage_seeding_production -d --force-recreate
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  run tiler_s3_cleaner_production tiler-cache-cleaner clean_by_prefix
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  up tiler_monitor_production -d --force-recreate 
+```
+
+
 
 📌 Notes
 	•	Ensure that you are using the correct Docker images for each environment.

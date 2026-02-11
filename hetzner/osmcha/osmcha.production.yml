@@ -1,40 +1,26 @@
 services:
-  osmcha-db:
-    container_name: osmcha-db_production
-    env_file: !override
-    - ./.env.osmcha.production
-  osmcha-redis:
-    container_name: osmcha-redis_production
-    
-  osmcha-init:
-    container_name: osmcha-init_production
-    env_file: !override
-    - ./.env.osmcha.production
-  osmcha-api:
-    container_name: osmcha-api_production
-    env_file: !override
-    - ./.env.osmcha.production
-
-  frontend-nginx:
-    container_name: frontend-nginx_production
-
-  osmcha-cron:
-    container_name: osmcha-cron_production
-    env_file: !override
-    - ./.env.osmcha.production
-
   osmcha_ohmx_adiff:
-    container_name: osmcha_ohmx_adiff_production
-    env_file: !override
-    - ./.env.osmcha.production
-
-volumes:
-  osmcha_db_data:
-    driver: local
-    name: osmcha_db_11102025
-  staticfiles:
-    driver: local
-    name: osmcha_staticfiles_11102025
-  ohmx_db:
-    driver: local
-    name: ohmx_db_production_06012026
+    image: ghcr.io/openhistoricalmap/ohmx-adiff-builder:0.0.1-0.dev.git.3256.h4c03a3a
+    container_name: osmcha_ohmx_adiff
+    environment:
+      - API_URL=https://api.${OHM_DOMAIN}
+      - PLANET_PBF_URL=https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260106_0350.osm.pbf
+      - MINUTE_REPLICATION_URL=https://planet.openhistoricalmap.org/?prefix=replication/minute/
+      # Add OSMX_INITIAL_SEQNUM to start from a specific sequence number
+      # - OSMX_INITIAL_SEQNUM=1881020
+      - AWS_S3_BUCKET=planet.openhistoricalmap.org
+    env_file:
+      - ./.env.osmcha
+    restart: always
+    volumes:
+      - ohmx_db:/data
+      - ${HOME}/.aws:/root/.aws:ro
+      - /production/services/images/ohmx-adiff-builder/config.sh:/app/config.sh
+      - /production/services/images/ohmx-adiff-builder/functions.sh:/app/functions.sh
+      - /production/services/images/ohmx-adiff-builder/start.sh:/app/start.sh
+      - /production/services/images/ohmx-adiff-builder/process_min_range.sh:/app/process_min_range.sh
+      - /production/services/images/ohmx-adiff-builder/update.sh:/app/update.sh
+    networks:
+      - ohm_network
+    cpus: '8.0'
+    mem_limit: 20G

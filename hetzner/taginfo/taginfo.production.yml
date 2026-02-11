@@ -1,9 +1,10 @@
 services:
   taginfo_data:
-    container_name: taginfo_data_producion
     volumes:
       - ${HOME}/data/production/taginfo_data:/usr/src/app/data
       - ${HOME}/data/production/taginfo_data_planet:/osm/planet/var
+    environment: !override
+      - AWS_S3_BUCKET=planet.openhistoricalmap.org
     command:
       - /bin/bash
       - -lc
@@ -14,8 +15,7 @@ services:
         crontab /tmp/cron_logs
         touch /var/log/taginfo-cron.log
         cron -f
-  
+
   taginfo_web:
-    container_name: taginfo_production
     volumes:
       - ${HOME}/data/production/taginfo_data_proceced:/usr/src/app/data
