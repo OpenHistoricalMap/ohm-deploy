@@ -32,3 +32,4 @@ hetzner/*/.envs.*.production
 .vscode
 hetzner/traefik/cloudflare-ips.txt
 hetzner/traefik/traefik.yml
+.vscode/
