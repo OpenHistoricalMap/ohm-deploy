@@ -1,18 +1,24 @@
 services:
   tiler_db:
+    container_name: tiler_db
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
     volumes: !overwrite
       - tiler_pgdata:/var/lib/postgresql/data
       - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
-    ports:
-      - "54329:5432"
+    # ports:
+    #   - "54329:5432"
+    env_file:
+      - .env.tiler
     mem_limit: 55G
     cpus: "28.0"
 
   tiler_imposm:
+    container_name: tiler_imposm
     image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
     volumes:
       - tiler_imposm_data:/mnt/data
+    env_file:
+      - .env.tiler
     command:
       - sh
       - -c
@@ -31,8 +37,8 @@ services:
   tiler_server:
     container_name: tiler_server
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
-    ports:
-      - "9090:9090"
+    # ports:
+    #   - "9090:9090"
     restart: always
     networks:
       - ohm_network
