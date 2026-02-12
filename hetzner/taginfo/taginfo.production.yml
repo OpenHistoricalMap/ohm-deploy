@@ -3,7 +3,7 @@ services:
     volumes:
       - ${HOME}/data/production/taginfo_data:/usr/src/app/data
       - ${HOME}/data/production/taginfo_data_planet:/osm/planet/var
-    environment: !override
+    environment:
       - AWS_S3_BUCKET=planet.openhistoricalmap.org
     command:
       - /bin/bash
