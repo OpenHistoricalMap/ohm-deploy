@@ -41,10 +41,10 @@ SERVICE_DIR="$(cd "$(dirname "$0")" && pwd)/$SERVICE"
 BASE_FILE="$SERVICE_DIR/$SERVICE.base.yml"
 ENV_FILE="$SERVICE_DIR/$SERVICE.$ENVIRONMENT.yml"
 
-# Load environment variables from .env
+# Load environment variables from .env.traefik
 HETZNER_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ -f "$HETZNER_DIR/.env" ]; then
-    export $(grep -v '^#' "$HETZNER_DIR/.env" | xargs)
+if [ -f "$HETZNER_DIR/.env.traefik" ]; then
+    export $(grep -v '^#' "$HETZNER_DIR/.env.traefik" | xargs)
 fi
 
 # For staging, only use base file. For production, use base + environment file

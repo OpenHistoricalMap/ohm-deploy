@@ -56,20 +56,20 @@ services:
     networks:
       - ohm_network
 
-volumes:
-  tiler_pgdata:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/HC_Volume_104590709/staging/tiler/pgdata
+# volumes:
+#   tiler_pgdata:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /mnt/HC_Volume_104590709/staging/tiler/pgdata
 
-  tiler_imposm_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/HC_Volume_104590709/staging/tiler/imposmdata
+#   tiler_imposm_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /mnt/HC_Volume_104590709/staging/tiler/imposmdata
       
 networks:
   ohm_network:
