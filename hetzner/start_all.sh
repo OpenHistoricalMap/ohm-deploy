@@ -3,7 +3,21 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-ENVIRONMENT=${ENVIRONMENT:-staging}
+ENVIRONMENT=${ENVIRONMENT}
+
+# Validate ENVIRONMENT is set and is either staging or production
+if [ -z "$ENVIRONMENT" ]; then
+    echo "Error: ENVIRONMENT variable is not set"
+    echo ""
+    echo "Please export ENVIRONMENT before running this script:"
+    echo "  export ENVIRONMENT=staging"
+    echo "  export ENVIRONMENT=production"
+    echo ""
+    echo "Then run: $0"
+    exit 1
+fi
+
+echo "########################## ENVIRONMENT -> $ENVIRONMENT ##########################"
 
 # Load environment variables from .env.traefik
 source "$SCRIPT_DIR/.env.traefik"

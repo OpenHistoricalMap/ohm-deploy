@@ -14,7 +14,7 @@ done
 
 ACTION=${ARGS[0]}
 SERVICE=${ARGS[1]}
-ENVIRONMENT=${ARGS[2]:-staging}
+ENVIRONMENT=${ARGS[2]}
 
 # Check if first arg is an action (start/stop/restart)
 if [ "$ACTION" = "start" ] || [ "$ACTION" = "stop" ] || [ "$ACTION" = "restart" ]; then
