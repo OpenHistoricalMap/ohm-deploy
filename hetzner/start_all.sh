@@ -8,6 +8,7 @@ ENVIRONMENT=${ENVIRONMENT:-staging}
 # Load environment variables from .env.traefik
 source "$SCRIPT_DIR/.env.traefik"
 echo "########################## OHM_DOMAIN -> $OHM_DOMAIN ##########################"
+
 # ###################### Tiler ######################
 ./hetzner/deploy.sh start tiler $ENVIRONMENT -y
 
@@ -28,7 +29,7 @@ echo "########################## OHM_DOMAIN -> $OHM_DOMAIN #####################
 ###### Update Cloudflare IPs and generate config file from template
 cd "$SCRIPT_DIR/traefik" && ./update-cloudflare-ips.sh && cd "$SCRIPT_DIR"
 
-docker compose -f $SCRIPT_DIR/services.yml up -d --force-recreate
+docker compose -f $SCRIPT_DIR/services.yml --env-file $SCRIPT_DIR/.env.traefik up -d --force-recreate
 
 ## Stop services that is not requiered for staging
 if [ "$ENVIRONMENT" = "staging" ]; then

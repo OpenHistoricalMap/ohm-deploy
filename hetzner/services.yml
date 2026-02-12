@@ -35,6 +35,8 @@ services:
     container_name: cloudflared-ohm
     restart: unless-stopped
     command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+    env_file:
+      - .env.traefik
     networks:
       - ohm_network
 
