@@ -5,8 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 ENVIRONMENT=${ENVIRONMENT:-staging}
 
-# Load environment variables from .env
-source "$SCRIPT_DIR/.env"
+# Load environment variables from .env.traefik
+source "$SCRIPT_DIR/.env.traefik"
 echo "########################## OHM_DOMAIN -> $OHM_DOMAIN ##########################"
 # ###################### Tiler ######################
 ./hetzner/deploy.sh start tiler $ENVIRONMENT -y

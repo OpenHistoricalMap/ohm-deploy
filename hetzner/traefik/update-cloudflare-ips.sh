@@ -40,8 +40,8 @@ awk '
   { print }
 ' <(gen_ips) "$TEMPLATE_FILE" > "$OUTPUT_FILE.tmp"
 
-# Load .env and substitute domain
-source "$SCRIPT_DIR/../.env"
+# Load .env.traefik and substitute domain
+source "$SCRIPT_DIR/../.env.traefik"
 sed "s/{{OHM_DOMAIN}}/$OHM_DOMAIN/g" "$OUTPUT_FILE.tmp" > "$OUTPUT_FILE"
 rm -f "$OUTPUT_FILE.tmp"
 
