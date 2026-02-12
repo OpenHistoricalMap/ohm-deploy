@@ -47,12 +47,8 @@ if [ -f "$HETZNER_DIR/.env.traefik" ]; then
     export $(grep -v '^#' "$HETZNER_DIR/.env.traefik" | xargs)
 fi
 
-# For staging, only use base file. For production, use base + environment file
-if [ "$ENVIRONMENT" = "staging" ]; then
-    COMPOSE_CMD="docker compose -f $BASE_FILE"
-else
-    COMPOSE_CMD="docker compose -f $BASE_FILE -f $ENV_FILE"
-fi
+# Always use base + environment file for both staging and production
+COMPOSE_CMD="docker compose -f $BASE_FILE -f $ENV_FILE"
 
 echo "================================================"
 echo "Action: $ACTION"

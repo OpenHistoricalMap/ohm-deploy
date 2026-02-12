@@ -172,7 +172,7 @@ http:
     overpass_api:
       loadBalancer:
         servers:
-          - url: http://overpass_api:80
+          - url: http://overpass:80
 
     osmcha_web:
       loadBalancer:

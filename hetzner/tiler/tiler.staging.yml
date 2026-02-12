@@ -1,0 +1,16 @@
+volumes:
+  tiler_pgdata:
+    driver: local
+    name: tiler_db_11_02
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/HC_Volume_104590709/staging/tiler/pgdata
+
+  tiler_imposm_data:
+    driver: local
+    name: tiler_imposm_11_02
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/HC_Volume_104590709/staging/tiler/imposmdata
