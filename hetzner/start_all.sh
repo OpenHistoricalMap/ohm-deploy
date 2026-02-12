@@ -41,4 +41,4 @@ fi
 
 docker stop tiler_s3_cleaner
 ## clean tiler cache 
-docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  run tiler_s3_cleaner tiler-cache-cleaner clean_by_prefix
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  run tiler_s3_cleaner tiler-cache-cleaner clean_by_prefix

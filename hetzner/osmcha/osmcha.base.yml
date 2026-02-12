@@ -3,12 +3,13 @@ services:
     image: postgis/postgis:17-3.5
     container_name: osmcha-db
     restart: always
-    env_file: ./.env.osmcha
+    env_file: 
+      - ./.env.osmcha
     volumes:
       - osmcha_db_data:/var/lib/postgresql/data
       - ./data_backup:/data_backup
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -30,7 +31,8 @@ services:
         python manage.py migrate &&
         python manage.py collectstatic --noinput
       "
-    env_file: ./.env.osmcha
+    env_file: 
+      - ./.env.osmcha
     volumes:
       - staticfiles:/app/staticfiles
     depends_on:
@@ -47,7 +49,8 @@ services:
     command: gunicorn config.wsgi -b 0.0.0.0:5000 --access-logfile - --timeout 120 --workers 4 --threads 16
     # ports:
     #   - "5100:5000"
-    env_file: ./.env.osmcha
+    env_file: 
+      - ./.env.osmcha
     volumes:
       - staticfiles:/staticfiles
     depends_on:
@@ -76,7 +79,8 @@ services:
   osmcha-cron:
     container_name: osmcha-cron
     image: ghcr.io/openhistoricalmap/osmcha-django:1bd58e1
-    env_file: ./.env.osmcha
+    env_file: 
+      - ./.env.osmcha
     depends_on:
       osmcha-db:
         condition: service_healthy

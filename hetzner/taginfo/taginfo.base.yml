@@ -5,7 +5,7 @@ services:
     volumes:
       -  ${HOME}/data/staging/taginfo_data:/usr/src/app/data
     env_file:
-      - ./.env.sample
+      - ./.env.taginfo
     restart: always
     networks:
       - ohm_network

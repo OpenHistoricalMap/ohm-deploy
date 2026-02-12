@@ -136,8 +136,12 @@ case "$ACTION" in
         echo "Service stopped: $SERVICE ($ENVIRONMENT)"
         ;;
     restart)
-        $COMPOSE_CMD restart
-        echo "Service restarted: $SERVICE ($ENVIRONMENT)"
+        echo ""
+        echo "Restarting with force recreate..."
+        $COMPOSE_CMD up -d --force-recreate
+        echo ""
+        echo "✓ Service restarted (force recreated): $SERVICE ($ENVIRONMENT)"
+        echo ""
         ;;
     *)
         echo "Unknown action: $ACTION"
