@@ -23,13 +23,20 @@ ENV_FILE="$HETZNER_DIR/$SERVICE/$SERVICE.$ENVIRONMENT.yml"
 
 [ -f "$HETZNER_DIR/.env.traefik" ] && export $(grep -v '^#' "$HETZNER_DIR/.env.traefik" | xargs)
 
-COMPOSE="docker compose -f $BASE_FILE -f $ENV_FILE"
+if [ -f "$ENV_FILE" ]; then
+    COMPOSE="docker compose -f $BASE_FILE -f $ENV_FILE"
+else
+    COMPOSE="docker compose -f $BASE_FILE"
+fi
 
 echo "==> $ACTION $SERVICE ($ENVIRONMENT)"
 
 # Confirm before start/restart (skip with --yes)
 if [[ "$ACTION" == "start" || "$ACTION" == "restart" ]] && [ "$AUTO_YES" != "true" ]; then
     [ "$ENVIRONMENT" = "production" ] && echo "WARNING: Deploying to PRODUCTION"
+    echo ""
+    $COMPOSE config
+    echo ""
     read -p "Continue? (yes/no): " confirm
     [ "$confirm" != "yes" ] && echo "Cancelled." && exit 0
 fi
