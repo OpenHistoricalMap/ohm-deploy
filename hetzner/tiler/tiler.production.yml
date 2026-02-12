@@ -63,6 +63,9 @@ services:
   tiler_s3_cleaner:
     container_name: tiler_s3_cleaner
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3245.hffaf924
+    command:
+      - tiler-cache-cleaner
+      - clean_by_prefix
     env_file:
       - .env.tiler
     networks:

@@ -7,19 +7,16 @@ ENVIRONMENT=${ENVIRONMENT}
 
 # Validate ENVIRONMENT is set and is either staging or production
 if [ -z "$ENVIRONMENT" ]; then
-    echo "Error: ENVIRONMENT variable is not set"
     echo ""
-    echo "Please export ENVIRONMENT before running this script:"
+    echo "Need to set ENVIRONMENT variable:"
     echo "  export ENVIRONMENT=staging"
     echo "  export ENVIRONMENT=production"
-    echo ""
-    echo "Then run: $0"
     exit 1
 fi
 
 echo "########################## ENVIRONMENT -> $ENVIRONMENT ##########################"
 
-# Load environment variables from .env.traefik
+# Load environment variables from .env.traefik, make sure the domain is set
 source "$SCRIPT_DIR/.env.traefik"
 echo "########################## OHM_DOMAIN -> $OHM_DOMAIN ##########################"
 
@@ -53,6 +50,7 @@ if [ "$ENVIRONMENT" = "staging" ]; then
     docker stop tiler_imposm
 fi
 
+## In production we need to clean the tiler cache
 docker stop tiler_s3_cleaner
 ## clean tiler cache 
 # docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml  run tiler_s3_cleaner tiler-cache-cleaner clean_by_prefix
