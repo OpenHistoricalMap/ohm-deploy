@@ -11,6 +11,8 @@ services:
       - .env.tiler
     mem_limit: 55G
     cpus: "28.0"
+    networks:
+      - ohm_network
 
   tiler_imposm:
     container_name: tiler_imposm
