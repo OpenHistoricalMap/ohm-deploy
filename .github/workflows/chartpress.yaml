@@ -4,7 +4,7 @@ on:
     branches:
       - 'main'
       - 'staging'
-      - 'cloudflare_tunnel'
+      - 'disable_alb'
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -71,7 +71,7 @@ jobs:
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
       ################ Staging secrets ################ 
       - name: Staging - substitute secrets
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/cloudflare_tunnel'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/disable_alb'
         uses: bluwy/substitute-string-action@v1
         with:
           _input-file: 'values.staging.template.yaml'
@@ -189,14 +189,14 @@ jobs:
           PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
           
       - name: AWS Credentials
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloudflare_tunnel'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/disable_alb'
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       - name: Setup Kubectl and Helm Dependencies
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloudflare_tunnel'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/disable_alb'
         run: |
           sudo pip install awscli --ignore-installed six
           sudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl
@@ -210,22 +210,22 @@ jobs:
           helm version
 
       - name: Update kube-config staging
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/cloudflare_tunnel'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/disable_alb'
         run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
       - name: Update kube-config prod
         if: github.ref == 'refs/heads/main'
         run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
       - name: Add Helm repository
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloudflare_tunnel'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/disable_alb'
         run: |
           helm repo add osm-seed https://osm-seed.github.io/osm-seed-chart/
           helm repo update
       - name: Install helm dependencies for
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloudflare_tunnel'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/disable_alb'
         run: cd ohm && helm dep up
       # Staging
       - name: Staging - helm deploy
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/cloudflare_tunnel'
+        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/disable_alb'
         run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
       # Production
       - name: Production - helm deploy
