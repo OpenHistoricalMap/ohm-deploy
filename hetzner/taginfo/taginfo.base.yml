@@ -1,11 +1,9 @@
 services:
   taginfo_web:
     container_name: taginfo_web
-    image:  ghcr.io/osm-seed/taginfo-web:0.1.0-0.dev.git.983.h32750c8
-    volumes:
-      -  ${HOME}/data/staging/taginfo_data:/usr/src/app/data
+    image:  ghcr.io/osm-seed/taginfo-web:0.1.0-0.dev.git.986.h0fae372
     env_file:
-      - ./.env.sample
+      - ./.env.taginfo
     restart: always
     networks:
       - ohm_network

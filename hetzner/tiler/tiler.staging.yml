@@ -1,0 +1,55 @@
+services:
+  tiler_db:
+    container_name: tiler_db
+    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
+    volumes:
+      - tiler_pgdata:/var/lib/postgresql/data
+      - ./config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
+    command:
+      - postgres
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+    # ports:
+    #   - "54321:5432"
+    env_file:
+      - .env.tiler
+    networks:
+      - ohm_network
+  tiler_imposm:
+    container_name: tiler_imposm
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
+    # image: tiler-imposm:staging
+    # build: 
+    #   context: ../../images/tiler-imposm
+    #   dockerfile: Dockerfile
+    volumes:
+      - tiler_imposm_data:/mnt/data
+    command:
+      - sh
+      - -c
+      - |
+        ./start.sh
+    env_file:
+      - .env.tiler
+    restart: always
+    networks:
+      - ohm_network
+volumes:
+  tiler_pgdata:
+    driver: local
+    name: tiler_db_11_02
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/HC_Volume_104590709/staging/tiler/pgdata
+
+  tiler_imposm_data:
+    driver: local
+    name: tiler_imposm_11_02
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/HC_Volume_104590709/staging/tiler/imposmdata

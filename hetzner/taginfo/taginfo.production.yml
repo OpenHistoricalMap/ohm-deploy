@@ -1,21 +1,33 @@
 services:
+
   taginfo_data:
+    container_name: taginfo_data
+    image: ghcr.io/osm-seed/taginfo:0.1.0-0.dev.git.984.hb289ff1
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ${HOME}/data/production/taginfo_data:/usr/src/app/data
       - ${HOME}/data/production/taginfo_data_planet:/osm/planet/var
     environment:
       - AWS_S3_BUCKET=planet.openhistoricalmap.org
+      - DOCKER_CONFIG_ENVIRONMENT=production
     command:
       - /bin/bash
       - -lc
       - |
         set -ex
-        # Run every 3 days at 3:00 AM
-        echo "0 3 1-31/3 * * /usr/src/app/start.sh >> /var/log/taginfo-cron.log 2>&1" > /tmp/cron_logs
-        crontab /tmp/cron_logs
+        echo "#!/bin/bash
+        /usr/src/app/start.sh
+        sleep 7200
+        # restart web container
+        curl -X POST --unix-socket /var/run/docker.sock http://v1.41/containers/taginfo_web/restart" > /run_task.sh
+        chmod +x /run_task.sh
+
+        # 2. Set cron: Run every 3 days at 3:00 AM
+        echo "0 3 */3 * * /run_task.sh >> /var/log/taginfo-cron.log 2>&1" | crontab -
+        
         touch /var/log/taginfo-cron.log
         cron -f
-
-  taginfo_web:
-    volumes:
-      - ${HOME}/data/production/taginfo_data_proceced:/usr/src/app/data
+    env_file:
+      - ./.env.taginfo
+    networks:
+      - ohm_network
