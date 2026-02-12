@@ -6,7 +6,7 @@ osm-seed:
     # ====================================================================================================
     # ====================================================================================================
     
-    # The version of the image group in osm-seed, get it here: https://hub.docker.com/r/developmentseed/osmseed-web/tags/
+    # The version of the image group in osm-seed, get it here: https://github.com/orgs/osm-seed/packages
     # osmSeedVersion: ohm-b8a0ed1
   
     environment: staging
@@ -18,45 +18,10 @@ osm-seed:
     # ====================================================================================================
     AWS_S3_BUCKET: {{STAGING_S3_BUCKET}}
   
-    # ====================================================
-    # AWS: Specify ARN for SSL certificate, currently assumes a single wildcard cert
-    # ====================================================
-  
-    AWS_SSL_ARN: {{STAGING_AWS_SSL_ARN}}
-  
-    # Specify serviceType.
-    #
-    # serviceType can be one of three values: 'NodePort', 'ClusterIP' or 'LoadBalancer'
-    # Use `NodePort` for local testing on minikube.
-    #
-    # The recommended setting is `ClusterIP`, and then following the instructions to
-    # point a DNS record to the cluster IP address. This will setup the ingress rules
-    # for all services as subdomains and configure SSL using Lets Encrypt.
-    #
-    # If you specify `LoadBalancer` as the service type, if you also specify
-    # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
-    # as the SSL certificate for your services. Else, you will need to configure
-    # SSL separately. 
+    # Traffic is routed via Cloudflare Tunnel, which connects directly to ClusterIP Services.
+    # No Ingress resources or load balancers (ALB/NLB) are needed.
     serviceType: ClusterIP
-    ingressClassNameType: "alb"
-    ingressClassName: alb
-    alb:
-      certificateArn: {{STAGING_AWS_SSL_ARN}}
-      enableWaf:
-        enabled: true
-        wafAclArn: {{STAGING_AWS_WAF_WEBACL_ARN}}
-    # Domain that is pointed to the clusterIP
-    # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
-    # Then, the cluster configuration will setup services at their respective subdomains:
-    # - web.osmseed.example.com
-    # - overpass.osmseed.example.com
-    # - nominatim.osmseed.example.com
-    # - etc.
-    domain: staging.openhistoricalmap.org
-  
-    # ====================================================================================================
-    # Configuration for Lets Encrypt setup
-    # ====================================================================================================
+    domain: ohmstaging.org
   
     # Admin Email address used when generating Lets Encrypt certificates.
     # You will be notified of expirations, etc. on this email address.
@@ -155,12 +120,10 @@ osm-seed:
         enabled: true
         name: ohm-s3-bucket-access-staging    
       replicaCount: 1
-      serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressDomain: www.staging.openhistoricalmap.org
+      ingressDomain: www.ohmstaging.org
       env:
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
-        MAILER_DOMAIN: staging.openhistoricalmap.org
+        MAILER_DOMAIN: ohmstaging.org
         MAILER_USERNAME: {{MAILER_USERNAME}}
         MAILER_PASSWORD: {{MAILER_PASSWORD}}
         # MAILER_PORT: "587"
@@ -168,8 +131,8 @@ osm-seed:
         OAUTH_CLIENT_ID: CiBBpurbtUj1np_QZOTngIePlS7K9uGvKDW2Pcw5O7Y
         OAUTH_KEY: 1O8WtBWivoefehDMT6sbm9TNUU_h_EXznI4cM5XMyJw
         MAILER_FROM: web@noreply.openhistoricalmap.org
-        NOMINATIM_URL: nominatim.staging.openhistoricalmap.org
-        OVERPASS_URL: overpass-api.staging.openhistoricalmap.org	
+        NOMINATIM_URL: nominatim.ohmstaging.org
+        OVERPASS_URL: overpass-api.ohmstaging.org	
         NEW_RELIC_LICENSE_KEY: "none"
         NEW_RELIC_APP_NAME: "none"
         ORGANIZATION_NAME: OpenHistoricalMap
@@ -610,9 +573,7 @@ osm-seed:
         ip: {{STAGING_TILER_SERVER_HOST}}
         port: 9091
       replicaCount: 1
-      serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressDomain: vtiles.staging.openhistoricalmap.org
+      ingressDomain: vtiles.ohmstaging.org
       env:
         TILER_SERVER_PORT: 9090
         TILER_CACHE_TYPE: s3
@@ -716,21 +677,19 @@ osm-seed:
       enabled: false
       priorityClass: medium-priority
       replicaCount: 1
-      serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
-      ingressDomain: tm-api.staging.openhistoricalmap.org
+      ingressDomain: tm-api.ohmstaging.org
       healthCheckPath: /health
       env:
         TM_ORG_NAME: OpenHistoricalMap
         TM_ORG_CODE: OHM
-        TM_ORG_URL: staging.openhistoricalmap.org
-        TM_ORG_PRIVACY_POLICY_URL: staging.openhistoricalmap.org/copyright
+        TM_ORG_URL: ohmstaging.org
+        TM_ORG_PRIVACY_POLICY_URL: ohmstaging.org/copyright
         TM_ORG_GITHUB: github.com/openhistoricalmap
-        OSM_SERVER_URL: https://staging.openhistoricalmap.org
-        OSM_NOMINATIM_SERVER_URL: https://nominatim.openhistoricalmap.org
-        OSM_REGISTER_URL: https://staging.openhistoricalmap.org/user/new
-        ID_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=id
-        POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
+        OSM_SERVER_URL: https://ohmstaging.org
+        OSM_NOMINATIM_SERVER_URL: https://nominatim.osmstaging.org
+        OSM_REGISTER_URL: https://ohmstaging.org/user/new
+        ID_EDITOR_URL: https://ohmstaging.org/edit?editor=id
+        POTLATCH2_EDITOR_URL: https://ohmstaging.org/edit?editor=potlatch2
         TM_SECRET: {{STAGING_TM_API_SECRET}}
         TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
         TM_EMAIL_CONTACT_ADDRESS: dev@openhistoricalmap.org
@@ -739,8 +698,8 @@ osm-seed:
         TM_SMTP_USER: {{MAILER_USERNAME}}
         TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
         TM_DEFAULT_LOCALE: en
-        TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
-        TM_APP_BASE_URL: https://tasks.staging.openhistoricalmap.org
+        TM_APP_API_URL: https://tm-api.ohmstaging.org
+        TM_APP_BASE_URL: https://tasks.ohmstaging.org
         TM_IMPORT_MAX_FILESIZE: 3000000
         TM_MAX_AOI_AREA: 15000
         TM_APP_API_VERSION: v2
@@ -748,11 +707,11 @@ osm-seed:
         TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
         TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
         TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
-        TM_REDIRECT_URI: https://tasks.staging.openhistoricalmap.org/authorized
+        TM_REDIRECT_URI: https://tasks.ohmstaging.org/authorized
         TM_SCOPE: 'read_prefs write_api'
         # Add extra info
         TM_ORG_FB: https://www.facebook.com/openhistoricalmap
-        TM_ORG_INSTAGRAM: https://www.openhistoricalmap.org
+        TM_ORG_INSTAGRAM: https://www.ohmstaging.org
         TM_ORG_TWITTER: https://x.com/OpenHistoricalMap
         TM_ORG_YOUTUBE: https://www.youtube.com/playlist?list=PLOi35w6_Hpx_CYdYBUpPeuiJ1djn5-wIx
 
@@ -790,9 +749,7 @@ osm-seed:
         ip: {{STAGING_NOMINATIM_HOST}}
         port: 8083
       priorityClass: medium-priority
-      serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
-      ingressDomain: nominatim.staging.openhistoricalmap.org
+      ingressDomain: nominatim.ohmstaging.org
       replicaCount: 1
       env:
         PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250213_0001.osm.pbf
@@ -809,7 +766,7 @@ osm-seed:
         PGDATA: /var/lib/postgresql/16/main
         NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
         UPDATE_MODE: continuous
-        OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
+        OSMSEED_WEB_API_DOMAIN: www.ohmstaging.org
         IMPORT_STYLE: extratags
         EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edt
       resources:
@@ -840,9 +797,7 @@ osm-seed:
         ip: {{STAGING_OVERPASS_HOST}}
         port: 8086
       priorityClass: medium-priority
-      serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressDomain: overpass-api.staging.openhistoricalmap.org
+      ingressDomain: overpass-api.ohmstaging.org
       env:
         OVERPASS_META: 'attic'
         OVERPASS_MODE: 'init'
@@ -876,9 +831,7 @@ osm-seed:
       serviceAccount:
         enabled: true
         name: ohm-s3-bucket-access-staging 
-      serviceAnnotations:
-        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-      ingressDomain: taginfo.staging.openhistoricalmap.org
+      ingressDomain: taginfo.ohmstaging.org
       env:
         URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
         URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
@@ -999,18 +952,18 @@ osm-seed:
       image:
         name: ghcr.io/openhistoricalmap/osmcha-django
         tag: 1bd58e1
-      ingressDomain: osmcha.staging.openhistoricalmap.org
+      ingressDomain: osmcha.ohmstaging.org
       env:
         DJANGO_SETTINGS_MODULE: "config.settings.production"
         OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
         DJANGO_SECRET_KEY: {{STAGING_OSMCHA_DJANGO_SECRET_KEY}}
         DJANGO_SECURE_SSL_REDIRECT: "False"
-        OSM_SERVER_URL: https://www.openhistoricalmap.org
-        OAUTH_REDIRECT_URI: https://osmcha.staging.openhistoricalmap.org/authorized
+        OSM_SERVER_URL: https://www.ohmstaging.org
+        OAUTH_REDIRECT_URI: https://osmcha.ohmstaging.org/authorized
         OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
         ## frontend
-        OSMCHA_URL: https://osmcha.staging.openhistoricalmap.org
-        OSMCHA_API_URL: www.openhistoricalmap.org
+        OSMCHA_URL: https://osmcha.ohmstaging.org
+        OSMCHA_API_URL: www.ohmstaging.org
         OAUTH2_OSM_KEY: tHRgc_GVLsUj2tuVQSg05nn5f8Tnda8mF-ZfEbI3ItA
         OAUTH2_OSM_SECRET: s9blyq71UditeidYeiQc_J40-DffUh3EVlDCGVcskQI
       resources:
@@ -1133,3 +1086,4 @@ ohm:
       enabled: true
       label_key: nodegroup_type
       label_value: web_medium
+      

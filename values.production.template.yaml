@@ -14,37 +14,9 @@ osm-seed:
   # ====================================================================================================
   AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
 
-  # AWS SSL ARN
-  AWS_SSL_ARN: {{PRODUCTION_AWS_SSL_ARN}}
-
-  # Specify serviceType.
-  #
-  # serviceType can be one of three values: 'NodePort', 'ClusterIP' or 'LoadBalancer'
-  # Use `NodePort` for local testing on minikube.
-  #
-  # The recommended setting is `ClusterIP`, and then following the instructions to
-  # point a DNS record to the cluster IP address. This will setup the ingress rules
-  # for all services as subdomains and configure SSL using Lets Encrypt.
-  #
-  # If you specify `LoadBalancer` as the service type, if you also specify
-  # an `AWS_SSL_ARN` that is a wildcart certificate, that will be configured
-  # as the SSL certificate for your services. Else, you will need to configure
-  # SSL separately. 
+  # Traffic is routed via Cloudflare Tunnel, which connects directly to ClusterIP Services.
+  # No Ingress resources or load balancers (ALB/NLB) are needed.
   serviceType: ClusterIP
-  ingressClassNameType: "alb" # ALB works with ACM
-  ingressClassName: alb
-  alb:
-    certificateArn: {{PRODUCTION_AWS_SSL_ARN}}
-    enableWaf:
-      enabled: true
-      wafAclArn: {{PRODUCTION_AWS_WAF_WEBACL_ARN}}
-  # Domain that is pointed to the clusterIP
-  # You will need to create an A record like *.osmseed.example.com pointed to the ClusterIP
-  # Then, the cluster configuration will setup services at their respective subdomains:
-  # - web.osmseed.example.com
-  # - overpass.osmseed.example.com
-  # - nominatim.osmseed.example.com
-  # - etc.
   domain: openhistoricalmap.org
 
   # ====================================================================================================

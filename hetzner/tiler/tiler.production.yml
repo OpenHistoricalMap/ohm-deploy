@@ -1,34 +1,18 @@
 services:
-  # Tiler db
-  db_production:
-    container_name: tiler_db_production
+  tiler_db:
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
-    volumes:
-      - tiler_production_pgdata:/var/lib/postgresql/data
+    volumes: !overwrite
+      - tiler_pgdata:/var/lib/postgresql/data
       - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
-    environment:
-      - PGDATA=/var/lib/postgresql/data
-      - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
-    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     ports:
       - "54329:5432"
-    env_file:
-      - .env.production
-    restart: always
-    networks:
-      - ohm_network
-    deploy:
-      resources:
-        limits:
-          cpus: '28.0'
-          memory: 55G
-          
-  # imposm3
-  imposm_production:
-    container_name: tiler_imposm_production
+    mem_limit: 55G
+    cpus: "28.0"
+
+  tiler_imposm:
     image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
     volumes:
-      - tiler_production_imposmdata:/mnt/data
+      - tiler_imposm_data:/mnt/data
     command:
       - sh
       - -c
@@ -39,32 +23,27 @@ services:
           sleep 60
         done &
         ./start.sh
-    env_file:
-      - .env.production
     restart: always
     networks:
       - ohm_network
 
-
   # Tiler server
-  tiler_server_production:
-    container_name: tiler_server_production
+  tiler_server:
+    container_name: tiler_server
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
     ports:
       - "9090:9090"
-    env_file:
-      - .env.production
     restart: always
     networks:
       - ohm_network
 
-  tiler_sqs_cleaner_production:
-    container_name: tiler_sqs_cleaner_production
+  tiler_sqs_cleaner:
+    container_name: tiler_sqs_cleaner
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3245.hffaf924
-    env_file:
-      - .env.production
     environment:
       - PORT=8000
+    env_file:
+      - .env.tiler
     command:
       - /bin/sh
       - -c
@@ -81,39 +60,32 @@ services:
     networks:
       - ohm_network
 
-  tiler_s3_cleaner_production:
-    container_name: tiler_s3_cleaner_production
+  tiler_s3_cleaner:
+    container_name: tiler_s3_cleaner
     image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3245.hffaf924
     env_file:
-      - .env.production
+      - .env.tiler
     networks:
       - ohm_network
 
-  tile_global_seeding_production:
-      container_name: tiler_global_seeding_production
-      image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
-      env_file:
-        - .env.production
-      volumes:
-        - ./seed.sh:/opt/seed.sh
-      entrypoint:
-        - /bin/bash
-        - "-c"
-        - |
-          /opt/seed.sh global
-      deploy:
-        resources:
-          limits:
-            cpus: '1'
-            memory: 1G
-      networks:
-        - ohm_network
-
-  tile_coverage_seeding_production:
-    container_name: tiler_coverage_seeding_production
+  tile_global_seeding:
+    container_name: tiler_global_seeding
     image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
     env_file:
-      - .env.production
+      - .env.tiler
+    volumes:
+      - ./seed.sh:/opt/seed.sh
+    entrypoint:
+      - /bin/bash
+      - "-c"
+      - |
+        /opt/seed.sh global
+    networks:
+      - ohm_network
+
+  tile_coverage_seeding:
+    container_name: tiler_coverage_seeding
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
     volumes:
       - ./seed.sh:/opt/seed.sh
     entrypoint:
@@ -121,16 +93,13 @@ services:
       - "-c"
       - |
         /opt/seed.sh coverage
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+    env_file:
+      - .env.tiler
     networks:
       - ohm_network
 
-  tiler_monitor_production:
-    container_name: tiler_monitor_production
+  tiler_monitor:
+    container_name: tiler_monitor
     image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2874.ha9bff68
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -138,20 +107,20 @@ services:
       - ../../hetzner:/app/hetzner
     environment:
       - DOCKER_CONFIG_ENVIRONMENT=production
-    env_file:
-      - .env.production
     stdin_open: true
     tty: true
+    env_file:
+      - .env.tiler
     networks:
       - ohm_network
       
 volumes:
-  tiler_production_pgdata:
+  tiler_pgdata:
     driver: local
-    name: tiler_db_2201
-  tiler_production_imposmdata:
+    name: tiler_db_11_02
+  tiler_imposm_data:
     driver: local
-    name: tiler_imposm_2201
+    name: tiler_imposm_11_02
 
 networks:
   ohm_network:

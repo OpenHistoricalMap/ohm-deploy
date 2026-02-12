@@ -1,15 +1,15 @@
 services:
   overpass:
     image: developmentseed/osmseed-overpass-api:0.1.0-0.dev.git.956.h49d677b
-    container_name: overpass_staging
-    ports:
-      - '8085:80'
+    container_name: overpass
+    # ports:
+    #   - '8085:80'
     volumes:
       - overpass_data:/db
     environment:
       OVERPASS_META: attic
       OVERPASS_MODE: init
-      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250731_0101.osm.pbf
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260210_0334.osm.pbf
       OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
       OVERPASS_RULES_LOAD: 10
       OVERPASS_PLANET_PREPROCESS: "mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf"
@@ -27,8 +27,6 @@ services:
       timeout: 30s 
       retries: 3
       start_period: 180m
-    mem_limit: 16g
-    cpus: 8
     networks:
       - ohm_network
 
@@ -39,5 +37,5 @@ networks:
 volumes:
   overpass_data:
     driver: local
-    name: overpass_db
+    name: overpass_db_11_02_2026_v4
 
