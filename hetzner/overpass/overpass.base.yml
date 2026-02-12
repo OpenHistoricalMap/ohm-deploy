@@ -1,6 +1,6 @@
 services:
   overpass:
-    image: developmentseed/osmseed-overpass-api:0.1.0-0.dev.git.956.h49d677b
+    image: ghcr.io/osm-seed/overpass-api:0.1.0-0.dev.git.985.h3b10440
     container_name: overpass
     # ports:
     #   - '8085:80'
