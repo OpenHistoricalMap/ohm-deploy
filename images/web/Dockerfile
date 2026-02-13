@@ -67,7 +67,7 @@ RUN SECRET_KEY_BASE_DUMMY=1  \
     bundle exec rails assets:precompile
 
 # Leaflet timeslider assets
-ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
+ENV LEAFLET_OHM_TIMESLIDER_V2=8d580a3ba37bb2eec1e018d9fffeaac27321baa5
 RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git public/leaflet-ohm-timeslider-v2 && \
     cd public/leaflet-ohm-timeslider-v2 && \
     git checkout $LEAFLET_OHM_TIMESLIDER_V2 && \
