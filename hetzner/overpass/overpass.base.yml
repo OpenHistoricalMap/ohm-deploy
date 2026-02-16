@@ -1,6 +1,6 @@
 services:
   overpass:
-    image: ghcr.io/osm-seed/overpass-api:0.1.0-0.dev.git.985.h3b10440
+    image: ghcr.io/osm-seed/overpass-api:0.1.0-0.dev.git.987.h56d7810
     container_name: overpass
     # ports:
     #   - '8085:80'
@@ -9,7 +9,7 @@ services:
     environment:
       OVERPASS_META: attic
       OVERPASS_MODE: init
-      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260210_0334.osm.pbf
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260216_0301.osm.pbf
       OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
       OVERPASS_RULES_LOAD: 10
       OVERPASS_PLANET_PREPROCESS: "mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf"
@@ -38,4 +38,3 @@ volumes:
   overpass_data:
     driver: local
     name: overpass_db_11_02_2026_v4
-
