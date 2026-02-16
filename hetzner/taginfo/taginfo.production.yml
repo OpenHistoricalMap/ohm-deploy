@@ -23,7 +23,7 @@ services:
         chmod +x /run_task.sh
 
         # 2. Set cron: Run every 3 days at 3:00 AM
-        echo "0 3 */3 * * /run_task.sh >> /var/log/taginfo-cron.log 2>&1" | crontab -
+        echo "0 8 */3 * * /run_task.sh >> /var/log/taginfo-cron.log 2>&1" | crontab -
         
         touch /var/log/taginfo-cron.log
         cron -f
