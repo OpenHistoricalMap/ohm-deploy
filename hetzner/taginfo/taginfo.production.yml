@@ -20,7 +20,7 @@ services:
         /usr/src/app/start.sh
         sleep 7200
         # restart web container
-        curl -X POST --unix-socket /var/run/docker.sock http://v1.41/containers/taginfo_web/restart" > /run_task.sh
+        curl -v -X POST --unix-socket /var/run/docker.sock http://localhost/v1.41/containers/taginfo_web/restart" > /run_task.sh
         chmod +x /run_task.sh
         /run_task.sh
         # 2. Set cron: Run every 3 days at 3:00 AM
