@@ -1,10 +1,4 @@
 services:
   overpass:
-    container_name: overpass_production
-    ports: !override
-      - '8086:80'
-
-volumes:
-  overpass_data:
-    name: overpass_db_31_07_2025_v3
-  
+    mem_limit: 16g
+    cpus: "8.0"
