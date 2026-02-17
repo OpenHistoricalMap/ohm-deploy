@@ -17,15 +17,19 @@ WORKDIR /app
 # Clone application.
 ENV CGIMAP_GITSHA=01e33669bfee17d55849d6f731a174b8058ca630
 RUN git clone https://github.com/zerebubuth/openstreetmap-cgimap.git /app \
-&& git checkout $CGIMAP_GITSHA \
-&& sed -i 's#OpenStreetMap and contributors#OpenHistoricalMap is dedicated to the public domain except where otherwise noted.#g' include/cgimap/output_formatter.hpp \
-&& sed -i 's#http://www.openstreetmap.org/copyright#https://www.openhistoricalmap.org/copyright#g' include/cgimap/output_formatter.hpp \
-&& sed -i 's#http://opendatacommons.org/licenses/odbl/1-0/#https://creativecommons.org/public-domain/cc0/#g' include/cgimap/output_formatter.hpp
+&& git checkout $CGIMAP_GITSHA
 
 ARG JOBS=1
 ARG BUILD_TESTING=OFF
 RUN mkdir build && cd build && \
-    CXXFLAGS="-fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2" cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=${BUILD_TESTING} -DCMAKE_BUILD_TYPE=Release && \
+    CXXFLAGS="-fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2" cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DBUILD_TESTING=${BUILD_TESTING} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCGIMAP_COPYRIGHT_MESSAGE="OpenHistoricalMap is dedicated to the public domain except where otherwise noted." \
+    -DCGIMAP_ATTRIBUTION_MESSAGE="https://www.openhistoricalmap.org/copyright" \
+    -DCGIMAP_LICENSE_MESSAGE="https://creativecommons.org/public-domain/cc0/" && \
     make -j${JOBS} && \
     cmake --build . -t package
 

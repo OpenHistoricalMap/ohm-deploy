@@ -1020,7 +1020,7 @@ osm-seed:
   # Variables for replication nomitoring task
   # ====================================================================================================
   monitoringReplication:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     serviceAccount:
       enabled: true
