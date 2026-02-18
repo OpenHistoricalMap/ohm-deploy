@@ -17,6 +17,13 @@ SELECT
     end_decdate,
     short_name,
     official_name,
+    religion,
+    denomination,
+    timezone,
+    utc,
+    postal_code,
+    ref,
+    political_division,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z0_2
@@ -42,6 +49,13 @@ SELECT
     end_decdate,
     short_name,
     official_name,
+    religion,
+    denomination,
+    timezone,
+    utc,
+    postal_code,
+    ref,
+    political_division,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z3_5
@@ -67,6 +81,13 @@ SELECT
     end_decdate,
     short_name,
     official_name,
+    religion,
+    denomination,
+    timezone,
+    utc,
+    postal_code,
+    ref,
+    political_division,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z6_7
@@ -92,6 +113,13 @@ SELECT
     end_decdate,
     short_name,
     official_name,
+    religion,
+    denomination,
+    timezone,
+    utc,
+    postal_code,
+    ref,
+    political_division,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z8_9
@@ -117,6 +145,13 @@ SELECT
     end_decdate,
     short_name,
     official_name,
+    religion,
+    denomination,
+    timezone,
+    utc,
+    postal_code,
+    ref,
+    political_division,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z10_12
@@ -142,6 +177,13 @@ SELECT
     end_decdate,
     short_name,
     official_name,
+    religion,
+    denomination,
+    timezone,
+    utc,
+    postal_code,
+    ref,
+    political_division,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z13_15
@@ -167,6 +209,13 @@ SELECT
     end_decdate,
     short_name,
     official_name,
+    religion,
+    denomination,
+    timezone,
+    utc,
+    postal_code,
+    ref,
+    political_division,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z16_20
@@ -175,42 +224,42 @@ WHERE geometry && !BBOX!
 #######Maps
 [[maps.layers]]
 name = "boundaries_centroids"
-provider_layer = "ohm_non_admin.non_admin_boundaries_centroid_z0_2"
+provider_layer = "non_admin.non_admin_boundaries_centroid_z0_2"
 min_zoom = 0
 max_zoom = 2
 
 [[maps.layers]]
 name = "boundaries_centroids"
-provider_layer = "ohm_non_admin.non_admin_boundaries_centroid_z3_5"
+provider_layer = "non_admin.non_admin_boundaries_centroid_z3_5"
 min_zoom = 3
 max_zoom = 5
 
 [[maps.layers]]
 name = "boundaries_centroids"
-provider_layer = "ohm_non_admin.non_admin_boundaries_centroid_z6_7"
+provider_layer = "non_admin.non_admin_boundaries_centroid_z6_7"
 min_zoom = 6
 max_zoom = 7
 
 [[maps.layers]]
 name = "boundaries_centroids"
-provider_layer = "ohm_non_admin.non_admin_boundaries_centroid_z8_9"
+provider_layer = "non_admin.non_admin_boundaries_centroid_z8_9"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
 name = "boundaries_centroids"
-provider_layer = "ohm_non_admin.non_admin_boundaries_centroid_z10_12"
+provider_layer = "non_admin.non_admin_boundaries_centroid_z10_12"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "boundaries_centroids"
-provider_layer = "ohm_non_admin.non_admin_boundaries_centroid_z13_15"
+provider_layer = "non_admin.non_admin_boundaries_centroid_z13_15"
 min_zoom = 13
 max_zoom = 15
 
 [[maps.layers]]
 name = "boundaries_centroids"
-provider_layer = "ohm_non_admin.non_admin_boundaries_centroid_z16_20"
+provider_layer = "non_admin.non_admin_boundaries_centroid_z16_20"
 min_zoom = 16
 max_zoom = 20
