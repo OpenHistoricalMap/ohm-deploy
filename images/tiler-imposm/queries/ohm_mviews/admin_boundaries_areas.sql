@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Create materialized views for admin boundaries areas
 -- ============================================================================
-DROP FUNCTION MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_areas_z16_20 CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_areas_z16_20 CASCADE;
 
 SELECT create_areas_mview( 'osm_admin_areas', 'mv_admin_boundaries_areas_z16_20', 1, 0, 'id, osm_id, type', 'admin_level IN (1,2,3,4,5,6,7,8,9,10,11)');
 SELECT create_area_mview_from_mview('mv_admin_boundaries_areas_z16_20','mv_admin_boundaries_areas_z13_15', 5, 0.0, NULL);

@@ -73,7 +73,7 @@ BEGIN
     FROM %I
     WHERE name IS NOT NULL AND name <> ''
       AND osm_id NOT IN (
-        SELECT osm_id FROM osm_relation_members WHERE role = 'label'
+        SELECT osm_id FROM osm_admin_relation_members WHERE role = 'label' AND type = 'administrative'
       )%s;
   $sql$, tmp_mview_name, all_cols, source_mview, custom_filter);
 

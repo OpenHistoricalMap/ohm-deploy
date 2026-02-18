@@ -39,6 +39,10 @@ DECLARE
     geom_index_final TEXT := format('idx_%s_geom', mview_name);
     uid_index_final  TEXT := format('idx_%s_uid', mview_name);
 BEGIN
+    -- Temporary memory configuration for the view creation
+    SET LOCAL work_mem = '512MB';
+    SET LOCAL maintenance_work_mem = '1GB';
+
     -- Step 1: Log and drop temp view
     RAISE NOTICE '==> [START] Creating view: %', mview_name;
     RAISE NOTICE '==> [DROP TEMP] Dropping tmp view: %', tmp_mview_name;
