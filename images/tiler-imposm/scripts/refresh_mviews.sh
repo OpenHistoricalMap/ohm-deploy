@@ -139,6 +139,12 @@ others_views=(
     mv_other_lines_z14_15
 )
 
+communication_views=(
+    # lines
+    mv_communication_z16_20
+    mv_communication_z14_15
+)
+
 places_views=(
     mv_place_points_centroids_z0_2
     mv_place_points_centroids_z3_5
@@ -242,6 +248,7 @@ refresh_mviews_group "TRANSPORTS" 180 "${transport_views[@]}" &
 refresh_mviews_group "AMENITY" 180 "${amenity_views[@]}" &
 refresh_mviews_group "LANDUSE" 180 "${landuse_views[@]}" &
 refresh_mviews_group "OTHERS" 180 "${others_views[@]}" &
+refresh_mviews_group "COMMUNICATION" 180 "${communication_views[@]}" &
 refresh_mviews_group "PLACES" 180 "${places_views[@]}" &
 refresh_mviews_group "WATER" 180 "${water_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 "${buildings_views[@]}" &

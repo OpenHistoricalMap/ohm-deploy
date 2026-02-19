@@ -72,7 +72,8 @@ execute_sql_file queries/ohm_mviews/admin_boundaries_maritime.sql
 
 execute_sql_file queries/ohm_mviews/amenity.sql &
 execute_sql_file queries/ohm_mviews/buildings.sql &
-execute_sql_file queries/ohm_mviews/others.sql 
+execute_sql_file queries/ohm_mviews/others.sql
+execute_sql_file queries/ohm_mviews/communication.sql &
 
 execute_sql_file queries/ohm_mviews/places.sql &
 execute_sql_file queries/ohm_mviews/transport_areas.sql  &

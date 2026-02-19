@@ -3,9 +3,19 @@
 -- Description:
 --   Creates a materialized view that merges transport lines from:
 --     - `osm_transport_lines` (ways: e.g. highway, railway),
---     - `osm_transport_multilines` (relations: e.g. route relations).
+--     - `osm_transport_multilines` (relations: e.g. route relations),
+--     - `osm_street_multilines` (type=street relations, via street_multilines.json).
 --
---   Each row gets a concatenated `id` (id + osm_id) and is marked with a 
+--   Ways that are members of `type=street` relations are expanded: each
+--   (way, street-relation) pair produces one feature. The relation's values
+--   override the way's values:
+--     - name      : relation's name if present, else way's name (fallback).
+--     - start_date: always from the relation when one exists, else from way.
+--     - end_date  : always from the relation when one exists, else from way.
+--     - other tags: relation's tags applied on top (way tags as base).
+--   Ways with no type=street membership produce a single unchanged feature.
+--
+--   Each row gets a concatenated `id` (id + osm_id) and is marked with a
 --   `source_type` ('way' or 'relation'). Multilingual name columns are added.
 --   Supports geometry simplification and filtering by type/class.
 --
@@ -19,6 +29,7 @@
 --   - Filtering uses OR logic: (type IN types) OR (class IN classes).
 --   - Only valid geometries (LineString) are included from relation sources.
 --   - View uses GiST index on geometry and unique index on `id`.
+--   - Requires osm_street_multilines (imposm re-import with street_multilines.json).
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS create_transport_lines_mview;
@@ -54,18 +65,91 @@ BEGIN
 
   sql_create := format($sql$
     CREATE MATERIALIZED VIEW %I AS
-    WITH combined AS (
+    WITH
+    -- -----------------------------------------------------------------------
+    -- Step 1: Expand ways by type=street relations.
+    --
+    -- osm_street_multilines has one row per (type=street relation, way member).
+    -- LEFT JOIN expands each way into N rows when it belongs to N street
+    -- relations, or leaves it as a single row when it has no membership.
+    --
+    -- Override rules (relation values take priority when a match exists):
+    --   name      : way's name if present, else relation's name (fallback).
+    --   start_date: relation's when exists, else way's.
+    --   end_date  : relation's when exists, else way's.
+    --   tags      : relation tags merged on top of way tags (way wins conflicts).
+    --
+    -- ID scheme:
+    --   - Street-relation row : sm.osm_id  || '_' || tl.osm_id
+    --                           (sm.osm_id is negative for relations in imposm)
+    --   - Plain-way row       : tl.id      || '_' || tl.osm_id
+    --                           (both positive; format never collides with above)
+    -- -----------------------------------------------------------------------
+    way_street_expanded AS (
       SELECT
-        (COALESCE(CAST(id AS TEXT), '') || '_' || COALESCE(CAST(osm_id AS TEXT), '')) AS id,
+        CASE
+          WHEN sm.osm_id IS NOT NULL THEN
+            COALESCE(CAST(sm.osm_id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '')
+          ELSE
+            COALESCE(CAST(tl.id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '')
+        END AS id,
+        tl.osm_id,
+        tl.geometry,
+        -- highway: relation's value when present, else way's
+        COALESCE(NULLIF(sm.highway, ''), tl.highway) AS highway,
+        tl.type,
+        tl.class,
+        -- name: relation's name if present, else way's name (fallback)
+        CASE
+          WHEN sm.osm_id IS NOT NULL
+            THEN COALESCE(NULLIF(sm.name, ''), NULLIF(tl.name, ''))
+          ELSE tl.name
+        END AS name,
+        -- tunnel/bridge/oneway/ref/z_order/access/service/ford:
+        --   relation's value when present, else way's
+        COALESCE(sm.tunnel,                tl.tunnel)                AS tunnel,
+        COALESCE(sm.bridge,                tl.bridge)                AS bridge,
+        COALESCE(sm.oneway,                tl.oneway)                AS oneway,
+        COALESCE(NULLIF(sm.ref,  ''),      tl.ref)                   AS ref,
+        COALESCE(sm.z_order,               tl.z_order)               AS z_order,
+        COALESCE(NULLIF(sm.access,  ''),   tl.access)                AS access,
+        COALESCE(NULLIF(sm.service, ''),   tl.service)               AS service,
+        COALESCE(NULLIF(sm.ford,    ''),   tl.ford)                  AS ford,
+        COALESCE(NULLIF(sm.electrified,''),tl.electrified)           AS electrified,
+        COALESCE(NULLIF(sm.highspeed,''),  tl.highspeed)             AS highspeed,
+        COALESCE(NULLIF(sm.usage,   ''),   tl.usage)                 AS usage,
+        COALESCE(NULLIF(sm.railway, ''),   tl.railway)               AS railway,
+        COALESCE(NULLIF(sm.aeroway, ''),   tl.aeroway)               AS aeroway,
+        COALESCE(NULLIF(sm.route,   ''),   tl.route)                 AS route,
+        -- tags: relation tags on top, way tags as base (way wins on conflict)
+        CASE
+          WHEN sm.osm_id IS NOT NULL THEN sm.tags || tl.tags
+          ELSE tl.tags
+        END AS tags,
+        -- dates: relation's values when in a street relation, else way's
+        CASE WHEN sm.osm_id IS NOT NULL THEN sm.start_date ELSE tl.start_date END AS start_date,
+        CASE WHEN sm.osm_id IS NOT NULL THEN sm.end_date   ELSE tl.end_date   END AS end_date
+      FROM osm_transport_lines tl
+      LEFT JOIN osm_street_multilines sm
+        ON sm.member::bigint = tl.osm_id
+        AND ST_GeometryType(sm.geometry) = 'ST_LineString'
+      WHERE tl.geometry IS NOT NULL
+        AND ( %s OR %s )
+    ),
+    combined AS (
+      -- -------------------------------------------------------------------
+      -- Ways (possibly expanded by street relations)
+      -- -------------------------------------------------------------------
+      SELECT
+        id,
         ABS(osm_id) AS osm_id,
-        CASE 
+        CASE
           WHEN %s > 0 THEN ST_Simplify(geometry, %s)
           ELSE geometry
         END AS geometry,
-        --  Detect highways in construcion https://github.com/OpenHistoricalMap/issues/issues/1151
+        --  Detect highways in construction https://github.com/OpenHistoricalMap/issues/issues/1151
         CASE
             WHEN highway = 'construction' THEN
-                -- If the 'construction' tag has a value, append '_construction'. Otherwise, use 'road_construction'.
                 COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
             ELSE type
         END AS type,
@@ -95,23 +179,22 @@ BEGIN
         NULL AS member,
         'way' AS source_type,
         %s
-      FROM osm_transport_lines
-      WHERE geometry IS NOT NULL
-        AND ( %s
-        OR %s)
+      FROM way_street_expanded
 
       UNION ALL
 
+      -- -------------------------------------------------------------------
+      -- Transport relation members (route relations, etc.)
+      -- -------------------------------------------------------------------
       SELECT
         (COALESCE(CAST(id AS TEXT), '') || '_' || COALESCE(CAST(osm_id AS TEXT), '')) AS id,
         ABS(osm_id) AS osm_id,
-        CASE 
+        CASE
           WHEN %s > 0 THEN ST_Simplify(geometry, %s)
           ELSE geometry
         END AS geometry,
         CASE
             WHEN highway = 'construction' THEN
-                -- If the 'construction' tag has a value, append '_construction'. Otherwise, use 'road_construction'.
                 COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
             ELSE type
         END AS type,
@@ -148,8 +231,9 @@ BEGIN
     )
     SELECT DISTINCT ON (id) *
     FROM combined;
-  $sql$, tmp_view_name, 
-         simplified_tolerance, simplified_tolerance, lang_columns, type_filter, class_filter,
+  $sql$, tmp_view_name,
+         type_filter, class_filter,
+         simplified_tolerance, simplified_tolerance, lang_columns,
          simplified_tolerance, simplified_tolerance, lang_columns, type_filter, class_filter);
 
   PERFORM finalize_materialized_view(

@@ -111,7 +111,8 @@ if __name__ == "__main__":
             "landuse_lines",
             "other_areas",
             "other_points_centroids",
-            "other_lines"
+            "other_lines",
+            "communication_lines"
         ]
     }
 
