@@ -48,12 +48,12 @@ WHERE
 
 [[maps.layers]]
 name = "buildings_points_centroids"
-provider_layer = "osm.buildings_points_centroids_z14_15"
+provider_layer = "ohm.buildings_points_centroids_z14_15"
 min_zoom = 14
 max_zoom = 15
 
 [[maps.layers]]
 name = "buildings_points_centroids"
-provider_layer = "osm.buildings_points_centroids_z16_20"
+provider_layer = "ohm.buildings_points_centroids_z16_20"
 min_zoom = 16
 max_zoom = 20

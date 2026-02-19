@@ -74,15 +74,15 @@ http:
         replacement: "https://${1}/ui/search.html"
         permanent: true
 
-    # replace-osm-to-ohm:
-    #   replacePathRegex:
-    #     regex: "^/capabilities/osm\\.json$"
-    #     replacement: "/capabilities/ohm.json"
+    replace-osm-to-ohm:
+      replacePathRegex:
+        regex: "^/capabilities/osm\\.json$"
+        replacement: "/capabilities/ohm.json"
 
-    # replace-osm-tiles-to-ohm:
-    #   replacePathRegex:
-    #     regex: "^/maps/osm/(.*)$"
-    #     replacement: "/maps/ohm/${1}"
+    replace-osm-tiles-to-ohm:
+      replacePathRegex:
+        regex: "^/maps/osm/(.*)$"
+        replacement: "/maps/ohm/${1}"
 
   routers:
     vtiles-router:
@@ -93,8 +93,8 @@ http:
       middlewares:
         - secure-headers-allow-iframe
         # Note: Removed replace-osm-to-ohm middleware because Tegola map is named "osm"
-        # - replace-osm-to-ohm
-        # - replace-osm-tiles-to-ohm
+        - replace-osm-to-ohm
+        - replace-osm-tiles-to-ohm
 
     nominatim-router:
       rule: Host(`nominatim.{{OHM_DOMAIN}}`) && !PathPrefix(`/ui`)
