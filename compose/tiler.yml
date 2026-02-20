@@ -7,12 +7,12 @@ services:
     ports:
       - "54321:5432"
     volumes:
-      - ../data/tiler-db-data2:/var/lib/postgresql/data
+      - tiler_pgdata:/var/lib/postgresql/data
     env_file:
       - ../envs/.env.tiler
     restart: always
     networks:
-      - tiler_network
+      - ohm_network
 
   imposm:
     image: rub21/tiler-imposm:v70
@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../images/tiler-imposm:/osm
-      - ../hetzner:/hetzner
+      - tiler_imposm_data:/mnt/data
     command:
       - sh
       - -c
@@ -29,7 +29,7 @@ services:
     env_file:
       - ../envs/.env.tiler
     networks:
-      - tiler_network
+      - ohm_network
 
   tiler:
     image: rub21/tiler-server:v73
@@ -45,7 +45,7 @@ services:
       - ../envs/.env.tiler
     restart: always
     networks:
-      - tiler_network
+      - ohm_network
 
   # tiler-cache:
   #   image: rub21/tiler-cache:v2
@@ -58,7 +58,7 @@ services:
   #     - ../envs/.env.tiler
   #   restart: always
   #   networks:
-  #     - tiler_network
+  #     - ohm_network
 
 
   # tiler-monitor:
@@ -78,6 +78,14 @@ services:
   #   tty: true
 
 networks:
-  tiler_network:
-    driver: bridge
-    
+  ohm_network:
+    external: true
+
+volumes:
+  tiler_pgdata:
+    driver: local
+    name: tiler_db
+
+  tiler_imposm_data:
+    driver: local
+    name: tiler_imposm
