@@ -68,6 +68,11 @@
           "type": "string"
         },
         {
+          "key": "highway",
+          "name": "highway",
+          "type": "string"
+        },
+        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null

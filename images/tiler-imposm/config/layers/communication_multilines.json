@@ -1,0 +1,97 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "communication_multilines": {
+      "type": "relation_member",
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "string",
+          "name": "communication_telephone",
+          "key": "communication:telephone"
+        },
+        {
+          "type": "string",
+          "name": "communication_telegraph",
+          "key": "communication:telegraph"
+        },
+        {
+          "type": "string",
+          "name": "communication_internet",
+          "key": "communication:internet"
+        },
+        {
+          "type": "string",
+          "name": "communication_cable_television",
+          "key": "communication:cable_television"
+        },
+        {
+          "type": "string",
+          "name": "operator",
+          "key": "operator"
+        },
+        {
+          "type": "string",
+          "name": "location",
+          "key": "location"
+        },
+        {
+          "type": "string",
+          "name": "layer",
+          "key": "layer"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "name": "member",
+          "type": "member_id"
+        }
+      ],
+      "mapping": {
+        "communication": [
+          "line"
+        ]
+      }
+    }
+  }
+}
