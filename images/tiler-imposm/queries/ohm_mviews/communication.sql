@@ -1,14 +1,14 @@
 -- ============================================================================
 -- Create materialized views for communication lines
 -- Uses create_lines_mview to build views at different zoom levels
--- from the osm_communication table (communication=line ways)
+-- from the osm_communication_lines table (communication=line ways)
 -- ============================================================================
 
 -- ============================================================================
 -- Zoom 16-20: No simplification, all features
 -- ============================================================================
 SELECT create_lines_mview(
-    'osm_communication',
+    'osm_communication_lines',
     'mv_communication_z16_20',
     0,
     0,

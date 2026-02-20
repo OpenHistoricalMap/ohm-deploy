@@ -47,20 +47,28 @@ DECLARE
   unique_columns TEXT := 'id';
   type_filter TEXT;
   class_filter TEXT;
+  tl_type_filter TEXT;
+  tl_class_filter TEXT;
   sql_create TEXT;
 BEGIN
-  -- Build type filter: '*' means all types
+  -- Build type/class filters.
+  -- tl_* variants are qualified with the tl. alias for the way_street_expanded
+  -- CTE where the LEFT JOIN with osm_street_multilines makes bare references ambiguous.
+  -- Unqualified variants are used for osm_transport_multilines (no join, no alias).
   IF types @> ARRAY['*'] THEN
     type_filter := '1=1';
+    tl_type_filter := '1=1';
   ELSE
     type_filter := format('type = ANY(%L)', types);
+    tl_type_filter := format('tl.type = ANY(%L)', types);
   END IF;
 
-  -- Build class filter: '*' means all classes
   IF classes @> ARRAY['*'] THEN
     class_filter := '1=1';
+    tl_class_filter := '1=1';
   ELSE
     class_filter := format('class = ANY(%L)', classes);
+    tl_class_filter := format('tl.class = ANY(%L)', classes);
   END IF;
 
   sql_create := format($sql$
@@ -232,7 +240,7 @@ BEGIN
     SELECT DISTINCT ON (id) *
     FROM combined;
   $sql$, tmp_view_name,
-         type_filter, class_filter,
+         tl_type_filter, tl_class_filter,
          simplified_tolerance, simplified_tolerance, lang_columns,
          simplified_tolerance, simplified_tolerance, lang_columns, type_filter, class_filter);
 
