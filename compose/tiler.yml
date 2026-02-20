@@ -1,6 +1,7 @@
 services:
   db:
     image: rub21/ohm-tiler-db:v1
+    container_name: db
     build:
       context: ../images/tiler-db
       dockerfile: Dockerfile
@@ -15,7 +16,8 @@ services:
       - ohm_network
 
   imposm:
-    image: rub21/tiler-imposm:v70
+    image: rub21/tiler-imposm:v1
+    container_name: imposm
     build:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
@@ -32,7 +34,8 @@ services:
       - ohm_network
 
   tiler:
-    image: rub21/tiler-server:v73
+    image: rub21/tiler-server:v1
+    container_name: tiler
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile
