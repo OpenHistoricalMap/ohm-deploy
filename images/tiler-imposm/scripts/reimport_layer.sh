@@ -9,8 +9,8 @@ WORKDIR=/mnt/data
 PBFFILE="${WORKDIR}/osm.pbf"
 LAYERS_DIR="./config/layers"
 TMP_MAPPING="./config/imposm3_reimport.json"
-TMP_CONFIG="$WORKDIR/config_reimport.json"
-TMP_CACHE="${WORKDIR}/cachedir_reimport"
+TMP_CONFIG="./config/config_reimport.json"
+TMP_CACHE="./cachedir_reimport"
 
 # Validate arguments
 if [ $# -eq 0 ]; then
@@ -42,7 +42,7 @@ cat <<EOF >"$TMP_CONFIG"
 {
     "cachedir": "$TMP_CACHE",
     "diffdir": "$WORKDIR/diff",
-    "connection": "postgis://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB",
+    "connection": "postgis://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB",
     "mapping": "/osm/$TMP_MAPPING",
     "replication_url": "$REPLICATION_URL"
 }
