@@ -26,7 +26,7 @@ CREATE VIEW mv_communication_z16_20 AS
         NULLIF(communication_internet, '') AS communication_internet,
         NULLIF(communication_cable_television, '') AS communication_cable_television,
         NULLIF(communication_television, '') AS communication_television,
-        NULLIF(communication_radio, '') AS communication_radio,
+        NULLIF(communication_radio, '') AS communication_radio, -- TODO, Do communication:radio usually apply in points, but old objects have it in lines. https://es.wikipedia.org/wiki/Radio_por_cable
         NULLIF(communication_microwave, '') AS communication_microwave,
         NULLIF(communication_bos, '') AS communication_bos,
         NULLIF(communication_mobile_phone, '') AS communication_mobile_phone,
@@ -62,7 +62,7 @@ CREATE VIEW mv_communication_z16_20 AS
         NULLIF(communication_internet, '') AS communication_internet,
         NULLIF(communication_cable_television, '') AS communication_cable_television,
         NULLIF(communication_television, '') AS communication_television,
-        NULLIF(communication_radio, '') AS communication_radio,
+        NULLIF(communication_radio, '') AS communication_radio, --
         NULLIF(communication_microwave, '') AS communication_microwave,
         NULLIF(communication_bos, '') AS communication_bos,
         NULLIF(communication_mobile_phone, '') AS communication_mobile_phone,
