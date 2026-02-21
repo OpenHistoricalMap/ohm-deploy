@@ -6,9 +6,10 @@
 
 -- ============================================================================
 -- Unified view: merge lines + multilines into a single source
+-- TODO, Do we need to add name_lcale columns?
 -- ============================================================================
-DROP VIEW IF EXISTS v_communication_combined CASCADE;
-CREATE VIEW v_communication_combined AS
+DROP VIEW IF EXISTS mv_communication_z16_20 CASCADE;
+CREATE VIEW mv_communication_z16_20 AS
     -- Ways (simple linestrings)
     SELECT
         id,
@@ -54,16 +55,6 @@ CREATE VIEW v_communication_combined AS
     WHERE geometry IS NOT NULL
       AND ST_GeometryType(geometry) IN ('ST_LineString', 'ST_MultiLineString');
 
--- ============================================================================
--- Zoom 16-20: No simplification, all features
--- ============================================================================
-SELECT create_lines_mview(
-    'v_communication_combined',
-    'mv_communication_z16_20',
-    0,
-    0,
-    'id, osm_id, type'
-);
 
 -- ============================================================================
 -- Zoom 14-15: Slight simplification (5m tolerance)
