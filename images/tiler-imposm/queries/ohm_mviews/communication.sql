@@ -87,10 +87,20 @@ CREATE VIEW mv_communication_z16_20 AS
 -- ============================================================================
 SELECT create_mview_line_from_mview(
     'mv_communication_z16_20',
-    'mv_communication_z14_15',
+    'mv_communication_z13_15',
     5
+);
+
+-- ============================================================================
+-- Zoom 10-13: More simplification (20m tolerance)
+-- ============================================================================
+SELECT create_mview_line_from_mview(
+    'mv_communication_z13_15',
+    'mv_communication_z10_12',
+    20
 );
 
 -- Refresh views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_communication_z16_20;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_communication_z14_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_communication_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_communication_z10_12;

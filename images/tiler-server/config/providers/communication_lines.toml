@@ -1,5 +1,5 @@
 [[providers.layers]]
-name = "communication_z14_15"
+name = "communication_z10_12"
 geometry_fieldname = "geometry"
 geometry_type = "linestring"
 id_fieldname = "osm_id"
@@ -30,10 +30,48 @@ SELECT
     telecom,
     operator,
     location,
-    layer,
-    {{LENGUAGES}}
+    layer
 FROM
-    mv_communication_z14_15
+    mv_communication_z10_12
+WHERE
+    geometry && !BBOX!
+"""
+
+[[providers.layers]]
+name = "communication_z13_15"
+geometry_fieldname = "geometry"
+geometry_type = "linestring"
+id_fieldname = "osm_id"
+sql = """
+SELECT
+    ST_AsMVTGeom(geometry, !BBOX!) AS geometry,
+    osm_id,
+    name,
+    type,
+    start_date,
+    end_date,
+    start_decdate,
+    end_decdate,
+    communication_telephone,
+    communication_telegraph,
+    communication_internet,
+    communication_cable_television,
+    communication_television,
+    communication_radio,
+    communication_microwave,
+    communication_bos,
+    communication_mobile_phone,
+    communication_satellite,
+    communication_amateur_radio,
+    communication_optical,
+    communication_space,
+    communication_gsm_r,
+    telecom,
+    operator,
+    location,
+    layer
+FROM
+    mv_communication_z13_15
 WHERE
     geometry && !BBOX!
 """
@@ -70,8 +108,7 @@ SELECT
     telecom,
     operator,
     location,
-    layer,
-    {{LENGUAGES}}
+    layer
 FROM
     mv_communication_z16_20
 WHERE
@@ -80,8 +117,14 @@ WHERE
 #######Maps
 [[maps.layers]]
 name = "communication"
-provider_layer = "ohm.communication_z14_15"
-min_zoom = 14
+provider_layer = "ohm.communication_z10_12"
+min_zoom = 10
+max_zoom = 12
+
+[[maps.layers]]
+name = "communication"
+provider_layer = "ohm.communication_z13_15"
+min_zoom = 13
 max_zoom = 15
 
 [[maps.layers]]
