@@ -1,12 +1,12 @@
 -- ============================================================================
--- Function: create_transport_lines_mview
+-- Materialized view: mv_transport_lines_z16_20
 -- Description:
---   Creates a materialized view that merges transport lines from:
---     - `osm_transport_lines` (ways: e.g. highway, railway),
---     - `osm_transport_multilines` (relations: e.g. route relations),
---     - `osm_street_multilines` (type=street relations, via street_multilines.json).
+--   Base materialized view that merges transport lines from:
+--     - osm_transport_lines (ways: e.g. highway, railway),
+--     - osm_transport_multilines (relations: e.g. route relations),
+--     - osm_street_multilines (type=street relations, via street_multilines.json).
 --
---   Ways that are members of `type=street` relations are expanded: each
+--   Ways that are members of type=street relations are expanded: each
 --   (way, street-relation) pair produces one feature. The relation's values
 --   override the way's values:
 --     - name      : relation's name if present, else way's name (fallback).
@@ -15,134 +15,113 @@
 --     - other tags: relation's tags applied on top (way tags as base).
 --   Ways with no type=street membership produce a single unchanged feature.
 --
---   Each row gets a concatenated `id` (id + osm_id) and is marked with a
---   `source_type` ('way' or 'relation'). Multilingual name columns are added.
---   Supports geometry simplification and filtering by type/class.
+--   Each row gets a concatenated id (id + osm_id) and is marked with a
+--   source_type ('way' or 'relation'). Multilingual name columns are added.
 --
--- Parameters:
---   view_name            TEXT    - Final materialized view name.
---   simplified_tolerance INTEGER - Tolerance for ST_Simplify (0 = no simplification).
---   types                TEXT[]  - Array of types to include (use ARRAY['*'] for all).
---   classes              TEXT[]  - Array of classes to include (use ARRAY['*'] for all).
---
--- Notes:
---   - Filtering uses OR logic: (type IN types) OR (class IN classes).
---   - Only valid geometries (LineString) are included from relation sources.
---   - View uses GiST index on geometry and unique index on `id`.
---   - Requires osm_street_multilines (imposm re-import with street_multilines.json).
+--   All derived zoom-level views (z13_15, z10_12, etc.) cascade from this one.
 -- ============================================================================
+DROP MATERIALIZED VIEW IF EXISTS mv_transport_lines_z16_20 CASCADE;
 
-DROP FUNCTION IF EXISTS create_transport_lines_mview;
-
-CREATE OR REPLACE FUNCTION create_transport_lines_mview(
-  view_name TEXT,
-  simplified_tolerance INTEGER,
-  types TEXT[],
-  classes TEXT[]
-)
-RETURNS void AS $$
+DO $do$
 DECLARE
   lang_columns TEXT := get_language_columns();
-  tmp_view_name TEXT := view_name || '_tmp';
-  unique_columns TEXT := 'id';
-  type_filter TEXT;
-  class_filter TEXT;
-  tl_type_filter TEXT;
-  tl_class_filter TEXT;
   sql_create TEXT;
 BEGIN
-  -- Build type/class filters.
-  -- tl_* variants are qualified with the tl. alias for the way_street_expanded
-  -- CTE where the LEFT JOIN with osm_street_multilines makes bare references ambiguous.
-  -- Unqualified variants are used for osm_transport_multilines (no join, no alias).
-  IF types @> ARRAY['*'] THEN
-    type_filter := '1=1';
-    tl_type_filter := '1=1';
-  ELSE
-    type_filter := format('type = ANY(%L)', types);
-    tl_type_filter := format('tl.type = ANY(%L)', types);
-  END IF;
-
-  IF classes @> ARRAY['*'] THEN
-    class_filter := '1=1';
-    tl_class_filter := '1=1';
-  ELSE
-    class_filter := format('class = ANY(%L)', classes);
-    tl_class_filter := format('tl.class = ANY(%L)', classes);
-  END IF;
-
   sql_create := format($sql$
-    CREATE MATERIALIZED VIEW %I AS
+    CREATE MATERIALIZED VIEW mv_transport_lines_z16_20_tmp AS
     WITH
     -- -----------------------------------------------------------------------
-    -- Step 1: Expand ways by type=street relations.
+    -- CTE: way_street_expanded
+    --
+    -- Expands ways by their type=street relation memberships.
     --
     -- osm_street_multilines has one row per (type=street relation, way member).
     -- LEFT JOIN expands each way into N rows when it belongs to N street
     -- relations, or leaves it as a single row when it has no membership.
     --
     -- Override rules (relation values take priority when a match exists):
-    --   name      : way's name if present, else relation's name (fallback).
+    --   name      : relation's name if present, else way's name (fallback).
     --   start_date: relation's when exists, else way's.
     --   end_date  : relation's when exists, else way's.
     --   tags      : relation tags merged on top of way tags (way wins conflicts).
     --
-    -- ID scheme:
-    --   - Street-relation row : sm.osm_id  || '_' || tl.osm_id
-    --                           (sm.osm_id is negative for relations in imposm)
-    --   - Plain-way row       : tl.id      || '_' || tl.osm_id
-    --                           (both positive; format never collides with above)
+    -- Example: Given these source tables:
+    --
+    --   osm_transport_lines (ways):
+    --   ┌────┬────────┬──────────┬──────────────┬────────────┬──────────┐
+    --   │ id │ osm_id │ highway  │ name         │ start_date │ end_date │
+    --   ├────┼────────┼──────────┼──────────────┼────────────┼──────────┤
+    --   │ 1  │ 100    │ primary  │ Main Street  │ 1920       │          │
+    --   │ 2  │ 200    │ tertiary │ Oak Ave      │ 1950       │          │
+    --   │ 3  │ 300    │ rail     │ Rail Line 5  │ 1880       │ 1960     │
+    --   └────┴────────┴──────────┴──────────────┴────────────┴──────────┘
+    --
+    --   osm_street_multilines (type=street relations):
+    --   ┌─────────┬────────┬──────────────────┬────────────┬──────────┐
+    --   │ osm_id  │ member │ name             │ start_date │ end_date │
+    --   ├─────────┼────────┼──────────────────┼────────────┼──────────┤
+    --   │ -5000   │ 100    │ Av. Principal    │ 1800       │          │  ← way 100 in relation -5000
+    --   │ -5001   │ 100    │ Calle Mayor      │ 1750       │ 1800     │  ← way 100 also in relation -5001
+    --   └─────────┴────────┴──────────────────┴────────────┴──────────┘
+    --
+    --   Result of way_street_expanded:
+    --   ┌──────────────┬────────┬──────────┬──────────────────┬────────────┬──────────┐
+    --   │ id           │ osm_id │ highway  │ name             │ start_date │ end_date │
+    --   ├──────────────┼────────┼──────────┼──────────────────┼────────────┼──────────┤
+    --   │ -5000_100    │ 100    │ primary  │ Av. Principal    │ 1800       │          │  ← relation -5000 overrides
+    --   │ -5001_100    │ 100    │ primary  │ Calle Mayor      │ 1750       │ 1800     │  ← relation -5001 overrides
+    --   │ 2_200        │ 200    │ tertiary │ Oak Ave          │ 1950       │          │  ← no relation, keeps way values
+    --   │ 3_300        │ 300    │ rail     │ Rail Line 5      │ 1880       │ 1960     │  ← no relation, keeps way values
+    --   └──────────────┴────────┴──────────┴──────────────────┴────────────┴──────────┘
+    --
+    --   Note: way 100 (Main Street) appears TWICE because it belongs to 2
+    --   street relations. Each row gets the relation's name and dates.
+    --   Ways 200 and 300 have no street relation, so they appear once with
+    --   their original values. The id uses tl.id_tl.osm_id (positive_positive).
     -- -----------------------------------------------------------------------
     way_street_expanded AS (
       SELECT
         CASE
-          WHEN sm.osm_id IS NOT NULL THEN
-            COALESCE(CAST(sm.osm_id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '')
+          WHEN street_mline_table.osm_id IS NOT NULL THEN
+            COALESCE(CAST(street_mline_table.osm_id AS TEXT), '') || '_' || COALESCE(CAST(tranport_line_table.osm_id AS TEXT), '')
           ELSE
-            COALESCE(CAST(tl.id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '')
+            COALESCE(CAST(tranport_line_table.id AS TEXT), '') || '_' || COALESCE(CAST(tranport_line_table.osm_id AS TEXT), '')
         END AS id,
-        tl.osm_id,
-        tl.geometry,
-        -- highway: relation's value when present, else way's
-        COALESCE(NULLIF(sm.highway, ''), tl.highway) AS highway,
-        tl.type,
-        tl.class,
-        -- name: relation's name if present, else way's name (fallback)
+        tranport_line_table.osm_id,
+        tranport_line_table.geometry,
+        COALESCE(NULLIF(street_mline_table.highway, ''), tranport_line_table.highway) AS highway,
+        tranport_line_table.type,
+        tranport_line_table.class,
         CASE
-          WHEN sm.osm_id IS NOT NULL
-            THEN COALESCE(NULLIF(sm.name, ''), NULLIF(tl.name, ''))
-          ELSE tl.name
+          WHEN street_mline_table.osm_id IS NOT NULL
+            THEN COALESCE(NULLIF(street_mline_table.name, ''), NULLIF(tranport_line_table.name, ''))
+          ELSE tranport_line_table.name
         END AS name,
-        -- tunnel/bridge/oneway/ref/z_order/access/service/ford:
-        --   relation's value when present, else way's
-        COALESCE(sm.tunnel,                tl.tunnel)                AS tunnel,
-        COALESCE(sm.bridge,                tl.bridge)                AS bridge,
-        COALESCE(sm.oneway,                tl.oneway)                AS oneway,
-        COALESCE(NULLIF(sm.ref,  ''),      tl.ref)                   AS ref,
-        COALESCE(sm.z_order,               tl.z_order)               AS z_order,
-        COALESCE(NULLIF(sm.access,  ''),   tl.access)                AS access,
-        COALESCE(NULLIF(sm.service, ''),   tl.service)               AS service,
-        COALESCE(NULLIF(sm.ford,    ''),   tl.ford)                  AS ford,
-        COALESCE(NULLIF(sm.electrified,''),tl.electrified)           AS electrified,
-        COALESCE(NULLIF(sm.highspeed,''),  tl.highspeed)             AS highspeed,
-        COALESCE(NULLIF(sm.usage,   ''),   tl.usage)                 AS usage,
-        COALESCE(NULLIF(sm.railway, ''),   tl.railway)               AS railway,
-        COALESCE(NULLIF(sm.aeroway, ''),   tl.aeroway)               AS aeroway,
-        COALESCE(NULLIF(sm.route,   ''),   tl.route)                 AS route,
-        -- tags: relation tags on top, way tags as base (way wins on conflict)
+        COALESCE(street_mline_table.tunnel,                tranport_line_table.tunnel)                AS tunnel,
+        COALESCE(street_mline_table.bridge,                tranport_line_table.bridge)                AS bridge,
+        COALESCE(street_mline_table.oneway,                tranport_line_table.oneway)                AS oneway,
+        COALESCE(NULLIF(street_mline_table.ref,  ''),      tranport_line_table.ref)                   AS ref,
+        COALESCE(street_mline_table.z_order,               tranport_line_table.z_order)               AS z_order,
+        COALESCE(NULLIF(street_mline_table.access,  ''),   tranport_line_table.access)                AS access,
+        COALESCE(NULLIF(street_mline_table.service, ''),   tranport_line_table.service)               AS service,
+        COALESCE(NULLIF(street_mline_table.ford,    ''),   tranport_line_table.ford)                  AS ford,
+        COALESCE(NULLIF(street_mline_table.electrified,''),tranport_line_table.electrified)           AS electrified,
+        COALESCE(NULLIF(street_mline_table.highspeed,''),  tranport_line_table.highspeed)             AS highspeed,
+        COALESCE(NULLIF(street_mline_table.usage,   ''),   tranport_line_table.usage)                 AS usage,
+        COALESCE(NULLIF(street_mline_table.railway, ''),   tranport_line_table.railway)               AS railway,
+        COALESCE(NULLIF(street_mline_table.aeroway, ''),   tranport_line_table.aeroway)               AS aeroway,
+        COALESCE(NULLIF(street_mline_table.route,   ''),   tranport_line_table.route)                 AS route,
         CASE
-          WHEN sm.osm_id IS NOT NULL THEN sm.tags || tl.tags
-          ELSE tl.tags
+          WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.tags || tranport_line_table.tags
+          ELSE tranport_line_table.tags
         END AS tags,
-        -- dates: relation's values when in a street relation, else way's
-        CASE WHEN sm.osm_id IS NOT NULL THEN sm.start_date ELSE tl.start_date END AS start_date,
-        CASE WHEN sm.osm_id IS NOT NULL THEN sm.end_date   ELSE tl.end_date   END AS end_date
-      FROM osm_transport_lines tl
-      LEFT JOIN osm_street_multilines sm
-        ON sm.member::bigint = tl.osm_id
-        AND ST_GeometryType(sm.geometry) = 'ST_LineString'
-      WHERE tl.geometry IS NOT NULL
-        AND ( %s OR %s )
+        CASE WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.start_date ELSE tranport_line_table.start_date END AS start_date,
+        CASE WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.end_date   ELSE tranport_line_table.end_date   END AS end_date
+      FROM osm_transport_lines AS tranport_line_table
+      LEFT JOIN osm_street_multilines AS street_mline_table
+        ON street_mline_table.member::bigint = tranport_line_table.osm_id
+        AND ST_GeometryType(street_mline_table.geometry) = 'ST_LineString'
+      WHERE tranport_line_table.geometry IS NOT NULL
     ),
     combined AS (
       -- -------------------------------------------------------------------
@@ -151,11 +130,7 @@ BEGIN
       SELECT
         id,
         ABS(osm_id) AS osm_id,
-        CASE
-          WHEN %s > 0 THEN ST_Simplify(geometry, %s)
-          ELSE geometry
-        END AS geometry,
-        --  Detect highways in construction https://github.com/OpenHistoricalMap/issues/issues/1151
+        geometry,
         CASE
             WHEN highway = 'construction' THEN
                 COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
@@ -197,10 +172,7 @@ BEGIN
       SELECT
         (COALESCE(CAST(id AS TEXT), '') || '_' || COALESCE(CAST(osm_id AS TEXT), '')) AS id,
         ABS(osm_id) AS osm_id,
-        CASE
-          WHEN %s > 0 THEN ST_Simplify(geometry, %s)
-          ELSE geometry
-        END AS geometry,
+        geometry,
         CASE
             WHEN highway = 'construction' THEN
                 COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
@@ -234,30 +206,21 @@ BEGIN
         %s
       FROM osm_transport_multilines
       WHERE ST_GeometryType(geometry) = 'ST_LineString' AND geometry IS NOT NULL
-        AND (%s
-        OR %s)
     )
     SELECT DISTINCT ON (id) *
     FROM combined;
-  $sql$, tmp_view_name,
-         tl_type_filter, tl_class_filter,
-         simplified_tolerance, simplified_tolerance, lang_columns,
-         simplified_tolerance, simplified_tolerance, lang_columns, type_filter, class_filter);
+  $sql$, lang_columns, lang_columns);
 
   PERFORM finalize_materialized_view(
-    tmp_view_name,
-    view_name,
-    unique_columns,
+    'mv_transport_lines_z16_20_tmp',
+    'mv_transport_lines_z16_20',
+    'id',
     sql_create
   );
 END;
-$$ LANGUAGE plpgsql;
+$do$;
 
--- ============================================================================
--- Create materialized views for  transport lines
--- ============================================================================
-DROP MATERIALIZED VIEW IF EXISTS mv_transport_lines_z16_20 CASCADE;
-SELECT create_transport_lines_mview('mv_transport_lines_z16_20', 0, ARRAY['*'], ARRAY['railway','route']);
+
 SELECT create_mview_line_from_mview('mv_transport_lines_z16_20', 'mv_transport_lines_z13_15', 5, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z13_15', 'mv_transport_lines_z10_12', 20, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z10_12', 'mv_transport_lines_z8_9', 100, NULL);
