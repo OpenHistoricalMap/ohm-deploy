@@ -120,7 +120,8 @@ WITH union_sources AS (
     member::bigint AS way_id,
     osm_id, name, type, route, ref, network, operator, direction, tags, geometry,
     start_decdate,
-    end_decdate
+    end_decdate,
+    me_highway AS highway
   FROM osm_route_multilines
   WHERE geometry IS NOT NULL
 
@@ -131,7 +132,8 @@ WITH union_sources AS (
     osm_id::bigint AS way_id,
     osm_id, name, type, route, ref, network, operator, direction, tags, geometry,
     start_decdate,
-    end_decdate
+    end_decdate,
+    highway
   FROM osm_route_lines
   WHERE geometry IS NOT NULL
 ),
@@ -156,16 +158,17 @@ data_for_null_dates AS (
       jsonb_build_object(
         'osm_id', u.osm_id,
         'ref', u.ref,
-        'route', u.route, 
+        'route', u.route,
         'network', u.network,
-        'name', u.name, 
-        'type', u.type, 
-        'operator', u.operator, 
-        'direction', u.direction, 
+        'name', u.name,
+        'type', u.type,
+        'operator', u.operator,
+        'direction', u.direction,
         'tags', u.tags
       )
       ORDER BY u.ref
-    ) AS routes                                     -- position 9
+    ) AS routes,                                    -- position 9
+    MAX(u.highway) AS highway                       -- all rows share the same way_id, so highway is identical; MAX is just to satisfy GROUP BY
   FROM union_sources u
   WHERE u.way_id NOT IN (SELECT way_id FROM ways_with_dates)
   GROUP BY u.way_id
@@ -197,7 +200,7 @@ data_for_dated_ways AS (
     -- Relate active routes to each time segment
     SELECT
       s.way_id, s.seg_start, s.seg_end,
-      u.osm_id, u.ref, u.route, u.network, u.name, u.type, u.operator, u.direction, u.tags, u.geometry
+      u.osm_id, u.ref, u.route, u.network, u.name, u.type, u.operator, u.direction, u.tags, u.geometry, u.highway
     FROM segments s
     JOIN union_sources u
       ON u.way_id = s.way_id
@@ -225,18 +228,19 @@ data_for_dated_ways AS (
       COUNT(DISTINCT osm_id) AS num_routes,
       jsonb_agg(
         jsonb_build_object(
-          'osm_id', osm_id, 
-          'ref', ref, 
-          'route', route, 
-          'network', network, 
+          'osm_id', osm_id,
+          'ref', ref,
+          'route', route,
+          'network', network,
           'name', name,
-          'type', type, 
-          'operator', operator, 
-          'direction', direction, 
+          'type', type,
+          'operator', operator,
+          'direction', direction,
           'tags', tags
         )
         ORDER BY ref
       ) AS routes,
+      MAX(highway) AS highway, -- same value per way_id; MAX just satisfies GROUP BY
       md5(
             jsonb_agg(
               jsonb_build_object(
@@ -261,6 +265,7 @@ data_for_dated_ways AS (
       (ARRAY_AGG(geometry))[1] AS geometry,
       MAX(num_routes) AS num_routes,
       (ARRAY_AGG(routes))[1] AS routes,
+      MAX(highway) AS highway, -- same value per way_id; MAX just satisfies GROUP BY
       routeset_hash
     FROM (
       SELECT 
@@ -288,15 +293,16 @@ data_for_dated_ways AS (
     ) g
     GROUP BY way_id, grp, routeset_hash
   )
-  SELECT 
-    way_id, 
-    min_start_decdate, 
-    max_end_decdate, 
-    min_start_date_iso, 
-    max_end_date_iso, 
-    geometry, 
-    num_routes, 
-    routes
+  SELECT
+    way_id,
+    min_start_decdate,
+    max_end_decdate,
+    min_start_date_iso,
+    max_end_date_iso,
+    geometry,
+    num_routes,
+    routes,
+    highway
   FROM merged
 )
 -- Combine the two result sets
