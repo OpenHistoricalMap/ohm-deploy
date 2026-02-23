@@ -116,7 +116,8 @@ BEGIN
           ELSE tranport_line_table.tags
         END AS tags,
         CASE WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.start_date ELSE tranport_line_table.start_date END AS start_date,
-        CASE WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.end_date   ELSE tranport_line_table.end_date   END AS end_date
+        CASE WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.end_date   ELSE tranport_line_table.end_date   END AS end_date,
+        street_mline_table.osm_id AS street_rel_osm_id
       FROM osm_transport_lines AS tranport_line_table
       LEFT JOIN osm_street_multilines AS street_mline_table
         ON street_mline_table.member::bigint = tranport_line_table.osm_id
@@ -159,10 +160,14 @@ BEGIN
         isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
         isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
         tags,
-        NULL AS member,
+        ABS(street_rel_osm_id) AS relation,
         'way' AS source_type,
         %s
       FROM way_street_expanded
+      WHERE NOT EXISTS (
+        SELECT 1 FROM osm_transport_multilines AS tm
+        WHERE tm.member::bigint = way_street_expanded.osm_id
+      )
 
       UNION ALL
 
@@ -171,7 +176,7 @@ BEGIN
       -- -------------------------------------------------------------------
       SELECT
         (COALESCE(CAST(id AS TEXT), '') || '_' || COALESCE(CAST(osm_id AS TEXT), '')) AS id,
-        ABS(osm_id) AS osm_id,
+        ABS(member::bigint) AS osm_id,
         geometry,
         CASE
             WHEN highway = 'construction' THEN
@@ -201,7 +206,7 @@ BEGIN
         isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
         isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
         tags,
-        member,
+        ABS(osm_id) AS relation,
         'relation' AS source_type,
         %s
       FROM osm_transport_multilines
