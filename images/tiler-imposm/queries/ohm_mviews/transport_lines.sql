@@ -33,96 +33,99 @@ BEGIN
     -- -----------------------------------------------------------------------
     -- CTE: way_street_expanded
     --
-    -- Expands ways by their type=street relation memberships.
+    -- Produces all transport line features from ways, always including the
+    -- standalone way feature plus any street-relation-expanded features.
     --
-    -- osm_street_multilines has one row per (type=street relation, way member).
-    -- LEFT JOIN expands each way into N rows when it belongs to N street
-    -- relations, or leaves it as a single row when it has no membership.
+    -- Part 1 (standalone ways):
+    --   Every way from osm_transport_lines appears as-is with its own
+    --   properties. This represents the physical infrastructure's full
+    --   lifespan, including periods not covered by any street relation.
     --
-    -- Override rules (relation values take priority when a match exists):
-    --   name      : relation's name if present, else way's name (fallback).
-    --   start_date: relation's when exists, else way's.
-    --   end_date  : relation's when exists, else way's.
-    --   tags      : relation tags merged on top of way tags (way wins conflicts).
+    -- Part 2 (street-relation-expanded):
+    --   For each (way, street-relation) pair, an additional feature is
+    --   produced with the relation's values overriding the way's:
+    --     - name      : relation's name if present, else way's name.
+    --     - start_date: from the relation.
+    --     - end_date  : from the relation.
+    --     - tags      : relation tags merged on top of way tags.
     --
-    -- Example: Given these source tables:
+    -- Example:
+    --   Way 100 (start_date=1915) belongs to street relation -5000
+    --   (start_date=1984, name="Oak Street").
     --
-    --   osm_transport_lines (ways):
-    --   ┌────┬────────┬──────────┬──────────────┬────────────┬──────────┐
-    --   │ id │ osm_id │ highway  │ name         │ start_date │ end_date │
-    --   ├────┼────────┼──────────┼──────────────┼────────────┼──────────┤
-    --   │ 1  │ 100    │ primary  │ Main Street  │ 1920       │          │
-    --   │ 2  │ 200    │ tertiary │ Oak Ave      │ 1950       │          │
-    --   │ 3  │ 300    │ rail     │ Rail Line 5  │ 1880       │ 1960     │
-    --   └────┴────────┴──────────┴──────────────┴────────────┴──────────┘
-    --
-    --   osm_street_multilines (type=street relations):
-    --   ┌─────────┬────────┬──────────────────┬────────────┬──────────┐
-    --   │ osm_id  │ member │ name             │ start_date │ end_date │
-    --   ├─────────┼────────┼──────────────────┼────────────┼──────────┤
-    --   │ -5000   │ 100    │ Av. Principal    │ 1800       │          │  ← way 100 in relation -5000
-    --   │ -5001   │ 100    │ Calle Mayor      │ 1750       │ 1800     │  ← way 100 also in relation -5001
-    --   └─────────┴────────┴──────────────────┴────────────┴──────────┘
-    --
-    --   Result of way_street_expanded:
-    --   ┌──────────────┬────────┬──────────┬──────────────────┬────────────┬──────────┐
-    --   │ id           │ osm_id │ highway  │ name             │ start_date │ end_date │
-    --   ├──────────────┼────────┼──────────┼──────────────────┼────────────┼──────────┤
-    --   │ -5000_100    │ 100    │ primary  │ Av. Principal    │ 1800       │          │  ← relation -5000 overrides
-    --   │ -5001_100    │ 100    │ primary  │ Calle Mayor      │ 1750       │ 1800     │  ← relation -5001 overrides
-    --   │ 2_200        │ 200    │ tertiary │ Oak Ave          │ 1950       │          │  ← no relation, keeps way values
-    --   │ 3_300        │ 300    │ rail     │ Rail Line 5      │ 1880       │ 1960     │  ← no relation, keeps way values
-    --   └──────────────┴────────┴──────────┴──────────────────┴────────────┴──────────┘
-    --
-    --   Note: way 100 (Main Street) appears TWICE because it belongs to 2
-    --   street relations. Each row gets the relation's name and dates.
-    --   Ways 200 and 300 have no street relation, so they appear once with
-    --   their original values. The id uses tl.id_tl.osm_id (positive_positive).
+    --   Result:
+    --   ┌──────────────┬────────┬──────────────┬────────────┬──────────┬──────────────────┐
+    --   │ id           │ osm_id │ name         │ start_date │ end_date │ street_rel_osm_id│
+    --   ├──────────────┼────────┼──────────────┼────────────┼──────────┼──────────────────┤
+    --   │ 1_100        │ 100    │ (way's name) │ 1915       │          │ NULL             │  ← standalone way
+    --   │ -5000_100    │ 100    │ Oak Street   │ 1984       │          │ -5000            │  ← relation overrides
+    --   └──────────────┴────────┴──────────────┴────────────┴──────────┴──────────────────┘
     -- -----------------------------------------------------------------------
     way_street_expanded AS (
+      -- Part 1: Standalone ways (always present)
       SELECT
-        CASE
-          WHEN street_mline_table.osm_id IS NOT NULL THEN
-            COALESCE(CAST(street_mline_table.osm_id AS TEXT), '') || '_' || COALESCE(CAST(tranport_line_table.osm_id AS TEXT), '')
-          ELSE
-            COALESCE(CAST(tranport_line_table.id AS TEXT), '') || '_' || COALESCE(CAST(tranport_line_table.osm_id AS TEXT), '')
-        END AS id,
-        tranport_line_table.osm_id,
-        tranport_line_table.geometry,
-        COALESCE(NULLIF(street_mline_table.highway, ''), tranport_line_table.highway) AS highway,
-        tranport_line_table.type,
-        tranport_line_table.class,
-        CASE
-          WHEN street_mline_table.osm_id IS NOT NULL
-            THEN COALESCE(NULLIF(street_mline_table.name, ''), NULLIF(tranport_line_table.name, ''))
-          ELSE tranport_line_table.name
-        END AS name,
-        COALESCE(street_mline_table.tunnel,                tranport_line_table.tunnel)                AS tunnel,
-        COALESCE(street_mline_table.bridge,                tranport_line_table.bridge)                AS bridge,
-        COALESCE(street_mline_table.oneway,                tranport_line_table.oneway)                AS oneway,
-        COALESCE(NULLIF(street_mline_table.ref,  ''),      tranport_line_table.ref)                   AS ref,
-        COALESCE(street_mline_table.z_order,               tranport_line_table.z_order)               AS z_order,
-        COALESCE(NULLIF(street_mline_table.access,  ''),   tranport_line_table.access)                AS access,
-        COALESCE(NULLIF(street_mline_table.service, ''),   tranport_line_table.service)               AS service,
-        COALESCE(NULLIF(street_mline_table.ford,    ''),   tranport_line_table.ford)                  AS ford,
-        COALESCE(NULLIF(street_mline_table.electrified,''),tranport_line_table.electrified)           AS electrified,
-        COALESCE(NULLIF(street_mline_table.highspeed,''),  tranport_line_table.highspeed)             AS highspeed,
-        COALESCE(NULLIF(street_mline_table.usage,   ''),   tranport_line_table.usage)                 AS usage,
-        COALESCE(NULLIF(street_mline_table.railway, ''),   tranport_line_table.railway)               AS railway,
-        COALESCE(NULLIF(street_mline_table.aeroway, ''),   tranport_line_table.aeroway)               AS aeroway,
-        COALESCE(NULLIF(street_mline_table.route,   ''),   tranport_line_table.route)                 AS route,
-        CASE
-          WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.tags || tranport_line_table.tags
-          ELSE tranport_line_table.tags
-        END AS tags,
-        CASE WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.start_date ELSE tranport_line_table.start_date END AS start_date,
-        CASE WHEN street_mline_table.osm_id IS NOT NULL THEN street_mline_table.end_date   ELSE tranport_line_table.end_date   END AS end_date,
-        street_mline_table.osm_id AS street_rel_osm_id
-      FROM osm_transport_lines AS tranport_line_table
-      LEFT JOIN osm_street_multilines AS street_mline_table
-        ON street_mline_table.member::bigint = tranport_line_table.osm_id
-        AND ST_GeometryType(street_mline_table.geometry) = 'ST_LineString'
-      WHERE tranport_line_table.geometry IS NOT NULL
+        COALESCE(CAST(tl.id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '') AS id,
+        tl.osm_id,
+        tl.geometry,
+        tl.highway,
+        tl.type,
+        tl.class,
+        tl.name,
+        tl.tunnel,
+        tl.bridge,
+        tl.oneway,
+        tl.ref,
+        tl.z_order,
+        tl.access,
+        tl.service,
+        tl.ford,
+        tl.electrified,
+        tl.highspeed,
+        tl.usage,
+        tl.railway,
+        tl.aeroway,
+        tl.route,
+        tl.tags,
+        tl.start_date,
+        tl.end_date,
+        NULL::bigint AS street_rel_osm_id
+      FROM osm_transport_lines AS tl
+      WHERE tl.geometry IS NOT NULL
+
+      UNION ALL
+
+      -- Part 2: Street-relation-expanded features
+      SELECT
+        COALESCE(CAST(sm.osm_id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '') AS id,
+        tl.osm_id,
+        tl.geometry,
+        COALESCE(NULLIF(sm.highway, ''), tl.highway)       AS highway,
+        tl.type,
+        tl.class,
+        COALESCE(NULLIF(sm.name, ''), NULLIF(tl.name, '')) AS name,
+        COALESCE(sm.tunnel,                tl.tunnel)                AS tunnel,
+        COALESCE(sm.bridge,                tl.bridge)                AS bridge,
+        COALESCE(sm.oneway,                tl.oneway)                AS oneway,
+        COALESCE(NULLIF(sm.ref,  ''),      tl.ref)                   AS ref,
+        COALESCE(sm.z_order,               tl.z_order)               AS z_order,
+        COALESCE(NULLIF(sm.access,  ''),   tl.access)                AS access,
+        COALESCE(NULLIF(sm.service, ''),   tl.service)               AS service,
+        COALESCE(NULLIF(sm.ford,    ''),   tl.ford)                  AS ford,
+        COALESCE(NULLIF(sm.electrified,''),tl.electrified)           AS electrified,
+        COALESCE(NULLIF(sm.highspeed,''),  tl.highspeed)             AS highspeed,
+        COALESCE(NULLIF(sm.usage,   ''),   tl.usage)                 AS usage,
+        COALESCE(NULLIF(sm.railway, ''),   tl.railway)               AS railway,
+        COALESCE(NULLIF(sm.aeroway, ''),   tl.aeroway)               AS aeroway,
+        COALESCE(NULLIF(sm.route,   ''),   tl.route)                 AS route,
+        sm.tags || tl.tags AS tags,
+        sm.start_date,
+        sm.end_date,
+        sm.osm_id AS street_rel_osm_id
+      FROM osm_transport_lines AS tl
+      INNER JOIN osm_street_multilines AS sm
+        ON sm.member::bigint = tl.osm_id
+        AND ST_GeometryType(sm.geometry) = 'ST_LineString'
+      WHERE tl.geometry IS NOT NULL
     ),
     combined AS (
       -- -------------------------------------------------------------------
