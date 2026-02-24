@@ -31,6 +31,57 @@ BEGIN
     CREATE MATERIALIZED VIEW mv_transport_lines_z16_20_tmp AS
     WITH
     -- -----------------------------------------------------------------------
+    -- CTE: attr_diff_pairs
+    --
+    -- Identifies (way, street-relation) pairs where the relation overrides
+    -- at least one attribute compared to the way. Only these pairs produce
+    -- separate relation-expanded features and trigger date trimming on the
+    -- standalone way. When all attributes match, the way keeps its original
+    -- date range and no expanded feature is emitted.
+    -- -----------------------------------------------------------------------
+    attr_diff_pairs AS (
+      SELECT sm.member::bigint AS way_osm_id, sm.osm_id AS rel_osm_id, sm.start_date AS rel_start_date
+      FROM osm_transport_lines AS tl
+      INNER JOIN osm_street_multilines AS sm
+        ON sm.member::bigint = tl.osm_id
+        AND ST_GeometryType(sm.geometry) = 'ST_LineString'
+      WHERE tl.geometry IS NOT NULL
+        AND (
+          (NULLIF(sm.name, '')         IS NOT NULL AND sm.name         IS DISTINCT FROM tl.name)
+          OR (NULLIF(sm.highway, '')   IS NOT NULL AND sm.highway      IS DISTINCT FROM tl.highway)
+          OR (NULLIF(sm.ref, '')       IS NOT NULL AND sm.ref          IS DISTINCT FROM tl.ref)
+          OR (NULLIF(sm.access, '')    IS NOT NULL AND sm.access       IS DISTINCT FROM tl.access)
+          OR (NULLIF(sm.service, '')   IS NOT NULL AND sm.service      IS DISTINCT FROM tl.service)
+          OR (NULLIF(sm.ford, '')      IS NOT NULL AND sm.ford         IS DISTINCT FROM tl.ford)
+          OR (NULLIF(sm.electrified,'')IS NOT NULL AND sm.electrified  IS DISTINCT FROM tl.electrified)
+          OR (NULLIF(sm.highspeed, '') IS NOT NULL AND sm.highspeed    IS DISTINCT FROM tl.highspeed)
+          OR (NULLIF(sm.usage, '')     IS NOT NULL AND sm.usage        IS DISTINCT FROM tl.usage)
+          OR (NULLIF(sm.railway, '')   IS NOT NULL AND sm.railway      IS DISTINCT FROM tl.railway)
+          OR (NULLIF(sm.aeroway, '')   IS NOT NULL AND sm.aeroway      IS DISTINCT FROM tl.aeroway)
+          OR (NULLIF(sm.route, '')     IS NOT NULL AND sm.route        IS DISTINCT FROM tl.route)
+          OR (sm.tunnel  IS NOT NULL AND sm.tunnel  IS DISTINCT FROM tl.tunnel)
+          OR (sm.bridge  IS NOT NULL AND sm.bridge  IS DISTINCT FROM tl.bridge)
+          OR (sm.oneway  IS NOT NULL AND sm.oneway  IS DISTINCT FROM tl.oneway)
+        )
+    ),
+    -- -----------------------------------------------------------------------
+    -- CTE: street_rel_dates
+    --
+    -- For each way with attribute-changing street relations, computes the
+    -- earliest relation start_date. Used to trim the standalone way's
+    -- end_date so it doesn't overlap with the relation's time period.
+    -- Relations with identical attributes are excluded (the way keeps its
+    -- original date range for those).
+    -- -----------------------------------------------------------------------
+    street_rel_dates AS (
+      SELECT
+        way_osm_id,
+        MIN(NULLIF(rel_start_date, '')) AS earliest_rel_start
+      FROM attr_diff_pairs
+      WHERE NULLIF(rel_start_date, '') IS NOT NULL
+      GROUP BY way_osm_id
+    ),
+    -- -----------------------------------------------------------------------
     -- CTE: way_street_expanded
     --
     -- Produces all transport line features from ways, always including the
@@ -38,27 +89,42 @@ BEGIN
     --
     -- Part 1 (standalone ways):
     --   Every way from osm_transport_lines appears as-is with its own
-    --   properties. This represents the physical infrastructure's full
-    --   lifespan, including periods not covered by any street relation.
+    --   properties. When the way belongs to a street relation that changes
+    --   attributes, the way's end_date is trimmed to the earliest such
+    --   relation's start_date so the time periods do not overlap. When the
+    --   relation has identical attributes, the way keeps its original dates
+    --   (no split needed).
     --
     -- Part 2 (street-relation-expanded):
-    --   For each (way, street-relation) pair, an additional feature is
-    --   produced with the relation's values overriding the way's:
+    --   Only produced when the relation changes at least one attribute.
+    --   The relation's values override the way's:
     --     - name      : relation's name if present, else way's name.
     --     - start_date: from the relation.
     --     - end_date  : from the relation.
     --     - tags      : relation tags merged on top of way tags.
     --
-    -- Example:
-    --   Way 100 (start_date=1915) belongs to street relation -5000
-    --   (start_date=1984, name="Oak Street").
+    -- Example A (relation changes name → split):
+    --   Way 100 (start_date=1915, name="Old Road") belongs to street
+    --   relation -5000 (start_date=1984, name="Oak Street").
     --
-    --   Result:
+    --   Result (no overlapping time periods):
     --   ┌──────────────┬────────┬──────────────┬────────────┬──────────┬──────────────────┐
     --   │ id           │ osm_id │ name         │ start_date │ end_date │ street_rel_osm_id│
     --   ├──────────────┼────────┼──────────────┼────────────┼──────────┼──────────────────┤
-    --   │ 1_100        │ 100    │ (way's name) │ 1915       │          │ NULL             │  ← standalone way
+    --   │ 1_100        │ 100    │ Old Road     │ 1915       │ 1984     │ NULL             │  ← way trimmed
     --   │ -5000_100    │ 100    │ Oak Street   │ 1984       │          │ -5000            │  ← relation overrides
+    --   └──────────────┴────────┴──────────────┴────────────┴──────────┴──────────────────┘
+    --
+    -- Example B (relation has same attributes → merged):
+    --   Way 100 (start_date=1915, name="Oak Street") belongs to street
+    --   relation -5000 (start_date=1984, name="Oak Street"). All attributes
+    --   are identical, so no expanded feature is produced.
+    --
+    --   Result (single feature with full date range):
+    --   ┌──────────────┬────────┬──────────────┬────────────┬──────────┬──────────────────┐
+    --   │ id           │ osm_id │ name         │ start_date │ end_date │ street_rel_osm_id│
+    --   ├──────────────┼────────┼──────────────┼────────────┼──────────┼──────────────────┤
+    --   │ 1_100        │ 100    │ Oak Street   │ 1915       │          │ NULL             │  ← way untrimmed
     --   └──────────────┴────────┴──────────────┴────────────┴──────────┴──────────────────┘
     -- -----------------------------------------------------------------------
     way_street_expanded AS (
@@ -87,9 +153,10 @@ BEGIN
         tl.route,
         tl.tags,
         tl.start_date,
-        tl.end_date,
+        LEAST(NULLIF(tl.end_date, ''), srd.earliest_rel_start) AS end_date,
         NULL::bigint AS street_rel_osm_id
       FROM osm_transport_lines AS tl
+      LEFT JOIN street_rel_dates AS srd ON srd.way_osm_id = tl.osm_id
       WHERE tl.geometry IS NOT NULL
 
       UNION ALL
@@ -126,6 +193,10 @@ BEGIN
         ON sm.member::bigint = tl.osm_id
         AND ST_GeometryType(sm.geometry) = 'ST_LineString'
       WHERE tl.geometry IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM attr_diff_pairs AS adp
+          WHERE adp.way_osm_id = tl.osm_id AND adp.rel_osm_id = sm.osm_id
+        )
     ),
     combined AS (
       -- -------------------------------------------------------------------
