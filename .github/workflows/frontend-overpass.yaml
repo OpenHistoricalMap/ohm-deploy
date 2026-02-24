@@ -15,7 +15,7 @@ jobs:
     steps:
 
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.13.0
         with:
           access_token: ${{ github.token }}
 
@@ -24,7 +24,7 @@ jobs:
         uses: allenevans/set-env@v4.0.0
         with:
           OVERPASS_API: overpass-api.openhistoricalmap.org
-          OVERPASS_BUCKET: overpass-turbo-staging.openhistoricalmap.org
+          OVERPASS_BUCKET: overpass-turbo.ohmstaging.org
           CLOUDFRONT_DISTRIBUTION_ID: EK1WJAGU1DEAZ
 
       - name: Set environment variables - Production
@@ -36,15 +36,15 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: E24URY7SKM2LDD
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.x"
 
       - name: Checkout overpass-turbo repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: 7a9c4bb794b2367970c052fbfb73dc7254e13455
+          ref: a64d500abc82744613b77bbb362e2cee98648d59
           path: overpass-turbo
 
       - name: Enable Corepack
@@ -63,7 +63,7 @@ jobs:
         working-directory: overpass-turbo
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
