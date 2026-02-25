@@ -24,7 +24,7 @@ jobs:
         uses: allenevans/set-env@v4.0.0
         with:
           OVERPASS_API: overpass-api.openhistoricalmap.org
-          OVERPASS_BUCKET: overpass-turbo.ohmstaging.org
+          OVERPASS_BUCKET: overpass-turbo-staging.openhistoricalmap.org
           CLOUDFRONT_DISTRIBUTION_ID: EK1WJAGU1DEAZ
 
       - name: Set environment variables - Production
