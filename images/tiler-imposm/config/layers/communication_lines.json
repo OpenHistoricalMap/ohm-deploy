@@ -1,0 +1,148 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "communication_lines": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "string",
+          "name": "communication_telephone",
+          "key": "communication:telephone"
+        },
+        {
+          "type": "string",
+          "name": "communication_telegraph",
+          "key": "communication:telegraph"
+        },
+        {
+          "type": "string",
+          "name": "communication_internet",
+          "key": "communication:internet"
+        },
+        {
+          "type": "string",
+          "name": "communication_cable_television",
+          "key": "communication:cable_television"
+        },
+        {
+          "type": "string",
+          "name": "communication_television",
+          "key": "communication:television"
+        },
+        {
+          "type": "string",
+          "name": "communication_radio",
+          "key": "communication:radio"
+        },
+        {
+          "type": "string",
+          "name": "communication_microwave",
+          "key": "communication:microwave"
+        },
+        {
+          "type": "string",
+          "name": "communication_bos",
+          "key": "communication:bos"
+        },
+        {
+          "type": "string",
+          "name": "communication_mobile_phone",
+          "key": "communication:mobile_phone"
+        },
+        {
+          "type": "string",
+          "name": "communication_satellite",
+          "key": "communication:satellite"
+        },
+        {
+          "type": "string",
+          "name": "communication_amateur_radio",
+          "key": "communication:amateur_radio"
+        },
+        {
+          "type": "string",
+          "name": "communication_optical",
+          "key": "communication:optical"
+        },
+        {
+          "type": "string",
+          "name": "communication_space",
+          "key": "communication:space"
+        },
+        {
+          "type": "string",
+          "name": "communication_gsm_r",
+          "key": "communication:gsm-r"
+        },
+        {
+          "type": "string",
+          "name": "telecom",
+          "key": "telecom"
+        },
+        {
+          "type": "string",
+          "name": "operator",
+          "key": "operator"
+        },
+        {
+          "type": "string",
+          "name": "location",
+          "key": "location"
+        },
+        {
+          "type": "string",
+          "name": "layer",
+          "key": "layer"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "linestring",
+      "mapping": {
+        "communication": [
+          "__any__"
+        ]
+      }
+    }
+  }
+}

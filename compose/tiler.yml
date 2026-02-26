@@ -1,27 +1,29 @@
 services:
   db:
-    image: ohm-tiler-db:v1
+    image: rub21/ohm-tiler-db:v1
+    container_name: db
     build:
       context: ../images/tiler-db
       dockerfile: Dockerfile
     ports:
-      - "5432:5432"
-    # volumes:
-    #   - ../data/tiler-db-data2:/var/lib/postgresql/data
+      - "54321:5432"
+    volumes:
+      - tiler_pgdata:/var/lib/postgresql/data
     env_file:
       - ../envs/.env.tiler
     restart: always
     networks:
-      - tiler_network
+      - ohm_network
 
   imposm:
-    image: rub21/tiler-imposm:v70
+    image: rub21/tiler-imposm:v1
+    container_name: imposm
     build:
       context: ../images/tiler-imposm
       dockerfile: Dockerfile
     volumes:
       - ../images/tiler-imposm:/osm
-      - ../hetzner:/hetzner
+      - tiler_imposm_data:/mnt/data
     command:
       - sh
       - -c
@@ -29,10 +31,11 @@ services:
     env_file:
       - ../envs/.env.tiler
     networks:
-      - tiler_network
+      - ohm_network
 
   tiler:
-    image: rub21/tiler-server:v73
+    image: rub21/tiler-server:v1
+    container_name: tiler
     build:
       context: ../images/tiler-server
       dockerfile: Dockerfile
@@ -45,39 +48,47 @@ services:
       - ../envs/.env.tiler
     restart: always
     networks:
-      - tiler_network
+      - ohm_network
 
-  tiler-cache:
-    image: rub21/tiler-cache:v2
-    build:
-      context: ../images/tiler-cache
-      dockerfile: Dockerfile
-    volumes:
-      - ../images/tiler-cache:/app
-    env_file:
-      - ../envs/.env.tiler
-    restart: always
-    networks:
-      - tiler_network
+  # tiler-cache:
+  #   image: rub21/tiler-cache:v2
+  #   build:
+  #     context: ../images/tiler-cache
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ../images/tiler-cache:/app
+  #   env_file:
+  #     - ../envs/.env.tiler
+  #   restart: always
+  #   networks:
+  #     - ohm_network
 
 
-  tiler-monitor:
-    image: rub21/tiler-monitor:v1
-    build:
-      context: ../images/tiler-monitor
-      dockerfile: Dockerfile
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ../images/tiler-monitor:/app
-      - ../hetzner:/app/hetzner
-    environment:
-      - DOCKER_CONFIG_ENVIRONMENT=staging
-    env_file:
-      - ../envs/.env.tiler
-    stdin_open: true
-    tty: true
+  # tiler-monitor:
+  #   image: rub21/tiler-monitor:v1
+  #   build:
+  #     context: ../images/tiler-monitor
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ../images/tiler-monitor:/app
+  #     - ../hetzner:/app/hetzner
+  #   environment:
+  #     - DOCKER_CONFIG_ENVIRONMENT=staging
+  #   env_file:
+  #     - ../envs/.env.tiler
+  #   stdin_open: true
+  #   tty: true
 
 networks:
-  tiler_network:
-    driver: bridge
-    
+  ohm_network:
+    external: true
+
+volumes:
+  tiler_pgdata:
+    driver: local
+    name: tiler_db
+
+  tiler_imposm_data:
+    driver: local
+    name: tiler_imposm

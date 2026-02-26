@@ -199,7 +199,7 @@ SELECT log_notice('STEP 2.3: Creating additional indexes for query performance')
 
 CREATE INDEX IF NOT EXISTS osm_admin_relation_members_type_idx ON osm_admin_relation_members (type);
 CREATE INDEX IF NOT EXISTS osm_admin_lines_type_idx ON osm_admin_lines (type);
-CREATE INDEX IF NOT EXISTS osm_relation_members_role_idx ON osm_admin_relation_members (role);
+CREATE INDEX IF NOT EXISTS osm_admin_relation_members_role_idx ON osm_admin_relation_members (role);
 
 CREATE INDEX IF NOT EXISTS osm_admin_relation_members_linestring_idx
 ON osm_admin_relation_members (admin_level, member, type)
