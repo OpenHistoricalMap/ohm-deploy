@@ -16,7 +16,7 @@ services:
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3294.h12c71f95
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -38,7 +38,7 @@ services:
   # Tiler server
   tiler_server:
     container_name: tiler_server
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
     # ports:
     #   - "9090:9090"
     restart: always
@@ -81,7 +81,7 @@ services:
 
   tile_global_seeding:
     container_name: tiler_global_seeding
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
     env_file:
       - .env.tiler
     volumes:
@@ -96,7 +96,7 @@ services:
 
   tile_coverage_seeding:
     container_name: tiler_coverage_seeding
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3225.h2122f3e
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
     volumes:
       - ./seed.sh:/opt/seed.sh
     entrypoint:
@@ -128,10 +128,10 @@ services:
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db_11_02
+    name: tiler_db_25_02
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm_11_02
+    name: tiler_imposm_25_02
 
 networks:
   ohm_network:
