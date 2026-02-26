@@ -72,18 +72,18 @@ WHERE
 #######Maps
 [[maps.layers]]
 name = "transport_areas"
-provider_layer = "osm.transport_areas_z10_12"
+provider_layer = "ohm.transport_areas_z10_12"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "transport_areas"
-provider_layer = "osm.transport_areas_z13_15"
+provider_layer = "ohm.transport_areas_z13_15"
 min_zoom = 13
 max_zoom = 15
 
 [[maps.layers]]
 name = "transport_areas"
-provider_layer = "osm.transport_areas_z16_20"
+provider_layer = "ohm.transport_areas_z16_20"
 min_zoom = 16
 max_zoom = 20

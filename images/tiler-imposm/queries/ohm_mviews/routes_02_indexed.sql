@@ -34,6 +34,7 @@ WITH exploded AS (
     n.max_end_date_iso,
     n.geometry,
     n.num_routes,
+    n.highway,
     r.value ->> 'ref'                      AS ref,
     r.value ->> 'network'                  AS network,
     r.value ->> 'network:wikidata'         AS network_wikidata,
@@ -65,6 +66,7 @@ ranked AS (
     max_end_date_iso,
     geometry,
     num_routes,
+    highway,
     routes,
     ref,
     network,
@@ -89,7 +91,7 @@ SELECT
   max_end_date_iso,
   geometry,
   num_routes,
-  -- direction,
+  highway,
   -- =========================================================================
   -- ROAD
   -- For each slot we store: ref, network, network_wikidata, operator, name.
@@ -418,7 +420,7 @@ WHERE type IN ('road', 'train', 'subway', 'light_rail', 'tram', 'trolleybus', 'b
 GROUP BY
   way_id, min_start_decdate, max_end_decdate,
   min_start_date_iso, max_end_date_iso,
-  geometry, num_routes, routes
+  geometry, num_routes, highway, routes
 WITH DATA;
 
 -- ============================================================================

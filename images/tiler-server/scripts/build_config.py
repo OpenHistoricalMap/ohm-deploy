@@ -111,7 +111,8 @@ if __name__ == "__main__":
             "landuse_lines",
             "other_areas",
             "other_points_centroids",
-            "other_lines"
+            "other_lines",
+            "communication_lines"
         ]
     }
 
@@ -123,7 +124,16 @@ if __name__ == "__main__":
         ]
     }
 
-    groups = [provider_osm, provider_ohm_admin_boundary]
+    provider_ohm_non_admin_boundary = {
+        "provider_marker": "###### PROVIDERS_NON_ADMIN_BOUNDARIES_AREAS",
+        "map_marker": "###### MAPS_NON_ADMIN_BOUNDARIES_AREAS",
+        "providers": [
+            "non_admin_boundaries_areas",
+            "non_admin_boundaries_centroids"
+        ]
+    }
+
+    groups = [provider_osm, provider_ohm_admin_boundary, provider_ohm_non_admin_boundary]
 
     with open(TEMPLATE_FILE, 'r') as f:
         template_content = f.read()

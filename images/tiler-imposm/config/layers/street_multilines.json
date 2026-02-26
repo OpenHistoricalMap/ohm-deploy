@@ -1,0 +1,140 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "street_multilines": {
+      "type": "relation_member",
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "boolint",
+          "name": "tunnel",
+          "key": "tunnel"
+        },
+        {
+          "type": "boolint",
+          "name": "bridge",
+          "key": "bridge"
+        },
+        {
+          "type": "direction",
+          "name": "oneway",
+          "key": "oneway"
+        },
+        {
+          "type": "string",
+          "name": "ref",
+          "key": "ref"
+        },
+        {
+          "type": "wayzorder",
+          "name": "z_order",
+          "key": "layer"
+        },
+        {
+          "type": "string",
+          "name": "access",
+          "key": "access"
+        },
+        {
+          "type": "string",
+          "name": "service",
+          "key": "service"
+        },
+        {
+          "type": "string",
+          "name": "ford",
+          "key": "ford"
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "electrified",
+          "key": "electrified"
+        },
+        {
+          "type": "string",
+          "name": "highspeed",
+          "key": "highspeed"
+        },
+        {
+          "type": "string",
+          "name": "usage",
+          "key": "usage"
+        },
+        {
+          "type": "string",
+          "name": "railway",
+          "key": "railway"
+        },
+        {
+          "type": "string",
+          "name": "aeroway",
+          "key": "aeroway"
+        },
+        {
+          "type": "string",
+          "name": "highway",
+          "key": "highway"
+        },
+        {
+          "type": "string",
+          "name": "route",
+          "key": "route"
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "name": "member",
+          "type": "member_id"
+        }
+      ],
+      "mapping": {
+        "type": ["street"]
+      }
+    }
+  }
+}

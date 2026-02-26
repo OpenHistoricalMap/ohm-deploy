@@ -12,19 +12,19 @@ services:
       - postgres
       - "-c"
       - "config_file=/etc/postgresql/postgresql.conf"
-    # ports:
-    #   - "54321:5432"
+    ports:
+      - "5432:5432"
     env_file:
       - .env.tiler
     networks:
       - ohm_network
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
-    # image: tiler-imposm:staging
-    # build: 
-    #   context: ../../images/tiler-imposm
-    #   dockerfile: Dockerfile
+    # image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
+    image: tiler-imposm:staging
+    build: 
+      context: ../../images/tiler-imposm
+      dockerfile: Dockerfile
     volumes:
       - tiler_imposm_data:/mnt/data
     command:
@@ -41,15 +41,7 @@ volumes:
   tiler_pgdata:
     driver: local
     name: tiler_db_11_02
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/HC_Volume_104590709/staging/tiler/pgdata
 
   tiler_imposm_data:
     driver: local
     name: tiler_imposm_11_02
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/HC_Volume_104590709/staging/tiler/imposmdata

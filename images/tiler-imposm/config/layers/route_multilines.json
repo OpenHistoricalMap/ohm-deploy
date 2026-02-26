@@ -91,6 +91,12 @@
           "key": "name",
           "type": "string",
           "from_member": true
+        },
+        {
+          "name": "me_highway",
+          "key": "highway",
+          "type": "string",
+          "from_member": true
         }
       ],
       "mapping": {

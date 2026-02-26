@@ -98,24 +98,24 @@ WHERE
 
 [[maps.layers]]
 name = "other_points_centroids"
-provider_layer = "osm.other_points_centroids_z8_9"
+provider_layer = "ohm.other_points_centroids_z8_9"
 min_zoom = 8
 max_zoom = 9
 
 [[maps.layers]]
 name = "other_points_centroids"
-provider_layer = "osm.other_points_centroids_z10_12"
+provider_layer = "ohm.other_points_centroids_z10_12"
 min_zoom = 10
 max_zoom = 12
 
 [[maps.layers]]
 name = "other_points_centroids"
-provider_layer = "osm.other_points_centroids_z13_15"
+provider_layer = "ohm.other_points_centroids_z13_15"
 min_zoom = 13
 max_zoom = 15
 
 [[maps.layers]]
 name = "other_points_centroids"
-provider_layer = "osm.other_points_centroids_z16_20"
+provider_layer = "ohm.other_points_centroids_z16_20"
 min_zoom = 16
 max_zoom = 20

@@ -139,6 +139,12 @@ others_views=(
     mv_other_lines_z14_15
 )
 
+communication_views=(
+    # lines
+    mv_communication_z16_20
+    mv_communication_z14_15
+)
+
 places_views=(
     mv_place_points_centroids_z0_2
     mv_place_points_centroids_z3_5
@@ -214,6 +220,27 @@ routes_views=(
     mv_routes_indexed_z5
 )
 
+no_admin_boundaries_views=(
+    # areas
+    mv_non_admin_boundaries_areas_z16_20
+    mv_non_admin_boundaries_areas_z13_15
+    mv_non_admin_boundaries_areas_z10_12
+    mv_non_admin_boundaries_areas_z8_9
+    mv_non_admin_boundaries_areas_z6_7
+    mv_non_admin_boundaries_areas_z3_5
+    mv_non_admin_boundaries_areas_z0_2
+
+    # centroids
+    mv_non_admin_boundaries_centroids_z16_20
+    mv_non_admin_boundaries_centroids_z13_15
+    mv_non_admin_boundaries_centroids_z10_12
+    mv_non_admin_boundaries_centroids_z8_9
+    mv_non_admin_boundaries_centroids_z6_7
+    mv_non_admin_boundaries_centroids_z3_5
+    mv_non_admin_boundaries_centroids_z0_2
+)
+
+
 refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 60 "${admin_boundaries_lines_views[@]}" &
 refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 180 "${admin_boundaries_areas_centroids_views[@]}" &
 refresh_mviews_group "ADMIN_MARITIME_LINES" 300 "${admin_maritime_lines_views[@]}" &
@@ -221,7 +248,11 @@ refresh_mviews_group "TRANSPORTS" 180 "${transport_views[@]}" &
 refresh_mviews_group "AMENITY" 180 "${amenity_views[@]}" &
 refresh_mviews_group "LANDUSE" 180 "${landuse_views[@]}" &
 refresh_mviews_group "OTHERS" 180 "${others_views[@]}" &
+refresh_mviews_group "COMMUNICATION" 180 "${communication_views[@]}" &
 refresh_mviews_group "PLACES" 180 "${places_views[@]}" &
 refresh_mviews_group "WATER" 180 "${water_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 "${buildings_views[@]}" &
 refresh_mviews_group "ROUTES" 180 "${routes_views[@]}" &
+
+## This group high demand, so we refresh every 1 hour
+refresh_mviews_group "NO_ADMIN_BOUNDARIES" 36000 "${no_admin_boundaries_views[@]}" &

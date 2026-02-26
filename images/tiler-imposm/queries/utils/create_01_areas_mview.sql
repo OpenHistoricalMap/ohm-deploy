@@ -17,6 +17,7 @@
 --   min_area        DOUBLE PRECISION  - Minimum area in m² to include (0 = no filter)
 --   unique_columns  TEXT              - Comma-separated columns for unique index (default: 'id, osm_id, type')
 --   where_filter    TEXT              - Optional WHERE clause filter (e.g., "type != 'barrier'" or "class NOT IN ('power', 'military')"). NULL = no filter
+--   tag_columns     TEXT              - Optional extra columns from tags (e.g., "tags->'religion' AS religion, tags->'denomination' AS denomination"). NULL = none
 --
 -- Notes:
 --   - Creates the materialized view using a temporary swap mechanism
@@ -25,6 +26,7 @@
 --   - where_filter is appended to WHERE clause with AND, so use conditions like "type != 'barrier'" not "AND type != 'barrier'"
 -- ============================================================================
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
+DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT);
 
 CREATE OR REPLACE FUNCTION create_areas_mview(
     source_table TEXT,
@@ -32,7 +34,8 @@ CREATE OR REPLACE FUNCTION create_areas_mview(
     simplify_tol DOUBLE PRECISION DEFAULT 0,
     min_area DOUBLE PRECISION DEFAULT 0,
     unique_columns TEXT DEFAULT 'id, osm_id, type',
-    where_filter TEXT DEFAULT NULL
+    where_filter TEXT DEFAULT NULL,
+    tag_columns TEXT DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE 
@@ -99,6 +102,11 @@ BEGIN
     all_cols := all_cols || ', ' || lang_columns;
     -- Add source column to identify origin (polygon)
     all_cols := all_cols || ', ''polygon'' AS source';
+
+    -- Add optional tag columns (e.g. "tags->'religion' AS religion, tags->'denomination' AS denomination")
+    IF tag_columns IS NOT NULL AND tag_columns <> '' THEN
+        all_cols := all_cols || ', ' || tag_columns;
+    END IF;
 
     sql_create := format($sql$
         CREATE MATERIALIZED VIEW %I AS

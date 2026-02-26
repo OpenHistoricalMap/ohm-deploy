@@ -51,6 +51,7 @@ BEGIN
         WHEN %s > 0 THEN ST_Simplify(geometry, %s)
         ELSE geometry
       END AS geometry,
+      NULLIF(highway, '') AS highway,
       NULLIF(route_road_1_ref, '') AS route_road_1_ref,
       NULLIF(route_road_1_network, '') AS route_road_1_network,
       NULLIF(route_road_1_network_wikidata, '') AS route_road_1_network_wikidata,
