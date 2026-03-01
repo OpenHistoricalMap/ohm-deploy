@@ -47,7 +47,7 @@ services:
 
   tiler_sqs_cleaner:
     container_name: tiler_sqs_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3245.hffaf924
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3305.hda810a70
     environment:
       - PORT=8000
     env_file:
@@ -70,10 +70,18 @@ services:
 
   tiler_s3_cleaner:
     container_name: tiler_s3_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3245.hffaf924
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3305.hda810a70
+    # image: tiler-cache:latest
+    # build:
+    #   context: ../../images/tiler-cache
+    #   dockerfile: Dockerfile
     command:
-      - tiler-cache-cleaner
-      - clean_by_prefix
+      - /bin/sh
+      - -c
+      - |
+        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm
+        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm_admin
+        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm_other_boundaries
     env_file:
       - .env.tiler
     networks:

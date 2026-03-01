@@ -39,7 +39,7 @@ class Config:
     )
     S3_BUCKET_CACHE_TILER = os.getenv("S3_BUCKET_CACHE_TILER", "tiler-cache-staging")
     # TODO , Replace mnt/data/osm to mnt/data/ohm
-    S3_BUCKET_PATH_FILES = os.getenv("S3_BUCKET_PATH_FILES", "mnt/data/osm,mnt/data/ohm_admin").split(",")
+    S3_BUCKET_PATH_FILES = os.getenv("S3_BUCKET_PATH_FILES", "mnt/data/ohm,mnt/data/ohm_admin,mnt/data/ohm_other_boundaries").split(",")
 
     # AWS S3 Credentials
     TILER_CACHE_CLOUD_INFRASTRUCTURE = os.getenv(
