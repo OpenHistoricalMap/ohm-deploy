@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: a64d500abc82744613b77bbb362e2cee98648d59
+          ref: 37a3d248fbdad914f2a0f0944003d6847ace6d35
           path: overpass-turbo
 
       - name: Enable Corepack
@@ -82,3 +82,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         working-directory: overpass-turbo
+        
