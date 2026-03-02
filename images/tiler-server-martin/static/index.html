@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Martin - Admin Boundaries Lines</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link href="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; display: flex; height: 100vh; }
+
+    #sidebar { width: 320px; background: #16213e; display: flex; flex-direction: column; border-right: 1px solid #0f3460; flex-shrink: 0; }
+    #sidebar-header { padding: 16px; border-bottom: 1px solid #0f3460; }
+    #sidebar-header h2 { font-size: 18px; font-weight: 600; }
+    #sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
+
+    .source-item { padding: 10px 12px; margin-bottom: 6px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 10px; }
+    .source-item:hover { background: rgba(255,255,255,0.08); }
+    .source-item.active { background: #0f3460; border-color: #4fc3f7; }
+    .source-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    .source-name { font-size: 14px; font-weight: 500; }
+    .source-meta { font-size: 11px; color: #888; margin-top: 4px; }
+    .source-url { font-size: 10px; color: #555; margin-top: 4px; word-break: break-all; font-family: monospace; }
+
+    #map-container { flex: 1; position: relative; }
+    #map { width: 100%; height: 100%; }
+
+    #map-header { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 8px; z-index: 5; pointer-events: none; }
+    #map-title { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: auto; }
+    #zoom-level { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; pointer-events: auto; margin-left: auto; }
+
+    #right-panel { width: 320px; background: #16213e; display: flex; flex-direction: column; border-left: 1px solid #0f3460; flex-shrink: 0; }
+    #right-panel-header { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; justify-content: space-between; align-items: center; }
+    #right-panel-header strong { color: #4fc3f7; font-size: 14px; }
+    #right-panel-close { cursor: pointer; background: none; border: 1px solid #555; color: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+    #right-panel-close:hover { background: #0f3460; }
+    #right-panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
+    .feature-card { margin-bottom: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
+    .feature-card:last-child { margin-bottom: 0; }
+    .feature-card-header { padding: 8px 10px; font-size: 12px; font-weight: 600; color: #4fc3f7; background: rgba(15,52,96,0.4); display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+    .feature-card-header-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .feature-card-header-left span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .feature-card-osmid { font-size: 11px; color: #888; font-weight: 400; }
+    .ohm-link { color: #4fc3f7; text-decoration: none; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+    .ohm-link:hover { text-decoration: underline; color: #81d4fa; }
+    .feature-card-color { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .feature-card-body { max-height: 210px; overflow-y: auto; padding: 6px 10px; }
+    .prop { margin: 2px 0; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; gap: 8px; align-items: baseline; }
+    .prop-key { color: #888; font-size: 11px; white-space: nowrap; min-width: 0; flex-shrink: 0; }
+    .prop-val { color: #eee; font-size: 13px; word-break: break-all; }
+    #right-panel.hidden { display: none; }
+
+    #tile-grid-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
+    #grid-toggle { position: absolute; bottom: 30px; left: 12px; z-index: 5; background: rgba(22,33,62,0.9); padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; user-select: none; }
+    #grid-toggle input { cursor: pointer; }
+    #grid-toggle label { cursor: pointer; color: #ccc; }
+
+    .group-item { padding: 12px 14px; margin-bottom: 6px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: space-between; }
+    .group-item:hover { background: rgba(255,255,255,0.08); }
+    .group-item.active { background: #0f3460; border-color: #4fc3f7; }
+    .group-name { font-size: 15px; font-weight: 600; }
+    .group-arrow { color: #888; font-size: 16px; }
+    .group-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+
+    .mode-toggle { display: flex; gap: 0; border-radius: 6px; overflow: hidden; border: 1px solid #0f3460; margin: 8px 12px; }
+    .mode-btn { flex: 1; padding: 7px 10px; font-size: 12px; font-weight: 500; text-align: center; cursor: pointer; background: rgba(255,255,255,0.04); color: #888; border: none; transition: all 0.15s; }
+    .mode-btn.active { background: #0f3460; color: #4fc3f7; }
+    .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.08); }
+
+    #sidebar-back { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
+    #sidebar-back:hover { background: rgba(255,255,255,0.05); }
+    #sidebar-back .back-arrow { font-size: 18px; color: #4fc3f7; }
+    #sidebar-back .back-label { font-size: 15px; font-weight: 600; }
+
+    .loading { padding: 16px; color: #888; }
+    .error { padding: 16px; color: #e57373; }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <h2>Martin</h2>
+    </div>
+    <div id="sidebar-back" style="display:none" onclick="showGroupList()">
+      <span class="back-arrow">&#8592;</span>
+      <span class="back-label" id="sidebar-back-label">Maps</span>
+    </div>
+    <div id="sidebar-content"><div class="loading">Loading catalog...</div></div>
+  </div>
+  <div id="map-container">
+    <div id="map"></div>
+    <canvas id="tile-grid-canvas"></canvas>
+    <div id="map-header">
+      <div id="map-title">Select a source</div>
+      <div id="zoom-level">z0</div>
+    </div>
+    <div id="grid-toggle">
+      <input type="checkbox" id="grid-check" onchange="toggleTileGrid()" />
+      <label for="grid-check">Tile Grid</label>
+    </div>
+  </div>
+  <div id="right-panel" class="hidden">
+    <div id="right-panel-header">
+      <strong id="right-panel-title">Properties</strong>
+      <button id="right-panel-close" onclick="closeRightPanel()">&#10005;</button>
+    </div>
+    <div id="right-panel-body"></div>
+  </div>
+
+  <script>
+    const MARTIN_BASE = window.location.origin;
+    const COLORS = ['#4fc3f7','#e91e63','#ffa726','#66bb6a','#ab47bc','#ef5350','#26c6da','#fdd835',
+                     '#78909c','#ff7043','#9ccc65','#5c6bc0','#ec407a','#29b6f6','#d4e157','#8d6e63'];
+
+    let activeSources = {};
+    const sourceColors = {};
+    let groupsData = [];       // parsed groups with filtered function names
+    let activeGroupIdx = null;  // which group is currently selected
+    let compositeMode = false;  // false = layer-by-layer, true = composite tile
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: {
+        version: 8,
+        sources: {},
+        layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#1a1a2e' } }]
+      },
+      center: [0, 20], zoom: 3, hash: true,
+    });
+    map.addControl(new maplibregl.NavigationControl());
+    map.on('zoom', () => {
+      document.getElementById('zoom-level').textContent = 'z' + Math.floor(map.getZoom());
+    });
+
+    async function init() {
+      const content = document.getElementById('sidebar-content');
+      try {
+        const [catalogResp, configResp] = await Promise.all([
+          fetch(MARTIN_BASE + '/catalog'),
+          fetch(MARTIN_BASE + '/config/functions.json').catch(() => null)
+        ]);
+        const catalog = await catalogResp.json();
+        const tiles = catalog.tiles || {};
+        const availableSources = new Set(Object.keys(tiles));
+
+        if (!availableSources.size) {
+          content.innerHTML = '<div class="error">No sources found in catalog</div>';
+          return;
+        }
+
+        let groups;
+        if (configResp && configResp.ok) {
+          const config = await configResp.json();
+          groups = config.groups || [];
+        } else {
+          groups = [{ name: 'sources', functions: [...availableSources].map(n => ({ function_name: n })) }];
+        }
+
+        // Build groupsData and assign colors
+        let colorIdx = 0;
+        groupsData = [];
+        groups.forEach(group => {
+          const fns = group.functions
+            .map(f => f.function_name)
+            .filter(n => availableSources.has(n));
+          if (!fns.length) return;
+          fns.forEach(name => {
+            sourceColors[name] = COLORS[colorIdx % COLORS.length];
+            colorIdx++;
+          });
+          groupsData.push({ name: group.name, functions: fns });
+        });
+
+        showGroupList();
+      } catch (e) {
+        content.innerHTML = `<div class="error">Failed to load catalog: ${e.message}</div>`;
+      }
+    }
+
+    function showGroupList() {
+      // Remove all active sources from map
+      removeAllSources();
+      activeGroupIdx = null;
+      compositeMode = false;
+
+      const content = document.getElementById('sidebar-content');
+      document.getElementById('sidebar-back').style.display = 'none';
+      document.getElementById('map-title').textContent = 'Select a map';
+      content.innerHTML = '';
+
+      groupsData.forEach((group, idx) => {
+        const item = document.createElement('div');
+        item.className = 'group-item';
+        item.innerHTML = `<div><div class="group-name">Maps/ ${group.name}</div><div class="group-subtitle">${group.functions.length} layers</div></div><span class="group-arrow">&#8594;</span>`;
+        item.onclick = () => selectGroup(idx);
+        content.appendChild(item);
+      });
+    }
+
+    function selectGroup(idx, mode) {
+      // Remove all active sources from map
+      removeAllSources();
+
+      activeGroupIdx = idx;
+      if (mode !== undefined) compositeMode = mode;
+      const group = groupsData[idx];
+      const content = document.getElementById('sidebar-content');
+
+      // Show back button
+      document.getElementById('sidebar-back').style.display = 'flex';
+      document.getElementById('sidebar-back-label').textContent = `Maps/ ${group.name}`;
+      document.getElementById('map-title').textContent = `Maps/ ${group.name}`;
+
+      content.innerHTML = '';
+
+      // Mode toggle
+      const toggle = document.createElement('div');
+      toggle.className = 'mode-toggle';
+      toggle.innerHTML = `
+        <button class="mode-btn ${!compositeMode ? 'active' : ''}" onclick="selectGroup(${idx}, false)">Layer by Layer</button>
+        <button class="mode-btn ${compositeMode ? 'active' : ''}" onclick="selectGroup(${idx}, true)">Composite</button>
+      `;
+      content.appendChild(toggle);
+
+      // Layer list
+      group.functions.forEach(name => {
+        const color = sourceColors[name];
+        const item = document.createElement('div');
+        item.className = 'source-item';
+        item.id = `src-item-${name}`;
+        item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
+        if (!compositeMode) {
+          item.onclick = () => toggleSource(name);
+        }
+        content.appendChild(item);
+      });
+
+      if (compositeMode) {
+        addCompositeSource(group);
+      } else {
+        group.functions.forEach(name => addSource(name));
+      }
+    }
+
+    function removeAllSources() {
+      // Remove composite source if exists
+      if (activeSources['__composite__']) {
+        const info = activeSources['__composite__'];
+        info.layerIds.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+        if (map.getSource(info.sourceId)) map.removeSource(info.sourceId);
+        delete activeSources['__composite__'];
+      }
+      Object.keys(activeSources).forEach(name => removeSource(name));
+    }
+
+    function addCompositeSource(group) {
+      const sourceId = `src-composite-${group.name}`;
+      const tileUrl = `${MARTIN_BASE}/maps/${group.name}/{z}/{x}/{y}.pbf`;
+
+      map.addSource(sourceId, {
+        type: 'vector',
+        tiles: [tileUrl],
+        minzoom: 0,
+        maxzoom: 22,
+      });
+
+      const layerIds = [];
+      group.functions.forEach((name, i) => {
+        const color = sourceColors[name];
+        const slName = name.toLowerCase();
+        let type, paint;
+        if (slName.includes('centroids') || slName.includes('points')) {
+          type = 'circle';
+          paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
+        } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime')) {
+          type = 'line';
+          paint = { 'line-color': color, 'line-width': 1.5 };
+        } else {
+          type = 'fill';
+          paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
+        }
+
+        const layerId = `lyr-${name}-c${i}`;
+        map.addLayer({
+          id: layerId,
+          type: type,
+          source: sourceId,
+          'source-layer': name,
+          paint: paint,
+        });
+        layerIds.push(layerId);
+
+        // Mark sidebar item active
+        const el = document.getElementById(`src-item-${name}`);
+        if (el) el.classList.add('active');
+      });
+
+      activeSources['__composite__'] = { sourceId, layerIds, color: '#4fc3f7' };
+      document.getElementById('map-title').textContent = `Maps/ ${group.name} (composite)`;
+    }
+
+    function toggleSource(name) {
+      if (activeSources[name]) {
+        removeSource(name);
+      } else {
+        addSource(name);
+      }
+    }
+
+    function removeSource(name) {
+      const info = activeSources[name];
+      if (!info) return;
+      info.layerIds.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+      if (map.getSource(info.sourceId)) map.removeSource(info.sourceId);
+      delete activeSources[name];
+      const el = document.getElementById(`src-item-${name}`);
+      if (el) el.classList.remove('active');
+      if (!Object.keys(activeSources).length) {
+        document.getElementById('map-title').textContent = 'Select a source';
+      }
+    }
+
+    // Parse MVT protobuf to extract layer names from a tile
+    async function detectMvtLayers(tileUrl) {
+      try {
+        const resp = await fetch(tileUrl);
+        if (!resp.ok) return null;
+        let buf = new Uint8Array(await resp.arrayBuffer());
+        // Decompress gzip if needed
+        if (buf.length > 2 && buf[0] === 0x1f && buf[1] === 0x8b) {
+          buf = new Uint8Array(await new Response(
+            new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))
+          ).arrayBuffer());
+        }
+        const names = [];
+        let p = 0;
+        function readVarint() {
+          let r = 0, s = 0;
+          while (p < buf.length) {
+            const b = buf[p++];
+            r |= (b & 0x7f) << s;
+            if (!(b & 0x80)) return r;
+            s += 7;
+          }
+          return r;
+        }
+        // Top-level Tile message: field 3 = Layer (length-delimited)
+        while (p < buf.length) {
+          const tag = readVarint();
+          const field = tag >> 3, wire = tag & 7;
+          if (wire === 2) {
+            const len = readVarint();
+            if (field === 3) {
+              // Inside Layer message: field 1 = name (string)
+              const end = p + len;
+              if (p < end) {
+                const innerTag = readVarint();
+                if ((innerTag >> 3) === 1 && (innerTag & 7) === 2) {
+                  const nameLen = readVarint();
+                  names.push(new TextDecoder().decode(buf.slice(p, p + nameLen)));
+                }
+              }
+              p = end;
+            } else {
+              p += len;
+            }
+          } else if (wire === 0) { readVarint(); }
+          else if (wire === 5) { p += 4; }
+          else if (wire === 1) { p += 8; }
+          else { break; }
+        }
+        return names.length ? names : null;
+      } catch (e) { return null; }
+    }
+
+    async function addSource(name) {
+      const color = sourceColors[name];
+      const sourceId = `src-${name}`;
+      const tileJsonUrl = `${MARTIN_BASE}/${name}`;
+
+      map.addSource(sourceId, { type: 'vector', url: tileJsonUrl });
+
+      const layerIds = [];
+      try {
+        const resp = await fetch(tileJsonUrl);
+        const tj = await resp.json();
+        if (!map.getSource(sourceId)) return;
+
+        // Get layer names from TileJSON, or detect from a sample tile for bytea functions
+        let layers = (tj.vector_layers || []).map(vl => vl.id);
+        if (!layers.length) {
+          // Bytea functions have no vector_layers metadata - detect from actual tile
+          const tiles = tj.tiles || [];
+          if (tiles.length) {
+            const sampleUrl = tiles[0].replace('{z}', '0').replace('{x}', '0').replace('{y}', '0');
+            const detected = await detectMvtLayers(sampleUrl);
+            layers = detected || [name];
+          } else {
+            layers = [name];
+          }
+        }
+
+        layers.forEach((sourceLayer, i) => {
+          const slName = sourceLayer.toLowerCase();
+          let type, paint;
+          if (slName.includes('centroids') || slName.includes('points')) {
+            type = 'circle';
+            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
+          } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime')) {
+            type = 'line';
+            paint = { 'line-color': color, 'line-width': 1.5 };
+          } else {
+            type = 'fill';
+            paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
+          }
+
+          const layerId = `lyr-${name}-${i}`;
+          map.addLayer({
+            id: layerId,
+            type: type,
+            source: sourceId,
+            'source-layer': sourceLayer,
+            paint: paint,
+          });
+          layerIds.push(layerId);
+        });
+      } catch (e) {}
+
+      activeSources[name] = { sourceId, layerIds, color };
+      const el = document.getElementById(`src-item-${name}`);
+      if (el) el.classList.add('active');
+      document.getElementById('map-title').textContent = name;
+    }
+
+    function closeRightPanel() {
+      document.getElementById('right-panel').classList.add('hidden');
+    }
+
+    map.on('click', (e) => {
+      const features = map.queryRenderedFeatures(e.point)
+        .filter(f => f.layer.id.startsWith('lyr-'));
+      const panel = document.getElementById('right-panel');
+
+      if (!features.length) {
+        panel.classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('right-panel-title').textContent = `${features.length} feature${features.length > 1 ? 's' : ''}`;
+
+      let html = '';
+      features.forEach(f => {
+        const entries = Object.entries(f.properties)
+          .filter(([k, v]) => v !== null && v !== '' && v !== undefined);
+        const srcName = f.layer.id.replace(/^lyr-/, '').replace(/-\d+$/, '');
+        const color = sourceColors[srcName] || '#4fc3f7';
+        const osmId = f.properties.osm_id;
+
+        // Build OHM link: negative osm_id = relation, positive = way
+        let ohmLink = '';
+        if (osmId) {
+          const absId = Math.abs(osmId);
+          const osmType = osmId < 0 ? 'relation' : 'way';
+          ohmLink = `<a class="ohm-link" href="https://www.openhistoricalmap.org/${osmType}/${absId}" target="_blank" rel="noopener">OHM</a>`;
+        }
+
+        const osmIdLabel = osmId ? `<span class="feature-card-osmid">#${osmId}</span>` : '';
+
+        html += `<div class="feature-card">`;
+        html += `<div class="feature-card-header"><div class="feature-card-header-left"><div class="feature-card-color" style="background:${color}"></div><span>${f.sourceLayer}</span>${osmIdLabel}</div>${ohmLink}</div>`;
+        html += `<div class="feature-card-body">`;
+        entries.forEach(([k, v]) => {
+          html += `<div class="prop"><div class="prop-key">${k}</div><div class="prop-val">${v}</div></div>`;
+        });
+        html += `</div></div>`;
+      });
+
+      document.getElementById('right-panel-body').innerHTML = html;
+      panel.classList.remove('hidden');
+    });
+
+    // === Tile Grid Overlay ===
+    let gridEnabled = false;
+    const tileSizeCache = {};
+    const pendingFetches = new Set();
+
+    function toggleTileGrid() {
+      gridEnabled = document.getElementById('grid-check').checked;
+      if (gridEnabled) drawTileGrid();
+      else clearTileGrid();
+    }
+
+    function clearTileGrid() {
+      const canvas = document.getElementById('tile-grid-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function lng2tile(lng, zoom) { return Math.floor((lng + 180) / 360 * Math.pow(2, zoom)); }
+    function lat2tile(lat, zoom) {
+      const r = lat * Math.PI / 180;
+      return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * Math.pow(2, zoom));
+    }
+    function tile2lng(x, zoom) { return x / Math.pow(2, zoom) * 360 - 180; }
+    function tile2lat(y, zoom) {
+      const n = Math.PI - 2 * Math.PI * y / Math.pow(2, zoom);
+      return 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+    }
+
+    function getTileUrl() {
+      if (activeGroupIdx === null) return null;
+      const group = groupsData[activeGroupIdx];
+      return `${MARTIN_BASE}/maps/${group.name}`;
+    }
+
+    async function fetchTileSize(z, x, y) {
+      const key = `${z}/${x}/${y}`;
+      if (tileSizeCache[key] !== undefined) return tileSizeCache[key];
+      if (pendingFetches.has(key)) return null;
+
+      const baseUrl = getTileUrl();
+      if (!baseUrl) return null;
+
+      pendingFetches.add(key);
+      try {
+        const resp = await fetch(`${baseUrl}/${z}/${x}/${y}.pbf`, { method: 'HEAD' });
+        const len = resp.headers.get('content-length');
+        const cacheStatus = resp.headers.get('x-cache-status') || '';
+        const size = len ? parseInt(len) : 0;
+        tileSizeCache[key] = { size, cacheStatus };
+        pendingFetches.delete(key);
+        // Redraw after getting the size
+        if (gridEnabled) drawTileGrid();
+        return tileSizeCache[key];
+      } catch (e) {
+        pendingFetches.delete(key);
+        return null;
+      }
+    }
+
+    function drawTileGrid() {
+      if (!gridEnabled) return;
+
+      const canvas = document.getElementById('tile-grid-canvas');
+      const container = document.getElementById('map-container');
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = container.clientWidth * dpr;
+      canvas.height = container.clientHeight * dpr;
+      canvas.style.width = container.clientWidth + 'px';
+      canvas.style.height = container.clientHeight + 'px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, container.clientWidth, container.clientHeight);
+
+      const zoom = Math.floor(map.getZoom());
+      const bounds = map.getBounds();
+      const maxTile = Math.pow(2, zoom);
+
+      const xMin = Math.max(0, lng2tile(bounds.getWest(), zoom));
+      const xMax = Math.min(maxTile - 1, lng2tile(bounds.getEast(), zoom));
+      const yMin = Math.max(0, lat2tile(bounds.getNorth(), zoom));
+      const yMax = Math.min(maxTile - 1, lat2tile(bounds.getSouth(), zoom));
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(255, 50, 50, 0.6)';
+      ctx.lineWidth = 1;
+
+      for (let x = xMin; x <= xMax + 1; x++) {
+        const lng = tile2lng(x, zoom);
+        const px = map.project([lng, 0]).x;
+        ctx.beginPath();
+        ctx.moveTo(px, 0);
+        ctx.lineTo(px, container.clientHeight);
+        ctx.stroke();
+      }
+      for (let y = yMin; y <= yMax + 1; y++) {
+        const lat = tile2lat(y, zoom);
+        const py = map.project([0, lat]).y;
+        ctx.beginPath();
+        ctx.moveTo(0, py);
+        ctx.lineTo(container.clientWidth, py);
+        ctx.stroke();
+      }
+
+      // Labels with tile size
+      for (let x = xMin; x <= xMax; x++) {
+        for (let y = yMin; y <= yMax; y++) {
+          const topLeft = map.project([tile2lng(x, zoom), tile2lat(y, zoom)]);
+          const bottomRight = map.project([tile2lng(x + 1, zoom), tile2lat(y + 1, zoom)]);
+          const cx = (topLeft.x + bottomRight.x) / 2;
+          const cy = (topLeft.y + bottomRight.y) / 2;
+
+          const key = `${zoom}/${x}/${y}`;
+          const cached = tileSizeCache[key];
+
+          let label = `${zoom}/${x}/${y}`;
+          let sizeLabel = '';
+          let cacheLabel = '';
+
+          if (cached) {
+            const kb = (cached.size / 1024).toFixed(1);
+            sizeLabel = `${kb} kB`;
+            if (cached.cacheStatus) {
+              cacheLabel = cached.cacheStatus;
+            }
+          } else {
+            fetchTileSize(zoom, x, y);
+          }
+
+          // Background
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+          const textW = Math.max(ctx.measureText(label).width, ctx.measureText(sizeLabel).width);
+          const bgW = textW + 16;
+          const bgH = cacheLabel ? 48 : (sizeLabel ? 38 : 22);
+          ctx.fillRect(cx - bgW / 2, cy - bgH / 2, bgW, bgH);
+
+          // Tile coordinates
+          ctx.fillStyle = '#ff5555';
+          ctx.font = 'bold 12px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, cx, cy - (sizeLabel ? 8 : 0));
+
+          // Size
+          if (sizeLabel) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '11px monospace';
+            ctx.fillText(sizeLabel, cx, cy + 6);
+          }
+
+          // Cache status
+          if (cacheLabel) {
+            ctx.fillStyle = cacheLabel === 'HIT' ? '#66bb6a' : (cacheLabel === 'MISS' ? '#ffa726' : '#78909c');
+            ctx.font = '10px monospace';
+            ctx.fillText(cacheLabel, cx, cy + 19);
+          }
+        }
+      }
+    }
+
+    // Clear size cache on zoom change
+    map.on('zoomstart', () => {
+      Object.keys(tileSizeCache).forEach(k => delete tileSizeCache[k]);
+    });
+    map.on('moveend', () => { if (gridEnabled) drawTileGrid(); });
+    map.on('move', () => { if (gridEnabled) drawTileGrid(); });
+    window.addEventListener('resize', () => { if (gridEnabled) drawTileGrid(); });
+
+    map.on('load', init);
+  </script>
+</body>
+</html>
