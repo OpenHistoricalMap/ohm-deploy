@@ -29,6 +29,9 @@ def main():
     for group in config["groups"]:
         group_name = group["name"]
         fn_names = [fn["function_name"] for fn in group["functions"]]
+        is_static = group.get("static", False)
+        cache_ttl = "365d" if is_static else "7d"
+        cache_zone = "static_tiles" if is_static else "tiles"
 
         if not fn_names:
             continue
@@ -36,10 +39,10 @@ def main():
         # Composite: /maps/{group}/{z}/{x}/{y}.pbf -> Martin composite source
         composite_src = ",".join(fn_names)
         composite_routes.append(
-            f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf\n"
+            f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf{' (static)' if is_static else ''}\n"
             f"        location ~ ^/maps/{group_name}/(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
-            f"            proxy_cache tiles;\n"
-            f"            proxy_cache_valid 200 7d;\n"
+            f"            proxy_cache {cache_zone};\n"
+            f"            proxy_cache_valid 200 {cache_ttl};\n"
             f"            proxy_cache_valid 204 1m;\n"
             f"            proxy_cache_key $uri;\n"
             f"            proxy_cache_lock on;\n"
@@ -53,10 +56,10 @@ def main():
 
         # Per-layer: /maps/{group}/{layer}/{z}/{x}/{y}.pbf
         perlayer_routes.append(
-            f"        # Per-layer: /maps/{group_name}/{{layer}}/{{z}}/{{x}}/{{y}}.pbf\n"
+            f"        # Per-layer: /maps/{group_name}/{{layer}}/{{z}}/{{x}}/{{y}}.pbf{' (static)' if is_static else ''}\n"
             f"        location ~ ^/maps/{group_name}/([^/]+)(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
-            f"            proxy_cache tiles;\n"
-            f"            proxy_cache_valid 200 7d;\n"
+            f"            proxy_cache {cache_zone};\n"
+            f"            proxy_cache_valid 200 {cache_ttl};\n"
             f"            proxy_cache_valid 204 1m;\n"
             f"            proxy_cache_key $uri;\n"
             f"            proxy_cache_lock on;\n"
@@ -67,8 +70,8 @@ def main():
             f"            proxy_pass http://martin/$1/$2;\n"
             f"        }}\n"
             f"        location ~ ^/maps/{group_name}/([^/]+)(/.*)$ {{\n"
-            f"            proxy_cache tiles;\n"
-            f"            proxy_cache_valid 200 7d;\n"
+            f"            proxy_cache {cache_zone};\n"
+            f"            proxy_cache_valid 200 {cache_ttl};\n"
             f"            proxy_cache_valid 204 1m;\n"
             f"            proxy_cache_key $uri;\n"
             f"            proxy_cache_lock on;\n"
@@ -80,7 +83,8 @@ def main():
             f"        }}"
         )
 
-        print(f"  {group_name}: composite={len(fn_names)} functions -> /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf")
+        static_label = " (static, cache=365d)" if is_static else ""
+        print(f"  {group_name}: composite={len(fn_names)} functions -> /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf{static_label}")
 
     nginx_conf = template.replace(
         "##COMPOSITE_ROUTES##", "\n\n".join(composite_routes)

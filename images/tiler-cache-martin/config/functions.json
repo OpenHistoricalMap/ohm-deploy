@@ -296,6 +296,78 @@
           ]
         }
       ]
+    },
+    {
+      "name": "ohm_other_boundaries",
+      "functions": [
+        {
+          "function_name": "non_admin_boundaries_areas",
+          "source_layer": "non_admin_boundaries_areas",
+          "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 0,
+          "zoom_mapping": [
+            [2, "mv_non_admin_boundaries_areas_z0_2"],
+            [5, "mv_non_admin_boundaries_areas_z3_5"],
+            [7, "mv_non_admin_boundaries_areas_z6_7"],
+            [9, "mv_non_admin_boundaries_areas_z8_9"],
+            [12, "mv_non_admin_boundaries_areas_z10_12"],
+            [15, "mv_non_admin_boundaries_areas_z13_15"],
+            [null, "mv_non_admin_boundaries_areas_z16_20"]
+          ]
+        },
+        {
+          "function_name": "non_admin_boundaries_centroids",
+          "source_layer": "non_admin_boundaries_centroids",
+          "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 0,
+          "zoom_mapping": [
+            [2, "mv_non_admin_boundaries_centroids_z0_2"],
+            [5, "mv_non_admin_boundaries_centroids_z3_5"],
+            [7, "mv_non_admin_boundaries_centroids_z6_7"],
+            [9, "mv_non_admin_boundaries_centroids_z8_9"],
+            [12, "mv_non_admin_boundaries_centroids_z10_12"],
+            [15, "mv_non_admin_boundaries_centroids_z13_15"],
+            [null, "mv_non_admin_boundaries_centroids_z16_20"]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "osm_land",
+      "static": true,
+      "functions": [
+        {
+          "function_name": "land_polygons",
+          "source_layer": "land_polygons",
+          "exclude_columns": ["geometry"],
+          "min_zoom": 0,
+          "zoom_mapping": [
+            [2, "mview_land_z0_2"],
+            [5, "mview_land_z3_5"],
+            [7, "mview_land_z6_7"],
+            [9, "mview_land_z8_9"],
+            [12, "mview_land_z10_12"],
+            [15, "mview_land_z13_15"],
+            [null, "mview_land_z16_20"]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ne",
+      "static": true,
+      "functions": [
+        {
+          "function_name": "ne_lakes",
+          "source_layer": "ne_lakes",
+          "exclude_columns": ["wkb_geometry"],
+          "geometry_column": "wkb_geometry",
+          "min_zoom": 0,
+          "zoom_mapping": [
+            [null, "mview_ne_lakes"]
+          ]
+        }
+      ]
     }
   ]
 }

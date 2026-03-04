@@ -13,12 +13,20 @@ http {
     sendfile on;
     keepalive_timeout 65;
 
-    # === Tile cache ===
+    # === Tile cache (dynamic: ohm, ohm_admin, etc.) ===
     proxy_cache_path /var/cache/nginx/tiles
         levels=1:2
         keys_zone=tiles:200m
         max_size=50g
         inactive=7d
+        use_temp_path=off;
+
+    # === Tile cache (static: ne, osm_land — never changes) ===
+    proxy_cache_path /var/cache/nginx/static_tiles
+        levels=1:2
+        keys_zone=static_tiles:50m
+        max_size=10g
+        inactive=365d
         use_temp_path=off;
 
     # =============================================

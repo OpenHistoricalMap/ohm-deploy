@@ -64,6 +64,7 @@ def generate_function_sql(func_def, columns_per_table):
     sl = func_def["source_layer"]
     zoom_mapping = func_def["zoom_mapping"]
     min_zoom = func_def.get("min_zoom")
+    geom_col = func_def.get("geometry_column", "geometry")
 
     # Build the IF/ELSIF/ELSE blocks
     blocks = []
@@ -75,9 +76,9 @@ def generate_function_sql(func_def, columns_per_table):
         query = (
             f"SELECT ST_AsMVT(q, '{sl}', {extent}) INTO mvt FROM (\n"
             f"            SELECT {col_list},\n"
-            f"                   ST_AsMVTGeom(t.geometry, bounds, {extent}, {buffer}, true) AS geometry\n"
+            f"                   ST_AsMVTGeom(t.{geom_col}, bounds, {extent}, {buffer}, true) AS geometry\n"
             f"            FROM public.{table_name} t\n"
-            f"            WHERE t.geometry && bounds\n"
+            f"            WHERE t.{geom_col} && bounds\n"
             f"        ) q;"
         )
 

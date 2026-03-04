@@ -12,7 +12,7 @@ services:
       - EXPIRE_DIR=/mnt/data/imposm3_expire_dir
       - CACHE_DIR=/var/cache/nginx/tiles
       - CACHE_LEVELS=1:2
-      - NGINX_GROUPS=ohm,ohm_admin
+      - NGINX_GROUPS=ohm,ohm_admin,ohm_other_boundaries
       - PURGE_PARENT_ZOOMS=true
       - POLL_INTERVAL=30
       - MIN_FILE_AGE=5

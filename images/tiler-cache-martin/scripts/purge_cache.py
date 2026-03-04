@@ -39,13 +39,20 @@ CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config", "functions
 
 
 def load_group_functions():
-    """Load function names per group from functions.json."""
+    """Load function names per group from functions.json.
+
+    Filters by NGINX_GROUPS env var and skips static groups
+    (their tiles never change, so no need to purge).
+    """
     try:
         with open(CONFIG_PATH) as f:
             config = json.load(f)
         groups = {}
         for g in config.get("groups", []):
-            groups[g["name"]] = [fn["function_name"] for fn in g["functions"]]
+            if g.get("static", False):
+                continue
+            if g["name"] in NGINX_GROUPS:
+                groups[g["name"]] = [fn["function_name"] for fn in g["functions"]]
         return groups
     except Exception:
         return {name: [] for name in NGINX_GROUPS}
