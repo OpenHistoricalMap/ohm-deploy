@@ -1,0 +1,37 @@
+services:
+  tiler-cache-martin:
+    image: ohm/tiler-cache-martin:latest
+    build:
+      context: ../images/tiler-cache-martin
+      dockerfile: Dockerfile
+    volumes:
+      - tiler_imposm_data:/mnt/data:ro
+      - martin_nginx_cache:/var/cache/nginx/tiles
+      - tiler_cache_martin_state:/app/data
+    environment:
+      - EXPIRE_DIR=/mnt/data/imposm3_expire_dir
+      - CACHE_DIR=/var/cache/nginx/tiles
+      - CACHE_LEVELS=1:2
+      - NGINX_GROUPS=ohm,ohm_admin
+      - PURGE_PARENT_ZOOMS=true
+      - POLL_INTERVAL=30
+      - MIN_FILE_AGE=5
+      - LOG_LEVEL=INFO
+    restart: always
+    networks:
+      - ohm_network
+
+volumes:
+  tiler_imposm_data:
+    external: true
+    name: tiler_imposm
+  martin_nginx_cache:
+    external: true
+    name: martin_nginx_cache
+  tiler_cache_martin_state:
+    driver: local
+    name: tiler_cache_martin_state
+
+networks:
+  ohm_network:
+    external: true

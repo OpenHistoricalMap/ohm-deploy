@@ -26,7 +26,7 @@ listen_addresses: '0.0.0.0:${MARTIN_INTERNAL_PORT}'
 worker_processes: ${MARTIN_WORKER_PROCESSES:-8}
 
 postgres:
-  connection_string: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}'
+  connection_string: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?connect_timeout=10&keepalives=1&keepalives_idle=30'
   pool_size: ${MARTIN_POOL_SIZE:-50}
   default_srid: 3857
   auto_publish:
