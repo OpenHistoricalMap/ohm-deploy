@@ -21,11 +21,14 @@ http {
         inactive=7d
         use_temp_path=off;
 
+    # =============================================
     # === Gzip compression for MVT tiles ===
-    gzip on;
+    # To disable: set NGINX_GZIP=off in env or change 'on' to 'off' below.
+    # =============================================
+    gzip ${NGINX_GZIP};
     gzip_types application/x-protobuf application/vnd.mapbox-vector-tile application/octet-stream;
     gzip_min_length 256;
-    gzip_comp_level 4;
+    gzip_comp_level ${NGINX_GZIP_COMP_LEVEL};   # 1=fastest/less compression, 9=slowest/best compression
     gzip_vary on;
     gzip_proxied any;
 
@@ -40,6 +43,11 @@ http {
     proxy_send_timeout 30s;
     proxy_buffers 16 256k;
     proxy_buffer_size 128k;
+
+    # === Prevent double gzip ===
+    # Tell Martin not to compress responses (strip Accept-Encoding from upstream requests).
+    # Nginx handles all compression via the gzip directives above.
+    proxy_set_header Accept-Encoding "";
 
     server {
         listen ${NGINX_PORT};

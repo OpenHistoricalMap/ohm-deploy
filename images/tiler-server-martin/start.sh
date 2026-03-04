@@ -5,6 +5,8 @@ echo "=== Martin Tile Server Setup ==="
 
 export MARTIN_INTERNAL_PORT="${MARTIN_INTERNAL_PORT:-3001}"
 export NGINX_PORT="${NGINX_PORT:-80}"
+export NGINX_GZIP="${NGINX_GZIP:-on}"                    # on | off
+export NGINX_GZIP_COMP_LEVEL="${NGINX_GZIP_COMP_LEVEL:-4}" # 1-9
 
 # Wait for PostgreSQL
 echo "Waiting for PostgreSQL to be ready..."

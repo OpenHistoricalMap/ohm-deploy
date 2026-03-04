@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Martin - Admin Boundaries Lines</title>
+  <title>Martin - Vector Tiles</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <link href="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.js"></script>
@@ -11,7 +11,7 @@
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; display: flex; height: 100vh; }
 
     #sidebar { width: 320px; background: #16213e; display: flex; flex-direction: column; border-right: 1px solid #0f3460; flex-shrink: 0; }
-    #sidebar-header { padding: 16px; border-bottom: 1px solid #0f3460; }
+    #sidebar-header { padding: 16px; border-bottom: 1px solid #0f3460; display: flex; justify-content: space-between; align-items: center; }
     #sidebar-header h2 { font-size: 18px; font-weight: 600; }
     #sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
 
@@ -20,15 +20,17 @@
     .source-item.active { background: #0f3460; border-color: #4fc3f7; }
     .source-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
     .source-name { font-size: 14px; font-weight: 500; }
-    .source-meta { font-size: 11px; color: #888; margin-top: 4px; }
-    .source-url { font-size: 10px; color: #555; margin-top: 4px; word-break: break-all; font-family: monospace; }
 
     #map-container { flex: 1; position: relative; }
     #map { width: 100%; height: 100%; }
 
     #map-header { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 8px; z-index: 5; pointer-events: none; }
     #map-title { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: auto; }
-    #zoom-level { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; pointer-events: auto; margin-left: auto; }
+    #map-controls { display: flex; gap: 6px; margin-left: auto; pointer-events: auto; }
+    #map-controls button { background: rgba(22,33,62,0.9); border: 1px solid rgba(255,255,255,0.15); color: #eee; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    #map-controls button:hover { background: rgba(22,33,62,1); }
+    #map-controls button.active { background: #0f3460; border-color: #4fc3f7; color: #4fc3f7; }
+    #zoom-level { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; pointer-events: auto; }
 
     #right-panel { width: 320px; background: #16213e; display: flex; flex-direction: column; border-left: 1px solid #0f3460; flex-shrink: 0; }
     #right-panel-header { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; justify-content: space-between; align-items: center; }
@@ -51,22 +53,12 @@
     .prop-val { color: #eee; font-size: 13px; word-break: break-all; }
     #right-panel.hidden { display: none; }
 
-    #tile-grid-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
-    #grid-toggle { position: absolute; bottom: 30px; left: 12px; z-index: 5; background: rgba(22,33,62,0.9); padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; user-select: none; }
-    #grid-toggle input { cursor: pointer; }
-    #grid-toggle label { cursor: pointer; color: #ccc; }
-
     .group-item { padding: 12px 14px; margin-bottom: 6px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: space-between; }
     .group-item:hover { background: rgba(255,255,255,0.08); }
     .group-item.active { background: #0f3460; border-color: #4fc3f7; }
     .group-name { font-size: 15px; font-weight: 600; }
     .group-arrow { color: #888; font-size: 16px; }
     .group-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
-
-    .mode-toggle { display: flex; gap: 0; border-radius: 6px; overflow: hidden; border: 1px solid #0f3460; margin: 8px 12px; }
-    .mode-btn { flex: 1; padding: 7px 10px; font-size: 12px; font-weight: 500; text-align: center; cursor: pointer; background: rgba(255,255,255,0.04); color: #888; border: none; transition: all 0.15s; }
-    .mode-btn.active { background: #0f3460; color: #4fc3f7; }
-    .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.08); }
 
     #sidebar-back { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
     #sidebar-back:hover { background: rgba(255,255,255,0.05); }
@@ -90,14 +82,12 @@
   </div>
   <div id="map-container">
     <div id="map"></div>
-    <canvas id="tile-grid-canvas"></canvas>
     <div id="map-header">
       <div id="map-title">Select a source</div>
+      <div id="map-controls">
+        <button id="btn-grid" onclick="toggleGrid()">Grid</button>
+      </div>
       <div id="zoom-level">z0</div>
-    </div>
-    <div id="grid-toggle">
-      <input type="checkbox" id="grid-check" onchange="toggleTileGrid()" />
-      <label for="grid-check">Tile Grid</label>
     </div>
   </div>
   <div id="right-panel" class="hidden">
@@ -115,22 +105,43 @@
 
     let activeSources = {};
     const sourceColors = {};
-    let groupsData = [];       // parsed groups with filtered function names
-    let activeGroupIdx = null;  // which group is currently selected
-    let compositeMode = false;  // false = layer-by-layer, true = composite tile
+    let groupsData = [];
+    let activeGroupIdx = null;
 
     const map = new maplibregl.Map({
       container: 'map',
       style: {
         version: 8,
-        sources: {},
-        layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#1a1a2e' } }]
+        sources: {
+          'osm-basemap': {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '&copy; OpenStreetMap contributors',
+          }
+        },
+        layers: [
+          { id: 'bg', type: 'background', paint: { 'background-color': '#1a1a2e' } },
+          { id: 'basemap', type: 'raster', source: 'osm-basemap', paint: { 'raster-opacity': 0.3 } }
+        ]
       },
-      center: [0, 20], zoom: 3, hash: true,
+      center: [0, 20], zoom: 2, hash: true,
     });
     map.addControl(new maplibregl.NavigationControl());
+    map.showTileBoundaries = true;
+
+    function toggleGrid() {
+      map.showTileBoundaries = !map.showTileBoundaries;
+      document.getElementById('btn-grid').classList.toggle('active', map.showTileBoundaries);
+    }
+    document.getElementById('btn-grid').classList.add('active');
+
     map.on('zoom', () => {
       document.getElementById('zoom-level').textContent = 'z' + Math.floor(map.getZoom());
+    });
+
+    map.on('error', (e) => {
+      console.error('[Map Error]', e.error || e);
     });
 
     async function init() {
@@ -157,7 +168,6 @@
           groups = [{ name: 'sources', functions: [...availableSources].map(n => ({ function_name: n })) }];
         }
 
-        // Build groupsData and assign colors
         let colorIdx = 0;
         groupsData = [];
         groups.forEach(group => {
@@ -179,10 +189,8 @@
     }
 
     function showGroupList() {
-      // Remove all active sources from map
-      removeAllSources();
+      Object.keys(activeSources).forEach(name => removeSource(name));
       activeGroupIdx = null;
-      compositeMode = false;
 
       const content = document.getElementById('sidebar-content');
       document.getElementById('sidebar-back').style.display = 'none';
@@ -198,114 +206,34 @@
       });
     }
 
-    function selectGroup(idx, mode) {
-      // Remove all active sources from map
-      removeAllSources();
+    function selectGroup(idx) {
+      Object.keys(activeSources).forEach(name => removeSource(name));
 
       activeGroupIdx = idx;
-      if (mode !== undefined) compositeMode = mode;
       const group = groupsData[idx];
       const content = document.getElementById('sidebar-content');
 
-      // Show back button
       document.getElementById('sidebar-back').style.display = 'flex';
       document.getElementById('sidebar-back-label').textContent = `Maps/ ${group.name}`;
       document.getElementById('map-title').textContent = `Maps/ ${group.name}`;
 
       content.innerHTML = '';
-
-      // Mode toggle
-      const toggle = document.createElement('div');
-      toggle.className = 'mode-toggle';
-      toggle.innerHTML = `
-        <button class="mode-btn ${!compositeMode ? 'active' : ''}" onclick="selectGroup(${idx}, false)">Layer by Layer</button>
-        <button class="mode-btn ${compositeMode ? 'active' : ''}" onclick="selectGroup(${idx}, true)">Composite</button>
-      `;
-      content.appendChild(toggle);
-
-      // Layer list
       group.functions.forEach(name => {
         const color = sourceColors[name];
         const item = document.createElement('div');
         item.className = 'source-item';
         item.id = `src-item-${name}`;
         item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
-        if (!compositeMode) {
-          item.onclick = () => toggleSource(name);
-        }
+        item.onclick = () => toggleSource(name);
         content.appendChild(item);
       });
 
-      if (compositeMode) {
-        addCompositeSource(group);
-      } else {
-        group.functions.forEach(name => addSource(name));
-      }
-    }
-
-    function removeAllSources() {
-      // Remove composite source if exists
-      if (activeSources['__composite__']) {
-        const info = activeSources['__composite__'];
-        info.layerIds.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-        if (map.getSource(info.sourceId)) map.removeSource(info.sourceId);
-        delete activeSources['__composite__'];
-      }
-      Object.keys(activeSources).forEach(name => removeSource(name));
-    }
-
-    function addCompositeSource(group) {
-      const sourceId = `src-composite-${group.name}`;
-      const tileUrl = `${MARTIN_BASE}/maps/${group.name}/{z}/{x}/{y}.pbf`;
-
-      map.addSource(sourceId, {
-        type: 'vector',
-        tiles: [tileUrl],
-        minzoom: 0,
-        maxzoom: 22,
-      });
-
-      const layerIds = [];
-      group.functions.forEach((name, i) => {
-        const color = sourceColors[name];
-        const slName = name.toLowerCase();
-        let type, paint;
-        if (slName.includes('centroids') || slName.includes('points')) {
-          type = 'circle';
-          paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
-        } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime')) {
-          type = 'line';
-          paint = { 'line-color': color, 'line-width': 1.5 };
-        } else {
-          type = 'fill';
-          paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
-        }
-
-        const layerId = `lyr-${name}-c${i}`;
-        map.addLayer({
-          id: layerId,
-          type: type,
-          source: sourceId,
-          'source-layer': name,
-          paint: paint,
-        });
-        layerIds.push(layerId);
-
-        // Mark sidebar item active
-        const el = document.getElementById(`src-item-${name}`);
-        if (el) el.classList.add('active');
-      });
-
-      activeSources['__composite__'] = { sourceId, layerIds, color: '#4fc3f7' };
-      document.getElementById('map-title').textContent = `Maps/ ${group.name} (composite)`;
+      if (group.functions.length) addSource(group.functions[0]);
     }
 
     function toggleSource(name) {
-      if (activeSources[name]) {
-        removeSource(name);
-      } else {
-        addSource(name);
-      }
+      if (activeSources[name]) removeSource(name);
+      else addSource(name);
     }
 
     function removeSource(name) {
@@ -321,13 +249,12 @@
       }
     }
 
-    // Parse MVT protobuf to extract layer names from a tile
+    // Parse MVT protobuf to extract layer names
     async function detectMvtLayers(tileUrl) {
       try {
         const resp = await fetch(tileUrl);
         if (!resp.ok) return null;
         let buf = new Uint8Array(await resp.arrayBuffer());
-        // Decompress gzip if needed
         if (buf.length > 2 && buf[0] === 0x1f && buf[1] === 0x8b) {
           buf = new Uint8Array(await new Response(
             new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))
@@ -345,14 +272,12 @@
           }
           return r;
         }
-        // Top-level Tile message: field 3 = Layer (length-delimited)
         while (p < buf.length) {
           const tag = readVarint();
           const field = tag >> 3, wire = tag & 7;
           if (wire === 2) {
             const len = readVarint();
             if (field === 3) {
-              // Inside Layer message: field 1 = name (string)
               const end = p + len;
               if (p < end) {
                 const innerTag = readVarint();
@@ -362,9 +287,7 @@
                 }
               }
               p = end;
-            } else {
-              p += len;
-            }
+            } else { p += len; }
           } else if (wire === 0) { readVarint(); }
           else if (wire === 5) { p += 4; }
           else if (wire === 1) { p += 8; }
@@ -379,21 +302,27 @@
       const sourceId = `src-${name}`;
       const tileJsonUrl = `${MARTIN_BASE}/${name}`;
 
-      map.addSource(sourceId, { type: 'vector', url: tileJsonUrl });
-
       const layerIds = [];
       try {
         const resp = await fetch(tileJsonUrl);
         const tj = await resp.json();
-        if (!map.getSource(sourceId)) return;
 
-        // Get layer names from TileJSON, or detect from a sample tile for bytea functions
+        const sourceOpts = {
+          type: 'vector',
+          tiles: tj.tiles,
+          minzoom: tj.minzoom || 0,
+          maxzoom: tj.maxzoom || 22,
+        };
+        if (tj.scheme) sourceOpts.scheme = tj.scheme;
+        if (tj.bounds) sourceOpts.bounds = tj.bounds;
+        map.addSource(sourceId, sourceOpts);
+
+        // Detect source-layer names from a sample tile
         let layers = (tj.vector_layers || []).map(vl => vl.id);
         if (!layers.length) {
-          // Bytea functions have no vector_layers metadata - detect from actual tile
           const tiles = tj.tiles || [];
           if (tiles.length) {
-            const sampleUrl = tiles[0].replace('{z}', '0').replace('{x}', '0').replace('{y}', '0');
+            const sampleUrl = tiles[0].replace('{z}', '2').replace('{x}', '2').replace('{y}', '1');
             const detected = await detectMvtLayers(sampleUrl);
             layers = detected || [name];
           } else {
@@ -425,7 +354,10 @@
           });
           layerIds.push(layerId);
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error(`Failed to add source ${name}:`, e);
+        return;
+      }
 
       activeSources[name] = { sourceId, layerIds, color };
       const el = document.getElementById(`src-item-${name}`);
@@ -457,7 +389,6 @@
         const color = sourceColors[srcName] || '#4fc3f7';
         const osmId = f.properties.osm_id;
 
-        // Build OHM link: negative osm_id = relation, positive = way
         let ohmLink = '';
         if (osmId) {
           const absId = Math.abs(osmId);
@@ -479,174 +410,6 @@
       document.getElementById('right-panel-body').innerHTML = html;
       panel.classList.remove('hidden');
     });
-
-    // === Tile Grid Overlay ===
-    let gridEnabled = false;
-    const tileSizeCache = {};
-    const pendingFetches = new Set();
-
-    function toggleTileGrid() {
-      gridEnabled = document.getElementById('grid-check').checked;
-      if (gridEnabled) drawTileGrid();
-      else clearTileGrid();
-    }
-
-    function clearTileGrid() {
-      const canvas = document.getElementById('tile-grid-canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function lng2tile(lng, zoom) { return Math.floor((lng + 180) / 360 * Math.pow(2, zoom)); }
-    function lat2tile(lat, zoom) {
-      const r = lat * Math.PI / 180;
-      return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * Math.pow(2, zoom));
-    }
-    function tile2lng(x, zoom) { return x / Math.pow(2, zoom) * 360 - 180; }
-    function tile2lat(y, zoom) {
-      const n = Math.PI - 2 * Math.PI * y / Math.pow(2, zoom);
-      return 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-    }
-
-    function getTileUrl() {
-      if (activeGroupIdx === null) return null;
-      const group = groupsData[activeGroupIdx];
-      return `${MARTIN_BASE}/maps/${group.name}`;
-    }
-
-    async function fetchTileSize(z, x, y) {
-      const key = `${z}/${x}/${y}`;
-      if (tileSizeCache[key] !== undefined) return tileSizeCache[key];
-      if (pendingFetches.has(key)) return null;
-
-      const baseUrl = getTileUrl();
-      if (!baseUrl) return null;
-
-      pendingFetches.add(key);
-      try {
-        const resp = await fetch(`${baseUrl}/${z}/${x}/${y}.pbf`, { method: 'HEAD' });
-        const len = resp.headers.get('content-length');
-        const cacheStatus = resp.headers.get('x-cache-status') || '';
-        const size = len ? parseInt(len) : 0;
-        tileSizeCache[key] = { size, cacheStatus };
-        pendingFetches.delete(key);
-        // Redraw after getting the size
-        if (gridEnabled) drawTileGrid();
-        return tileSizeCache[key];
-      } catch (e) {
-        pendingFetches.delete(key);
-        return null;
-      }
-    }
-
-    function drawTileGrid() {
-      if (!gridEnabled) return;
-
-      const canvas = document.getElementById('tile-grid-canvas');
-      const container = document.getElementById('map-container');
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = container.clientWidth * dpr;
-      canvas.height = container.clientHeight * dpr;
-      canvas.style.width = container.clientWidth + 'px';
-      canvas.style.height = container.clientHeight + 'px';
-
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, container.clientWidth, container.clientHeight);
-
-      const zoom = Math.floor(map.getZoom());
-      const bounds = map.getBounds();
-      const maxTile = Math.pow(2, zoom);
-
-      const xMin = Math.max(0, lng2tile(bounds.getWest(), zoom));
-      const xMax = Math.min(maxTile - 1, lng2tile(bounds.getEast(), zoom));
-      const yMin = Math.max(0, lat2tile(bounds.getNorth(), zoom));
-      const yMax = Math.min(maxTile - 1, lat2tile(bounds.getSouth(), zoom));
-
-      // Grid lines
-      ctx.strokeStyle = 'rgba(255, 50, 50, 0.6)';
-      ctx.lineWidth = 1;
-
-      for (let x = xMin; x <= xMax + 1; x++) {
-        const lng = tile2lng(x, zoom);
-        const px = map.project([lng, 0]).x;
-        ctx.beginPath();
-        ctx.moveTo(px, 0);
-        ctx.lineTo(px, container.clientHeight);
-        ctx.stroke();
-      }
-      for (let y = yMin; y <= yMax + 1; y++) {
-        const lat = tile2lat(y, zoom);
-        const py = map.project([0, lat]).y;
-        ctx.beginPath();
-        ctx.moveTo(0, py);
-        ctx.lineTo(container.clientWidth, py);
-        ctx.stroke();
-      }
-
-      // Labels with tile size
-      for (let x = xMin; x <= xMax; x++) {
-        for (let y = yMin; y <= yMax; y++) {
-          const topLeft = map.project([tile2lng(x, zoom), tile2lat(y, zoom)]);
-          const bottomRight = map.project([tile2lng(x + 1, zoom), tile2lat(y + 1, zoom)]);
-          const cx = (topLeft.x + bottomRight.x) / 2;
-          const cy = (topLeft.y + bottomRight.y) / 2;
-
-          const key = `${zoom}/${x}/${y}`;
-          const cached = tileSizeCache[key];
-
-          let label = `${zoom}/${x}/${y}`;
-          let sizeLabel = '';
-          let cacheLabel = '';
-
-          if (cached) {
-            const kb = (cached.size / 1024).toFixed(1);
-            sizeLabel = `${kb} kB`;
-            if (cached.cacheStatus) {
-              cacheLabel = cached.cacheStatus;
-            }
-          } else {
-            fetchTileSize(zoom, x, y);
-          }
-
-          // Background
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-          const textW = Math.max(ctx.measureText(label).width, ctx.measureText(sizeLabel).width);
-          const bgW = textW + 16;
-          const bgH = cacheLabel ? 48 : (sizeLabel ? 38 : 22);
-          ctx.fillRect(cx - bgW / 2, cy - bgH / 2, bgW, bgH);
-
-          // Tile coordinates
-          ctx.fillStyle = '#ff5555';
-          ctx.font = 'bold 12px monospace';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(label, cx, cy - (sizeLabel ? 8 : 0));
-
-          // Size
-          if (sizeLabel) {
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '11px monospace';
-            ctx.fillText(sizeLabel, cx, cy + 6);
-          }
-
-          // Cache status
-          if (cacheLabel) {
-            ctx.fillStyle = cacheLabel === 'HIT' ? '#66bb6a' : (cacheLabel === 'MISS' ? '#ffa726' : '#78909c');
-            ctx.font = '10px monospace';
-            ctx.fillText(cacheLabel, cx, cy + 19);
-          }
-        }
-      }
-    }
-
-    // Clear size cache on zoom change
-    map.on('zoomstart', () => {
-      Object.keys(tileSizeCache).forEach(k => delete tileSizeCache[k]);
-    });
-    map.on('moveend', () => { if (gridEnabled) drawTileGrid(); });
-    map.on('move', () => { if (gridEnabled) drawTileGrid(); });
-    window.addEventListener('resize', () => { if (gridEnabled) drawTileGrid(); });
 
     map.on('load', init);
   </script>

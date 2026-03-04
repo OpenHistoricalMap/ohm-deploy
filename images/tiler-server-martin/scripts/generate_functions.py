@@ -73,7 +73,7 @@ def generate_function_sql(func_def, columns_per_table):
         extent, buffer = get_mvt_geom_params(max_zoom)
 
         query = (
-            f"SELECT ST_AsMVT(q, '{sl}') INTO mvt FROM (\n"
+            f"SELECT ST_AsMVT(q, '{sl}', {extent}) INTO mvt FROM (\n"
             f"            SELECT {col_list},\n"
             f"                   ST_AsMVTGeom(t.geometry, bounds, {extent}, {buffer}, true) AS geometry\n"
             f"            FROM public.{table_name} t\n"

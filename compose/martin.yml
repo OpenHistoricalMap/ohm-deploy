@@ -12,7 +12,7 @@ services:
       - ../envs/.env.tiler
     environment:
       - MARTIN_INTERNAL_PORT=3000
-      - MARTIN_POOL_SIZE=20
+      - MARTIN_POOL_SIZE=50
       - MARTIN_WORKER_PROCESSES=8
     # restart: always
     networks:
