@@ -263,6 +263,17 @@
             [15, "mv_other_lines_z14_15"],
             [null, "mv_other_lines_z16_20"]
           ]
+        },
+        {
+          "function_name": "communication_lines",
+          "source_layer": "communication_lines",
+          "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 10,
+          "zoom_mapping": [
+            [12, "mv_communication_z10_12"],
+            [15, "mv_communication_z13_15"],
+            [null, "mv_communication_z16_20"]
+          ]
         }
       ]
     },

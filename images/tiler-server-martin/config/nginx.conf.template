@@ -17,7 +17,7 @@ http {
     proxy_cache_path /var/cache/nginx/tiles
         levels=1:2
         keys_zone=tiles:200m
-        max_size=20g
+        max_size=50g
         inactive=7d
         use_temp_path=off;
 
@@ -73,6 +73,7 @@ http {
         location /config/ {
             alias /app/config/;
             add_header Content-Type application/json;
+            add_header Cache-Control "no-cache";
         }
 
         # Viewer

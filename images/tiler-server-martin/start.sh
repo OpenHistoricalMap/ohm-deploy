@@ -63,7 +63,7 @@ echo "=== Ready ==="
 echo "  Nginx  :${NGINX_PORT} -> Martin :${MARTIN_INTERNAL_PORT}"
 echo "  Composite: /maps/ohm/{z}/{x}/{y}.pbf (all layers)"
 echo "  Per-layer: /maps/ohm/land_ohm_lines/{z}/{x}/{y}.pbf"
-echo "  Direct:    /land_ohm_lines/{z}/{x}/{y}"
+
 
 # Wait for either process to exit
 wait -n $MARTIN_PID $NGINX_PID

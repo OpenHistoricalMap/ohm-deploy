@@ -60,6 +60,11 @@
     .group-arrow { color: #888; font-size: 16px; }
     .group-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
 
+    .mode-toggle { display: flex; gap: 0; margin: 8px 0 12px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); }
+    .mode-toggle button { flex: 1; padding: 7px 0; font-size: 12px; border: none; background: rgba(255,255,255,0.04); color: #aaa; cursor: pointer; transition: all 0.15s; }
+    .mode-toggle button.active { background: #0f3460; color: #4fc3f7; font-weight: 600; }
+    .mode-toggle button:hover:not(.active) { background: rgba(255,255,255,0.08); }
+
     #sidebar-back { padding: 12px 16px; border-bottom: 1px solid #0f3460; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
     #sidebar-back:hover { background: rgba(255,255,255,0.05); }
     #sidebar-back .back-arrow { font-size: 18px; color: #4fc3f7; }
@@ -107,6 +112,7 @@
     const sourceColors = {};
     let groupsData = [];
     let activeGroupIdx = null;
+    let viewMode = 'composite'; // 'composite' | 'layers'
 
     const map = new maplibregl.Map({
       container: 'map',
@@ -189,7 +195,7 @@
     }
 
     function showGroupList() {
-      Object.keys(activeSources).forEach(name => removeSource(name));
+      removeAllSources();
       activeGroupIdx = null;
 
       const content = document.getElementById('sidebar-content');
@@ -207,28 +213,123 @@
     }
 
     function selectGroup(idx) {
-      Object.keys(activeSources).forEach(name => removeSource(name));
-
+      removeAllSources();
       activeGroupIdx = idx;
       const group = groupsData[idx];
-      const content = document.getElementById('sidebar-content');
 
       document.getElementById('sidebar-back').style.display = 'flex';
       document.getElementById('sidebar-back-label').textContent = `Maps/ ${group.name}`;
       document.getElementById('map-title').textContent = `Maps/ ${group.name}`;
 
-      content.innerHTML = '';
-      group.functions.forEach(name => {
-        const color = sourceColors[name];
-        const item = document.createElement('div');
-        item.className = 'source-item';
-        item.id = `src-item-${name}`;
-        item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
-        item.onclick = () => toggleSource(name);
-        content.appendChild(item);
-      });
+      renderGroupContent(group);
+    }
 
-      if (group.functions.length) addSource(group.functions[0]);
+    function renderGroupContent(group) {
+      const content = document.getElementById('sidebar-content');
+      content.innerHTML = '';
+
+      // Mode toggle
+      const toggle = document.createElement('div');
+      toggle.className = 'mode-toggle';
+      toggle.innerHTML = `
+        <button id="btn-composite" class="${viewMode === 'composite' ? 'active' : ''}" onclick="switchMode('composite')">Composite</button>
+        <button id="btn-layers" class="${viewMode === 'layers' ? 'active' : ''}" onclick="switchMode('layers')">Layer by layer</button>
+      `;
+      content.appendChild(toggle);
+
+      if (viewMode === 'composite') {
+        // Show single composite entry
+        const item = document.createElement('div');
+        item.className = 'source-item active';
+        item.id = 'src-item-composite';
+        item.innerHTML = `<div class="source-color" style="background:#4fc3f7"></div><div><div class="source-name">${group.name} (all layers)</div><div style="font-size:11px;color:#888;margin-top:2px">${group.functions.length} layers combined</div></div>`;
+        content.appendChild(item);
+
+        // List layers (info only, not clickable)
+        group.functions.forEach(name => {
+          const color = sourceColors[name];
+          const info = document.createElement('div');
+          info.style.cssText = 'padding:4px 12px 4px 34px;font-size:12px;color:#888;display:flex;align-items:center;gap:8px;';
+          info.innerHTML = `<div style="width:8px;height:8px;border-radius:2px;background:${color};flex-shrink:0"></div>${name}`;
+          content.appendChild(info);
+        });
+
+        addCompositeSource(group);
+      } else {
+        // Layer-by-layer mode
+        group.functions.forEach(name => {
+          const color = sourceColors[name];
+          const item = document.createElement('div');
+          item.className = 'source-item';
+          item.id = `src-item-${name}`;
+          item.innerHTML = `<div class="source-color" style="background:${color}"></div><div class="source-name">${name}</div>`;
+          item.onclick = () => toggleSource(name);
+          content.appendChild(item);
+        });
+
+        // Load all layers by default
+        group.functions.forEach(name => addSource(name));
+      }
+    }
+
+    function switchMode(mode) {
+      if (mode === viewMode) return;
+      viewMode = mode;
+      removeAllSources();
+      const group = groupsData[activeGroupIdx];
+      renderGroupContent(group);
+    }
+
+    function removeAllSources() {
+      Object.keys(activeSources).forEach(name => removeSource(name));
+    }
+
+    async function addCompositeSource(group) {
+      const compositeFns = group.functions.join(',');
+      const sourceId = `src-composite-${group.name}`;
+      const tileJsonUrl = `${MARTIN_BASE}/${compositeFns}`;
+
+      try {
+        const resp = await fetch(tileJsonUrl);
+        const tj = await resp.json();
+
+        map.addSource(sourceId, {
+          type: 'vector',
+          tiles: tj.tiles,
+          minzoom: tj.minzoom || 0,
+          maxzoom: tj.maxzoom || 22,
+        });
+
+        const layerIds = [];
+        // Use group function names as source-layer names directly
+        // (source_layer matches function_name in our config)
+        const layers = group.functions;
+
+        layers.forEach((sourceLayer, i) => {
+          const color = sourceColors[sourceLayer] || COLORS[i % COLORS.length];
+          const slName = sourceLayer.toLowerCase();
+          let type, paint;
+          if (slName.includes('centroids') || slName.includes('points')) {
+            type = 'circle';
+            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
+          } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime') || slName.includes('communication')) {
+            type = 'line';
+            paint = { 'line-color': color, 'line-width': 1 };
+          } else {
+            type = 'fill';
+            paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
+          }
+
+          const layerId = `lyr-composite-${sourceLayer}-${i}`;
+          map.addLayer({ id: layerId, type, source: sourceId, 'source-layer': sourceLayer, paint });
+          layerIds.push(layerId);
+        });
+
+        activeSources['__composite__'] = { sourceId, layerIds, color: '#4fc3f7' };
+        document.getElementById('map-title').textContent = `Maps/ ${group.name} (composite)`;
+      } catch (e) {
+        console.error('Failed to add composite source:', e);
+      }
     }
 
     function toggleSource(name) {
@@ -336,9 +437,9 @@
           if (slName.includes('centroids') || slName.includes('points')) {
             type = 'circle';
             paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
-          } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime')) {
+          } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime') || slName.includes('communication')) {
             type = 'line';
-            paint = { 'line-color': color, 'line-width': 1.5 };
+            paint = { 'line-color': color, 'line-width': 1 };
           } else {
             type = 'fill';
             paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
