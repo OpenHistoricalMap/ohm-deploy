@@ -60,15 +60,10 @@
     .footer-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa; }
     .footer-row label { cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .footer-row input[type="checkbox"] { accent-color: #4fc3f7; cursor: pointer; }
-    .opacity-slider { display: flex; align-items: center; gap: 8px; width: 100%; }
-    .opacity-slider input[type="range"] { flex: 1; accent-color: #4fc3f7; height: 4px; cursor: pointer; }
-    .opacity-value { font-size: 11px; color: #888; min-width: 28px; text-align: right; }
-
     /* Map */
     #map-container { flex: 1; position: relative; }
     #map { width: 100%; height: 100%; }
     #map-header { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 8px; z-index: 5; pointer-events: none; }
-    #map-title { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: auto; }
     #map-controls { display: flex; gap: 6px; margin-left: auto; pointer-events: auto; }
     #map-controls button { background: rgba(22,33,62,0.9); border: 1px solid rgba(255,255,255,0.15); color: #eee; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
     #map-controls button:hover { background: rgba(22,33,62,1); }
@@ -126,11 +121,6 @@
     </div>
     <div id="sidebar-content"><div class="loading">Loading catalog...</div></div>
     <div id="sidebar-footer">
-      <div class="opacity-slider">
-        <span>Opacity</span>
-        <input type="range" id="opacity-range" min="0" max="100" value="80" oninput="setLayerOpacity(this.value)">
-        <span class="opacity-value" id="opacity-val">80%</span>
-      </div>
       <div class="footer-row">
         <label><input type="checkbox" id="inspect-toggle" checked onchange="toggleInspect(this.checked)"> Inspect Features</label>
       </div>
@@ -140,7 +130,6 @@
     <button id="sidebar-open" onclick="toggleSidebar()" title="Open sidebar">&#8594;</button>
     <div id="map"></div>
     <div id="map-header">
-      <div id="map-title">Select a source</div>
       <div id="map-controls">
         <button id="btn-grid" onclick="toggleGrid()">Grid</button>
       </div>
@@ -168,7 +157,6 @@
     let activeGroupIdx = null;
     let viewMode = 'composite';
     let inspectEnabled = true;
-    let currentOpacity = 80;
 
     const map = new maplibregl.Map({
       container: 'map',
@@ -209,23 +197,6 @@
     function toggleInspect(enabled) {
       inspectEnabled = enabled;
       if (!enabled) closeRightPanel();
-    }
-
-    // Opacity
-    function setLayerOpacity(val) {
-      currentOpacity = parseInt(val);
-      document.getElementById('opacity-val').textContent = val + '%';
-      const opacity = val / 100;
-      Object.values(activeSources).forEach(info => {
-        info.layerIds.forEach(id => {
-          const layer = map.getLayer(id);
-          if (!layer) return;
-          const t = layer.type;
-          if (t === 'fill') map.setPaintProperty(id, 'fill-opacity', opacity * 0.35);
-          else if (t === 'line') map.setPaintProperty(id, 'line-opacity', opacity);
-          else if (t === 'circle') map.setPaintProperty(id, 'circle-opacity', opacity * 0.8);
-        });
-      });
     }
 
     map.on('zoom', () => {
@@ -324,7 +295,6 @@
 
       const content = document.getElementById('sidebar-content');
       document.getElementById('sidebar-back').style.display = 'none';
-      document.getElementById('map-title').textContent = 'Select a map';
       content.innerHTML = '';
 
       groupsData.forEach((group, idx) => {
@@ -343,7 +313,6 @@
 
       document.getElementById('sidebar-back').style.display = 'flex';
       document.getElementById('sidebar-back-label').textContent = `Maps/ ${group.name}`;
-      document.getElementById('map-title').textContent = `Maps/ ${group.name}`;
 
       renderGroupContent(group);
     }
@@ -433,21 +402,20 @@
 
         const layerIds = [];
         const layers = group.functions;
-        const opacity = currentOpacity / 100;
-
+        
         layers.forEach((sourceLayer, i) => {
           const color = sourceColors[sourceLayer] || COLORS[i % COLORS.length];
           const slName = sourceLayer.toLowerCase();
           let type, paint;
           if (slName.includes('centroids') || slName.includes('points')) {
             type = 'circle';
-            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': opacity * 0.8 };
+            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
           } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime') || slName.includes('communication')) {
             type = 'line';
-            paint = { 'line-color': color, 'line-width': 1, 'line-opacity': opacity };
+            paint = { 'line-color': color, 'line-width': 1, 'line-opacity': 1 };
           } else {
             type = 'fill';
-            paint = { 'fill-color': color, 'fill-opacity': opacity * 0.35, 'fill-outline-color': color };
+            paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
           }
 
           const layerId = `lyr-composite-${sourceLayer}-${i}`;
@@ -456,7 +424,6 @@
         });
 
         activeSources['__composite__'] = { sourceId, layerIds, color: '#4fc3f7' };
-        document.getElementById('map-title').textContent = `Maps/ ${group.name} (composite)`;
       } catch (e) {
         console.error('Failed to add composite source:', e);
       }
@@ -475,9 +442,6 @@
       delete activeSources[name];
       const el = document.getElementById(`src-item-${name}`);
       if (el) el.classList.remove('active');
-      if (!Object.keys(activeSources).length) {
-        document.getElementById('map-title').textContent = 'Select a source';
-      }
     }
 
     // Parse MVT protobuf to extract layer names
@@ -532,8 +496,7 @@
       const color = sourceColors[name];
       const sourceId = `src-${name}`;
       const tileJsonUrl = `${MARTIN_BASE}/${name}`;
-      const opacity = currentOpacity / 100;
-
+      
       const layerIds = [];
       try {
         const resp = await fetch(tileJsonUrl);
@@ -567,13 +530,13 @@
           let type, paint;
           if (slName.includes('centroids') || slName.includes('points')) {
             type = 'circle';
-            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': opacity * 0.8 };
+            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
           } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime') || slName.includes('communication')) {
             type = 'line';
-            paint = { 'line-color': color, 'line-width': 1, 'line-opacity': opacity };
+            paint = { 'line-color': color, 'line-width': 1, 'line-opacity': 1 };
           } else {
             type = 'fill';
-            paint = { 'fill-color': color, 'fill-opacity': opacity * 0.35, 'fill-outline-color': color };
+            paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
           }
 
           const layerId = `lyr-${name}-${i}`;
@@ -594,7 +557,6 @@
       activeSources[name] = { sourceId, layerIds, color };
       const el = document.getElementById(`src-item-${name}`);
       if (el) el.classList.add('active');
-      document.getElementById('map-title').textContent = name;
     }
 
     function closeRightPanel() {
@@ -646,6 +608,32 @@
     });
 
     map.on('load', init);
+
+    // ---- Cross-iframe sync via postMessage ----
+    let _syncInProgress = false;
+
+    // Send position to parent when map moves
+    map.on('moveend', () => {
+      if (_syncInProgress) return;
+      const center = map.getCenter();
+      window.parent.postMessage({
+        type: 'mapSync',
+        center: { lat: center.lat, lng: center.lng },
+        zoom: map.getZoom()
+      }, '*');
+    });
+
+    // Receive position from parent
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'mapSync') {
+        _syncInProgress = true;
+        map.jumpTo({
+          center: [e.data.center.lng, e.data.center.lat],
+          zoom: e.data.zoom
+        });
+        setTimeout(() => { _syncInProgress = false; }, 100);
+      }
+    });
   </script>
 </body>
 </html>
