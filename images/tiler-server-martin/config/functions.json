@@ -338,7 +338,7 @@
       "functions": [
         {
           "function_name": "land_polygons",
-          "source_layer": "land_polygons",
+          "source_layer": "land",
           "exclude_columns": ["geometry"],
           "min_zoom": 0,
           "zoom_mapping": [
@@ -359,7 +359,7 @@
       "functions": [
         {
           "function_name": "ne_lakes",
-          "source_layer": "ne_lakes",
+          "source_layer": "water_areas",
           "exclude_columns": ["wkb_geometry"],
           "geometry_column": "wkb_geometry",
           "min_zoom": 0,
