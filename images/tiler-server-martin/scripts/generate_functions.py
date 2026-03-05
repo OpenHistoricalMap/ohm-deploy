@@ -25,8 +25,12 @@ def load_config():
         return json.load(f)
 
 
+ALWAYS_EXCLUDE = ["source", "id"]
+
+
 def get_columns(cur, table_name, exclude):
     """Get column names from a table/mview, excluding specified columns."""
+    exclude = list(exclude) + ALWAYS_EXCLUDE
     cur.execute("""
         SELECT attname
         FROM pg_attribute a

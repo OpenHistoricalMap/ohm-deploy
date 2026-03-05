@@ -16,6 +16,7 @@ services:
       - MARTIN_INTERNAL_PORT=3000
       - MARTIN_POOL_SIZE=50
       - MARTIN_WORKER_PROCESSES=8
+      - NGINX_GZIP_COMP_LEVEL=9
     # restart: always
     networks:
       - ohm_network
