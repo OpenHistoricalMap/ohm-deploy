@@ -25,7 +25,7 @@ def load_config():
         return json.load(f)
 
 
-ALWAYS_EXCLUDE = ["source", "id"]
+ALWAYS_EXCLUDE = ["source", "id", "source_type"]
 
 
 def get_columns(cur, table_name, exclude):
