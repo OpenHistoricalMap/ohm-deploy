@@ -40,9 +40,11 @@ function refresh_mviews_group() {
             local error_output
             # Disable statement_timeout for long-running refresh operations (0 = no limit)
             local exit_code=0
+            local start_time=$SECONDS
             error_output=$(psql "$PG_CONNECTION" -v ON_ERROR_STOP=1 -c "SET statement_timeout = 0" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;" 2>&1) || exit_code=$?
+            local elapsed=$((SECONDS - start_time))
             if [ $exit_code -eq 0 ]; then
-                log_message "[$group_name] ✅ Successfully refreshed $mview."
+                log_message "[$group_name] ✅ Successfully refreshed $mview. Time: ${elapsed}s"
             else
                 log_message "[$group_name] ❌ ERROR refreshing $mview! Exit code: $exit_code"
                 log_message "[$group_name] ❌ Error details: $error_output"
