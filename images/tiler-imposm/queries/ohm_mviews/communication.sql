@@ -8,8 +8,8 @@
 -- Unified view: merge lines + multilines into a single source
 -- TODO, Do we need to add name_lcale columns?
 -- ============================================================================
-DROP VIEW IF EXISTS mv_communication_z16_20 CASCADE;
-CREATE VIEW mv_communication_z16_20 AS
+DROP MATERIALIZED VIEW IF EXISTS mv_communication_z16_20 CASCADE;
+CREATE MATERIALIZED VIEW mv_communication_z16_20 AS
     -- Ways (simple linestrings)
     SELECT
         id,
@@ -81,6 +81,10 @@ CREATE VIEW mv_communication_z16_20 AS
     WHERE geometry IS NOT NULL
       AND ST_GeometryType(geometry) IN ('ST_LineString', 'ST_MultiLineString');
 
+-- Unique index required for REFRESH MATERIALIZED VIEW CONCURRENTLY
+CREATE UNIQUE INDEX idx_mv_communication_z16_20_unique ON mv_communication_z16_20 (id, osm_id, source_type);
+-- Spatial index for geometry queries
+CREATE INDEX idx_mv_communication_z16_20_geometry ON mv_communication_z16_20 USING GIST (geometry);
 
 -- ============================================================================
 -- Zoom 14-15: Slight simplification (5m tolerance)

@@ -39,13 +39,20 @@ function refresh_mviews_group() {
             log_message "[$group_name] Refreshing $mview..."
             local error_output
             # Disable statement_timeout for long-running refresh operations (0 = no limit)
-            error_output=$(psql "$PG_CONNECTION" -c "SET statement_timeout = 0; REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;" 2>&1)
-            local exit_code=$?
+            local exit_code=0
+            local start_time=$SECONDS
+            error_output=$(psql "$PG_CONNECTION" -v ON_ERROR_STOP=1 -c "SET statement_timeout = 0" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;" 2>&1) || exit_code=$?
+            local elapsed=$((SECONDS - start_time))
             if [ $exit_code -eq 0 ]; then
-                log_message "[$group_name] ✅ Successfully refreshed $mview."
+                log_message "[$group_name] ✅ Successfully refreshed $mview. Time: ${elapsed}s"
             else
                 log_message "[$group_name] ❌ ERROR refreshing $mview! Exit code: $exit_code"
                 log_message "[$group_name] ❌ Error details: $error_output"
+                # If connection failed, skip remaining views and wait before retrying
+                if echo "$error_output" | grep -qi "connection\|could not connect\|server closed\|SSL"; then
+                    log_message "[$group_name] ⚠️ Connection error detected. Waiting ${sleep_interval}s before retrying all views..."
+                    break
+                fi
             fi
         done
         sleep "$sleep_interval"
@@ -142,7 +149,8 @@ others_views=(
 communication_views=(
     # lines
     mv_communication_z16_20
-    mv_communication_z14_15
+    mv_communication_z13_15
+    mv_communication_z10_12
 )
 
 places_views=(
