@@ -224,7 +224,7 @@ def generate_tilejson_files(groups, fields_per_function, base_url):
             tj = build_tilejson(
                 name=fn,
                 description=f"Layer: {func_def['source_layer']}",
-                tiles_url=f"{base_url}/maps/{group_name}/{fn}/{{z}}/{{x}}/{{y}}.pbf",
+                tiles_url=f"{base_url}/maps/{group_name}/{fn}/{{z}}/{{x}}/{{y}}",
                 vector_layers=[vl],
                 minzoom=fn_minzoom,
                 maxzoom=fn_maxzoom,
@@ -239,7 +239,7 @@ def generate_tilejson_files(groups, fields_per_function, base_url):
             tj = build_tilejson(
                 name=group_name,
                 description=f"Composite: {group_name} ({len(group_vector_layers)} layers)",
-                tiles_url=f"{base_url}/maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf",
+                tiles_url=f"{base_url}/maps/{group_name}/{{z}}/{{x}}/{{y}}",
                 vector_layers=group_vector_layers,
                 minzoom=group_minzoom,
                 maxzoom=group_maxzoom,
