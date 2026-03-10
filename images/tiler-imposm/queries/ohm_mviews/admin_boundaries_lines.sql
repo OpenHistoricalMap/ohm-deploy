@@ -491,10 +491,10 @@ SELECT
     end_decdate,
     start_date,
     end_date,
-    indefinite,
-    maritime,
-    disputed,
-    disputed_by
+    NULLIF(indefinite, '') AS indefinite,
+    NULLIF(maritime, '') AS maritime,
+    NULLIF(disputed, '') AS disputed,
+    NULLIF(disputed_by, '') AS disputed_by
 FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10,11)
 WITH DATA;
