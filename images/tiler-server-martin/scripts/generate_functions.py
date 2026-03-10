@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """
-Generates and executes Martin SQL tile functions.
+Generates and executes Martin SQL tile functions, and produces TileJSON manifests.
 
 Reads function definitions from config/functions.json, connects to PostgreSQL,
 reads column names from materialized views, and creates PL/pgSQL functions
 with hardcoded columns (no dynamic SQL at runtime).
 
+Also generates static TileJSON files (per-function and per-group composite)
+with full vector_layers and field metadata, since Martin cannot introspect
+function sources for field information.
+
 Usage: python3 generate_functions.py
   Requires env vars: POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+  Optional env vars: MARTIN_BASE_URL (default: "")
 """
 
 import json
@@ -17,6 +22,7 @@ import psycopg2
 BASE_DIR = os.path.join(os.path.dirname(__file__), "..")
 CONFIG_PATH = os.path.join(BASE_DIR, "config", "functions.json")
 OUTPUT_DIR = os.path.join(BASE_DIR, "pg_functions")
+TILEJSON_DIR = os.path.join(BASE_DIR, "tilejson")
 
 
 def load_config():
@@ -26,6 +32,13 @@ def load_config():
 
 
 ALWAYS_EXCLUDE = ["source", "id", "source_type"]
+
+
+PG_TYPE_MAP = {
+    "int2": "Number", "int4": "Number", "int8": "Number",
+    "float4": "Number", "float8": "Number", "numeric": "Number",
+    "bool": "Boolean",
+}
 
 
 def get_columns(cur, table_name, exclude):
@@ -47,6 +60,28 @@ def get_columns(cur, table_name, exclude):
     if not cols:
         print(f"  WARNING: No columns found for {table_name}")
     return cols
+
+
+def get_columns_with_types(cur, table_name, exclude):
+    """Get column names and TileJSON-compatible types from a table/mview."""
+    exclude = list(exclude) + ALWAYS_EXCLUDE
+    cur.execute("""
+        SELECT a.attname, t.typname
+        FROM pg_attribute a
+        JOIN pg_class c ON a.attrelid = c.oid
+        JOIN pg_namespace n ON c.relnamespace = n.oid
+        JOIN pg_type t ON a.atttypid = t.oid
+        WHERE n.nspname = 'public'
+          AND c.relname = %s
+          AND a.attnum > 0
+          AND NOT a.attisdropped
+          AND a.attname != ALL(%s)
+        ORDER BY a.attnum
+    """, (table_name, exclude))
+    fields = {}
+    for col_name, pg_type in cur.fetchall():
+        fields[col_name] = PG_TYPE_MAP.get(pg_type, "String")
+    return fields
 
 
 def get_mvt_geom_params(max_zoom):
@@ -130,6 +165,93 @@ $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;
 """
 
 
+def get_maxzoom(zoom_mapping):
+    """Derive maxzoom from zoom_mapping. null entry means up to z20."""
+    last_max = zoom_mapping[-1][0]
+    return 20 if last_max is None else last_max
+
+
+def build_tilejson(name, description, tiles_url, vector_layers, minzoom=0, maxzoom=20):
+    """Build a TileJSON 3.0.0 manifest."""
+    return {
+        "tilejson": "3.0.0",
+        "name": name,
+        "description": description,
+        "tiles": [tiles_url],
+        "minzoom": minzoom,
+        "maxzoom": maxzoom,
+        "vector_layers": vector_layers,
+    }
+
+
+def build_vector_layer(func_def, fields):
+    """Build a single vector_layer entry for TileJSON."""
+    return {
+        "id": func_def["source_layer"],
+        "description": func_def["function_name"],
+        "minzoom": func_def.get("min_zoom", 0),
+        "maxzoom": get_maxzoom(func_def["zoom_mapping"]),
+        "fields": fields,
+    }
+
+
+def generate_tilejson_files(groups, fields_per_function, base_url):
+    """Generate static TileJSON files for each function and each composite group."""
+    os.makedirs(TILEJSON_DIR, exist_ok=True)
+    count = 0
+
+    for group in groups:
+        group_name = group["name"]
+        group_vector_layers = []
+        group_minzoom = 20
+        group_maxzoom = 0
+
+        for func_def in group["functions"]:
+            fn = func_def["function_name"]
+            if fn not in fields_per_function:
+                continue
+
+            fields = fields_per_function[fn]
+            vl = build_vector_layer(func_def, fields)
+            group_vector_layers.append(vl)
+
+            fn_minzoom = func_def.get("min_zoom", 0)
+            fn_maxzoom = get_maxzoom(func_def["zoom_mapping"])
+            group_minzoom = min(group_minzoom, fn_minzoom)
+            group_maxzoom = max(group_maxzoom, fn_maxzoom)
+
+            # Per-function TileJSON
+            tj = build_tilejson(
+                name=fn,
+                description=f"Layer: {func_def['source_layer']}",
+                tiles_url=f"{base_url}/maps/{group_name}/{fn}/{{z}}/{{x}}/{{y}}.pbf",
+                vector_layers=[vl],
+                minzoom=fn_minzoom,
+                maxzoom=fn_maxzoom,
+            )
+            path = os.path.join(TILEJSON_DIR, f"{fn}.json")
+            with open(path, "w") as f:
+                json.dump(tj, f, separators=(",", ":"))
+            count += 1
+
+        # Composite group TileJSON
+        if group_vector_layers:
+            tj = build_tilejson(
+                name=group_name,
+                description=f"Composite: {group_name} ({len(group_vector_layers)} layers)",
+                tiles_url=f"{base_url}/maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf",
+                vector_layers=group_vector_layers,
+                minzoom=group_minzoom,
+                maxzoom=group_maxzoom,
+            )
+            path = os.path.join(TILEJSON_DIR, f"{group_name}.json")
+            with open(path, "w") as f:
+                json.dump(tj, f, separators=(",", ":"))
+            count += 1
+
+    return count
+
+
 def main():
     config = load_config()
     groups = config["groups"]
@@ -151,6 +273,7 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     created = 0
     skipped = 0
+    fields_per_function = {}
 
     for group in groups:
         group_name = group["name"]
@@ -179,6 +302,10 @@ def main():
                 skipped += 1
                 continue
 
+            # Get fields with types from the highest-zoom table (most complete schema)
+            last_table = zoom_mapping[-1][1]
+            fields_per_function[fn] = get_columns_with_types(cur, last_table, exclude)
+
             # Generate SQL, write to file, execute
             sql = generate_function_sql(func_def, columns_per_table)
 
@@ -194,6 +321,11 @@ def main():
     cur.close()
     conn.close()
     print(f"\nDone: {created} created, {skipped} skipped.")
+
+    # Generate TileJSON manifests
+    base_url = os.environ.get("MARTIN_BASE_URL", "")
+    tj_count = generate_tilejson_files(groups, fields_per_function, base_url)
+    print(f"TileJSON: {tj_count} files written to {TILEJSON_DIR}")
 
 
 if __name__ == "__main__":

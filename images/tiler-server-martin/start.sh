@@ -41,7 +41,7 @@ echo "Generating nginx config..."
 python3 /app/scripts/generate_nginx_conf.py
 
 # Ensure nginx dirs exist
-mkdir -p /run/nginx /var/log/nginx /var/cache/nginx/tiles
+mkdir -p /run/nginx /var/log/nginx /var/cache/nginx/tiles /app/tilejson
 
 # Start Martin in background
 echo "Starting Martin on port ${MARTIN_INTERNAL_PORT}..."

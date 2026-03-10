@@ -25,6 +25,7 @@ def main():
 
     composite_routes = []
     perlayer_routes = []
+    tilejson_routes = []
 
     for group in config["groups"]:
         group_name = group["name"]
@@ -35,6 +36,31 @@ def main():
 
         if not fn_names:
             continue
+
+        # TileJSON: /capabilities/{group}.json (Tegola-compatible) + /maps/{group}.json
+        for prefix in ("capabilities", "maps"):
+            tilejson_routes.append(
+                f"        # TileJSON: /{prefix}/{group_name}.json\n"
+                f"        location = /{prefix}/{group_name}.json {{\n"
+                f"            default_type application/json;\n"
+                f"            alias /app/tilejson/{group_name}.json;\n"
+                f"            add_header Cache-Control \"no-cache\";\n"
+                f"            add_header Access-Control-Allow-Origin \"*\";\n"
+                f"        }}"
+            )
+
+        # TileJSON: /capabilities/{group}/{layer}.json + /maps/{group}/{layer}.json
+        for fn_name in fn_names:
+            for prefix in ("capabilities", "maps"):
+                tilejson_routes.append(
+                    f"        # TileJSON: /{prefix}/{group_name}/{fn_name}.json\n"
+                    f"        location = /{prefix}/{group_name}/{fn_name}.json {{\n"
+                    f"            default_type application/json;\n"
+                    f"            alias /app/tilejson/{fn_name}.json;\n"
+                    f"            add_header Cache-Control \"no-cache\";\n"
+                    f"            add_header Access-Control-Allow-Origin \"*\";\n"
+                    f"        }}"
+                )
 
         # Composite: /maps/{group}/{z}/{x}/{y}.pbf -> Martin composite source
         composite_src = ",".join(fn_names)
@@ -87,6 +113,8 @@ def main():
         print(f"  {group_name}: composite={len(fn_names)} functions -> /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf{static_label}")
 
     nginx_conf = template.replace(
+        "##TILEJSON_ROUTES##", "\n\n".join(tilejson_routes)
+    ).replace(
         "##COMPOSITE_ROUTES##", "\n\n".join(composite_routes)
     ).replace(
         "##PERLAYER_ROUTES##", "\n\n".join(perlayer_routes)
