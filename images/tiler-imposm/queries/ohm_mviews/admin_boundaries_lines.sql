@@ -273,8 +273,8 @@ WITH ordered AS (
       ORDER BY start_decdate NULLS FIRST
     ) AS prev_end
   FROM osm_admin_relation_members
-  WHERE ST_GeometryType(geometry) = ‘ST_LineString’
-    AND type = ‘administrative’
+  WHERE ST_GeometryType(geometry) = 'ST_LineString'
+    AND type = 'administrative'
     AND geometry IS NOT NULL
 ),
 
