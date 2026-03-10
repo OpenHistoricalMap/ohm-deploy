@@ -13,8 +13,9 @@ SELECT
     start_date, 
     end_date, 
     area_km2,  
-    start_decdate, 
+    start_decdate,
     end_decdate,
+    border_type,
     short_name,
     official_name,
     {{LENGUAGES}} 
@@ -39,8 +40,9 @@ SELECT
     start_date, 
     end_date, 
     area_km2,  
-    start_decdate, 
+    start_decdate,
     end_decdate,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_areas_z3_5
@@ -64,8 +66,9 @@ SELECT
     start_date, 
     end_date, 
     area_km2,  
-    start_decdate, 
+    start_decdate,
     end_decdate,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_areas_z6_7
@@ -88,8 +91,9 @@ SELECT
     start_date, 
     end_date, 
     area_km2,  
-    start_decdate, 
+    start_decdate,
     end_decdate,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_areas_z8_9
@@ -112,8 +116,9 @@ SELECT
     start_date, 
     end_date, 
     area_km2,  
-    start_decdate, 
+    start_decdate,
     end_decdate,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_areas_z10_12
@@ -136,8 +141,9 @@ SELECT
     start_date, 
     end_date, 
     area_km2,  
-    start_decdate, 
+    start_decdate,
     end_decdate,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_areas_z13_15
@@ -161,8 +167,9 @@ SELECT
     start_date, 
     end_date, 
     area_km2,  
-    start_decdate, 
+    start_decdate,
     end_decdate,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_admin_boundaries_areas_z16_20

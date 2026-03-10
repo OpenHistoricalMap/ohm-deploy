@@ -11,8 +11,12 @@ SELECT
     type,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
 FROM 
     mv_admin_boundaries_lines_z0_2
 WHERE 
@@ -32,8 +36,12 @@ SELECT
     type,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
 FROM 
     mv_admin_boundaries_lines_z3_5
 WHERE 
@@ -54,8 +62,12 @@ SELECT
     type,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
 FROM 
     mv_admin_boundaries_lines_z6_7
 WHERE 
@@ -75,8 +87,12 @@ SELECT
     type,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
 FROM 
     mv_admin_boundaries_lines_z8_9
 WHERE 
@@ -96,8 +112,12 @@ SELECT
     type,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
 FROM 
     mv_admin_boundaries_lines_z10_12 
 WHERE 
@@ -117,8 +137,12 @@ SELECT
     type,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
 FROM 
     mv_admin_boundaries_lines_z13_15 
 WHERE 
@@ -138,8 +162,12 @@ SELECT
     type,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
 FROM 
     mv_admin_boundaries_lines_z16_20
 WHERE 
