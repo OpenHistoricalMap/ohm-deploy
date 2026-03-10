@@ -71,6 +71,24 @@
           "from_member": true
         },
         {
+          "name": "me_indefinite",
+          "type": "string",
+          "key": "indefinite",
+          "from_member": true
+        },
+        {
+          "name": "me_disputed",
+          "type": "string",
+          "key": "disputed",
+          "from_member": true
+        },
+        {
+          "name": "me_disputed_by",
+          "type": "string",
+          "key": "disputed_by",
+          "from_member": true
+        },
+        {
           "type": "hstore_tags",
           "name": "me_tags",
           "from_member": true

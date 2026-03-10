@@ -24,6 +24,7 @@ SELECT
     postal_code,
     ref,
     political_division,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z0_2
@@ -56,6 +57,7 @@ SELECT
     postal_code,
     ref,
     political_division,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z3_5
@@ -88,6 +90,7 @@ SELECT
     postal_code,
     ref,
     political_division,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z6_7
@@ -120,6 +123,7 @@ SELECT
     postal_code,
     ref,
     political_division,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z8_9
@@ -152,6 +156,7 @@ SELECT
     postal_code,
     ref,
     political_division,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z10_12
@@ -184,6 +189,7 @@ SELECT
     postal_code,
     ref,
     political_division,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z13_15
@@ -216,6 +222,7 @@ SELECT
     postal_code,
     ref,
     political_division,
+    border_type,
     {{LENGUAGES}} 
 FROM 
     mv_non_admin_boundaries_centroids_z16_20
