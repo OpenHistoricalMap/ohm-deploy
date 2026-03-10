@@ -201,6 +201,14 @@ function monitorImposmErrors() {
 function updateData() {
     log_message "Starting database update process..."
 
+    # Step 0: Recreate materialized views if RECREATE_MVIEWS_ON_UPDATE is enabled
+    if [ "$RECREATE_MVIEWS_ON_UPDATE" = "true" ]; then
+        log_message "Recreating materialized views before update..."
+        ./scripts/create_mviews.sh --all=true
+    else
+        log_message "Skipping materialized views recreation (RECREATE_MVIEWS_ON_UPDATE=$RECREATE_MVIEWS_ON_UPDATE)"
+    fi
+
     # Step 1: Refreshing materialized views
     if [ "$REFRESH_MVIEWS" = "true" ]; then
         log_message "Refreshing materialized views..."
