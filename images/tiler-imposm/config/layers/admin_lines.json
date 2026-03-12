@@ -42,6 +42,21 @@
           "key": "maritime"
         },
         {
+          "type": "string",
+          "name": "indefinite",
+          "key": "indefinite"
+        },
+        {
+          "type": "string",
+          "name": "disputed",
+          "key": "disputed"
+        },
+        {
+          "type": "string",
+          "name": "disputed_by",
+          "key": "disputed_by"
+        },
+        {
           "type": "boolint",
           "name": "has_label",
           "key": false

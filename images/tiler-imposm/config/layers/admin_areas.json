@@ -57,6 +57,26 @@
           "key": null
         },
         {
+          "type": "string",
+          "name": "border_type",
+          "key": "border_type"
+        },
+        {
+          "type": "string",
+          "name": "indefinite",
+          "key": "indefinite"
+        },
+        {
+          "type": "string",
+          "name": "disputed",
+          "key": "disputed"
+        },
+        {
+          "type": "string",
+          "name": "disputed_by",
+          "key": "disputed_by"
+        },
+        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null

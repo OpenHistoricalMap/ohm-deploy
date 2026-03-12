@@ -261,11 +261,15 @@ WITH ordered AS (
     type,
     admin_level,
     member,
-    geometry, 
-    start_decdate,  
+    geometry,
+    start_decdate,
     end_decdate,
+    me_indefinite,
+    me_maritime,
+    me_disputed,
+    me_disputed_by,
     LAG(end_decdate) OVER (
-      PARTITION BY admin_level, member, type  
+      PARTITION BY admin_level, member, type
       ORDER BY start_decdate NULLS FIRST
     ) AS prev_end
   FROM osm_admin_relation_members
@@ -280,12 +284,16 @@ flagged AS (
     admin_level,
     member,
     geometry,
-    start_decdate,  
-    end_decdate,   
-    CASE 
-        WHEN prev_end IS NULL THEN 0 
+    start_decdate,
+    end_decdate,
+    me_indefinite,
+    me_maritime,
+    me_disputed,
+    me_disputed_by,
+    CASE
+        WHEN prev_end IS NULL THEN 0
         WHEN start_decdate IS NULL THEN 0
-        WHEN 
+        WHEN
             -- 0.003 covers all possible decimal gaps that correspond to one day (whether it’s a leap year or not).
             (start_decdate - prev_end) < 0.003
         THEN 0 -- No gap, merge
@@ -300,10 +308,14 @@ grouped AS (
     admin_level,
     member,
     geometry,
-    start_decdate,  
+    start_decdate,
     end_decdate,
+    me_indefinite,
+    me_maritime,
+    me_disputed,
+    me_disputed_by,
     SUM(gap_flag) OVER (
-      PARTITION BY admin_level, member, type  
+      PARTITION BY admin_level, member, type
       ORDER BY start_decdate NULLS FIRST
       ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) AS group_id
@@ -319,34 +331,40 @@ SELECT
   COUNT(*) AS merged_row_count,
 
   -- Keep the original decimal dates
-  CASE 
-      WHEN BOOL_OR(start_decdate IS NULL) THEN NULL 
-      ELSE MIN(start_decdate) 
+  CASE
+      WHEN BOOL_OR(start_decdate IS NULL) THEN NULL
+      ELSE MIN(start_decdate)
   END AS min_start_decdate,
-  
+
   -- Ensure NULL propagation for end_decdate
-  CASE 
-      WHEN BOOL_OR(end_decdate IS NULL) THEN NULL 
-      ELSE MAX(end_decdate) 
+  CASE
+      WHEN BOOL_OR(end_decdate IS NULL) THEN NULL
+      ELSE MAX(end_decdate)
   END AS max_end_decdate,
 
   -- Convert the decimal dates to ISO format in separate columns
   convert_decimal_to_iso_date(
-      CASE 
-          WHEN BOOL_OR(start_decdate IS NULL) THEN NULL 
-          ELSE MIN(start_decdate) 
+      CASE
+          WHEN BOOL_OR(start_decdate IS NULL) THEN NULL
+          ELSE MIN(start_decdate)
       END::NUMERIC
   ) AS min_start_date_iso,
-  
+
   convert_decimal_to_iso_date(
-      CASE 
-          WHEN BOOL_OR(end_decdate IS NULL) THEN NULL 
-          ELSE MAX(end_decdate) 
+      CASE
+          WHEN BOOL_OR(end_decdate IS NULL) THEN NULL
+          ELSE MAX(end_decdate)
       END::NUMERIC
-  ) AS max_end_date_iso
-     
+  ) AS max_end_date_iso,
+
+  -- Boundary attributes from member ways
+  MAX(me_indefinite) AS indefinite,
+  MAX(me_maritime) AS maritime,
+  MAX(me_disputed) AS disputed,
+  MAX(me_disputed_by) AS disputed_by
+
 FROM grouped
-GROUP BY 
+GROUP BY
   type, admin_level, member, group_id
 WITH DATA;
 
@@ -379,7 +397,11 @@ WITH relation_boundaries AS (
     min_start_decdate AS start_decdate,
     max_end_decdate AS end_decdate,
     min_start_date_iso AS start_date,
-    max_end_date_iso AS end_date
+    max_end_date_iso AS end_date,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
   FROM mv_relation_members_boundaries
 ),
 way_boundaries AS (
@@ -391,14 +413,18 @@ way_boundaries AS (
     0 AS group_id,
     start_date,
     end_date,
-    start_decdate, 
-    end_decdate
+    start_decdate,
+    end_decdate,
+    indefinite,
+    maritime,
+    disputed,
+    disputed_by
   FROM osm_admin_lines
   WHERE type = 'administrative'
-    AND osm_id NOT IN (SELECT member FROM mv_relation_members_boundaries) 
+    AND osm_id NOT IN (SELECT member FROM mv_relation_members_boundaries)
 )
 -- Join the two tables
-SELECT 
+SELECT
   type,
   admin_level,
   member,
@@ -407,12 +433,16 @@ SELECT
   start_decdate,
   end_decdate,
   start_date,
-  end_date
+  end_date,
+  indefinite,
+  maritime,
+  disputed,
+  disputed_by
 FROM relation_boundaries
 
 UNION ALL
 
-SELECT 
+SELECT
   type,
   admin_level,
   member,
@@ -421,7 +451,11 @@ SELECT
   start_decdate,
   end_decdate,
   start_date,
-  end_date
+  end_date,
+  indefinite,
+  maritime,
+  disputed,
+  disputed_by
 FROM way_boundaries
 WITH DATA;
 
@@ -446,7 +480,7 @@ SELECT log_notice('STEP 6: Create a materialized view for zoom levels');
 -- ==========================================
 DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_lines_z16_20 CASCADE;
 CREATE MATERIALIZED VIEW mv_admin_boundaries_lines_z16_20 AS
-SELECT 
+SELECT
     ROW_NUMBER() OVER (ORDER BY admin_level, member, group_id) AS id,
     type,
     admin_level,
@@ -456,7 +490,11 @@ SELECT
     start_decdate,
     end_decdate,
     start_date,
-    end_date
+    end_date,
+    NULLIF(indefinite, '') AS indefinite,
+    NULLIF(maritime, '') AS maritime,
+    NULLIF(disputed, '') AS disputed,
+    NULLIF(disputed_by, '') AS disputed_by
 FROM mv_admin_boundaries_relations_ways
 WHERE admin_level IN (1,2,3,4,5,6,7,8,9,10,11)
 WITH DATA;
