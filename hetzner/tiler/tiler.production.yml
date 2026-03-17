@@ -2,21 +2,22 @@ services:
   tiler_db:
     container_name: tiler_db
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     volumes: !overwrite
       - tiler_pgdata:/var/lib/postgresql/data
-      - ./config/${PG_CONFIG:-postgresql.production.conf}:/etc/postgresql/postgresql.conf
+      - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
     ports:
       - "54329:5432"
     env_file:
       - .env.tiler
-    mem_limit: 55G
-    cpus: "28.0"
+    mem_limit: 40G
+    cpus: "25.0"
     networks:
       - ohm_network
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3325.hb9f97989
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3323.haf36ae7d
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -132,35 +133,14 @@ services:
       - .env.tiler
     networks:
       - ohm_network
-
-  tiler_pipeline_monitor:
-    container_name: tiler_pipeline_monitor
-    image: ghcr.io/openhistoricalmap/tiler-pipeline-monitor:0.0.1
-    ports:
-      - "8001:8001"
-    environment:
-      - CHECK_INTERVAL=300
-      - REPLICATION_LAG_THRESHOLD=600
-      - MV_REFRESH_THRESHOLD=600
-      - IMPOSM_IMPORT_MAX_AGE=900
-    env_file:
-      - .env.tiler
-    restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      retries: 3
-      timeout: 10s
-    networks:
-      - ohm_network
       
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db_10_03
+    name: tiler_db_16_03
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm_10_03
+    name: tiler_imposm_16_03
 
 networks:
   ohm_network:

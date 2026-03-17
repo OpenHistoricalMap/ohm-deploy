@@ -28,20 +28,37 @@ source ./scripts/utils.sh
 # Example:
 #   refresh_mviews_group "WATER" 180 "${water_views[@]}" &
 # ============================================================================
+LIGHT_WORK_MEM="64MB"
+LIGHT_MAINT_MEM="256MB"
+HEAVY_WORK_MEM="512MB"
+HEAVY_MAINT_MEM="4GB"
+
 function refresh_mviews_group() {
     local group_name="$1"
     local sleep_interval="$2"
-    shift 2
+    local mem_profile="${3:-light}"  # "light" or "heavy"
+    shift 3
     local materialized_views=("$@")
+
+    local work_mem="$LIGHT_WORK_MEM"
+    local maint_mem="$LIGHT_MAINT_MEM"
+    if [ "$mem_profile" = "heavy" ]; then
+        work_mem="$HEAVY_WORK_MEM"
+        maint_mem="$HEAVY_MAINT_MEM"
+    fi
 
     while true; do
         for mview in "${materialized_views[@]}"; do
-            log_message "[$group_name] Refreshing $mview..."
+            log_message "[$group_name] Refreshing $mview (work_mem=$work_mem, maintenance_work_mem=$maint_mem)..."
             local error_output
             # Disable statement_timeout for long-running refresh operations (0 = no limit)
             local exit_code=0
             local start_time=$SECONDS
-            error_output=$(psql "$PG_CONNECTION" -v ON_ERROR_STOP=1 -c "SET statement_timeout = 0" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;" 2>&1) || exit_code=$?
+            error_output=$(psql "$PG_CONNECTION" -v ON_ERROR_STOP=1 \
+                -c "SET statement_timeout = 0" \
+                -c "SET work_mem = '$work_mem'" \
+                -c "SET maintenance_work_mem = '$maint_mem'" \
+                -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;" 2>&1) || exit_code=$?
             local elapsed=$((SECONDS - start_time))
             if [ $exit_code -eq 0 ]; then
                 log_message "[$group_name] ✅ Successfully refreshed $mview. Time: ${elapsed}s"
@@ -249,18 +266,21 @@ no_admin_boundaries_views=(
 )
 
 
-refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 60 "${admin_boundaries_lines_views[@]}" &
-refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 180 "${admin_boundaries_areas_centroids_views[@]}" &
-refresh_mviews_group "ADMIN_MARITIME_LINES" 300 "${admin_maritime_lines_views[@]}" &
-refresh_mviews_group "TRANSPORTS" 180 "${transport_views[@]}" &
-refresh_mviews_group "AMENITY" 180 "${amenity_views[@]}" &
-refresh_mviews_group "LANDUSE" 180 "${landuse_views[@]}" &
-refresh_mviews_group "OTHERS" 180 "${others_views[@]}" &
-refresh_mviews_group "COMMUNICATION" 180 "${communication_views[@]}" &
-refresh_mviews_group "PLACES" 180 "${places_views[@]}" &
-refresh_mviews_group "WATER" 180 "${water_views[@]}" &
-refresh_mviews_group "BUILDINGS" 180 "${buildings_views[@]}" &
-refresh_mviews_group "ROUTES" 180 "${routes_views[@]}" &
+# Heavy groups - admin boundaries have the largest tables
+refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 60 heavy "${admin_boundaries_lines_views[@]}" &
+refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 180 heavy "${admin_boundaries_areas_centroids_views[@]}" &
+
+# Light groups - smaller tables, minimal resources
+refresh_mviews_group "ADMIN_MARITIME_LINES" 300 light "${admin_maritime_lines_views[@]}" &
+refresh_mviews_group "TRANSPORTS" 180 heavy "${transport_views[@]}" &
+refresh_mviews_group "AMENITY" 180 light "${amenity_views[@]}" &
+refresh_mviews_group "LANDUSE" 180 light "${landuse_views[@]}" &
+refresh_mviews_group "OTHERS" 180 light "${others_views[@]}" &
+refresh_mviews_group "COMMUNICATION" 180 light "${communication_views[@]}" &
+refresh_mviews_group "PLACES" 180 light "${places_views[@]}" &
+refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
+refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
+refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
 
 ## This group high demand, so we refresh every 1 hour
-refresh_mviews_group "NO_ADMIN_BOUNDARIES" 36000 "${no_admin_boundaries_views[@]}" &
+refresh_mviews_group "NO_ADMIN_BOUNDARIES" 36000 light "${no_admin_boundaries_views[@]}" &
