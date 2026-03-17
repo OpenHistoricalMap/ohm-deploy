@@ -3,10 +3,12 @@
 For each changeset in the 1-2 hour window:
   1. Check if minute replication covers it (replication timestamp >= closed_at)
   2. Check if its way/relation elements exist in the tiler DB with the correct version
+  3. For a random sample: verify materialized views + S3 tile cache
 """
 
 import json
 import os
+import random
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 
@@ -202,107 +204,65 @@ def _get_changeset_elements(changeset_id):
 RELATION_TABLES = _tables_config["relation_tables"]
 WAY_TABLES = _tables_config["way_tables"]
 TABLE_TO_VIEWS = _tables_config["table_to_views"]
-TAG_TO_TABLES = _tables_config.get("tag_to_tables", {})
 
 
-def _resolve_candidate_tables(elem):
-    """Determine candidate tables based on element type and tags.
-
-    Uses tag_to_tables mapping from imposm config to narrow the search
-    to only the tables where the element could exist, instead of searching all.
-    Falls back to all tables for the element type if no tags match.
-    """
-    type_tables = RELATION_TABLES if elem["type"] == "relation" else WAY_TABLES
-    tags = elem.get("tags", {})
-
-    if not tags or not TAG_TO_TABLES:
-        return type_tables
-
-    # Collect tables that match any of the element's tag keys
-    matched_tables = set()
-    for tag_key in tags:
-        for table in TAG_TO_TABLES.get(tag_key, []):
-            matched_tables.add(table)
-
-    # Intersect with type tables (relations vs ways) to respect element type
-    filtered = [t for t in type_tables if t in matched_tables]
-
-    if not filtered:
-        # No tag matched any known mapping — fall back to all tables for safety
-        return type_tables
-
-    return filtered
+def _build_union_query(tables, search_id):
+    """Build a UNION ALL query to search osm_id across multiple tables in 1 round-trip."""
+    parts = []
+    for table in tables:
+        parts.append(
+            f"SELECT '{table}' AS tbl, tags->'version' AS version "
+            f"FROM {table} WHERE osm_id = {int(search_id)} LIMIT 1"
+        )
+    return " UNION ALL ".join(parts)
 
 
-def _check_element_in_db(conn, elem):
-    """Check if an element exists in tiler DB tables (osm_*) and views (mv_*)."""
+def _check_element_in_tables(conn, elem):
+    """Check if an element exists in tiler DB tables using a single UNION ALL query."""
     osm_id = elem["osm_id"]
-    # Imposm stores relations with negative IDs
     search_id = -osm_id if elem["type"] == "relation" else osm_id
+    candidate_tables = RELATION_TABLES if elem["type"] == "relation" else WAY_TABLES
 
     cur = conn.cursor()
 
-    # --- Resolve candidate tables based on element tags ---
-    candidate_tables = _resolve_candidate_tables(elem)
-
-    # Filter to only tables that actually exist
+    # Get existing tables (cached per connection would be ideal, but simple first)
     cur.execute("""
         SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public' AND table_name LIKE 'osm_%%'
-        ORDER BY table_name
     """)
     existing_tables = {row[0] for row in cur.fetchall()}
     tables = [t for t in candidate_tables if t in existing_tables]
 
+    if not tables:
+        cur.close()
+        return {
+            "type": elem["type"],
+            "osm_id": osm_id,
+            "action": elem["action"],
+            "expected_version": elem["version"],
+            "found_in_tables": [],
+            "found_in_views": [],
+            "version_match": None,
+            "url": f"{_ohm_base()}/{elem['type']}/{elem['osm_id']}",
+        }
+
+    # Single UNION ALL query across all candidate tables
+    query = _build_union_query(tables, search_id)
     found_in_tables = []
     version_match = None
 
-    for table in tables:
-        try:
-            quoted = psycopg2.extensions.quote_ident(table, cur)
-            cur.execute(
-                f"SELECT tags->'version' FROM {quoted} WHERE osm_id = %s LIMIT 1",
-                (search_id,),
-            )
-            row = cur.fetchone()
-            if row is not None:
-                db_version = row[0]
-                found_in_tables.append(table)
-                if elem["version"] is not None and db_version is not None:
-                    try:
-                        version_match = int(db_version) >= elem["version"]
-                    except (ValueError, TypeError):
-                        version_match = None
-        except Exception:
-            conn.rollback()
-
-    # --- Search in mv_* views related to candidate tables ---
-    candidate_views = set()
-    for table in candidate_tables:
-        for v in TABLE_TO_VIEWS.get(table, []):
-            candidate_views.add(v)
-
-    # Filter to only views that exist
-    cur.execute("""
-        SELECT matviewname FROM pg_matviews
-        WHERE schemaname = 'public' AND matviewname LIKE 'mv_%%'
-    """)
-    existing_views = {row[0] for row in cur.fetchall()}
-    views_to_check = [v for v in candidate_views if v in existing_views]
-
-    found_in_views = []
-
-    for view in sorted(views_to_check):
-        try:
-            quoted = psycopg2.extensions.quote_ident(view, cur)
-            cur.execute(
-                f"SELECT 1 FROM {quoted} WHERE osm_id = %s LIMIT 1",
-                (search_id,),
-            )
-            if cur.fetchone() is not None:
-                found_in_views.append(view)
-        except Exception:
-            conn.rollback()
+    try:
+        cur.execute(query)
+        for row in cur.fetchall():
+            found_in_tables.append(row[0])
+            db_version = row[1]
+            if elem["version"] is not None and db_version is not None:
+                try:
+                    version_match = int(db_version) >= elem["version"]
+                except (ValueError, TypeError):
+                    version_match = None
+    except Exception:
+        conn.rollback()
 
     cur.close()
 
@@ -312,11 +272,61 @@ def _check_element_in_db(conn, elem):
         "action": elem["action"],
         "expected_version": elem["version"],
         "found_in_tables": found_in_tables,
-        "found_in_views": found_in_views,
+        "found_in_views": [],
         "version_match": version_match,
-        "searched_tables": candidate_tables,
         "url": f"{_ohm_base()}/{elem['type']}/{elem['osm_id']}",
     }
+
+
+def _check_element_in_views(conn, check):
+    """Check if an element exists in materialized views using a single UNION ALL query."""
+    osm_id = check["osm_id"]
+    search_id = -osm_id if check["type"] == "relation" else osm_id
+
+    # Collect all candidate views from the tables where the element was found
+    found_tables = check["found_in_tables"]
+    candidate_views = set()
+    for table in found_tables:
+        for v in TABLE_TO_VIEWS.get(table, []):
+            candidate_views.add(v)
+
+    if not candidate_views:
+        return check
+
+    cur = conn.cursor()
+
+    # Filter to existing views
+    cur.execute("""
+        SELECT matviewname FROM pg_matviews
+        WHERE schemaname = 'public' AND matviewname LIKE 'mv_%%'
+    """)
+    existing_views = {row[0] for row in cur.fetchall()}
+    views = sorted(v for v in candidate_views if v in existing_views)
+
+    if not views:
+        cur.close()
+        return check
+
+    # Single UNION ALL query across all candidate views
+    parts = []
+    for view in views:
+        parts.append(
+            f"SELECT '{view}' AS vw FROM {view} "
+            f"WHERE osm_id = {int(search_id)} LIMIT 1"
+        )
+    query = " UNION ALL ".join(parts)
+
+    found_in_views = []
+    try:
+        cur.execute(query)
+        for row in cur.fetchall():
+            found_in_views.append(row[0])
+    except Exception:
+        conn.rollback()
+
+    cur.close()
+    check["found_in_views"] = found_in_views
+    return check
 
 
 def _is_element_deleted(elem):
@@ -337,8 +347,14 @@ def _is_element_deleted(elem):
         return False
 
 
-def _check_elements_in_db(conn, changeset_id):
-    """Check all elements of a changeset in the tiler DB."""
+def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None):
+    """Check all elements of a changeset in the tiler DB.
+
+    - ALL elements: verified in osm_* tables (fast, tag-filtered)
+    - SAMPLE elements: full check → tables + views + S3 tile cache
+    """
+    from checks.tile_cache import check_tile_cache_for_element
+
     try:
         elements = _get_changeset_elements(changeset_id)
     except requests.RequestException as e:
@@ -355,58 +371,95 @@ def _check_elements_in_db(conn, changeset_id):
             "elements": [],
         }
 
-    missing = []
-    mismatches = []
-    checked = []
-
-    print(f"  [tiler_db] Checking {len(elements)} way/relation elements")
-
+    # Filter out deletes
+    active_elements = []
     for elem in elements:
         if elem["action"] == "delete":
             print(f"    SKIP {elem['type']}/{elem['osm_id']} (action=delete)")
-            continue
+        else:
+            active_elements.append(elem)
 
-        check = _check_element_in_db(conn, elem)
+    if not active_elements:
+        return {
+            "status": "ok",
+            "message": "All elements in this changeset are deletes",
+            "elements": [],
+        }
+
+    # Select random sample for full pipeline check (tables + views + S3)
+    sample_size = min(Config.FULL_CHECK_SAMPLE_SIZE, len(active_elements))
+    sample_indices = set(random.sample(range(len(active_elements)), sample_size))
+
+    print(f"  [tiler_db] Checking {len(active_elements)} elements "
+          f"(full pipeline check on {sample_size} sampled)")
+
+    missing = []
+    mismatches = []
+    checked = []
+    tile_cache_results = []
+
+    for idx, elem in enumerate(active_elements):
+        is_sample = idx in sample_indices
+        sample_label = " [SAMPLE]" if is_sample else ""
+
+        # Step 1: Check tables — single UNION ALL query (ALL elements)
+        check = _check_element_in_tables(conn, elem)
+
+        # Step 2: Check views — single UNION ALL query (SAMPLE only)
+        if is_sample and check["found_in_tables"]:
+            check = _check_element_in_views(conn, check)
+
         checked.append(check)
 
         tables = check["found_in_tables"]
         views = check["found_in_views"]
 
-        # Show which tags were used to resolve candidate tables
-        tag_keys = [k for k in elem.get("tags", {}) if k in TAG_TO_TABLES]
-        searched = check.get("searched_tables", [])
-
-        if tables or views:
+        if tables:
             icon = "OK" if check["version_match"] is not False else "VERSION_MISMATCH"
-            print(f"    {icon} {elem['type']}/{elem['osm_id']} v{elem['version']} "
+            print(f"    {icon}{sample_label} {elem['type']}/{elem['osm_id']} v{elem['version']} "
                   f"({elem['action']}) version_match={check['version_match']}")
-            if tag_keys:
-                print(f"         matched tags: {tag_keys} -> searched: {searched}")
-            if tables:
-                print(f"         tables: {tables}")
+            print(f"         tables: {tables}")
             if views:
                 print(f"         views:  {views}")
             print(f"         {check['url']}")
+
+            # Step 3: Check S3 tile cache (SAMPLE only)
+            if is_sample and changeset_closed_at and Config.S3_BUCKET_CACHE_TILER:
+                try:
+                    tile_result = check_tile_cache_for_element(
+                        conn, check, changeset_closed_at
+                    )
+                    tile_cache_results.append(tile_result)
+                    cache_status = tile_result.get("cache", {}).get("status", "unknown")
+                    tile_info = tile_result.get("tile", {})
+                    if cache_status == "stale":
+                        print(f"         [S3 CACHE] STALE tile z{tile_info.get('z')}/{tile_info.get('x')}/{tile_info.get('y')}")
+                    elif cache_status == "ok":
+                        print(f"         [S3 CACHE] OK tile z{tile_info.get('z')}/{tile_info.get('x')}/{tile_info.get('y')}")
+                    elif cache_status == "skipped":
+                        print(f"         [S3 CACHE] skipped: {tile_result.get('cache', {}).get('message', '')}")
+                except Exception as e:
+                    print(f"         [S3 CACHE] error: {e}")
         else:
-            # Check if the element was deleted in a later changeset
+            # Not found — check if deleted in a later changeset
             if _is_element_deleted(elem):
                 print(f"    SKIP {elem['type']}/{elem['osm_id']} v{elem['version']} "
                       f"({elem['action']}) -> deleted in a later changeset")
                 print(f"         {check['url']}")
                 check["deleted"] = True
                 continue
-            print(f"    MISSING {elem['type']}/{elem['osm_id']} v{elem['version']} "
-                  f"({elem['action']}) -> NOT in tables or views")
-            if tag_keys:
-                print(f"         matched tags: {tag_keys} -> searched: {searched}")
-            else:
-                print(f"         no matching tags found, searched all: {searched}")
+
+            print(f"    MISSING{sample_label} {elem['type']}/{elem['osm_id']} v{elem['version']} "
+                  f"({elem['action']}) -> NOT in tables")
             print(f"         {check['url']}")
 
-        if not tables and not views and not check.get("deleted"):
+        if not tables and not check.get("deleted"):
             missing.append(f"{elem['type']}/{elem['osm_id']}")
         elif check["version_match"] is False:
             mismatches.append(f"{elem['type']}/{elem['osm_id']} expected v{elem['version']}")
+
+    # Build status message
+    stale_tiles = [r for r in tile_cache_results if r.get("cache", {}).get("status") == "stale"]
 
     if missing:
         status = "warning"
@@ -416,11 +469,23 @@ def _check_elements_in_db(conn, changeset_id):
     elif mismatches:
         status = "warning"
         msg = f"Version mismatches: {', '.join(mismatches)}"
+    elif stale_tiles:
+        status = "warning"
+        stale_ids = [f"{r['type']}/{r['osm_id']}" for r in stale_tiles]
+        msg = (f"All {len(checked)} elements in tables, "
+               f"but S3 tile cache stale for: {', '.join(stale_ids)}")
     else:
         status = "ok"
         msg = f"All {len(checked)} elements verified in tiler DB"
+        if tile_cache_results:
+            msg += f" (S3 cache OK for {len(tile_cache_results)} sampled)"
 
-    return {"status": status, "message": msg, "elements": checked}
+    return {
+        "status": status,
+        "message": msg,
+        "elements": checked,
+        "tile_cache": tile_cache_results,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -543,7 +608,7 @@ def check_pipeline():
             print(f"  [replication] UNKNOWN: Replication state unavailable")
 
         # Step 2: tiler DB
-        db_check = _check_elements_in_db(conn, cs["id"])
+        db_check = _check_elements_in_db(conn, cs["id"], cs["closed_at"])
         cs_result["tiler_db"] = db_check
         print(f"  [tiler_db] {db_check['status'].upper()}: {db_check['message']}")
 
@@ -646,7 +711,7 @@ def check_single_changeset(changeset_id):
         result["details"]["tiler_db"] = {"status": "critical", "message": str(e)}
         return result
 
-    db_check = _check_elements_in_db(conn, changeset_id)
+    db_check = _check_elements_in_db(conn, changeset_id, closed_at or None)
     conn.close()
     result["details"]["tiler_db"] = db_check
     print(f"  [tiler_db] {db_check['status'].upper()}: {db_check['message']}")

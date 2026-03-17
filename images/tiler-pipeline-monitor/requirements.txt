@@ -2,3 +2,5 @@ fastapi
 uvicorn
 requests
 psycopg2-binary
+mercantile
+boto3
