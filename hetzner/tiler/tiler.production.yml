@@ -137,10 +137,10 @@ services:
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db_10_03
+    name: tiler_db_16_03
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm_10_03
+    name: tiler_imposm_16_03
 
 networks:
   ohm_network:
