@@ -17,7 +17,7 @@ services:
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3325.hb9f97989
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3323.haf36ae7d
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
