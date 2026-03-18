@@ -16,12 +16,8 @@ BEGIN
 END
 \$\$;
 
--- Permissions
-GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB TO imposm;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO imposm;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO imposm;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO imposm;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO imposm;
+-- Grant superuser to imposm so it has full permissions like postgres
+ALTER ROLE imposm SUPERUSER;
 
 -- Session-level parameters (only apply to imposm connections, not Tegola)
 ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET work_mem = '${IMPOSM_WORK_MEM:-1GB}';
