@@ -870,7 +870,7 @@ osm-seed:
       UPDATE_MODE: continuous
       OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
       IMPORT_STYLE: extratags
-      EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edt
+      EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edtf
     resources:
       enabled: false
       requests:
