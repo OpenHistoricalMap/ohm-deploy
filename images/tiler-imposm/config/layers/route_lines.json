@@ -48,6 +48,11 @@
           "type": "string"
         },
         {
+          "key": "network:wikidata",
+          "name": "network_wikidata",
+          "type": "string"
+        },
+        {
           "key": "direction",
           "name": "direction",
           "type": "string"

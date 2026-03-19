@@ -118,7 +118,7 @@ WITH union_sources AS (
   -- 1) From multi-lines (relations with members)
   SELECT
     member::bigint AS way_id,
-    osm_id, name, type, route, ref, network, operator, direction, tags, geometry,
+    osm_id, name, type, route, ref, network, network_wikidata, operator, direction, tags, geometry,
     start_decdate,
     end_decdate,
     me_highway AS highway
@@ -130,7 +130,7 @@ WITH union_sources AS (
   -- 2) From lines (direct way-based routes)
   SELECT
     osm_id::bigint AS way_id,
-    osm_id, name, type, route, ref, network, operator, direction, tags, geometry,
+    osm_id, name, type, route, ref, network, network_wikidata, operator, direction, tags, geometry,
     start_decdate,
     end_decdate,
     highway
@@ -160,6 +160,7 @@ data_for_null_dates AS (
         'ref', u.ref,
         'route', u.route,
         'network', u.network,
+        'network:wikidata', u.network_wikidata,
         'name', u.name,
         'type', u.type,
         'operator', u.operator,
@@ -200,7 +201,7 @@ data_for_dated_ways AS (
     -- Relate active routes to each time segment
     SELECT
       s.way_id, s.seg_start, s.seg_end,
-      u.osm_id, u.ref, u.route, u.network, u.name, u.type, u.operator, u.direction, u.tags, u.geometry, u.highway
+      u.osm_id, u.ref, u.route, u.network, u.network_wikidata, u.name, u.type, u.operator, u.direction, u.tags, u.geometry, u.highway
     FROM segments s
     JOIN union_sources u
       ON u.way_id = s.way_id
@@ -232,6 +233,7 @@ data_for_dated_ways AS (
           'ref', ref,
           'route', route,
           'network', network,
+          'network:wikidata', network_wikidata,
           'name', name,
           'type', type,
           'operator', operator,
