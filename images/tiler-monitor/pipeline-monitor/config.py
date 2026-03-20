@@ -1,4 +1,27 @@
 import os
+import re
+
+
+def _parse_duration(value, default):
+    """Parse human-readable duration (e.g. '1h', '30m', '1.5h', '2h30m', '3600') to seconds."""
+    raw = os.getenv(value, "")
+    if not raw:
+        return default
+    # If it's just a number, treat as seconds
+    try:
+        return int(float(raw))
+    except ValueError:
+        pass
+    total = 0
+    for amount, unit in re.findall(r"(\d+\.?\d*)\s*(h|m|s)", raw.lower()):
+        amount = float(amount)
+        if unit == "h":
+            total += amount * 3600
+        elif unit == "m":
+            total += amount * 60
+        elif unit == "s":
+            total += amount
+    return int(total) if total > 0 else default
 
 
 class Config:
@@ -16,27 +39,28 @@ class Config:
     )
     OHM_API_BASE = os.getenv("OHM_API_BASE", "https://www.openhistoricalmap.org/api/0.6")
 
-    # How often to run the pipeline check (seconds)
-    CHECK_INTERVAL = int(os.getenv("TILER_MONITORING_CHECK_INTERVAL", 3600))  # 1 hour
+    # How often to run the pipeline check (e.g. "1h", "30m", "3600")
+    CHECK_INTERVAL = _parse_duration("TILER_MONITORING_CHECK_INTERVAL", 3600)
 
-    # OHM changeset age window (seconds)
-    # Only check changesets closed at least CHANGESET_MIN_AGE ago
-    # and at most CHANGESET_MAX_AGE ago.
-    # Example: min=3600 max=10800 → changesets closed between 1 and 3 hours ago
-    CHANGESET_MIN_AGE = int(os.getenv("TILER_MONITORING_CHANGESET_MIN_AGE", 10800))    # 1 hour
-    CHANGESET_MAX_AGE = int(os.getenv("TILER_MONITORING_CHANGESET_MAX_AGE", 14400))   # 3 hours
+    # OHM changeset age window (e.g. "1h", "2h30m", "3600")
+    CHANGESET_MIN_AGE = _parse_duration("TILER_MONITORING_CHANGESET_MIN_AGE", 10800)
+    CHANGESET_MAX_AGE = _parse_duration("TILER_MONITORING_CHANGESET_MAX_AGE", 14400)
 
     # Max number of changesets to check per run
     CHANGESET_LIMIT = int(os.getenv("CHANGESET_LIMIT", 30))
+
+    # Retry: how many times to recheck a missing element before alerting
+    MAX_RETRIES = int(os.getenv("TILER_MONITORING_MAX_RETRIES", 3))
 
     # Verbose logging
     VERBOSE_LOGGING = os.getenv("VERBOSE_LOGGING", "false").lower() == "true"
 
     # Alerting (optional)
-    SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
+    SLACK_WEBHOOK_URL = os.getenv("TILER_MONITORING_SLACK_WEBHOOK_URL", "")
 
     # Server
     MONITOR_PORT = int(os.getenv("MONITOR_PORT", 8001))
+    MONITOR_BASE_URL = os.getenv("TILER_MONITORING_BASE_URL", "")
 
     # S3 tile cache verification
     S3_BUCKET_CACHE_TILER = os.getenv("S3_BUCKET_CACHE_TILER", "")
@@ -48,8 +72,9 @@ class Config:
     TILER_CACHE_CLOUD_INFRASTRUCTURE = os.getenv("TILER_CACHE_CLOUD_INFRASTRUCTURE", "aws")
     # Zoom level to verify tile cache (use high zoom for precise check)
     TILE_CHECK_ZOOM = int(os.getenv("TILE_CHECK_ZOOM", 16))
-    # Number of random elements to do full pipeline check (tables + views + S3)
-    FULL_CHECK_SAMPLE_SIZE = int(os.getenv("FULL_CHECK_SAMPLE_SIZE", 2))
+    # Percentage of elements to do full pipeline check (tables + views + S3)
+    # e.g. 25 = 25% of elements, minimum 1
+    FULL_CHECK_SAMPLE_PCT = int(os.getenv("TILER_MONITORING_FULL_CHECK_SAMPLE_PCT", 25))
 
     @staticmethod
     def get_s3_client():
