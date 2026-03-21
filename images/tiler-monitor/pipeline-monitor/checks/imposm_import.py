@@ -966,6 +966,58 @@ def check_single_changeset(changeset_id):
     return result
 
 
+def recheck_single_element(element_type, osm_id):
+    """Manually recheck a single element in the tiler DB.
+
+    Returns detailed info about where it was found or why it's missing.
+    """
+    try:
+        conn = psycopg2.connect(
+            host=Config.POSTGRES_HOST,
+            port=Config.POSTGRES_PORT,
+            dbname=Config.POSTGRES_DB,
+            user=Config.POSTGRES_USER,
+            password=Config.POSTGRES_PASSWORD,
+        )
+    except psycopg2.Error as e:
+        return {"status": "error", "message": f"Cannot connect to tiler DB: {e}"}
+
+    elem = {"type": element_type, "osm_id": osm_id, "action": "modify"}
+    check = _check_element_in_tables(conn, elem)
+
+    # Also check views if found in tables
+    if check["found_in_tables"]:
+        check = _check_element_in_views(conn, elem, check)
+
+    conn.close()
+
+    found = bool(check["found_in_tables"])
+
+    # If found, resolve all pending retries for this element
+    if found:
+        pending = retry_store.get_pending() + retry_store.get_failed()
+        for entry in pending:
+            if entry["element_type"] == element_type and entry["osm_id"] == osm_id:
+                retry_store.mark_resolved(entry["changeset_id"], element_type, osm_id)
+
+    # Build detailed result
+    search_id = -osm_id if element_type == "relation" else osm_id
+    result = {
+        "status": "resolved" if found else "not_found",
+        "element_type": element_type,
+        "osm_id": osm_id,
+        "search_id": search_id,
+        "found_in_tables": check["found_in_tables"],
+        "found_in_views": check["found_in_views"],
+        "message": (
+            f"Found in: {', '.join(check['found_in_tables'])}"
+            if found
+            else f"Not found in any osm_* table (searched with osm_id={search_id})"
+        ),
+    }
+    return result
+
+
 def recheck_retries():
     """Manually recheck all pending and failed retries against the tiler DB.
 

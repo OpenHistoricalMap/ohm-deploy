@@ -197,6 +197,14 @@ def retries_recheck():
     return JSONResponse(content=result)
 
 
+@app.post("/retries/recheck/{element_type}/{osm_id}")
+def retries_recheck_single(element_type: str, osm_id: int):
+    """Manually recheck a single element in the tiler DB."""
+    from checks.imposm_import import recheck_single_element
+    result = recheck_single_element(element_type, osm_id)
+    return JSONResponse(content=result)
+
+
 @app.get("/retries")
 def retries():
     """Return current retry state with full details for debugging."""

@@ -178,7 +178,7 @@
   <table>
     <thead><tr>
       <th>Element</th><th>Changeset</th><th>Action</th><th>Status</th>
-      <th>Retries</th><th>First Seen</th><th>Last Checked</th>
+      <th>Retries</th><th>First Seen</th><th>Last Checked</th><th></th>
     </tr></thead>
     <tbody id="retriesBody"></tbody>
   </table>
@@ -445,6 +445,34 @@ function filterHistory() {
   });
 }
 
+// ---- Recheck single element ----
+async function recheckSingle(elementType, osmId, btn) {
+  const resultEl = document.getElementById(`recheck-result-${elementType}-${osmId}`);
+  btn.disabled = true;
+  resultEl.textContent = 'checking...';
+  resultEl.style.color = 'var(--muted)';
+  try {
+    const r = await fetch(`${API}/retries/recheck/${elementType}/${osmId}`, { method: 'POST' });
+    const data = await r.json();
+    if (data.status === 'resolved') {
+      resultEl.style.color = 'var(--green)';
+      resultEl.textContent = `Found in: ${data.found_in_tables.join(', ')}`;
+      // Refresh the retries list after a short delay so user can see the result
+      setTimeout(() => loadRetries(), 2000);
+    } else if (data.status === 'error') {
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = data.message;
+    } else {
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = data.message;
+    }
+  } catch (e) {
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = 'Request failed';
+  }
+  btn.disabled = false;
+}
+
 // ---- Recheck retries ----
 async function recheckRetries(btn) {
   const resultEl = document.getElementById('recheckResult');
@@ -498,7 +526,7 @@ async function loadRetries() {
     }
     empty.style.display = 'none';
 
-    tbody.innerHTML = all.map(e => `<tr>
+    tbody.innerHTML = all.map(e => `<tr id="retry-row-${e.element_type}-${e.osm_id}">
       <td><a href="${e.element_url}" target="_blank">${e.element_type}/${e.osm_id}</a>
         ${e.version ? `<span style="color:var(--muted)">v${e.version}</span>` : ''}</td>
       <td><a href="${e.changeset_url}" target="_blank">${e.changeset_id}</a></td>
@@ -507,6 +535,12 @@ async function loadRetries() {
       <td style="width:120px">${retryBar(e.retry_count, e.max_retries)}</td>
       <td title="${e.first_seen}">${e.age}</td>
       <td title="${e.last_checked}">${e.last_checked_ago}</td>
+      <td>
+        <button class="expand-btn" style="width:auto;padding:2px 8px;font-size:11px"
+          onclick="recheckSingle('${e.element_type}', ${e.osm_id}, this)"
+          title="Recheck this element in the tiler DB now">&#x21bb;</button>
+        <span id="recheck-result-${e.element_type}-${e.osm_id}" style="font-size:11px;margin-left:4px"></span>
+      </td>
     </tr>`).join('');
   } catch (e) {
     console.error('Failed to load retries:', e);
