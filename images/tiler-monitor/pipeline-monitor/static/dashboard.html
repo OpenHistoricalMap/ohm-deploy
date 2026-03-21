@@ -447,26 +447,36 @@ function filterHistory() {
 
 // ---- Recheck single element ----
 async function recheckSingle(elementType, osmId, btn) {
-  const resultEl = document.getElementById(`recheck-result-${elementType}-${osmId}`);
+  // Update ALL result spans for this element (may appear multiple times with different versions)
+  const allResults = document.querySelectorAll(`.recheck-result-${elementType}-${osmId}`);
   btn.disabled = true;
-  resultEl.innerHTML = '<span style="color:var(--muted)">checking...</span>';
+  allResults.forEach(el => el.innerHTML = '<span style="color:var(--muted)">checking...</span>');
   try {
     const r = await fetch(`${API}/retries/recheck/${elementType}/${osmId}`, { method: 'POST' });
+    if (!r.ok) {
+      const errText = await r.text();
+      allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">&#10007; Server error ${r.status}: ${errText.substring(0, 100)}</span>`);
+      btn.disabled = false;
+      return;
+    }
     const data = await r.json();
     if (data.status === 'resolved') {
-      let html = `<span style="color:var(--green)">&#10003; Found in: ${data.found_in_tables.join(', ')}</span>`;
+      let html = `<span style="color:var(--green)">&#10003; ${(data.found_in_tables || []).join(', ')}</span>`;
       if (data.found_in_views?.length) {
         html += `<br><span style="color:var(--green);opacity:0.7">Views: ${data.found_in_views.join(', ')}</span>`;
       }
-      resultEl.innerHTML = html;
+      allResults.forEach(el => el.innerHTML = html);
       setTimeout(() => loadRetries(), 3000);
     } else if (data.status === 'not_found') {
-      resultEl.innerHTML = `<span style="color:var(--red)">&#10007; Not found (osm_id=${data.search_id}) in ${data.searched_tables?.length || '?'} tables</span>`;
+      const tables = data.searched_tables?.length || '?';
+      const sid = data.search_id != null ? data.search_id : osmId;
+      allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">&#10007; Not found (osm_id=${sid}) in ${tables} tables</span>`);
     } else {
-      resultEl.innerHTML = `<span style="color:var(--red)">&#10007; ${data.message}</span>`;
+      const msg = data.message || data.detail || JSON.stringify(data);
+      allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">&#10007; ${msg}</span>`);
     }
   } catch (e) {
-    resultEl.innerHTML = '<span style="color:var(--red)">Request failed</span>';
+    allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">Request failed: ${e.message}</span>`);
   }
   btn.disabled = false;
 }
@@ -524,7 +534,7 @@ async function loadRetries() {
     }
     empty.style.display = 'none';
 
-    tbody.innerHTML = all.map(e => `<tr id="retry-row-${e.element_type}-${e.osm_id}">
+    tbody.innerHTML = all.map(e => `<tr>
       <td><a href="${e.element_url}" target="_blank">${e.element_type}/${e.osm_id}</a>
         ${e.version ? `<span style="color:var(--muted)">v${e.version}</span>` : ''}</td>
       <td><a href="${e.changeset_url}" target="_blank">${e.changeset_id}</a></td>
@@ -537,7 +547,7 @@ async function loadRetries() {
         <button class="expand-btn" style="width:auto;padding:2px 8px;font-size:11px"
           onclick="recheckSingle('${e.element_type}', ${e.osm_id}, this)"
           title="Recheck this element in the tiler DB now">&#x21bb;</button>
-        <span id="recheck-result-${e.element_type}-${e.osm_id}" style="font-size:11px;margin-left:4px"></span>
+        <span class="recheck-result-${e.element_type}-${e.osm_id}" style="font-size:11px;margin-left:4px"></span>
       </td>
     </tr>`).join('');
   } catch (e) {

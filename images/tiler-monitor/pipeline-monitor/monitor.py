@@ -200,9 +200,16 @@ def retries_recheck():
 @app.post("/retries/recheck/{element_type}/{osm_id}")
 def retries_recheck_single(element_type: str, osm_id: int):
     """Manually recheck a single element in the tiler DB."""
-    from checks.imposm_import import recheck_single_element
-    result = recheck_single_element(element_type, osm_id)
-    return JSONResponse(content=result)
+    try:
+        from checks.imposm_import import recheck_single_element
+        result = recheck_single_element(element_type, osm_id)
+        return JSONResponse(content=result)
+    except Exception as e:
+        logger.exception(f"Recheck failed for {element_type}/{osm_id}")
+        return JSONResponse(
+            content={"status": "error", "message": f"Recheck failed: {e}"},
+            status_code=500,
+        )
 
 
 @app.get("/retries")
