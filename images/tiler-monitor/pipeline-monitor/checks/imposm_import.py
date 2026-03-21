@@ -460,6 +460,36 @@ def _is_element_deleted(elem):
         return False
 
 
+def _get_current_element_tags(element_type, osm_id):
+    """Fetch the latest version of an element from OHM API and return its tags.
+
+    Returns None if the element is deleted/gone or the request fails.
+    Returns a dict of tags if the element exists.
+    """
+    url = f"{Config.OHM_API_BASE}/{element_type}/{osm_id}"
+    headers = {"User-Agent": "ohm-pipeline-monitor/1.0"}
+    try:
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code == 410:
+            return None
+        if resp.status_code == 200:
+            root = ET.fromstring(resp.content)
+            el = root.find(element_type)
+            if el is not None:
+                if el.attrib.get("visible") == "false":
+                    return None
+                tags = {}
+                for tag in el.findall("tag"):
+                    k = tag.attrib.get("k")
+                    v = tag.attrib.get("v")
+                    if k and v:
+                        tags[k] = v
+                return tags
+        return None
+    except Exception:
+        return None
+
+
 def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None):
     """Check all elements of a changeset in the tiler DB.
 
@@ -785,6 +815,22 @@ def check_pipeline():
         oid = entry["osm_id"]
         retry_num = entry["retry_count"] + 1
         prev_status = entry["status"]
+
+        # Check if the latest version still has mappable tags
+        current_tags = _get_current_element_tags(etype, oid)
+        if current_tags is None:
+            # Element was deleted — no longer needs to be in DB
+            print(f"  [retry] RESOLVED {etype}/{oid} (changeset {cs_id}) "
+                  f"-> element deleted in latest version, no longer expected in DB")
+            retry_store.mark_resolved(cs_id, etype, oid)
+            continue
+        current_elem = {"tags": current_tags}
+        if not _has_mappable_tags(current_elem):
+            # Latest version has no mappable tags — imposm won't import it
+            print(f"  [retry] RESOLVED {etype}/{oid} (changeset {cs_id}) "
+                  f"-> latest version has no mappable tags, no longer expected in DB")
+            retry_store.mark_resolved(cs_id, etype, oid)
+            continue
 
         # Check if the element is now in the DB
         check = _check_element_in_tables(conn, {"type": etype, "osm_id": oid, "action": "modify"})
