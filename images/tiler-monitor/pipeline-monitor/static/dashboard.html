@@ -169,6 +169,12 @@
 
 <!-- Retries panel -->
 <div class="panel" id="panel-retries">
+  <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
+    <button onclick="recheckRetries(this)" style="background:var(--surface);border:1px solid var(--border);color:var(--accent);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;">
+      Recheck Now
+    </button>
+    <span id="recheckResult" style="font-size:12px;color:var(--muted)"></span>
+  </div>
   <table>
     <thead><tr>
       <th>Element</th><th>Changeset</th><th>Action</th><th>Status</th>
@@ -437,6 +443,35 @@ function filterHistory() {
       next.style.display = match ? '' : 'none';
     }
   });
+}
+
+// ---- Recheck retries ----
+async function recheckRetries(btn) {
+  const resultEl = document.getElementById('recheckResult');
+  btn.disabled = true;
+  btn.textContent = 'Rechecking...';
+  resultEl.textContent = '';
+  try {
+    const r = await fetch(`${API}/retries/recheck`, { method: 'POST' });
+    const data = await r.json();
+    if (data.error) {
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = data.error;
+    } else {
+      const parts = [];
+      if (data.resolved?.length) parts.push(`${data.resolved.length} resolved`);
+      if (data.still_missing?.length) parts.push(`${data.still_missing.length} still missing`);
+      if (data.newly_failed?.length) parts.push(`${data.newly_failed.length} newly failed`);
+      resultEl.style.color = data.resolved?.length ? 'var(--green)' : 'var(--muted)';
+      resultEl.textContent = parts.length ? parts.join(', ') : 'No retries to check';
+    }
+    await loadRetries();
+  } catch (e) {
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = 'Failed to recheck';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Recheck Now';
 }
 
 // ---- Retries ----

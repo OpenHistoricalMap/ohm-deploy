@@ -311,7 +311,13 @@ def _check_element_in_tables(conn, elem):
         WHERE table_schema = 'public' AND table_name LIKE 'osm_%%'
     """)
     existing_tables = {row[0] for row in cur.fetchall()}
-    tables = [t for t in candidate_tables if t in existing_tables]
+
+    if candidate_tables:
+        # Normal path: filter to candidate tables that exist
+        tables = [t for t in candidate_tables if t in existing_tables]
+    else:
+        # Retry path: no tags available, search ALL osm_* tables
+        tables = sorted(existing_tables)
 
     if not tables:
         cur.close()
@@ -958,3 +964,66 @@ def check_single_changeset(changeset_id):
 
     print(f"  [result] {result['status'].upper()}: {result['message']}")
     return result
+
+
+def recheck_retries():
+    """Manually recheck all pending and failed retries against the tiler DB.
+
+    Returns a summary of resolved, still-missing, and newly-failed elements.
+    """
+    retryable = retry_store.get_pending() + retry_store.get_failed()
+    if not retryable:
+        return {"resolved": [], "still_missing": [], "newly_failed": [], "message": "No retries to check"}
+
+    try:
+        conn = psycopg2.connect(
+            host=Config.POSTGRES_HOST,
+            port=Config.POSTGRES_PORT,
+            dbname=Config.POSTGRES_DB,
+            user=Config.POSTGRES_USER,
+            password=Config.POSTGRES_PASSWORD,
+        )
+    except psycopg2.Error as e:
+        return {"error": f"Cannot connect to tiler DB: {e}"}
+
+    resolved = []
+    still_missing = []
+    newly_failed = []
+
+    for entry in retryable:
+        cs_id = entry["changeset_id"]
+        etype = entry["element_type"]
+        oid = entry["osm_id"]
+        retry_num = entry["retry_count"] + 1
+        prev_status = entry["status"]
+
+        check = _check_element_in_tables(conn, {"type": etype, "osm_id": oid, "action": "modify"})
+        if check["found_in_tables"]:
+            retry_store.mark_resolved(cs_id, etype, oid)
+            resolved.append({"type": etype, "osm_id": oid, "changeset_id": cs_id,
+                             "found_in_tables": check["found_in_tables"]})
+        elif prev_status == "failed":
+            still_missing.append({"type": etype, "osm_id": oid, "changeset_id": cs_id})
+        else:
+            new_status = retry_store.increment_retry(cs_id, etype, oid)
+            if new_status == "failed":
+                newly_failed.append({"type": etype, "osm_id": oid, "changeset_id": cs_id})
+            else:
+                still_missing.append({"type": etype, "osm_id": oid, "changeset_id": cs_id})
+
+    conn.close()
+
+    msg_parts = []
+    if resolved:
+        msg_parts.append(f"{len(resolved)} resolved")
+    if still_missing:
+        msg_parts.append(f"{len(still_missing)} still missing")
+    if newly_failed:
+        msg_parts.append(f"{len(newly_failed)} newly failed")
+
+    return {
+        "resolved": resolved,
+        "still_missing": still_missing,
+        "newly_failed": newly_failed,
+        "message": ", ".join(msg_parts) if msg_parts else "No retries to check",
+    }

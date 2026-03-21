@@ -15,7 +15,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from checks.imposm_import import check_pipeline, check_single_changeset
+from checks.imposm_import import check_pipeline, check_single_changeset, recheck_retries
 from config import Config
 import retry_store
 
@@ -188,6 +188,13 @@ def evaluate_changeset(changeset_id: int):
     result = check_single_changeset(changeset_id)
     status_code = 200 if result["status"] == "ok" else 503
     return JSONResponse(content=result, status_code=status_code)
+
+
+@app.post("/retries/recheck")
+def retries_recheck():
+    """Manually trigger a recheck of all pending and failed retries."""
+    result = recheck_retries()
+    return JSONResponse(content=result)
 
 
 @app.get("/retries")
