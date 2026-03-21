@@ -207,8 +207,6 @@ def get_all_details(ohm_base="https://www.openhistoricalmap.org"):
         entry = dict(r)
         entry["changeset_url"] = f"{ohm_base}/changeset/{r['changeset_id']}"
         entry["element_url"] = f"{ohm_base}/{r['element_type']}/{r['osm_id']}"
-        if r["version"]:
-            entry["element_url"] += f"/history/{r['version']}"
         try:
             first = datetime.fromisoformat(r["first_seen"])
             entry["age"] = _human_duration((now - first).total_seconds())
@@ -327,8 +325,6 @@ def get_changeset_elements(history_id: int,
     for r in rows:
         entry = dict(r)
         entry["element_url"] = f"{ohm_base}/{r['element_type']}/{r['osm_id']}"
-        if r["version"]:
-            entry["element_url"] += f"/history/{r['version']}"
         entry["found_in_tables"] = r["found_in_tables"].split(", ") if r["found_in_tables"] else []
         entry["found_in_views"] = r["found_in_views"].split(", ") if r["found_in_views"] else []
         results.append(entry)

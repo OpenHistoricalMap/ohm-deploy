@@ -449,26 +449,24 @@ function filterHistory() {
 async function recheckSingle(elementType, osmId, btn) {
   const resultEl = document.getElementById(`recheck-result-${elementType}-${osmId}`);
   btn.disabled = true;
-  resultEl.textContent = 'checking...';
-  resultEl.style.color = 'var(--muted)';
+  resultEl.innerHTML = '<span style="color:var(--muted)">checking...</span>';
   try {
     const r = await fetch(`${API}/retries/recheck/${elementType}/${osmId}`, { method: 'POST' });
     const data = await r.json();
     if (data.status === 'resolved') {
-      resultEl.style.color = 'var(--green)';
-      resultEl.textContent = `Found in: ${data.found_in_tables.join(', ')}`;
-      // Refresh the retries list after a short delay so user can see the result
-      setTimeout(() => loadRetries(), 2000);
-    } else if (data.status === 'error') {
-      resultEl.style.color = 'var(--red)';
-      resultEl.textContent = data.message;
+      let html = `<span style="color:var(--green)">&#10003; Found in: ${data.found_in_tables.join(', ')}</span>`;
+      if (data.found_in_views?.length) {
+        html += `<br><span style="color:var(--green);opacity:0.7">Views: ${data.found_in_views.join(', ')}</span>`;
+      }
+      resultEl.innerHTML = html;
+      setTimeout(() => loadRetries(), 3000);
+    } else if (data.status === 'not_found') {
+      resultEl.innerHTML = `<span style="color:var(--red)">&#10007; Not found (osm_id=${data.search_id}) in ${data.searched_tables?.length || '?'} tables</span>`;
     } else {
-      resultEl.style.color = 'var(--red)';
-      resultEl.textContent = data.message;
+      resultEl.innerHTML = `<span style="color:var(--red)">&#10007; ${data.message}</span>`;
     }
   } catch (e) {
-    resultEl.style.color = 'var(--red)';
-    resultEl.textContent = 'Request failed';
+    resultEl.innerHTML = '<span style="color:var(--red)">Request failed</span>';
   }
   btn.disabled = false;
 }

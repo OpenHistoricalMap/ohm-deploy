@@ -983,6 +983,18 @@ def recheck_single_element(element_type, osm_id):
         return {"status": "error", "message": f"Cannot connect to tiler DB: {e}"}
 
     elem = {"type": element_type, "osm_id": osm_id, "action": "modify"}
+    search_id = -osm_id if element_type == "relation" else osm_id
+
+    # Get all osm_* tables to report what was searched
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT table_name FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name LIKE 'osm_%%'
+        ORDER BY table_name
+    """)
+    all_tables = [row[0] for row in cur.fetchall()]
+    cur.close()
+
     check = _check_element_in_tables(conn, elem)
 
     # Also check views if found in tables
@@ -1001,7 +1013,16 @@ def recheck_single_element(element_type, osm_id):
                 retry_store.mark_resolved(entry["changeset_id"], element_type, osm_id)
 
     # Build detailed result
-    search_id = -osm_id if element_type == "relation" else osm_id
+    if found:
+        message = f"Found in: {', '.join(check['found_in_tables'])}"
+        if check["found_in_views"]:
+            message += f" | Views: {', '.join(check['found_in_views'])}"
+    else:
+        message = (
+            f"Not found in any of {len(all_tables)} osm_* tables "
+            f"(searched with osm_id={search_id})"
+        )
+
     result = {
         "status": "resolved" if found else "not_found",
         "element_type": element_type,
@@ -1009,11 +1030,8 @@ def recheck_single_element(element_type, osm_id):
         "search_id": search_id,
         "found_in_tables": check["found_in_tables"],
         "found_in_views": check["found_in_views"],
-        "message": (
-            f"Found in: {', '.join(check['found_in_tables'])}"
-            if found
-            else f"Not found in any osm_* table (searched with osm_id={search_id})"
-        ),
+        "searched_tables": all_tables,
+        "message": message,
     }
     return result
 
