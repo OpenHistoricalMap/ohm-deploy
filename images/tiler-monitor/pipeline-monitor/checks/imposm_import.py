@@ -1154,6 +1154,19 @@ def recheck_retries():
         retry_num = entry["retry_count"] + 1
         prev_status = entry["status"]
 
+        # Check if the latest version still has mappable tags
+        current_tags = _get_current_element_tags(etype, oid)
+        if current_tags is None:
+            retry_store.mark_resolved(cs_id, etype, oid)
+            resolved.append({"type": etype, "osm_id": oid, "changeset_id": cs_id,
+                             "reason": "element deleted"})
+            continue
+        if not _has_mappable_tags({"tags": current_tags}):
+            retry_store.mark_resolved(cs_id, etype, oid)
+            resolved.append({"type": etype, "osm_id": oid, "changeset_id": cs_id,
+                             "reason": "no mappable tags (rejected by imposm)"})
+            continue
+
         check = _check_element_in_tables(conn, {"type": etype, "osm_id": oid, "action": "modify"})
         if check["found_in_tables"]:
             retry_store.mark_resolved(cs_id, etype, oid)
