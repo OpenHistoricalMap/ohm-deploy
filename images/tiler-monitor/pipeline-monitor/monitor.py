@@ -194,6 +194,22 @@ def evaluate_changeset(changeset_id: int):
 def retries_recheck():
     """Manually trigger a recheck of all pending and failed retries."""
     result = recheck_retries()
+
+    # Update cached status if all retries are now resolved
+    remaining = retry_store.summary()
+    if remaining.get("failed", 0) == 0 and remaining.get("pending", 0) == 0:
+        with _lock:
+            prev = _latest_result
+            if prev and prev.get("status") == "critical":
+                updated = dict(prev)
+                updated["status"] = "ok"
+                updated["message"] = "All retries resolved"
+                updated["details"] = dict(prev.get("details", {}))
+                updated["details"]["retries"] = remaining
+                updated["details"]["total_failed"] = 0
+                updated["details"]["newly_failed"] = []
+                globals()["_latest_result"] = updated
+
     return JSONResponse(content=result)
 
 
@@ -203,6 +219,22 @@ def retries_recheck_single(element_type: str, osm_id: int):
     try:
         from checks.imposm_import import recheck_single_element
         result = recheck_single_element(element_type, osm_id)
+
+        # Update cached status if no more failed retries
+        remaining = retry_store.summary()
+        if remaining.get("failed", 0) == 0 and remaining.get("pending", 0) == 0:
+            with _lock:
+                prev = _latest_result
+                if prev and prev.get("status") == "critical":
+                    updated = dict(prev)
+                    updated["status"] = "ok"
+                    updated["message"] = "All retries resolved"
+                    updated["details"] = dict(prev.get("details", {}))
+                    updated["details"]["retries"] = remaining
+                    updated["details"]["total_failed"] = 0
+                    updated["details"]["newly_failed"] = []
+                    globals()["_latest_result"] = updated
+
         return JSONResponse(content=result)
     except Exception as e:
         logger.exception(f"Recheck failed for {element_type}/{osm_id}")
