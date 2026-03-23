@@ -231,6 +231,9 @@ def _get_changeset_elements(changeset_id):
 # Loaded from tables_config.json
 TAG_TO_CHECK = _tables_config["tag_to_check"]
 
+# Reject rules: tag key -> list of values that imposm rejects (not imported)
+_REJECT_VALUES = _tables_config.get("reject_values", {})
+
 # Split config keys into simple tags ("highway") and key=value tags ("type=street")
 _SIMPLE_TAGS = {}
 _KV_TAGS = {}
@@ -242,12 +245,20 @@ for key, val in TAG_TO_CHECK.items():
 
 
 def _matching_entries(elem):
-    """Return matching tag_to_check entries for this element's tags."""
+    """Return matching tag_to_check entries for this element's tags.
+
+    Skips tags whose value is rejected by imposm (e.g. natural=coastline).
+    Other mappable tags on the same element are still matched.
+    """
     tags = elem.get("tags", {})
     entries = []
-    # Simple tags: match if tag key exists (e.g. "highway")
+    # Simple tags: match if tag key exists (e.g. "highway"),
+    # but skip if the value is in the reject list for that key
     for tag_key in tags:
         if tag_key in _SIMPLE_TAGS:
+            rejected = _REJECT_VALUES.get(tag_key, [])
+            if tags[tag_key] in rejected:
+                continue
             entries.append(_SIMPLE_TAGS[tag_key])
     # Key=value tags: match if tag key AND value match (e.g. "type=street")
     for kv, entry in _KV_TAGS.items():
@@ -490,11 +501,15 @@ def _get_current_element_tags(element_type, osm_id):
         return None
 
 
-def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None):
+def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None, already_checked=None):
     """Check all elements of a changeset in the tiler DB.
 
     - ALL elements: verified in osm_* tables (fast, tag-filtered)
     - SAMPLE elements: full check → tables + views + S3 tile cache
+
+    If *already_checked* is a set of (type, osm_id) tuples, elements that
+    were already verified in a newer changeset are skipped to avoid
+    duplicate reporting.
     """
     from checks.tile_cache import check_tile_cache_for_element
 
@@ -525,6 +540,25 @@ def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None):
         return {
             "status": "ok",
             "message": "No importable elements in this changeset",
+            "elements": [],
+        }
+
+    # Deduplicate: skip elements already checked in a newer changeset
+    if already_checked is not None:
+        deduped = []
+        for elem in checkable_elements:
+            key = (elem["type"], elem["osm_id"])
+            if key in already_checked:
+                print(f"    SKIP {elem['type']}/{elem['osm_id']} v{elem['version']} "
+                      f"-> already checked in a newer changeset")
+                continue
+            deduped.append(elem)
+        checkable_elements = deduped
+
+    if not checkable_elements:
+        return {
+            "status": "ok",
+            "message": "All elements already checked in newer changesets",
             "elements": [],
         }
 
@@ -744,6 +778,9 @@ def check_pipeline():
     # --- Check each changeset through the pipeline ---
     problems = []
     skipped = 0
+    # Track already-checked elements to avoid duplicates across changesets.
+    # Changesets are ordered newest-first, so only the latest version is checked.
+    checked_elements = set()  # (type, osm_id)
 
     for cs in changesets:
         # Skip changesets already checked with status OK
@@ -779,9 +816,13 @@ def check_pipeline():
             print(f"  [replication] UNKNOWN: Replication state unavailable")
 
         # Step 2: tiler DB
-        db_check = _check_elements_in_db(conn, cs["id"], cs["closed_at"])
+        db_check = _check_elements_in_db(conn, cs["id"], cs["closed_at"], already_checked=checked_elements)
         cs_result["tiler_db"] = db_check
         print(f"  [tiler_db] {db_check['status'].upper()}: {db_check['message']}")
+
+        # Track checked elements to skip in older changesets
+        for elem in db_check.get("elements", []):
+            checked_elements.add((elem["type"], elem["osm_id"]))
 
         if db_check["status"] not in ("ok", "retry_pending"):
             problems.append(f"Changeset {cs['id']}: {db_check['message']}")

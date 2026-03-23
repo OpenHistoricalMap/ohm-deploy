@@ -90,5 +90,8 @@
       "tables": ["osm_water_lines", "osm_water_areas"],
       "views": ["mv_water_lines_z8_9", "mv_water_lines_z16_20", "mv_water_areas_z0_2", "mv_water_areas_z16_20", "mv_water_areas_centroids_z8_9", "mv_water_areas_centroids_z16_20"]
     }
+  },
+  "reject_values": {
+    "natural": ["coastline"]
   }
 }
