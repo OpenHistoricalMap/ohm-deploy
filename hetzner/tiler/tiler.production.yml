@@ -39,7 +39,7 @@ services:
   # Tiler server
   tiler_server:
     container_name: tiler_server
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3292.h0f5e7d60
     # ports:
     #   - "9090:9090"
     restart: always
