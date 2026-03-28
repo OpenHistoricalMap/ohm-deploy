@@ -64,13 +64,13 @@ osm-seed:
         max_connections = 200
         shared_buffers = 4GB
         work_mem = 20MB
-        maintenance_work_mem = 512MB
+        maintenance_work_mem = 1GB
         dynamic_shared_memory_type = posix
         effective_io_concurrency = 200
-        max_wal_size = 1GB
-        min_wal_size = 256MB
-        random_page_cost = 1.0
-        effective_cache_size = 8GB
+        max_wal_size = 2GB
+        min_wal_size = 512MB
+        random_page_cost = 1.1
+        effective_cache_size = 12GB
         log_min_duration_statement = 3000
         log_connections = on
         log_disconnections = on
@@ -86,9 +86,9 @@ osm-seed:
         lc_time = 'en_US.utf8'
         default_text_search_config = 'pg_catalog.english'
         # Parallelism settings
-        max_parallel_workers_per_gather = 2
-        max_parallel_workers = 4
-        max_worker_processes = 4
+        max_parallel_workers_per_gather = 1
+        max_parallel_workers = 2
+        max_worker_processes = 2
         parallel_tuple_cost = 0.05
         parallel_setup_cost = 500
         min_parallel_table_scan_size = 2MB
