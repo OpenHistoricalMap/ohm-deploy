@@ -47,12 +47,14 @@ def _init_tables(conn):
             first_seen    TEXT    NOT NULL,
             last_checked  TEXT    NOT NULL,
             status        TEXT    NOT NULL DEFAULT 'pending',
+            closed_at     TEXT    NOT NULL DEFAULT '',
             PRIMARY KEY (changeset_id, element_type, osm_id)
         )
     """)
     # Migrate: add columns if missing (for existing DBs)
     for col, typedef in [("version", "INTEGER NOT NULL DEFAULT 0"),
-                         ("action", "TEXT NOT NULL DEFAULT ''")]:
+                         ("action", "TEXT NOT NULL DEFAULT ''"),
+                         ("closed_at", "TEXT NOT NULL DEFAULT ''")]:
         try:
             conn.execute(f"ALTER TABLE pending_retries ADD COLUMN {col} {typedef}")
         except sqlite3.OperationalError:
@@ -62,6 +64,7 @@ def _init_tables(conn):
         CREATE TABLE IF NOT EXISTS changeset_history (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             changeset_id    INTEGER NOT NULL,
+            created_at      TEXT    NOT NULL DEFAULT '',
             closed_at       TEXT    NOT NULL DEFAULT '',
             checked_at      TEXT    NOT NULL,
             status          TEXT    NOT NULL,
@@ -71,10 +74,12 @@ def _init_tables(conn):
             message         TEXT    NOT NULL DEFAULT ''
         )
     """)
-    try:
-        conn.execute("ALTER TABLE changeset_history ADD COLUMN closed_at TEXT NOT NULL DEFAULT ''")
-    except sqlite3.OperationalError:
-        pass
+    for hist_col, hist_typedef in [("closed_at", "TEXT NOT NULL DEFAULT ''"),
+                                    ("created_at", "TEXT NOT NULL DEFAULT ''")]:
+        try:
+            conn.execute(f"ALTER TABLE changeset_history ADD COLUMN {hist_col} {hist_typedef}")
+        except sqlite3.OperationalError:
+            pass
     conn.execute("""
         CREATE INDEX IF NOT EXISTS idx_history_checked_at
         ON changeset_history(checked_at DESC)
@@ -101,6 +106,28 @@ def _init_tables(conn):
         ON element_history(history_id)
     """)
 
+    # Feed events: persistent log of alerts (failed elements, recoveries)
+    # for the RSS feed. Items are never deleted, only added.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS feed_events (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type      TEXT    NOT NULL,
+            element_type    TEXT    NOT NULL DEFAULT '',
+            osm_id          INTEGER NOT NULL DEFAULT 0,
+            version         INTEGER NOT NULL DEFAULT 0,
+            changeset_id    INTEGER NOT NULL DEFAULT 0,
+            action          TEXT    NOT NULL DEFAULT '',
+            title           TEXT    NOT NULL,
+            description     TEXT    NOT NULL DEFAULT '',
+            link            TEXT    NOT NULL DEFAULT '',
+            created_at      TEXT    NOT NULL
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_feed_events_created
+        ON feed_events(created_at DESC)
+    """)
+
     conn.commit()
 
 
@@ -109,7 +136,8 @@ def _init_tables(conn):
 # ---------------------------------------------------------------------------
 
 def add_missing(changeset_id: int, element_type: str, osm_id: int,
-                max_retries: int, version: int = 0, action: str = ""):
+                max_retries: int, version: int = 0, action: str = "",
+                closed_at: str = ""):
     """Register a missing element for future retry. If it already exists, do nothing."""
     now = datetime.now(timezone.utc).isoformat()
     with _lock:
@@ -117,9 +145,9 @@ def add_missing(changeset_id: int, element_type: str, osm_id: int,
         conn.execute("""
             INSERT OR IGNORE INTO pending_retries
                 (changeset_id, element_type, osm_id, version, action,
-                 retry_count, max_retries, first_seen, last_checked, status)
-            VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, 'pending')
-        """, (changeset_id, element_type, osm_id, version, action, max_retries, now, now))
+                 retry_count, max_retries, first_seen, last_checked, status, closed_at)
+            VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, 'pending', ?)
+        """, (changeset_id, element_type, osm_id, version, action, max_retries, now, now, closed_at or ""))
         conn.commit()
 
 
@@ -201,6 +229,27 @@ def get_all_details(ohm_base="https://www.openhistoricalmap.org"):
             "SELECT * FROM pending_retries ORDER BY status, first_seen DESC"
         ).fetchall()
 
+        # Get changeset object counts from history (latest check per changeset)
+        cs_ids = list(set(r["changeset_id"] for r in rows))
+        cs_stats = {}
+        if cs_ids:
+            placeholders = ",".join("?" * len(cs_ids))
+            stats_rows = conn.execute(f"""
+                SELECT changeset_id, total_elements, missing_count, ok_count
+                FROM changeset_history
+                WHERE id IN (
+                    SELECT MAX(id) FROM changeset_history
+                    WHERE changeset_id IN ({placeholders})
+                    GROUP BY changeset_id
+                )
+            """, cs_ids).fetchall()
+            for sr in stats_rows:
+                cs_stats[sr["changeset_id"]] = {
+                    "total_elements": sr["total_elements"],
+                    "missing_count": sr["missing_count"],
+                    "ok_count": sr["ok_count"],
+                }
+
     now = datetime.now(timezone.utc)
     results = []
     for r in rows:
@@ -217,6 +266,21 @@ def get_all_details(ohm_base="https://www.openhistoricalmap.org"):
             entry["last_checked_ago"] = _human_duration((now - last).total_seconds())
         except Exception:
             entry["last_checked_ago"] = ""
+        # Changeset closed_at (close time as formatted date)
+        closed_at_val = r["closed_at"] if "closed_at" in r.keys() else ""
+        if closed_at_val:
+            try:
+                closed = datetime.fromisoformat(closed_at_val.replace("Z", "+00:00"))
+                entry["closed_at_fmt"] = closed.strftime("%Y-%m-%d %H:%M UTC")
+            except Exception:
+                entry["closed_at_fmt"] = ""
+        else:
+            entry["closed_at_fmt"] = ""
+        # Changeset object counts
+        stats = cs_stats.get(r["changeset_id"], {})
+        entry["cs_total_elements"] = stats.get("total_elements", 0)
+        entry["cs_ok_count"] = stats.get("ok_count", 0)
+        entry["cs_missing_count"] = stats.get("missing_count", 0)
         entry["retries_remaining"] = max(0, r["max_retries"] - r["retry_count"])
         results.append(entry)
     return results
@@ -229,16 +293,17 @@ def get_all_details(ohm_base="https://www.openhistoricalmap.org"):
 def log_changeset_check(changeset_id: int, status: str,
                         total_elements: int, missing_count: int,
                         ok_count: int, message: str,
-                        closed_at: str = "", elements: list = None):
+                        created_at: str = "", closed_at: str = "",
+                        elements: list = None):
     """Record a changeset check and its elements in the history tables."""
     now = datetime.now(timezone.utc).isoformat()
     with _lock:
         conn = _get_conn()
         cur = conn.execute("""
             INSERT INTO changeset_history
-                (changeset_id, closed_at, checked_at, status, total_elements, missing_count, ok_count, message)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (changeset_id, closed_at or "", now, status, total_elements, missing_count, ok_count, message))
+                (changeset_id, created_at, closed_at, checked_at, status, total_elements, missing_count, ok_count, message)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (changeset_id, created_at or "", closed_at or "", now, status, total_elements, missing_count, ok_count, message))
         history_id = cur.lastrowid
 
         if elements:
@@ -299,6 +364,15 @@ def get_changeset_history(page: int = 1, per_page: int = 20,
                 entry["closed_ago"] = ""
         else:
             entry["closed_ago"] = ""
+        created_at_val = r["created_at"] if "created_at" in r.keys() else ""
+        if created_at_val:
+            try:
+                created = datetime.fromisoformat(created_at_val.replace("Z", "+00:00"))
+                entry["created_fmt"] = created.strftime("%Y-%m-%d %H:%M UTC")
+            except Exception:
+                entry["created_fmt"] = ""
+        else:
+            entry["created_fmt"] = ""
         results.append(entry)
 
     return {
@@ -351,6 +425,39 @@ def summary():
             "SELECT status, COUNT(*) as cnt FROM pending_retries GROUP BY status"
         ).fetchall()
         return {r["status"]: r["cnt"] for r in rows}
+
+
+# ---------------------------------------------------------------------------
+# Feed events
+# ---------------------------------------------------------------------------
+
+def add_feed_event(event_type: str, title: str, description: str = "",
+                   link: str = "", element_type: str = "", osm_id: int = 0,
+                   version: int = 0, changeset_id: int = 0, action: str = ""):
+    """Add a persistent event to the RSS feed."""
+    now = datetime.now(timezone.utc).isoformat()
+    with _lock:
+        conn = _get_conn()
+        conn.execute("""
+            INSERT INTO feed_events
+                (event_type, element_type, osm_id, version, changeset_id,
+                 action, title, description, link, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (event_type, element_type, osm_id, version, changeset_id,
+              action, title, description, link, now))
+        conn.commit()
+
+
+def get_feed_events(limit: int = 50):
+    """Return the most recent feed events for the RSS feed."""
+    with _lock:
+        conn = _get_conn()
+        rows = conn.execute("""
+            SELECT * FROM feed_events
+            ORDER BY created_at DESC
+            LIMIT ?
+        """, (limit,)).fetchall()
+        return [dict(r) for r in rows]
 
 
 # ---------------------------------------------------------------------------

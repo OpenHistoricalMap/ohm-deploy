@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 import requests
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 
 from checks.imposm_import import check_pipeline, check_single_changeset, recheck_retries
 from config import Config
@@ -105,12 +105,32 @@ def _run_check():
         if newly_failed:
             # New elements just exhausted retries — always alert
             _send_slack_alert(result)
+            # Log each failed element as a feed event
+            ohm = "https://www.openhistoricalmap.org"
+            for f in newly_failed:
+                retry_store.add_feed_event(
+                    event_type="failed",
+                    title=f"FAILED: {f['type']}/{f['osm_id']} not found in tiler DB after all retries",
+                    description=(
+                        f"Element {f['type']}/{f['osm_id']} from changeset {f['changeset_id']} "
+                        f"was not found in the tiler database after all retries."
+                    ),
+                    link=f"{ohm}/{f['type']}/{f['osm_id']}",
+                    element_type=f["type"],
+                    osm_id=f["osm_id"],
+                    changeset_id=f["changeset_id"],
+                )
         elif result["status"] == "warning":
             if prev is None or prev["status"] == "ok":
                 _send_slack_alert(result)
         elif result["status"] == "ok" and prev and prev["status"] in ("critical", "warning"):
             # Recovered — send ok notification
             _send_slack_alert(result)
+            retry_store.add_feed_event(
+                event_type="recovered",
+                title="RECOVERED: All pipeline elements verified OK",
+                description=result["message"],
+            )
 
     except Exception as e:
         logger.exception(f"Pipeline check raised an exception: {e}")
@@ -273,6 +293,93 @@ def history_elements(history_id: int):
     """Return all elements checked for a specific history entry."""
     elements = retry_store.get_changeset_elements(history_id)
     return JSONResponse(content={"history_id": history_id, "elements": elements})
+
+
+# ---------------------------------------------------------------------------
+# RSS / Atom feed
+# ---------------------------------------------------------------------------
+
+def _xml_escape(text):
+    """Escape XML special characters."""
+    return (str(text)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;"))
+
+
+def _to_rfc822(iso_str):
+    """Convert ISO timestamp to RFC 822 format for RSS."""
+    try:
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        return dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
+    except Exception:
+        return datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")
+
+
+def _build_rss_feed():
+    """Build an RSS 2.0 feed from persistent feed events.
+
+    Each event is a unique item with a stable guid (based on DB id),
+    so Slack's /feed command detects new items as they appear.
+    """
+    base_url = Config.MONITOR_BASE_URL or "https://tiler-monitoring.openhistoricalmap.org"
+    now = datetime.now(timezone.utc)
+    rfc822_now = now.strftime("%a, %d %b %Y %H:%M:%S +0000")
+
+    events = retry_store.get_feed_events(limit=50)
+
+    items_xml = []
+    for ev in events:
+        title = ev["title"]
+        link = ev["link"] or base_url
+        guid = f"ohm-tiler-feed-{ev['id']}"
+        pub_date = _to_rfc822(ev["created_at"])
+        desc = ev["description"]
+
+        # Add element/changeset links in description if available
+        if ev["osm_id"] and ev["element_type"]:
+            ohm = "https://www.openhistoricalmap.org"
+            elem_link = f"{ohm}/{ev['element_type']}/{ev['osm_id']}"
+            cs_link = f"{ohm}/changeset/{ev['changeset_id']}" if ev["changeset_id"] else ""
+            desc_parts = [desc]
+            desc_parts.append(f"Element: {elem_link}")
+            if cs_link:
+                desc_parts.append(f"Changeset: {cs_link}")
+            desc_parts.append(f"Dashboard: {base_url}")
+            desc = " | ".join(desc_parts)
+
+        items_xml.append(f"""    <item>
+      <title>{_xml_escape(title)}</title>
+      <link>{_xml_escape(link)}</link>
+      <guid isPermaLink="false">{_xml_escape(guid)}</guid>
+      <pubDate>{pub_date}</pubDate>
+      <description>{_xml_escape(desc)}</description>
+    </item>""")
+
+    items_str = "\n".join(items_xml) if items_xml else ""
+
+    feed = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>OHM Tiler Pipeline Monitor - Alerts</title>
+    <link>{_xml_escape(base_url)}</link>
+    <description>Alerts from the OHM tiler pipeline monitor: failed elements not found in the tiler DB after retries.</description>
+    <language>en</language>
+    <lastBuildDate>{rfc822_now}</lastBuildDate>
+    <atom:link href="{_xml_escape(base_url)}/feed.rss" rel="self" type="application/rss+xml"/>
+{items_str}
+  </channel>
+</rss>"""
+    return feed
+
+
+@app.get("/feed.rss")
+def rss_feed():
+    """RSS 2.0 feed of pipeline alerts for Slack integration."""
+    xml = _build_rss_feed()
+    return Response(content=xml, media_type="application/rss+xml")
 
 
 # ---------------------------------------------------------------------------

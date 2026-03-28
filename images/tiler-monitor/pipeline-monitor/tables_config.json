@@ -93,5 +93,11 @@
   },
   "reject_values": {
     "natural": ["coastline"]
-  }
+  },
+  "importable_relation_types": [
+    "multipolygon",
+    "boundary",
+    "route",
+    "street"
+  ]
 }

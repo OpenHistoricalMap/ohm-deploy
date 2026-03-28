@@ -159,7 +159,7 @@
     <thead><tr>
       <th style="width:32px"></th>
       <th>Changeset</th><th>Status</th><th>Total</th><th>OK</th>
-      <th>Missing</th><th>Closed</th><th>Checked</th><th>Message</th>
+      <th>Missing</th><th>Created</th><th>Closed</th><th>Checked</th><th>Message</th>
     </tr></thead>
     <tbody id="historyBody"></tbody>
   </table>
@@ -178,7 +178,7 @@
   <table>
     <thead><tr>
       <th>Element</th><th>Changeset</th><th>Action</th><th>Status</th>
-      <th>Retries</th><th>First Seen</th><th>Last Checked</th><th></th>
+      <th>Retries</th><th>Objects</th><th>Changeset Closed</th><th>First Seen</th><th>Last Checked</th><th></th>
     </tr></thead>
     <tbody id="retriesBody"></tbody>
   </table>
@@ -414,6 +414,7 @@ async function loadHistory(page) {
       <td>${c.total_elements}</td>
       <td style="color:var(--green)">${c.ok_count}</td>
       <td style="color:${c.missing_count ? 'var(--yellow)' : 'var(--muted)'}">${c.missing_count}</td>
+      <td title="${c.created_at || ''}">${c.created_fmt || '—'}</td>
       <td title="${c.closed_at || ''}">${c.closed_ago || '—'}</td>
       <td title="${c.checked_at}">${c.checked_ago}</td>
       <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
@@ -534,13 +535,22 @@ async function loadRetries() {
     }
     empty.style.display = 'none';
 
-    tbody.innerHTML = all.map(e => `<tr>
+    tbody.innerHTML = all.map(e => {
+      const total = e.cs_total_elements || 0;
+      const missing = e.cs_missing_count || 0;
+      const ok = e.cs_ok_count || 0;
+      const objectsHtml = total > 0
+        ? `<span style="color:${missing ? 'var(--yellow)' : 'var(--green)'}" title="${ok} ok, ${missing} missing of ${total} total">${missing}/${total} missing</span>`
+        : '<span style="color:var(--muted)">—</span>';
+      return `<tr>
       <td><a href="${e.element_url}" target="_blank">${e.element_type}/${e.osm_id}</a>
         ${e.version ? `<span style="color:var(--muted)">v${e.version}</span>` : ''}</td>
       <td><a href="${e.changeset_url}" target="_blank">${e.changeset_id}</a></td>
       <td>${e.action || '—'}</td>
       <td>${statusBadge(e.status)}</td>
       <td style="width:120px">${retryBar(e.retry_count, e.max_retries)}</td>
+      <td>${objectsHtml}</td>
+      <td title="${e.closed_at || ''}">${e.closed_at_fmt || '—'}</td>
       <td title="${e.first_seen}">${e.age}</td>
       <td title="${e.last_checked}">${e.last_checked_ago}</td>
       <td>
@@ -549,7 +559,8 @@ async function loadRetries() {
           title="Recheck this element in the tiler DB now">&#x21bb;</button>
         <span class="recheck-result-${e.element_type}-${e.osm_id}" style="font-size:11px;margin-left:4px"></span>
       </td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
   } catch (e) {
     console.error('Failed to load retries:', e);
   }
