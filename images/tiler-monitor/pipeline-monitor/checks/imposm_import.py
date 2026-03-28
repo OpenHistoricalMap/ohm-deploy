@@ -252,13 +252,29 @@ for key, val in TAG_TO_CHECK.items():
         _SIMPLE_TAGS[key] = val
 
 
+def _has_compatible_tables(entry, elem_type):
+    """Return True if the entry has at least one table compatible with the element type.
+
+    - Nodes can only be stored in tables ending with '_points'.
+    - Ways and relations need tables ending with '_lines', '_areas',
+      '_multilines', '_relation_members', or other non-point suffixes.
+    """
+    if elem_type == "node":
+        return any(t.endswith("_points") for t in entry.get("tables", []))
+    # way or relation: needs at least one non-points table
+    return any(not t.endswith("_points") for t in entry.get("tables", []))
+
+
 def _matching_entries(elem):
     """Return matching tag_to_check entries for this element's tags.
 
     Skips tags whose value is rejected by imposm (e.g. natural=coastline).
+    Skips entries whose tables are incompatible with the element type
+    (e.g. a way matching 'shop' which only has point tables).
     Other mappable tags on the same element are still matched.
     """
     tags = elem.get("tags", {})
+    elem_type = elem.get("type", "")
     entries = []
     # Simple tags: match if tag key exists (e.g. "highway"),
     # but skip if the value is in the reject list for that key
@@ -267,11 +283,16 @@ def _matching_entries(elem):
             rejected = _REJECT_VALUES.get(tag_key, [])
             if tags[tag_key] in rejected:
                 continue
-            entries.append(_SIMPLE_TAGS[tag_key])
+            entry = _SIMPLE_TAGS[tag_key]
+            if not _has_compatible_tables(entry, elem_type):
+                continue
+            entries.append(entry)
     # Key=value tags: match if tag key AND value match (e.g. "type=street")
     for kv, entry in _KV_TAGS.items():
         k, v = kv.split("=", 1)
         if tags.get(k) == v:
+            if not _has_compatible_tables(entry, elem_type):
+                continue
             entries.append(entry)
     return entries
 
