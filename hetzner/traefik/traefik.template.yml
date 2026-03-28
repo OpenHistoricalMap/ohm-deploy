@@ -137,6 +137,14 @@ http:
       middlewares:
         - secure-headers
 
+    martin-router:
+      rule: Host(`martin.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: martin
+      middlewares:
+        - secure-headers
+
     node-exporter-router:
       rule: Host(`node-exporter.{{OHM_DOMAIN}}`)
       entryPoints:
@@ -150,6 +158,14 @@ http:
       entryPoints:
         - port-web
       service: cadvisor
+      middlewares:
+        - secure-headers
+
+    tiler-monitoring-router:
+      rule: Host(`tiler-monitoring.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: tiler_monitor
       middlewares:
         - secure-headers
 
@@ -184,6 +200,11 @@ http:
         servers:
           - url: http://taginfo_web:4567
 
+    martin:
+      loadBalancer:
+        servers:
+          - url: http://martin:80
+
     node_exporter:
       loadBalancer:
         servers:
@@ -193,6 +214,11 @@ http:
       loadBalancer:
         servers:
           - url: http://cadvisor:8080
+
+    tiler_monitor:
+      loadBalancer:
+        servers:
+          - url: http://tiler-monitor:8001
 
 providers:
   file:

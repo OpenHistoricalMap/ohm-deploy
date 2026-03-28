@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OHM Tiler Pipeline Monitor</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --red: #f85149;
+    --orange: #db6d28;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5; padding: 20px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .header h1 { font-size: 22px; font-weight: 600; }
+  .header .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .card .value { font-size: 28px; font-weight: 600; margin-top: 4px; }
+
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .tab { padding: 8px 16px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent;
+    font-size: 14px; background: none; border-top: none; border-left: none; border-right: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab .badge { background: var(--border); color: var(--muted); font-size: 11px; padding: 1px 6px;
+    border-radius: 10px; margin-left: 6px; }
+  .tab .badge.warn { background: var(--yellow); color: #000; }
+  .tab .badge.err { background: var(--red); color: #fff; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 500;
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface); }
+
+  .badge-status { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge-ok { background: rgba(63,185,80,0.15); color: var(--green); }
+  .badge-warning { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .badge-critical, .badge-failed { background: rgba(248,81,73,0.15); color: var(--red); }
+  .badge-pending { background: rgba(219,109,40,0.15); color: var(--orange); }
+  .badge-retry_pending { background: rgba(219,109,40,0.15); color: var(--orange); }
+  .badge-missing { background: rgba(248,81,73,0.15); color: var(--red); }
+  .badge-not_deleted { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .badge-skipped { background: rgba(139,148,158,0.15); color: var(--muted); }
+
+  .pagination { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 16px; }
+  .pagination button { background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .pagination button:hover { background: var(--border); }
+  .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pagination span { color: var(--muted); font-size: 13px; }
+
+  .refresh-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .refresh-bar button { background: var(--surface); border: 1px solid var(--border); color: var(--accent);
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .refresh-bar button:hover { background: var(--border); }
+  .refresh-bar .last-refresh { color: var(--muted); font-size: 12px; }
+  .auto-label { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 4px; }
+  .auto-label input { accent-color: var(--accent); }
+
+  .empty { color: var(--muted); text-align: center; padding: 40px; font-size: 14px; }
+
+  .retry-bar { display: flex; align-items: center; gap: 4px; }
+  .retry-bar .fill { height: 6px; border-radius: 3px; }
+  .retry-bar .used { background: var(--yellow); }
+  .retry-bar .remaining { background: var(--border); }
+
+  .search-box { background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 12px; border-radius: 6px; font-size: 13px; width: 220px; }
+  .search-box::placeholder { color: var(--muted); }
+
+  /* Expandable rows */
+  .expand-btn { background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+    width: 24px; height: 24px; border-radius: 4px; font-size: 12px; display: inline-flex;
+    align-items: center; justify-content: center; transition: all 0.15s; }
+  .expand-btn:hover { color: var(--text); border-color: var(--accent); }
+  .expand-btn.open { color: var(--accent); transform: rotate(90deg); }
+
+  .elements-row td { padding: 0; border-bottom: 1px solid var(--border); }
+  .elements-container { background: var(--surface); padding: 12px 16px 12px 48px; }
+  .elements-container table { margin: 0; }
+  .elements-container th { background: var(--surface); font-size: 12px; padding: 4px 10px; }
+  .elements-container td { padding: 4px 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .elements-container tr:last-child td { border-bottom: none; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 3px; }
+  .tag { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 6px;
+    border-radius: 3px; font-size: 11px; white-space: nowrap; }
+
+  .loading-elements { color: var(--muted); font-size: 12px; padding: 8px; }
+
+  @media (max-width: 600px) {
+    .cards { grid-template-columns: 1fr 1fr; }
+    table { font-size: 12px; }
+    td, th { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="status-dot" id="statusDot"></span>
+  <h1>OHM Tiler Pipeline Monitor</h1>
+</div>
+
+<div class="cards" id="cards">
+  <div class="card"><div class="label">Status</div><div class="value" style="color:var(--muted)">LOADING...</div></div>
+</div>
+
+<div class="refresh-bar">
+  <button onclick="refreshAll()">Refresh</button>
+  <span class="last-refresh" id="lastRefresh"></span>
+  <label class="auto-label">
+    <input type="checkbox" id="autoRefresh" checked> Auto-refresh 30s
+  </label>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="health" onclick="switchTab('health')">Current Run</button>
+  <button class="tab" data-tab="history" onclick="switchTab('history')">
+    History <span class="badge" id="historyBadge">0</span>
+  </button>
+  <button class="tab" data-tab="retries" onclick="switchTab('retries')">
+    Retries <span class="badge" id="retriesBadge">0</span>
+  </button>
+</div>
+
+<!-- Health panel -->
+<div class="panel active" id="panel-health">
+  <table>
+    <thead><tr>
+      <th style="width:32px"></th>
+      <th>Changeset</th><th>Status</th><th>Elements</th><th>Missing</th>
+      <th>Replication</th><th>Age</th><th>Message</th>
+    </tr></thead>
+    <tbody id="healthBody"></tbody>
+  </table>
+  <div class="empty" id="healthEmpty" style="display:none">Waiting for current run to complete...</div>
+</div>
+
+<!-- History panel -->
+<div class="panel" id="panel-history">
+  <div style="margin-bottom: 12px;">
+    <input class="search-box" id="historySearch" placeholder="Filter by changeset ID..." oninput="filterHistory()">
+  </div>
+  <table>
+    <thead><tr>
+      <th style="width:32px"></th>
+      <th>Changeset</th><th>Status</th><th>Total</th><th>OK</th>
+      <th>Missing</th><th>Created</th><th>Closed</th><th>Checked</th><th>Message</th>
+    </tr></thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+  <div class="empty" id="historyEmpty" style="display:none">No changesets checked yet.</div>
+  <div class="pagination" id="historyPagination"></div>
+</div>
+
+<!-- Retries panel -->
+<div class="panel" id="panel-retries">
+  <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
+    <button onclick="recheckRetries(this)" style="background:var(--surface);border:1px solid var(--border);color:var(--accent);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;">
+      Recheck Now
+    </button>
+    <span id="recheckResult" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Element</th><th>Changeset</th><th>Action</th><th>Status</th>
+      <th>Retries</th><th>Objects</th><th>Changeset Closed</th><th>First Seen</th><th>Last Checked</th><th></th>
+    </tr></thead>
+    <tbody id="retriesBody"></tbody>
+  </table>
+  <div class="empty" id="retriesEmpty" style="display:none">No pending retries. All elements are in sync.</div>
+</div>
+
+<script>
+const API = '';  // Use relative URLs — works regardless of host/port
+let historyPage = 1;
+const historyPerPage = 20;
+let historyData = {};
+let autoRefreshTimer = null;
+// Cache loaded elements per history_id
+const elementsCache = {};
+
+function statusBadge(s) {
+  return `<span class="badge-status badge-${s}">${s}</span>`;
+}
+
+function retryBar(used, total) {
+  const pctUsed = (used / total) * 100;
+  const pctRem = 100 - pctUsed;
+  return `<div class="retry-bar" title="${used}/${total} retries used">
+    <div class="fill used" style="width:${pctUsed}%"></div>
+    <div class="fill remaining" style="width:${pctRem}%"></div>
+    <span style="margin-left:6px;font-size:12px;color:var(--muted)">${used}/${total}</span>
+  </div>`;
+}
+
+function statusColor(s) {
+  return { ok: 'var(--green)', warning: 'var(--yellow)', critical: 'var(--red)' }[s] || 'var(--muted)';
+}
+
+function tagsHtml(list) {
+  if (!list || !list.length) return '<span style="color:var(--muted)">—</span>';
+  return `<div class="tag-list">${list.map(t => `<span class="tag">${t}</span>`).join('')}</div>`;
+}
+
+function escAttr(s) { return (s||'').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+// ---- Render elements sub-table ----
+function renderElements(elements, containerId) {
+  const container = document.getElementById(containerId);
+  if (!elements.length) {
+    container.innerHTML = '<div class="loading-elements">No elements recorded.</div>';
+    return;
+  }
+
+  const rows = elements.map(e => `<tr>
+    <td><a href="${e.element_url}" target="_blank">${e.element_type}/${e.osm_id}</a>
+      ${e.version ? `<span style="color:var(--muted)">v${e.version}</span>` : ''}</td>
+    <td>${e.action || '—'}</td>
+    <td>${statusBadge(e.status)}</td>
+    <td>${tagsHtml(e.found_in_tables)}</td>
+    <td>${tagsHtml(e.found_in_views)}</td>
+  </tr>`).join('');
+
+  container.innerHTML = `<table>
+    <thead><tr><th>Element</th><th>Action</th><th>Status</th><th>Tables</th><th>Views</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ---- Toggle elements for history rows ----
+async function toggleHistoryElements(historyId, btn) {
+  const rowId = `elements-row-${historyId}`;
+  const existing = document.getElementById(rowId);
+
+  if (existing) {
+    existing.remove();
+    btn.classList.remove('open');
+    return;
+  }
+
+  btn.classList.add('open');
+  const parentRow = btn.closest('tr');
+  const colCount = parentRow.cells.length;
+  const newRow = document.createElement('tr');
+  newRow.id = rowId;
+  newRow.className = 'elements-row';
+  newRow.innerHTML = `<td colspan="${colCount}"><div class="elements-container" id="elems-${historyId}">
+    <div class="loading-elements">Loading elements...</div>
+  </div></td>`;
+  parentRow.after(newRow);
+
+  if (elementsCache[historyId]) {
+    renderElements(elementsCache[historyId], `elems-${historyId}`);
+    return;
+  }
+
+  try {
+    const r = await fetch(`${API}/history/${historyId}/elements`);
+    const data = await r.json();
+    elementsCache[historyId] = data.elements || [];
+    renderElements(elementsCache[historyId], `elems-${historyId}`);
+  } catch (e) {
+    document.getElementById(`elems-${historyId}`).innerHTML =
+      '<div class="loading-elements" style="color:var(--red)">Failed to load elements.</div>';
+  }
+}
+
+// ---- Toggle elements for health (live) rows ----
+function toggleHealthElements(csId, elements, btn) {
+  const rowId = `health-elems-${csId}`;
+  const existing = document.getElementById(rowId);
+  if (existing) {
+    existing.remove();
+    btn.classList.remove('open');
+    return;
+  }
+  btn.classList.add('open');
+  const parentRow = btn.closest('tr');
+  const colCount = parentRow.cells.length;
+  const newRow = document.createElement('tr');
+  newRow.id = rowId;
+  newRow.className = 'elements-row';
+  const containerId = `health-container-${csId}`;
+  newRow.innerHTML = `<td colspan="${colCount}"><div class="elements-container" id="${containerId}"></div></td>`;
+  parentRow.after(newRow);
+
+  // Map live data to match element_history format
+  const mapped = elements.map(e => ({
+    element_type: e.type,
+    osm_id: e.osm_id,
+    version: e.version || 0,
+    action: e.action,
+    status: e.deleted ? 'skipped' : (e.found_in_tables && e.found_in_tables.length ? 'ok' : 'missing'),
+    found_in_tables: e.found_in_tables || [],
+    found_in_views: e.found_in_views || [],
+    element_url: e.url || `https://www.openhistoricalmap.org/${e.type}/${e.osm_id}`,
+  }));
+  renderElements(mapped, containerId);
+}
+
+// ---- Health ----
+async function loadHealth() {
+  try {
+    const r = await fetch(`${API}/checks`);
+    const data = await r.json();
+
+    document.getElementById('statusDot').style.background = statusColor(data.status);
+
+    const cards = document.getElementById('cards');
+    const repl = data.details?.replication || {};
+    const changesets = data.details?.changesets || [];
+    const retries = data.details?.retries || {};
+    const okCount = changesets.filter(c => c.tiler_db?.status === 'ok').length;
+    const issueCount = changesets.length - okCount;
+
+    cards.innerHTML = `
+      <div class="card">
+        <div class="label">Status</div>
+        <div class="value" style="color:${statusColor(data.status)}">${(data.status || '...').toUpperCase()}</div>
+      </div>
+      <div class="card">
+        <div class="label">Changesets Checked</div>
+        <div class="value">${changesets.length}</div>
+      </div>
+      <div class="card">
+        <div class="label">OK / Issues</div>
+        <div class="value"><span style="color:var(--green)">${okCount}</span> / <span style="color:${issueCount ? 'var(--yellow)' : 'var(--muted)'}">${issueCount}</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Replication Lag</div>
+        <div class="value">${repl.lag_minutes != null ? repl.lag_minutes + 'm' : '—'}</div>
+      </div>
+      <div class="card">
+        <div class="label">Pending Retries</div>
+        <div class="value" style="color:${(retries.pending||0) ? 'var(--orange)' : 'var(--muted)'}">${retries.pending || 0}</div>
+      </div>
+      <div class="card">
+        <div class="label">Window</div>
+        <div class="value" style="font-size:16px">${data.details?.window || '—'}</div>
+      </div>
+    `;
+
+    const tbody = document.getElementById('healthBody');
+    const empty = document.getElementById('healthEmpty');
+    if (!changesets.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = changesets.map((cs, i) => {
+      const db = cs.tiler_db || {};
+      const elems = db.elements || [];
+      const missingCount = elems.filter(e => !e.found_in_tables?.length && !e.deleted).length;
+      const hasElems = elems.length > 0;
+      return `<tr>
+        <td>${hasElems ? `<button class="expand-btn" onclick='toggleHealthElements(${cs.changeset_id}, ${JSON.stringify(elems).replace(/'/g,"&#39;")}, this)'>&#9654;</button>` : ''}</td>
+        <td><a href="${cs.changeset_url}" target="_blank">${cs.changeset_id}</a></td>
+        <td>${statusBadge(db.status || 'unknown')}</td>
+        <td>${elems.length}</td>
+        <td style="color:${missingCount ? 'var(--yellow)' : 'var(--muted)'}">${missingCount || '—'}</td>
+        <td>${statusBadge(cs.replication?.status || 'unknown')}</td>
+        <td>${cs.age_minutes != null ? cs.age_minutes + 'm' : '—'}</td>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+            title="${escAttr(db.message)}">${db.message || ''}</td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    console.error('Failed to load health:', e);
+  }
+}
+
+// ---- History ----
+async function loadHistory(page) {
+  historyPage = page || 1;
+  try {
+    const r = await fetch(`${API}/history?page=${historyPage}&per_page=${historyPerPage}`);
+    historyData = await r.json();
+
+    document.getElementById('historyBadge').textContent = historyData.total || 0;
+
+    const tbody = document.getElementById('historyBody');
+    const empty = document.getElementById('historyEmpty');
+    const cs = historyData.changesets || [];
+
+    if (!cs.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      document.getElementById('historyPagination').innerHTML = '';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = cs.map(c => `<tr>
+      <td>${c.total_elements > 0 ? `<button class="expand-btn" onclick="toggleHistoryElements(${c.id}, this)">&#9654;</button>` : ''}</td>
+      <td><a href="${c.changeset_url}" target="_blank">${c.changeset_id}</a></td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${c.total_elements}</td>
+      <td style="color:var(--green)">${c.ok_count}</td>
+      <td style="color:${c.missing_count ? 'var(--yellow)' : 'var(--muted)'}">${c.missing_count}</td>
+      <td title="${c.created_at || ''}">${c.created_fmt || '—'}</td>
+      <td title="${c.closed_at || ''}">${c.closed_ago || '—'}</td>
+      <td title="${c.checked_at}">${c.checked_ago}</td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+          title="${escAttr(c.message)}">${c.message || ''}</td>
+    </tr>`).join('');
+
+    const pag = document.getElementById('historyPagination');
+    pag.innerHTML = `
+      <button ${historyPage <= 1 ? 'disabled' : ''} onclick="loadHistory(${historyPage - 1})">Prev</button>
+      <span>Page ${historyPage} of ${historyData.total_pages}</span>
+      <button ${historyPage >= historyData.total_pages ? 'disabled' : ''} onclick="loadHistory(${historyPage + 1})">Next</button>
+    `;
+  } catch (e) {
+    console.error('Failed to load history:', e);
+  }
+}
+
+function filterHistory() {
+  const q = document.getElementById('historySearch').value.trim();
+  const rows = document.querySelectorAll('#historyBody tr:not(.elements-row)');
+  rows.forEach(row => {
+    const match = !q || row.textContent.includes(q);
+    row.style.display = match ? '' : 'none';
+    // Also hide expanded elements if parent is hidden
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('elements-row')) {
+      next.style.display = match ? '' : 'none';
+    }
+  });
+}
+
+// ---- Recheck single element ----
+async function recheckSingle(elementType, osmId, btn) {
+  // Update ALL result spans for this element (may appear multiple times with different versions)
+  const allResults = document.querySelectorAll(`.recheck-result-${elementType}-${osmId}`);
+  btn.disabled = true;
+  allResults.forEach(el => el.innerHTML = '<span style="color:var(--muted)">checking...</span>');
+  try {
+    const r = await fetch(`${API}/retries/recheck/${elementType}/${osmId}`, { method: 'POST' });
+    if (!r.ok) {
+      const errText = await r.text();
+      allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">&#10007; Server error ${r.status}: ${errText.substring(0, 100)}</span>`);
+      btn.disabled = false;
+      return;
+    }
+    const data = await r.json();
+    if (data.status === 'resolved') {
+      let html = `<span style="color:var(--green)">&#10003; ${(data.found_in_tables || []).join(', ')}</span>`;
+      if (data.found_in_views?.length) {
+        html += `<br><span style="color:var(--green);opacity:0.7">Views: ${data.found_in_views.join(', ')}</span>`;
+      }
+      allResults.forEach(el => el.innerHTML = html);
+      setTimeout(() => loadRetries(), 3000);
+    } else if (data.status === 'not_found') {
+      const tables = data.searched_tables?.length || '?';
+      const sid = data.search_id != null ? data.search_id : osmId;
+      allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">&#10007; Not found (osm_id=${sid}) in ${tables} tables</span>`);
+    } else {
+      const msg = data.message || data.detail || JSON.stringify(data);
+      allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">&#10007; ${msg}</span>`);
+    }
+  } catch (e) {
+    allResults.forEach(el => el.innerHTML = `<span style="color:var(--red)">Request failed: ${e.message}</span>`);
+  }
+  btn.disabled = false;
+}
+
+// ---- Recheck retries ----
+async function recheckRetries(btn) {
+  const resultEl = document.getElementById('recheckResult');
+  btn.disabled = true;
+  btn.textContent = 'Rechecking...';
+  resultEl.textContent = '';
+  try {
+    const r = await fetch(`${API}/retries/recheck`, { method: 'POST' });
+    const data = await r.json();
+    if (data.error) {
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = data.error;
+    } else {
+      const parts = [];
+      if (data.resolved?.length) parts.push(`${data.resolved.length} resolved`);
+      if (data.still_missing?.length) parts.push(`${data.still_missing.length} still missing`);
+      if (data.newly_failed?.length) parts.push(`${data.newly_failed.length} newly failed`);
+      resultEl.style.color = data.resolved?.length ? 'var(--green)' : 'var(--muted)';
+      resultEl.textContent = parts.length ? parts.join(', ') : 'No retries to check';
+    }
+    await loadRetries();
+  } catch (e) {
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = 'Failed to recheck';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Recheck Now';
+}
+
+// ---- Retries ----
+async function loadRetries() {
+  try {
+    const r = await fetch(`${API}/retries`);
+    const data = await r.json();
+
+    const pending = data.pending || [];
+    const failed = data.failed || [];
+    const warnings = data.warnings || [];
+    const all = [...failed, ...warnings, ...pending];
+
+    const badge = document.getElementById('retriesBadge');
+    badge.textContent = data.total || 0;
+    badge.className = 'badge' + (failed.length ? ' err' : (warnings.length || pending.length) ? ' warn' : '');
+
+    const tbody = document.getElementById('retriesBody');
+    const empty = document.getElementById('retriesEmpty');
+
+    if (!all.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = all.map(e => {
+      const total = e.cs_total_elements || 0;
+      const missing = e.cs_missing_count || 0;
+      const ok = e.cs_ok_count || 0;
+      const objectsHtml = total > 0
+        ? `<span style="color:${missing ? 'var(--yellow)' : 'var(--green)'}" title="${ok} ok, ${missing} missing of ${total} total">${missing}/${total} missing</span>`
+        : '<span style="color:var(--muted)">—</span>';
+      return `<tr>
+      <td><a href="${e.element_url}" target="_blank">${e.element_type}/${e.osm_id}</a>
+        ${e.version ? `<span style="color:var(--muted)">v${e.version}</span>` : ''}</td>
+      <td><a href="${e.changeset_url}" target="_blank">${e.changeset_id}</a></td>
+      <td>${e.action || '—'}</td>
+      <td>${statusBadge(e.status)}</td>
+      <td style="width:120px">${retryBar(e.retry_count, e.max_retries)}</td>
+      <td>${objectsHtml}</td>
+      <td title="${e.closed_at || ''}">${e.closed_at_fmt || '—'}</td>
+      <td title="${e.first_seen}">${e.age}</td>
+      <td title="${e.last_checked}">${e.last_checked_ago}</td>
+      <td>
+        <button class="expand-btn" style="width:auto;padding:2px 8px;font-size:11px"
+          onclick="recheckSingle('${e.element_type}', ${e.osm_id}, this)"
+          title="Recheck this element in the tiler DB now">&#x21bb;</button>
+        <span class="recheck-result-${e.element_type}-${e.osm_id}" style="font-size:11px;margin-left:4px"></span>
+      </td>
+    </tr>`;
+    }).join('');
+  } catch (e) {
+    console.error('Failed to load retries:', e);
+  }
+}
+
+// ---- Tabs ----
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
+  if (name === 'history' && !historyData.total) loadHistory(1);
+  if (name === 'retries') loadRetries();
+}
+
+// ---- Refresh ----
+async function refreshAll() {
+  await Promise.all([loadHealth(), loadHistory(historyPage), loadRetries()]);
+  document.getElementById('lastRefresh').textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
+}
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(() => {
+    if (document.getElementById('autoRefresh').checked) refreshAll();
+  }, 30000);
+}
+
+// ---- Init ----
+refreshAll();
+startAutoRefresh();
+</script>
+</body>
+</html>

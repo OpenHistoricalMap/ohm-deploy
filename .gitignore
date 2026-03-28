@@ -34,6 +34,7 @@ images/tiler-server-martin/pg_functions
 hetzner/traefik/cloudflare-ips.txt
 hetzner/traefik/traefik.yml
 .vscode/
+.claude/
 imposm3.json
 cachedir_reimport/
 config_reimport.json

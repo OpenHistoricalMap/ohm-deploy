@@ -1,0 +1,103 @@
+{
+  "tag_to_check": {
+    "amenity": {
+      "tables": ["osm_amenity_areas", "osm_amenity_points"],
+      "views": ["mv_amenity_areas_z14_15", "mv_amenity_areas_z16_20", "mv_amenity_points", "mv_amenity_points_centroids_z14_15", "mv_amenity_points_centroids_z16_20"]
+    },
+    "aeroway": {
+      "tables": ["osm_transport_lines", "osm_transport_areas", "osm_transport_points"],
+      "views": ["mv_transport_lines_z5", "mv_transport_lines_z16_20", "mv_transport_areas_z10_12", "mv_transport_areas_z16_20", "mv_transport_points", "mv_transport_points_centroids_z16_20"]
+    },
+    "barrier": {
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points", "osm_water_lines"],
+      "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z16_20", "mv_water_lines_z8_9", "mv_water_lines_z16_20"]
+    },
+    "boundary": {
+      "tables": ["osm_admin_areas", "osm_admin_lines", "osm_admin_relation_members"],
+      "views": ["mv_admin_boundaries_areas_z0_2", "mv_admin_boundaries_areas_z16_20", "mv_admin_boundaries_lines_z0_2", "mv_admin_boundaries_lines_z16_20", "mv_admin_boundaries_centroids_z0_2", "mv_admin_boundaries_centroids_z16_20", "mv_admin_maritime_lines_z0_5_v2", "mv_admin_maritime_lines_z10_15", "mv_non_admin_boundaries_areas_z0_2", "mv_non_admin_boundaries_areas_z16_20", "mv_non_admin_boundaries_centroids_z0_2", "mv_non_admin_boundaries_centroids_z16_20", "mv_relation_members_boundaries"]
+    },
+    "building": {
+      "tables": ["osm_buildings", "osm_buildings_points"],
+      "views": ["mv_buildings_areas_z14_15", "mv_buildings_areas_z16_20", "mv_buildings_points", "mv_buildings_points_centroids_z14_15", "mv_buildings_points_centroids_z16_20"]
+    },
+    "communication": {
+      "tables": ["osm_communication_lines", "osm_communication_multilines"],
+      "views": ["mv_communication_z10_12", "mv_communication_z16_20"]
+    },
+    "craft": {
+      "tables": ["osm_other_points"],
+      "views": ["mv_other_points", "mv_other_points_centroids_z16_20"]
+    },
+    "highway": {
+      "tables": ["osm_transport_lines", "osm_transport_areas", "osm_transport_points", "osm_transport_multilines"],
+      "views": ["mv_transport_lines_z5", "mv_transport_lines_z16_20", "mv_transport_areas_z10_12", "mv_transport_areas_z16_20", "mv_transport_points", "mv_transport_points_centroids_z10_12", "mv_transport_points_centroids_z16_20"]
+    },
+    "historic": {
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
+    },
+    "landuse": {
+      "tables": ["osm_landuse_areas", "osm_landuse_lines", "osm_landuse_points", "osm_water_areas"],
+      "views": ["mv_landuse_areas_z6_7", "mv_landuse_areas_z16_20", "mv_landuse_lines_z14_15", "mv_landuse_lines_z16_20", "mv_landuse_points", "mv_landuse_points_centroids_z6_7", "mv_landuse_points_centroids_z16_20", "mv_water_areas_z0_2", "mv_water_areas_z16_20", "mv_water_areas_centroids_z8_9", "mv_water_areas_centroids_z16_20"]
+    },
+    "leisure": {
+      "tables": ["osm_landuse_areas", "osm_landuse_lines", "osm_landuse_points"],
+      "views": ["mv_landuse_areas_z6_7", "mv_landuse_areas_z16_20", "mv_landuse_lines_z14_15", "mv_landuse_lines_z16_20", "mv_landuse_points", "mv_landuse_points_centroids_z6_7", "mv_landuse_points_centroids_z16_20"]
+    },
+    "man_made": {
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
+    },
+    "military": {
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
+    },
+    "natural": {
+      "tables": ["osm_landuse_areas", "osm_landuse_lines", "osm_landuse_points", "osm_water_areas", "osm_water_lines"],
+      "views": ["mv_landuse_areas_z6_7", "mv_landuse_areas_z16_20", "mv_landuse_lines_z14_15", "mv_landuse_lines_z16_20", "mv_landuse_points", "mv_landuse_points_centroids_z6_7", "mv_landuse_points_centroids_z16_20", "mv_water_areas_z0_2", "mv_water_areas_z16_20", "mv_water_areas_centroids_z8_9", "mv_water_areas_centroids_z16_20", "mv_water_lines_z8_9", "mv_water_lines_z16_20"]
+    },
+    "place": {
+      "tables": ["osm_place_areas", "osm_place_points"],
+      "views": ["mv_place_areas_z14_20", "mv_place_points_centroids_z0_2", "mv_place_points_centroids_z11_20"]
+    },
+    "power": {
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
+    },
+    "railway": {
+      "tables": ["osm_transport_lines", "osm_transport_areas", "osm_transport_points", "osm_transport_multilines"],
+      "views": ["mv_transport_lines_z5", "mv_transport_lines_z16_20", "mv_transport_areas_z10_12", "mv_transport_areas_z16_20", "mv_transport_points", "mv_transport_points_centroids_z10_12", "mv_transport_points_centroids_z16_20"]
+    },
+    "route": {
+      "tables": ["osm_route_lines", "osm_route_multilines"],
+      "views": ["mv_routes_indexed_z16_20"],
+      "view_column": "osm_id",
+      "view_id_mode": "members"
+    },
+    "shop": {
+      "tables": ["osm_other_points"],
+      "views": ["mv_other_points", "mv_other_points_centroids_z16_20"]
+    },
+    "tourism": {
+      "tables": ["osm_other_points"],
+      "views": ["mv_other_points", "mv_other_points_centroids_z16_20"]
+    },
+    "type=street": {
+      "tables": ["osm_street_multilines"],
+      "views": ["mv_transport_lines_z5", "mv_transport_lines_z16_20"]
+    },
+    "waterway": {
+      "tables": ["osm_water_lines", "osm_water_areas"],
+      "views": ["mv_water_lines_z8_9", "mv_water_lines_z16_20", "mv_water_areas_z0_2", "mv_water_areas_z16_20", "mv_water_areas_centroids_z8_9", "mv_water_areas_centroids_z16_20"]
+    }
+  },
+  "reject_values": {
+    "natural": ["coastline"]
+  },
+  "importable_relation_types": [
+    "multipolygon",
+    "boundary",
+    "route",
+    "street"
+  ]
+}

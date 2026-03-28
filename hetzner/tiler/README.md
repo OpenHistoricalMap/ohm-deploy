@@ -33,7 +33,7 @@ docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production
 # docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml up tiler_sqs_cleaner -d --force-recreate
 # docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml up tile_global_seeding -d --force-recreate
 # docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml up tile_coverage_seeding -d --force-recreate
-# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml run tiler_s3_cleaner tiler-cache-cleaner clean_by_prefix
+# docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml run tiler_s3_cleaner
 # docker compose -f hetzner/tiler/tiler.base.yml -f hetzner/tiler/tiler.production.yml up tiler_monitor -d --force-recreate 
 ```
 

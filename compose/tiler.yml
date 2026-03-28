@@ -9,6 +9,13 @@ services:
       - "54321:5432"
     volumes:
       - tiler_pgdata:/var/lib/postgresql/data
+      - ../hetzner/tiler/config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
+    environment:
+      - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
+    command:
+      - postgres
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
     env_file:
       - ../envs/.env.tiler
     restart: always
@@ -33,22 +40,22 @@ services:
     networks:
       - ohm_network
 
-  tiler:
-    image: rub21/tiler-server:v1
-    container_name: tiler
-    build:
-      context: ../images/tiler-server
-      dockerfile: Dockerfile
-    volumes:
-      - ../hetzner:/hetzner
-      - ../images/tiler-server:/app
-    ports:
-      - "9090:9090"
-    env_file:
-      - ../envs/.env.tiler
-    restart: always
-    networks:
-      - ohm_network
+  # tiler:
+  #   image: rub21/tiler-server:v1
+  #   container_name: tiler
+  #   build:
+  #     context: ../images/tiler-server
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ../hetzner:/hetzner
+  #     - ../images/tiler-server:/app
+  #   ports:
+  #     - "9090:9090"
+  #   env_file:
+  #     - ../envs/.env.tiler
+  #   restart: always
+  #   networks:
+  #     - ohm_network
 
   # tiler-cache:
   #   image: rub21/tiler-cache:v2
@@ -64,21 +71,24 @@ services:
   #     - ohm_network
 
 
-  # tiler-monitor:
-  #   image: rub21/tiler-monitor:v1
-  #   build:
-  #     context: ../images/tiler-monitor
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - ../images/tiler-monitor:/app
-  #     - ../hetzner:/app/hetzner
-  #   environment:
-  #     - DOCKER_CONFIG_ENVIRONMENT=staging
-  #   env_file:
-  #     - ../envs/.env.tiler
-  #   stdin_open: true
-  #   tty: true
+  tiler-monitor:
+    image: rub21/tiler-monitor:v2
+    build:
+      context: ../images/tiler-monitor
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../hetzner:/app/hetzner
+      - tiler_monitor_data:/data
+    ports:
+      - "8001:8001"
+    environment:
+      - TILER_MONITORING_DOCKER_CONFIG_ENVIRONMENT=staging
+    env_file:
+      - ../envs/.env.tiler
+    restart: always
+    networks:
+      - ohm_network
 
 networks:
   ohm_network:
@@ -92,3 +102,7 @@ volumes:
   tiler_imposm_data:
     driver: local
     name: tiler_imposm
+
+  tiler_monitor_data:
+    driver: local
+    name: tiler_monitor

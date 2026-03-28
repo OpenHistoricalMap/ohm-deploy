@@ -2,21 +2,22 @@ services:
   tiler_db:
     container_name: tiler_db
     image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     volumes: !overwrite
       - tiler_pgdata:/var/lib/postgresql/data
       - ./config/postgresql.production.conf:/etc/postgresql/postgresql.conf
-    # ports:
-    #   - "54329:5432"
+    ports:
+      - "54329:5432"
     env_file:
       - .env.tiler
-    mem_limit: 55G
-    cpus: "28.0"
+    mem_limit: 40G
+    cpus: "25.0"
     networks:
       - ohm_network
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3294.h12c71f95
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3323.h6950acce
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -38,7 +39,7 @@ services:
   # Tiler server
   tiler_server:
     container_name: tiler_server
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
+    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3292.h0f5e7d60
     # ports:
     #   - "9090:9090"
     restart: always
@@ -47,7 +48,7 @@ services:
 
   tiler_sqs_cleaner:
     container_name: tiler_sqs_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3305.hda810a70
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3290.h63549fc1
     environment:
       - PORT=8000
     env_file:
@@ -70,7 +71,7 @@ services:
 
   tiler_s3_cleaner:
     container_name: tiler_s3_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3305.hda810a70
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3290.h63549fc1
     # image: tiler-cache:latest
     # build:
     #   context: ../../images/tiler-cache
@@ -119,11 +120,12 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.2874.ha9bff68
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3353.h63df1944
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../../images/tiler-monitor:/app
+      # - ../../images/tiler-monitor:/app
       - ../../hetzner:/app/hetzner
+      - tiler_monitor_data:/data
     environment:
       - DOCKER_CONFIG_ENVIRONMENT=production
     stdin_open: true
@@ -136,10 +138,13 @@ services:
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db_25_02
+    name: tiler_db_17_03
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm_25_02
+    name: tiler_imposm_17_03
+  tiler_monitor_data:
+    driver: local
+    name: tiler_monitor_data
 
 networks:
   ohm_network:

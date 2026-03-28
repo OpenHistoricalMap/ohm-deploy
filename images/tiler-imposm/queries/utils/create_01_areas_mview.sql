@@ -81,9 +81,7 @@ BEGIN
                 '%I, ROUND(CAST(%I AS numeric), 1)::numeric(20,1) AS area_m2, ROUND(CAST(%I AS numeric) / 1000000, 1)::numeric(20,1) AS area_km2',
                 column_name, column_name, column_name
             )
-            WHEN column_name = 'name' THEN 'NULLIF(name, '''') AS name'
-            WHEN column_name = 'start_date' THEN 'NULLIF(start_date, '''') AS start_date'
-            WHEN column_name = 'end_date' THEN 'NULLIF(end_date, '''') AS end_date'
+            WHEN data_type IN ('text', 'character varying') THEN format('NULLIF(%I, '''') AS %I', column_name, column_name)
             ELSE quote_ident(column_name)
         END,
         ', ' ORDER BY ordinal_position
