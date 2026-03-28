@@ -519,11 +519,12 @@ async function loadRetries() {
 
     const pending = data.pending || [];
     const failed = data.failed || [];
-    const all = [...failed, ...pending];
+    const warnings = data.warnings || [];
+    const all = [...failed, ...warnings, ...pending];
 
     const badge = document.getElementById('retriesBadge');
     badge.textContent = data.total || 0;
-    badge.className = 'badge' + (failed.length ? ' err' : pending.length ? ' warn' : '');
+    badge.className = 'badge' + (failed.length ? ' err' : (warnings.length || pending.length) ? ' warn' : '');
 
     const tbody = document.getElementById('retriesBody');
     const empty = document.getElementById('retriesEmpty');

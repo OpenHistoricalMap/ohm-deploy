@@ -952,12 +952,12 @@ def check_pipeline():
             elements=elements,
         )
 
-    # --- Recheck pending and failed retries ---
-    retryable = retry_store.get_pending() + retry_store.get_failed()
+    # --- Recheck pending, failed, and warning retries ---
+    retryable = retry_store.get_pending() + retry_store.get_failed() + retry_store.get_warnings()
     newly_failed = []
 
     if retryable:
-        print(f"\n[pipeline] Rechecking {len(retryable)} retries (pending + failed)...")
+        print(f"\n[pipeline] Rechecking {len(retryable)} retries (pending + failed + warning)...")
 
     for entry in retryable:
         cs_id = entry["changeset_id"]
@@ -1003,18 +1003,34 @@ def check_pipeline():
             print(f"  [retry] RESOLVED {etype}/{oid} (changeset {cs_id}) "
                   f"-> found in tables after {retry_num} retries")
             retry_store.mark_resolved(cs_id, etype, oid)
-        elif prev_status == "failed":
-            # Already failed, keep checking but don't increment
+        elif prev_status in ("failed", "warning"):
+            # Already exhausted retries, keep checking but don't increment
             print(f"  [retry] STILL MISSING {etype}/{oid} (changeset {cs_id}) "
-                  f"-> failed, still monitoring")
+                  f"-> {prev_status}, still monitoring")
         else:
-            new_status = retry_store.increment_retry(cs_id, etype, oid)
+            # Check missing percentage threshold to decide severity
+            cs_stats = retry_store.get_changeset_stats(cs_id)
+            if cs_stats and cs_stats["total_elements"] > 0:
+                missing_pct = (cs_stats["missing_count"] / cs_stats["total_elements"]) * 100
+            else:
+                missing_pct = 100  # no stats available, assume worst case
+
+            above_threshold = missing_pct >= Config.MISSING_THRESHOLD_PCT
+            final_status = "failed" if above_threshold else "warning"
+            new_status = retry_store.increment_retry(cs_id, etype, oid, final_status=final_status)
+
             if new_status == "failed":
                 print(f"  [retry] FAILED {etype}/{oid} (changeset {cs_id}) "
-                      f"-> still missing after {retry_num}/{Config.MAX_RETRIES} retries")
+                      f"-> still missing after {retry_num}/{Config.MAX_RETRIES} retries "
+                      f"({missing_pct:.1f}% missing >= {Config.MISSING_THRESHOLD_PCT}% threshold)")
                 newly_failed.append({
                     "type": etype, "osm_id": oid, "changeset_id": cs_id,
                 })
+            elif new_status == "warning":
+                print(f"  [retry] WARNING {etype}/{oid} (changeset {cs_id}) "
+                      f"-> still missing after {retry_num}/{Config.MAX_RETRIES} retries "
+                      f"({missing_pct:.1f}% missing < {Config.MISSING_THRESHOLD_PCT}% threshold, "
+                      f"not alerting)")
             else:
                 print(f"  [retry] PENDING {etype}/{oid} (changeset {cs_id}) "
                       f"-> retry {retry_num}/{Config.MAX_RETRIES}")
@@ -1040,8 +1056,10 @@ def check_pipeline():
 
     # Include failed details for Slack alerting
     failed_count = retry_summary.get("failed", 0)
+    warning_count = retry_summary.get("warning", 0)
     result["details"]["newly_failed"] = newly_failed
     result["details"]["total_failed"] = failed_count
+    result["details"]["total_warnings"] = warning_count
 
     if newly_failed:
         result["status"] = "critical"
@@ -1065,6 +1083,8 @@ def check_pipeline():
             msg += f", {skipped} already passed (skipped)"
         if pending_count:
             msg += f", {pending_count} elements pending retry"
+        if warning_count:
+            msg += f", {warning_count} elements below threshold (warning)"
         result["message"] = msg
 
     if skipped:

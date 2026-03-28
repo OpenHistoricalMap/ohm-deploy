@@ -120,10 +120,10 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3333.hd8192f15
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3352.hf1f72cb1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../../images/tiler-monitor:/app
+      # - ../../images/tiler-monitor:/app
       - ../../hetzner:/app/hetzner
       - tiler_monitor_data:/data
     environment:
@@ -134,7 +134,7 @@ services:
       - .env.tiler
     networks:
       - ohm_network
-
+      
 volumes:
   tiler_pgdata:
     driver: local
@@ -142,7 +142,6 @@ volumes:
   tiler_imposm_data:
     driver: local
     name: tiler_imposm_17_03
-
   tiler_monitor_data:
     driver: local
     name: tiler_monitor_data

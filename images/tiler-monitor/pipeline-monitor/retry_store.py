@@ -172,10 +172,14 @@ def mark_resolved(changeset_id: int, element_type: str, osm_id: int):
         conn.commit()
 
 
-def increment_retry(changeset_id: int, element_type: str, osm_id: int):
-    """Bump retry_count. If it reaches max_retries, flip status to 'failed'.
+def increment_retry(changeset_id: int, element_type: str, osm_id: int,
+                     final_status: str = "failed"):
+    """Bump retry_count. If it reaches max_retries, flip status to *final_status*.
 
-    Returns the new status ('pending' or 'failed').
+    *final_status* is normally 'failed', but callers may pass 'warning' when
+    the missing percentage is below the alerting threshold.
+
+    Returns the new status ('pending', 'warning', or 'failed').
     """
     now = datetime.now(timezone.utc).isoformat()
     with _lock:
@@ -193,22 +197,32 @@ def increment_retry(changeset_id: int, element_type: str, osm_id: int):
 
         if row and row["retry_count"] >= row["max_retries"]:
             conn.execute("""
-                UPDATE pending_retries SET status = 'failed'
+                UPDATE pending_retries SET status = ?
                 WHERE changeset_id = ? AND element_type = ? AND osm_id = ?
-            """, (changeset_id, element_type, osm_id))
+            """, (final_status, changeset_id, element_type, osm_id))
             conn.commit()
-            return "failed"
+            return final_status
 
         conn.commit()
         return "pending"
 
 
 def get_failed():
-    """Return all elements that exhausted their retries."""
+    """Return all elements that exhausted their retries with status='failed'."""
     with _lock:
         conn = _get_conn()
         rows = conn.execute(
             "SELECT * FROM pending_retries WHERE status = 'failed'"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_warnings():
+    """Return all elements that exhausted retries but are below the missing threshold."""
+    with _lock:
+        conn = _get_conn()
+        rows = conn.execute(
+            "SELECT * FROM pending_retries WHERE status = 'warning'"
         ).fetchall()
         return [dict(r) for r in rows]
 
@@ -284,6 +298,32 @@ def get_all_details(ohm_base="https://www.openhistoricalmap.org"):
         entry["retries_remaining"] = max(0, r["max_retries"] - r["retry_count"])
         results.append(entry)
     return results
+
+
+# ---------------------------------------------------------------------------
+# Changeset stats helpers
+# ---------------------------------------------------------------------------
+
+def get_changeset_stats(changeset_id: int):
+    """Return the latest total_elements, missing_count, ok_count for a changeset.
+
+    Returns a dict with those keys, or None if no history exists.
+    """
+    with _lock:
+        conn = _get_conn()
+        row = conn.execute("""
+            SELECT total_elements, missing_count, ok_count
+            FROM changeset_history
+            WHERE changeset_id = ?
+            ORDER BY id DESC LIMIT 1
+        """, (changeset_id,)).fetchone()
+    if row:
+        return {
+            "total_elements": row["total_elements"],
+            "missing_count": row["missing_count"],
+            "ok_count": row["ok_count"],
+        }
+    return None
 
 
 # ---------------------------------------------------------------------------

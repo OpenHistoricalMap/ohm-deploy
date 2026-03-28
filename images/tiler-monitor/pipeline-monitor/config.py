@@ -52,6 +52,12 @@ class Config:
     # Retry: how many times to recheck a missing element before alerting
     MAX_RETRIES = int(os.getenv("TILER_MONITORING_MAX_RETRIES", 3))
 
+    # Missing threshold: minimum percentage of missing elements in a changeset
+    # to consider it a real failure. Below this threshold, elements are marked
+    # as "warning" instead of "failed" and do NOT trigger RSS/Slack alerts.
+    # e.g. 10 = 10% — if only 1/44 elements is missing (2.3%), it's a warning.
+    MISSING_THRESHOLD_PCT = int(os.getenv("TILER_MONITORING_MISSING_THRESHOLD_PCT", 10))
+
     # Verbose logging
     VERBOSE_LOGGING = os.getenv("VERBOSE_LOGGING", "false").lower() == "true"
 

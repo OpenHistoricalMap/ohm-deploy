@@ -270,11 +270,13 @@ def retries():
     all_entries = retry_store.get_all_details()
     pending = [e for e in all_entries if e["status"] == "pending"]
     failed = [e for e in all_entries if e["status"] == "failed"]
+    warnings = [e for e in all_entries if e["status"] == "warning"]
     return JSONResponse(content={
         "summary": retry_store.summary(),
         "total": len(all_entries),
         "pending": pending,
         "failed": failed,
+        "warnings": warnings,
     })
 
 
