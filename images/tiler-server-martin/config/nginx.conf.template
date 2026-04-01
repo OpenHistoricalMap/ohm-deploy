@@ -14,11 +14,13 @@ http {
     keepalive_timeout 65;
 
     # === Tile cache (dynamic: ohm, ohm_admin, etc.) ===
+    # Long storage (30d) — the purge service actively invalidates changed tiles.
+    # If purge fails, Cache-Control headers (zoom-based) limit browser staleness.
     proxy_cache_path /var/cache/nginx/tiles
         levels=1:2
         keys_zone=tiles:200m
         max_size=50g
-        inactive=7d
+        inactive=30d
         use_temp_path=off;
 
     # === Tile cache (static: ne, osm_land — never changes) ===
@@ -39,6 +41,32 @@ http {
     gzip_comp_level ${NGINX_GZIP_COMP_LEVEL};   # 1=fastest/less compression, 9=slowest/best compression
     gzip_vary on;
     gzip_proxied any;
+
+    # === Zoom-based Cache-Control for tile responses ===
+    # Extract zoom level from tile URLs:
+    #   Composite: /maps/{group}/{z}/{x}/{y}.pbf
+    #   Per-layer: /maps/{group}/{layer}/{z}/{x}/{y}.pbf
+    map $uri $tile_zoom {
+        ~^/maps/[^/]+/[^/]+/(\d+)/\d+/\d+\.pbf$   $1;
+        ~^/maps/[^/]+/(\d+)/\d+/\d+\.pbf$          $1;
+        default                                      -1;
+    }
+
+    # Map zoom level to Cache-Control max-age (browser/CDN caching).
+    # nginx proxy_cache is invalidated by the purge service on data changes,
+    # but browser caches cannot be purged — so these TTLs control staleness
+    # seen by end users.
+    #   z0-6:   24h  — low zoom, very stable, few tiles
+    #   z7-11:  12h  — moderate detail
+    #   z12-16:  3h  — high detail, edits visible in hours
+    #   z17+:   30m  — max detail, editors see changes quickly
+    map $tile_zoom $tile_cache_control {
+        ~^[0-6]$       "public, max-age=86400";
+        ~^[7-9]$       "public, max-age=43200";
+        ~^1[01]$       "public, max-age=43200";
+        ~^1[2-6]$      "public, max-age=10800";
+        default         "public, max-age=1800";
+    }
 
     upstream martin {
         server 127.0.0.1:${MARTIN_INTERNAL_PORT};

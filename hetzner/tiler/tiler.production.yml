@@ -12,6 +12,7 @@ services:
       - .env.tiler
     mem_limit: 40G
     cpus: "25.0"
+    shm_size: 12g
     networks:
       - ohm_network
 

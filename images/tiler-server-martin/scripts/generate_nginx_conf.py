@@ -31,7 +31,7 @@ def main():
         group_name = group["name"]
         fn_names = [fn["function_name"] for fn in group["functions"]]
         is_static = group.get("static", False)
-        cache_ttl = "365d" if is_static else "7d"
+        cache_ttl = "365d" if is_static else "30d"
         cache_zone = "static_tiles" if is_static else "tiles"
 
         if not fn_names:
@@ -64,6 +64,11 @@ def main():
 
         # Composite: /maps/{group}/{z}/{x}/{y}.pbf -> Martin composite source
         composite_src = ",".join(fn_names)
+        cache_control_header = (
+            'add_header Cache-Control "public, max-age=31536000";'
+            if is_static
+            else "add_header Cache-Control $tile_cache_control;"
+        )
         composite_routes.append(
             f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf{' (static)' if is_static else ''}\n"
             f"        location ~ ^/maps/{group_name}/(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
@@ -75,6 +80,8 @@ def main():
             f"            proxy_cache_use_stale error timeout updating;\n"
             f"            proxy_cache_background_update on;\n"
             f"            add_header X-Cache-Status $upstream_cache_status;\n"
+            f"            {cache_control_header}\n"
+            f"            add_header Access-Control-Allow-Origin \"*\";\n"
             f"            proxy_set_header Host $http_host;\n"
             f"            proxy_pass http://martin/{composite_src}/$1;\n"
             f"        }}"
@@ -92,6 +99,8 @@ def main():
             f"            proxy_cache_use_stale error timeout updating;\n"
             f"            proxy_cache_background_update on;\n"
             f"            add_header X-Cache-Status $upstream_cache_status;\n"
+            f"            {cache_control_header}\n"
+            f"            add_header Access-Control-Allow-Origin \"*\";\n"
             f"            proxy_set_header Host $http_host;\n"
             f"            proxy_pass http://martin/$1/$2;\n"
             f"        }}\n"
@@ -104,6 +113,8 @@ def main():
             f"            proxy_cache_use_stale error timeout updating;\n"
             f"            proxy_cache_background_update on;\n"
             f"            add_header X-Cache-Status $upstream_cache_status;\n"
+            f"            {cache_control_header}\n"
+            f"            add_header Access-Control-Allow-Origin \"*\";\n"
             f"            proxy_set_header Host $http_host;\n"
             f"            proxy_pass http://martin/$1$2;\n"
             f"        }}"

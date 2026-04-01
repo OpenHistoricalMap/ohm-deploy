@@ -1,4 +1,9 @@
-"""Endpoint to clean tile cache in S3 based on OpenHistoricalMap changeset or point with buffer."""
+"""Endpoint to clean tile cache based on OpenHistoricalMap changeset or point with buffer.
+
+Supports two cache backends via CACHE_BACKEND env var:
+  - s3:    Delete tiles from S3 (Tegola)
+  - nginx: Delete tiles from nginx proxy cache volume (Martin)
+"""
 
 import os
 import sys
@@ -66,10 +71,10 @@ def delete_tiles_from_s3(tiles: List[mercantile.Tile], path_files: List[str]) ->
     s3 = Config.get_s3_client()
     bucket = Config.S3_BUCKET_CACHE_TILER
     keys = [f"{pf}/{t.z}/{t.x}/{t.y}{ext}" for t in tiles for pf in path_files for ext in ['.pbf', '']]
-    
+
     if not keys:
         return {'deleted': 0, 'errors': 0, 'total_tiles_processed': 0}
-    
+
     deleted = errors = 0
     for i in range(0, len(keys), 1000):
         try:
@@ -79,8 +84,17 @@ def delete_tiles_from_s3(tiles: List[mercantile.Tile], path_files: List[str]) ->
         except Exception as e:
             logger.error(f"Error deleting batch: {e}")
             errors += len(keys[i:i+1000])
-    
+
     return {'deleted': deleted, 'errors': errors, 'total_tiles_processed': len(keys)}
+
+
+def delete_tiles(tiles: List[mercantile.Tile], path_files: List[str]) -> dict:
+    """Delete tiles using the configured backend (S3 or nginx)."""
+    if Config.CACHE_BACKEND == "nginx":
+        from nginx_purger import purge_tiles_from_nginx_by_bbox
+        return purge_tiles_from_nginx_by_bbox(tiles, path_files)
+    else:
+        return delete_tiles_from_s3(tiles, path_files)
 
 
 def terminate_process_after_delay(delay=1):
@@ -163,7 +177,7 @@ def clean_cache_by_changeset(
         if not tiles:
             return {"success": True, "tiles_count": 0, "deleted": 0}
         
-        stats = delete_tiles_from_s3(tiles, Config.S3_BUCKET_PATH_FILES)
+        stats = delete_tiles(tiles, Config.S3_BUCKET_PATH_FILES)
         return {"success": True, "tiles_count": len(tiles), "delete_stats": stats}
         
     except HTTPException:
