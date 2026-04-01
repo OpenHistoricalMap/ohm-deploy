@@ -1,1 +1,0 @@
-{"tilejson":"3.0.0","name":"ne","description":"Composite: ne (1 layers)","tiles":["/maps/ne/{z}/{x}/{y}"],"minzoom":0,"maxzoom":20,"vector_layers":[{"id":"water_areas","description":"ne_lakes","minzoom":0,"maxzoom":20,"fields":{"name":"String","source_table":"String"}}]}

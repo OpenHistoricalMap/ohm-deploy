@@ -1,1 +1,0 @@
-{"tilejson":"3.0.0","name":"land_polygons","description":"Layer: land","tiles":["/maps/osm_land/land_polygons/{z}/{x}/{y}"],"minzoom":0,"maxzoom":20,"vector_layers":[{"id":"land","description":"land_polygons","minzoom":0,"maxzoom":20,"fields":{"ogc_fid":"Number"}}]}
