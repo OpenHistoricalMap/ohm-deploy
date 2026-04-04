@@ -21,7 +21,7 @@ import retry_store
 
 logger = logging.getLogger(__name__)
 
-# Load imposm config from S3 (falls back to bundled tables_config.json)
+# Load imposm config from S3
 import imposm_config_loader
 _imposm_config = imposm_config_loader.load_config()
 
@@ -231,7 +231,7 @@ def _get_changeset_elements(changeset_id):
 
 
 
-# Loaded from imposm3.json (S3) or fallback tables_config.json
+# Loaded from imposm3.json (S3)
 TAG_TO_CHECK = _imposm_config["tag_to_check"]
 _TABLE_DETAILS = _imposm_config["table_details"]
 _IMPORTABLE_RELATION_TYPES = _imposm_config["importable_relation_types"]

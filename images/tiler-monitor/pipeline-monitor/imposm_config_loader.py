@@ -3,8 +3,6 @@
 The compiled imposm3.json is the source of truth for what imposm actually imports.
 This module downloads it and builds a precise mapping structure that tells the monitor
 exactly which tags, values, geometry types, and filters each table uses.
-
-Falls back to the bundled tables_config.json if the download fails.
 """
 
 import json
@@ -111,7 +109,7 @@ def _parse_imposm_config(imposm_config):
     """Parse imposm3.json into the structures needed by the monitor.
 
     Returns a dict with:
-    - tag_to_check: same format as tables_config.json for backward compatibility
+    - tag_to_check: tag-to-table mapping
     - table_details: precise per-table info (geometry, values, rejects, excludes)
     - importable_relation_types: set of relation types that imposm imports
     """
@@ -208,39 +206,23 @@ def _parse_imposm_config(imposm_config):
     }
 
 
-def _load_fallback():
-    """Load the bundled tables_config.json as fallback."""
-    config_path = os.path.join(os.path.dirname(__file__), "tables_config.json")
-    with open(config_path) as f:
-        config = json.load(f)
-    return {
-        "tag_to_check": config["tag_to_check"],
-        "table_details": {},  # no precise details in fallback
-        "importable_relation_types": set(config.get("importable_relation_types", [])),
-    }
-
-
 def load_config():
-    """Load imposm config: try S3 first, fall back to bundled tables_config.json.
+    """Load imposm config from S3 and parse it.
 
     Returns dict with tag_to_check, table_details, and importable_relation_types.
     """
     imposm_config = _download_imposm_config()
-    if imposm_config:
-        try:
-            result = _parse_imposm_config(imposm_config)
-            logger.info(
-                "Loaded imposm config from S3: %d tags, %d table mappings, relation types: %s",
-                len(result["tag_to_check"]),
-                len(result["table_details"]),
-                sorted(result["importable_relation_types"]),
-            )
-            return result
-        except Exception as e:
-            logger.error("Failed to parse imposm config from S3: %s", e, exc_info=True)
+    if not imposm_config:
+        raise RuntimeError("Failed to download imposm config from S3")
 
-    logger.warning("Using fallback tables_config.json")
-    return _load_fallback()
+    result = _parse_imposm_config(imposm_config)
+    logger.info(
+        "Loaded imposm config from S3: %d tags, %d table mappings, relation types: %s",
+        len(result["tag_to_check"]),
+        len(result["table_details"]),
+        sorted(result["importable_relation_types"]),
+    )
+    return result
 
 
 def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types):
@@ -258,20 +240,6 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
 
     if not tags:
         return {"reason": "Element has no tags", "commentable": False}
-
-    # Check relation type
-    if elem_type == "relation":
-        rel_type = tags.get("type", "")
-        if rel_type and rel_type not in importable_relation_types:
-            # Only commentable if the relation has other tiler-relevant tags
-            has_tiler_tags = any(k in tag_to_check for k in tags if k != "type")
-            return {
-                "reason": (
-                    f"Relation type '{rel_type}' is not imported by the tiler. "
-                    f"Only these relation types are supported: {', '.join(sorted(importable_relation_types))}"
-                ),
-                "commentable": has_tiler_tags,
-            }
 
     # Check geometry validity
     if elem_type == "way":
@@ -362,6 +330,19 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
                     return None
 
     if not matched_any_tag:
+        # For relations: check if the relation type itself is not importable
+        # (only check here, after confirming no other tags matched any table)
+        if elem_type == "relation":
+            rel_type = tags.get("type", "")
+            if rel_type and rel_type not in importable_relation_types:
+                return {
+                    "reason": (
+                        f"Relation type '{rel_type}' is not imported by the tiler. "
+                        f"Only these relation types are supported: {', '.join(sorted(importable_relation_types))}"
+                    ),
+                    "commentable": False,
+                }
+
         return {
             "reason": "No tags match the tiler's import configuration",
             "commentable": False,
@@ -369,6 +350,14 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
 
     # Tags matched but all tables rejected it — mapper should know
     if rejection_reasons:
+        # For relations with non-standard type: mention the relation type in the reason
+        if elem_type == "relation":
+            rel_type = tags.get("type", "")
+            if rel_type and rel_type not in importable_relation_types:
+                rejection_reasons.append(
+                    f"relation type '{rel_type}' is not directly importable "
+                    f"(supported: {', '.join(sorted(importable_relation_types))})"
+                )
         return {
             "reason": "Element has mappable tags but was rejected by all tables: " + "; ".join(rejection_reasons),
             "commentable": True,
