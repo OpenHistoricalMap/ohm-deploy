@@ -181,19 +181,23 @@ function monitorImposmErrors() {
             
             # Wait a bit and check if connection recovers
             sleep 30
-            # Clear the error from log to avoid immediate re-trigger
-            sed -i '/driver: bad connection/d' "$LOG_FILE" 2>/dev/null || true
+            # Clear errors from log to avoid immediate re-trigger
+            > "$LOG_FILE"
         elif grep -q "\[error\] Importing" "$LOG_FILE"; then
             # Other import errors - log but don't immediately restart
             log_message "Detected [error] Importing in Imposm log. Monitoring..."
             ERROR_COUNT=$((ERROR_COUNT + 1))
-            
+
             if [ $ERROR_COUNT -ge $MAX_ERRORS ]; then
                 log_message "Max errors reached ($MAX_ERRORS). Restarting container..."
                 kill $UPLOADER_PID 2>/dev/null
                 kill $IMPOSM_PID 2>/dev/null
                 exit 1
             fi
+
+            # Wait and clear log to avoid re-detecting the same error
+            sleep 30
+            > "$LOG_FILE"
         else
             # Reset error count if no errors found
             if [ $ERROR_COUNT -gt 0 ]; then
