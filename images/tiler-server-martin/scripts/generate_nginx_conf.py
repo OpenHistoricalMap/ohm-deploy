@@ -15,6 +15,19 @@ CONFIG_PATH = os.path.join(BASE_DIR, "config", "functions.json")
 TEMPLATE_PATH = os.path.join(BASE_DIR, "config", "nginx.conf.template")
 OUTPUT_PATH = os.path.join(BASE_DIR, "config", "nginx.conf")
 
+# Zoom-based nginx cache TTLs for dynamic tiles.
+# proxy_cache_valid doesn't accept variables, so we generate
+# separate location blocks per zoom range.
+ZOOM_RANGES = [
+    {"label": "z0-2",   "regex": "[0-2]",                    "ttl": "48h"},
+    {"label": "z3-5",   "regex": "[3-5]",                    "ttl": "24h"},
+    {"label": "z6-7",   "regex": "[6-7]",                    "ttl": "16h"},
+    {"label": "z8-9",   "regex": "[8-9]",                    "ttl": "12h"},
+    {"label": "z10-12", "regex": "1[0-2]",                   "ttl": "8h"},
+    {"label": "z13-15", "regex": "1[3-5]",                   "ttl": "4h"},
+    {"label": "z16-20", "regex": "(?:1[6-9]|20)",            "ttl": "1h"},
+]
+
 
 def main():
     with open(CONFIG_PATH) as f:
@@ -64,61 +77,80 @@ def main():
 
         # Composite: /maps/{group}/{z}/{x}/{y}.pbf -> Martin composite source
         composite_src = ",".join(fn_names)
-        cache_control_header = (
-            'add_header Cache-Control "public, max-age=31536000";'
-            if is_static
-            else "add_header Cache-Control $tile_cache_control;"
-        )
-        composite_routes.append(
-            f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf{' (static)' if is_static else ''}\n"
-            f"        location ~ ^/maps/{group_name}/(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
-            f"            proxy_cache {cache_zone};\n"
-            f"            proxy_cache_valid 200 {cache_ttl};\n"
-            f"            proxy_cache_valid 204 1m;\n"
-            f"            proxy_cache_key $uri;\n"
-            f"            proxy_cache_lock on;\n"
-            f"            proxy_cache_use_stale error timeout updating;\n"
-            f"            proxy_cache_background_update on;\n"
-            f"            add_header X-Cache-Status $upstream_cache_status;\n"
-            f"            {cache_control_header}\n"
-            f"            add_header Access-Control-Allow-Origin \"*\";\n"
-            f"            proxy_set_header Host $http_host;\n"
-            f"            proxy_pass http://martin/{composite_src}/$1;\n"
-            f"        }}"
-        )
 
-        # Per-layer: /maps/{group}/{layer}/{z}/{x}/{y}.pbf
-        perlayer_routes.append(
-            f"        # Per-layer: /maps/{group_name}/{{layer}}/{{z}}/{{x}}/{{y}}.pbf{' (static)' if is_static else ''}\n"
-            f"        location ~ ^/maps/{group_name}/([^/]+)(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
-            f"            proxy_cache {cache_zone};\n"
-            f"            proxy_cache_valid 200 {cache_ttl};\n"
-            f"            proxy_cache_valid 204 1m;\n"
-            f"            proxy_cache_key $uri;\n"
-            f"            proxy_cache_lock on;\n"
-            f"            proxy_cache_use_stale error timeout updating;\n"
-            f"            proxy_cache_background_update on;\n"
-            f"            add_header X-Cache-Status $upstream_cache_status;\n"
-            f"            {cache_control_header}\n"
-            f"            add_header Access-Control-Allow-Origin \"*\";\n"
-            f"            proxy_set_header Host $http_host;\n"
-            f"            proxy_pass http://martin/$1/$2;\n"
-            f"        }}\n"
-            f"        location ~ ^/maps/{group_name}/([^/]+)(/.*)$ {{\n"
-            f"            proxy_cache {cache_zone};\n"
-            f"            proxy_cache_valid 200 {cache_ttl};\n"
-            f"            proxy_cache_valid 204 1m;\n"
-            f"            proxy_cache_key $uri;\n"
-            f"            proxy_cache_lock on;\n"
-            f"            proxy_cache_use_stale error timeout updating;\n"
-            f"            proxy_cache_background_update on;\n"
-            f"            add_header X-Cache-Status $upstream_cache_status;\n"
-            f"            {cache_control_header}\n"
-            f"            add_header Access-Control-Allow-Origin \"*\";\n"
-            f"            proxy_set_header Host $http_host;\n"
-            f"            proxy_pass http://martin/$1$2;\n"
-            f"        }}"
-        )
+        if is_static:
+            # Static groups: single block, 365d cache, immutable
+            composite_routes.append(
+                f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf (static)\n"
+                f"        location ~ ^/maps/{group_name}/(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
+                f"            proxy_cache {cache_zone};\n"
+                f"            proxy_cache_valid 200 365d;\n"
+                f"            proxy_cache_valid 204 1m;\n"
+                f"            proxy_cache_key $uri;\n"
+                f"            proxy_cache_lock on;\n"
+                f"            proxy_cache_use_stale error timeout updating;\n"
+                f"            proxy_cache_background_update on;\n"
+                f"            add_header X-Cache-Status $upstream_cache_status;\n"
+                f"            add_header Cache-Control \"public, max-age=31536000\";\n"
+                f"            add_header Access-Control-Allow-Origin \"*\";\n"
+                f"            proxy_set_header Host $http_host;\n"
+                f"            proxy_pass http://martin/{composite_src}/$1;\n"
+                f"        }}"
+            )
+            perlayer_routes.append(
+                f"        # Per-layer: /maps/{group_name}/{{layer}}/{{z}}/{{x}}/{{y}}.pbf (static)\n"
+                f"        location ~ ^/maps/{group_name}/([^/]+)/(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
+                f"            proxy_cache {cache_zone};\n"
+                f"            proxy_cache_valid 200 365d;\n"
+                f"            proxy_cache_valid 204 1m;\n"
+                f"            proxy_cache_key $uri;\n"
+                f"            proxy_cache_lock on;\n"
+                f"            proxy_cache_use_stale error timeout updating;\n"
+                f"            proxy_cache_background_update on;\n"
+                f"            add_header X-Cache-Status $upstream_cache_status;\n"
+                f"            add_header Cache-Control \"public, max-age=31536000\";\n"
+                f"            add_header Access-Control-Allow-Origin \"*\";\n"
+                f"            proxy_set_header Host $http_host;\n"
+                f"            proxy_pass http://martin/$1/$2;\n"
+                f"        }}"
+            )
+        else:
+            # Dynamic groups: one location block per zoom range
+            for zr in ZOOM_RANGES:
+                composite_routes.append(
+                    f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf ({zr['label']}, cache={zr['ttl']})\n"
+                    f"        location ~ ^/maps/{group_name}/({zr['regex']})/([0-9]+)/([0-9]+)\\.pbf$ {{\n"
+                    f"            proxy_cache {cache_zone};\n"
+                    f"            proxy_cache_valid 200 {zr['ttl']};\n"
+                    f"            proxy_cache_valid 204 1m;\n"
+                    f"            proxy_cache_key $uri;\n"
+                    f"            proxy_cache_lock on;\n"
+                    f"            proxy_cache_use_stale error timeout updating;\n"
+                    f"            proxy_cache_background_update on;\n"
+                    f"            add_header X-Cache-Status $upstream_cache_status;\n"
+                    f"            add_header Cache-Control \"no-cache\";\n"
+                    f"            add_header Access-Control-Allow-Origin \"*\";\n"
+                    f"            proxy_set_header Host $http_host;\n"
+                    f"            proxy_pass http://martin/{composite_src}/$1/$2/$3;\n"
+                    f"        }}"
+                )
+                perlayer_routes.append(
+                    f"        # Per-layer: /maps/{group_name}/{{layer}}/{{z}}/{{x}}/{{y}}.pbf ({zr['label']}, cache={zr['ttl']})\n"
+                    f"        location ~ ^/maps/{group_name}/([^/]+)/({zr['regex']})/([0-9]+)/([0-9]+)\\.pbf$ {{\n"
+                    f"            proxy_cache {cache_zone};\n"
+                    f"            proxy_cache_valid 200 {zr['ttl']};\n"
+                    f"            proxy_cache_valid 204 1m;\n"
+                    f"            proxy_cache_key $uri;\n"
+                    f"            proxy_cache_lock on;\n"
+                    f"            proxy_cache_use_stale error timeout updating;\n"
+                    f"            proxy_cache_background_update on;\n"
+                    f"            add_header X-Cache-Status $upstream_cache_status;\n"
+                    f"            add_header Cache-Control \"no-cache\";\n"
+                    f"            add_header Access-Control-Allow-Origin \"*\";\n"
+                    f"            proxy_set_header Host $http_host;\n"
+                    f"            proxy_pass http://martin/$1/$2/$3/$4;\n"
+                    f"        }}"
+                )
 
         static_label = " (static, cache=365d)" if is_static else ""
         print(f"  {group_name}: composite={len(fn_names)} functions -> /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf{static_label}")

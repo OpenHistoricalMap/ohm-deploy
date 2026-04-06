@@ -75,9 +75,13 @@ class Config:
     # Tile groups to purge, comma-separated (must match nginx route groups)
     # Example: "ohm,ohm_admin,ohm_other_boundaries"
     NGINX_GROUPS = os.getenv("NGINX_GROUPS", "ohm,ohm_admin,ohm_other_boundaries").split(",")
-    # Also purge parent tiles up to z0: "true" or "false"
-    # When true, purging z14/8192/5461 also purges z13/4096/2730, z12/2048/1365, ..., z0/0/0
+    # Also purge parent tiles: "true" or "false"
+    # When true, purging z14/8192/5461 also purges z13/4096/2730, ..., up to NGINX_PURGE_PARENT_MIN_ZOOM
     NGINX_PURGE_PARENT_ZOOMS = os.getenv("NGINX_PURGE_PARENT_ZOOMS", "true").lower() == "true"
+    # Minimum zoom for parent purge (default: 6). Tiles below this expire via proxy_cache_valid.
+    NGINX_PURGE_PARENT_MIN_ZOOM = int(os.getenv("NGINX_PURGE_PARENT_MIN_ZOOM", 6))
+    # Maximum zoom for child purge (default: 15). Tiles above this expire via proxy_cache_valid.
+    NGINX_PURGE_CHILD_MAX_ZOOM = int(os.getenv("NGINX_PURGE_CHILD_MAX_ZOOM", 15))
     # Path to functions.json (defines layer names per group for per-layer URI generation)
     # Example: "/app/config/functions.json"
     NGINX_FUNCTIONS_JSON = os.getenv("NGINX_FUNCTIONS_JSON", "/app/config/functions.json")

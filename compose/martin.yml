@@ -1,7 +1,7 @@
 # Martin tile server + cache purge service
 # Both share the martin_nginx_cache volume:
 #   - martin: nginx writes cached tiles to the volume
-#   - tiler-cache-martin: receives expire notifications via SQS and deletes stale tiles from the volume
+#   - tiler-cache: receives expire notifications and deletes stale tiles from the volume
 services:
   martin:
     image: rub21/tiler-server-martin:v1
@@ -19,7 +19,7 @@ services:
     networks:
       - ohm_network
 
-  tiler-cache-martin:
+  tiler-cache:
     image: ohm/tiler-cache:latest
     build:
       context: ../images/tiler-cache

@@ -65,15 +65,33 @@ def cache_file_path(uri):
     return os.path.join(Config.NGINX_CACHE_DIR, *parts, md5)
 
 
-def get_parent_tiles(z, x, y):
-    """Get all parent tiles from z down to z0."""
+def get_parent_tiles(z, x, y, min_zoom=0):
+    """Get parent tiles from z down to min_zoom."""
     parents = []
-    while z > 0:
+    while z > min_zoom:
         z -= 1
         x //= 2
         y //= 2
         parents.append((z, x, y))
     return parents
+
+
+def get_child_tiles(z, x, y, max_zoom):
+    """Get all child tiles from z down to max_zoom."""
+    if z >= max_zoom:
+        return []
+    children = []
+    stack = [(z + 1, x * 2, y * 2), (z + 1, x * 2 + 1, y * 2),
+             (z + 1, x * 2, y * 2 + 1), (z + 1, x * 2 + 1, y * 2 + 1)]
+    while stack:
+        cz, cx, cy = stack.pop()
+        children.append((cz, cx, cy))
+        if cz < max_zoom:
+            stack.append((cz + 1, cx * 2, cy * 2))
+            stack.append((cz + 1, cx * 2 + 1, cy * 2))
+            stack.append((cz + 1, cx * 2, cy * 2 + 1))
+            stack.append((cz + 1, cx * 2 + 1, cy * 2 + 1))
+    return children
 
 
 def uris_for_tile(z, x, y, groups):
@@ -105,10 +123,16 @@ def purge_tiles_from_nginx(tiles):
     groups = load_group_functions()
     all_tiles = set(tiles)
 
+    # Add parent tiles (down to NGINX_PURGE_PARENT_MIN_ZOOM)
     if Config.NGINX_PURGE_PARENT_ZOOMS:
         for z, x, y in list(tiles):
-            for pz, px, py in get_parent_tiles(z, x, y):
+            for pz, px, py in get_parent_tiles(z, x, y, Config.NGINX_PURGE_PARENT_MIN_ZOOM):
                 all_tiles.add((pz, px, py))
+
+    # Add child tiles (up to NGINX_PURGE_CHILD_MAX_ZOOM)
+    for z, x, y in list(tiles):
+        for cz, cx, cy in get_child_tiles(z, x, y, Config.NGINX_PURGE_CHILD_MAX_ZOOM):
+            all_tiles.add((cz, cx, cy))
 
     deleted = 0
     not_found = 0

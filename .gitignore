@@ -41,3 +41,4 @@ config_reimport.json
 imposm3_reimport.json
 images/tiler-server-martin/tilejson
 config.yaml
+images/tiler-server-martin/config/nginx.conf

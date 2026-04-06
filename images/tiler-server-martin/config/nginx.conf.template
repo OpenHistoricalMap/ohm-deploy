@@ -42,31 +42,15 @@ http {
     gzip_vary on;
     gzip_proxied any;
 
-    # === Zoom-based Cache-Control for tile responses ===
-    # Extract zoom level from tile URLs:
-    #   Composite: /maps/{group}/{z}/{x}/{y}.pbf
-    #   Per-layer: /maps/{group}/{layer}/{z}/{x}/{y}.pbf
-    map $uri $tile_zoom {
-        ~^/maps/[^/]+/[^/]+/(\d+)/\d+/\d+\.pbf$   $1;
-        ~^/maps/[^/]+/(\d+)/\d+/\d+\.pbf$          $1;
-        default                                      -1;
-    }
-
-    # Map zoom level to Cache-Control max-age (browser/CDN caching).
-    # nginx proxy_cache is invalidated by the purge service on data changes,
-    # but browser caches cannot be purged — so these TTLs control staleness
-    # seen by end users.
-    #   z0-6:   24h  — low zoom, very stable, few tiles
-    #   z7-11:  12h  — moderate detail
-    #   z12-16:  3h  — high detail, edits visible in hours
-    #   z17+:   30m  — max detail, editors see changes quickly
-    map $tile_zoom $tile_cache_control {
-        ~^[0-6]$       "public, max-age=86400";
-        ~^[7-9]$       "public, max-age=43200";
-        ~^1[01]$       "public, max-age=43200";
-        ~^1[2-6]$      "public, max-age=10800";
-        default         "public, max-age=1800";
-    }
+    # === Zoom-based caching ===
+    # nginx proxy_cache TTL varies by zoom range (generated per location block).
+    # Ranges match materialized view zoom ranges. Lower zooms cache longer
+    # (less change), higher zooms expire faster (more edits).
+    # Purge service actively invalidates z6-15; TTL is the safety net.
+    #   z0-2:   24h    z3-5:  24h    z6-7:  16h    z8-9:  12h
+    #   z10-12:  8h    z13-15: 4h    z16-20: 1h
+    # Browser Cache-Control is set to "no-cache" for dynamic tiles so
+    # browsers always revalidate with nginx.
 
     upstream martin {
         server 127.0.0.1:${MARTIN_INTERNAL_PORT};
