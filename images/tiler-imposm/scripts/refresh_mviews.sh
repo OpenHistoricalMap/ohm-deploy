@@ -298,7 +298,6 @@ no_admin_boundaries_views=(
 
 
 # NO_ADMIN_BOUNDARIES always runs in its own background loop (refreshes every 10 hours)
-refresh_mviews_group "NO_ADMIN_BOUNDARIES" 36000 light "${no_admin_boundaries_views[@]}" &
 
 if [ "$REFRESH_PARALLEL" = "true" ]; then
     log_message "Starting PARALLEL refresh of materialized views..."
@@ -318,6 +317,8 @@ if [ "$REFRESH_PARALLEL" = "true" ]; then
     refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
     refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
     refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
+    refresh_mviews_group "NO_ADMIN_BOUNDARIES" 3600 light "${no_admin_boundaries_views[@]}" &
+
 else
     log_message "Starting SEQUENTIAL refresh of materialized views..."
     REFRESH_LOOP=false
@@ -340,6 +341,8 @@ else
         refresh_mviews_group "WATER" 1 light "${water_views[@]}" || true
         refresh_mviews_group "BUILDINGS" 1 light "${buildings_views[@]}" || true
         refresh_mviews_group "ROUTES" 1 light "${routes_views[@]}" || true
+
+        refresh_mviews_group "NO_ADMIN_BOUNDARIES" 1 light "${no_admin_boundaries_views[@]}" || true
 
         elapsed=$((SECONDS - start_time))
         log_message "Sequential refresh cycle completed in ${elapsed}s. Sleeping ${SEQUENTIAL_SLEEP_INTERVAL}s..."
