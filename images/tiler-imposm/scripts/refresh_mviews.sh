@@ -266,21 +266,47 @@ no_admin_boundaries_views=(
 )
 
 
-# Heavy groups - admin boundaries have the largest tables
-refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 60 heavy "${admin_boundaries_lines_views[@]}" &
-refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 180 heavy "${admin_boundaries_areas_centroids_views[@]}" &
 
-# Light groups - smaller tables, minimal resources
-refresh_mviews_group "ADMIN_MARITIME_LINES" 300 light "${admin_maritime_lines_views[@]}" &
-refresh_mviews_group "TRANSPORTS" 180 heavy "${transport_views[@]}" &
-refresh_mviews_group "AMENITY" 180 light "${amenity_views[@]}" &
-refresh_mviews_group "LANDUSE" 180 light "${landuse_views[@]}" &
-refresh_mviews_group "OTHERS" 180 light "${others_views[@]}" &
-refresh_mviews_group "COMMUNICATION" 180 light "${communication_views[@]}" &
-refresh_mviews_group "PLACES" 180 light "${places_views[@]}" &
-refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
-refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
-refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
+# REFRESH_PARALLEL: "true" = all groups in parallel (default), "false" = sequential
+REFRESH_PARALLEL="${REFRESH_PARALLEL:-true}"
 
-## This group high demand, so we refresh every 1 hour
+# NO_ADMIN_BOUNDARIES always runs in its own background loop (refreshes every 10 hours)
 refresh_mviews_group "NO_ADMIN_BOUNDARIES" 36000 light "${no_admin_boundaries_views[@]}" &
+
+if [ "$REFRESH_PARALLEL" = "true" ]; then
+    log_message "Starting PARALLEL refresh of materialized views..."
+
+    # Heavy groups
+    refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 60 heavy "${admin_boundaries_lines_views[@]}" &
+    refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 180 heavy "${admin_boundaries_areas_centroids_views[@]}" &
+    refresh_mviews_group "TRANSPORTS" 180 heavy "${transport_views[@]}" &
+
+    # Light groups
+    refresh_mviews_group "ADMIN_MARITIME_LINES" 300 light "${admin_maritime_lines_views[@]}" &
+    refresh_mviews_group "AMENITY" 180 light "${amenity_views[@]}" &
+    refresh_mviews_group "LANDUSE" 180 light "${landuse_views[@]}" &
+    refresh_mviews_group "OTHERS" 180 light "${others_views[@]}" &
+    refresh_mviews_group "COMMUNICATION" 180 light "${communication_views[@]}" &
+    refresh_mviews_group "PLACES" 180 light "${places_views[@]}" &
+    refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
+    refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
+    refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
+else
+    log_message "Starting SEQUENTIAL refresh of materialized views..."
+
+    # Heavy groups
+    refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 heavy "${admin_boundaries_lines_views[@]}"
+    refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 1 heavy "${admin_boundaries_areas_centroids_views[@]}"
+    refresh_mviews_group "TRANSPORTS" 1 heavy "${transport_views[@]}"
+
+    # Light groups
+    refresh_mviews_group "ADMIN_MARITIME_LINES" 1 light "${admin_maritime_lines_views[@]}"
+    refresh_mviews_group "AMENITY" 1 light "${amenity_views[@]}"
+    refresh_mviews_group "LANDUSE" 1 light "${landuse_views[@]}"
+    refresh_mviews_group "OTHERS" 1 light "${others_views[@]}"
+    refresh_mviews_group "COMMUNICATION" 1 light "${communication_views[@]}"
+    refresh_mviews_group "PLACES" 1 light "${places_views[@]}"
+    refresh_mviews_group "WATER" 1 light "${water_views[@]}"
+    refresh_mviews_group "BUILDINGS" 1 light "${buildings_views[@]}"
+    refresh_mviews_group "ROUTES" 1 light "${routes_views[@]}"
+fi

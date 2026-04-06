@@ -160,7 +160,7 @@ function monitorImposmErrors() {
         log_message "Checking minute replication import into the database"
         
         # Check for connection errors specifically
-        if grep -q "driver: bad connection" "$LOG_FILE" || grep -q "\[error\] Importing.*bad connection" "$LOG_FILE"; then
+        if grep -q "driver: bad connection" "$LOG_FILE" || grep -q "\[error\] Importing.*bad connection" "$LOG_FILE" || grep -q "server closed the connection unexpectedly" "$LOG_FILE"; then
             ERROR_COUNT=$((ERROR_COUNT + 1))
             log_message "Detected bad connection error (count: $ERROR_COUNT/$MAX_ERRORS). Waiting before retry..."
             
