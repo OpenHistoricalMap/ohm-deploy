@@ -258,6 +258,8 @@ EOF
     UPLOADER_PID=$!
 
     # Step 4: Run Imposm update process
+    # Clear old imposm log to prevent liveness check from detecting stale errors
+    > /tmp/imposm.log
     log_message "Running Imposm update process..."
     # Note: The Go pq driver used by imposm doesn't support keepalive parameters
     # in connection URLs or via environment variables. We rely on:
