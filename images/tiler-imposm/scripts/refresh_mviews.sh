@@ -28,10 +28,22 @@ source ./scripts/utils.sh
 # Example:
 #   refresh_mviews_group "WATER" 180 "${water_views[@]}" &
 # ============================================================================
-LIGHT_WORK_MEM="64MB"
-LIGHT_MAINT_MEM="256MB"
-HEAVY_WORK_MEM="512MB"
-HEAVY_MAINT_MEM="4GB"
+# Memory defaults depend on REFRESH_PARALLEL mode:
+#   parallel (default): conservative values to avoid OOM with many concurrent refreshes
+#   sequential: higher values since only 1 refresh runs at a time
+REFRESH_PARALLEL="${REFRESH_PARALLEL:-true}"
+
+if [ "$REFRESH_PARALLEL" = "true" ]; then
+    LIGHT_WORK_MEM="${LIGHT_WORK_MEM:-64MB}"
+    LIGHT_MAINT_MEM="${LIGHT_MAINT_MEM:-256MB}"
+    HEAVY_WORK_MEM="${HEAVY_WORK_MEM:-512MB}"
+    HEAVY_MAINT_MEM="${HEAVY_MAINT_MEM:-4GB}"
+else
+    LIGHT_WORK_MEM="${LIGHT_WORK_MEM:-4GB}"
+    LIGHT_MAINT_MEM="${LIGHT_MAINT_MEM:-8GB}"
+    HEAVY_WORK_MEM="${HEAVY_WORK_MEM:-8GB}"
+    HEAVY_MAINT_MEM="${HEAVY_MAINT_MEM:-16GB}"
+fi
 
 function refresh_mviews_group() {
     local group_name="$1"
@@ -266,9 +278,6 @@ no_admin_boundaries_views=(
 )
 
 
-
-# REFRESH_PARALLEL: "true" = all groups in parallel (default), "false" = sequential
-REFRESH_PARALLEL="${REFRESH_PARALLEL:-true}"
 
 # NO_ADMIN_BOUNDARIES always runs in its own background loop (refreshes every 10 hours)
 refresh_mviews_group "NO_ADMIN_BOUNDARIES" 36000 light "${no_admin_boundaries_views[@]}" &
