@@ -310,7 +310,7 @@ else
     log_message "Starting SEQUENTIAL refresh of materialized views..."
     REFRESH_LOOP=false
     while true; do
-        local start_time=$SECONDS
+        start_time=$SECONDS
 
         # Heavy groups
         refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 heavy "${admin_boundaries_lines_views[@]}"
@@ -328,7 +328,7 @@ else
         refresh_mviews_group "BUILDINGS" 1 light "${buildings_views[@]}"
         refresh_mviews_group "ROUTES" 1 light "${routes_views[@]}"
 
-        local elapsed=$((SECONDS - start_time))
+        elapsed=$((SECONDS - start_time))
         log_message "Sequential refresh cycle completed in ${elapsed}s. Sleeping ${SEQUENTIAL_SLEEP_INTERVAL}s..."
         sleep 20
     done
