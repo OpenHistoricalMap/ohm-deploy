@@ -19,6 +19,17 @@ INIT_FILE="$WORKDIR/init_done"
 
 mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
+# Archive old imposm log before clearing, so we can debug what caused the restart
+IMPOSM_LOG_DIR="$WORKDIR/imposm_logs"
+mkdir -p "$IMPOSM_LOG_DIR"
+if [ -s /tmp/imposm.log ]; then
+    cp /tmp/imposm.log "$IMPOSM_LOG_DIR/imposm_$(date +%Y%m%d_%H%M%S).log"
+    # Keep only the last 20 log files to avoid filling the volume
+    ls -t "$IMPOSM_LOG_DIR"/imposm_*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null
+fi
+# Clear log to prevent liveness probe from detecting stale errors on restart
+> /tmp/imposm.log
+
 # Tracking file for uploaded files
 TRACKING_FILE="$WORKDIR/uploaded_files.log"
 [ -f "$TRACKING_FILE" ] || touch "$TRACKING_FILE"
