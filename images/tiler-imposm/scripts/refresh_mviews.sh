@@ -54,9 +54,11 @@ function refresh_mviews_group() {
 
     local work_mem="$LIGHT_WORK_MEM"
     local maint_mem="$LIGHT_MAINT_MEM"
+    local parallel_workers="${LIGHT_PARALLEL_WORKERS:-0}"
     if [ "$mem_profile" = "heavy" ]; then
         work_mem="$HEAVY_WORK_MEM"
         maint_mem="$HEAVY_MAINT_MEM"
+        parallel_workers="${HEAVY_PARALLEL_WORKERS:-4}"
     fi
 
     local run_loop="${REFRESH_LOOP:-true}"
@@ -72,6 +74,7 @@ function refresh_mviews_group() {
                 -c "SET statement_timeout = 0" \
                 -c "SET work_mem = '$work_mem'" \
                 -c "SET maintenance_work_mem = '$maint_mem'" \
+                -c "SET max_parallel_workers_per_gather = $parallel_workers" \
                 -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $mview;" 2>&1) || exit_code=$?
             local elapsed=$((SECONDS - start_time))
             if [ $exit_code -eq 0 ]; then
