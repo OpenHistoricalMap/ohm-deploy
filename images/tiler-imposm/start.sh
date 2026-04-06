@@ -27,8 +27,9 @@ if [ -s /tmp/imposm.log ]; then
     # Keep only the last 20 log files to avoid filling the volume
     ls -t "$IMPOSM_LOG_DIR"/imposm_*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null
 fi
-# Clear log to prevent liveness probe from detecting stale errors on restart
+# Clear log and ready flag to prevent liveness probe from detecting stale errors on restart
 > /tmp/imposm.log
+rm -f /tmp/imposm_ready
 
 # Tracking file for uploaded files
 TRACKING_FILE="$WORKDIR/uploaded_files.log"
@@ -285,6 +286,9 @@ EOF
         -expiretiles-dir "${IMPOSM3_EXPIRE_DIR}" \
         -quiet 2>&1 | tee /tmp/imposm.log &
     IMPOSM_PID=$!
+
+    # Signal liveness probe that imposm is running
+    touch /tmp/imposm_ready
 
     # Step 5: Monitor imposm process and handle errors
     monitorImposmErrors $IMPOSM_PID $UPLOADER_PID

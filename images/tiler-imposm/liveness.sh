@@ -3,6 +3,21 @@
 DIFF_DIR="/mnt/data/diff"
 STATE_FILE="$DIFF_DIR/last.state.txt"
 MAX_STALE_SECONDS="${MAX_STALE_SECONDS:-3600}" # 1 hour
+READY_FILE="/tmp/imposm_ready"
+STARTUP_GRACE_SECONDS="${STARTUP_GRACE_SECONDS:-300}" # 5 minutes
+
+# Skip checks if imposm hasn't started yet (still in startup/config phase)
+if [ ! -f "$READY_FILE" ]; then
+  # Check how long the container has been running
+  UPTIME_SECONDS=$(awk '{print int($1)}' /proc/uptime)
+  if [ "$UPTIME_SECONDS" -lt "$STARTUP_GRACE_SECONDS" ]; then
+    echo "Imposm still starting up (${UPTIME_SECONDS}s < ${STARTUP_GRACE_SECONDS}s grace). Skipping checks."
+    exit 0
+  else
+    echo "Startup grace period exceeded and imposm never became ready. Exiting..."
+    pkill -f start.sh && exit 1
+  fi
+fi
 
 # 1) Check if imposm is running
 if ! pgrep -f imposm >/dev/null; then
