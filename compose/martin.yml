@@ -19,19 +19,19 @@ services:
     networks:
       - ohm_network
 
-  tiler-cache:
-    image: ohm/tiler-cache:latest
-    build:
-      context: ../images/tiler-cache
-      dockerfile: Dockerfile
-    volumes:
-      - martin_nginx_cache:/var/cache/nginx
-      - ../images/tiler-server-martin/config/functions.json:/app/config/functions.json:ro
-    env_file:
-      - ../envs/.env.tiler
-    restart: always
-    networks:
-      - ohm_network
+  # tiler-cache:
+  #   image: ohm/tiler-cache:latest
+  #   build:
+  #     context: ../images/tiler-cache
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - martin_nginx_cache:/var/cache/nginx
+  #     - ../images/tiler-server-martin/config/functions.json:/app/config/functions.json:ro
+  #   env_file:
+  #     - ../envs/.env.tiler
+  #   restart: always
+  #   networks:
+  #     - ohm_network
 
 volumes:
   martin_nginx_cache:
