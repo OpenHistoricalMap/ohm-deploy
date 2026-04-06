@@ -59,11 +59,12 @@ function refresh_mviews_group() {
         maint_mem="$HEAVY_MAINT_MEM"
     fi
 
+    local run_loop="${REFRESH_LOOP:-true}"
+
     while true; do
         for mview in "${materialized_views[@]}"; do
             log_message "[$group_name] Refreshing $mview (work_mem=$work_mem, maintenance_work_mem=$maint_mem)..."
             local error_output
-            # Disable statement_timeout for long-running refresh operations (0 = no limit)
             local exit_code=0
             local start_time=$SECONDS
             error_output=$(psql "$PG_CONNECTION" -v ON_ERROR_STOP=1 \
@@ -77,13 +78,18 @@ function refresh_mviews_group() {
             else
                 log_message "[$group_name] ❌ ERROR refreshing $mview! Exit code: $exit_code"
                 log_message "[$group_name] ❌ Error details: $error_output"
-                # If connection failed, skip remaining views and wait before retrying
                 if echo "$error_output" | grep -qi "connection\|could not connect\|server closed\|SSL"; then
                     log_message "[$group_name] ⚠️ Connection error detected. Waiting ${sleep_interval}s before retrying all views..."
                     break
                 fi
             fi
         done
+
+        # If REFRESH_LOOP=false, run once and exit (used in sequential mode)
+        if [ "$run_loop" != "true" ]; then
+            log_message "[$group_name] Completed single pass."
+            return
+        fi
         sleep "$sleep_interval"
     done
 }
@@ -302,20 +308,28 @@ if [ "$REFRESH_PARALLEL" = "true" ]; then
     refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
 else
     log_message "Starting SEQUENTIAL refresh of materialized views..."
+    REFRESH_LOOP=false
+    while true; do
+        local start_time=$SECONDS
 
-    # Heavy groups
-    refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 heavy "${admin_boundaries_lines_views[@]}"
-    refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 1 heavy "${admin_boundaries_areas_centroids_views[@]}"
-    refresh_mviews_group "TRANSPORTS" 1 heavy "${transport_views[@]}"
+        # Heavy groups
+        refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 heavy "${admin_boundaries_lines_views[@]}"
+        refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 1 heavy "${admin_boundaries_areas_centroids_views[@]}"
+        refresh_mviews_group "TRANSPORTS" 1 heavy "${transport_views[@]}"
 
-    # Light groups
-    refresh_mviews_group "ADMIN_MARITIME_LINES" 1 light "${admin_maritime_lines_views[@]}"
-    refresh_mviews_group "AMENITY" 1 light "${amenity_views[@]}"
-    refresh_mviews_group "LANDUSE" 1 light "${landuse_views[@]}"
-    refresh_mviews_group "OTHERS" 1 light "${others_views[@]}"
-    refresh_mviews_group "COMMUNICATION" 1 light "${communication_views[@]}"
-    refresh_mviews_group "PLACES" 1 light "${places_views[@]}"
-    refresh_mviews_group "WATER" 1 light "${water_views[@]}"
-    refresh_mviews_group "BUILDINGS" 1 light "${buildings_views[@]}"
-    refresh_mviews_group "ROUTES" 1 light "${routes_views[@]}"
+        # Light groups
+        refresh_mviews_group "ADMIN_MARITIME_LINES" 1 light "${admin_maritime_lines_views[@]}"
+        refresh_mviews_group "AMENITY" 1 light "${amenity_views[@]}"
+        refresh_mviews_group "LANDUSE" 1 light "${landuse_views[@]}"
+        refresh_mviews_group "OTHERS" 1 light "${others_views[@]}"
+        refresh_mviews_group "COMMUNICATION" 1 light "${communication_views[@]}"
+        refresh_mviews_group "PLACES" 1 light "${places_views[@]}"
+        refresh_mviews_group "WATER" 1 light "${water_views[@]}"
+        refresh_mviews_group "BUILDINGS" 1 light "${buildings_views[@]}"
+        refresh_mviews_group "ROUTES" 1 light "${routes_views[@]}"
+
+        local elapsed=$((SECONDS - start_time))
+        log_message "Sequential refresh cycle completed in ${elapsed}s. Sleeping ${SEQUENTIAL_SLEEP_INTERVAL}s..."
+        sleep 20
+    done
 fi
