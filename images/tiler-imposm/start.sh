@@ -174,15 +174,17 @@ function monitorImposmErrors() {
         # Check for connection errors specifically
         if grep -q "driver: bad connection" "$LOG_FILE" || grep -q "\[error\] Importing.*bad connection" "$LOG_FILE" || grep -q "server closed the connection unexpectedly" "$LOG_FILE"; then
             ERROR_COUNT=$((ERROR_COUNT + 1))
+            local error_detail=$(grep -E "bad connection|server closed" "$LOG_FILE" | tail -1)
+            write_status "IMPOSM_REPLICATION" "error" 0 0 "$ERROR_COUNT" "" "$error_detail"
             log_message "Detected bad connection error (count: $ERROR_COUNT/$MAX_ERRORS). Waiting before retry..."
-            
+
             # Check if imposm process is still running
             if ! kill -0 $IMPOSM_PID 2>/dev/null; then
                 log_message "Imposm process has died. Restarting container..."
                 kill $UPLOADER_PID 2>/dev/null
                 exit 1
             fi
-            
+
             # If we've hit max errors, restart
             if [ $ERROR_COUNT -ge $MAX_ERRORS ]; then
                 log_message "Max connection errors reached ($MAX_ERRORS). Restarting container..."
@@ -190,15 +192,17 @@ function monitorImposmErrors() {
                 kill $IMPOSM_PID 2>/dev/null
                 exit 1
             fi
-            
+
             # Wait a bit and check if connection recovers
             sleep 30
             # Clear errors from log to avoid immediate re-trigger
             > "$LOG_FILE"
         elif grep -q "\[error\] Importing" "$LOG_FILE"; then
             # Other import errors - log but don't immediately restart
-            log_message "Detected [error] Importing in Imposm log. Monitoring..."
             ERROR_COUNT=$((ERROR_COUNT + 1))
+            local error_detail=$(grep "\[error\] Importing" "$LOG_FILE" | tail -1)
+            write_status "IMPOSM_REPLICATION" "error" 0 0 "$ERROR_COUNT" "" "$error_detail"
+            log_message "Detected [error] Importing in Imposm log. Monitoring..."
 
             if [ $ERROR_COUNT -ge $MAX_ERRORS ]; then
                 log_message "Max errors reached ($MAX_ERRORS). Restarting container..."
@@ -216,6 +220,7 @@ function monitorImposmErrors() {
                 log_message "No errors detected. Resetting error count."
                 ERROR_COUNT=0
             fi
+            write_status "IMPOSM_REPLICATION" "success" 0 0 0 "" ""
         fi
         
         sleep 10
@@ -300,7 +305,10 @@ EOF
     # Signal liveness probe that imposm is running
     touch /tmp/imposm_ready
 
-    # Step 5: Monitor imposm process and handle errors
+    # Step 5: Upload RSS status feed to S3 every hour
+    ./scripts/upload_status_rss.sh &
+
+    # Step 6: Monitor imposm process and handle errors
     monitorImposmErrors $IMPOSM_PID $UPLOADER_PID
 }
 

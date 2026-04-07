@@ -6,44 +6,24 @@ source ./scripts/utils.sh
 # ============================================================================
 # Function: refresh_mviews_group
 # Description:
-#   Refreshes a group of materialized views sequentially in an infinite loop.
+#   Refreshes a group of materialized views in an infinite loop.
 #   Each view is refreshed using REFRESH MATERIALIZED VIEW CONCURRENTLY to
 #   avoid blocking reads during the refresh operation.
+#   Each group runs as a background process for parallel execution.
 #
 # Parameters:
 #   $1 - group_name: Name of the group (used for logging purposes)
 #   $2 - sleep_interval: Number of seconds to wait between refresh cycles
+#   $3 - mem_profile: "light" or "heavy" memory profile
 #   $@ - materialized_views: Array of materialized view names to refresh
 #
-# Behavior:
-#   - Runs in an infinite loop
-#   - Refreshes all views in the group sequentially (one after another)
-#   - Uses CONCURRENTLY to avoid blocking database reads
-#   - Logs success/failure for each view refresh
-#   - Waits for sleep_interval seconds after completing each full cycle
-#
 # Usage:
-#   refresh_mviews_group "GROUP_NAME" 180 "${views_array[@]}" &
-#
-# Example:
-#   refresh_mviews_group "WATER" 180 "${water_views[@]}" &
+#   refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
 # ============================================================================
-# Memory defaults depend on REFRESH_PARALLEL mode:
-#   parallel (default): conservative values to avoid OOM with many concurrent refreshes
-#   sequential: higher values since only 1 refresh runs at a time
-REFRESH_PARALLEL="${REFRESH_PARALLEL:-true}"
-
-if [ "$REFRESH_PARALLEL" = "true" ]; then
-    LIGHT_WORK_MEM="${LIGHT_WORK_MEM:-64MB}"
-    LIGHT_MAINT_MEM="${LIGHT_MAINT_MEM:-256MB}"
-    HEAVY_WORK_MEM="${HEAVY_WORK_MEM:-512MB}"
-    HEAVY_MAINT_MEM="${HEAVY_MAINT_MEM:-4GB}"
-else
-    LIGHT_WORK_MEM="${LIGHT_WORK_MEM:-1GB}"
-    LIGHT_MAINT_MEM="${LIGHT_MAINT_MEM:-2GB}"
-    HEAVY_WORK_MEM="${HEAVY_WORK_MEM:-2GB}"
-    HEAVY_MAINT_MEM="${HEAVY_MAINT_MEM:-4GB}"
-fi
+LIGHT_WORK_MEM="${LIGHT_WORK_MEM:-64MB}"
+LIGHT_MAINT_MEM="${LIGHT_MAINT_MEM:-256MB}"
+HEAVY_WORK_MEM="${HEAVY_WORK_MEM:-512MB}"
+HEAVY_MAINT_MEM="${HEAVY_MAINT_MEM:-4GB}"
 
 function refresh_mviews_group() {
     local group_name="$1"
@@ -61,10 +41,13 @@ function refresh_mviews_group() {
         parallel_workers="${HEAVY_PARALLEL_WORKERS:-4}"
     fi
 
-    local run_loop="${REFRESH_LOOP:-true}"
+    local total_views=${#materialized_views[@]}
 
     while true; do
-        local connection_error=false
+        local cycle_start=$SECONDS
+        local failed_count=0
+        local failed_list=""
+        local last_error=""
         for mview in "${materialized_views[@]}"; do
             log_message "[$group_name] Refreshing $mview (work_mem=$work_mem, maintenance_work_mem=$maint_mem)..."
             local error_output
@@ -80,32 +63,25 @@ function refresh_mviews_group() {
             if [ $exit_code -eq 0 ]; then
                 log_message "[$group_name] ✅ Successfully refreshed $mview. Time: ${elapsed}s"
             else
+                failed_count=$((failed_count + 1))
+                failed_list="${failed_list}${mview} "
+                last_error="$error_output"
                 log_message "[$group_name] ❌ ERROR refreshing $mview! Exit code: $exit_code"
                 log_message "[$group_name] ❌ Error details: $error_output"
                 if echo "$error_output" | grep -qi "connection\|could not connect\|server closed\|SSL\|recovery mode"; then
                     log_message "[$group_name] ⚠️ Connection error detected. Waiting 180s for DB to recover..."
-                    connection_error=true
                     sleep 180
                     break
                 fi
             fi
         done
-
-        # If connection error in sequential mode, signal caller to stop
-        if [ "$connection_error" = true ] && [ "$run_loop" != "true" ]; then
-            log_message "[$group_name] Connection error during single pass. Returning error."
-            return 2
-        fi
-
-        # If REFRESH_LOOP=false, run once and exit (used in sequential mode)
-        if [ "$run_loop" != "true" ]; then
-            log_message "[$group_name] Completed single pass."
-            return 0
-        fi
+        local cycle_duration=$((SECONDS - cycle_start))
+        local status="success"
+        [ $failed_count -gt 0 ] && status="error"
+        write_status "$group_name" "$status" "$cycle_duration" "$total_views" "$failed_count" "$failed_list" "$last_error"
         sleep "$sleep_interval"
     done
 }
-
 
 admin_boundaries_lines_views=(
     mv_relation_members_boundaries
@@ -297,55 +273,21 @@ no_admin_boundaries_views=(
 
 
 
-# NO_ADMIN_BOUNDARIES always runs in its own background loop (refreshes every 10 hours)
+log_message "Starting parallel refresh of materialized views..."
 
-if [ "$REFRESH_PARALLEL" = "true" ]; then
-    log_message "Starting PARALLEL refresh of materialized views..."
+# Heavy groups
+refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 180 heavy "${admin_boundaries_lines_views[@]}" &
+refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 180 heavy "${admin_boundaries_areas_centroids_views[@]}" &
+refresh_mviews_group "TRANSPORTS" 180 heavy "${transport_views[@]}" &
 
-    # Heavy groups
-    refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 60 heavy "${admin_boundaries_lines_views[@]}" &
-    refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 180 heavy "${admin_boundaries_areas_centroids_views[@]}" &
-    refresh_mviews_group "TRANSPORTS" 180 heavy "${transport_views[@]}" &
-
-    # Light groups
-    refresh_mviews_group "ADMIN_MARITIME_LINES" 300 light "${admin_maritime_lines_views[@]}" &
-    refresh_mviews_group "AMENITY" 180 light "${amenity_views[@]}" &
-    refresh_mviews_group "LANDUSE" 180 light "${landuse_views[@]}" &
-    refresh_mviews_group "OTHERS" 180 light "${others_views[@]}" &
-    refresh_mviews_group "COMMUNICATION" 180 light "${communication_views[@]}" &
-    refresh_mviews_group "PLACES" 180 light "${places_views[@]}" &
-    refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
-    refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
-    refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
-    refresh_mviews_group "NO_ADMIN_BOUNDARIES" 3600 light "${no_admin_boundaries_views[@]}" &
-
-else
-    log_message "Starting SEQUENTIAL refresh of materialized views..."
-    REFRESH_LOOP=false
-    SEQUENTIAL_SLEEP_INTERVAL="${SEQUENTIAL_SLEEP_INTERVAL:-120}"
-    while true; do
-        start_time=$SECONDS
-
-        # Heavy groups
-        refresh_mviews_group "ADMIN_BOUNDARIES_LINES" 1 heavy "${admin_boundaries_lines_views[@]}" || true
-        refresh_mviews_group "ADMIN_BOUNDARIES_AREAS_CENTROIDS" 1 heavy "${admin_boundaries_areas_centroids_views[@]}" || true
-        refresh_mviews_group "TRANSPORTS" 1 heavy "${transport_views[@]}" || true
-
-        # Light groups
-        refresh_mviews_group "ADMIN_MARITIME_LINES" 1 light "${admin_maritime_lines_views[@]}" || true
-        refresh_mviews_group "AMENITY" 1 light "${amenity_views[@]}" || true
-        refresh_mviews_group "LANDUSE" 1 light "${landuse_views[@]}" || true
-        refresh_mviews_group "OTHERS" 1 light "${others_views[@]}" || true
-        refresh_mviews_group "COMMUNICATION" 1 light "${communication_views[@]}" || true
-        refresh_mviews_group "PLACES" 1 light "${places_views[@]}" || true
-        refresh_mviews_group "WATER" 1 light "${water_views[@]}" || true
-        refresh_mviews_group "BUILDINGS" 1 light "${buildings_views[@]}" || true
-        refresh_mviews_group "ROUTES" 1 light "${routes_views[@]}" || true
-
-        refresh_mviews_group "NO_ADMIN_BOUNDARIES" 1 light "${no_admin_boundaries_views[@]}" || true
-
-        elapsed=$((SECONDS - start_time))
-        log_message "Sequential refresh cycle completed in ${elapsed}s. Sleeping ${SEQUENTIAL_SLEEP_INTERVAL}s..."
-        sleep 20
-    done
-fi
+# Light groups
+refresh_mviews_group "ADMIN_MARITIME_LINES" 180 light "${admin_maritime_lines_views[@]}" &
+refresh_mviews_group "AMENITY" 180 light "${amenity_views[@]}" &
+refresh_mviews_group "LANDUSE" 180 light "${landuse_views[@]}" &
+refresh_mviews_group "OTHERS" 180 light "${others_views[@]}" &
+refresh_mviews_group "COMMUNICATION" 180 light "${communication_views[@]}" &
+refresh_mviews_group "PLACES" 180 light "${places_views[@]}" &
+refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
+refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
+refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
+refresh_mviews_group "NO_ADMIN_BOUNDARIES" 180 light "${no_admin_boundaries_views[@]}" &
