@@ -245,13 +245,23 @@ function updateData() {
 
     # Step 2: Handle last.state.txt if OVERWRITE_STATE is enabled
     if [ "$OVERWRITE_STATE" = "true" ]; then
-    log_message "Overwriting last.state.txt..."
-    timestamp=$(date -u +"%Y-%m-%dT%H\\:%M\\:%SZ")
-    cat <<EOF > "$local_last_state_path"
+        log_message "Overwriting last.state.txt with sequenceNumber=${SEQUENCE_NUMBER:-0}..."
+        # Clean old downloaded diffs to force imposm to re-download from the new sequence number
+        log_message "Cleaning old diff files in ${DIFF_DIR} to avoid stale state..."
+        find "$DIFF_DIR" -type f ! -name "last.state.txt" -delete 2>/dev/null
+        timestamp=$(date -u +"%Y-%m-%dT%H\\:%M\\:%SZ")
+        cat <<EOF > "$local_last_state_path"
 timestamp=${timestamp}
 sequenceNumber=${SEQUENCE_NUMBER:-0}
 replicationUrl=${REPLICATION_URL}
 EOF
+    else
+        if [ -f "$local_last_state_path" ]; then
+            current_seq=$(grep -oP 'sequenceNumber=\K\d+' "$local_last_state_path" 2>/dev/null || echo "unknown")
+            log_message "Using existing last.state.txt (sequenceNumber=${current_seq}). Set OVERWRITE_STATE=true to override with SEQUENCE_NUMBER=${SEQUENCE_NUMBER:-0}."
+        else
+            log_message "WARNING: No last.state.txt found and OVERWRITE_STATE=false. Imposm may not know where to start replication."
+        fi
     fi
 
     # Step 3: Start uploader in background and store its PID
