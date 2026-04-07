@@ -20,9 +20,9 @@ END
 ALTER ROLE imposm SUPERUSER;
 
 -- Session-level parameters (only apply to imposm connections, not Tegola)
-ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET work_mem = '${IMPOSM_WORK_MEM:-1GB}';
-ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET maintenance_work_mem = '${IMPOSM_MAINTENANCE_WORK_MEM:-10GB}';
-ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET temp_buffers = '${IMPOSM_TEMP_BUFFERS:-64MB}';
+ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET work_mem = '${IMPOSM_WORK_MEM:-4GB}';
+ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET maintenance_work_mem = '${IMPOSM_MAINTENANCE_WORK_MEM:-24GB}';
+ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET temp_buffers = '${IMPOSM_TEMP_BUFFERS:-256MB}';
 EOSQL
 
 log_message "Imposm role setup complete."

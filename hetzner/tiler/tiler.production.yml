@@ -10,9 +10,9 @@ services:
       - "54329:5432"
     env_file:
       - .env.tiler
-    mem_limit: 50G
-    cpus: "25.0"
-    shm_size: 12g
+    mem_limit: 100G
+    cpus: "30.0"
+    shm_size: 16g
     networks:
       - ohm_network
 
