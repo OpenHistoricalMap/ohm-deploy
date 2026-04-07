@@ -241,6 +241,23 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
     if not tags:
         return {"reason": "Element has no tags", "commentable": False}
 
+    # Check non-importable relation types early.
+    # Relations with types like "waterway" are grouping relations whose member
+    # ways get imported individually — the relation itself is never stored.
+    # This must be checked before tag matching to avoid false positives when the
+    # relation carries tags (e.g. waterway=stream) that match import tables but
+    # are incompatible with the relation geometry type.
+    if elem_type == "relation":
+        rel_type = tags.get("type", "")
+        if rel_type and rel_type not in importable_relation_types:
+            return {
+                "reason": (
+                    f"Relation type '{rel_type}' is not imported by the tiler. "
+                    f"Only these relation types are supported: {', '.join(sorted(importable_relation_types))}"
+                ),
+                "commentable": False,
+            }
+
     # Check geometry validity
     if elem_type == "way":
         node_count = elem.get("node_count", 0)
@@ -330,19 +347,6 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
                     return None
 
     if not matched_any_tag:
-        # For relations: check if the relation type itself is not importable
-        # (only check here, after confirming no other tags matched any table)
-        if elem_type == "relation":
-            rel_type = tags.get("type", "")
-            if rel_type and rel_type not in importable_relation_types:
-                return {
-                    "reason": (
-                        f"Relation type '{rel_type}' is not imported by the tiler. "
-                        f"Only these relation types are supported: {', '.join(sorted(importable_relation_types))}"
-                    ),
-                    "commentable": False,
-                }
-
         return {
             "reason": "No tags match the tiler's import configuration",
             "commentable": False,
@@ -350,14 +354,6 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
 
     # Tags matched but all tables rejected it — mapper should know
     if rejection_reasons:
-        # For relations with non-standard type: mention the relation type in the reason
-        if elem_type == "relation":
-            rel_type = tags.get("type", "")
-            if rel_type and rel_type not in importable_relation_types:
-                rejection_reasons.append(
-                    f"relation type '{rel_type}' is not directly importable "
-                    f"(supported: {', '.join(sorted(importable_relation_types))})"
-                )
         return {
             "reason": "Element has mappable tags but was rejected by all tables: " + "; ".join(rejection_reasons),
             "commentable": True,
