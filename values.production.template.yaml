@@ -339,11 +339,11 @@ osm-seed:
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: utils
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["web"]
+      values: ["utils"]
   # ====================================================================================================
   # Variables for osm-seed to pupulate the apidb
   # ====================================================================================================
@@ -755,11 +755,11 @@ osm-seed:
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
-      label_value: web
+      label_value: utils
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["database"] 
+      values: ["utils"] 
   # ====================================================================================================
   # Variables for Tasking Manager API
   # ====================================================================================================
@@ -820,11 +820,11 @@ osm-seed:
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
-      label_value: web
+      label_value: utils
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["web"] 
+      values: ["utils"] 
  # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
@@ -1069,11 +1069,11 @@ osm-seed:
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
-      label_value: web
+      label_value: utils
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["web"]
+      values: ["utils"]
 # ====================================================================================================
 # Variables for osmcha web
 # ====================================================================================================
