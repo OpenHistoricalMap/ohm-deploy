@@ -20,10 +20,10 @@ source ./scripts/utils.sh
 # Usage:
 #   refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
 # ============================================================================
-LIGHT_WORK_MEM="${LIGHT_WORK_MEM:-64MB}"
-LIGHT_MAINT_MEM="${LIGHT_MAINT_MEM:-256MB}"
-HEAVY_WORK_MEM="${HEAVY_WORK_MEM:-512MB}"
-HEAVY_MAINT_MEM="${HEAVY_MAINT_MEM:-4GB}"
+LIGHT_WORK_MEM="${LIGHT_WORK_MEM:-256MB}"
+LIGHT_MAINT_MEM="${LIGHT_MAINT_MEM:-2GB}"
+HEAVY_WORK_MEM="${HEAVY_WORK_MEM:-1GB}"
+HEAVY_MAINT_MEM="${HEAVY_MAINT_MEM:-8GB}"
 
 function refresh_mviews_group() {
     local group_name="$1"
