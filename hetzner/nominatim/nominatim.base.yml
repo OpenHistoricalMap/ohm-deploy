@@ -5,7 +5,7 @@ services:
     volumes:
       - nominatim_data:/var/lib/postgresql/16/main
     environment:
-      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250716_0101.osm.pbf
+      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
       REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
       REPLICATION_UPDATE_INTERVAL: 60
       REPLICATION_RECHECK_INTERVAL: 30

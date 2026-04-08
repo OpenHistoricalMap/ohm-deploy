@@ -9,10 +9,10 @@ services:
     environment:
       OVERPASS_META: attic
       OVERPASS_MODE: init
-      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260216_0301.osm.pbf
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
       OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
       OVERPASS_RULES_LOAD: 10
-      OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1796000
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1900000
       OVERPASS_ALLOW_DUPLICATE_QUERIES: yes
     restart: always
     ## Disable healthcheck during initialization phase to prevent premature restarts

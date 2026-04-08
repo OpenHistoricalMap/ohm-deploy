@@ -39,6 +39,12 @@ class Config:
     )
     OHM_API_BASE = os.getenv("OHM_API_BASE", "https://www.openhistoricalmap.org/api/0.6")
 
+    # Imposm config URL (compiled imposm3.json uploaded by tiler-imposm to S3)
+    IMPOSM_CONFIG_URL = os.getenv(
+        "IMPOSM_CONFIG_URL",
+        "https://s3.amazonaws.com/planet.openhistoricalmap.org/imposm/imposm3.json",
+    )
+
     # How often to run the pipeline check (e.g. "1h", "30m", "3600")
     CHECK_INTERVAL = _parse_duration("TILER_MONITORING_CHECK_INTERVAL", 3600)
 
@@ -57,6 +63,10 @@ class Config:
     # as "warning" instead of "failed" and do NOT trigger RSS/Slack alerts.
     # e.g. 10 = 10% — if only 1/44 elements is missing (2.3%), it's a warning.
     MISSING_THRESHOLD_PCT = int(os.getenv("TILER_MONITORING_MISSING_THRESHOLD_PCT", 10))
+
+    # Changeset commenting (OHM API credentials for posting comments)
+    OHM_COMMENT_USER = os.getenv("OHM_COMMENT_USER", "")
+    OHM_COMMENT_PASSWORD = os.getenv("OHM_COMMENT_PASSWORD", "")
 
     # Verbose logging
     VERBOSE_LOGGING = os.getenv("VERBOSE_LOGGING", "false").lower() == "true"

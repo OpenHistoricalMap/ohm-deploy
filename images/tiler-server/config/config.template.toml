@@ -26,7 +26,7 @@ type = "prometheus"
 name = "ohm"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 120
+max_connections = 30
 	###### PROVIDERS_OSM
 
 ####################################
@@ -37,7 +37,7 @@ max_connections = 120
 name = "ohm_admin"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 25
+max_connections = 8
 	###### PROVIDERS_ADMIN_BOUNDARIES_AREAS
 
 ####################################
@@ -48,7 +48,7 @@ max_connections = 25
 name = "ohm_other_boundaries"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 25
+max_connections = 8
 	###### PROVIDERS_NON_ADMIN_BOUNDARIES_AREAS
 
 ####################################
@@ -58,7 +58,7 @@ max_connections = 25
 name = "ne"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 25
+max_connections = 5
 	###### Water lands ne
 	[[providers.layers]]
 	name = "ne_water_lakes_0-8"
@@ -74,7 +74,7 @@ max_connections = 25
 name = "osm_land"
 type = "mvt_postgis"
 uri = "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-max_connections = 25
+max_connections = 5
 	[[providers.layers]]
 	name = "osm_land_0-2"
 	geometry_fieldname = "geometry"

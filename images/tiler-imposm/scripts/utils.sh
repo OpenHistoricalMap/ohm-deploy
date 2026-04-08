@@ -13,6 +13,16 @@ log_message() {
     echo -e "$(date +'%Y-%m-%d %H:%M:%S') - ${message}${NC}"
 }
 
+STATUS_DIR="/tmp/mview_status"
+mkdir -p "$STATUS_DIR"
+
+write_status() {
+    local name="$1" status="$2" duration="$3" total="$4" failed="$5" failed_views="$6" error_msg="$7"
+    cat > "$STATUS_DIR/${name}.json" <<EOF
+{"group":"$name","status":"$status","timestamp":"$(date -u '+%Y-%m-%dT%H:%M:%SZ')","duration_seconds":$duration,"views_total":$total,"views_failed":$failed,"failed_views":"$failed_views","error":"$error_msg"}
+EOF
+}
+
 execute_sql_file() {
     local file="$1"
     log_message "${YELLOW}⚙️  Executing: $file"
