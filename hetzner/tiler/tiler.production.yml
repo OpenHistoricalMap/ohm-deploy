@@ -139,10 +139,10 @@ services:
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db_17_03
+    name: tiler_db
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm_17_03
+    name: tiler_imposm
   tiler_monitor_data:
     driver: local
     name: tiler_monitor_data_v3
