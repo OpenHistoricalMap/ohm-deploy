@@ -218,7 +218,7 @@ http:
     tiler_monitor:
       loadBalancer:
         servers:
-          - url: http://tiler-monitor:8001
+          - url: http://tiler_monitor:8001
 
 providers:
   file:
