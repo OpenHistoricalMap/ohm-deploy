@@ -91,6 +91,7 @@ services:
     volumes:
       - staticfiles:/srv/www/static/django:ro
       - ${PWD}/hetzner/osmcha/script/update.sh:/app/update.sh
+      - ${PWD}/hetzner/osmcha/script/backfill_changesets.py:/app/osmchadjango/changeset/management/commands/backfill_changesets.py
     command: sh /app/update.sh
 
 volumes:

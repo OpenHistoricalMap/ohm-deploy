@@ -128,6 +128,30 @@ def _init_tables(conn):
         ON feed_events(created_at DESC)
     """)
 
+<<<<<<< HEAD
+=======
+    # Comment drafts: elements with tiler-relevant tags that imposm rejected.
+    # Stored for review before posting actual changeset comments.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS comment_drafts (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            changeset_id    INTEGER NOT NULL,
+            element_type    TEXT    NOT NULL,
+            osm_id          INTEGER NOT NULL,
+            version         INTEGER NOT NULL DEFAULT 0,
+            action          TEXT    NOT NULL DEFAULT '',
+            skip_reason     TEXT    NOT NULL,
+            tags            TEXT    NOT NULL DEFAULT '',
+            created_at      TEXT    NOT NULL,
+            UNIQUE(changeset_id, element_type, osm_id)
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_comment_drafts_created
+        ON comment_drafts(created_at DESC)
+    """)
+
+>>>>>>> staging
     conn.commit()
 
 
@@ -501,6 +525,88 @@ def get_feed_events(limit: int = 50):
 
 
 # ---------------------------------------------------------------------------
+<<<<<<< HEAD
+=======
+# Comment drafts
+# ---------------------------------------------------------------------------
+
+def add_comment_draft(changeset_id: int, element_type: str, osm_id: int,
+                      skip_reason: str, version: int = 0, action: str = "",
+                      tags: dict = None):
+    """Store a commentable element for review in the dashboard."""
+    import json
+    now = datetime.now(timezone.utc).isoformat()
+    tags_str = json.dumps(tags) if tags else "{}"
+    with _lock:
+        conn = _get_conn()
+        conn.execute("""
+            INSERT OR IGNORE INTO comment_drafts
+                (changeset_id, element_type, osm_id, version, action,
+                 skip_reason, tags, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (changeset_id, element_type, osm_id, version, action,
+              skip_reason, tags_str, now))
+        conn.commit()
+
+
+def get_comment_drafts(page: int = 1, per_page: int = 50,
+                       ohm_base: str = "https://www.openhistoricalmap.org"):
+    """Return paginated comment drafts grouped by changeset."""
+    import json
+    with _lock:
+        conn = _get_conn()
+        total = conn.execute("SELECT COUNT(*) FROM comment_drafts").fetchone()[0]
+        total_pages = max(1, (total + per_page - 1) // per_page)
+        offset = (page - 1) * per_page
+
+        rows = conn.execute("""
+            SELECT * FROM comment_drafts
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+        """, (per_page, offset)).fetchall()
+
+    now = datetime.now(timezone.utc)
+    results = []
+    for r in rows:
+        entry = dict(r)
+        entry["element_url"] = f"{ohm_base}/{r['element_type']}/{r['osm_id']}"
+        entry["changeset_url"] = f"{ohm_base}/changeset/{r['changeset_id']}"
+        try:
+            entry["tags"] = json.loads(r["tags"]) if r["tags"] else {}
+        except Exception:
+            entry["tags"] = {}
+        try:
+            created = datetime.fromisoformat(r["created_at"])
+            entry["created_ago"] = _human_duration((now - created).total_seconds())
+        except Exception:
+            entry["created_ago"] = ""
+        results.append(entry)
+
+    # Group by changeset for the preview
+    changesets = {}
+    for r in results:
+        cs_id = r["changeset_id"]
+        if cs_id not in changesets:
+            changesets[cs_id] = {
+                "changeset_id": cs_id,
+                "changeset_url": r["changeset_url"],
+                "elements": [],
+                "created_ago": r["created_ago"],
+            }
+        changesets[cs_id]["elements"].append(r)
+
+    return {
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "total_pages": total_pages,
+        "drafts": results,
+        "by_changeset": list(changesets.values()),
+    }
+
+
+# ---------------------------------------------------------------------------
+>>>>>>> staging
 # Helpers
 # ---------------------------------------------------------------------------
 

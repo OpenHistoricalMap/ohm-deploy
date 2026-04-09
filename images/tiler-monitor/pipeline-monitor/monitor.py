@@ -29,6 +29,12 @@ logger = logging.getLogger(__name__)
 _latest_result = None
 _lock = threading.Lock()
 
+<<<<<<< HEAD
+=======
+# Track changesets already commented on (to avoid duplicate comments)
+_commented_changesets = set()
+
+>>>>>>> staging
 app = FastAPI(title="OHM Vtile Pipeline Monitor")
 
 
@@ -100,6 +106,30 @@ def _run_check():
             prev = _latest_result
             globals()["_latest_result"] = result
 
+<<<<<<< HEAD
+=======
+        # Store comment drafts for elements with tiler tags that imposm rejected
+        changeset_results = result.get("details", {}).get("changesets", [])
+        draft_count = 0
+        for cs_result in changeset_results:
+            db_check = cs_result.get("tiler_db", {})
+            commentable = db_check.get("commentable_elements", [])
+            cs_id = cs_result.get("changeset_id")
+            for elem in commentable:
+                retry_store.add_comment_draft(
+                    changeset_id=cs_id,
+                    element_type=elem.get("type", ""),
+                    osm_id=elem.get("osm_id", 0),
+                    skip_reason=elem.get("skip_reason", ""),
+                    version=elem.get("version", 0),
+                    action=elem.get("action", ""),
+                    tags=elem.get("tags"),
+                )
+                draft_count += 1
+        if draft_count:
+            logger.info(f"Stored {draft_count} comment draft(s) for review")
+
+>>>>>>> staging
         # Alert on state changes or new failures
         newly_failed = result.get("details", {}).get("newly_failed", [])
         if newly_failed:
@@ -297,6 +327,20 @@ def history_elements(history_id: int):
     return JSONResponse(content={"history_id": history_id, "elements": elements})
 
 
+<<<<<<< HEAD
+=======
+@app.get("/comments")
+def comments(page: int = 1, per_page: int = 50):
+    """Return comment drafts — elements with tiler tags that imposm rejected.
+
+    These are stored for review before posting actual changeset comments.
+    Example: /comments?page=1&per_page=50
+    """
+    data = retry_store.get_comment_drafts(page=page, per_page=per_page)
+    return JSONResponse(content=data)
+
+
+>>>>>>> staging
 # ---------------------------------------------------------------------------
 # RSS / Atom feed
 # ---------------------------------------------------------------------------

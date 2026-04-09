@@ -40,11 +40,11 @@ RUN git clone https://github.com/OpenHistoricalMap/DateFunctions-plpgsql.git /us
 
 WORKDIR /go
 ENV GOPATH /go
-RUN echo "Version v0.14.2"
-RUN git clone https://github.com/omniscale/imposm3.git $GOPATH/src/github.com/omniscale/imposm3
+RUN echo "objs_warnings"
+RUN git clone https://github.com/OpenHistoricalMap/imposm3.git $GOPATH/src/github.com/omniscale/imposm3
 
 WORKDIR $GOPATH/src/github.com/omniscale/imposm3
-RUN git checkout v0.14.2
+RUN git checkout objs_warnings
 
 # Apply fixes or patches (if necessary)
 RUN sed -i '/setMaxFileSize/d' cache/ldb_pre_121.go

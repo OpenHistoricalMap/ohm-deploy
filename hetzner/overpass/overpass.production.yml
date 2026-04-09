@@ -1,4 +1,4 @@
 services:
   overpass:
-    mem_limit: 16g
-    cpus: "8.0"
+    # mem_limit: 16g
+    # cpus: "8.0"

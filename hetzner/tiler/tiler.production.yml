@@ -10,14 +10,15 @@ services:
       - "54329:5432"
     env_file:
       - .env.tiler
-    mem_limit: 40G
-    cpus: "25.0"
+    mem_limit: 100G
+    cpus: "30.0"
+    shm_size: 16g
     networks:
       - ohm_network
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3323.h6950acce
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3347.h9440d7a7
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -120,7 +121,11 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
+<<<<<<< HEAD
     image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3353.h63df1944
+=======
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3340.h7261c0e9
+>>>>>>> staging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ../../images/tiler-monitor:/app
@@ -138,13 +143,20 @@ services:
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db_17_03
+    name: tiler_db
   tiler_imposm_data:
     driver: local
+<<<<<<< HEAD
     name: tiler_imposm_17_03
   tiler_monitor_data:
     driver: local
     name: tiler_monitor_data
+=======
+    name: tiler_imposm
+  tiler_monitor_data:
+    driver: local
+    name: tiler_monitor_data_v3
+>>>>>>> staging
 
 networks:
   ohm_network:

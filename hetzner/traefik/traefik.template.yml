@@ -218,7 +218,11 @@ http:
     tiler_monitor:
       loadBalancer:
         servers:
+<<<<<<< HEAD
           - url: http://tiler-monitor:8001
+=======
+          - url: http://tiler_monitor:8001
+>>>>>>> staging
 
 providers:
   file:
