@@ -29,12 +29,9 @@ logger = logging.getLogger(__name__)
 _latest_result = None
 _lock = threading.Lock()
 
-<<<<<<< HEAD
-=======
 # Track changesets already commented on (to avoid duplicate comments)
 _commented_changesets = set()
 
->>>>>>> staging
 app = FastAPI(title="OHM Vtile Pipeline Monitor")
 
 
@@ -106,8 +103,6 @@ def _run_check():
             prev = _latest_result
             globals()["_latest_result"] = result
 
-<<<<<<< HEAD
-=======
         # Store comment drafts for elements with tiler tags that imposm rejected
         changeset_results = result.get("details", {}).get("changesets", [])
         draft_count = 0
@@ -129,7 +124,6 @@ def _run_check():
         if draft_count:
             logger.info(f"Stored {draft_count} comment draft(s) for review")
 
->>>>>>> staging
         # Alert on state changes or new failures
         newly_failed = result.get("details", {}).get("newly_failed", [])
         if newly_failed:
@@ -327,8 +321,6 @@ def history_elements(history_id: int):
     return JSONResponse(content={"history_id": history_id, "elements": elements})
 
 
-<<<<<<< HEAD
-=======
 @app.get("/comments")
 def comments(page: int = 1, per_page: int = 50):
     """Return comment drafts — elements with tiler tags that imposm rejected.
@@ -340,7 +332,6 @@ def comments(page: int = 1, per_page: int = 50):
     return JSONResponse(content=data)
 
 
->>>>>>> staging
 # ---------------------------------------------------------------------------
 # RSS / Atom feed
 # ---------------------------------------------------------------------------

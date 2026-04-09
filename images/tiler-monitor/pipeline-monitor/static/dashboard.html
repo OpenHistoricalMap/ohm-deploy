@@ -135,12 +135,9 @@
   <button class="tab" data-tab="retries" onclick="switchTab('retries')">
     Retries <span class="badge" id="retriesBadge">0</span>
   </button>
-<<<<<<< HEAD
-=======
   <button class="tab" data-tab="comments" onclick="switchTab('comments')">
     Comments <span class="badge" id="commentsBadge">0</span>
   </button>
->>>>>>> staging
 </div>
 
 <!-- Health panel -->
@@ -191,8 +188,6 @@
   <div class="empty" id="retriesEmpty" style="display:none">No pending retries. All elements are in sync.</div>
 </div>
 
-<<<<<<< HEAD
-=======
 <!-- Comments panel -->
 <div class="panel" id="panel-comments">
   <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
@@ -211,7 +206,6 @@
   <div class="pagination" id="commentsPagination"></div>
 </div>
 
->>>>>>> staging
 <script>
 const API = '';  // Use relative URLs — works regardless of host/port
 let historyPage = 1;
@@ -594,8 +588,6 @@ async function loadRetries() {
   }
 }
 
-<<<<<<< HEAD
-=======
 // ---- Comments ----
 let commentsPage = 1;
 const commentsPerPage = 50;
@@ -656,17 +648,13 @@ function filterComments() {
   });
 }
 
->>>>>>> staging
 // ---- Tabs ----
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
   if (name === 'history' && !historyData.total) loadHistory(1);
   if (name === 'retries') loadRetries();
-<<<<<<< HEAD
-=======
   if (name === 'comments' && !commentsData.total) loadComments(1);
->>>>>>> staging
 }
 
 // ---- Refresh ----

@@ -21,16 +21,9 @@ import retry_store
 
 logger = logging.getLogger(__name__)
 
-<<<<<<< HEAD
-# Load table/view mapping from JSON config
-_config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tables_config.json")
-with open(_config_path) as f:
-    _tables_config = json.load(f)
-=======
 # Load imposm config from S3
 import imposm_config_loader
 _imposm_config = imposm_config_loader.load_config()
->>>>>>> staging
 
 OHM_BASE = None  # lazily computed
 
@@ -238,17 +231,6 @@ def _get_changeset_elements(changeset_id):
 
 
 
-<<<<<<< HEAD
-# Loaded from tables_config.json
-TAG_TO_CHECK = _tables_config["tag_to_check"]
-
-# Reject rules: tag key -> list of values that imposm rejects (not imported)
-_REJECT_VALUES = _tables_config.get("reject_values", {})
-
-# Relation types that imposm actually imports (multipolygon, boundary, route, street)
-# Relations with other type= values (e.g. site, associatedStreet) are ignored by imposm
-_IMPORTABLE_RELATION_TYPES = set(_tables_config.get("importable_relation_types", []))
-=======
 # Loaded from imposm3.json (S3)
 TAG_TO_CHECK = _imposm_config["tag_to_check"]
 _TABLE_DETAILS = _imposm_config["table_details"]
@@ -262,7 +244,6 @@ for (table_name, tag_key), detail in _TABLE_DETAILS.items():
             _REJECT_VALUES[reject_key] = set()
         _REJECT_VALUES[reject_key].update(reject_vals)
 _REJECT_VALUES = {k: list(v) for k, v in _REJECT_VALUES.items()}
->>>>>>> staging
 
 # Split config keys into simple tags ("highway") and key=value tags ("type=street")
 _SIMPLE_TAGS = {}
@@ -647,26 +628,6 @@ def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None, already_
             "elements": [],
         }
 
-<<<<<<< HEAD
-    # Filter elements: skip those without mappable tags or with invalid geometry
-    checkable_elements = []
-    for elem in elements:
-        if not _has_mappable_tags(elem):
-            continue
-        if _has_invalid_geometry(elem):
-            tags = elem.get("tags", {})
-            print(f"    SKIP {elem['type']}/{elem['osm_id']} v{elem['version']} "
-                  f"-> invalid geometry (area={tags.get('area', 'no')}, "
-                  f"nodes={elem.get('node_count', '?')}), imposm will reject")
-            continue
-        if _is_non_importable_relation(elem):
-            rel_type = elem.get("tags", {}).get("type", "")
-            print(f"    SKIP {elem['type']}/{elem['osm_id']} v{elem['version']} "
-                  f"-> relation type={rel_type} is not imported by imposm")
-            continue
-        checkable_elements.append(elem)
-
-=======
     # Filter elements: skip those that imposm won't import, with precise reason
     checkable_elements = []
     skipped_elements = []
@@ -685,16 +646,12 @@ def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None, already_
     # Collect elements that have tiler tags but imposm rejected (for changeset comments)
     commentable_elements = [e for e in skipped_elements if e.get("commentable")]
 
->>>>>>> staging
     if not checkable_elements:
         return {
             "status": "ok",
             "message": "No importable elements in this changeset",
             "elements": [],
-<<<<<<< HEAD
-=======
             "commentable_elements": commentable_elements,
->>>>>>> staging
         }
 
     # Deduplicate: skip elements already checked in a newer changeset
@@ -839,10 +796,7 @@ def _check_elements_in_db(conn, changeset_id, changeset_closed_at=None, already_
         "message": msg,
         "elements": checked,
         "tile_cache": tile_cache_results,
-<<<<<<< HEAD
-=======
         "commentable_elements": commentable_elements,
->>>>>>> staging
     }
 
 
@@ -1027,32 +981,11 @@ def check_pipeline():
             continue
         current_elem = {"type": etype, "tags": current_info["tags"],
                         "node_count": current_info["node_count"]}
-<<<<<<< HEAD
-        if not _has_mappable_tags(current_elem):
-            # Latest version has no mappable tags — imposm won't import it
-            print(f"  [retry] RESOLVED {etype}/{oid} (changeset {cs_id}) "
-                  f"-> latest version has no mappable tags, no longer expected in DB")
-            retry_store.mark_resolved(cs_id, etype, oid)
-            continue
-        if _has_invalid_geometry(current_elem):
-            # Invalid geometry — imposm will reject it
-            tags = current_info["tags"]
-            print(f"  [retry] RESOLVED {etype}/{oid} (changeset {cs_id}) "
-                  f"-> invalid geometry (area={tags.get('area', 'no')}, "
-                  f"nodes={current_info['node_count']}), imposm rejects this")
-            retry_store.mark_resolved(cs_id, etype, oid)
-            continue
-        if _is_non_importable_relation(current_elem):
-            rel_type = current_info["tags"].get("type", "")
-            print(f"  [retry] RESOLVED {etype}/{oid} (changeset {cs_id}) "
-                  f"-> relation type={rel_type} is not imported by imposm")
-=======
         skip_info = imposm_config_loader.get_skip_reason(
             current_elem, TAG_TO_CHECK, _TABLE_DETAILS, _IMPORTABLE_RELATION_TYPES
         )
         if skip_info:
             print(f"  [retry] RESOLVED {etype}/{oid} (changeset {cs_id}) -> {skip_info['reason']}")
->>>>>>> staging
             retry_store.mark_resolved(cs_id, etype, oid)
             continue
 
@@ -1366,23 +1299,6 @@ def recheck_retries():
             continue
         current_elem = {"type": etype, "tags": current_info["tags"],
                         "node_count": current_info["node_count"]}
-<<<<<<< HEAD
-        if not _has_mappable_tags(current_elem):
-            retry_store.mark_resolved(cs_id, etype, oid)
-            resolved.append({"type": etype, "osm_id": oid, "changeset_id": cs_id,
-                             "reason": "no mappable tags (rejected by imposm)"})
-            continue
-        if _has_invalid_geometry(current_elem):
-            retry_store.mark_resolved(cs_id, etype, oid)
-            resolved.append({"type": etype, "osm_id": oid, "changeset_id": cs_id,
-                             "reason": f"invalid geometry (area={current_info['tags'].get('area', 'no')}, nodes={current_info['node_count']})"})
-            continue
-        if _is_non_importable_relation(current_elem):
-            rel_type = current_info["tags"].get("type", "")
-            retry_store.mark_resolved(cs_id, etype, oid)
-            resolved.append({"type": etype, "osm_id": oid, "changeset_id": cs_id,
-                             "reason": f"relation type={rel_type} not imported by imposm"})
-=======
         skip_info = imposm_config_loader.get_skip_reason(
             current_elem, TAG_TO_CHECK, _TABLE_DETAILS, _IMPORTABLE_RELATION_TYPES
         )
@@ -1390,7 +1306,6 @@ def recheck_retries():
             retry_store.mark_resolved(cs_id, etype, oid)
             resolved.append({"type": etype, "osm_id": oid, "changeset_id": cs_id,
                              "reason": skip_info["reason"]})
->>>>>>> staging
             continue
 
         check = _check_element_in_tables(conn, {"type": etype, "osm_id": oid, "action": "modify"})

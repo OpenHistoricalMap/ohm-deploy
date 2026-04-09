@@ -27,11 +27,11 @@ services:
       - sh
       - -c
       - |
-        while true; do
-          # make sure you disable this for importing the data, for update it shule b eenable
-          ./liveness.sh || exit 1
-          sleep 60
-        done &
+        # while true; do
+        #   # make sure you disable this for importing the data, for update it shule b eenable
+        #   ./liveness.sh || exit 1
+        #   sleep 60
+        # done &
         ./start.sh
     restart: always
     networks:
@@ -121,11 +121,7 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
-<<<<<<< HEAD
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3353.h63df1944
-=======
     image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3340.h7261c0e9
->>>>>>> staging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ../../images/tiler-monitor:/app
@@ -146,17 +142,10 @@ volumes:
     name: tiler_db
   tiler_imposm_data:
     driver: local
-<<<<<<< HEAD
-    name: tiler_imposm_17_03
-  tiler_monitor_data:
-    driver: local
-    name: tiler_monitor_data
-=======
     name: tiler_imposm
   tiler_monitor_data:
     driver: local
     name: tiler_monitor_data_v3
->>>>>>> staging
 
 networks:
   ohm_network:

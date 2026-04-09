@@ -128,8 +128,6 @@ def _init_tables(conn):
         ON feed_events(created_at DESC)
     """)
 
-<<<<<<< HEAD
-=======
     # Comment drafts: elements with tiler-relevant tags that imposm rejected.
     # Stored for review before posting actual changeset comments.
     conn.execute("""
@@ -151,7 +149,6 @@ def _init_tables(conn):
         ON comment_drafts(created_at DESC)
     """)
 
->>>>>>> staging
     conn.commit()
 
 
@@ -525,8 +522,6 @@ def get_feed_events(limit: int = 50):
 
 
 # ---------------------------------------------------------------------------
-<<<<<<< HEAD
-=======
 # Comment drafts
 # ---------------------------------------------------------------------------
 
@@ -606,7 +601,6 @@ def get_comment_drafts(page: int = 1, per_page: int = 50,
 
 
 # ---------------------------------------------------------------------------
->>>>>>> staging
 # Helpers
 # ---------------------------------------------------------------------------
 
