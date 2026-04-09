@@ -193,6 +193,22 @@ def mark_resolved(changeset_id: int, element_type: str, osm_id: int):
         conn.commit()
 
 
+def mark_resolved_all(element_type: str, osm_id: int):
+    """Remove ALL retry entries for an element across all changesets.
+
+    When an element is resolved (found in DB, deleted, or skipped), older
+    versions of the same element in other changesets should also be cleared
+    to prevent duplicate entries in the retry dashboard.
+    """
+    with _lock:
+        conn = _get_conn()
+        conn.execute("""
+            DELETE FROM pending_retries
+            WHERE element_type = ? AND osm_id = ?
+        """, (element_type, osm_id))
+        conn.commit()
+
+
 def increment_retry(changeset_id: int, element_type: str, osm_id: int,
                      final_status: str = "failed"):
     """Bump retry_count. If it reaches max_retries, flip status to *final_status*.

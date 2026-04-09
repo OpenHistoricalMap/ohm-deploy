@@ -18,7 +18,7 @@ services:
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3347.h9440d7a7
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3339.h2fbce74c
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -27,11 +27,11 @@ services:
       - sh
       - -c
       - |
-        # while true; do
-        #   # make sure you disable this for importing the data, for update it shule b eenable
-        #   ./liveness.sh || exit 1
-        #   sleep 60
-        # done &
+        while true; do
+          # make sure you disable this for importing the data
+          sleep 600
+          ./liveness.sh || exit 1
+        done &
         ./start.sh
     restart: always
     networks:
@@ -121,7 +121,7 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3340.h7261c0e9
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3362.ha53a5a87
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ../../images/tiler-monitor:/app

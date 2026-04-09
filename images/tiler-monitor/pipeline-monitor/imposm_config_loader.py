@@ -199,6 +199,19 @@ def _parse_imposm_config(imposm_config):
     importable_relation_types.add("multipolygon")
     importable_relation_types.add("boundary")
 
+    # Imposm handles natural=coastline separately (coastline processing) and never
+    # stores it in normal tables. Ensure ALL tables that map "natural" reject
+    # "coastline", even if the imposm3.json only declares the reject on some tables.
+    _GLOBAL_REJECTS = {"natural": ["coastline"]}
+    for (tbl, tag_key), detail in table_details.items():
+        for reject_key, reject_vals in _GLOBAL_REJECTS.items():
+            if tag_key == reject_key:
+                if reject_key not in detail["rejects"]:
+                    detail["rejects"][reject_key] = []
+                for v in reject_vals:
+                    if v not in detail["rejects"][reject_key]:
+                        detail["rejects"][reject_key].append(v)
+
     return {
         "tag_to_check": tag_to_check,
         "table_details": table_details,
