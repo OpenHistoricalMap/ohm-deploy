@@ -82,7 +82,7 @@ def main():
             # Static groups: single block, 365d cache, immutable
             composite_routes.append(
                 f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf (static)\n"
-                f"        location ~ ^/maps/{group_name}/(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
+                f"        location ~ ^/maps/{group_name}/(\\d+/\\d+/\\d+)(?:\\.pbf)?$ {{\n"
                 f"            proxy_cache {cache_zone};\n"
                 f"            proxy_cache_valid 200 365d;\n"
                 f"            proxy_cache_valid 204 1m;\n"
@@ -99,7 +99,7 @@ def main():
             )
             perlayer_routes.append(
                 f"        # Per-layer: /maps/{group_name}/{{layer}}/{{z}}/{{x}}/{{y}}.pbf (static)\n"
-                f"        location ~ ^/maps/{group_name}/([^/]+)/(\\d+/\\d+/\\d+)\\.pbf$ {{\n"
+                f"        location ~ ^/maps/{group_name}/([^/]+)/(\\d+/\\d+/\\d+)(?:\\.pbf)?$ {{\n"
                 f"            proxy_cache {cache_zone};\n"
                 f"            proxy_cache_valid 200 365d;\n"
                 f"            proxy_cache_valid 204 1m;\n"
@@ -119,7 +119,7 @@ def main():
             for zr in ZOOM_RANGES:
                 composite_routes.append(
                     f"        # Composite: /maps/{group_name}/{{z}}/{{x}}/{{y}}.pbf ({zr['label']}, cache={zr['ttl']})\n"
-                    f"        location ~ ^/maps/{group_name}/({zr['regex']})/([0-9]+)/([0-9]+)\\.pbf$ {{\n"
+                    f"        location ~ ^/maps/{group_name}/({zr['regex']})/([0-9]+)/([0-9]+)(?:\\.pbf)?$ {{\n"
                     f"            proxy_cache {cache_zone};\n"
                     f"            proxy_cache_valid 200 {zr['ttl']};\n"
                     f"            proxy_cache_valid 204 1m;\n"
@@ -136,7 +136,7 @@ def main():
                 )
                 perlayer_routes.append(
                     f"        # Per-layer: /maps/{group_name}/{{layer}}/{{z}}/{{x}}/{{y}}.pbf ({zr['label']}, cache={zr['ttl']})\n"
-                    f"        location ~ ^/maps/{group_name}/([^/]+)/({zr['regex']})/([0-9]+)/([0-9]+)\\.pbf$ {{\n"
+                    f"        location ~ ^/maps/{group_name}/([^/]+)/({zr['regex']})/([0-9]+)/([0-9]+)(?:\\.pbf)?$ {{\n"
                     f"            proxy_cache {cache_zone};\n"
                     f"            proxy_cache_valid 200 {zr['ttl']};\n"
                     f"            proxy_cache_valid 204 1m;\n"
