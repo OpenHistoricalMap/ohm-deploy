@@ -107,7 +107,7 @@ def _init_tables(conn):
     """)
 
     # Feed events: persistent log of alerts (failed elements, recoveries)
-    # for the RSS feed. Items are never deleted, only added.
+    # for the RSS feed. Resolved items are hidden from the feed.
     conn.execute("""
         CREATE TABLE IF NOT EXISTS feed_events (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,9 +120,15 @@ def _init_tables(conn):
             title           TEXT    NOT NULL,
             description     TEXT    NOT NULL DEFAULT '',
             link            TEXT    NOT NULL DEFAULT '',
-            created_at      TEXT    NOT NULL
+            created_at      TEXT    NOT NULL,
+            resolved        INTEGER NOT NULL DEFAULT 0
         )
     """)
+    # Migration: add resolved column if missing (existing DBs)
+    try:
+        conn.execute("ALTER TABLE feed_events ADD COLUMN resolved INTEGER NOT NULL DEFAULT 0")
+    except Exception:
+        pass  # column already exists
     conn.execute("""
         CREATE INDEX IF NOT EXISTS idx_feed_events_created
         ON feed_events(created_at DESC)
@@ -183,13 +189,18 @@ def get_pending():
 
 
 def mark_resolved(changeset_id: int, element_type: str, osm_id: int):
-    """Element was found in a retry — remove it from pending."""
+    """Element was found in a retry — remove it from pending and hide from feed."""
     with _lock:
         conn = _get_conn()
         conn.execute("""
             DELETE FROM pending_retries
             WHERE changeset_id = ? AND element_type = ? AND osm_id = ?
         """, (changeset_id, element_type, osm_id))
+        # Mark corresponding feed events as resolved so they disappear from RSS
+        conn.execute("""
+            UPDATE feed_events SET resolved = 1
+            WHERE element_type = ? AND osm_id = ? AND event_type = 'failed'
+        """, (element_type, osm_id))
         conn.commit()
 
 
@@ -510,11 +521,12 @@ def add_feed_event(event_type: str, title: str, description: str = "",
 
 
 def get_feed_events(limit: int = 50):
-    """Return the most recent feed events for the RSS feed."""
+    """Return the most recent unresolved feed events for the RSS feed."""
     with _lock:
         conn = _get_conn()
         rows = conn.execute("""
             SELECT * FROM feed_events
+            WHERE resolved = 0
             ORDER BY created_at DESC
             LIMIT ?
         """, (limit,)).fetchall()
