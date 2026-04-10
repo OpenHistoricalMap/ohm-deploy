@@ -135,6 +135,9 @@
   <button class="tab" data-tab="retries" onclick="switchTab('retries')">
     Retries <span class="badge" id="retriesBadge">0</span>
   </button>
+  <button class="tab" data-tab="comments" onclick="switchTab('comments')">
+    Comments <span class="badge" id="commentsBadge">0</span>
+  </button>
 </div>
 
 <!-- Health panel -->
@@ -183,6 +186,24 @@
     <tbody id="retriesBody"></tbody>
   </table>
   <div class="empty" id="retriesEmpty" style="display:none">No pending retries. All elements are in sync.</div>
+</div>
+
+<!-- Comments panel -->
+<div class="panel" id="panel-comments">
+  <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
+    Elements with tiler-relevant tags that imposm rejected. These are draft comments — review before posting to changesets.
+  </p>
+  <div style="margin-bottom: 12px;">
+    <input class="search-box" id="commentsSearch" placeholder="Filter by changeset ID or element..." oninput="filterComments()">
+  </div>
+  <table>
+    <thead><tr>
+      <th>Changeset</th><th>Element</th><th>Action</th><th>Tags</th><th>Reason</th><th>Detected</th>
+    </tr></thead>
+    <tbody id="commentsBody"></tbody>
+  </table>
+  <div class="empty" id="commentsEmpty" style="display:none">No comment drafts yet. Elements with tiler tags that imposm rejects will appear here.</div>
+  <div class="pagination" id="commentsPagination"></div>
 </div>
 
 <script>
@@ -567,12 +588,73 @@ async function loadRetries() {
   }
 }
 
+// ---- Comments ----
+let commentsPage = 1;
+const commentsPerPage = 50;
+let commentsData = {};
+
+async function loadComments(page) {
+  commentsPage = page || 1;
+  try {
+    const r = await fetch(`${API}/comments?page=${commentsPage}&per_page=${commentsPerPage}`);
+    commentsData = await r.json();
+
+    document.getElementById('commentsBadge').textContent = commentsData.total || 0;
+
+    const tbody = document.getElementById('commentsBody');
+    const empty = document.getElementById('commentsEmpty');
+    const drafts = commentsData.drafts || [];
+
+    if (!drafts.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      document.getElementById('commentsPagination').innerHTML = '';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = drafts.map(d => {
+      const tagsEntries = Object.entries(d.tags || {});
+      const tagsHtmlStr = tagsEntries.length
+        ? `<div class="tag-list">${tagsEntries.slice(0, 5).map(([k,v]) => `<span class="tag">${k}=${v}</span>`).join('')}${tagsEntries.length > 5 ? `<span class="tag">+${tagsEntries.length - 5}</span>` : ''}</div>`
+        : '<span style="color:var(--muted)">—</span>';
+      return `<tr>
+        <td><a href="${d.changeset_url}" target="_blank">${d.changeset_id}</a></td>
+        <td><a href="${d.element_url}" target="_blank">${d.element_type}/${d.osm_id}</a>
+          ${d.version ? `<span style="color:var(--muted)">v${d.version}</span>` : ''}</td>
+        <td>${d.action || '—'}</td>
+        <td>${tagsHtmlStr}</td>
+        <td style="max-width:400px;font-size:12px;color:var(--yellow)">${d.skip_reason || ''}</td>
+        <td style="color:var(--muted)">${d.created_ago || ''}</td>
+      </tr>`;
+    }).join('');
+
+    const pag = document.getElementById('commentsPagination');
+    pag.innerHTML = `
+      <button ${commentsPage <= 1 ? 'disabled' : ''} onclick="loadComments(${commentsPage - 1})">Prev</button>
+      <span>Page ${commentsPage} of ${commentsData.total_pages}</span>
+      <button ${commentsPage >= commentsData.total_pages ? 'disabled' : ''} onclick="loadComments(${commentsPage + 1})">Next</button>
+    `;
+  } catch (e) {
+    console.error('Failed to load comments:', e);
+  }
+}
+
+function filterComments() {
+  const q = document.getElementById('commentsSearch').value.trim().toLowerCase();
+  const rows = document.querySelectorAll('#commentsBody tr');
+  rows.forEach(row => {
+    row.style.display = (!q || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+
 // ---- Tabs ----
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
   if (name === 'history' && !historyData.total) loadHistory(1);
   if (name === 'retries') loadRetries();
+  if (name === 'comments' && !commentsData.total) loadComments(1);
 }
 
 // ---- Refresh ----
