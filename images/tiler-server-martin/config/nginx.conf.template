@@ -14,8 +14,8 @@ http {
     keepalive_timeout 65;
 
     # === Tile cache (dynamic: ohm, ohm_admin, etc.) ===
-    # Long storage (30d) — the purge service actively invalidates changed tiles.
-    # If purge fails, Cache-Control headers (zoom-based) limit browser staleness.
+    # Tiles expire automatically via proxy_cache_valid TTLs (per zoom range).
+    # Manual purge: append ?purge=1 to any tile URL to bypass cache and fetch fresh.
     proxy_cache_path /var/cache/nginx/tiles
         levels=1:2
         keys_zone=tiles:200m
@@ -46,11 +46,20 @@ http {
     # nginx proxy_cache TTL varies by zoom range (generated per location block).
     # Ranges match materialized view zoom ranges. Lower zooms cache longer
     # (less change), higher zooms expire faster (more edits).
-    # Purge service actively invalidates z6-15; TTL is the safety net.
+    # Manual purge via ?purge=1; TTLs are the automatic safety net.
     #   z0-2:   24h    z3-5:  24h    z6-7:  16h    z8-9:  12h
     #   z10-12:  8h    z13-15: 4h    z16-20: 1h
     # Browser Cache-Control is set to "no-cache" for dynamic tiles so
     # browsers always revalidate with nginx.
+
+    # === Cache bypass for force-purge ===
+    # Append ?purge=1 to any tile URL to skip the cache and fetch fresh from Martin.
+    # The fresh response replaces the old cache entry (cache_key = $uri, without query params).
+    # Usage: /maps/ohm/10/512/340.pbf?purge=1
+    map $arg_purge $cache_bypass {
+        default 0;
+        "1"     1;
+    }
 
     upstream martin {
         server 127.0.0.1:${MARTIN_INTERNAL_PORT};
@@ -97,7 +106,6 @@ http {
             alias /app/tilejson/;
             default_type application/json;
             add_header Cache-Control "no-cache";
-            add_header Access-Control-Allow-Origin "*";
         }
 
         # Serve config files (functions.json for the viewer)
