@@ -51,28 +51,26 @@ def main():
         if not fn_names:
             continue
 
-        # TileJSON: /capabilities/{group}.json (Tegola-compatible) + /maps/{group}.json
-        for prefix in ("capabilities", "maps"):
+        # TileJSON: /maps/{group}.json
+        tilejson_routes.append(
+            f"        # TileJSON: /maps/{group_name}.json\n"
+            f"        location = /maps/{group_name}.json {{\n"
+            f"            default_type application/json;\n"
+            f"            alias /app/tilejson/{group_name}.json;\n"
+            f"            add_header Cache-Control \"no-store\";\n"
+            f"        }}"
+        )
+
+        # TileJSON: /maps/{group}/{layer}.json
+        for fn_name in fn_names:
             tilejson_routes.append(
-                f"        # TileJSON: /{prefix}/{group_name}.json\n"
-                f"        location = /{prefix}/{group_name}.json {{\n"
+                f"        # TileJSON: /maps/{group_name}/{fn_name}.json\n"
+                f"        location = /maps/{group_name}/{fn_name}.json {{\n"
                 f"            default_type application/json;\n"
-                f"            alias /app/tilejson/{group_name}.json;\n"
+                f"            alias /app/tilejson/{fn_name}.json;\n"
                 f"            add_header Cache-Control \"no-store\";\n"
                 f"        }}"
             )
-
-        # TileJSON: /capabilities/{group}/{layer}.json + /maps/{group}/{layer}.json
-        for fn_name in fn_names:
-            for prefix in ("capabilities", "maps"):
-                tilejson_routes.append(
-                    f"        # TileJSON: /{prefix}/{group_name}/{fn_name}.json\n"
-                    f"        location = /{prefix}/{group_name}/{fn_name}.json {{\n"
-                    f"            default_type application/json;\n"
-                    f"            alias /app/tilejson/{fn_name}.json;\n"
-                    f"            add_header Cache-Control \"no-store\";\n"
-                    f"        }}"
-                )
 
         # Composite: /maps/{group}/{z}/{x}/{y}.pbf -> Martin composite source
         composite_src = ",".join(fn_names)

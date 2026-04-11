@@ -91,7 +91,7 @@ http {
             proxy_pass http://martin;
         }
 
-        # TileJSON routes: /capabilities/{group}.json, /capabilities/{group}/{layer}.json
+        # TileJSON routes: /maps/{group}.json, /maps/{group}/{layer}.json
         ##TILEJSON_ROUTES##
 
         # Composite tile routes (one per group, Tegola-compatible)
@@ -100,13 +100,6 @@ http {
 
         # Per-layer routes: /maps/{group}/{layer}/{z}/{x}/{y}.pbf
         ##PERLAYER_ROUTES##
-
-        # TileJSON manifests fallback (auto-generated with vector_layers and fields)
-        location /capabilities/ {
-            alias /app/tilejson/;
-            default_type application/json;
-            add_header Cache-Control "no-cache";
-        }
 
         # Serve config files (functions.json for the viewer)
         location /config/ {
