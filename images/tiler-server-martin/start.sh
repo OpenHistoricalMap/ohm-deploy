@@ -24,6 +24,9 @@ echo "Generating Martin config..."
 cat > /app/config/config.yaml <<EOF
 listen_addresses: '0.0.0.0:${MARTIN_INTERNAL_PORT}'
 worker_processes: ${MARTIN_WORKER_PROCESSES:-8}
+# Disable Martin's internal tile cache so tiles are always generated fresh.
+# Nginx handles caching with TTLs + ?purge=1 bypass.
+cache_size_mb: 0
 
 postgres:
   connection_string: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?connect_timeout=10&keepalives=1&keepalives_idle=30'
@@ -63,7 +66,6 @@ echo "=== Ready ==="
 echo "  Nginx  :${NGINX_PORT} -> Martin :${MARTIN_INTERNAL_PORT}"
 echo "  Composite: /maps/ohm/{z}/{x}/{y}.pbf (all layers)"
 echo "  Per-layer: /maps/ohm/land_ohm_lines/{z}/{x}/{y}.pbf"
-
 
 # Wait for either process to exit
 wait -n $MARTIN_PID $NGINX_PID

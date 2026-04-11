@@ -18,14 +18,15 @@ OUTPUT_PATH = os.path.join(BASE_DIR, "config", "nginx.conf")
 # Zoom-based nginx cache TTLs for dynamic tiles.
 # proxy_cache_valid doesn't accept variables, so we generate
 # separate location blocks per zoom range.
+# Override via env vars: CACHE_TTL_Z0_2=6h, CACHE_TTL_Z3_5=4h, etc.
 ZOOM_RANGES = [
-    {"label": "z0-2",   "regex": "[0-2]",                    "ttl": "48h"},
-    {"label": "z3-5",   "regex": "[3-5]",                    "ttl": "24h"},
-    {"label": "z6-7",   "regex": "[6-7]",                    "ttl": "16h"},
-    {"label": "z8-9",   "regex": "[8-9]",                    "ttl": "12h"},
-    {"label": "z10-12", "regex": "1[0-2]",                   "ttl": "8h"},
-    {"label": "z13-15", "regex": "1[3-5]",                   "ttl": "4h"},
-    {"label": "z16-20", "regex": "(?:1[6-9]|20)",            "ttl": "1h"},
+    {"label": "z0-2",   "regex": "[0-2]",                    "ttl": os.environ.get("CACHE_TTL_Z0_2",   "48h")},
+    {"label": "z3-5",   "regex": "[3-5]",                    "ttl": os.environ.get("CACHE_TTL_Z3_5",   "24h")},
+    {"label": "z6-7",   "regex": "[6-7]",                    "ttl": os.environ.get("CACHE_TTL_Z6_7",   "16h")},
+    {"label": "z8-9",   "regex": "[8-9]",                    "ttl": os.environ.get("CACHE_TTL_Z8_9",   "12h")},
+    {"label": "z10-12", "regex": "1[0-2]",                   "ttl": os.environ.get("CACHE_TTL_Z10_12", "8h")},
+    {"label": "z13-15", "regex": "1[3-5]",                   "ttl": os.environ.get("CACHE_TTL_Z13_15", "4h")},
+    {"label": "z16-20", "regex": "(?:1[6-9]|20)",            "ttl": os.environ.get("CACHE_TTL_Z16_20", "1h")},
 ]
 
 
@@ -57,7 +58,7 @@ def main():
                 f"        location = /{prefix}/{group_name}.json {{\n"
                 f"            default_type application/json;\n"
                 f"            alias /app/tilejson/{group_name}.json;\n"
-                f"            add_header Cache-Control \"no-cache\";\n"
+                f"            add_header Cache-Control \"no-store\";\n"
                 f"        }}"
             )
 
@@ -69,7 +70,7 @@ def main():
                     f"        location = /{prefix}/{group_name}/{fn_name}.json {{\n"
                     f"            default_type application/json;\n"
                     f"            alias /app/tilejson/{fn_name}.json;\n"
-                    f"            add_header Cache-Control \"no-cache\";\n"
+                    f"            add_header Cache-Control \"no-store\";\n"
                     f"        }}"
                 )
 
@@ -87,8 +88,7 @@ def main():
                 f"            proxy_cache_key $uri;\n"
                 f"            proxy_cache_bypass $cache_bypass;\n"
                 f"            proxy_cache_lock on;\n"
-                f"            proxy_cache_use_stale error timeout updating;\n"
-                f"            proxy_cache_background_update on;\n"
+                f"            proxy_cache_use_stale error timeout;\n"
                 f"            add_header X-Cache-Status $upstream_cache_status;\n"
                 f"            add_header Cache-Control \"public, max-age=31536000\";\n"
                 f"            proxy_set_header Host $http_host;\n"
@@ -104,8 +104,7 @@ def main():
                 f"            proxy_cache_key $uri;\n"
                 f"            proxy_cache_bypass $cache_bypass;\n"
                 f"            proxy_cache_lock on;\n"
-                f"            proxy_cache_use_stale error timeout updating;\n"
-                f"            proxy_cache_background_update on;\n"
+                f"            proxy_cache_use_stale error timeout;\n"
                 f"            add_header X-Cache-Status $upstream_cache_status;\n"
                 f"            add_header Cache-Control \"public, max-age=31536000\";\n"
                 f"            proxy_set_header Host $http_host;\n"
@@ -124,10 +123,9 @@ def main():
                     f"            proxy_cache_key $uri;\n"
                     f"            proxy_cache_bypass $cache_bypass;\n"
                     f"            proxy_cache_lock on;\n"
-                    f"            proxy_cache_use_stale error timeout updating;\n"
-                    f"            proxy_cache_background_update on;\n"
+                    f"            proxy_cache_use_stale error timeout;\n"
                     f"            add_header X-Cache-Status $upstream_cache_status;\n"
-                    f"            add_header Cache-Control \"no-cache\";\n"
+                    f"            add_header Cache-Control \"no-store\";\n"
                     f"            proxy_set_header Host $http_host;\n"
                     f"            proxy_pass http://martin/{composite_src}/$1/$2/$3;\n"
                     f"        }}"
@@ -141,10 +139,9 @@ def main():
                     f"            proxy_cache_key $uri;\n"
                     f"            proxy_cache_bypass $cache_bypass;\n"
                     f"            proxy_cache_lock on;\n"
-                    f"            proxy_cache_use_stale error timeout updating;\n"
-                    f"            proxy_cache_background_update on;\n"
+                    f"            proxy_cache_use_stale error timeout;\n"
                     f"            add_header X-Cache-Status $upstream_cache_status;\n"
-                    f"            add_header Cache-Control \"no-cache\";\n"
+                    f"            add_header Cache-Control \"no-store\";\n"
                     f"            proxy_set_header Host $http_host;\n"
                     f"            proxy_pass http://martin/$1/$2/$3/$4;\n"
                     f"        }}"

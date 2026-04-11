@@ -49,7 +49,7 @@ http {
     # Manual purge via ?purge=1; TTLs are the automatic safety net.
     #   z0-2:   24h    z3-5:  24h    z6-7:  16h    z8-9:  12h
     #   z10-12:  8h    z13-15: 4h    z16-20: 1h
-    # Browser Cache-Control is set to "no-cache" for dynamic tiles so
+    # Browser Cache-Control is set to "no-store" for dynamic tiles so
     # browsers always revalidate with nginx.
 
     # === Cache bypass for force-purge ===
@@ -122,10 +122,12 @@ http {
             try_files /index.html =404;
         }
 
-        # Fallback
+        # Fallback — proxy to Martin without nginx cache.
+        # no-store prevents the browser from caching tile responses.
         location / {
             proxy_set_header Host $http_host;
             proxy_pass http://martin;
+            add_header Cache-Control "no-store";
         }
     }
 }
