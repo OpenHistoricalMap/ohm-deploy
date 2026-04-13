@@ -208,11 +208,11 @@ osm-seed:
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
-      label_value: web_helpers_medium
+      label_value: utils
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["web"]
+      values: ["utils"]
     # ====================================================================================================
     # Cgimap
     # ====================================================================================================
