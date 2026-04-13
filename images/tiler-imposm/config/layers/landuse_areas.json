@@ -58,6 +58,11 @@
         }
       ],
       "type": "polygon",
+      "filters": {
+        "reject": {
+          "natural": ["coastline"]
+        }
+      },
       "mappings": {
         "landuse": {
           "mapping": {

@@ -161,6 +161,14 @@ http:
       middlewares:
         - secure-headers
 
+    tiler-monitoring-router:
+      rule: Host(`tiler-monitoring.{{OHM_DOMAIN}}`)
+      entryPoints:
+        - port-web
+      service: tiler_monitor
+      middlewares:
+        - secure-headers
+
   services:
     tiler_server:
       loadBalancer:
@@ -206,6 +214,11 @@ http:
       loadBalancer:
         servers:
           - url: http://cadvisor:8080
+
+    tiler_monitor:
+      loadBalancer:
+        servers:
+          - url: http://tiler_monitor:8001
 
 providers:
   file:

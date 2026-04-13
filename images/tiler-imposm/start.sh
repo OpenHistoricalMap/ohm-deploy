@@ -19,12 +19,32 @@ INIT_FILE="$WORKDIR/init_done"
 
 mkdir -p "$CACHE_DIR" "$DIFF_DIR" "$IMPOSM3_EXPIRE_DIR"
 
+# Archive old imposm log before clearing, so we can debug what caused the restart
+IMPOSM_LOG_DIR="$WORKDIR/imposm_logs"
+mkdir -p "$IMPOSM_LOG_DIR"
+if [ -s /tmp/imposm.log ]; then
+    cp /tmp/imposm.log "$IMPOSM_LOG_DIR/imposm_$(date +%Y%m%d_%H%M%S).log"
+    # Keep only the last 20 log files to avoid filling the volume
+    ls -t "$IMPOSM_LOG_DIR"/imposm_*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null
+fi
+# Clear log and ready flag to prevent liveness probe from detecting stale errors on restart
+> /tmp/imposm.log
+rm -f /tmp/imposm_ready
+
 # Tracking file for uploaded files
 TRACKING_FILE="$WORKDIR/uploaded_files.log"
 [ -f "$TRACKING_FILE" ] || touch "$TRACKING_FILE"
 
 # Create config map for imposm
 python build_imposm3_config.py
+
+# Upload compiled imposm config to S3 for the tiler-monitor to read
+if [ -n "$AWS_S3_BUCKET" ]; then
+    log_message "Uploading imposm3.json to S3..."
+    aws s3 cp ./config/imposm3.json "${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/imposm3.json" --acl public-read && \
+        log_message "imposm3.json uploaded to S3 successfully." || \
+        log_message "Warning: Failed to upload imposm3.json to S3. Monitor will use cached version."
+fi
 
 # Create config file for imposm
 cat <<EOF >"$WORKDIR/config.json"
@@ -152,17 +172,19 @@ function monitorImposmErrors() {
         log_message "Checking minute replication import into the database"
         
         # Check for connection errors specifically
-        if grep -q "driver: bad connection" "$LOG_FILE" || grep -q "\[error\] Importing.*bad connection" "$LOG_FILE"; then
+        if grep -q "driver: bad connection" "$LOG_FILE" || grep -q "\[error\] Importing.*bad connection" "$LOG_FILE" || grep -q "server closed the connection unexpectedly" "$LOG_FILE"; then
             ERROR_COUNT=$((ERROR_COUNT + 1))
+            local error_detail=$(grep -E "bad connection|server closed" "$LOG_FILE" | tail -1)
+            write_status "IMPOSM_REPLICATION" "error" 0 0 "$ERROR_COUNT" "" "$error_detail"
             log_message "Detected bad connection error (count: $ERROR_COUNT/$MAX_ERRORS). Waiting before retry..."
-            
+
             # Check if imposm process is still running
             if ! kill -0 $IMPOSM_PID 2>/dev/null; then
                 log_message "Imposm process has died. Restarting container..."
                 kill $UPLOADER_PID 2>/dev/null
                 exit 1
             fi
-            
+
             # If we've hit max errors, restart
             if [ $ERROR_COUNT -ge $MAX_ERRORS ]; then
                 log_message "Max connection errors reached ($MAX_ERRORS). Restarting container..."
@@ -170,28 +192,35 @@ function monitorImposmErrors() {
                 kill $IMPOSM_PID 2>/dev/null
                 exit 1
             fi
-            
+
             # Wait a bit and check if connection recovers
             sleep 30
-            # Clear the error from log to avoid immediate re-trigger
-            sed -i '/driver: bad connection/d' "$LOG_FILE" 2>/dev/null || true
+            # Clear errors from log to avoid immediate re-trigger
+            > "$LOG_FILE"
         elif grep -q "\[error\] Importing" "$LOG_FILE"; then
             # Other import errors - log but don't immediately restart
-            log_message "Detected [error] Importing in Imposm log. Monitoring..."
             ERROR_COUNT=$((ERROR_COUNT + 1))
-            
+            local error_detail=$(grep "\[error\] Importing" "$LOG_FILE" | tail -1)
+            write_status "IMPOSM_REPLICATION" "error" 0 0 "$ERROR_COUNT" "" "$error_detail"
+            log_message "Detected [error] Importing in Imposm log. Monitoring..."
+
             if [ $ERROR_COUNT -ge $MAX_ERRORS ]; then
                 log_message "Max errors reached ($MAX_ERRORS). Restarting container..."
                 kill $UPLOADER_PID 2>/dev/null
                 kill $IMPOSM_PID 2>/dev/null
                 exit 1
             fi
+
+            # Wait and clear log to avoid re-detecting the same error
+            sleep 30
+            > "$LOG_FILE"
         else
             # Reset error count if no errors found
             if [ $ERROR_COUNT -gt 0 ]; then
                 log_message "No errors detected. Resetting error count."
                 ERROR_COUNT=0
             fi
+            write_status "IMPOSM_REPLICATION" "success" 0 0 0 "" ""
         fi
         
         sleep 10
@@ -221,13 +250,23 @@ function updateData() {
 
     # Step 2: Handle last.state.txt if OVERWRITE_STATE is enabled
     if [ "$OVERWRITE_STATE" = "true" ]; then
-    log_message "Overwriting last.state.txt..."
-    timestamp=$(date -u +"%Y-%m-%dT%H\\:%M\\:%SZ")
-    cat <<EOF > "$local_last_state_path"
+        log_message "Overwriting last.state.txt with sequenceNumber=${SEQUENCE_NUMBER:-0}..."
+        # Clean old downloaded diffs to force imposm to re-download from the new sequence number
+        log_message "Cleaning old diff files in ${DIFF_DIR} to avoid stale state..."
+        find "$DIFF_DIR" -type f ! -name "last.state.txt" -delete 2>/dev/null
+        timestamp=$(date -u +"%Y-%m-%dT%H\\:%M\\:%SZ")
+        cat <<EOF > "$local_last_state_path"
 timestamp=${timestamp}
 sequenceNumber=${SEQUENCE_NUMBER:-0}
 replicationUrl=${REPLICATION_URL}
 EOF
+    else
+        if [ -f "$local_last_state_path" ]; then
+            current_seq=$(grep -oP 'sequenceNumber=\K\d+' "$local_last_state_path" 2>/dev/null || echo "unknown")
+            log_message "Using existing last.state.txt (sequenceNumber=${current_seq}). Set OVERWRITE_STATE=true to override with SEQUENCE_NUMBER=${SEQUENCE_NUMBER:-0}."
+        else
+            log_message "WARNING: No last.state.txt found and OVERWRITE_STATE=false. Imposm may not know where to start replication."
+        fi
     fi
 
     # Step 3: Start uploader in background and store its PID
@@ -246,6 +285,8 @@ EOF
     UPLOADER_PID=$!
 
     # Step 4: Run Imposm update process
+    # Clear old imposm log to prevent liveness check from detecting stale errors
+    > /tmp/imposm.log
     log_message "Running Imposm update process..."
     # Note: The Go pq driver used by imposm doesn't support keepalive parameters
     # in connection URLs or via environment variables. We rely on:
@@ -261,7 +302,13 @@ EOF
         -quiet 2>&1 | tee /tmp/imposm.log &
     IMPOSM_PID=$!
 
-    # Step 5: Monitor imposm process and handle errors
+    # Signal liveness probe that imposm is running
+    touch /tmp/imposm_ready
+
+    # Step 5: Upload RSS status feed to S3 every hour
+    ./scripts/upload_status_rss.sh &
+
+    # Step 6: Monitor imposm process and handle errors
     monitorImposmErrors $IMPOSM_PID $UPLOADER_PID
 }
 
