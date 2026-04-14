@@ -22,3 +22,5 @@ charts:
         valuesPath: ohm.tilerMonitor.image
       ohmx-adiff-builder:
         valuesPath: ohm.ohmxAdiffBuilder.image
+      tiler-server-martin:
+        valuesPath: ohm.tilerServerMartin.image
