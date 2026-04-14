@@ -138,7 +138,7 @@ services:
 
   tiler_server_martin:
     container_name: tiler_server_martin
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3292.h0f5e7d60
+    image: ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3370.h7e23ad27
     restart: always
     environment:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
