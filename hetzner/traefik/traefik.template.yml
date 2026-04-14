@@ -84,7 +84,7 @@ http:
       rule: Host(`vtiles.{{OHM_DOMAIN}}`)
       entryPoints:
         - port-web
-      service: martin
+      service: tiler_server_martin
       middlewares:
         - secure-headers-allow-iframe
         - replace-osm-tiles-to-ohm
@@ -134,7 +134,7 @@ http:
       rule: Host(`martin.{{OHM_DOMAIN}}`)
       entryPoints:
         - port-web
-      service: martin
+      service: tiler_server_martin
       middlewares:
         - secure-headers
 
@@ -193,10 +193,10 @@ http:
         servers:
           - url: http://taginfo_web:4567
 
-    martin:
+    tiler_server_martin:
       loadBalancer:
         servers:
-          - url: http://martin:80
+          - url: http://tiler_server_martin:80
 
     node_exporter:
       loadBalancer:
