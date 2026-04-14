@@ -18,15 +18,15 @@ OUTPUT_PATH = os.path.join(BASE_DIR, "config", "nginx.conf")
 # Zoom-based nginx cache TTLs for dynamic tiles.
 # proxy_cache_valid doesn't accept variables, so we generate
 # separate location blocks per zoom range.
-# Override via env vars: CACHE_TTL_Z0_2=6h, CACHE_TTL_Z3_5=4h, etc.
+# Override via env vars: MARTIN_CACHE_TTL_Z0_2=6h, MARTIN_CACHE_TTL_Z3_5=4h, etc.
 ZOOM_RANGES = [
-    {"label": "z0-2",   "regex": "[0-2]",                    "ttl": os.environ.get("CACHE_TTL_Z0_2",   "48h")},
-    {"label": "z3-5",   "regex": "[3-5]",                    "ttl": os.environ.get("CACHE_TTL_Z3_5",   "24h")},
-    {"label": "z6-7",   "regex": "[6-7]",                    "ttl": os.environ.get("CACHE_TTL_Z6_7",   "16h")},
-    {"label": "z8-9",   "regex": "[8-9]",                    "ttl": os.environ.get("CACHE_TTL_Z8_9",   "12h")},
-    {"label": "z10-12", "regex": "1[0-2]",                   "ttl": os.environ.get("CACHE_TTL_Z10_12", "8h")},
-    {"label": "z13-15", "regex": "1[3-5]",                   "ttl": os.environ.get("CACHE_TTL_Z13_15", "4h")},
-    {"label": "z16-20", "regex": "(?:1[6-9]|20)",            "ttl": os.environ.get("CACHE_TTL_Z16_20", "1h")},
+    {"label": "z0-2",   "regex": "[0-2]",                    "ttl": os.environ.get("MARTIN_CACHE_TTL_Z0_2",   "48h")},
+    {"label": "z3-5",   "regex": "[3-5]",                    "ttl": os.environ.get("MARTIN_CACHE_TTL_Z3_5",   "24h")},
+    {"label": "z6-7",   "regex": "[6-7]",                    "ttl": os.environ.get("MARTIN_CACHE_TTL_Z6_7",   "16h")},
+    {"label": "z8-9",   "regex": "[8-9]",                    "ttl": os.environ.get("MARTIN_CACHE_TTL_Z8_9",   "12h")},
+    {"label": "z10-12", "regex": "1[0-2]",                   "ttl": os.environ.get("MARTIN_CACHE_TTL_Z10_12", "8h")},
+    {"label": "z13-15", "regex": "1[3-5]",                   "ttl": os.environ.get("MARTIN_CACHE_TTL_Z13_15", "4h")},
+    {"label": "z16-20", "regex": "(?:1[6-9]|20)",            "ttl": os.environ.get("MARTIN_CACHE_TTL_Z16_20", "1h")},
 ]
 
 

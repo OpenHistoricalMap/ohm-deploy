@@ -11,7 +11,6 @@ RUN apk add --no-cache \
     bash
 
 WORKDIR /app
-RUN "echo"
 COPY . .
 RUN chmod +x /app/start.sh
 

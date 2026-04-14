@@ -4,9 +4,9 @@ set -euo pipefail
 echo "=== Martin Tile Server Setup ==="
 
 export MARTIN_INTERNAL_PORT="${MARTIN_INTERNAL_PORT:-3001}"
-export NGINX_PORT="${NGINX_PORT:-80}"
-export NGINX_GZIP="${NGINX_GZIP:-on}"                    # on | off
-export NGINX_GZIP_COMP_LEVEL="${NGINX_GZIP_COMP_LEVEL:-4}" # 1-9
+export MARTIN_NGINX_PORT="${MARTIN_NGINX_PORT:-80}"
+export MARTIN_NGINX_GZIP="${MARTIN_NGINX_GZIP:-on}"                    # on | off
+export MARTIN_NGINX_GZIP_COMP_LEVEL="${MARTIN_NGINX_GZIP_COMP_LEVEL:-4}" # 1-9
 
 # Wait for PostgreSQL
 echo "Waiting for PostgreSQL to be ready..."
@@ -58,12 +58,12 @@ done
 echo "Martin is ready."
 
 # Start Nginx in foreground
-echo "Starting Nginx on port ${NGINX_PORT}..."
+echo "Starting Nginx on port ${MARTIN_NGINX_PORT}..."
 nginx -c /app/config/nginx.conf -g 'daemon off;' &
 NGINX_PID=$!
 
 echo "=== Ready ==="
-echo "  Nginx  :${NGINX_PORT} -> Martin :${MARTIN_INTERNAL_PORT}"
+echo "  Nginx  :${MARTIN_NGINX_PORT} -> Martin :${MARTIN_INTERNAL_PORT}"
 echo "  Composite: /maps/ohm/{z}/{x}/{y}.pbf (all layers)"
 echo "  Per-layer: /maps/ohm/land_ohm_lines/{z}/{x}/{y}.pbf"
 
