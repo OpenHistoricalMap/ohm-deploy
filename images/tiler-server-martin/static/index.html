@@ -157,6 +157,7 @@
     let activeSources = {};
     const sourceColors = {};
     const sourceZoomRanges = {}; // { name: { min, max } }
+    const sourceLayerNames = {}; // { function_name: source_layer }
     let groupsData = [];
     let activeGroupIdx = null;
     let viewMode = 'composite';
@@ -318,6 +319,7 @@
                 min: cfg.min_zoom || 0,
                 max: getMaxZoom(cfg.zoom_mapping)
               };
+              sourceLayerNames[name] = cfg.source_layer || name;
             }
           });
           groupsData.push({ name: group.name, functions: fns });
@@ -446,9 +448,10 @@
         const layerIds = [];
         const layers = group.functions;
         
-        layers.forEach((sourceLayer, i) => {
-          const color = sourceColors[sourceLayer] || COLORS[i % COLORS.length];
-          const slName = sourceLayer.toLowerCase();
+        layers.forEach((fnName, i) => {
+          const color = sourceColors[fnName] || COLORS[i % COLORS.length];
+          const sourceLayer = sourceLayerNames[fnName] || fnName;
+          const slName = fnName.toLowerCase();
           let type, paint;
           if (slName.includes('centroids') || slName.includes('points')) {
             type = 'circle';
@@ -461,7 +464,7 @@
             paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
           }
 
-          const layerId = `lyr-composite-${sourceLayer}-${i}`;
+          const layerId = `lyr-composite-${fnName}-${i}`;
           map.addLayer({ id: layerId, type, source: sourceId, 'source-layer': sourceLayer, paint });
           layerIds.push(layerId);
         });
@@ -559,13 +562,19 @@
         // Detect source-layer names from a sample tile
         let layers = (tj.vector_layers || []).map(vl => vl.id);
         if (!layers.length) {
-          const tiles = tj.tiles || [];
-          if (tiles.length) {
-            const sampleUrl = tiles[0].replace('{z}', '2').replace('{x}', '2').replace('{y}', '1');
-            const detected = await detectMvtLayers(sampleUrl);
-            layers = detected || [name];
+          // Use source_layer from config if available, otherwise try MVT detection
+          const configuredLayer = sourceLayerNames[name];
+          if (configuredLayer) {
+            layers = [configuredLayer];
           } else {
-            layers = [name];
+            const tiles = tj.tiles || [];
+            if (tiles.length) {
+              const sampleUrl = tiles[0].replace('{z}', '2').replace('{x}', '2').replace('{y}', '1');
+              const detected = await detectMvtLayers(sampleUrl);
+              layers = detected || [name];
+            } else {
+              layers = [name];
+            }
           }
         }
 
