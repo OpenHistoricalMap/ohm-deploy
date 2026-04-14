@@ -177,9 +177,14 @@ def build_tilejson(name, description, tiles_url, vector_layers, minzoom=0, maxzo
         "tilejson": "3.0.0",
         "name": name,
         "description": description,
+        "version": "1.0.0",
+        "attribution": "&copy; <a href=\"https://www.openhistoricalmap.org/copyright\">OpenHistoricalMap</a> contributors",
+        "scheme": "xyz",
         "tiles": [tiles_url],
         "minzoom": minzoom,
         "maxzoom": maxzoom,
+        "bounds": [-180, -85.0511, 180, 85.0511],
+        "center": [0, 0, 2],
         "vector_layers": vector_layers,
     }
 
@@ -323,7 +328,12 @@ def main():
     print(f"\nDone: {created} created, {skipped} skipped.")
 
     # Generate TileJSON manifests
+    # Build base URL from MARTIN_BASE_URL or OHM_DOMAIN (e.g. "https://vtiles.openhistoricalmap.org")
     base_url = os.environ.get("MARTIN_BASE_URL", "")
+    if not base_url:
+        ohm_domain = os.environ.get("OHM_DOMAIN", "")
+        if ohm_domain:
+            base_url = f"https://vtiles.{ohm_domain}"
     tj_count = generate_tilejson_files(groups, fields_per_function, base_url)
     print(f"TileJSON: {tj_count} files written to {TILEJSON_DIR}")
 
