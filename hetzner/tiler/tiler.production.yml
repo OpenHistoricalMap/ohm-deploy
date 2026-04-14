@@ -121,7 +121,7 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3362.ha53a5a87
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3364.hd63ad03e
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ../../images/tiler-monitor:/app
