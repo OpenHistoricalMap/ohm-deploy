@@ -26,6 +26,15 @@ def check_tiler_db_postgres_status():
         return False
 
 
+def get_purge_and_seed_commands(script_path="purge_seed_tiles.sh"):
+    try:
+        with open(script_path, "r") as file:
+            commands = file.read()
+        return commands
+    except FileNotFoundError:
+        return "Error: Bash script file not found."
+
+
 def get_logger(name="default_logger"):
     """
     Returns a configured logger instance.
