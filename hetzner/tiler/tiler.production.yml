@@ -18,7 +18,7 @@ services:
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3339.h2fbce74c
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3374.h513ba86f
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -138,7 +138,7 @@ services:
 
   tiler_server_martin:
     container_name: tiler_server_martin
-    image: ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3370.h7e23ad27
+    image:  ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3374.h513ba86f
     restart: always
     environment:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
