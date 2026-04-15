@@ -101,12 +101,11 @@ SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z13_15
 SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z16_20', 'mv_admin_boundaries_centroids_z16_20', 'id, osm_id, type', NULL);
 
 -- Refresh centroids views
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z0_2;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z3_5;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z6_7;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z8_9;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z10_12;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z13_15;
+
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z16_20;
-
-
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z3_5;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z0_2;
