@@ -1,0 +1,31 @@
+# Martin tile server
+# Cache invalidation: nginx TTLs per zoom + manual purge via ?purge=1 query param.
+# No external purge service needed.
+services:
+  martin:
+    container_name: martin
+    image: rub21/tiler-server-martin:v1
+    build:
+      context: ../images/tiler-server-martin
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-server-martin:/app
+      - martin_nginx_cache:/var/cache/nginx
+    ports:
+      - "3020:80"
+    env_file:
+      - ../envs/.env.tiler
+    environment:
+      - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
+    # restart: always
+    networks:
+      - ohm_network
+
+volumes:
+  martin_nginx_cache:
+    driver: local
+    name: martin_nginx_cache
+
+networks:
+  ohm_network:
+    external: true

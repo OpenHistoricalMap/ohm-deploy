@@ -23,22 +23,10 @@ spec:
           {{- end }}
           containers:
             - name: {{ .Release.Name }}-tiler-cache-seed-global
-              image: "{{ index .Values "osm-seed" "tilerServer" "image" "name" }}:{{ index .Values "osm-seed" "tilerServer" "image" "tag" }}"   
+              image: {{ .Values.ohm.tilerCacheSeedGlobal.image.name }}:{{ .Values.ohm.tilerCacheSeedGlobal.image.tag }}
               command:
-                - sh
-                - -c
-                - |
-                  set -x
-                  echo "Seeding tiler from 0 to 7 zoom levels"
-                  echo "0/0/0" > tile-list.tiles
-                  tegola cache seed tile-list tile-list.tiles \
-                    --config=/opt/tegola_config/config.toml \
-                    --map=osm \
-                    --min-zoom=$MIN_ZOOM \
-                    --max-zoom=$MAX_ZOOM \
-                    --concurrency=$CONCURRENCY \
-                    --overwrite=true
-
+                - python3
+                - /app/seed_cache.py
               {{- if .Values.ohm.tilerCacheSeedGlobal.resources.enabled }}
               resources:
                 requests:
@@ -49,17 +37,14 @@ spec:
                   cpu: {{ .Values.ohm.tilerCacheSeedGlobal.resources.limits.cpu }}
               {{- end }}
               env:
-                - name: CONCURRENCY
-                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.CONCURRENCY | quote }}
-                - name: MIN_ZOOM
-                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.MIN_ZOOM | quote }}
-                - name: MAX_ZOOM
+                - name: SEED_MAX_ZOOM
                   value: {{ .Values.ohm.tilerCacheSeedGlobal.env.MAX_ZOOM | quote }}
-              envFrom:
-              - configMapRef:
-                  name: {{ .Release.Name }}-tiler-server-cm
-              - configMapRef:
-                  name: {{ .Release.Name }}-tiler-db-cm
+                - name: SEED_CONCURRENCY
+                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.CONCURRENCY | quote }}
+                - name: SEED_NGINX_URL
+                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.NGINX_URL | quote }}
+                - name: SEED_GROUPS
+                  value: {{ .Values.ohm.tilerCacheSeedGlobal.env.GROUPS | quote }}
           restartPolicy: OnFailure
       backoffLimit: 3
 {{- end }}

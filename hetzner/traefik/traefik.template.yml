@@ -74,11 +74,6 @@ http:
         replacement: "https://${1}/ui/search.html"
         permanent: true
 
-    replace-osm-to-ohm:
-      replacePathRegex:
-        regex: "^/capabilities/osm\\.json$"
-        replacement: "/capabilities/ohm.json"
-
     replace-osm-tiles-to-ohm:
       replacePathRegex:
         regex: "^/maps/osm/(.*)$"
@@ -89,11 +84,9 @@ http:
       rule: Host(`vtiles.{{OHM_DOMAIN}}`)
       entryPoints:
         - port-web
-      service: tiler_server
+      service: tiler_server_martin
       middlewares:
         - secure-headers-allow-iframe
-        # Note: Removed replace-osm-to-ohm middleware because Tegola map is named "osm"
-        - replace-osm-to-ohm
         - replace-osm-tiles-to-ohm
 
     nominatim-router:
@@ -141,7 +134,7 @@ http:
       rule: Host(`martin.{{OHM_DOMAIN}}`)
       entryPoints:
         - port-web
-      service: martin
+      service: tiler_server_martin
       middlewares:
         - secure-headers
 
@@ -200,10 +193,10 @@ http:
         servers:
           - url: http://taginfo_web:4567
 
-    martin:
+    tiler_server_martin:
       loadBalancer:
         servers:
-          - url: http://martin:80
+          - url: http://tiler_server_martin:80
 
     node_exporter:
       loadBalancer:
