@@ -68,9 +68,9 @@
     #map-controls button { background: rgba(22,33,62,0.9); border: 1px solid rgba(255,255,255,0.15); color: #eee; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
     #map-controls button:hover { background: rgba(22,33,62,1); }
     #map-controls button.active { background: #0f3460; border-color: #4fc3f7; color: #4fc3f7; }
-    #map-controls button.purge { border-color: #e57373; color: #e57373; }
-    #map-controls button.purge:hover { background: rgba(229,115,115,0.15); }
-    #map-controls button.purge.active { background: #e57373; color: #fff; border-color: #e57373; }
+    #map-controls button.fresh-tiles { border-color: #e57373; color: #e57373; }
+    #map-controls button.fresh-tiles:hover { background: rgba(229,115,115,0.15); }
+    #map-controls button.fresh-tiles.active { background: #e57373; color: #fff; border-color: #e57373; }
     #zoom-level { background: rgba(22,33,62,0.9); padding: 8px 14px; border-radius: 6px; font-size: 13px; pointer-events: auto; }
 
     /* Tile info */
@@ -135,7 +135,7 @@
     <div id="map-header">
       <div id="map-controls">
         <button id="btn-grid" onclick="toggleGrid()">Grid</button>
-        <button id="btn-purge" class="purge" onclick="togglePurge()" title="Toggle cache bypass: tiles load fresh from Martin">Purge Cache</button>
+        <button id="btn-fresh-tiles" class="fresh-tiles" onclick="toggleFreshTiles()" title="Toggle cache bypass: tiles load fresh from Martin">Req Fresh Tiles</button>
       </div>
       <div id="zoom-level">z0</div>
     </div>
@@ -198,20 +198,20 @@
     }
     document.getElementById('btn-grid').classList.add('active');
 
-    // Purge mode: toggle ?purge=1 on all tile requests to bypass nginx cache
+    // Fresh tiles mode: toggle ?fresh_tiles=1 on all tile requests to bypass nginx cache
     // cacheBuster is appended to tile URLs to defeat MapLibre's in-memory cache.
-    // It is incremented each time purge is toggled off, so MapLibre sees new URLs
+    // It is incremented each time fresh tiles is toggled off, so MapLibre sees new URLs
     // and re-fetches from nginx (which already has the fresh tiles from BYPASS).
-    let purgeMode = false;
+    let freshTilesMode = false;
     let cacheBuster = 0;
 
-    function togglePurge() {
-      purgeMode = !purgeMode;
-      const btn = document.getElementById('btn-purge');
-      btn.classList.toggle('active', purgeMode);
-      btn.textContent = purgeMode ? 'Purge ON' : 'Purge Cache';
+    function toggleFreshTiles() {
+      freshTilesMode = !freshTilesMode;
+      const btn = document.getElementById('btn-fresh-tiles');
+      btn.classList.toggle('active', freshTilesMode);
+      btn.textContent = freshTilesMode ? 'Fresh Tiles ON' : 'Fresh Tiles';
 
-      if (!purgeMode) {
+      if (!freshTilesMode) {
         // Increment cache buster so MapLibre treats all tile URLs as new
         cacheBuster++;
       }
@@ -224,10 +224,10 @@
         if (!source || !source.tiles) return;
         const urls = source.tiles.map(url => {
           const base = url.split('?')[0];
-          if (purgeMode) {
-            return base + '?purge=1&_v=' + cacheBuster;
+          if (freshTilesMode) {
+            return base + '?fresh_tiles=1&_v=' + cacheBuster;
           }
-          // cacheBuster > 0 means we've done at least one purge cycle
+          // cacheBuster > 0 means we've done at least one fresh tiles cycle
           return cacheBuster > 0 ? base + '?_v=' + cacheBuster : base;
         });
         source.setTiles(urls);
@@ -429,7 +429,7 @@
     async function addCompositeSource(group) {
       const compositeFns = group.functions.join(',');
       const sourceId = `src-composite-${group.name}`;
-      // Use /maps/{group}/ route which goes through nginx cache + purge support,
+      // Use /maps/{group}/ route which goes through nginx cache + fresh_tiles support,
       // instead of Martin's native TileJSON URLs which bypass cache.
       const cachedTileUrl = `${MARTIN_BASE}/maps/${group.name}/{z}/{x}/{y}.pbf`;
       const tileJsonUrl = `${MARTIN_BASE}/${compositeFns}`;
@@ -470,7 +470,7 @@
         });
 
         activeSources['__composite__'] = { sourceId, layerIds, color: '#4fc3f7' };
-        if (purgeMode || cacheBuster > 0) applyTileUrls();
+        if (freshTilesMode || cacheBuster > 0) applyTileUrls();
       } catch (e) {
         console.error('Failed to add composite source:', e);
       }
@@ -608,7 +608,7 @@
       }
 
       activeSources[name] = { sourceId, layerIds, color };
-      if (purgeMode || cacheBuster > 0) applyTileUrls();
+      if (freshTilesMode || cacheBuster > 0) applyTileUrls();
       const el = document.getElementById(`src-item-${name}`);
       if (el) el.classList.add('active');
     }
