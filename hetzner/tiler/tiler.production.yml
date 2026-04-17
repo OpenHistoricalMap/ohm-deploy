@@ -138,7 +138,7 @@ services:
 
   tiler_server_martin:
     container_name: tiler_server_martin
-    image:  ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3374.h513ba86f
+    image: ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3344.h09bfac2f
     restart: always
     environment:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
@@ -162,7 +162,7 @@ volumes:
     name: tiler_monitor_data_v3
   tiler_martin_nginx_cache:
     driver: local
-    name: tiler_martin_nginx_cache
+    name: tiler_martin_nginx_cache_v1
 networks:
   ohm_network:
     external: true
