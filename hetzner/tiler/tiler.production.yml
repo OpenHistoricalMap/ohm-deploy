@@ -121,7 +121,7 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3364.hd63ad03e
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3348.h4fbb83d8
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ../../images/tiler-monitor:/app
@@ -144,6 +144,8 @@ services:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
     env_file:
       - .env.tiler
+    ports:
+      - "3030:80"
     volumes:
       - tiler_martin_nginx_cache:/var/cache/nginx
     networks:
