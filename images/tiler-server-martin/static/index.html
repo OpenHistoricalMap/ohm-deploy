@@ -617,11 +617,23 @@
       document.getElementById('right-panel').classList.add('hidden');
     }
 
+    const CLICK_BUFFER = 5;
     map.on('click', (e) => {
       if (!inspectEnabled) return;
 
-      const features = map.queryRenderedFeatures(e.point)
-        .filter(f => f.layer.id.startsWith('lyr-'));
+      const bbox = [
+        [e.point.x - CLICK_BUFFER, e.point.y - CLICK_BUFFER],
+        [e.point.x + CLICK_BUFFER, e.point.y + CLICK_BUFFER]
+      ];
+      const seen = new Set();
+      const features = map.queryRenderedFeatures(bbox)
+        .filter(f => {
+          if (!f.layer.id.startsWith('lyr-')) return false;
+          const key = `${f.layer.id}:${f.sourceLayer}:${f.id ?? ''}:${f.properties.osm_id ?? ''}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
       const panel = document.getElementById('right-panel');
 
       if (!features.length) {
