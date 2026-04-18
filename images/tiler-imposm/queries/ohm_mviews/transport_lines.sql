@@ -300,18 +300,17 @@ END;
 $do$;
 
 
-SELECT create_mview_line_from_mview('mv_transport_lines_z16_20', 'mv_transport_lines_z13_15', 5, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'', ''ferry'') OR class IN (''railway'')');
+SELECT create_mview_line_from_mview('mv_transport_lines_z16_20', 'mv_transport_lines_z13_15', 5, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'', ''ferry'', ''track'', ''path'', ''footway'', ''cycleway'', ''pedestrian'', ''living_street'', ''steps'', ''bridleway'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z13_15', 'mv_transport_lines_z10_12', 20, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''ferry'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z10_12', 'mv_transport_lines_z8_9', 100, NULL);
 SELECT create_mview_line_from_mview('mv_transport_lines_z8_9', 'mv_transport_lines_z6_7', 200 , 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''ferry'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z6_7', 'mv_transport_lines_z5', 1000 , NULL);
 
 
-
 -- Refresh lines views
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z5;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z6_7;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z8_9;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z10_12;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z13_15;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z16_20;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z5;
