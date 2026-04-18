@@ -37,6 +37,21 @@
           "key": "ref"
         },
         {
+          "type": "string",
+          "name": "iata",
+          "key": "iata"
+        },
+        {
+          "type": "string",
+          "name": "icao",
+          "key": "icao"
+        },
+        {
+          "type": "string",
+          "name": "faa",
+          "key": "faa"
+        },
+        {
           "type": "mapping_key",
           "name": "class",
           "key": null
