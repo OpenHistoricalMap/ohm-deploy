@@ -4,10 +4,10 @@ services:
     container_name: osmcha_ohmx_adiff
     environment:
       - API_URL=https://api.${OHM_DOMAIN}
-      - PLANET_PBF_URL=https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
+      - PLANET_PBF_URL=https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260418_0301.osm.pbf
       - MINUTE_REPLICATION_URL=https://planet.openhistoricalmap.org/?prefix=replication/minute/
       # Add OSMX_INITIAL_SEQNUM to start from a specific sequence number
-      # - OSMX_INITIAL_SEQNUM=1900000
+      - OSMX_INITIAL_SEQNUM=1900000
       - AWS_S3_BUCKET=planet.openhistoricalmap.org
     env_file:
       - ./.env.osmcha

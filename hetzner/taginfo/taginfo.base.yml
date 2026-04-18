@@ -5,6 +5,16 @@ services:
     env_file:
       - ./.env.taginfo
     restart: always
+    command:
+      - /bin/bash
+      - -lc
+      - |
+        set -ex
+        while true; do
+          rm -rf /usr/src/app/data/*.db
+          /usr/src/app/start.sh
+          sleep 270000
+        done
     networks:
       - ohm_network
 
