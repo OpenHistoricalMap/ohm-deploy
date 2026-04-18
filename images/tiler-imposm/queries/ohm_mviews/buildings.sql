@@ -6,7 +6,8 @@ SELECT create_points_mview(
     'osm_buildings_points',
     'mv_buildings_points',
     'id, source, osm_id',
-    ARRAY['NULL as height']
+    ARRAY['NULL as height'],
+    NULL
 );
 
 
@@ -23,6 +24,8 @@ SELECT create_areas_mview(
     5,
     5000,
     'id, osm_id, type',
+    NULL,
+    NULL,
     NULL
 );
 
@@ -44,6 +47,8 @@ SELECT create_areas_mview(
     0,
     0,
     'id, osm_id, type',
+    NULL,
+    NULL,
     NULL
 );
 SELECT create_points_centroids_mview(

@@ -3,7 +3,7 @@
 -- ============================================================================
 DROP MATERIALIZED VIEW IF EXISTS mv_non_admin_boundaries_areas_z16_20 CASCADE;
 
-SELECT create_areas_mview( 'osm_admin_areas', 'mv_non_admin_boundaries_areas_z16_20', 1, 0, 'id, osm_id, type', 'type  <> ''administrative''', 'tags->''religion'' AS religion, tags->''denomination'' AS denomination, tags->''timezone'' AS timezone, tags->''utc'' AS utc, tags->''postal_code'' AS postal_code, tags->''ref'' AS ref, tags->''political_division'' AS political_division' );
+SELECT create_areas_mview( 'osm_admin_areas', 'mv_non_admin_boundaries_areas_z16_20', 1, 0, 'id, osm_id, type', 'type  <> ''administrative''', 'tags->''religion'' AS religion, tags->''denomination'' AS denomination, tags->''timezone'' AS timezone, tags->''utc'' AS utc, tags->''postal_code'' AS postal_code, tags->''ref'' AS ref, tags->''political_division'' AS political_division', NULL);
 SELECT create_area_mview_from_mview('mv_non_admin_boundaries_areas_z16_20','mv_non_admin_boundaries_areas_z13_15', 5, 0.0, NULL);
 SELECT create_area_mview_from_mview('mv_non_admin_boundaries_areas_z13_15','mv_non_admin_boundaries_areas_z10_12', 20, 0.0, NULL );
 SELECT create_area_mview_from_mview('mv_non_admin_boundaries_areas_z10_12','mv_non_admin_boundaries_areas_z8_9', 100, 0.0, NULL );
