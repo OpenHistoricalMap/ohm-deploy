@@ -33,7 +33,9 @@
     .layer-zoom { font-size: 11px; color: #666; white-space: nowrap; flex-shrink: 0; }
 
     /* Composite layer info */
-    .composite-layer-info { padding: 3px 10px 3px 22px; font-size: 12px; color: #888; display: flex; align-items: center; gap: 8px; }
+    .composite-layer-info { padding: 3px 10px 3px 14px; font-size: 12px; color: #888; display: flex; align-items: center; gap: 8px; }
+    .composite-layer-info.hidden-layer { opacity: 0.45; }
+    .composite-layer-info input[type="checkbox"] { accent-color: #4fc3f7; cursor: pointer; margin: 0; }
     .composite-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
     /* Source item (for groups) */
@@ -391,7 +393,14 @@
           const zl = zoomLabel(name);
           const info = document.createElement('div');
           info.className = 'composite-layer-info';
-          info.innerHTML = `<div class="composite-dot" style="background:${color}"></div><span style="flex:1">${name}</span>${zl ? `<span style="color:#666;font-size:11px">${zl}</span>` : ''}`;
+          info.id = `comp-item-${name}`;
+          info.innerHTML = `<input type="checkbox" checked><div class="composite-dot" style="background:${color}"></div><span style="flex:1">${name}</span>${zl ? `<span style="color:#666;font-size:11px">${zl}</span>` : ''}`;
+          const cb = info.querySelector('input');
+          cb.onchange = (ev) => {
+            ev.stopPropagation();
+            toggleCompositeLayer(name, cb.checked);
+            info.classList.toggle('hidden-layer', !cb.checked);
+          };
           content.appendChild(info);
         });
 
@@ -446,9 +455,12 @@
         });
 
         const layerIds = [];
+        const layerByFn = {};
         const layers = group.functions;
-        
-        layers.forEach((fnName, i) => {
+
+        // Build specs first so we can sort: fills/lines first, circles (centroids/points) last
+        // so points always render on top while preserving the relative order within each type.
+        const specs = layers.map((fnName, i) => {
           const color = sourceColors[fnName] || COLORS[i % COLORS.length];
           const sourceLayer = sourceLayerNames[fnName] || fnName;
           const slName = fnName.toLowerCase();
@@ -463,13 +475,22 @@
             type = 'fill';
             paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
           }
-
-          const layerId = `lyr-composite-${fnName}-${i}`;
-          map.addLayer({ id: layerId, type, source: sourceId, 'source-layer': sourceLayer, paint });
-          layerIds.push(layerId);
+          return { fnName, sourceLayer, type, paint, i };
         });
 
-        activeSources['__composite__'] = { sourceId, layerIds, color: '#4fc3f7' };
+        const ordered = [
+          ...specs.filter(s => s.type !== 'circle'),
+          ...specs.filter(s => s.type === 'circle'),
+        ];
+
+        ordered.forEach(spec => {
+          const layerId = `lyr-composite-${spec.fnName}-${spec.i}`;
+          map.addLayer({ id: layerId, type: spec.type, source: sourceId, 'source-layer': spec.sourceLayer, paint: spec.paint });
+          layerIds.push(layerId);
+          layerByFn[spec.fnName] = layerId;
+        });
+
+        activeSources['__composite__'] = { sourceId, layerIds, layerByFn, color: '#4fc3f7' };
         if (freshTilesMode || cacheBuster > 0) applyTileUrls();
       } catch (e) {
         console.error('Failed to add composite source:', e);
@@ -479,6 +500,14 @@
     function toggleSource(name) {
       if (activeSources[name]) removeSource(name);
       else addSource(name);
+    }
+
+    function toggleCompositeLayer(fnName, visible) {
+      const composite = activeSources['__composite__'];
+      if (!composite) return;
+      const layerId = composite.layerByFn && composite.layerByFn[fnName];
+      if (!layerId || !map.getLayer(layerId)) return;
+      map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
     }
 
     function removeSource(name) {
