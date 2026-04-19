@@ -6,7 +6,7 @@
 -- Delete existing views, in cascade
 DROP MATERIALIZED VIEW IF EXISTS mv_water_areas_z16_20 CASCADE;
 
-SELECT create_areas_mview('osm_water_areas','mv_water_areas_z16_20',0,0,'id, osm_id, type');
+SELECT create_areas_mview('osm_water_areas', 'mv_water_areas_z16_20', 0, 0, 'id, osm_id, type', NULL, NULL, NULL);
 SELECT create_area_mview_from_mview('mv_water_areas_z16_20','mv_water_areas_z13_15',5,0.0,NULL);
 SELECT create_area_mview_from_mview('mv_water_areas_z13_15','mv_water_areas_z10_12',20,100, 'type IN (''water'',''pond'',''basin'',''canal'',''mill_pond'',''riverbank'')');
 SELECT create_area_mview_from_mview('mv_water_areas_z10_12','mv_water_areas_z8_9',100,10000, NULL);

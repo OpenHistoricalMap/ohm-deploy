@@ -20,6 +20,7 @@
 --                                - Example: 'CASE WHEN tags->''height'' IS NULL OR trim(tags->''height'') = '''' THEN NULL WHEN trim(regexp_replace(tags->''height'', ''[^0-9\.]'', '''', ''g'')) = '''' THEN NULL ELSE regexp_replace(tags->''height'', ''[^0-9\.]'', '''', ''g'')::double precision END AS height'
 --                                - Use double single quotes ('') inside expressions for string literals
 --                                - Expressions are used as-is, no automatic generation
+--   column_overrides   JSONB   - Optional mapping {column_name: sql_expression} to override how an existing column is selected (e.g., '{"ref": "COALESCE(faa, iata, icao, NULLIF(ref, ''''))"}'). NULL = no overrides
 --
 -- Returns:
 --   TEXT    - Name of the created materialized view
@@ -31,14 +32,17 @@
 --   - Follows the same structure as create_simplified_mview
 --   - extra_columns: All expressions are used exactly as provided, must include 'AS column_name'
 --   - Columns specified in extra_columns will be excluded from the source table to avoid duplicates
+--   - column_overrides replaces the default expression for a column (including the NULLIF text-wrapping), and the alias is kept as the column name
 -- ============================================================================
 DROP FUNCTION IF EXISTS create_points_mview(TEXT, TEXT, TEXT, TEXT[]);
+DROP FUNCTION IF EXISTS create_points_mview(TEXT, TEXT, TEXT, TEXT[], JSONB);
 
 CREATE OR REPLACE FUNCTION create_points_mview(
     points_table TEXT,
     mview_name TEXT,
     unique_columns TEXT DEFAULT 'id, source, osm_id',
-    extra_columns TEXT[] DEFAULT NULL
+    extra_columns TEXT[] DEFAULT NULL,
+    column_overrides JSONB DEFAULT NULL
 )
 RETURNS TEXT AS $$
 DECLARE
@@ -79,8 +83,11 @@ BEGIN
     
     -- Build SQL - get all columns from points_table and add calculated ones
     -- Exclude start_decdate, end_decdate, area columns, and any columns from extra_columns
+    -- column_overrides (if provided) takes precedence and fully replaces the default expression for a column
     SELECT COALESCE(string_agg(
-        CASE 
+        CASE
+            WHEN column_overrides IS NOT NULL AND column_overrides ? column_name THEN
+                format('%s AS %I', column_overrides->>column_name, column_name)
             WHEN column_name = 'name' THEN 'NULLIF(name, '''') AS name'
             WHEN column_name = 'start_date' THEN 'NULLIF(start_date, '''') AS start_date'
             WHEN column_name = 'end_date' THEN 'NULLIF(end_date, '''') AS end_date'

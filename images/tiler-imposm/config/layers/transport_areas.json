@@ -43,6 +43,26 @@
         },
         {
           "type": "string",
+          "name": "ref",
+          "key": "ref"
+        },
+        {
+          "type": "string",
+          "name": "iata",
+          "key": "iata"
+        },
+        {
+          "type": "string",
+          "name": "icao",
+          "key": "icao"
+        },
+        {
+          "type": "string",
+          "name": "faa",
+          "key": "faa"
+        },
+        {
+          "type": "string",
           "name": "start_date",
           "key": "start_date"
         },

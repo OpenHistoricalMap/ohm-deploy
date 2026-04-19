@@ -7,7 +7,7 @@
 DROP MATERIALIZED VIEW IF EXISTS mv_landuse_areas_z16_20 CASCADE;
 
 
-SELECT create_areas_mview( 'osm_landuse_areas', 'mv_landuse_areas_z16_20', 0, 0, 'id, osm_id, type', 'NOT (type = ''water'' AND class = ''natural'')');
+SELECT create_areas_mview( 'osm_landuse_areas', 'mv_landuse_areas_z16_20', 0, 0, 'id, osm_id, type', 'NOT (type = ''water'' AND class = ''natural'')', NULL, NULL);
 SELECT create_area_mview_from_mview('mv_landuse_areas_z16_20', 'mv_landuse_areas_z13_15', 5, 10000, NULL);
 SELECT create_area_mview_from_mview('mv_landuse_areas_z13_15', 'mv_landuse_areas_z10_12', 20, 50000, NULL);
 SELECT create_area_mview_from_mview('mv_landuse_areas_z10_12', 'mv_landuse_areas_z8_9', 100, 1000000, NULL);
@@ -19,7 +19,7 @@ SELECT create_area_mview_from_mview('mv_landuse_areas_z8_9', 'mv_landuse_areas_z
 -- Create points materialized view to add laater with centroids
 -- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
 -- ============================================================================
-SELECT create_points_mview('osm_landuse_points','mv_landuse_points' );
+SELECT create_points_mview('osm_landuse_points', 'mv_landuse_points', 'id, source, osm_id', NULL, NULL);
 -- Create points centroids materialized views, add points  only for higher zoom levels
 SELECT create_points_centroids_mview('mv_landuse_areas_z16_20','mv_landuse_points_centroids_z16_20','mv_landuse_points');
 SELECT create_points_centroids_mview( 'mv_landuse_areas_z13_15', 'mv_landuse_points_centroids_z13_15', 'mv_landuse_points');

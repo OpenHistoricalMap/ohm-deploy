@@ -18,7 +18,7 @@ services:
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3374.h513ba86f
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3356.h880c9a8b
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -121,7 +121,7 @@ services:
 
   tiler_monitor:
     container_name: tiler_monitor
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3364.hd63ad03e
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3348.h4fbb83d8
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ../../images/tiler-monitor:/app
@@ -138,12 +138,14 @@ services:
 
   tiler_server_martin:
     container_name: tiler_server_martin
-    image:  ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3374.h513ba86f
+    image: ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3357.he67b0015
     restart: always
     environment:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
     env_file:
       - .env.tiler
+    ports:
+      - "3030:80"
     volumes:
       - tiler_martin_nginx_cache:/var/cache/nginx
     networks:
@@ -153,16 +155,16 @@ services:
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db
+    name: tiler_db_1704
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm
+    name: tiler_imposm_1704
   tiler_monitor_data:
     driver: local
-    name: tiler_monitor_data_v3
+    name: tiler_monitor_1704
   tiler_martin_nginx_cache:
     driver: local
-    name: tiler_martin_nginx_cache
+    name: tiler_martin_nginx_cache_1704
 networks:
   ohm_network:
     external: true

@@ -25,7 +25,7 @@ cat > /app/config/config.yaml <<EOF
 listen_addresses: '0.0.0.0:${MARTIN_INTERNAL_PORT}'
 worker_processes: ${MARTIN_WORKER_PROCESSES:-8}
 # Disable Martin's internal tile cache so tiles are always generated fresh.
-# Nginx handles caching with TTLs + ?purge=1 bypass.
+# Nginx handles caching with TTLs + ?fresh_tiles=1 bypass.
 cache_size_mb: 0
 
 postgres:
