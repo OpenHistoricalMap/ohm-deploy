@@ -26,7 +26,6 @@
       "contact:*",
       "opening_hours",
       "opening_hours:*",
-      "addr:*",
       "is_in",
       "is_in:*",
       "attribution",
