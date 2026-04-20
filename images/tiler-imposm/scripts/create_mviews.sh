@@ -88,3 +88,6 @@ execute_sql_file queries/ohm_mviews/routes_03_mv.sql
 
 ## non admin boundaries
 execute_sql_file queries/ohm_mviews/non_admin_boundaries_areas.sql
+
+## Addresses points
+execute_sql_file queries/ohm_mviews/addresses_points.sql
