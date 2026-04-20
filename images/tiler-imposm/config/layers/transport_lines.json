@@ -112,7 +112,7 @@
           "key": "route"
         },
         {
-          "type": "string",
+          "type": "boolint",
           "name": "expressway",
           "key": "expressway"
         },
