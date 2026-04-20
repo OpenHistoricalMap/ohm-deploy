@@ -15,6 +15,10 @@ until pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT
 done
 echo "PostgreSQL is ready."
 
+# Export languages bbox feed to GeoJSON and upload to S3
+echo "Extracting languages to geojson..."
+python3 /app/scripts/lang2geojson.py
+
 # Generate and create function sources in PostgreSQL
 echo "Generating function sources..."
 python3 /app/scripts/generate_functions.py
