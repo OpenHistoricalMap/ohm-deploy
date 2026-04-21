@@ -10,7 +10,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../images/tiler-server-martin:/app
-      - martin_nginx_cache:/var/cache/nginx
+      - martin_nginx_cache_dynamic:/var/cache/nginx/tiles
+      - martin_nginx_cache_static:/var/cache/nginx/static_tiles
     ports:
       - "3020:80"
     env_file:
@@ -22,9 +23,12 @@ services:
       - ohm_network
 
 volumes:
-  martin_nginx_cache:
+  martin_nginx_cache_dynamic:
     driver: local
-    name: martin_nginx_cache
+    name: martin_nginx_cache_dynamic
+  martin_nginx_cache_static:
+    driver: local
+    name: martin_nginx_cache_static
 
 networks:
   ohm_network:
