@@ -186,7 +186,7 @@ BEGIN
         COALESCE(NULLIF(sm.railway, ''),   tl.railway)               AS railway,
         COALESCE(NULLIF(sm.aeroway, ''),   tl.aeroway)               AS aeroway,
         COALESCE(NULLIF(sm.route,   ''),   tl.route)                 AS route,
-        COALESCE(NULLIF(sm.expressway,''), tl.expressway)            AS expressway,
+        COALESCE(sm.expressway, tl.expressway)                       AS expressway,
         sm.tags || tl.tags AS tags,
         sm.start_date,
         sm.end_date,
