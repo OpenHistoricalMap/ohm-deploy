@@ -1,0 +1,58 @@
+services:
+  varnish:
+    image: varnish:7.5
+    container_name: varnish-poc
+    ports:
+      - "6081:6081"
+    volumes:
+      - ../images/varnish-poc/default.vcl:/etc/varnish/default.vcl:ro
+      - varnish_poc_storage:/var/lib/varnish
+    command: >
+      varnishd -F
+      -a :6081
+      -f /etc/varnish/default.vcl
+      -s file,/var/lib/varnish/storage.bin,5G
+      -p default_ttl=604800
+      -p default_grace=3600
+      -p workspace_client=256k
+      -p workspace_backend=256k
+    networks:
+      - ohm_network
+    depends_on:
+      - martin
+
+  martin:
+    container_name: martin
+    image: rub21/tiler-server-martin:v1
+    build:
+      context: ../images/tiler-server-martin
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-server-martin:/app
+      - martin_nginx_cache_dynamic:/var/cache/nginx/tiles
+      - martin_nginx_cache_static:/var/cache/nginx/static_tiles
+    ports:
+      - "3020:80"
+    expose:
+      - "3001"
+    env_file:
+      - ../envs/.env.tiler
+    environment:
+      - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
+    networks:
+      - ohm_network
+
+volumes:
+  varnish_poc_storage:
+    driver: local
+    name: varnish_poc_storage
+  martin_nginx_cache_dynamic:
+    driver: local
+    name: martin_nginx_cache_dynamic
+  martin_nginx_cache_static:
+    driver: local
+    name: martin_nginx_cache_static
+
+networks:
+  ohm_network:
+    external: true
