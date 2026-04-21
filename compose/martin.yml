@@ -1,7 +1,32 @@
-# Martin tile server
-# Cache invalidation: nginx TTLs per zoom + manual purge via ?purge=1 query param.
-# No external purge service needed.
+# Martin tile server + Varnish cache
+# Caching: Varnish only. Nginx in Martin does routing/gzip/tilejson/static.
+# Invalidation: BAN requests from tiler-cache (replaces TTL-based invalidation).
 services:
+  varnish:
+    image: varnish:7.5
+    container_name: varnish
+    ports:
+      - "6081:6081"
+    volumes:
+      - ../images/varnish-poc/default.vcl:/etc/varnish/default.vcl:ro
+      - varnish_storage:/var/lib/varnish
+    command: >
+      varnishd -F
+      -a :6081
+      -f /etc/varnish/default.vcl
+      -s dynamic=file,/var/lib/varnish/dynamic.bin,${VARNISH_DYNAMIC_SIZE:-20G}
+      -s static=file,/var/lib/varnish/static.bin,${VARNISH_STATIC_SIZE:-10G}
+      -p default_ttl=604800
+      -p default_grace=3600
+      -p workspace_client=256k
+      -p workspace_backend=256k
+      -p thread_pool_min=100
+      -p thread_pool_max=5000
+    networks:
+      - ohm_network
+    depends_on:
+      - martin
+
   martin:
     container_name: martin
     image: rub21/tiler-server-martin:v1
@@ -10,21 +35,21 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../images/tiler-server-martin:/app
-      - martin_nginx_cache:/var/cache/nginx
     ports:
       - "3020:80"
+    expose:
+      - "3001"
     env_file:
       - ../envs/.env.tiler
     environment:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
-    # restart: always
     networks:
       - ohm_network
 
 volumes:
-  martin_nginx_cache:
+  varnish_storage:
     driver: local
-    name: martin_nginx_cache
+    name: varnish_storage
 
 networks:
   ohm_network:

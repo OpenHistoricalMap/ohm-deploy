@@ -13,75 +13,29 @@ http {
     sendfile on;
     keepalive_timeout 65;
 
-    # === Tile cache (dynamic: ohm, ohm_admin, etc.) ===
-    # Tiles expire automatically via proxy_cache_valid TTLs (per zoom range).
-    # Manual bypass: append ?fresh_tiles=1 to any tile URL to bypass cache and fetch fresh.
-    proxy_cache_path /var/cache/nginx/tiles
-        levels=1:2
-        keys_zone=tiles:200m
-        max_size=50g
-        inactive=30d
-        use_temp_path=off;
-
-    # === Tile cache (static: ne, osm_land — never changes) ===
-    proxy_cache_path /var/cache/nginx/static_tiles
-        levels=1:2
-        keys_zone=static_tiles:50m
-        max_size=10g
-        inactive=365d
-        use_temp_path=off;
-
-    # =============================================
-    # === Gzip compression for MVT tiles ===
-    # To disable: set NGINX_GZIP=off in env or change 'on' to 'off' below.
-    # =============================================
+    # Caching is handled by Varnish upstream. Nginx here only routes + gzip.
     gzip ${MARTIN_NGINX_GZIP};
     gzip_types application/x-protobuf application/vnd.mapbox-vector-tile application/octet-stream;
     gzip_min_length 256;
-    gzip_comp_level ${MARTIN_NGINX_GZIP_COMP_LEVEL};   # 1=fastest/less compression, 9=slowest/best compression
+    gzip_comp_level ${MARTIN_NGINX_GZIP_COMP_LEVEL};
     gzip_vary on;
     gzip_proxied any;
-
-    # === Zoom-based caching ===
-    # nginx proxy_cache TTL varies by zoom range (generated per location block).
-    # Ranges match materialized view zoom ranges. Lower zooms cache longer
-    # (less change), higher zooms expire faster (more edits).
-    # Manual bypass via ?fresh_tiles=1; TTLs are the automatic safety net.
-    #   z0-2:   24h    z3-5:  24h    z6-7:  16h    z8-9:  12h
-    #   z10-12:  8h    z13-15: 4h    z16-20: 1h
-    # Browser Cache-Control is set to "no-store" for dynamic tiles so
-    # browsers always revalidate with nginx.
-
-    # === Cache bypass for fresh tiles ===
-    # Append ?fresh_tiles=1 to any tile URL to skip the cache and fetch fresh from Martin.
-    # The fresh response replaces the old cache entry (cache_key = $uri, without query params).
-    # Usage: /maps/ohm/10/512/340.pbf?fresh_tiles=1
-    map $arg_fresh_tiles $cache_bypass {
-        default 0;
-        "1"     1;
-    }
 
     upstream martin {
         server 127.0.0.1:${MARTIN_INTERNAL_PORT};
         keepalive 32;
     }
 
-    # === Proxy timeouts for large composite tiles ===
     proxy_read_timeout 120s;
     proxy_connect_timeout 10s;
     proxy_send_timeout 30s;
     proxy_buffers 16 256k;
     proxy_buffer_size 128k;
-
-    # === Prevent double gzip ===
-    # Tell Martin not to compress responses (strip Accept-Encoding from upstream requests).
-    # Nginx handles all compression via the gzip directives above.
     proxy_set_header Accept-Encoding "";
 
     server {
         listen ${MARTIN_NGINX_PORT};
 
-        # Health and catalog
         location /catalog {
             proxy_set_header Host $http_host;
             proxy_pass http://martin;
@@ -91,36 +45,26 @@ http {
             proxy_pass http://martin;
         }
 
-        # TileJSON routes: /maps/{group}.json, /maps/{group}/{layer}.json
         ##TILEJSON_ROUTES##
 
-        # Composite tile routes (one per group, Tegola-compatible)
-        # /maps/{group}/{z}/{x}/{y}.pbf -> all layers in one tile
         ##COMPOSITE_ROUTES##
 
-        # Per-layer routes: /maps/{group}/{layer}/{z}/{x}/{y}.pbf
         ##PERLAYER_ROUTES##
 
-        # Serve config files (functions.json for the viewer)
         location /config/ {
             alias /app/config/;
             add_header Content-Type application/json;
-            add_header Cache-Control "no-cache";
         }
 
-        # Viewer
         location = / {
             default_type text/html;
             root /app/static;
             try_files /index.html =404;
         }
 
-        # Fallback — proxy to Martin without nginx cache.
-        # no-store prevents the browser from caching tile responses.
         location / {
             proxy_set_header Host $http_host;
             proxy_pass http://martin;
-            add_header Cache-Control "no-store";
         }
     }
 }

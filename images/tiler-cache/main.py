@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 from config import Config
 from utils.utils import get_logger
+from utils.varnish_purger import ban_tiles
 
 app = FastAPI()
 logger = get_logger()
@@ -164,7 +165,13 @@ def clean_cache_by_changeset(
             return {"success": True, "tiles_count": 0, "deleted": 0}
         
         stats = delete_tiles_from_s3(tiles, Config.S3_BUCKET_PATH_FILES)
-        return {"success": True, "tiles_count": len(tiles), "delete_stats": stats}
+        varnish_ok = ban_tiles(tiles)
+        return {
+            "success": True,
+            "tiles_count": len(tiles),
+            "delete_stats": stats,
+            "varnish_ban_ok": varnish_ok,
+        }
         
     except HTTPException:
         raise
