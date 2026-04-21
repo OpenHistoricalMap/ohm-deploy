@@ -59,7 +59,7 @@ BEGIN
           OR (NULLIF(sm.railway, '')   IS NOT NULL AND sm.railway      IS DISTINCT FROM tl.railway)
           OR (NULLIF(sm.aeroway, '')   IS NOT NULL AND sm.aeroway      IS DISTINCT FROM tl.aeroway)
           OR (NULLIF(sm.route, '')     IS NOT NULL AND sm.route        IS DISTINCT FROM tl.route)
-          OR (NULLIF(sm.expressway,'') IS NOT NULL AND sm.expressway   IS DISTINCT FROM tl.expressway)
+          OR (sm.expressway IS NOT NULL AND sm.expressway IS DISTINCT FROM tl.expressway)
           OR (sm.tunnel  IS NOT NULL AND sm.tunnel  IS DISTINCT FROM tl.tunnel)
           OR (sm.bridge  IS NOT NULL AND sm.bridge  IS DISTINCT FROM tl.bridge)
           OR (sm.oneway  IS NOT NULL AND sm.oneway  IS DISTINCT FROM tl.oneway)
