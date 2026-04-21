@@ -28,32 +28,32 @@
         },
         {
           "type": "string",
-          "name": "housenumber",
+          "name": "addr_housenumber",
           "key": "addr:housenumber"
         },
         {
           "type": "string",
-          "name": "housename",
+          "name": "addr_housename",
           "key": "addr:housename"
         },
         {
           "type": "string",
-          "name": "unit",
+          "name": "addr_unit",
           "key": "addr:unit"
         },
         {
           "type": "string",
-          "name": "street",
+          "name": "addr_street",
           "key": "addr:street"
         },
         {
           "type": "string",
-          "name": "city",
+          "name": "addr_city",
           "key": "addr:city"
         },
         {
           "type": "string",
-          "name": "postcode",
+          "name": "addr_postcode",
           "key": "addr:postcode"
         },
         {

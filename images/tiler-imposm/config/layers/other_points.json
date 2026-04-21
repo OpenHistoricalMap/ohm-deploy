@@ -47,36 +47,6 @@
           "key": "end_date"
         },
         {
-          "type": "string",
-          "name": "housenumber",
-          "key": "addr:housenumber"
-        },
-        {
-          "type": "string",
-          "name": "housename",
-          "key": "addr:housename"
-        },
-        {
-          "type": "string",
-          "name": "unit",
-          "key": "addr:unit"
-        },
-        {
-          "type": "string",
-          "name": "street",
-          "key": "addr:street"
-        },
-        {
-          "type": "string",
-          "name": "city",
-          "key": "addr:city"
-        },
-        {
-          "type": "string",
-          "name": "postcode",
-          "key": "addr:postcode"
-        },
-        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null

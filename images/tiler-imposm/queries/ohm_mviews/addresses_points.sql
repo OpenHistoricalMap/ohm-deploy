@@ -9,11 +9,11 @@
 -- ============================================================================
 SELECT create_points_mview(
     'osm_address_points',
-    'mv_address_points',
-    'id, source, osm_id',
+    'mv_address_points_z16_20',
+    'id, osm_id',
     NULL,
     NULL
 );
 
 -- Refresh:
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_address_points;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_address_points_z16_20;
