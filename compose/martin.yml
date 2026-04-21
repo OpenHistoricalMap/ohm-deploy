@@ -9,21 +9,12 @@ services:
       - "6081:6081"
     volumes:
       - ../images/varnish-poc/default.vcl:/etc/varnish/default.vcl:ro
-      - varnish_storage:/var/lib/varnish
     command: >
       varnishd -F
       -a :6081
       -f /etc/varnish/default.vcl
-      -s dynamic=file,/var/lib/varnish/dynamic.bin,${VARNISH_DYNAMIC_SIZE:-20G}
-      -s static=file,/var/lib/varnish/static.bin,${VARNISH_STATIC_SIZE:-10G}
-      -p default_ttl=604800
-      -p default_grace=3600
-      -p workspace_client=256k
-      -p workspace_backend=256k
-      -p http_req_hdr_len=32768
-      -p http_resp_hdr_len=32768
-      -p thread_pool_min=100
-      -p thread_pool_max=5000
+      -s dynamic=malloc,${VARNISH_DYNAMIC_SIZE:-2G}
+      -s static=malloc,${VARNISH_STATIC_SIZE:-1G}
     networks:
       - ohm_network
     depends_on:
@@ -82,11 +73,6 @@ services:
       - ohm_network
     depends_on:
       - varnish
-
-volumes:
-  varnish_storage:
-    driver: local
-    name: varnish_storage
 
 networks:
   ohm_network:

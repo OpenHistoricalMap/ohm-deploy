@@ -18,6 +18,9 @@ VARNISH_URL = os.getenv("VARNISH_URL", "http://varnish:6081")
 VARNISH_BAN_TIMEOUT = int(os.getenv("VARNISH_BAN_TIMEOUT", "5"))
 VARNISH_TILE_URL_PREFIX = os.getenv("VARNISH_TILE_URL_PREFIX", "/maps/ohm")
 VARNISH_MAX_TILES_PER_REQUEST = int(os.getenv("VARNISH_MAX_TILES_PER_REQUEST", "200"))
+# Limit child-zoom expansion depth to avoid CPU blowup for low-zoom tiles.
+# factor = 2^depth, so 6 => up to 64 iterations per tile per zoom level.
+VARNISH_MAX_ZOOM_EXPANSION = int(os.getenv("VARNISH_MAX_ZOOM_EXPANSION", "6"))
 
 _TILE_RE = re.compile(r"^(\d+)/(\d+)/(\d+)")
 
@@ -57,7 +60,8 @@ def _expand_tile_prefixes(z: int, x: int, zoom_levels: Iterable[int]) -> Set[str
         if pz in zooms:
             out.add(_tile_to_prefix(pz, px))
 
-    for cz in range(z + 1, zmax + 1):
+    effective_zmax = min(zmax, z + VARNISH_MAX_ZOOM_EXPANSION)
+    for cz in range(z + 1, effective_zmax + 1):
         if cz not in zooms:
             continue
         factor = 2 ** (cz - z)
