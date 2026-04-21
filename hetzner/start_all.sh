@@ -21,19 +21,19 @@ source "$SCRIPT_DIR/.env.traefik"
 echo "########################## OHM_DOMAIN -> $OHM_DOMAIN ##########################"
 
 # ###################### Tiler ######################
-./hetzner/deploy.sh start tiler $ENVIRONMENT -y
+# ./hetzner/deploy.sh start tiler $ENVIRONMENT -y
 
-# ###################### Osmcha ######################
-./hetzner/deploy.sh start osmcha $ENVIRONMENT -y 
+# # ###################### Osmcha ######################
+# ./hetzner/deploy.sh start osmcha $ENVIRONMENT -y 
 
-# ###################### Nominatim ######################
-./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
+# # ###################### Nominatim ######################
+# ./hetzner/deploy.sh start nominatim $ENVIRONMENT -y 
 
-# ###################### Overpass ####################
-./hetzner/deploy.sh start overpass $ENVIRONMENT -y
+# # ###################### Overpass ####################
+# ./hetzner/deploy.sh start overpass $ENVIRONMENT -y
 
-#################### Taginfo ####################
-./hetzner/deploy.sh start taginfo $ENVIRONMENT -y
+# #################### Taginfo ####################
+# ./hetzner/deploy.sh start taginfo $ENVIRONMENT -y
 
 #################### Traefik ####################
 

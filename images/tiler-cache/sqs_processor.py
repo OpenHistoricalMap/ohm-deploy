@@ -6,8 +6,10 @@ import threading
 import datetime
 
 from tiler_cache_cleaner.cleaner import clean_cache_by_file
+from tiler_cache_cleaner.utils.files import get_list_expired_tiles
 from config import Config
 from utils.utils import (check_tiler_db_postgres_status, get_logger, s3_path_to_url)
+from utils.varnish_purger import ban_tile_strings
 
 logger = get_logger()
 
@@ -52,29 +54,49 @@ def check_postgres_with_retries(max_retries=3, retry_delay=5):
     return False
 
 
-def cleanup_zoom_levels(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file, cleanup_type="immediate"):
+def cleanup_zoom_levels_s3(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file, cleanup_type="immediate"):
     """Executes the S3 cleanup process for specific zoom levels."""
     file_name = os.path.basename(s3_imposm3_exp_path)
-    logger.info(f"[{cleanup_type.upper()}] {file_name} | path={path_file} | zooms={min(zoom_levels)}-{max(zoom_levels)}")
+    logger.info(f"[{cleanup_type.upper()}][s3] {file_name} | path={path_file} | zooms={min(zoom_levels)}-{max(zoom_levels)}")
     try:
         expired_file_url = s3_path_to_url(s3_imposm3_exp_path)
         clean_cache_by_file(expired_file_url, path_file, zoom_levels)
     except Exception as e:
-        logger.exception(f"[{cleanup_type.upper()}] Error: {file_name}")
+        logger.exception(f"[{cleanup_type.upper()}][s3] Error: {file_name}")
+        raise
+
+
+def cleanup_varnish(s3_imposm3_exp_path, zoom_levels, cleanup_type="immediate"):
+    """Read the expire file and send BAN(s) to Varnish for the expanded tiles."""
+    file_name = os.path.basename(s3_imposm3_exp_path)
+    logger.info(f"[{cleanup_type.upper()}][varnish] {file_name} | zooms={min(zoom_levels)}-{max(zoom_levels)}")
+    try:
+        expired_file_url = s3_path_to_url(s3_imposm3_exp_path)
+        chunks = get_list_expired_tiles(expired_file_url)
+        for chunk in chunks:
+            ban_tile_strings(chunk, zoom_levels)
+    except Exception as e:
+        logger.exception(f"[{cleanup_type.upper()}][varnish] Error: {file_name}")
         raise
 
 
 def execute_cleanup_for_all_paths(s3_imposm3_exp_path, cleanup_type):
-    """
-    Executes cleanup for all configured S3 bucket paths in separate threads.
+    """Dispatch cleanup based on TILE_CACHE_BACKEND ("s3" or "varnish")."""
+    backend = Config.TILE_CACHE_BACKEND
 
-    Args:
-        s3_imposm3_exp_path (str): S3 path to the imposm3 expiration file
-        cleanup_type (str): Type of cleanup (e.g., "immediate", "delayed_15min", "delayed_1hour")
-    """
+    if backend == "varnish":
+        threading.Thread(
+            target=cleanup_varnish,
+            args=(s3_imposm3_exp_path, Config.ZOOM_LEVELS_TO_DELETE, cleanup_type),
+        ).start()
+        return
+
+    if backend != "s3":
+        logger.warning(f"Unknown TILE_CACHE_BACKEND='{backend}', falling back to s3")
+
     for path_file in Config.S3_BUCKET_PATH_FILES:
         threading.Thread(
-            target=cleanup_zoom_levels,
+            target=cleanup_zoom_levels_s3,
             args=(
                 s3_imposm3_exp_path,
                 Config.ZOOM_LEVELS_TO_DELETE,

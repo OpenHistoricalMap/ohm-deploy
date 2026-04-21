@@ -20,6 +20,8 @@ services:
       -p default_grace=3600
       -p workspace_client=256k
       -p workspace_backend=256k
+      -p http_req_hdr_len=32768
+      -p http_resp_hdr_len=32768
       -p thread_pool_min=100
       -p thread_pool_max=5000
     networks:
@@ -45,6 +47,41 @@ services:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
     networks:
       - ohm_network
+
+  tiler-cache:
+    container_name: tiler-cache
+    image: ohm/tiler-cache:latest
+    build:
+      context: ../images/tiler-cache
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-cache:/app
+    ports:
+      - "8000:8000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -x
+        python sqs_processor.py &
+        python main.py
+    env_file:
+      - ../envs/.env.tiler
+    environment:
+      - PORT=8000
+      - TILE_CACHE_BACKEND=varnish
+      - VARNISH_URL=http://varnish:6081
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ohm_network
+    depends_on:
+      - varnish
 
 volumes:
   varnish_storage:

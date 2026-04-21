@@ -52,13 +52,13 @@ sub vcl_backend_response {
 
     if (bereq.url ~ "^/maps/(ne|osm_land)/") {
         # Static tiles: storage separado, TTL casi infinito
-        set beresp.storage_hint = "static";
+        set beresp.storage = storage.static;
         set beresp.ttl = 365d;
         set beresp.grace = 30d;
         set beresp.keep = 7d;
     } else {
         # Dynamic tiles: TTL largo como safety net; BAN invalida antes
-        set beresp.storage_hint = "dynamic";
+        set beresp.storage = storage.dynamic;
         set beresp.ttl = 7d;
         set beresp.grace = 1h;
         set beresp.keep = 1d;

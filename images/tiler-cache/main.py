@@ -163,15 +163,21 @@ def clean_cache_by_changeset(
         
         if not tiles:
             return {"success": True, "tiles_count": 0, "deleted": 0}
-        
-        stats = delete_tiles_from_s3(tiles, Config.S3_BUCKET_PATH_FILES)
-        varnish_ok = ban_tiles(tiles)
-        return {
-            "success": True,
-            "tiles_count": len(tiles),
-            "delete_stats": stats,
-            "varnish_ban_ok": varnish_ok,
-        }
+
+        backend = Config.TILE_CACHE_BACKEND
+        response = {"success": True, "tiles_count": len(tiles), "backend": backend}
+
+        if backend == "varnish":
+            response["varnish_ban_ok"] = ban_tiles(tiles)
+        elif backend == "s3":
+            response["delete_stats"] = delete_tiles_from_s3(tiles, Config.S3_BUCKET_PATH_FILES)
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unknown TILE_CACHE_BACKEND='{backend}' (expected 's3' or 'varnish')",
+            )
+
+        return response
         
     except HTTPException:
         raise

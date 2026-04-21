@@ -6,6 +6,9 @@ class Config:
     # General settings SQS
     ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
     SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "default-queue-url")
+
+    # Cache backend: "s3" (tegola) or "varnish" (martin + varnish)
+    TILE_CACHE_BACKEND = os.getenv("TILE_CACHE_BACKEND", "varnish").lower()
     ## In case the container is running in hetzner cloud, we need to load the AWS credentials env vars to read sqs messages
     AWS_REGION_NAME = os.getenv("AWS_REGION_NAME", "us-east-1")
 
