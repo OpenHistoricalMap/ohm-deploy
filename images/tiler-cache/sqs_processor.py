@@ -5,7 +5,6 @@ import json
 import threading
 import datetime
 
-from tiler_cache_cleaner.cleaner import clean_cache_by_file
 from tiler_cache_cleaner.utils.files import get_list_expired_tiles
 from config import Config
 from utils.utils import (check_tiler_db_postgres_status, get_logger, s3_path_to_url)
@@ -33,11 +32,11 @@ def update_heartbeat():
 def check_postgres_with_retries(max_retries=3, retry_delay=5):
     """
     Check PostgreSQL database status with retry logic.
-    
+
     Args:
         max_retries (int): Maximum number of retry attempts (default: 3)
         retry_delay (int): Delay in seconds between retries (default: 5)
-    
+
     Returns:
         bool: True if PostgreSQL is available, False otherwise
     """
@@ -50,20 +49,8 @@ def check_postgres_with_retries(max_retries=3, retry_delay=5):
                 time.sleep(retry_delay)
             else:
                 logger.error("PostgreSQL database is down after all retries.")
-    
+
     return False
-
-
-def cleanup_zoom_levels_s3(s3_imposm3_exp_path, zoom_levels, bucket_name, path_file, cleanup_type="immediate"):
-    """Executes the S3 cleanup process for specific zoom levels."""
-    file_name = os.path.basename(s3_imposm3_exp_path)
-    logger.info(f"[{cleanup_type.upper()}][s3] {file_name} | path={path_file} | zooms={min(zoom_levels)}-{max(zoom_levels)}")
-    try:
-        expired_file_url = s3_path_to_url(s3_imposm3_exp_path)
-        clean_cache_by_file(expired_file_url, path_file, zoom_levels)
-    except Exception as e:
-        logger.exception(f"[{cleanup_type.upper()}][s3] Error: {file_name}")
-        raise
 
 
 def cleanup_varnish(s3_imposm3_exp_path, zoom_levels, cleanup_type="immediate"):
@@ -80,31 +67,12 @@ def cleanup_varnish(s3_imposm3_exp_path, zoom_levels, cleanup_type="immediate"):
         raise
 
 
-def execute_cleanup_for_all_paths(s3_imposm3_exp_path, cleanup_type):
-    """Dispatch cleanup based on TILE_CACHE_BACKEND ("s3" or "varnish")."""
-    backend = Config.TILE_CACHE_BACKEND
-
-    if backend == "varnish":
-        threading.Thread(
-            target=cleanup_varnish,
-            args=(s3_imposm3_exp_path, Config.ZOOM_LEVELS_TO_DELETE, cleanup_type),
-        ).start()
-        return
-
-    if backend != "s3":
-        logger.warning(f"Unknown TILE_CACHE_BACKEND='{backend}', falling back to s3")
-
-    for path_file in Config.S3_BUCKET_PATH_FILES:
-        threading.Thread(
-            target=cleanup_zoom_levels_s3,
-            args=(
-                s3_imposm3_exp_path,
-                Config.ZOOM_LEVELS_TO_DELETE,
-                Config.S3_BUCKET_CACHE_TILER,
-                path_file,
-                cleanup_type,
-            ),
-        ).start()
+def execute_cleanup(s3_imposm3_exp_path, cleanup_type):
+    """Run Varnish BAN cleanup for the given expire file in a background thread."""
+    threading.Thread(
+        target=cleanup_varnish,
+        args=(s3_imposm3_exp_path, Config.ZOOM_LEVELS_TO_DELETE, cleanup_type),
+    ).start()
 
 
 # SQS max delay is 15 minutes (900 seconds)
@@ -150,7 +118,7 @@ def process_delayed_cleanup(body, sent_time, action_name, required_delay_seconds
 
     s3_imposm3_exp_path = body["s3_path"]
     cleanup_type = action_name.replace("delayed_cleanup_", "delayed_")
-    execute_cleanup_for_all_paths(s3_imposm3_exp_path, cleanup_type)
+    execute_cleanup(s3_imposm3_exp_path, cleanup_type)
     return True
 
 
@@ -184,11 +152,11 @@ def process_sqs_messages():
     """Unified function to process SQS messages and create jobs based on infrastructure."""
     # Initialize heartbeat file
     update_heartbeat()
-    
+
     while True:
         # Update heartbeat at the start of each iteration
         update_heartbeat()
-        
+
         logger.debug("Polling SQS...")
         response = sqs.receive_message(
             QueueUrl=Config.SQS_QUEUE_URL,
@@ -245,7 +213,7 @@ def process_sqs_messages():
                     # Immediate cleanup
                     now = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
                     logger.info(f"[S3 FILE] {s3_imposm3_exp_path} | created:{eventTime} | cleaning:{now} UTC")
-                    execute_cleanup_for_all_paths(s3_imposm3_exp_path, "immediate")
+                    execute_cleanup(s3_imposm3_exp_path, "immediate")
 
                     # Send delayed cleanup messages if enabled
                     if Config.ENABLE_DELAYED_CLEANUP:

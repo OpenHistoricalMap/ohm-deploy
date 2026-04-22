@@ -1,4 +1,4 @@
-"""Endpoint to clean tile cache in S3 based on OpenHistoricalMap changeset or point with buffer."""
+"""Endpoint to invalidate tiles in Varnish based on OpenHistoricalMap changeset or point with buffer."""
 
 import os
 import sys
@@ -62,28 +62,6 @@ def get_tiles_in_bbox(bbox: dict, zoom_levels: List[int]) -> List[mercantile.Til
     return tiles
 
 
-def delete_tiles_from_s3(tiles: List[mercantile.Tile], path_files: List[str]) -> dict:
-    """Deletes tiles from S3 in batches of 1000 objects."""
-    s3 = Config.get_s3_client()
-    bucket = Config.S3_BUCKET_CACHE_TILER
-    keys = [f"{pf}/{t.z}/{t.x}/{t.y}{ext}" for t in tiles for pf in path_files for ext in ['.pbf', '']]
-    
-    if not keys:
-        return {'deleted': 0, 'errors': 0, 'total_tiles_processed': 0}
-    
-    deleted = errors = 0
-    for i in range(0, len(keys), 1000):
-        try:
-            r = s3.delete_objects(Bucket=bucket, Delete={'Objects': [{'Key': k} for k in keys[i:i+1000]], 'Quiet': False})
-            deleted += len(r.get('Deleted', []))
-            errors += len(r.get('Errors', []))
-        except Exception as e:
-            logger.error(f"Error deleting batch: {e}")
-            errors += len(keys[i:i+1000])
-    
-    return {'deleted': deleted, 'errors': errors, 'total_tiles_processed': len(keys)}
-
-
 def terminate_process_after_delay(delay=1):
     """Terminate the process after a short delay to allow HTTP response to be sent."""
     import time
@@ -96,12 +74,12 @@ def terminate_process_after_delay(delay=1):
 def health():
     """Health check that validates both HTTP server and SQS processor."""
     import time
-    
+
     hb_file = "/tmp/sqs_processor_heartbeat"
     sqs_status = "starting"
     sqs_last = None
     is_healthy = True
-    
+
     try:
         if os.path.exists(hb_file):
             t = time.time() - float(open(hb_file).read().strip())
@@ -117,18 +95,17 @@ def health():
     except Exception as e:
         sqs_status = f"error: {str(e)}"
         is_healthy = False
-        
+
     response_data = {
         "status": "healthy" if is_healthy else "unhealthy",
         "sqs_processor": sqs_status,
         "sqs_last_heartbeat_seconds_ago": round(sqs_last, 1) if sqs_last else None
     }
-    
+
     if not is_healthy:
-        # Terminate process after sending response
         threading.Thread(target=terminate_process_after_delay, daemon=True).start()
         return JSONResponse(status_code=503, content=response_data)
-    
+
     return response_data
 
 
@@ -141,7 +118,7 @@ def clean_cache_by_changeset(
     zoom_levels: Optional[str] = Query("16,17,18,19,20", description="Zoom levels separated by comma (e.g., 18,19,20)"),
     api_base_url: str = Query("https://www.openhistoricalmap.org", description="OpenHistoricalMap API base URL")
 ):
-    """Cleans tile cache in S3 based on changeset or point with buffer."""
+    """Invalidates tiles in Varnish based on changeset or point with buffer."""
     try:
         if not changeset_id and not (lat and lon):
             raise HTTPException(status_code=400, detail="Must provide 'changeset_id' or 'lat' and 'lon'")
@@ -149,7 +126,7 @@ def clean_cache_by_changeset(
             raise HTTPException(status_code=400, detail="Must provide 'changeset_id' OR 'lat/lon', not both")
         if lat and lon and not buffer_meters:
             raise HTTPException(status_code=400, detail="When using 'lat' and 'lon', must provide 'buffer_meters'")
-        
+
         if zoom_levels:
             zoom_list = [int(z.strip()) for z in zoom_levels.split(',')]
             if max(zoom_list) > 20:
@@ -157,28 +134,19 @@ def clean_cache_by_changeset(
             zoom_list = [z for z in zoom_list if z <= 20]
         else:
             zoom_list = [z for z in Config.ZOOM_LEVELS_TO_DELETE if z <= 20]
-        
+
         bbox = fetch_changeset(changeset_id, api_base_url) if changeset_id else calculate_bbox_from_point(lat, lon, buffer_meters)
         tiles = get_tiles_in_bbox(bbox, zoom_list)
-        
+
         if not tiles:
-            return {"success": True, "tiles_count": 0, "deleted": 0}
+            return {"success": True, "tiles_count": 0}
 
-        backend = Config.TILE_CACHE_BACKEND
-        response = {"success": True, "tiles_count": len(tiles), "backend": backend}
+        return {
+            "success": True,
+            "tiles_count": len(tiles),
+            "varnish_ban_ok": ban_tiles(tiles),
+        }
 
-        if backend == "varnish":
-            response["varnish_ban_ok"] = ban_tiles(tiles)
-        elif backend == "s3":
-            response["delete_stats"] = delete_tiles_from_s3(tiles, Config.S3_BUCKET_PATH_FILES)
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Unknown TILE_CACHE_BACKEND='{backend}' (expected 's3' or 'varnish')",
-            )
-
-        return response
-        
     except HTTPException:
         raise
     except Exception as e:
@@ -190,4 +158,3 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
-

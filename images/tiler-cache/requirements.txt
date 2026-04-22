@@ -1,14 +1,8 @@
 requests
 smart_open
-joblib
-tqdm
-click
 mercantile
-aiohttp
 boto3
-kubernetes
 psycopg2-binary
-docker
 fastapi
 uvicorn
 git+https://github.com/OpenHistoricalMap/tiler_cache_cleaner.git
