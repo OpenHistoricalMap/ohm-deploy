@@ -1,23 +1,5 @@
 services:
-  tiler_db:
-    container_name: tiler_db
-    image: ghcr.io/openhistoricalmap/tiler-db:0.0.1-0.dev.git.2166.hc55c4cd
-    volumes:
-      - tiler_pgdata:/var/lib/postgresql/data
-      - ./config/postgresql.staging.conf:/etc/postgresql/postgresql.conf
-    environment:
-      - PGDATA=/var/lib/postgresql/data
-      - POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
-    command:
-      - postgres
-      - "-c"
-      - "config_file=/etc/postgresql/postgresql.conf"
-    ports:
-      - "5432:5432"
-    env_file:
-      - .env.tiler
-    networks:
-      - ohm_network
+
 volumes:
   tiler_pgdata:
     driver: local

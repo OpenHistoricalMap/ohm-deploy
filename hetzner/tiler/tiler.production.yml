@@ -39,7 +39,7 @@ services:
 
   tiler_sqs_cleaner:
     container_name: tiler_sqs_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3290.h63549fc1
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3357.h3c23a908
     environment:
       - PORT=8000
     env_file:
@@ -60,8 +60,6 @@ services:
     networks:
       - ohm_network
 
-
-
   tiler_monitor:
     container_name: tiler_monitor
     image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3348.h4fbb83d8
@@ -81,7 +79,7 @@ services:
 
   tiler_server_martin:
     container_name: tiler_server_martin
-    image: ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3357.he67b0015
+    image:  ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3352.h1c81647b
     restart: always
     environment:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}

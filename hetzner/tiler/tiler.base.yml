@@ -1,18 +1,16 @@
 services:
-  tiler_server:
-    container_name: tiler_server
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
-    # image: tiler-server:staging
-    # build:
-    #   context: ../../images/tiler-server
-    #   dockerfile: Dockerfile
-    # ports:
-    #   - "9090:9090"
+  tiler_server_martin:
+    container_name: tiler_server_martin
+    image:  ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3352.h1c81647b
+    restart: always
+    environment:
+      - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
     env_file:
       - .env.tiler
-    restart: always
-    # volumes:
-    #   - ../../images/tiler-server/start.sh:/app/start.sh:ro
+    ports:
+      - "3030:80"
+    volumes:
+      - tiler_martin_nginx_cache:/var/cache/nginx
     networks:
       - ohm_network
       
