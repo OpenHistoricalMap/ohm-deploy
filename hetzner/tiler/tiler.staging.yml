@@ -18,25 +18,6 @@ services:
       - .env.tiler
     networks:
       - ohm_network
-  tiler_imposm:
-    container_name: tiler_imposm
-    # image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3208.h6ef73bb
-    image: tiler-imposm:staging
-    build: 
-      context: ../../images/tiler-imposm
-      dockerfile: Dockerfile
-    volumes:
-      - tiler_imposm_data:/mnt/data
-    command:
-      - sh
-      - -c
-      - |
-        ./start.sh
-    env_file:
-      - .env.tiler
-    restart: always
-    networks:
-      - ohm_network
 volumes:
   tiler_pgdata:
     driver: local
