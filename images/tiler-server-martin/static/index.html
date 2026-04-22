@@ -245,41 +245,48 @@
     }
     document.getElementById('btn-grid').classList.add('active');
 
-    // Fresh tiles mode: toggle ?fresh_tiles=1 on all tile requests to bypass nginx cache
-    // cacheBuster is appended to tile URLs to defeat MapLibre's in-memory cache.
-    // It is incremented each time fresh tiles is toggled off, so MapLibre sees new URLs
-    // and re-fetches from nginx (which already has the fresh tiles from BYPASS).
-    let freshTilesMode = false;
-    let cacheBuster = 0;
+    // Fresh tiles mode: append ?fresh_tiles=1 to all tile requests so Varnish
+    // forces MISS and refreshes its cache entry. Persisted in the page URL
+    // (?fresh_tiles=1) so reloading keeps the mode active.
+    let freshTilesMode = new URLSearchParams(window.location.search).get('fresh_tiles') === '1';
+
+    function syncFreshTilesUrl() {
+      const params = new URLSearchParams(window.location.search);
+      if (freshTilesMode) params.set('fresh_tiles', '1');
+      else params.delete('fresh_tiles');
+      const qs = params.toString();
+      const newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+      history.replaceState(null, '', newUrl);
+    }
+
+    function syncFreshTilesButton() {
+      const btn = document.getElementById('btn-fresh-tiles');
+      if (!btn) return;
+      btn.classList.toggle('active', freshTilesMode);
+      btn.textContent = freshTilesMode ? 'Fresh Tiles ON' : 'Req Fresh Tiles';
+    }
 
     function toggleFreshTiles() {
       freshTilesMode = !freshTilesMode;
-      const btn = document.getElementById('btn-fresh-tiles');
-      btn.classList.toggle('active', freshTilesMode);
-      btn.textContent = freshTilesMode ? 'Fresh Tiles ON' : 'Fresh Tiles';
-
-      if (!freshTilesMode) {
-        // Increment cache buster so MapLibre treats all tile URLs as new
-        cacheBuster++;
-      }
+      syncFreshTilesButton();
+      syncFreshTilesUrl();
       applyTileUrls();
+    }
+
+    function tileUrlForMode(url) {
+      const base = url.split('?')[0];
+      return freshTilesMode ? base + '?fresh_tiles=1' : base;
     }
 
     function applyTileUrls() {
       Object.values(activeSources).forEach(({ sourceId }) => {
         const source = map.getSource(sourceId);
         if (!source || !source.tiles) return;
-        const urls = source.tiles.map(url => {
-          const base = url.split('?')[0];
-          if (freshTilesMode) {
-            return base + '?fresh_tiles=1&_v=' + cacheBuster;
-          }
-          // cacheBuster > 0 means we've done at least one fresh tiles cycle
-          return cacheBuster > 0 ? base + '?_v=' + cacheBuster : base;
-        });
-        source.setTiles(urls);
+        source.setTiles(source.tiles.map(tileUrlForMode));
       });
     }
+
+    syncFreshTilesButton();
 
     // Inspect toggle
     function toggleInspect(enabled) {
@@ -494,7 +501,7 @@
 
         map.addSource(sourceId, {
           type: 'vector',
-          tiles: [cachedTileUrl],
+          tiles: [tileUrlForMode(cachedTileUrl)],
           minzoom: tj.minzoom || 0,
           maxzoom: tj.maxzoom || 22,
         });
@@ -625,7 +632,7 @@
 
         const sourceOpts = {
           type: 'vector',
-          tiles: tj.tiles,
+          tiles: (tj.tiles || []).map(tileUrlForMode),
           minzoom: tj.minzoom || 0,
           maxzoom: tj.maxzoom || 22,
         };
