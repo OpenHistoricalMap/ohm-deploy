@@ -18,9 +18,6 @@ VARNISH_URL = os.getenv("VARNISH_URL", "http://varnish:6081")
 VARNISH_BAN_TIMEOUT = int(os.getenv("VARNISH_BAN_TIMEOUT", "5"))
 VARNISH_TILE_URL_PREFIX = os.getenv("VARNISH_TILE_URL_PREFIX", "/maps/ohm")
 VARNISH_MAX_TILES_PER_REQUEST = int(os.getenv("VARNISH_MAX_TILES_PER_REQUEST", "200"))
-# Limit child-zoom expansion depth to avoid CPU blowup for low-zoom tiles.
-# factor = 2^depth, so 6 => up to 64 iterations per tile per zoom level.
-VARNISH_MAX_ZOOM_EXPANSION = int(os.getenv("VARNISH_MAX_ZOOM_EXPANSION", "6"))
 
 _TILE_RE = re.compile(r"^(\d+)/(\d+)/(\d+)")
 
@@ -43,8 +40,33 @@ def _tile_to_prefix(z: int, x: int) -> str:
     return f"{z}/{x_str[:-2]}"
 
 
+def _prefixes_for_x_range(z: int, x_lo: int, x_hi: int) -> Set[str]:
+    """Unique z/x_prefix strings for x in [x_lo, x_hi].
+
+    Walks x by jumping to the next x that would change the truncated prefix,
+    so the work scales with the number of prefixes, not the width of the range.
+    """
+    out: Set[str] = set()
+    x = x_lo
+    while x <= x_hi:
+        out.add(_tile_to_prefix(z, x))
+        s = str(x)
+        if len(s) <= 2:
+            x += 1
+        elif len(s) == 3:
+            x = (x // 10 + 1) * 10
+        else:
+            x = (x // 100 + 1) * 100
+    return out
+
+
 def _expand_tile_prefixes(z: int, x: int, zoom_levels: Iterable[int]) -> Set[str]:
-    """Expand a tile to z/x_prefix strings for parents + same zoom + children."""
+    """Expand a tile to z/x_prefix strings for parents + same zoom + children.
+
+    Children expansion is bounded by max(zoom_levels) — the caller-supplied
+    list is the authoritative range. Prefixes at each child zoom are generated
+    directly from the x-range instead of iterating every child tile.
+    """
     zooms = set(zoom_levels)
     if not zooms:
         return set()
@@ -60,13 +82,13 @@ def _expand_tile_prefixes(z: int, x: int, zoom_levels: Iterable[int]) -> Set[str
         if pz in zooms:
             out.add(_tile_to_prefix(pz, px))
 
-    effective_zmax = min(zmax, z + VARNISH_MAX_ZOOM_EXPANSION)
-    for cz in range(z + 1, effective_zmax + 1):
+    for cz in range(z + 1, zmax + 1):
         if cz not in zooms:
             continue
         factor = 2 ** (cz - z)
-        for dx in range(factor):
-            out.add(_tile_to_prefix(cz, x * factor + dx))
+        x_lo = x * factor
+        x_hi = x_lo + factor - 1
+        out.update(_prefixes_for_x_range(cz, x_lo, x_hi))
 
     return out
 

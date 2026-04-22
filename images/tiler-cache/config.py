@@ -19,20 +19,6 @@ class Config:
     MAX_ACTIVE_JOBS = int(os.getenv("MAX_ACTIVE_JOBS", 2))
     DELETE_OLD_JOBS_AGE = int(os.getenv("DELETE_OLD_JOBS_AGE", 3600))
 
-    # Tiler cache purge and seed settings
-    EXECUTE_PURGE = os.getenv("EXECUTE_PURGE", "true")
-    EXECUTE_SEED = os.getenv("EXECUTE_SEED", "true")
-
-    # Zoom levels
-    PURGE_MIN_ZOOM = int(os.getenv("PURGE_MIN_ZOOM", 8))
-    PURGE_MAX_ZOOM = int(os.getenv("PURGE_MAX_ZOOM", 20))
-    SEED_MIN_ZOOM = int(os.getenv("SEED_MIN_ZOOM", 8))
-    SEED_MAX_ZOOM = int(os.getenv("SEED_MAX_ZOOM", 14))
-
-    # Concurrency settings
-    SEED_CONCURRENCY = int(os.getenv("SEED_CONCURRENCY", 16))
-    PURGE_CONCURRENCY = int(os.getenv("PURGE_CONCURRENCY", 16))
-
     # Job settings
     JOB_NAME_PREFIX = f"{ENVIRONMENT}-tiler-cache-purge"
 

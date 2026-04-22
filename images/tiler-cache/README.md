@@ -20,14 +20,8 @@ The container is configured entirely through environment variables. All variable
 | `ENVIRONMENT` | The operating environment (e.g., `development`, `staging`, `production`). | `development` |
 | `SQS_QUEUE_URL` | The URL of the AWS SQS queue to listen to for purge messages. | `default-queue-url` |
 | `AWS_REGION_NAME` | The AWS region for the SQS queue. | `us-east-1` |
-| **Tiler Cache Operations** |
-| `EXECUTE_PURGE` | Set to `"true"` to enable the tile purging process. | `true` |
 | **Zoom Levels** |
-| `PURGE_MIN_ZOOM` | The minimum zoom level to purge. | `8` |
-| `PURGE_MAX_ZOOM` | The maximum zoom level to purge. | `20` |
-| `ZOOM_LEVELS_TO_DELETE` | A comma-separated list of high zoom levels to delete directly from S3. | `18,19,20` |
-| **Concurrency** |
-| `PURGE_CONCURRENCY` | The number of parallel processes to use for purging tiles. | `16` |
+| `ZOOM_LEVELS_TO_DELETE` | Comma-separated zoom levels to invalidate (S3 delete / Varnish BAN). | `10,11,12,13,14,15,16,17,18,19,20` |
 | **S3 Settings** |
 | `S3_BUCKET_CACHE_TILER` | The S3 bucket where the tile cache is stored. | `tiler-cache-staging` |
 | `S3_BUCKET_PATH_FILES` | The base path(s) in the S3 bucket for tiles to be deleted (comma-separated). | `mnt/data/osm,mnt/data/ohm_admin` |
