@@ -8,7 +8,7 @@ services:
     ports:
       - "6081:6081"
     volumes:
-      - ../images/varnish-poc/default.vcl:/etc/varnish/default.vcl:ro
+      - ../images/tiler-varnish/default.vcl:/etc/varnish/default.vcl:ro
     command: >
       varnishd -F
       -a :6081
