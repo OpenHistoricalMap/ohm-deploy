@@ -96,7 +96,7 @@ def ban_tiles(tiles: List[mercantile.Tile]) -> bool:
     all_ok = True
     for chunk in _chunks(list(tiles), VARNISH_MAX_TILES_PER_REQUEST):
         patterns = "|".join(f"{t.z}/{t.x}/{t.y}" for t in chunk)
-        regex = f"^{VARNISH_TILE_URL_PREFIX}/({patterns})\\.pbf$"
+        regex = f"^{VARNISH_TILE_URL_PREFIX}/({patterns})(\\.pbf)?$"
         if not _send_ban(regex, len(chunk)):
             all_ok = False
     return all_ok
@@ -130,7 +130,7 @@ def ban_tile_strings(tile_strings: Iterable[str], zoom_levels: Iterable[int]) ->
     all_ok = True
     sorted_prefixes = sorted(prefixes)
     for chunk in _chunks(sorted_prefixes, VARNISH_MAX_TILES_PER_REQUEST):
-        regex = f"^{VARNISH_TILE_URL_PREFIX}/({'|'.join(chunk)})[0-9]*/[0-9]+\\.pbf$"
+        regex = f"^{VARNISH_TILE_URL_PREFIX}/({'|'.join(chunk)})[0-9]*/[0-9]+(\\.pbf)?$"
         if not _send_ban(regex, len(chunk)):
             all_ok = False
     return all_ok
