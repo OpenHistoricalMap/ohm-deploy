@@ -83,7 +83,7 @@ SQS_MAX_DELAY_SECONDS = 900
 DELAYED_CLEANUPS = [
     ("delayed_cleanup_15min", 900),   # 15 minutes
     ("delayed_cleanup_1hour", 7200),  # 1 hour
-    ("delayed_cleanup_2hour", 14400),  # 2 hour
+    ("delayed_cleanup_3hour", 10800),  # 3 hour
     # ("delayed_cleanup_12hour", 43200),  # 12 hour
     # ("delayed_cleanup_24hour", 86400),  # 24 hour
 ]

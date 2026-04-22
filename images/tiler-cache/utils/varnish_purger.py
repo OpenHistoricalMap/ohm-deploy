@@ -16,8 +16,14 @@ logger = get_logger()
 
 VARNISH_URL = os.getenv("VARNISH_URL", "http://varnish:6081")
 VARNISH_BAN_TIMEOUT = int(os.getenv("VARNISH_BAN_TIMEOUT", "5"))
-VARNISH_TILE_URL_PREFIX = os.getenv("VARNISH_TILE_URL_PREFIX", "/maps/ohm")
+VARNISH_TILE_URL_PREFIX = os.getenv(
+    "VARNISH_TILE_URL_PREFIX",
+    "/maps/ohm,/maps/ohm_admin,/maps/ohm_other_boundaries",
+)
 VARNISH_MAX_TILES_PER_REQUEST = int(os.getenv("VARNISH_MAX_TILES_PER_REQUEST", "200"))
+
+_TILE_URL_PREFIXES = [p.strip() for p in VARNISH_TILE_URL_PREFIX.split(",") if p.strip()]
+_TILE_URL_PREFIX_GROUP = "(?:" + "|".join(re.escape(p) for p in _TILE_URL_PREFIXES) + ")"
 
 _TILE_RE = re.compile(r"^(\d+)/(\d+)/(\d+)")
 
@@ -118,7 +124,7 @@ def ban_tiles(tiles: List[mercantile.Tile]) -> bool:
     all_ok = True
     for chunk in _chunks(list(tiles), VARNISH_MAX_TILES_PER_REQUEST):
         patterns = "|".join(f"{t.z}/{t.x}/{t.y}" for t in chunk)
-        regex = f"^{VARNISH_TILE_URL_PREFIX}/({patterns})(\\.pbf)?$"
+        regex = f"^{_TILE_URL_PREFIX_GROUP}/({patterns})(\\.pbf)?$"
         if not _send_ban(regex, len(chunk)):
             all_ok = False
     return all_ok
@@ -152,7 +158,7 @@ def ban_tile_strings(tile_strings: Iterable[str], zoom_levels: Iterable[int]) ->
     all_ok = True
     sorted_prefixes = sorted(prefixes)
     for chunk in _chunks(sorted_prefixes, VARNISH_MAX_TILES_PER_REQUEST):
-        regex = f"^{VARNISH_TILE_URL_PREFIX}/({'|'.join(chunk)})[0-9]*/[0-9]+(\\.pbf)?$"
+        regex = f"^{_TILE_URL_PREFIX_GROUP}/({'|'.join(chunk)})[0-9]*/[0-9]+(\\.pbf)?$"
         if not _send_ban(regex, len(chunk)):
             all_ok = False
     return all_ok

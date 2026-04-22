@@ -6,7 +6,6 @@ import threading
 import requests
 import xml.etree.ElementTree as ET
 import mercantile
-import math
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
@@ -39,19 +38,6 @@ def fetch_changeset(changeset_id: int, api_base_url: str = "https://www.openhist
         raise HTTPException(status_code=500, detail=f"Error fetching changeset: {str(e)}")
     except (ET.ParseError, ValueError) as e:
         raise HTTPException(status_code=500, detail=f"Error parsing changeset: {str(e)}")
-
-
-def calculate_bbox_from_point(lat: float, lon: float, buffer_meters: float) -> dict:
-    """Calculates a bbox from a point with a buffer in meters."""
-    r = 6371000.0
-    lat_delta = math.degrees(buffer_meters / r)
-    lon_delta = math.degrees(buffer_meters / (r * math.cos(math.radians(lat))))
-    return {
-        'min_lon': lon - lon_delta,
-        'min_lat': lat - lat_delta,
-        'max_lon': lon + lon_delta,
-        'max_lat': lat + lat_delta
-    }
 
 
 def get_tiles_in_bbox(bbox: dict, zoom_levels: List[int]) -> List[mercantile.Tile]:
@@ -111,22 +97,12 @@ def health():
 
 @app.get("/clean-cache")
 def clean_cache_by_changeset(
-    changeset_id: Optional[int] = Query(None, description="OpenHistoricalMap changeset ID"),
-    lat: Optional[float] = Query(None, description="Point latitude"),
-    lon: Optional[float] = Query(None, description="Point longitude"),
-    buffer_meters: Optional[float] = Query(None, description="Buffer in meters around the point"),
+    changeset_id: int = Query(..., description="OpenHistoricalMap changeset ID"),
     zoom_levels: Optional[str] = Query("16,17,18,19,20", description="Zoom levels separated by comma (e.g., 18,19,20)"),
     api_base_url: str = Query("https://www.openhistoricalmap.org", description="OpenHistoricalMap API base URL")
 ):
-    """Invalidates tiles in Varnish based on changeset or point with buffer."""
+    """Invalidates tiles in Varnish for the bbox of the given changeset."""
     try:
-        if not changeset_id and not (lat and lon):
-            raise HTTPException(status_code=400, detail="Must provide 'changeset_id' or 'lat' and 'lon'")
-        if changeset_id and (lat or lon):
-            raise HTTPException(status_code=400, detail="Must provide 'changeset_id' OR 'lat/lon', not both")
-        if lat and lon and not buffer_meters:
-            raise HTTPException(status_code=400, detail="When using 'lat' and 'lon', must provide 'buffer_meters'")
-
         if zoom_levels:
             zoom_list = [int(z.strip()) for z in zoom_levels.split(',')]
             if max(zoom_list) > 20:
@@ -135,7 +111,7 @@ def clean_cache_by_changeset(
         else:
             zoom_list = [z for z in Config.ZOOM_LEVELS_TO_DELETE if z <= 20]
 
-        bbox = fetch_changeset(changeset_id, api_base_url) if changeset_id else calculate_bbox_from_point(lat, lon, buffer_meters)
+        bbox = fetch_changeset(changeset_id, api_base_url)
         tiles = get_tiles_in_bbox(bbox, zoom_list)
 
         if not tiles:

@@ -7,7 +7,7 @@ It is designed to run under Docker Compose (Hetzner stack). It listens to an AWS
 ### Core Features
 
 *   **Varnish BAN invalidation**: Listens to an SQS queue for notifications about new imposm3 expire files and issues BAN requests to Varnish so the next request repopulates the cache from Martin.
-*   **Delayed retries**: Optionally re-runs the BAN invalidation after 15 min / 1 h / 2 h using SQS-delayed messages, to catch late-reaching tiles.
+*   **Delayed retries**: Optionally re-runs the BAN invalidation after 15 min / 1 h / 3 h using SQS-delayed messages, to catch late-reaching tiles.
 *   **Changeset / point endpoint**: Exposes `/clean-cache` to invalidate tiles for an OHM changeset bbox or a `lat/lon + buffer_meters`.
 
 ## Configuration
@@ -25,7 +25,7 @@ The container is configured entirely through environment variables. All variable
 | **Varnish** |
 | `VARNISH_URL` | Base URL of the Varnish instance receiving BAN requests. | `http://varnish:6081` |
 | `VARNISH_BAN_TIMEOUT` | Timeout (seconds) for BAN HTTP requests. | `5` |
-| `VARNISH_TILE_URL_PREFIX` | URL prefix used when matching tile paths in BAN regex. | `/maps/ohm` |
+| `VARNISH_TILE_URL_PREFIX` | Comma-separated URL prefixes matched by BAN regex (one per Martin group to invalidate). | `/maps/ohm,/maps/ohm_admin,/maps/ohm_other_boundaries` |
 | `VARNISH_MAX_TILES_PER_REQUEST` | Max tile patterns per BAN request. | `200` |
 | **PostgreSQL Database** |
 | `POSTGRES_HOST` | Hostname of the PostgreSQL database. | `localhost` |
@@ -34,7 +34,7 @@ The container is configured entirely through environment variables. All variable
 | `POSTGRES_USER` | Username for the PostgreSQL database. | `postgres` |
 | `POSTGRES_PASSWORD` | Password for the PostgreSQL database. | `password` |
 | **Cleanup** |
-| `ENABLE_DELAYED_CLEANUP` | Enable delayed BAN retries (15 min / 1 h / 2 h). Set to `"true"` to enable. | `true` |
+| `ENABLE_DELAYED_CLEANUP` | Enable delayed BAN retries (15 min / 1 h / 3 h). Set to `"true"` to enable. | `true` |
 
 ## Usage
 
@@ -50,7 +50,7 @@ To run this script, you must configure the SQS and Postgres environment variable
 The system implements a multi-phase invalidation strategy:
 
 1. **Immediate BAN**: Executed immediately when an expire-file S3 event arrives.
-2. **Delayed retries (15 min / 1 h / 2 h)**: Scheduled via SQS `DelaySeconds` (for ≤15 min) or timestamp-based re-checking (for longer delays, since SQS max delay is 15 minutes).
+2. **Delayed retries (15 min / 1 h / 3 h)**: Scheduled via SQS `DelaySeconds` (for ≤15 min) or timestamp-based re-checking (for longer delays, since SQS max delay is 15 minutes).
 
 Delayed retries can be toggled with `ENABLE_DELAYED_CLEANUP`. They cover tiles whose rendering dependencies (e.g. materialised views, neighbouring features) take some time to settle.
 
