@@ -188,7 +188,7 @@ http:
     varnish_tiles:
       loadBalancer:
         servers:
-          - url: http://varnish:6081
+          - url: http://tiler_varnish:6081
 
     node_exporter:
       loadBalancer:
