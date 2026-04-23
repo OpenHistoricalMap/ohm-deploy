@@ -112,6 +112,16 @@
     /* Scrollbar */
     #sidebar-content::-webkit-scrollbar, #right-panel-body::-webkit-scrollbar { width: 6px; }
     #sidebar-content::-webkit-scrollbar-thumb, #right-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+    /* Cache debug mode (?debug=cache) */
+    .cache-debug-body { padding: 0 !important; }
+    .cache-debug-entry { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; padding: 5px 12px; font-size: 11px; font-family: 'SF Mono', Menlo, Consolas, monospace; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: baseline; }
+    .cache-debug-entry:hover { background: rgba(255,255,255,0.03); }
+    .cache-debug-tile { color: #4fc3f7; }
+    .cache-debug-size { color: #888; text-align: right; min-width: 50px; }
+    .cache-debug-status { font-weight: 600; font-size: 10px; letter-spacing: 0.5px; min-width: 40px; text-align: right; }
+    .cache-debug-time { color: #666; font-size: 10px; white-space: nowrap; text-align: right; min-width: 30px; }
+    .cache-debug-empty { padding: 20px; color: #888; font-size: 12px; text-align: center; }
   </style>
 </head>
 <body>
@@ -156,6 +166,35 @@
     const COLORS = ['#4fc3f7','#e91e63','#ffa726','#66bb6a','#ab47bc','#ef5350','#26c6da','#fdd835',
                      '#78909c','#ff7043','#9ccc65','#5c6bc0','#ec407a','#29b6f6','#d4e157','#8d6e63'];
 
+    // ---- Cache debug mode (?debug=cache) — must be registered before map init ----
+    // Uses addProtocol instead of window.fetch because MapLibre fetches vector tiles
+    // from a Web Worker, which bypasses the main-thread fetch override.
+    const cacheDebug = ((new URLSearchParams(window.location.search).get('debug') || '')
+                         .replace(/\/+$/, '')) === 'cache';
+    const cacheEntries = [];
+    const MAX_CACHE_ENTRIES = 100;
+
+    if (cacheDebug) {
+      console.log('[debug=cache] active — tile fetches routed via cachedebug:// protocol');
+      maplibregl.addProtocol('cachedebug', async (params, abortController) => {
+        const realUrl = params.url.replace(/^cachedebug:\/\//, 'https://');
+        const resp = await fetch(realUrl, { signal: abortController.signal });
+        const buffer = await resp.arrayBuffer();
+        const m = realUrl.match(/\/(\d+)\/(\d+)\/(\d+)\.pbf(?:\?|$)/);
+        if (m) {
+          cacheEntries.unshift({
+            key: `${m[1]}/${m[2]}/${m[3]}`,
+            size: buffer.byteLength,
+            cache: (resp.headers.get('X-Cache') || '?').toUpperCase(),
+            time: Date.now(),
+          });
+          if (cacheEntries.length > MAX_CACHE_ENTRIES) cacheEntries.length = MAX_CACHE_ENTRIES;
+          if (typeof renderCacheDebug === 'function') renderCacheDebug();
+        }
+        return { data: buffer };
+      });
+    }
+
     let activeSources = {};
     const sourceColors = {};
     const sourceZoomRanges = {}; // { name: { min, max } }
@@ -183,6 +222,12 @@
         ]
       },
       center: [0, 20], zoom: 2, hash: true,
+      transformRequest: cacheDebug ? (url, resourceType) => {
+        if (resourceType === 'Tile' && /\.pbf(\?|$)/.test(url)) {
+          return { url: url.replace(/^https?:\/\//, 'cachedebug://') };
+        }
+        return { url };
+      } : undefined,
     });
     map.showTileBoundaries = true;
 
@@ -200,41 +245,48 @@
     }
     document.getElementById('btn-grid').classList.add('active');
 
-    // Fresh tiles mode: toggle ?fresh_tiles=1 on all tile requests to bypass nginx cache
-    // cacheBuster is appended to tile URLs to defeat MapLibre's in-memory cache.
-    // It is incremented each time fresh tiles is toggled off, so MapLibre sees new URLs
-    // and re-fetches from nginx (which already has the fresh tiles from BYPASS).
-    let freshTilesMode = false;
-    let cacheBuster = 0;
+    // Fresh tiles mode: append ?fresh_tiles=1 to all tile requests so Varnish
+    // forces MISS and refreshes its cache entry. Persisted in the page URL
+    // (?fresh_tiles=1) so reloading keeps the mode active.
+    let freshTilesMode = new URLSearchParams(window.location.search).get('fresh_tiles') === '1';
+
+    function syncFreshTilesUrl() {
+      const params = new URLSearchParams(window.location.search);
+      if (freshTilesMode) params.set('fresh_tiles', '1');
+      else params.delete('fresh_tiles');
+      const qs = params.toString();
+      const newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+      history.replaceState(null, '', newUrl);
+    }
+
+    function syncFreshTilesButton() {
+      const btn = document.getElementById('btn-fresh-tiles');
+      if (!btn) return;
+      btn.classList.toggle('active', freshTilesMode);
+      btn.textContent = freshTilesMode ? 'Fresh Tiles ON' : 'Req Fresh Tiles';
+    }
 
     function toggleFreshTiles() {
       freshTilesMode = !freshTilesMode;
-      const btn = document.getElementById('btn-fresh-tiles');
-      btn.classList.toggle('active', freshTilesMode);
-      btn.textContent = freshTilesMode ? 'Fresh Tiles ON' : 'Fresh Tiles';
-
-      if (!freshTilesMode) {
-        // Increment cache buster so MapLibre treats all tile URLs as new
-        cacheBuster++;
-      }
+      syncFreshTilesButton();
+      syncFreshTilesUrl();
       applyTileUrls();
+    }
+
+    function tileUrlForMode(url) {
+      const base = url.split('?')[0];
+      return freshTilesMode ? base + '?fresh_tiles=1' : base;
     }
 
     function applyTileUrls() {
       Object.values(activeSources).forEach(({ sourceId }) => {
         const source = map.getSource(sourceId);
         if (!source || !source.tiles) return;
-        const urls = source.tiles.map(url => {
-          const base = url.split('?')[0];
-          if (freshTilesMode) {
-            return base + '?fresh_tiles=1&_v=' + cacheBuster;
-          }
-          // cacheBuster > 0 means we've done at least one fresh tiles cycle
-          return cacheBuster > 0 ? base + '?_v=' + cacheBuster : base;
-        });
-        source.setTiles(urls);
+        source.setTiles(source.tiles.map(tileUrlForMode));
       });
     }
+
+    syncFreshTilesButton();
 
     // Inspect toggle
     function toggleInspect(enabled) {
@@ -449,7 +501,7 @@
 
         map.addSource(sourceId, {
           type: 'vector',
-          tiles: [cachedTileUrl],
+          tiles: [tileUrlForMode(cachedTileUrl)],
           minzoom: tj.minzoom || 0,
           maxzoom: tj.maxzoom || 22,
         });
@@ -580,7 +632,7 @@
 
         const sourceOpts = {
           type: 'vector',
-          tiles: tj.tiles,
+          tiles: (tj.tiles || []).map(tileUrlForMode),
           minzoom: tj.minzoom || 0,
           maxzoom: tj.maxzoom || 22,
         };
@@ -643,6 +695,10 @@
     }
 
     function closeRightPanel() {
+      if (cacheDebug) {
+        clearCacheDebug();
+        return;
+      }
       document.getElementById('right-panel').classList.add('hidden');
     }
 
@@ -701,6 +757,62 @@
       document.getElementById('right-panel-body').innerHTML = html;
       panel.classList.remove('hidden');
     });
+
+    // ---- Cache debug render functions (state + protocol registered above) ----
+    function formatSize(bytes) {
+      if (!bytes) return '—';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return Math.round(bytes/1024) + ' kB';
+      return (bytes/1048576).toFixed(1) + ' MB';
+    }
+
+    function formatAgo(t) {
+      const s = Math.floor((Date.now() - t) / 1000);
+      if (s < 1) return 'now';
+      if (s < 60) return s + 's';
+      return Math.floor(s/60) + 'm';
+    }
+
+    function renderCacheDebug() {
+      const panel = document.getElementById('right-panel');
+      if (!panel) return;
+      panel.classList.remove('hidden');
+      const hits = cacheEntries.filter(e => /HIT/.test(e.cache)).length;
+      const total = cacheEntries.length;
+      const rate = total ? Math.round(hits * 100 / total) : 0;
+      document.getElementById('right-panel-title').textContent = total
+        ? `Cache · ${total} · ${rate}% HIT`
+        : 'Cache Monitor';
+      const body = document.getElementById('right-panel-body');
+      if (!total) {
+        body.innerHTML = '<div class="cache-debug-empty">Waiting for tiles...</div>';
+        return;
+      }
+      body.innerHTML = cacheEntries.map(e => {
+        const color = /HIT/.test(e.cache) ? '#66bb6a' : /MISS/.test(e.cache) ? '#e57373' : '#aaa';
+        return `<div class="cache-debug-entry"><span class="cache-debug-tile">${e.key}</span><span class="cache-debug-size">${formatSize(e.size)}</span><span class="cache-debug-status" style="color:${color}">${e.cache}</span><span class="cache-debug-time">${formatAgo(e.time)}</span></div>`;
+      }).join('');
+    }
+
+    function clearCacheDebug() {
+      cacheEntries.length = 0;
+      renderCacheDebug();
+    }
+
+    if (cacheDebug) {
+      const toggle = document.getElementById('inspect-toggle');
+      if (toggle) { toggle.checked = false; toggle.disabled = true; toggleInspect(false); }
+      const closeBtn = document.getElementById('right-panel-close');
+      if (closeBtn) { closeBtn.textContent = 'Clear'; closeBtn.title = 'Clear cache log'; }
+      document.getElementById('right-panel-body').classList.add('cache-debug-body');
+      renderCacheDebug();
+      setInterval(() => {
+        if (!cacheEntries.length) return;
+        document.querySelectorAll('.cache-debug-time').forEach((el, i) => {
+          if (cacheEntries[i]) el.textContent = formatAgo(cacheEntries[i].time);
+        });
+      }, 5000);
+    }
 
     map.on('load', init);
 

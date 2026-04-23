@@ -37,19 +37,9 @@ services:
     networks:
       - ohm_network
 
-  # Tiler server
-  tiler_server:
-    container_name: tiler_server
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3292.h0f5e7d60
-    # ports:
-    #   - "9090:9090"
-    restart: always
-    networks:
-      - ohm_network
-
   tiler_sqs_cleaner:
     container_name: tiler_sqs_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3290.h63549fc1
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3357.h3c23a908
     environment:
       - PORT=8000
     env_file:
@@ -67,55 +57,6 @@ services:
       interval: 10s
       retries: 3
       timeout: 5s
-    networks:
-      - ohm_network
-
-  tiler_s3_cleaner:
-    container_name: tiler_s3_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3290.h63549fc1
-    # image: tiler-cache:latest
-    # build:
-    #   context: ../../images/tiler-cache
-    #   dockerfile: Dockerfile
-    command:
-      - /bin/sh
-      - -c
-      - |
-        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm
-        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm_admin
-        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm_other_boundaries
-    env_file:
-      - .env.tiler
-    networks:
-      - ohm_network
-
-  tile_global_seeding:
-    container_name: tiler_global_seeding
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
-    env_file:
-      - .env.tiler
-    volumes:
-      - ./seed.sh:/opt/seed.sh
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        /opt/seed.sh global
-    networks:
-      - ohm_network
-
-  tile_coverage_seeding:
-    container_name: tiler_coverage_seeding
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
-    volumes:
-      - ./seed.sh:/opt/seed.sh
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        /opt/seed.sh coverage
-    env_file:
-      - .env.tiler
     networks:
       - ohm_network
 
@@ -138,7 +79,7 @@ services:
 
   tiler_server_martin:
     container_name: tiler_server_martin
-    image: ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3357.he67b0015
+    image:  ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3352.h1c81647b
     restart: always
     environment:
       - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}

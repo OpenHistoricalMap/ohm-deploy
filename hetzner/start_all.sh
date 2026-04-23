@@ -20,7 +20,7 @@ echo "########################## ENVIRONMENT -> $ENVIRONMENT ###################
 source "$SCRIPT_DIR/.env.traefik"
 echo "########################## OHM_DOMAIN -> $OHM_DOMAIN ##########################"
 
-# ###################### Tiler ######################
+###################### Tiler ######################
 ./hetzner/deploy.sh start tiler $ENVIRONMENT -y
 
 # ###################### Osmcha ######################

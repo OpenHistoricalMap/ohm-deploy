@@ -84,7 +84,7 @@ http:
       rule: Host(`vtiles.{{OHM_DOMAIN}}`)
       entryPoints:
         - port-web
-      service: tiler_server_martin
+      service: varnish_tiles
       middlewares:
         - secure-headers-allow-iframe
         - replace-osm-tiles-to-ohm
@@ -127,14 +127,6 @@ http:
       entryPoints:
         - port-web
       service: taginfo
-      middlewares:
-        - secure-headers
-
-    martin-router:
-      rule: Host(`martin.{{OHM_DOMAIN}}`)
-      entryPoints:
-        - port-web
-      service: tiler_server_martin
       middlewares:
         - secure-headers
 
@@ -193,10 +185,10 @@ http:
         servers:
           - url: http://taginfo_web:4567
 
-    tiler_server_martin:
+    varnish_tiles:
       loadBalancer:
         servers:
-          - url: http://tiler_server_martin:80
+          - url: http://varnish:6081
 
     node_exporter:
       loadBalancer:
