@@ -1,14 +1,14 @@
 # Tiler Cache Management Container
 
-This repository contains a containerized application designed to manage the tile cache for a map server. It provides scripts to **purging** (deleting outdated tiles based on notifications).
+This repository contains a containerized application that invalidates the map tile cache by sending **BAN** requests to Varnish when imposm3 produces expire files.
 
-The system is designed to run in a Kubernetes environment or Docker , leveraging AWS SQS for message queuing and interacting directly with S3 for efficient cache management.
+It is designed to run under Docker Compose (Hetzner stack). It listens to an AWS SQS queue fed by S3 events on the imposm3 expire-file bucket and, for each file, expands the affected tiles and bans them in Varnish.
 
 ### Core Features
 
-*   **Tile Purging**: Listens to an SQS queue for messages about expired tiles and deletes the corresponding cache tiles directly from S3 based on the expired data's coverage.
-*   **High-Zoom S3 Deletion**: Includes an optimized process to directly delete tiles from S3 for high zoom levels (18-20), which is significantly faster than traditional purging methods.
-*   **Multi-Cloud Support**: Configurable to work with both AWS S3 and other S3-compatible object storage services like Hetzner.
+*   **Varnish BAN invalidation**: Listens to an SQS queue for notifications about new imposm3 expire files and issues BAN requests to Varnish so the next request repopulates the cache from Martin.
+*   **Delayed retries**: Optionally re-runs the BAN invalidation after 15 min / 1 h / 3 h using SQS-delayed messages, to catch late-reaching tiles.
+*   **Changeset / point endpoint**: Exposes `/clean-cache` to invalidate tiles for an OHM changeset bbox or a `lat/lon + buffer_meters`.
 
 ## Configuration
 
@@ -18,26 +18,15 @@ The container is configured entirely through environment variables. All variable
 | :--- | :--- | :--- |
 | **General & SQS** |
 | `ENVIRONMENT` | The operating environment (e.g., `development`, `staging`, `production`). | `development` |
-| `SQS_QUEUE_URL` | The URL of the AWS SQS queue to listen to for purge messages. | `default-queue-url` |
+| `SQS_QUEUE_URL` | The URL of the AWS SQS queue to listen to for expire-file events. | `default-queue-url` |
 | `AWS_REGION_NAME` | The AWS region for the SQS queue. | `us-east-1` |
-| **Tiler Cache Operations** |
-| `EXECUTE_PURGE` | Set to `"true"` to enable the tile purging process. | `true` |
 | **Zoom Levels** |
-| `PURGE_MIN_ZOOM` | The minimum zoom level to purge. | `8` |
-| `PURGE_MAX_ZOOM` | The maximum zoom level to purge. | `20` |
-| `ZOOM_LEVELS_TO_DELETE` | A comma-separated list of high zoom levels to delete directly from S3. | `18,19,20` |
-| **Concurrency** |
-| `PURGE_CONCURRENCY` | The number of parallel processes to use for purging tiles. | `16` |
-| **S3 Settings** |
-| `S3_BUCKET_CACHE_TILER` | The S3 bucket where the tile cache is stored. | `tiler-cache-staging` |
-| `S3_BUCKET_PATH_FILES` | The base path(s) in the S3 bucket for tiles to be deleted (comma-separated). | `mnt/data/osm,mnt/data/ohm_admin` |
-| **Cloud Infrastructure & Credentials** |
-| `TILER_CACHE_CLOUD_INFRASTRUCTURE` | The cloud provider for S3. Can be `aws` or `hetzner`. | `aws` |
-| `TILER_CACHE_AWS_ACCESS_KEY_ID` | The access key for your S3-compatible storage (required for `hetzner`). | `""` |
-| `TILER_CACHE_AWS_SECRET_ACCESS_KEY` | The secret key for your S3-compatible storage (required for `hetzner`). | `""` |
-| `TILER_CACHE_AWS_ENDPOINT` | The S3 endpoint URL. Use the default for AWS, or a custom one for `hetzner`. | `https://s3.amazonaws.com` |
-| `TILER_CACHE_REGION` | The region for the S3-compatible storage. | `us-east-1` |
-| `TILER_CACHE_BUCKET` | The name of the S3 bucket for the tiler cache. | `none` |
+| `ZOOM_LEVELS_TO_DELETE` | Comma-separated zoom levels to invalidate via Varnish BAN. | `10,11,12,13,14,15,16,17,18,19,20` |
+| **Varnish** |
+| `VARNISH_URL` | Base URL of the Varnish instance receiving BAN requests. | `http://varnish:6081` |
+| `VARNISH_BAN_TIMEOUT` | Timeout (seconds) for BAN HTTP requests. | `5` |
+| `VARNISH_TILE_URL_PREFIX` | Comma-separated URL prefixes matched by BAN regex (one per Martin group to invalidate). | `/maps/ohm,/maps/ohm_admin,/maps/ohm_other_boundaries` |
+| `VARNISH_MAX_TILES_PER_REQUEST` | Max tile patterns per BAN request. | `200` |
 | **PostgreSQL Database** |
 | `POSTGRES_HOST` | Hostname of the PostgreSQL database. | `localhost` |
 | `POSTGRES_PORT` | Port for the PostgreSQL database. | `5432` |
@@ -45,38 +34,34 @@ The container is configured entirely through environment variables. All variable
 | `POSTGRES_USER` | Username for the PostgreSQL database. | `postgres` |
 | `POSTGRES_PASSWORD` | Password for the PostgreSQL database. | `password` |
 | **Cleanup** |
-| `ENABLE_DELAYED_CLEANUP` | Enable delayed cleanup operations (15 minutes and 1 hour). Set to `"true"` to enable. | `true` |
-| `DELAYED_CLEANUP_TIMER_SECONDS` | Delay in seconds before cleaning up resources after a job (legacy, kept for backward compatibility). | `3600` |
+| `ENABLE_DELAYED_CLEANUP` | Enable delayed BAN retries (15 min / 1 h / 3 h). Set to `"true"` to enable. | `true` |
 
 ## Usage
 
 ```sh
 python sqs_processor.py
 ```
-This script  listens to an SQS queue for messages about expired map data. Upon receiving a message, it calculates the affected tile coverage and deletes the corresponding tiles directly from the S3 bucket.
+This script listens to the SQS queue for S3 events on the imposm3 expire-file bucket. For each new file it reads the expired tile list and issues BAN request(s) to Varnish.
 
-To run this script, you must configure all the required environment variables, especially those related to SQS and S3.
+To run this script, you must configure the SQS and Postgres environment variables, plus `VARNISH_URL` if your Varnish is not reachable at the default.
 
 ### Delayed Cleanup System
 
-The system implements a three-phase cleanup strategy:
+The system implements a multi-phase invalidation strategy:
 
-1. **Immediate Cleanup**: Executed immediately when an S3 expiration file is detected
-2. **15-Minute Delayed Cleanup**: Scheduled via SQS with a 15-minute delay (using SQS `DelaySeconds`)
-3. **1-Hour Delayed Cleanup**: Scheduled via SQS with a 1-hour delay (using timestamp-based checking since SQS max delay is 15 minutes)
+1. **Immediate BAN**: Executed immediately when an expire-file S3 event arrives.
+2. **Delayed retries (15 min / 1 h / 3 h)**: Scheduled via SQS `DelaySeconds` (for ≤15 min) or timestamp-based re-checking (for longer delays, since SQS max delay is 15 minutes).
 
-The delayed cleanups can be enabled/disabled using the `ENABLE_DELAYED_CLEANUP` environment variable. When enabled, both delayed cleanups are automatically scheduled after the immediate cleanup completes.
-
-**Note**: The 1-hour cleanup uses a timestamp in the message body to track when it was originally scheduled. When the message is processed (after the 15-minute SQS delay), the system checks if 1 hour has actually passed before executing the cleanup.
+Delayed retries can be toggled with `ENABLE_DELAYED_CLEANUP`. They cover tiles whose rendering dependencies (e.g. materialised views, neighbouring features) take some time to settle.
 
 ### Required Cloud Permissions (IAM)
-Since the script no longer creates Kubernetes jobs, it does not require RBAC permissions to manage cluster resources. Instead, the service account running the purge.py pod needs AWS IAM permissions to interact with SQS and S3.
 
-Ensure the pod's service account has an associated IAM role with permissions for actions such as:
+The pod/container needs AWS IAM permissions to:
 
 ```
 sqs:ReceiveMessage
 sqs:DeleteMessage
-s3:DeleteObject
-s3:ListBucket
+sqs:SendMessage
 ```
+
+`SendMessage` is used to schedule delayed BAN retries back onto the same queue.
