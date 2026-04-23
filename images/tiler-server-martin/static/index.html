@@ -314,74 +314,50 @@
       document.getElementById('tile-info').textContent = `${z}/${x}/${y}`;
     }
 
-    // Derive max zoom from zoom_mapping
-    function getMaxZoom(zoomMapping) {
-      if (!zoomMapping || !zoomMapping.length) return 20;
-      const lastEntry = zoomMapping[zoomMapping.length - 1];
-      const tableName = lastEntry[1] || '';
-      const match = tableName.match(/z(\d+)_(\d+)/);
-      if (match) return parseInt(match[2]);
-      const match2 = tableName.match(/z(\d+)$/);
-      if (match2) return parseInt(match2[1]);
-      return 20;
-    }
+    // Hardcoded list of TileJSON groups (one per /maps/<group>.json endpoint).
+    // Add new groups here when functions.json gains a new group entry.
+    const TILEJSON_GROUPS = ['ohm', 'ohm_admin', 'ohm_other_boundaries', 'osm_land', 'ne'];
 
     async function init() {
       const content = document.getElementById('sidebar-content');
       try {
-        const [catalogResp, configResp] = await Promise.all([
-          fetch(MARTIN_BASE + '/catalog'),
-          fetch(MARTIN_BASE + '/config/functions.json').catch(() => null)
-        ]);
-        const catalog = await catalogResp.json();
-        const tiles = catalog.tiles || {};
-        const availableSources = new Set(Object.keys(tiles));
+        const results = await Promise.all(
+          TILEJSON_GROUPS.map(name =>
+            fetch(`${MARTIN_BASE}/maps/${name}.json`)
+              .then(r => r.ok ? r.json().then(tj => ({ name, tj })) : null)
+              .catch(() => null)
+          )
+        );
 
-        if (!availableSources.size) {
-          content.innerHTML = '<div class="error">No sources found in catalog</div>';
+        const groups = results.filter(Boolean);
+        if (!groups.length) {
+          content.innerHTML = '<div class="error">No TileJSON groups found</div>';
           return;
-        }
-
-        let groups;
-        let configFunctions = {};
-        if (configResp && configResp.ok) {
-          const config = await configResp.json();
-          groups = config.groups || [];
-          // Build a lookup for zoom ranges
-          groups.forEach(g => {
-            (g.functions || []).forEach(f => {
-              configFunctions[f.function_name] = f;
-            });
-          });
-        } else {
-          groups = [{ name: 'sources', functions: [...availableSources].map(n => ({ function_name: n })) }];
         }
 
         let colorIdx = 0;
         groupsData = [];
-        groups.forEach(group => {
-          const fns = group.functions
-            .map(f => f.function_name)
-            .filter(n => availableSources.has(n));
-          if (!fns.length) return;
-          fns.forEach(name => {
-            sourceColors[name] = COLORS[colorIdx % COLORS.length];
+        groups.forEach(({ name: groupName, tj }) => {
+          const vls = tj.vector_layers || [];
+          if (!vls.length) return;
+          // In TileJSON: vl.id == source_layer, vl.description == function_name
+          const fns = vls.map(vl => vl.description || vl.id);
+          fns.forEach((fnName, i) => {
+            const vl = vls[i];
+            sourceColors[fnName] = COLORS[colorIdx % COLORS.length];
             colorIdx++;
-            const cfg = configFunctions[name];
-            if (cfg) {
-              sourceZoomRanges[name] = {
-                min: cfg.min_zoom || 0,
-                max: getMaxZoom(cfg.zoom_mapping)
-              };
-              sourceLayerNames[name] = cfg.source_layer || name;
-            }
+            sourceZoomRanges[fnName] = {
+              min: vl.minzoom != null ? vl.minzoom : 0,
+              max: vl.maxzoom != null ? vl.maxzoom : 20,
+            };
+            sourceLayerNames[fnName] = vl.id;
           });
-          groupsData.push({ name: group.name, functions: fns });
+          groupsData.push({ name: groupName, functions: fns });
         });
 
         showGroupList();
       } catch (e) {
-        content.innerHTML = `<div class="error">Failed to load catalog: ${e.message}</div>`;
+        content.innerHTML = `<div class="error">Failed to load TileJSON: ${e.message}</div>`;
       }
     }
 

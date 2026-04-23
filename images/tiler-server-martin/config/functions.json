@@ -274,6 +274,15 @@
             [15, "mv_communication_z13_15"],
             [null, "mv_communication_z16_20"]
           ]
+        },
+        {
+          "function_name": "address_points",
+          "source_layer": "address_points",
+          "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 16,
+          "zoom_mapping": [
+            [null, "mv_address_points_z16_20"]
+          ]
         }
       ]
     },

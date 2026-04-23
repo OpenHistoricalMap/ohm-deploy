@@ -88,10 +88,11 @@ services:
     ports:
       - "3030:80"
     volumes:
-      - tiler_martin_nginx_cache:/var/cache/nginx
+      - tiler_martin_nginx_cache_dynamic:/var/cache/nginx/tiles
+      - tiler_martin_nginx_cache_static:/var/cache/nginx/static_tiles
     networks:
       - ohm_network
-      
+
 
 volumes:
   tiler_pgdata:
@@ -103,9 +104,12 @@ volumes:
   tiler_monitor_data:
     driver: local
     name: tiler_monitor_1704
-  tiler_martin_nginx_cache:
+  tiler_martin_nginx_cache_dynamic:
     driver: local
-    name: tiler_martin_nginx_cache_1704
+    name: tiler_martin_nginx_cache_dynamic_1704
+  tiler_martin_nginx_cache_static:
+    driver: local
+    name: tiler_martin_nginx_cache_static
 networks:
   ohm_network:
     external: true

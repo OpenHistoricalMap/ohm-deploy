@@ -9,7 +9,7 @@
   },
   "generalized_tables": {},
   "tables": {
-    "amenity_points": {
+    "address_points": {
       "fields": [
         {
           "type": "id",
@@ -25,26 +25,6 @@
           "type": "string",
           "name": "name",
           "key": "name"
-        },
-        {
-          "type": "mapping_value",
-          "name": "type",
-          "key": null
-        },
-        {
-          "type": "mapping_key",
-          "name": "class",
-          "key": null
-        },
-        {
-          "type": "string",
-          "name": "start_date",
-          "key": "start_date"
-        },
-        {
-          "type": "string",
-          "name": "end_date",
-          "key": "end_date"
         },
         {
           "type": "string",
@@ -77,16 +57,48 @@
           "key": "addr:postcode"
         },
         {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null
         }
       ],
       "type": "point",
+      "filters": {
+        "reject": {
+          "building": ["__any__"],
+          "shop": ["__any__"],
+          "amenity": ["__any__"],
+          "tourism": ["__any__"],
+          "office": ["__any__"],
+          "craft": ["__any__"],
+          "leisure": ["__any__"],
+          "historic": ["__any__"],
+          "man_made": ["__any__"],
+          "emergency": ["__any__"],
+          "healthcare": ["__any__"],
+          "public_transport": ["__any__"],
+          "aeroway": ["__any__"],
+          "railway": ["__any__"],
+          "highway": ["__any__"],
+          "power": ["__any__"],
+          "natural": ["__any__"],
+          "landuse": ["__any__"],
+          "place": ["__any__"],
+          "military": ["__any__"]
+        }
+      },
       "mapping": {
-        "amenity": [
-          "__any__"
-        ]
+        "addr:housenumber": ["__any__"]
       }
     }
   }

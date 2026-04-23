@@ -1,6 +1,3 @@
-# Martin tile server + Varnish cache
-# Caching: Varnish only. Nginx in Martin does routing/gzip/tilejson/static.
-# Invalidation: BAN requests from tiler-cache (replaces TTL-based invalidation).
 services:
   varnish:
     image: varnish:7.5

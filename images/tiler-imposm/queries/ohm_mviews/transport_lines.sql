@@ -59,7 +59,7 @@ BEGIN
           OR (NULLIF(sm.railway, '')   IS NOT NULL AND sm.railway      IS DISTINCT FROM tl.railway)
           OR (NULLIF(sm.aeroway, '')   IS NOT NULL AND sm.aeroway      IS DISTINCT FROM tl.aeroway)
           OR (NULLIF(sm.route, '')     IS NOT NULL AND sm.route        IS DISTINCT FROM tl.route)
-          OR (NULLIF(sm.expressway,'') IS NOT NULL AND sm.expressway   IS DISTINCT FROM tl.expressway)
+          OR (sm.expressway IS NOT NULL AND sm.expressway IS DISTINCT FROM tl.expressway)
           OR (sm.tunnel  IS NOT NULL AND sm.tunnel  IS DISTINCT FROM tl.tunnel)
           OR (sm.bridge  IS NOT NULL AND sm.bridge  IS DISTINCT FROM tl.bridge)
           OR (sm.oneway  IS NOT NULL AND sm.oneway  IS DISTINCT FROM tl.oneway)
@@ -186,7 +186,7 @@ BEGIN
         COALESCE(NULLIF(sm.railway, ''),   tl.railway)               AS railway,
         COALESCE(NULLIF(sm.aeroway, ''),   tl.aeroway)               AS aeroway,
         COALESCE(NULLIF(sm.route,   ''),   tl.route)                 AS route,
-        COALESCE(NULLIF(sm.expressway,''), tl.expressway)            AS expressway,
+        COALESCE(sm.expressway, tl.expressway)                       AS expressway,
         sm.tags || tl.tags AS tags,
         sm.start_date,
         sm.end_date,
@@ -217,9 +217,9 @@ BEGIN
         NULLIF(tags->'construction', '') AS construction,
         class,
         NULLIF(name, '') AS name,
-        tunnel,
-        bridge,
-        oneway,
+        NULLIF(tunnel, 0) AS tunnel,
+        NULLIF(bridge, 0) AS bridge,
+        NULLIF(oneway, 0) AS oneway,
         NULLIF(ref, '') AS ref,
         z_order,
         NULLIF(access, '') AS access,
@@ -232,7 +232,7 @@ BEGIN
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
         NULLIF(route, '') AS route,
-        NULLIF(expressway, '') AS expressway,
+        NULLIF(expressway, 0) AS expressway,
         NULLIF(start_date, '') AS start_date,
         NULLIF(end_date, '') AS end_date,
         isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
@@ -264,9 +264,9 @@ BEGIN
         NULLIF(tags->'construction', '') AS construction,
         class,
         NULLIF(name, '') AS name,
-        tunnel,
-        bridge,
-        oneway,
+        NULLIF(tunnel, 0) AS tunnel,
+        NULLIF(bridge, 0) AS bridge,
+        NULLIF(oneway, 0) AS oneway,
         NULLIF(ref, '') AS ref,
         z_order,
         NULLIF(access, '') AS access,
@@ -279,7 +279,7 @@ BEGIN
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
         NULLIF(route, '') AS route,
-        NULLIF(expressway, '') AS expressway,
+        NULLIF(expressway, 0) AS expressway,
         NULLIF(start_date, '') AS start_date,
         NULLIF(end_date, '') AS end_date,
         isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
