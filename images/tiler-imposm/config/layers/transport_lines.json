@@ -112,6 +112,11 @@
           "key": "route"
         },
         {
+          "type": "boolint",
+          "name": "expressway",
+          "key": "expressway"
+        },
+        {
           "type": "string",
           "name": "start_date",
           "key": "start_date"

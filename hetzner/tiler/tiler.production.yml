@@ -18,7 +18,7 @@ services:
 
   tiler_imposm:
     container_name: tiler_imposm
-    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3339.h2fbce74c
+    image: ghcr.io/openhistoricalmap/tiler-imposm:0.0.1-0.dev.git.3349.h2739b4b1
     volumes:
       - tiler_imposm_data:/mnt/data
     env_file:
@@ -37,19 +37,9 @@ services:
     networks:
       - ohm_network
 
-  # Tiler server
-  tiler_server:
-    container_name: tiler_server
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3292.h0f5e7d60
-    # ports:
-    #   - "9090:9090"
-    restart: always
-    networks:
-      - ohm_network
-
   tiler_sqs_cleaner:
     container_name: tiler_sqs_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3290.h63549fc1
+    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3348.h372d22c4
     environment:
       - PORT=8000
     env_file:
@@ -70,58 +60,9 @@ services:
     networks:
       - ohm_network
 
-  tiler_s3_cleaner:
-    container_name: tiler_s3_cleaner
-    image: ghcr.io/openhistoricalmap/tiler-cache:0.0.1-0.dev.git.3290.h63549fc1
-    # image: tiler-cache:latest
-    # build:
-    #   context: ../../images/tiler-cache
-    #   dockerfile: Dockerfile
-    command:
-      - /bin/sh
-      - -c
-      - |
-        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm
-        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm_admin
-        tiler-cache-cleaner clean_by_prefix --prefix-path-file mnt/data/ohm_other_boundaries
-    env_file:
-      - .env.tiler
-    networks:
-      - ohm_network
-
-  tile_global_seeding:
-    container_name: tiler_global_seeding
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
-    env_file:
-      - .env.tiler
-    volumes:
-      - ./seed.sh:/opt/seed.sh
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        /opt/seed.sh global
-    networks:
-      - ohm_network
-
-  tile_coverage_seeding:
-    container_name: tiler_coverage_seeding
-    image: ghcr.io/openhistoricalmap/tiler-server:0.0.1-0.dev.git.3296.h0e45d176
-    volumes:
-      - ./seed.sh:/opt/seed.sh
-    entrypoint:
-      - /bin/bash
-      - "-c"
-      - |
-        /opt/seed.sh coverage
-    env_file:
-      - .env.tiler
-    networks:
-      - ohm_network
-
   tiler_monitor:
     container_name: tiler_monitor
-    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3362.ha53a5a87
+    image: ghcr.io/openhistoricalmap/tiler-monitor:0.0.1-0.dev.git.3348.h4fbb83d8
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ../../images/tiler-monitor:/app
@@ -135,18 +76,71 @@ services:
       - .env.tiler
     networks:
       - ohm_network
-      
+
+  tiler_server_martin:
+    container_name: tiler_server_martin
+    image: ghcr.io/openhistoricalmap/tiler-server-martin:0.0.1-0.dev.git.3349.h2739b4b1
+    restart: always
+    environment:
+      - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
+    env_file:
+      - .env.tiler
+    ports:
+      - "3030:80"
+    networks:
+      ohm_network:
+        aliases:
+          - martin
+
+  tiler_varnish:
+    container_name: tiler_varnish
+    image: varnish:7.5
+    restart: always
+    ports:
+      - "6081:6081"
+    volumes:
+      - ../../images/tiler-varnish/default.vcl:/etc/varnish/default.vcl:ro
+    tmpfs:
+      - /var/lib/varnish/varnishd:exec
+    command: >
+      varnishd -F
+      -a :6081
+      -f /etc/varnish/default.vcl
+      -s dynamic=malloc,${VARNISH_DYNAMIC_SIZE:-16G}
+      -s static=malloc,${VARNISH_STATIC_SIZE:-4G}
+      -p thread_pool_min=100
+      -p thread_pool_max=2000
+      -p thread_pools=2
+      -p workspace_backend=256k
+      -p workspace_client=256k
+      -p http_resp_hdr_len=32k
+      -p http_resp_size=256k
+      -p nuke_limit=1000
+      -p timeout_idle=30
+      -p feature=+http2
+    mem_limit: 24G
+    cpus: "4.0"
+    ulimits:
+      memlock: -1
+      nofile:
+        soft: 131072
+        hard: 131072
+    networks:
+      - ohm_network
+    depends_on:
+      - tiler_server_martin
+
+
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db
+    name: tiler_db_2104
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm
+    name: tiler_imposm_2104
   tiler_monitor_data:
     driver: local
-    name: tiler_monitor_data_v3
-
+    name: tiler_monitor_2104
 networks:
   ohm_network:
     external: true

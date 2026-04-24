@@ -5,6 +5,7 @@ services:
     build:
       context: ../images/tiler-db
       dockerfile: Dockerfile
+    shm_size: 1g
     ports:
       - "54321:5432"
     volumes:
@@ -71,24 +72,24 @@ services:
   #     - ohm_network
 
 
-  tiler-monitor:
-    image: rub21/tiler-monitor:v2
-    build:
-      context: ../images/tiler-monitor
-      dockerfile: Dockerfile
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ../hetzner:/app/hetzner
-      - tiler_monitor_data:/data
-    ports:
-      - "8001:8001"
-    environment:
-      - TILER_MONITORING_DOCKER_CONFIG_ENVIRONMENT=staging
-    env_file:
-      - ../envs/.env.tiler
-    restart: always
-    networks:
-      - ohm_network
+  # tiler-monitor:
+  #   image: rub21/tiler-monitor:v2
+  #   build:
+  #     context: ../images/tiler-monitor
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ../hetzner:/app/hetzner
+  #     - tiler_monitor_data:/data
+  #   ports:
+  #     - "8001:8001"
+  #   environment:
+  #     - TILER_MONITORING_DOCKER_CONFIG_ENVIRONMENT=staging
+  #   env_file:
+  #     - ../envs/.env.tiler
+  #   restart: always
+  #   networks:
+  #     - ohm_network
 
 networks:
   ohm_network:
@@ -97,12 +98,12 @@ networks:
 volumes:
   tiler_pgdata:
     driver: local
-    name: tiler_db
+    name: tiler_db_1704
 
   tiler_imposm_data:
     driver: local
-    name: tiler_imposm
+    name: tiler_imposm_1704
 
   tiler_monitor_data:
     driver: local
-    name: tiler_monitor
+    name: tiler_monitor_1704

@@ -12,6 +12,8 @@ SELECT create_areas_mview(
     100,
     1000000,
     'id, osm_id, type',
+    NULL,
+    NULL,
     NULL
 );
 SELECT create_points_centroids_mview(
@@ -29,6 +31,8 @@ SELECT create_areas_mview(
     20,
     50000,
     'id, osm_id, type',
+    NULL,
+    NULL,
     NULL
 );
 SELECT create_points_centroids_mview(
@@ -44,7 +48,10 @@ SELECT create_points_centroids_mview(
 -- This must be done before creating centroids views that include points
 SELECT create_points_mview(
     'osm_other_points',
-    'mv_other_points'
+    'mv_other_points',
+    'id, source, osm_id',
+    NULL,
+    NULL
 );
 
 
@@ -57,6 +64,8 @@ SELECT create_areas_mview(
     5,
     5000,
     'id, osm_id, type',
+    NULL,
+    NULL,
     NULL
 );
 SELECT create_points_centroids_mview(
@@ -77,6 +86,8 @@ SELECT create_areas_mview(
     0,
     0,
     'id, osm_id, type',
+    NULL,
+    NULL,
     NULL
 );
 SELECT create_points_centroids_mview(

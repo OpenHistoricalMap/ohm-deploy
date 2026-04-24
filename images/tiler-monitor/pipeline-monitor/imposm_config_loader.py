@@ -254,6 +254,16 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
     if not tags:
         return {"reason": "Element has no tags", "commentable": False}
 
+    # Skip relations with no members — imposm cannot build geometry from an
+    # empty relation, so it will never appear in the tiler DB.
+    if elem_type == "relation":
+        member_count = elem.get("member_count", -1)
+        if member_count == 0:
+            return {
+                "reason": "Relation has no members — imposm cannot import empty relations",
+                "commentable": False,
+            }
+
     # Check non-importable relation types early.
     # Relations with types like "waterway" are grouping relations whose member
     # ways get imported individually — the relation itself is never stored.

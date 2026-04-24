@@ -127,6 +127,11 @@
           "key": "route"
         },
         {
+          "type": "boolint",
+          "name": "expressway",
+          "key": "expressway"
+        },
+        {
           "key": "type",
           "name": "relation_type",
           "type": "string"

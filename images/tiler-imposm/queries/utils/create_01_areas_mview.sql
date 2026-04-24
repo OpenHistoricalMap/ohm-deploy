@@ -18,15 +18,18 @@
 --   unique_columns  TEXT              - Comma-separated columns for unique index (default: 'id, osm_id, type')
 --   where_filter    TEXT              - Optional WHERE clause filter (e.g., "type != 'barrier'" or "class NOT IN ('power', 'military')"). NULL = no filter
 --   tag_columns     TEXT              - Optional extra columns from tags (e.g., "tags->'religion' AS religion, tags->'denomination' AS denomination"). NULL = none
+--   column_overrides JSONB            - Optional mapping {column_name: sql_expression} to override how an existing column is selected (e.g., '{"ref": "COALESCE(faa, iata, icao, NULLIF(ref, ''''))"}'). NULL = no overrides
 --
 -- Notes:
 --   - Creates the materialized view using a temporary swap mechanism
 --   - Adds a spatial index (GiST) on geometry and a unique index on unique_columns
 --   - Useful for creating views at different zoom levels with variable simplification
 --   - where_filter is appended to WHERE clause with AND, so use conditions like "type != 'barrier'" not "AND type != 'barrier'"
+--   - column_overrides replaces the default expression for a column (including the NULLIF text-wrapping), and the alias is kept as the column name
 -- ============================================================================
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT, JSONB);
 
 CREATE OR REPLACE FUNCTION create_areas_mview(
     source_table TEXT,
@@ -35,7 +38,8 @@ CREATE OR REPLACE FUNCTION create_areas_mview(
     min_area DOUBLE PRECISION DEFAULT 0,
     unique_columns TEXT DEFAULT 'id, osm_id, type',
     where_filter TEXT DEFAULT NULL,
-    tag_columns TEXT DEFAULT NULL
+    tag_columns TEXT DEFAULT NULL,
+    column_overrides JSONB DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE 
@@ -74,8 +78,11 @@ BEGIN
     
     -- Build SQL - get all columns from source table and replace geometry, handle special columns
     -- Exclude start_decdate and end_decdate because they will be recalculated
+    -- column_overrides (if provided) takes precedence and fully replaces the default expression for a column
     SELECT COALESCE(string_agg(
-        CASE 
+        CASE
+            WHEN column_overrides IS NOT NULL AND column_overrides ? column_name THEN
+                format('%s AS %I', column_overrides->>column_name, column_name)
             WHEN column_name = 'geometry' THEN format('%s AS geometry', simplify_expr)
             WHEN column_name = 'area' THEN format(
                 '%I, ROUND(CAST(%I AS numeric), 1)::numeric(20,1) AS area_m2, ROUND(CAST(%I AS numeric) / 1000000, 1)::numeric(20,1) AS area_km2',

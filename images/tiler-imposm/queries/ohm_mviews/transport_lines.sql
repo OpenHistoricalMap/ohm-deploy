@@ -59,6 +59,7 @@ BEGIN
           OR (NULLIF(sm.railway, '')   IS NOT NULL AND sm.railway      IS DISTINCT FROM tl.railway)
           OR (NULLIF(sm.aeroway, '')   IS NOT NULL AND sm.aeroway      IS DISTINCT FROM tl.aeroway)
           OR (NULLIF(sm.route, '')     IS NOT NULL AND sm.route        IS DISTINCT FROM tl.route)
+          OR (sm.expressway IS NOT NULL AND sm.expressway IS DISTINCT FROM tl.expressway)
           OR (sm.tunnel  IS NOT NULL AND sm.tunnel  IS DISTINCT FROM tl.tunnel)
           OR (sm.bridge  IS NOT NULL AND sm.bridge  IS DISTINCT FROM tl.bridge)
           OR (sm.oneway  IS NOT NULL AND sm.oneway  IS DISTINCT FROM tl.oneway)
@@ -151,6 +152,7 @@ BEGIN
         tl.railway,
         tl.aeroway,
         tl.route,
+        tl.expressway,
         tl.tags,
         tl.start_date,
         LEAST(NULLIF(tl.end_date, ''), srd.earliest_rel_start) AS end_date,
@@ -184,6 +186,7 @@ BEGIN
         COALESCE(NULLIF(sm.railway, ''),   tl.railway)               AS railway,
         COALESCE(NULLIF(sm.aeroway, ''),   tl.aeroway)               AS aeroway,
         COALESCE(NULLIF(sm.route,   ''),   tl.route)                 AS route,
+        COALESCE(sm.expressway, tl.expressway)                       AS expressway,
         sm.tags || tl.tags AS tags,
         sm.start_date,
         sm.end_date,
@@ -214,9 +217,9 @@ BEGIN
         NULLIF(tags->'construction', '') AS construction,
         class,
         NULLIF(name, '') AS name,
-        tunnel,
-        bridge,
-        oneway,
+        NULLIF(tunnel, 0) AS tunnel,
+        NULLIF(bridge, 0) AS bridge,
+        NULLIF(oneway, 0) AS oneway,
         NULLIF(ref, '') AS ref,
         z_order,
         NULLIF(access, '') AS access,
@@ -229,6 +232,7 @@ BEGIN
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
         NULLIF(route, '') AS route,
+        NULLIF(expressway, 0) AS expressway,
         NULLIF(start_date, '') AS start_date,
         NULLIF(end_date, '') AS end_date,
         isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
@@ -260,9 +264,9 @@ BEGIN
         NULLIF(tags->'construction', '') AS construction,
         class,
         NULLIF(name, '') AS name,
-        tunnel,
-        bridge,
-        oneway,
+        NULLIF(tunnel, 0) AS tunnel,
+        NULLIF(bridge, 0) AS bridge,
+        NULLIF(oneway, 0) AS oneway,
         NULLIF(ref, '') AS ref,
         z_order,
         NULLIF(access, '') AS access,
@@ -275,6 +279,7 @@ BEGIN
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
         NULLIF(route, '') AS route,
+        NULLIF(expressway, 0) AS expressway,
         NULLIF(start_date, '') AS start_date,
         NULLIF(end_date, '') AS end_date,
         isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
@@ -300,18 +305,17 @@ END;
 $do$;
 
 
-SELECT create_mview_line_from_mview('mv_transport_lines_z16_20', 'mv_transport_lines_z13_15', 5, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'', ''ferry'') OR class IN (''railway'')');
+SELECT create_mview_line_from_mview('mv_transport_lines_z16_20', 'mv_transport_lines_z13_15', 5, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'', ''ferry'', ''track'', ''path'', ''footway'', ''cycleway'', ''pedestrian'', ''living_street'', ''steps'', ''bridleway'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z13_15', 'mv_transport_lines_z10_12', 20, 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''ferry'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z10_12', 'mv_transport_lines_z8_9', 100, NULL);
 SELECT create_mview_line_from_mview('mv_transport_lines_z8_9', 'mv_transport_lines_z6_7', 200 , 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''ferry'') OR class IN (''railway'')');
 SELECT create_mview_line_from_mview('mv_transport_lines_z6_7', 'mv_transport_lines_z5', 1000 , NULL);
 
 
-
 -- Refresh lines views
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z5;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z6_7;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z8_9;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z10_12;
--- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z13_15;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z16_20;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z13_15;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z10_12;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z8_9;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z6_7;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_lines_z5;
