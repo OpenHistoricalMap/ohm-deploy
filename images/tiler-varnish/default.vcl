@@ -42,6 +42,11 @@ sub vcl_recv {
 
     unset req.http.Cookie;
     unset req.http.Authorization;
+
+    # Solo cacheamos tiles bajo /maps/. Catalog, health y UI admin siempre fresh.
+    if (req.url !~ "^/maps/") {
+        return (pass);
+    }
 }
 
 sub vcl_backend_response {
