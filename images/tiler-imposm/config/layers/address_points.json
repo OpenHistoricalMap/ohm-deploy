@@ -1,0 +1,105 @@
+{
+  "tags": {
+    "load_all": true,
+    "exclude": [
+      "created_by",
+      "source",
+      "source:datetime"
+    ]
+  },
+  "generalized_tables": {},
+  "tables": {
+    "address_points": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "string",
+          "name": "addr_housenumber",
+          "key": "addr:housenumber"
+        },
+        {
+          "type": "string",
+          "name": "addr_housename",
+          "key": "addr:housename"
+        },
+        {
+          "type": "string",
+          "name": "addr_unit",
+          "key": "addr:unit"
+        },
+        {
+          "type": "string",
+          "name": "addr_street",
+          "key": "addr:street"
+        },
+        {
+          "type": "string",
+          "name": "addr_city",
+          "key": "addr:city"
+        },
+        {
+          "type": "string",
+          "name": "addr_postcode",
+          "key": "addr:postcode"
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "point",
+      "filters": {
+        "reject": {
+          "building": ["__any__"],
+          "shop": ["__any__"],
+          "amenity": ["__any__"],
+          "tourism": ["__any__"],
+          "office": ["__any__"],
+          "craft": ["__any__"],
+          "leisure": ["__any__"],
+          "historic": ["__any__"],
+          "man_made": ["__any__"],
+          "emergency": ["__any__"],
+          "healthcare": ["__any__"],
+          "public_transport": ["__any__"],
+          "aeroway": ["__any__"],
+          "railway": ["__any__"],
+          "highway": ["__any__"],
+          "power": ["__any__"],
+          "natural": ["__any__"],
+          "landuse": ["__any__"],
+          "place": ["__any__"],
+          "military": ["__any__"]
+        }
+      },
+      "mapping": {
+        "addr:housenumber": ["__any__"]
+      }
+    }
+  }
+}

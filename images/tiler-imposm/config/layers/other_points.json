@@ -45,7 +45,7 @@
           "type": "string",
           "name": "end_date",
           "key": "end_date"
-        },        
+        },
         {
           "type": "hstore_tags",
           "name": "tags",

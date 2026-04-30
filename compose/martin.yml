@@ -1,0 +1,76 @@
+services:
+  varnish:
+    image: varnish:7.5
+    container_name: varnish
+    ports:
+      - "6081:6081"
+    volumes:
+      - ../images/tiler-varnish/default.vcl:/etc/varnish/default.vcl:ro
+    command: >
+      varnishd -F
+      -a :6081
+      -f /etc/varnish/default.vcl
+      -s dynamic=malloc,${VARNISH_DYNAMIC_SIZE:-2G}
+      -s static=malloc,${VARNISH_STATIC_SIZE:-1G}
+    networks:
+      - ohm_network
+    depends_on:
+      - martin
+
+  martin:
+    container_name: martin
+    image: rub21/tiler-server-martin:v1
+    build:
+      context: ../images/tiler-server-martin
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-server-martin:/app
+    ports:
+      - "3020:80"
+    expose:
+      - "3001"
+    env_file:
+      - ../envs/.env.tiler
+    environment:
+      - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
+    networks:
+      - ohm_network
+
+  tiler-cache:
+    container_name: tiler-cache
+    image: ohm/tiler-cache:latest
+    build:
+      context: ../images/tiler-cache
+      dockerfile: Dockerfile
+    volumes:
+      - ../images/tiler-cache:/app
+    ports:
+      - "8000:8000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -x
+        python sqs_processor.py &
+        python main.py
+    env_file:
+      - ../envs/.env.tiler
+    environment:
+      - PORT=8000
+      - TILE_CACHE_BACKEND=varnish
+      - VARNISH_URL=http://varnish:6081
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ohm_network
+    depends_on:
+      - varnish
+
+networks:
+  ohm_network:
+    external: true

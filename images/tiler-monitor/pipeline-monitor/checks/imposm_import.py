@@ -218,6 +218,8 @@ def _get_changeset_elements(changeset_id):
                 timestamp = elem.attrib.get("timestamp", "")
                 # Count nodes for ways (to detect invalid geometries)
                 node_count = len(elem.findall("nd")) if elem_type == "way" else 0
+                # Count members for relations (to detect empty relations)
+                member_count = len(elem.findall("member")) if elem_type == "relation" else 0
                 elements.append({
                     "type": elem_type,
                     "osm_id": int(osm_id),
@@ -226,6 +228,7 @@ def _get_changeset_elements(changeset_id):
                     "tags": tags,
                     "timestamp": timestamp,
                     "node_count": node_count,
+                    "member_count": member_count,
                 })
     return elements
 

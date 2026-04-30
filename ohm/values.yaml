@@ -40,4 +40,8 @@ ohm:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  tilerServerMartin:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
       
