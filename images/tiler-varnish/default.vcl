@@ -51,15 +51,21 @@ sub vcl_backend_response {
     unset beresp.http.Set-Cookie;
 
     if (bereq.url ~ "^/maps/(ne|osm_land)/") {
-        # Static tiles: storage separado, TTL casi infinito
+        # Static tiles: separate storage, near-infinite TTL
         set beresp.storage = storage.static;
         set beresp.ttl = 365d;
         set beresp.grace = 30d;
         set beresp.keep = 7d;
-    } else {
-        # Dynamic tiles: TTL largo como safety net; BAN invalida antes
+    } else if (bereq.url ~ "^/maps/[^/]+/[0-5]/") {
+        # Dynamic low zooms (0-5): not invalidated via BAN, refreshed by short TTL
         set beresp.storage = storage.dynamic;
-        set beresp.ttl = 7d;
+        set beresp.ttl = 24h;
+        set beresp.grace = 1h;
+        set beresp.keep = 1d;
+    } else {
+        # Dynamic mid/high zooms (6-20): long TTL; BAN invalidates earlier
+        set beresp.storage = storage.dynamic;
+        set beresp.ttl = 5d;
         set beresp.grace = 1h;
         set beresp.keep = 1d;
     }
