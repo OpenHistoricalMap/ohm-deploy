@@ -123,17 +123,21 @@ def generate_function_sql(func_def, columns_per_table):
 
     # Build the IF/ELSIF/ELSE blocks
     blocks = []
+    quoted_geom = f'"{geom_col}"'
     for i, (max_zoom, table_name) in enumerate(zoom_mapping):
         cols = columns_per_table[table_name]
-        col_list = ", ".join(f"t.{c}" for c in cols)
+        # Quote each column with double quotes so identifiers with hyphens or
+        # mixed case (e.g. localized name columns like "name_zh-Hant-TW")
+        # remain valid PostgreSQL identifiers.
+        col_list = ", ".join(f't."{c}"' for c in cols)
         extent, buffer = get_mvt_geom_params(max_zoom)
 
         query = (
             f"SELECT ST_AsMVT(q, '{sl}', {extent}) INTO mvt FROM (\n"
             f"            SELECT {col_list},\n"
-            f"                   ST_AsMVTGeom(t.{geom_col}, bounds, {extent}, {buffer}, true) AS geometry\n"
+            f"                   ST_AsMVTGeom(t.{quoted_geom}, bounds, {extent}, {buffer}, true) AS geometry\n"
             f"            FROM public.{table_name} t\n"
-            f"            WHERE t.{geom_col} && bounds\n"
+            f"            WHERE t.{quoted_geom} && bounds\n"
             f"        ) q;"
         )
 
