@@ -42,9 +42,9 @@ if [[ "$ACTION" == "start" || "$ACTION" == "restart" ]] && [ "$AUTO_YES" != "tru
 fi
 
 case "$ACTION" in
-    start)   $COMPOSE up -d ;;
+    start)   $COMPOSE up -d --build;;
     stop)    $COMPOSE down ;;
-    restart) $COMPOSE up -d --force-recreate ;;
+    restart) $COMPOSE up -d --force-recreate --build ;;
     *)       echo "Unknown action: $ACTION"; exit 1 ;;
 esac
 
