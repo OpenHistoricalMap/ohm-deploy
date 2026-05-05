@@ -41,6 +41,22 @@ PG_TYPE_MAP = {
 }
 
 
+# Per-group attribution strings (see openhistoricalmap/issues/1343).
+# OHM groups link to the copyright page without "©" or "contributors", since
+# OHM does not claim copyright over all contributed data.
+OHM_ATTRIBUTION = '<a href="https://www.openhistoricalmap.org/copyright">OpenHistoricalMap</a>'
+OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+NE_ATTRIBUTION = '<a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a>'
+
+GROUP_ATTRIBUTION = {
+    "ohm": OHM_ATTRIBUTION,
+    "ohm_admin": OHM_ATTRIBUTION,
+    "ohm_other_boundaries": OHM_ATTRIBUTION,
+    "osm_land": OSM_ATTRIBUTION,
+    "ne": NE_ATTRIBUTION,
+}
+
+
 def get_columns(cur, table_name, exclude):
     """Get column names from a table/mview, excluding specified columns."""
     exclude = list(exclude) + ALWAYS_EXCLUDE
@@ -171,14 +187,14 @@ def get_maxzoom(zoom_mapping):
     return 20 if last_max is None else last_max
 
 
-def build_tilejson(name, description, tiles_url, vector_layers, minzoom=0, maxzoom=20):
+def build_tilejson(name, description, tiles_url, vector_layers, attribution, minzoom=0, maxzoom=20):
     """Build a TileJSON 3.0.0 manifest."""
     return {
         "tilejson": "3.0.0",
         "name": name,
         "description": description,
         "version": "1.0.0",
-        "attribution": "&copy; <a href=\"https://www.openhistoricalmap.org/copyright\">OpenHistoricalMap</a> contributors",
+        "attribution": attribution,
         "scheme": "xyz",
         "tiles": [tiles_url],
         "minzoom": minzoom,
@@ -207,6 +223,7 @@ def generate_tilejson_files(groups, fields_per_function, base_url):
 
     for group in groups:
         group_name = group["name"]
+        attribution = GROUP_ATTRIBUTION.get(group_name, OHM_ATTRIBUTION)
         group_vector_layers = []
         group_minzoom = 20
         group_maxzoom = 0
@@ -231,6 +248,7 @@ def generate_tilejson_files(groups, fields_per_function, base_url):
                 description=f"Layer: {func_def['source_layer']}",
                 tiles_url=f"{base_url}/maps/{group_name}/{fn}/{{z}}/{{x}}/{{y}}",
                 vector_layers=[vl],
+                attribution=attribution,
                 minzoom=fn_minzoom,
                 maxzoom=fn_maxzoom,
             )
@@ -246,6 +264,7 @@ def generate_tilejson_files(groups, fields_per_function, base_url):
                 description=f"Composite: {group_name} ({len(group_vector_layers)} layers)",
                 tiles_url=f"{base_url}/maps/{group_name}/{{z}}/{{x}}/{{y}}",
                 vector_layers=group_vector_layers,
+                attribution=attribution,
                 minzoom=group_minzoom,
                 maxzoom=group_maxzoom,
             )

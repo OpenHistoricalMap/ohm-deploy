@@ -1,7 +1,7 @@
 services:
   varnish:
     image: varnish:7.5
-    container_name: varnish
+    container_name: tiler_varnish
     ports:
       - "6081:6081"
     volumes:
@@ -18,7 +18,7 @@ services:
       - martin
 
   martin:
-    container_name: martin
+    container_name: tiler_server_martin
     image: rub21/tiler-server-martin:v1
     build:
       context: ../images/tiler-server-martin

@@ -1,7 +1,7 @@
 vcl 4.1;
 
 backend martin {
-    .host = "martin";
+    .host = "tiler_server_martin";
     .port = "80";
     .connect_timeout = 10s;
     .first_byte_timeout = 120s;

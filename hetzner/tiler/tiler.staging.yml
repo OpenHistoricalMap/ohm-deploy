@@ -1,10 +1,55 @@
 services:
 
-volumes:
-  tiler_pgdata:
-    driver: local
-    name: tiler_db_11_02
+  tiler_server_martin:
+      container_name: tiler_server_martin
+      image: ohm/tiler-server-martin:v1
+      build:
+        context: ../../images/tiler-server-martin
+        dockerfile: Dockerfile  
+      restart: always
+      environment:
+        - OHM_DOMAIN=${OHM_DOMAIN:-openhistoricalmap.org}
+      env_file:
+        - .env.tiler
+      ports:
+        - "3030:80"
+      networks:
+        - ohm_network
 
-  tiler_imposm_data:
-    driver: local
-    name: tiler_imposm_11_02
+  tiler_varnish:
+    container_name: tiler_varnish
+    image: varnish:7.5
+    restart: always
+    ports:
+      - "6081:6081"
+    volumes:
+      - ../../images/tiler-varnish/default.vcl:/etc/varnish/default.vcl:ro
+    tmpfs:
+      - /var/lib/varnish/varnishd:exec
+    command: >
+      varnishd -F
+      -a :6081
+      -f /etc/varnish/default.vcl
+      -s dynamic=malloc,${VARNISH_DYNAMIC_SIZE:-16G}
+      -s static=malloc,${VARNISH_STATIC_SIZE:-4G}
+      -p thread_pool_min=100
+      -p thread_pool_max=2000
+      -p thread_pools=2
+      -p workspace_backend=256k
+      -p workspace_client=256k
+      -p http_resp_hdr_len=32k
+      -p http_resp_size=256k
+      -p nuke_limit=1000
+      -p timeout_idle=30
+      -p feature=+http2
+    mem_limit: 4G
+    cpus: "2.0"
+    ulimits:
+      memlock: -1
+      nofile:
+        soft: 131072
+        hard: 131072
+    networks:
+      - ohm_network
+    depends_on:
+      - tiler_server_martin
