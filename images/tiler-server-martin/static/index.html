@@ -352,7 +352,13 @@
             };
             sourceLayerNames[fnName] = vl.id;
           });
-          groupsData.push({ name: groupName, functions: fns });
+          groupsData.push({
+            name: groupName,
+            functions: fns,
+            attribution: tj.attribution,
+            minzoom: tj.minzoom,
+            maxzoom: tj.maxzoom,
+          });
         });
 
         showGroupList();
@@ -464,24 +470,19 @@
     }
 
     async function addCompositeSource(group) {
-      const compositeFns = group.functions.join(',');
       const sourceId = `src-composite-${group.name}`;
       // Use /maps/{group}/ route which goes through nginx cache + fresh_tiles support,
       // instead of Martin's native TileJSON URLs which bypass cache.
       const cachedTileUrl = `${MARTIN_BASE}/maps/${group.name}/{z}/{x}/{y}.pbf`;
-      const tileJsonUrl = `${MARTIN_BASE}/${compositeFns}`;
 
       try {
-        const resp = await fetch(tileJsonUrl);
-        const tj = await resp.json();
-
         const compositeSourceOpts = {
           type: 'vector',
           tiles: [tileUrlForMode(cachedTileUrl)],
-          minzoom: tj.minzoom || 0,
-          maxzoom: tj.maxzoom || 22,
+          minzoom: group.minzoom != null ? group.minzoom : 0,
+          maxzoom: group.maxzoom != null ? group.maxzoom : 22,
         };
-        if (tj.attribution) compositeSourceOpts.attribution = tj.attribution;
+        if (group.attribution) compositeSourceOpts.attribution = group.attribution;
         map.addSource(sourceId, compositeSourceOpts);
 
         const layerIds = [];
@@ -521,7 +522,7 @@
         });
 
         activeSources['__composite__'] = { sourceId, layerIds, layerByFn, color: '#4fc3f7' };
-        if (freshTilesMode || cacheBuster > 0) applyTileUrls();
+        if (freshTilesMode) applyTileUrls();
       } catch (e) {
         console.error('Failed to add composite source:', e);
       }
@@ -614,7 +615,11 @@
           minzoom: tj.minzoom || 0,
           maxzoom: tj.maxzoom || 22,
         };
-        if (tj.attribution) sourceOpts.attribution = tj.attribution;
+        // Prefer group attribution from /maps/{group}.json — Martin's per-function
+        // TileJSON does not include the custom per-group attribution.
+        const group = activeGroupIdx != null ? groupsData[activeGroupIdx] : null;
+        const attribution = (group && group.attribution) || tj.attribution;
+        if (attribution) sourceOpts.attribution = attribution;
         if (tj.scheme) sourceOpts.scheme = tj.scheme;
         if (tj.bounds) sourceOpts.bounds = tj.bounds;
         map.addSource(sourceId, sourceOpts);
@@ -668,7 +673,7 @@
       }
 
       activeSources[name] = { sourceId, layerIds, color };
-      if (freshTilesMode || cacheBuster > 0) applyTileUrls();
+      if (freshTilesMode) applyTileUrls();
       const el = document.getElementById(`src-item-${name}`);
       if (el) el.classList.add('active');
     }
