@@ -480,6 +480,7 @@
           tiles: [tileUrlForMode(cachedTileUrl)],
           minzoom: tj.minzoom || 0,
           maxzoom: tj.maxzoom || 22,
+          attribution: tj.attribution,
         });
 
         const layerIds = [];
@@ -611,6 +612,7 @@
           tiles: (tj.tiles || []).map(tileUrlForMode),
           minzoom: tj.minzoom || 0,
           maxzoom: tj.maxzoom || 22,
+          attribution: tj.attribution,
         };
         if (tj.scheme) sourceOpts.scheme = tj.scheme;
         if (tj.bounds) sourceOpts.bounds = tj.bounds;
