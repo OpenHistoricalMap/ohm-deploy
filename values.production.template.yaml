@@ -289,7 +289,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    schedule: '0 5 */3 * *'
+    schedule: '0 3 * * 0'
     env:
       OVERWRITE_FHISTORY_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
@@ -314,6 +314,28 @@ osm-seed:
       enabled: true
       key: "nodegroup_type"
       values: ["job"]
+
+    # ====================================================================================================
+    # Variables for changesets-dump container
+    # ====================================================================================================
+  changesetsDump:
+    enabled: true
+    priorityClass: "low-priority"
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-bucket-access-production
+    schedule: "0 5 * * 0"
+    resources:
+      enabled: false
+    env:
+      OVERWRITE_CHANGESETS_FILE: false
+      DUMP_CLOUD_URL: s3://osmseed-production-db/database/web-api-db/state.txt
+      PLANET_EPOCH_DATE: '1970-01-01'
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["job"]
+
   # ====================================================================================================
   # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
