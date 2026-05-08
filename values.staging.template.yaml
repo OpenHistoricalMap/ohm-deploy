@@ -241,7 +241,7 @@ osm-seed:
     # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
     # ====================================================================================================
     planetDump:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
@@ -267,7 +267,7 @@ osm-seed:
     # Variables for full-history container
     # ====================================================================================================
     fullHistory:
-      enabled: true
+      enabled: false
       priorityClass: medium-priority
       serviceAccount:
         enabled: true
@@ -290,7 +290,7 @@ osm-seed:
     # Variables for changesets-dump container
     # ====================================================================================================
     changesetsDump:
-      enabled: true
+      enabled: false
       priorityClass: "low-priority"
       serviceAccount:
         enabled: true
