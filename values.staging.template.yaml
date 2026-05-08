@@ -272,7 +272,7 @@ osm-seed:
       serviceAccount:
         enabled: true
         name: ohm-s3-bucket-access-staging 
-      schedule: '* * * * *'
+      schedule: "0 5 */3 * *"
       env:
         OVERWRITE_FHISTORY_FILE: false
         PLANET_EXPORT_METHOD: planet-dump-ng
@@ -281,10 +281,27 @@ osm-seed:
         PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
       resources:
         enabled: false
-      nodeSelector:
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["job"]
+
+    # ====================================================================================================
+    # Variables for changesets-dump container
+    # ====================================================================================================
+    changesetsDump:
+      enabled: false
+      priorityClass: "low-priority"
+      serviceAccount:
+        enabled: true
+        name: ohm-s3-bucket-access-staging
+      schedule: "* * * * *"
+      resources:
         enabled: false
-        label_key: nodegroup_type
-        label_value: job_xlarge
+      env:
+        OVERWRITE_CHANGESETS_FILE: false
+        DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
+        PLANET_EPOCH_DATE: '1970-01-01'
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
