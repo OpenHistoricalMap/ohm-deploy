@@ -291,9 +291,6 @@ osm-seed:
     # ====================================================================================================
     changesetsDump:
       enabled: true
-      image:
-        name: ""
-        tag: ""
       priorityClass: "low-priority"
       serviceAccount:
         enabled: true
