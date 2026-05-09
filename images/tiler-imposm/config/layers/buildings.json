@@ -43,6 +43,56 @@
         },
         {
           "type": "string",
+          "name": "building_height",
+          "key": "building:height"
+        },
+        {
+          "type": "string",
+          "name": "building_use",
+          "key": "building:use"
+        },
+        {
+          "type": "string",
+          "name": "building_material",
+          "key": "building:material"
+        },
+        {
+          "type": "string",
+          "name": "building_levels",
+          "key": "building:levels"
+        },
+        {
+          "type": "string",
+          "name": "building_colour",
+          "key": "building:colour"
+        },
+        {
+          "type": "string",
+          "name": "building_part",
+          "key": "building:part"
+        },
+        {
+          "type": "string",
+          "name": "roof_material",
+          "key": "roof:material"
+        },
+        {
+          "type": "string",
+          "name": "roof_colour",
+          "key": "roof:colour"
+        },
+        {
+          "type": "string",
+          "name": "roof_shape",
+          "key": "roof:shape"
+        },
+        {
+          "type": "string",
+          "name": "roof_height",
+          "key": "roof:height"
+        },
+        {
+          "type": "string",
           "name": "start_date",
           "key": "start_date"
         },

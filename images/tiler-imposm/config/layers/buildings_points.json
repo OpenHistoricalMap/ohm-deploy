@@ -38,6 +38,11 @@
         },
         {
           "type": "string",
+          "name": "building_use",
+          "key": "building:use"
+        },
+        {
+          "type": "string",
           "name": "start_date",
           "key": "start_date"
         },
