@@ -73,11 +73,6 @@
       "odbl:note",
       "history",
 
-      "roof:*",
-      "building:levels",
-      "building:part",
-      "building:material",
-      "building:colour",
       "generator:*",
       "tactile_paving",
       "crossing:markings",
