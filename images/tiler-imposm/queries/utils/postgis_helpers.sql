@@ -16,25 +16,50 @@ END;
 $$ STRICT
 LANGUAGE plpgsql IMMUTABLE;
 
--- Parse free-form OSM height-like values to meters as double precision.
--- Accepts: "20", "20.5", "20 m", "20m", "20 meters" (case-insensitive).
+-- Parse free-form OSM height-like values (height=*, min_height=*, roof:height=*,
+-- building:height=*) to meters as double precision.
+--
+-- Accepts (per https://wiki.openstreetmap.org/wiki/Key:height):
+--   "20", "20.5"            -> meters (OSM default unit)
+--   "20 m", "20m"           -> meters with explicit unit
+--   "20 meter", "20 meters"
+--   "85'", "85 ft"          -> feet -> meters
+--   "8'5\"", "8'5"          -> feet + inches -> meters
+--
 -- Returns NULL for null/empty/unparseable input or for non-positive / out-of-range
 -- values (<=0 or >1000m). NULLs are stripped from MVT properties, so consumers
 -- can use ["coalesce", ["get","height"], <fallback>] safely. Why: a 0 is a real
 -- numeric in MVT and would short-circuit coalesce, rendering 3D extrusions flat.
 CREATE OR REPLACE FUNCTION parse_to_meters(input text) RETURNS double precision AS $$
 DECLARE
-    cleaned text;
-    result  double precision;
+    s        text;
+    ft       numeric;
+    inch     numeric;
+    m        text;
+    result   double precision;
 BEGIN
-    IF trim(input) = '' THEN
+    s := trim(input);
+    IF s = '' THEN
         RETURN NULL;
     END IF;
-    cleaned := regexp_replace(trim(input), '\s*(m|meter|meters)\s*$', '', 'i');
-    IF cleaned !~ '^-?\d+(\.\d+)?$' THEN
+
+    -- feet + optional inches:  8'5"  /  8'5  /  8'
+    IF s ~ '^\d+(\.\d+)?''(\s*\d+(\.\d+)?"?)?$' THEN
+        ft   := (regexp_match(s, '^(\d+(\.\d+)?)'''))[1]::numeric;
+        inch := COALESCE((regexp_match(s, '''\s*(\d+(\.\d+)?)"?$'))[1], '0')::numeric;
+        result := (ft * 0.3048) + (inch * 0.0254);
+    -- feet with ft suffix:  85ft  /  85 ft  /  85.5 ft
+    ELSIF s ~* '^\d+(\.\d+)?\s*ft$' THEN
+        ft := regexp_replace(s, '\s*ft$', '', 'i')::numeric;
+        result := ft * 0.3048;
+    -- meters (default or explicit):  20  /  20.5  /  20 m  /  20m  /  20 meters
+    ELSIF s ~* '^-?\d+(\.\d+)?\s*(m|meter|meters)?$' THEN
+        m := regexp_replace(s, '\s*(m|meter|meters)\s*$', '', 'i');
+        result := m::double precision;
+    ELSE
         RETURN NULL;
     END IF;
-    result := cleaned::double precision;
+
     IF result <= 0 OR result > 1000 THEN
         RETURN NULL;
     END IF;

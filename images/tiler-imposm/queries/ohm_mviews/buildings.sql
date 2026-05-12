@@ -14,8 +14,10 @@ SELECT create_points_mview(
     'id, source, osm_id',
     ARRAY[
         'NULL::double precision AS height',
+        'NULL::double precision AS min_height',
         'NULL::double precision AS building_height',
         'NULL::double precision AS roof_height',
+        'NULL::text AS building_min_level',
         'NULL::text AS building_material',
         'NULL::text AS building_levels',
         'NULL::text AS building_colour',
@@ -42,7 +44,7 @@ SELECT create_areas_mview(
     'id, osm_id, type',
     NULL,
     NULL,
-    '{"height": "parse_to_meters(height)", "building_height": "parse_to_meters(building_height)", "roof_height": "parse_to_meters(roof_height)"}'::jsonb
+    '{"height": "parse_to_meters(height)", "min_height": "parse_to_meters(min_height)", "building_height": "parse_to_meters(building_height)", "roof_height": "parse_to_meters(roof_height)"}'::jsonb
 );
 
 -- ============================================================================
