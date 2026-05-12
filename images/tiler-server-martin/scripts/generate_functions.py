@@ -17,7 +17,20 @@ Usage: python3 generate_functions.py
 
 import json
 import os
+import re
 import psycopg2
+
+# Allowed column names: letters, digits, underscore, hyphen (for locale
+# columns like "name_zh-Hant-TW"). Anything else is rejected before being
+# interpolated into SQL.
+SAFE_COL_NAME_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_-]*$')
+
+
+def safe_col(c):
+    """Return c if it's a safe PostgreSQL identifier, else raise ValueError."""
+    if not SAFE_COL_NAME_RE.match(c):
+        raise ValueError(f"Refusing to quote unsafe column name from catalog: {c!r}")
+    return c
 
 BASE_DIR = os.path.join(os.path.dirname(__file__), "..")
 CONFIG_PATH = os.path.join(BASE_DIR, "config", "functions.json")
@@ -128,8 +141,10 @@ def generate_function_sql(func_def, columns_per_table):
         cols = columns_per_table[table_name]
         # Quote each column with double quotes so identifiers with hyphens or
         # mixed case (e.g. localized name columns like "name_zh-Hant-TW")
-        # remain valid PostgreSQL identifiers.
-        col_list = ", ".join(f't."{c}"' for c in cols)
+        # remain valid PostgreSQL identifiers. safe_col() rejects any name that
+        # falls outside [A-Za-z_][A-Za-z0-9_-]* to prevent SQL injection via
+        # crafted column names from the catalog.
+        col_list = ", ".join(f't."{safe_col(c)}"' for c in cols)
         extent, buffer = get_mvt_geom_params(max_zoom)
 
         query = (
