@@ -20,7 +20,7 @@ BUCKET_DIR=$WORKDIR/stage-data/bucket-data
 UPLOAD_TRACK_FILE=$WORKDIR/stage-data/uploaded_files.md5
 BAD_CHANGESETS_DIR=$WORKDIR/stage-data/bad_changesets
 
-## Liveness — heartbeats que el watchdog y el healthcheck consultan
+## Liveness — heartbeats that the watchdog and the healthcheck check
 HEARTBEAT_DIR=${HEARTBEAT_DIR:-/tmp/heartbeat}
 HEARTBEAT_STALE_SECONDS=${HEARTBEAT_STALE_SECONDS:-600}
 
@@ -108,9 +108,9 @@ upload_diff_files() {
   while true; do
     beat upload_diff_files
     echo "Uploading files at $(date)..."
-    # NOTA: usamos process substitution (< <(...)) en lugar de "find | while" porque
-    # el pipe ejecuta el while en un subshell y las modificaciones al array
-    # uploaded_md5s se perderian al salir, causando re-uploads infinitos.
+    # NOTE: use process substitution (< <(...)) instead of "find | while" because
+    # the pipe runs the while in a subshell and changes to the uploaded_md5s array
+    # would be lost on exit, causing infinite re-uploads.
     while read -r filepath; do
       filename=$(basename "$filepath")
       current_md5=$(md5sum "$filepath" | awk '{print $1}')
@@ -135,7 +135,7 @@ upload_diff_files() {
       fi
     done < <(find "$BUCKET_DIR" -type f -name '*.adiff' -mmin -60)
 
-    # Actualiza archivo de control
+    # Update tracking file
     : > "$UPLOAD_TRACK_FILE"
     for fname in "${!uploaded_md5s[@]}"; do
       echo "$fname ${uploaded_md5s[$fname]}" >> "$UPLOAD_TRACK_FILE"
@@ -145,7 +145,7 @@ upload_diff_files() {
   done
 }
 
-# Watchdog: si alguno de los heartbeats queda viejo, salimos -> docker reinicia
+# Watchdog: if any heartbeat goes stale, we exit -> docker restarts
 watchdog() {
   while true; do
     sleep 60
@@ -156,7 +156,7 @@ watchdog() {
       mtime=$(stat -c %Y "$hb")
       age=$(( now - mtime ))
       if [ "$age" -gt "$HEARTBEAT_STALE_SECONDS" ]; then
-        echo "[$(date)] FATAL: heartbeat de '$name' viejo (${age}s > ${HEARTBEAT_STALE_SECONDS}s). Saliendo para que docker reinicie el contenedor." >&2
+        echo "[$(date)] FATAL: heartbeat '$name' stale (${age}s > ${HEARTBEAT_STALE_SECONDS}s). Exiting so docker restarts the container." >&2
         exit 1
       fi
     done
@@ -177,9 +177,9 @@ WATCH_PID=$!
 
 echo "[$(date)] PIDs: create=$CREATE_PID process=$PROCESS_PID upload=$UPLOAD_PID watchdog=$WATCH_PID"
 
-# Si CUALQUIERA de los background muere, salimos con error -> docker restartea
+# If ANY background process dies, exit with error -> docker restarts
 wait -n
 EXIT_CODE=$?
-echo "[$(date)] FATAL: un proceso background salió (exit=$EXIT_CODE). Matando los demás y saliendo." >&2
+echo "[$(date)] FATAL: a background process exited (exit=$EXIT_CODE). Killing the others and exiting." >&2
 kill "$CREATE_PID" "$PROCESS_PID" "$UPLOAD_PID" "$WATCH_PID" 2>/dev/null
 exit "$EXIT_CODE"
