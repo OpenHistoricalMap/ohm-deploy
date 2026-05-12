@@ -20,13 +20,22 @@ BUCKET_DIR=$WORKDIR/stage-data/bucket-data
 UPLOAD_TRACK_FILE=$WORKDIR/stage-data/uploaded_files.md5
 BAD_CHANGESETS_DIR=$WORKDIR/stage-data/bad_changesets
 
+## Liveness — heartbeats que el watchdog y el healthcheck consultan
+HEARTBEAT_DIR=${HEARTBEAT_DIR:-/tmp/heartbeat}
+HEARTBEAT_STALE_SECONDS=${HEARTBEAT_STALE_SECONDS:-600}
+
 ## Sequence number
 OSMX_INITIAL_SEQNUM=${OSMX_INITIAL_SEQNUM:-0}
 
 ## Process diff files from the last 60 min
 FILTER_ADIFF_FILES=60
 
-mkdir -p $OSMX_DB_DIR $REPLICATION_ADIFFS_DIR $SPLIT_ADIFFS_DIR $CHANGESET_DIR $BUCKET_DIR $BAD_CHANGESETS_DIR
+mkdir -p "$OSMX_DB_DIR" "$REPLICATION_ADIFFS_DIR" "$SPLIT_ADIFFS_DIR" \
+         "$CHANGESET_DIR" "$BUCKET_DIR" "$BAD_CHANGESETS_DIR" "$HEARTBEAT_DIR" \
+         "$BUCKET_DIR/replication/minute" \
+         /app/bucket-data/replication/minute
+
+beat() { touch "$HEARTBEAT_DIR/$1"; }
 
 create_database() {
   if [ ! -f "$OSMX_DB_PATH" ]; then
@@ -53,6 +62,7 @@ create_database() {
 
 create_diff_files() {
   while true; do
+    beat create_diff_files
     echo "Running update.sh at $(date)..."
     if ! ./update.sh "$OSMX_DB_PATH" "$REPLICATION_ADIFFS_DIR" "$BAD_CHANGESETS_DIR"; then
       echo "update.sh failed at $(date), restarting..."
@@ -66,6 +76,7 @@ create_diff_files() {
 
 process_diff_files() {
   while true; do
+    beat process_diff_files
     echo "Processing diff files at $(date)..."
     if ! ./process.sh \
       "$REPLICATION_ADIFFS_DIR" \
@@ -95,8 +106,12 @@ upload_diff_files() {
   done < "$UPLOAD_TRACK_FILE"
 
   while true; do
+    beat upload_diff_files
     echo "Uploading files at $(date)..."
-    find "$BUCKET_DIR" -type f -name '*.adiff' -mmin -60 | while read -r filepath; do
+    # NOTA: usamos process substitution (< <(...)) en lugar de "find | while" porque
+    # el pipe ejecuta el while en un subshell y las modificaciones al array
+    # uploaded_md5s se perderian al salir, causando re-uploads infinitos.
+    while read -r filepath; do
       filename=$(basename "$filepath")
       current_md5=$(md5sum "$filepath" | awk '{print $1}')
 
@@ -111,12 +126,14 @@ upload_diff_files() {
         echo "New file: $filename — uploading"
       fi
 
-      aws s3 cp "$filepath" "s3://$AWS_S3_BUCKET/ohm-augmented-diffs/changesets/$filename" \
+      if aws s3 cp "$filepath" "s3://$AWS_S3_BUCKET/ohm-augmented-diffs/changesets/$filename" \
         --content-type "application/xml" \
-        --content-encoding "gzip"
-
-      uploaded_md5s["$filename"]="$current_md5"
-    done
+        --content-encoding "gzip"; then
+        uploaded_md5s["$filename"]="$current_md5"
+      else
+        echo "Upload failed for $filename, will retry next loop"
+      fi
+    done < <(find "$BUCKET_DIR" -type f -name '*.adiff' -mmin -60)
 
     # Actualiza archivo de control
     : > "$UPLOAD_TRACK_FILE"
@@ -128,8 +145,41 @@ upload_diff_files() {
   done
 }
 
+# Watchdog: si alguno de los heartbeats queda viejo, salimos -> docker reinicia
+watchdog() {
+  while true; do
+    sleep 60
+    now=$(date +%s)
+    for name in create_diff_files process_diff_files upload_diff_files; do
+      hb="$HEARTBEAT_DIR/$name"
+      [ -f "$hb" ] || continue
+      mtime=$(stat -c %Y "$hb")
+      age=$(( now - mtime ))
+      if [ "$age" -gt "$HEARTBEAT_STALE_SECONDS" ]; then
+        echo "[$(date)] FATAL: heartbeat de '$name' viejo (${age}s > ${HEARTBEAT_STALE_SECONDS}s). Saliendo para que docker reinicie el contenedor." >&2
+        exit 1
+      fi
+    done
+  done
+}
+
 ## Start process diff files
 create_database
+
 create_diff_files &
+CREATE_PID=$!
 process_diff_files &
-upload_diff_files
+PROCESS_PID=$!
+upload_diff_files &
+UPLOAD_PID=$!
+watchdog &
+WATCH_PID=$!
+
+echo "[$(date)] PIDs: create=$CREATE_PID process=$PROCESS_PID upload=$UPLOAD_PID watchdog=$WATCH_PID"
+
+# Si CUALQUIERA de los background muere, salimos con error -> docker restartea
+wait -n
+EXIT_CODE=$?
+echo "[$(date)] FATAL: un proceso background salió (exit=$EXIT_CODE). Matando los demás y saliendo." >&2
+kill "$CREATE_PID" "$PROCESS_PID" "$UPLOAD_PID" "$WATCH_PID" 2>/dev/null
+exit "$EXIT_CODE"

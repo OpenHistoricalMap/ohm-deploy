@@ -9,6 +9,8 @@ services:
       # Add OSMX_INITIAL_SEQNUM to start from a specific sequence number
       - OSMX_INITIAL_SEQNUM=1900000
       - AWS_S3_BUCKET=planet.openhistoricalmap.org
+      - HEARTBEAT_DIR=/tmp/heartbeat
+      - HEARTBEAT_STALE_SECONDS=600
     env_file:
       - ./.env.osmcha
     restart: always
@@ -18,8 +20,15 @@ services:
       - ${PWD}/images/ohmx-adiff-builder/config.sh:/app/config.sh
       - ${PWD}/images/ohmx-adiff-builder/functions.sh:/app/functions.sh
       - ${PWD}/images/ohmx-adiff-builder/start.sh:/app/start.sh
+      - ${PWD}/images/ohmx-adiff-builder/healthcheck.sh:/app/healthcheck.sh
       - ${PWD}/images/ohmx-adiff-builder/process_min_range.sh:/app/process_min_range.sh
       - ${PWD}/images/ohmx-adiff-builder/update.sh:/app/update.sh
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 60s
+      timeout: 10s
+      start_period: 600s
+      retries: 3
     networks:
       - ohm_network
     # cpus: '8.0'
