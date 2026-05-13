@@ -80,9 +80,6 @@
         }
       ],
       "mapping": {
-        "waterway": [
-          "__any__"
-        ],
         "type": [
           "waterway"
         ]
