@@ -39,7 +39,9 @@ RUN autoreconf -f -i \
     && CXXFLAGS='-O2' CFLAGS='-O2' ./configure --prefix=/app --enable-lz4 \
     && make -j "$(nproc)" \
     && make install \
-    && cp -r /tmp/src/rules /app/etc/rules
+    && mkdir -p /app/etc \
+    && cp -r /tmp/src/rules /app/etc/rules \
+    && rm -rf /tmp/src /tmp/src.tar.gz
 
 ARG WIKTORN_TAG
 FROM wiktorn/overpass-api:v0.7.62.9
