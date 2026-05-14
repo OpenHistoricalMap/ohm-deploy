@@ -31,9 +31,9 @@ RUN tar -x -z --strip-components 1 -f /tmp/src.tar.gz
 RUN sed -i \
         -e 's|from www\.openstreetmap\.org|from www.openhistoricalmap.org|g' \
         -e 's|made available under ODbL|made available under CC0|g' \
-        src/overpass_api/frontend/basic_formats.cc \
-        src/overpass_api/output_formats/output_json.cc \
-        src/overpass_api/output_formats/output_xml.cc
+        overpass_api/frontend/basic_formats.cc \
+        overpass_api/output_formats/output_json.cc \
+        overpass_api/output_formats/output_xml.cc
 
 RUN autoreconf -f -i \
     && CXXFLAGS='-O2' CFLAGS='-O2' ./configure --prefix=/app --enable-lz4 \
