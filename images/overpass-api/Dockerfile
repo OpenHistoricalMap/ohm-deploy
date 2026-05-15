@@ -49,8 +49,9 @@ RUN autoreconf -f -i \
 ARG WIKTORN_TAG
 FROM wiktorn/overpass-api:v0.7.62.9
 
-COPY --from=builder /app/bin/   /app/bin/
-COPY --from=builder /app/etc/   /app/etc/
+COPY --from=builder /app/bin/     /app/bin/
+COPY --from=builder /app/cgi-bin/ /app/cgi-bin/
+COPY --from=builder /app/etc/     /app/etc/
 
 RUN apt-get update \
     && apt-get install --no-install-recommends --no-install-suggests -y \
