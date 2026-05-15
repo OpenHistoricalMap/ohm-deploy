@@ -27,6 +27,10 @@ osm-seed:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  overpassApi:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
 ohm:
   tilerCache:
     image:
@@ -44,4 +48,5 @@ ohm:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+
       
