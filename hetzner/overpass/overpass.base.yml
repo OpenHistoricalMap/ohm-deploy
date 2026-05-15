@@ -1,6 +1,6 @@
 services:
   overpass:
-    image: ghcr.io/osm-seed/overpass-api:0.1.0-0.dev.git.989.h5488a16
+    image: ghcr.io/openhistoricalmap/overpass-api:0.0.1-0.dev.git.3374.hec6fee3c
     container_name: overpass
     # ports:
     #   - '8085:80'
