@@ -27,13 +27,16 @@ ADD http://dev.overpass-api.de/releases/osm-3s_v0.7.62.9.tar.gz /tmp/src.tar.gz
 WORKDIR /tmp/src
 RUN tar -x -z --strip-components 1 -f /tmp/src.tar.gz
 
-# Use OHM copyright instead of ODbL/openstreetmap.org. See issue #558.
+# Use OHM copyright and URLs instead of OSM defaults. See issue #558.
 RUN sed -i \
-        -e 's|from www\.openstreetmap\.org|from www.openhistoricalmap.org|g' \
+        -e 's|www\.openstreetmap\.org/browse/|www.openhistoricalmap.org/|g' \
+        -e 's|www\.openstreetmap\.org|www.openhistoricalmap.org|g' \
         -e 's|made available under ODbL|made available under CC0|g' \
         overpass_api/frontend/basic_formats.cc \
         overpass_api/output_formats/output_json.cc \
-        overpass_api/output_formats/output_xml.cc
+        overpass_api/output_formats/output_xml.cc \
+        overpass_api/dispatch/osm3s_query.cc \
+        overpass_api/output_formats/output_custom_factory.cc
 
 RUN autoreconf -f -i \
     && CXXFLAGS='-O2' CFLAGS='-O2' ./configure --prefix=/app --enable-lz4 \
