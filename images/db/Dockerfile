@@ -1,5 +1,5 @@
-# Stage 1: Compilar el plugin para PostgreSQL 17
-FROM postgres:17 AS builder
+# Stage 1: Compilar el plugin para PostgreSQL 17 con PostGIS
+FROM postgis/postgis:17-3.5 AS builder
 
 # Instalar dependencias de compilación
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -27,7 +27,7 @@ RUN git clone https://github.com/openstreetmap/osmdbt.git /tmp/osmdbt && \
     cmake .. && \
     make
 
-FROM postgres:17
+FROM postgis/postgis:17-3.5
 
 COPY --from=builder /tmp/osmdbt/postgresql-plugin/build/osm-logical.so /usr/lib/postgresql/17/lib/osm-logical.so
 
