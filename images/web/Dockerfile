@@ -1,4 +1,4 @@
-FROM ruby:3.3-slim AS builder
+FROM ruby:3.4-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
@@ -24,7 +24,7 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download OHM Website using gitsha, faster than cloning
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=8690db86e4e5b51c4d59c1e2ec273bb2f8471189
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=6dc7d515a60b70a27f90e0e8d333df645e37e9a8
 ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
 RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
     unzip /tmp/ohm-website.zip -d /tmp && \
@@ -77,7 +77,7 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
     cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ && \
     cp assets/* $workdir/app/assets/images/
 
-FROM ruby:3.3-slim
+FROM ruby:3.4-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
