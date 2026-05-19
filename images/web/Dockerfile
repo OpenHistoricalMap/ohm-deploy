@@ -14,7 +14,7 @@ WORKDIR $workdir
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git curl gnupg build-essential \
-    libarchive-dev zlib1g-dev libcurl4-openssl-dev \
+    libarchive-dev zlib1g-dev libcurl4-openssl-dev libgd-dev \
     apache2 apache2-dev libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
     postgresql-client libpq-dev libxml2-dev libyaml-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip\
