@@ -31,7 +31,7 @@ RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && 
     mv /tmp/ohm-website-$OPENHISTORICALMAP_WEBSITE_GITSHA/* $workdir && \
     rm -rf /tmp/*
 
-RUN gem install bundler && \
+RUN gem install bundler -v 2.6.9 --no-document && \
     bundle install && \
     yarn install && \
     bundle exec rake yarn:install
@@ -151,6 +151,10 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
     a2ensite production && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     apache2ctl configtest
+
+# Install bundler 2.6.9 — supports default gem replacement, avoids Passenger preloader Gem::LoadError.
+RUN gem install bundler -v 2.6.9 --no-document
+
 
 RUN echo '#!/bin/bash\nexec /usr/local/bin/ruby --yjit --yjit-exec-mem-size=64 "$@"' > /usr/local/bin/ruby_yjit && \
     chmod +x /usr/local/bin/ruby_yjit
