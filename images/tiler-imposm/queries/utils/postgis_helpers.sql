@@ -70,4 +70,11 @@ END;
 $$ STRICT
 LANGUAGE plpgsql IMMUTABLE;
 
+-- Parse a numeric string to numeric, or NULL if malformed.
+-- Regex from OpenMapTiles CleanNumeric.
+CREATE OR REPLACE FUNCTION clean_numeric(input text) RETURNS numeric AS $$
+    SELECT substring(input from '^\s*([-+]?(?=\d|\.\d)\d*(?:\.\d*)?(?:[Ee][-+]?\d+)?)\s*$')::numeric;
+$$ STRICT
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
+
 COMMIT;
