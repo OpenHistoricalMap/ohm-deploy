@@ -15,7 +15,6 @@ SELECT create_points_mview(
     ARRAY[
         'NULL::double precision AS height',
         'NULL::double precision AS min_height',
-        'NULL::double precision AS building_height',
         'NULL::double precision AS roof_height',
         'NULL::numeric AS building_min_level',
         'NULL::text AS building_material',
@@ -33,8 +32,9 @@ SELECT create_points_mview(
 
 -- ============================================================================
 -- Zoom 16-20: BASE
--- No simplification, all areas. Single point where height/building_height/
--- roof_height are parsed to numeric. All derived zoom levels inherit this.
+-- No simplification, all areas. Height columns are parsed to numeric here.
+-- `height` falls back to deprecated `building:height` and `building_height`
+-- is dropped from the output. All derived zoom levels inherit this.
 -- ============================================================================
 SELECT create_areas_mview(
     'osm_buildings',
@@ -44,7 +44,8 @@ SELECT create_areas_mview(
     'id, osm_id, type',
     NULL,
     NULL,
-    '{"height": "parse_to_meters(height)", "min_height": "parse_to_meters(min_height)", "building_height": "parse_to_meters(building_height)", "roof_height": "parse_to_meters(roof_height)", "building_levels": "clean_numeric(building_levels)", "building_min_level": "clean_numeric(building_min_level)"}'::jsonb
+    '{"height": "COALESCE(parse_to_meters(height), parse_to_meters(building_height))", "min_height": "parse_to_meters(min_height)", "roof_height": "parse_to_meters(roof_height)", "building_levels": "clean_numeric(building_levels)", "building_min_level": "clean_numeric(building_min_level)"}'::jsonb,
+    ARRAY['building_height']
 );
 
 -- ============================================================================
