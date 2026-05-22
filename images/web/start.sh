@@ -3,12 +3,6 @@ workdir="/var/www"
 export RAILS_ENV=production
 
 setup_env_vars() {
-  #### Apply OHM website overlay patches (if repo mounted)
-  if [ -d /opt/ohm-patches/overlays ]; then
-    echo "Applying OHM website patches from /opt/ohm-patches..."
-    /opt/ohm-patches/scripts/apply.sh "$workdir"
-  fi
-
   #### Setting up the production database
   cat <<EOF > "$workdir/config/database.yml"
 production:

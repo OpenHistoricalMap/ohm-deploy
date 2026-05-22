@@ -22,7 +22,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./../images/web/start.sh:/var/www/start.sh
-      - ./../../ohm-website-patches:/opt/ohm-patches:ro
     env_file:
       - ./../envs/.env.web
     ports:

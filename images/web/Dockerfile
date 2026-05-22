@@ -31,7 +31,7 @@ RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && 
     mv /tmp/ohm-website-$OPENHISTORICALMAP_WEBSITE_GITSHA/* $workdir && \
     rm -rf /tmp/*
 
-RUN gem install bundler -v 2.6.9 --no-document && \
+RUN gem install bundler -v 4.0.11 --no-document && \
     bundle install && \
     yarn install && \
     bundle exec rake yarn:install
@@ -116,6 +116,7 @@ RUN BUILD_DEPS=" \
     gifsicle \
     postgresql-client \
     curl \
+    git \
     libvips \
     nodejs \
     \
@@ -123,7 +124,7 @@ RUN BUILD_DEPS=" \
     \
     # Install Passenger as a gem and compile the Apache module
     \
-    && gem install passenger --no-document \
+    && gem install passenger -v 6.1.3 --no-document \
     && yes | passenger-install-apache2-module --auto --languages ruby \
     && passenger-config validate-install --auto \
     \
@@ -152,8 +153,8 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     apache2ctl configtest
 
-# Install bundler 2.6.9 — supports default gem replacement, avoids Passenger preloader Gem::LoadError.
-RUN gem install bundler -v 2.6.9 --no-document
+# Install bundler matching ohm-website Gemfile.lock to avoid Passenger preloader Gem::LoadError.
+RUN gem install bundler -v 4.0.11 --no-document
 
 
 RUN echo '#!/bin/bash\nexec /usr/local/bin/ruby --yjit --yjit-exec-mem-size=64 "$@"' > /usr/local/bin/ruby_yjit && \
