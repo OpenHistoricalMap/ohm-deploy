@@ -1,4 +1,13 @@
 -- ============================================================================
+-- Partial index on building relation outline members.
+-- Speeds up the EXISTS subquery that derives hide_3d in mv_buildings_areas_z16_20.
+-- Mirrors the OpenMapTiles pattern for the building layer.
+-- ============================================================================
+CREATE INDEX IF NOT EXISTS osm_buildings_relation_members_outline_idx
+    ON osm_buildings_relation_members (member)
+    WHERE role = 'outline';
+
+-- ============================================================================
 -- Prepare points materialized view for higher zoom levels (12+)
 -- All building/roof attributes (height, building:height, building:material, etc.)
 -- are now extracted as native columns by imposm in osm_buildings_points
@@ -22,6 +31,7 @@ SELECT create_points_mview(
         'NULL::text AS building_colour',
         'NULL::text AS building_part',
         'FALSE::boolean AS is_building_part',
+        'FALSE::boolean AS hide_3d',
         'NULL::text AS roof_material',
         'NULL::text AS roof_colour',
         'NULL::text AS roof_shape'
@@ -44,7 +54,7 @@ SELECT create_areas_mview(
     0,
     'id, osm_id, type',
     NULL,
-    '(class = ''building:part'') AS is_building_part',
+    '(class = ''building:part'') AS is_building_part, EXISTS (SELECT 1 FROM osm_buildings_relation_members obrm WHERE obrm.member = osm_buildings.osm_id AND obrm.role = ''outline'') AS hide_3d',
     '{"height": "COALESCE(parse_to_meters(height), parse_to_meters(building_height))", "min_height": "parse_to_meters(min_height)", "roof_height": "parse_to_meters(roof_height)", "building_levels": "clean_numeric(building_levels)", "building_min_level": "clean_numeric(building_min_level)"}'::jsonb,
     ARRAY['building_height']
 );
