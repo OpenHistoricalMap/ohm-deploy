@@ -156,7 +156,16 @@
       "mapping": {
         "building": [
           "__any__"
+        ],
+        "building:part": [
+          "__any__"
         ]
+      },
+      "filters": {
+        "reject": {
+          "building": ["no", "none", "No"],
+          "building:part": ["no", "none", "No"]
+        }
       }
     }
   }

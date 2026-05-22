@@ -21,6 +21,7 @@ SELECT create_points_mview(
         'NULL::numeric AS building_levels',
         'NULL::text AS building_colour',
         'NULL::text AS building_part',
+        'FALSE::boolean AS is_building_part',
         'NULL::text AS roof_material',
         'NULL::text AS roof_colour',
         'NULL::text AS roof_shape'
@@ -43,7 +44,7 @@ SELECT create_areas_mview(
     0,
     'id, osm_id, type',
     NULL,
-    NULL,
+    '(class = ''building:part'') AS is_building_part',
     '{"height": "COALESCE(parse_to_meters(height), parse_to_meters(building_height))", "min_height": "parse_to_meters(min_height)", "roof_height": "parse_to_meters(roof_height)", "building_levels": "clean_numeric(building_levels)", "building_min_level": "clean_numeric(building_min_level)"}'::jsonb,
     ARRAY['building_height']
 );
