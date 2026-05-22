@@ -54,7 +54,7 @@ SELECT create_areas_mview(
     0,
     'id, osm_id, type',
     NULL,
-    '(class = ''building:part'') AS is_building_part, EXISTS (SELECT 1 FROM osm_buildings_relation_members obrm WHERE obrm.member = osm_buildings.osm_id AND obrm.role = ''outline'') AS hide_3d',
+    '(class = ''building:part'') AS is_building_part, EXISTS (SELECT 1 FROM osm_buildings_relation_members obrm WHERE obrm.member = ABS(osm_buildings.osm_id) AND obrm.role = ''outline'') AS hide_3d',
     '{"height": "COALESCE(parse_to_meters(height), parse_to_meters(building_height))", "min_height": "parse_to_meters(min_height)", "roof_height": "parse_to_meters(roof_height)", "building_levels": "clean_numeric(building_levels)", "building_min_level": "clean_numeric(building_min_level)"}'::jsonb,
     ARRAY['building_height']
 );
