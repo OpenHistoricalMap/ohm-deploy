@@ -33,6 +33,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-17-postgis-3-scripts \
     && rm -rf /var/lib/apt/lists/*
 
+# Auto-create required extensions on fresh initdb
+COPY ./scripts/init-extensions.sh /docker-entrypoint-initdb.d/10-extensions.sh
+RUN chmod +x /docker-entrypoint-initdb.d/10-extensions.sh
+
 COPY --from=builder /tmp/osmdbt/postgresql-plugin/build/osm-logical.so /usr/lib/postgresql/17/lib/osm-logical.so
 
 RUN ln -s /usr/lib/postgresql/17/lib/osm-logical.so /usr/lib/postgresql/17/lib/osm_logical.so
