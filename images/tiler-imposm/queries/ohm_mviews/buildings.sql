@@ -1,33 +1,27 @@
 -- ============================================================================
--- Partial index on building relation outline members.
--- Speeds up the EXISTS subquery that derives hide_3d in mv_buildings_areas_z16_20.
--- Mirrors the OpenMapTiles pattern for the building layer.
+-- Index on building relation outline members.
+-- Speeds up the hide_3d EXISTS subquery in mv_buildings_areas_z16_20.
 -- ============================================================================
 CREATE INDEX IF NOT EXISTS osm_buildings_relation_members_outline_idx
     ON osm_buildings_relation_members (member)
     WHERE role = 'outline';
 
 -- ============================================================================
--- Prepare points materialized view for higher zoom levels (12+)
--- All building/roof attributes (height, building:height, building:material, etc.)
--- are now extracted as native columns by imposm in osm_buildings_points
+-- Points mview for zoom 12+. Building and roof attributes come from imposm
+-- in osm_buildings_points. Point buildings don't render in 3D, so
+-- render_height and render_min_height are NULL placeholders. They're here
+-- so the UNION with polygon centroids in mv_buildings_points_centroids_*
+-- lines up column-for-column.
 -- ============================================================================
--- 3D / rendering attributes (height, materials, colours, levels, parts, roof
--- shape) are only meaningful on polygon footprints. Points (building=*
--- nodes) keep just identity/classification fields (name, type, building_use,
--- addresses). Inject NULLs of matching types so the UNION with polygon
--- centroids in mv_buildings_points_centroids_* aligns by name and type.
 SELECT create_points_mview(
     'osm_buildings_points',
     'mv_buildings_points',
     'id, source, osm_id',
     ARRAY[
-        'NULL::double precision AS height',
-        'NULL::double precision AS min_height',
+        'NULL::double precision AS render_height',
+        'NULL::double precision AS render_min_height',
         'NULL::double precision AS roof_height',
-        'NULL::numeric AS building_min_level',
         'NULL::text AS building_material',
-        'NULL::numeric AS building_levels',
         'NULL::text AS building_colour',
         'NULL::text AS building_part',
         'FALSE::boolean AS is_building_part',
@@ -40,13 +34,16 @@ SELECT create_points_mview(
 );
 
 
+-- ============================================================================
+-- Base areas mview, zoom 16-20.
+-- render_height and render_min_height use the openmaptiles fallback:
+-- parsed height first, then building:height (deprecated), then
+-- building:levels * 3m. Raw height and level columns are dropped, so
+-- anything downstream reads render_height / render_min_height instead.
+-- roof_height stays separate (parsed, not combined) since roof rendering
+-- needs it on its own. Lower zooms inherit this schema.
+-- ============================================================================
 
--- ============================================================================
--- Zoom 16-20: BASE
--- No simplification, all areas. Height columns are parsed to numeric here.
--- `height` falls back to deprecated `building:height` and `building_height`
--- is dropped from the output. All derived zoom levels inherit this.
--- ============================================================================
 SELECT create_areas_mview(
     'osm_buildings',
     'mv_buildings_areas_z16_20',
@@ -54,14 +51,17 @@ SELECT create_areas_mview(
     0,
     'id, osm_id, type',
     NULL,
-    '(class = ''building:part'') AS is_building_part, EXISTS (SELECT 1 FROM osm_buildings_relation_members obrm WHERE obrm.member = ABS(osm_buildings.osm_id) AND obrm.role = ''outline'') AS hide_3d',
-    '{"height": "COALESCE(parse_to_meters(height), parse_to_meters(building_height))", "min_height": "parse_to_meters(min_height)", "roof_height": "parse_to_meters(roof_height)", "building_levels": "clean_numeric(building_levels)", "building_min_level": "clean_numeric(building_min_level)"}'::jsonb,
-    ARRAY['building_height']
+    '(class = ''building:part'') AS is_building_part,
+     EXISTS (SELECT 1 FROM osm_buildings_relation_members obrm WHERE obrm.member = ABS(osm_buildings.osm_id) AND obrm.role = ''outline'') AS hide_3d,
+     render_height(height, building_height, building_levels) AS render_height,
+     render_min_height(min_height, building_min_level) AS render_min_height',
+    '{"roof_height": "parse_to_meters(roof_height)"}'::jsonb,
+    ARRAY['height', 'min_height', 'building_height', 'building_levels', 'building_min_level']
 );
 
 -- ============================================================================
--- Zoom 14-15: derived from z16_20
--- Low simplification (5m), filters out small buildings (<5,000 m²)
+-- Areas z14-15, derived from z16-20.
+-- Light 5m simplification, drops buildings under 5,000 m².
 -- ============================================================================
 SELECT create_area_mview_from_mview(
     'mv_buildings_areas_z16_20',
@@ -72,7 +72,8 @@ SELECT create_area_mview_from_mview(
 );
 
 -- ============================================================================
--- Centroids per zoom level (UNION with point-tagged buildings)
+-- Centroid mviews per zoom. Each one UNIONs polygon centroids with
+-- point-tagged buildings.
 -- ============================================================================
 SELECT create_points_centroids_mview(
     'mv_buildings_areas_z16_20',
@@ -85,10 +86,8 @@ SELECT create_points_centroids_mview(
     'mv_buildings_points'
 );
 
--- Refresh areas views
+
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_areas_z14_15;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_areas_z16_20;
-
--- Refresh centroids views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_points_centroids_z14_15;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_buildings_points_centroids_z16_20;

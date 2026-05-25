@@ -104,4 +104,37 @@ CREATE OR REPLACE FUNCTION clean_numeric(input text) RETURNS numeric AS $$
 $$ STRICT
 LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
+-- Resolve a building height in meters, using OpenMapTiles fallback order:
+--   1. height=*               (parsed via parse_to_meters)
+--   2. building:height=*      (deprecated alias, parsed)
+--   3. building:levels=* * 3m (one level assumed 3m)
+-- Returns NULL when no source is parseable. Mirrors the openmaptiles
+-- building layer logic so render_height stays consistent across consumers.
+-- Reference (OMT uses 3.66m per level; we use 3m):
+--   https://github.com/openmaptiles/openmaptiles/blob/master/layers/building/building.sql#L101-L102
+CREATE OR REPLACE FUNCTION render_height(
+    height_text          text,
+    building_height_text text,
+    building_levels_text text
+) RETURNS double precision AS $$
+    SELECT COALESCE(
+        public.parse_to_meters(height_text),
+        public.parse_to_meters(building_height_text),
+        public.clean_numeric(building_levels_text)::double precision * 3
+    );
+$$ LANGUAGE sql IMMUTABLE PARALLEL SAFE;
+
+-- Resolve a building min_height in meters using the same fallback pattern:
+--   1. min_height=*               (parsed via parse_to_meters)
+--   2. building:min_level=* * 3m  (one level assumed 3m)
+CREATE OR REPLACE FUNCTION render_min_height(
+    min_height_text        text,
+    building_min_level_text text
+) RETURNS double precision AS $$
+    SELECT COALESCE(
+        public.parse_to_meters(min_height_text),
+        public.clean_numeric(building_min_level_text)::double precision * 3
+    );
+$$ LANGUAGE sql IMMUTABLE PARALLEL SAFE;
+
 COMMIT;
