@@ -272,6 +272,10 @@ no_admin_boundaries_views=(
     mv_non_admin_boundaries_centroids_z0_2
 )
 
+addresses_views=(
+    mv_address_points_z16_20
+)
+
 
 
 log_message "Starting parallel refresh of materialized views..."
@@ -292,3 +296,4 @@ refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
 refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
 refresh_mviews_group "NO_ADMIN_BOUNDARIES" 180 light "${no_admin_boundaries_views[@]}" &
+refresh_mviews_group "ADDRESSES" 180 light "${addresses_views[@]}" &

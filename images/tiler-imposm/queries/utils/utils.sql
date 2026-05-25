@@ -79,15 +79,22 @@ $$ LANGUAGE plpgsql;
 -- Function: get_language_columns()
 -- Description:
 --   Returns a comma-separated list of SQL expressions like:
---     tags -> 'name:es' AS "es"
---   Based on aliases found in the `languages` table.
+--     tags -> 'name:zh-Hant-TW' AS "name_zh-Hant-TW"
+--   Based on the `key_name` values stored in the `languages` table.
+--
+--   Only the first ':' in the tag key (the one separating `name` from the
+--   language tag) is rewritten to `_`. Hyphens and mixed case inside the
+--   IETF BCP 47 language tag are preserved so consumers (e.g. Diplomat) can
+--   discover script and country subtags. Identifiers are quoted with %I so
+--   that hyphens / uppercase are accepted as PostgreSQL column names.
 --
 -- Notes:
 --   - Designed for direct use when `tags` is accessed without a table alias.
 --   - Useful for generating multilingual columns dynamically in SQL queries.
 --
 -- Example:
---   get_language_columns() → "tags->'name:es' AS es, tags->'name:fr' AS fr, ..."
+--   get_language_columns() → tags->'name:es' AS "name_es",
+--                            tags->'name:zh-Hant-TW' AS "name_zh-Hant-TW", ...
 -- ============================================================================
 CREATE OR REPLACE FUNCTION get_language_columns()
 RETURNS TEXT AS $$
@@ -98,7 +105,7 @@ BEGIN
         format(
             'tags -> %L AS %I',
             key_name,
-            'name_' || regexp_replace(lower(substring(key_name from 6)), '[^a-z0-9]', '_', 'g')
+            'name_' || substring(key_name from 6)
         ),
         ', '
     )

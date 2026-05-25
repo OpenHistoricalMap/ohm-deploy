@@ -19,6 +19,7 @@
 --   where_filter    TEXT              - Optional WHERE clause filter (e.g., "type != 'barrier'" or "class NOT IN ('power', 'military')"). NULL = no filter
 --   tag_columns     TEXT              - Optional extra columns from tags (e.g., "tags->'religion' AS religion, tags->'denomination' AS denomination"). NULL = none
 --   column_overrides JSONB            - Optional mapping {column_name: sql_expression} to override how an existing column is selected (e.g., '{"ref": "COALESCE(faa, iata, icao, NULLIF(ref, ''''))"}'). NULL = no overrides
+--   exclude_columns TEXT[]            - Optional list of source-table column names to omit from the mview output (e.g., ARRAY['building_height'] to suppress a deprecated column). NULL = no exclusions
 --
 -- Notes:
 --   - Creates the materialized view using a temporary swap mechanism
@@ -30,6 +31,7 @@
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT);
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT, JSONB);
+DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT, JSONB, TEXT[]);
 
 CREATE OR REPLACE FUNCTION create_areas_mview(
     source_table TEXT,
@@ -39,7 +41,8 @@ CREATE OR REPLACE FUNCTION create_areas_mview(
     unique_columns TEXT DEFAULT 'id, osm_id, type',
     where_filter TEXT DEFAULT NULL,
     tag_columns TEXT DEFAULT NULL,
-    column_overrides JSONB DEFAULT NULL
+    column_overrides JSONB DEFAULT NULL,
+    exclude_columns TEXT[] DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE 
@@ -97,7 +100,8 @@ BEGIN
     FROM information_schema.columns
     WHERE table_schema = 'public'
       AND table_name = source_table
-      AND column_name NOT IN ('start_decdate', 'end_decdate');
+      AND column_name NOT IN ('start_decdate', 'end_decdate')
+      AND (exclude_columns IS NULL OR NOT (column_name = ANY(exclude_columns)));
     
     -- Always add calculated date columns
     all_cols := all_cols || ', public.isodatetodecimaldate(public.pad_date(start_date, ''start''), FALSE) AS start_decdate';

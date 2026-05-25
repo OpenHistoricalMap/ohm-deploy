@@ -9,7 +9,8 @@
   },
   "generalized_tables": {},
   "tables": {
-    "buildings_points": {
+    "water_multilines": {
+      "type": "relation_member",
       "fields": [
         {
           "type": "id",
@@ -38,8 +39,8 @@
         },
         {
           "type": "string",
-          "name": "building_use",
-          "key": "building:use"
+          "name": "bridge",
+          "key": "bridge"
         },
         {
           "type": "string",
@@ -52,45 +53,35 @@
           "key": "end_date"
         },
         {
-          "type": "string",
-          "name": "addr_housenumber",
-          "key": "addr:housenumber"
-        },
-        {
-          "type": "string",
-          "name": "addr_housename",
-          "key": "addr:housename"
-        },
-        {
-          "type": "string",
-          "name": "addr_unit",
-          "key": "addr:unit"
-        },
-        {
-          "type": "string",
-          "name": "addr_street",
-          "key": "addr:street"
-        },
-        {
-          "type": "string",
-          "name": "addr_city",
-          "key": "addr:city"
-        },
-        {
-          "type": "string",
-          "name": "addr_postcode",
-          "key": "addr:postcode"
-        },
-        {
           "type": "hstore_tags",
           "name": "tags",
           "key": null
+        },
+        {
+          "type": "member_id",
+          "name": "member"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
+        },
+        {
+          "type": "string",
+          "name": "me_name",
+          "key": "name",
+          "from_member": true
+        },
+        {
+          "type": "string",
+          "name": "me_waterway",
+          "key": "waterway",
+          "from_member": true
         }
       ],
-      "type": "point",
       "mapping": {
-        "building": [
-          "__any__"
+        "type": [
+          "waterway"
         ]
       }
     }
