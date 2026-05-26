@@ -43,6 +43,66 @@
         },
         {
           "type": "string",
+          "name": "min_height",
+          "key": "min_height"
+        },
+        {
+          "type": "string",
+          "name": "building_height",
+          "key": "building:height"
+        },
+        {
+          "type": "string",
+          "name": "building_min_level",
+          "key": "building:min_level"
+        },
+        {
+          "type": "string",
+          "name": "building_use",
+          "key": "building:use"
+        },
+        {
+          "type": "string",
+          "name": "building_material",
+          "key": "building:material"
+        },
+        {
+          "type": "string",
+          "name": "building_levels",
+          "key": "building:levels"
+        },
+        {
+          "type": "string",
+          "name": "building_colour",
+          "key": "building:colour"
+        },
+        {
+          "type": "string",
+          "name": "building_part",
+          "key": "building:part"
+        },
+        {
+          "type": "string",
+          "name": "roof_material",
+          "key": "roof:material"
+        },
+        {
+          "type": "string",
+          "name": "roof_colour",
+          "key": "roof:colour"
+        },
+        {
+          "type": "string",
+          "name": "roof_shape",
+          "key": "roof:shape"
+        },
+        {
+          "type": "string",
+          "name": "roof_height",
+          "key": "roof:height"
+        },
+        {
+          "type": "string",
           "name": "start_date",
           "key": "start_date"
         },
@@ -96,7 +156,16 @@
       "mapping": {
         "building": [
           "__any__"
+        ],
+        "building:part": [
+          "__any__"
         ]
+      },
+      "filters": {
+        "reject": {
+          "building": ["no", "none", "No"],
+          "building:part": ["no", "none", "No"]
+        }
       }
     }
   }

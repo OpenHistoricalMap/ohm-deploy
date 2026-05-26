@@ -63,6 +63,10 @@ fi
 ##################### OHM #####################
 log_message "Creating materialized views for OSM data"
 
+# Always (re)load helper functions so mview SQL can rely on them after
+# upgrades or reimports without re-running the full --all path.
+execute_sql_file ./queries/utils/postgis_helpers.sql
+
 ## Admin boundaries areas
 execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql
 execute_sql_file queries/ohm_mviews/admin_boundaries_centroids.sql
