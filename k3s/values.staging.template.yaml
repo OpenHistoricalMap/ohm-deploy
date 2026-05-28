@@ -1,0 +1,30 @@
+# ============================================================
+# Staging overrides
+# ============================================================
+# Small Hetzner box. Only taginfo-web enabled.
+# Public access via Cloudflare Tunnel Public Hostnames (no IngressRoute).
+# ============================================================
+
+global:
+  environment: staging
+  domain: ohmstaging.org
+
+taginfo:
+  enabled: true
+  web:
+    enabled: true
+    replicas: 1
+  data:
+    enabled: false
+
+overpass:
+  enabled: false
+
+nominatim:
+  enabled: false
+
+osmcha:
+  enabled: false
+
+tiler:
+  enabled: false

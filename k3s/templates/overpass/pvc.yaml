@@ -1,0 +1,14 @@
+{{- if .Values.overpass.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: overpass-db
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "overpass") | nindent 4 }}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: {{ .Values.global.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.overpass.persistence.size }}
+{{- end }}

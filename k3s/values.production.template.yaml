@@ -1,0 +1,66 @@
+# ============================================================
+# Production overrides
+# ============================================================
+# Public access via Cloudflare Tunnel Public Hostnames (no IngressRoute).
+# ============================================================
+
+global:
+  environment: production
+  domain: openhistoricalmap.org
+
+taginfo:
+  enabled: true
+  web:
+    enabled: true
+    resources:
+      enabled: true
+  data:
+    enabled: true
+    resources:
+      enabled: true
+
+overpass:
+  enabled: true
+  resources:
+    enabled: true
+    requests: { cpu: 2, memory: 8Gi }
+    limits:   { cpu: 8, memory: 32Gi }
+  persistence:
+    size: 500Gi
+
+nominatim:
+  enabled: true
+  api:
+    enabled: true
+    resources:
+      enabled: true
+    publicUrl: https://nominatim.openhistoricalmap.org
+  ui:
+    enabled: true
+    resources:
+      enabled: true
+  persistence:
+    size: 300Gi
+
+osmcha:
+  enabled: true
+  django:
+    api:
+      replicas: 2
+      resources:
+        enabled: true
+    cron:
+      enabled: true
+      resources:
+        enabled: true
+  frontend:
+    resources:
+      enabled: true
+  db:
+    resources:
+      enabled: true
+    persistence:
+      size: 100Gi
+  redis:
+    resources:
+      enabled: true

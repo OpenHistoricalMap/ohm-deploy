@@ -1,0 +1,67 @@
+{{- if .Values.osmcha.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osmcha-web
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-web") | nindent 4 }}
+spec:
+  replicas: {{ .Values.osmcha.frontend.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: osmcha-web
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-web") | nindent 8 }}
+    spec:
+      containers:
+        - name: web
+          image: "{{ .Values.osmcha.frontend.image.repository }}:{{ .Values.osmcha.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: BACKEND_URL
+              value: http://osmcha-api:5000
+          {{- if .Values.osmcha.frontend.resources.enabled }}
+          resources:
+            requests:
+              {{- toYaml .Values.osmcha.frontend.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.osmcha.frontend.resources.limits | nindent 14 }}
+          {{- end }}
+          volumeMounts:
+            - name: staticfiles
+              mountPath: /srv/www/static/django
+              readOnly: true
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+        - name: staticfiles
+          persistentVolumeClaim:
+            claimName: osmcha-staticfiles
+        - name: nginx-config
+          configMap:
+            name: osmcha-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osmcha-web
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-web") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: osmcha-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+{{- end }}

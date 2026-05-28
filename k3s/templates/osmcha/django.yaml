@@ -1,0 +1,164 @@
+{{- if .Values.osmcha.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: osmcha-init
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-init") | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: "{{ .Values.osmcha.django.image.repository | default "ghcr.io/openhistoricalmap/osmcha-django" }}:{{ .Values.osmcha.django.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+            - secretRef:
+                name: osmcha-env
+          command:
+            - sh
+            - -c
+            - |
+              python manage.py migrate
+              python manage.py collectstatic --noinput
+          volumeMounts:
+            - name: staticfiles
+              mountPath: /app/staticfiles
+      volumes:
+        - name: staticfiles
+          persistentVolumeClaim:
+            claimName: osmcha-staticfiles
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osmcha-api
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-api") | nindent 4 }}
+spec:
+  replicas: {{ .Values.osmcha.django.api.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: osmcha-api
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-api") | nindent 8 }}
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.osmcha.django.image.repository | default "ghcr.io/openhistoricalmap/osmcha-django" }}:{{ .Values.osmcha.django.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: osmcha-env
+          command:
+            - gunicorn
+            - config.wsgi
+            - -b
+            - 0.0.0.0:5000
+            - --access-logfile
+            - "-"
+            - --timeout
+            - "120"
+            - --workers
+            - "4"
+            - --threads
+            - "16"
+          {{- if .Values.osmcha.django.api.resources.enabled }}
+          resources:
+            requests:
+              {{- toYaml .Values.osmcha.django.api.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.osmcha.django.api.resources.limits | nindent 14 }}
+          {{- end }}
+          volumeMounts:
+            - name: staticfiles
+              mountPath: /staticfiles
+      volumes:
+        - name: staticfiles
+          persistentVolumeClaim:
+            claimName: osmcha-staticfiles
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osmcha-api
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-api") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: osmcha-api
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+{{- if .Values.osmcha.django.cron.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osmcha-cron
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-cron") | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: osmcha-cron
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-cron") | nindent 8 }}
+    spec:
+      containers:
+        - name: cron
+          image: "{{ .Values.osmcha.django.image.repository | default "ghcr.io/openhistoricalmap/osmcha-django" }}:{{ .Values.osmcha.django.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+            - secretRef:
+                name: osmcha-env
+          command: [sh, /app/update.sh]
+          {{- if .Values.osmcha.django.cron.resources.enabled }}
+          resources:
+            requests:
+              {{- toYaml .Values.osmcha.django.cron.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.osmcha.django.cron.resources.limits | nindent 14 }}
+          {{- end }}
+          volumeMounts:
+            - name: scripts
+              mountPath: /app/update.sh
+              subPath: update.sh
+            - name: scripts
+              mountPath: /app/osmchadjango/changeset/management/commands/backfill_changesets.py
+              subPath: backfill_changesets.py
+            - name: staticfiles
+              mountPath: /srv/www/static/django
+              readOnly: true
+      volumes:
+        - name: scripts
+          configMap:
+            name: osmcha-scripts
+            defaultMode: 0755
+        - name: staticfiles
+          persistentVolumeClaim:
+            claimName: osmcha-staticfiles
+{{- end }}
+{{- end }}

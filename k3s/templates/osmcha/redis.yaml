@@ -1,0 +1,51 @@
+{{- if .Values.osmcha.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osmcha-redis
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-redis") | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: osmcha-redis
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-redis") | nindent 8 }}
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.osmcha.redis.image.repository }}:{{ .Values.osmcha.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: redis
+              containerPort: 6379
+          {{- if .Values.osmcha.redis.resources.enabled }}
+          resources:
+            requests:
+              {{- toYaml .Values.osmcha.redis.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.osmcha.redis.resources.limits | nindent 14 }}
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osmcha-redis
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "osmcha-redis") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: osmcha-redis
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+{{- end }}

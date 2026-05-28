@@ -1,0 +1,24 @@
+# ============================================================
+# Chartpress config for the k3s/ chart (ohm-services)
+# ============================================================
+# Builds OHM-owned images and rewrites their tags in values.yaml
+# during CI runs. Third-party images (postgis, redis, taginfo-web,
+# osmseed-nominatim) keep pinned tags in values.yaml and are not
+# managed here.
+# ============================================================
+charts:
+  - name: ohm-services
+    # Path to the chart relative to this file.
+    # Chartpress is invoked from this directory.
+    imagePrefix: ghcr.io/openhistoricalmap/
+    images:
+      overpass-api:
+        valuesPath: overpass.image
+        # contextPath / dockerfilePath set in the source repo workflow
+      osmcha-django:
+        valuesPath: osmcha.django.image
+      # Add more OHM-owned images here as services migrate:
+      # taginfo-ohm:
+      #   valuesPath: taginfo.web.image
+      # tiler-server-martin:
+      #   valuesPath: tiler.server.image

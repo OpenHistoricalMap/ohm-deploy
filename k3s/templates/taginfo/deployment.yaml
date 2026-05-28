@@ -1,0 +1,102 @@
+{{- if and .Values.taginfo.enabled .Values.taginfo.web.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taginfo-web
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "taginfo-web") | nindent 4 }}
+spec:
+  replicas: {{ .Values.taginfo.web.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: taginfo-web
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ohm.serviceLabels" (dict "ctx" . "name" "taginfo-web") | nindent 8 }}
+    spec:
+      containers:
+        - name: taginfo-web
+          image: "{{ .Values.taginfo.web.image.repository }}:{{ .Values.taginfo.web.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          env:
+            {{- range $k, $v := .Values.taginfo.web.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          command: ["/usr/src/app/start.sh"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.taginfo.web.port }}
+          {{- if .Values.taginfo.web.resources.enabled }}
+          resources:
+            requests:
+              {{- toYaml .Values.taginfo.web.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.taginfo.web.resources.limits | nindent 14 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/app/data
+      volumes:
+        - name: data
+          emptyDir: {}
+{{- end }}
+{{- if and .Values.taginfo.enabled .Values.taginfo.data.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: taginfo-data
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "taginfo-data") | nindent 4 }}
+spec:
+  schedule: {{ .Values.taginfo.data.schedule | quote }}
+  {{- with .Values.taginfo.data.timeZone }}
+  timeZone: {{ . | quote }}
+  {{- end }}
+  concurrencyPolicy: {{ .Values.taginfo.data.concurrencyPolicy | default "Forbid" }}
+  successfulJobsHistoryLimit: {{ .Values.taginfo.data.successfulJobsHistoryLimit | default 1 }}
+  failedJobsHistoryLimit: {{ .Values.taginfo.data.failedJobsHistoryLimit | default 3 }}
+  jobTemplate:
+    spec:
+      {{- with .Values.taginfo.data.activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
+      template:
+        metadata:
+          labels:
+            {{- include "ohm.serviceLabels" (dict "ctx" . "name" "taginfo-data") | nindent 12 }}
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: taginfo-data
+              image: "{{ .Values.taginfo.data.image.repository }}:{{ .Values.taginfo.data.image.tag }}"
+              imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+              env:
+                {{- range $k, $v := .Values.taginfo.data.env }}
+                - name: {{ $k }}
+                  value: {{ $v | quote }}
+                {{- end }}
+              command: ["/usr/src/app/start.sh"]
+              {{- if .Values.taginfo.data.resources.enabled }}
+              resources:
+                requests:
+                  {{- toYaml .Values.taginfo.data.resources.requests | nindent 18 }}
+                limits:
+                  {{- toYaml .Values.taginfo.data.resources.limits | nindent 18 }}
+              {{- end }}
+              volumeMounts:
+                - name: data
+                  mountPath: /usr/src/app/data
+                - name: planet
+                  mountPath: /osm/planet/var
+          volumes:
+            - name: data
+              emptyDir: {}
+            - name: planet
+              emptyDir: {}
+{{- end }}

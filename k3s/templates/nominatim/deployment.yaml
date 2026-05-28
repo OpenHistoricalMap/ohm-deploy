@@ -1,0 +1,111 @@
+{{- if and .Values.nominatim.enabled .Values.nominatim.api.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nominatim
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "nominatim") | nindent 4 }}
+spec:
+  serviceName: nominatim
+  replicas: {{ .Values.nominatim.api.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nominatim
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ohm.serviceLabels" (dict "ctx" . "name" "nominatim") | nindent 8 }}
+    spec:
+      containers:
+        - name: nominatim
+          image: "{{ .Values.nominatim.api.image.repository }}:{{ .Values.nominatim.api.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: OSMSEED_WEB_API_DOMAIN
+              value: "www.{{ .Values.global.domain }}"
+            {{- range $k, $v := .Values.nominatim.api.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          envFrom:
+            - secretRef:
+                name: nominatim-env
+          {{- if .Values.nominatim.api.resources.enabled }}
+          resources:
+            requests:
+              {{- toYaml .Values.nominatim.api.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.nominatim.api.resources.limits | nindent 14 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.nominatim.persistence.mountPath }}
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          startupProbe:
+            httpGet:
+              path: /status
+              port: http
+            periodSeconds: 60
+            failureThreshold: 240
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nominatim-data
+{{- end }}
+{{- if and .Values.nominatim.enabled .Values.nominatim.ui.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nominatim-ui
+  labels:
+    {{- include "ohm.serviceLabels" (dict "ctx" . "name" "nominatim-ui") | nindent 4 }}
+spec:
+  replicas: {{ .Values.nominatim.ui.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nominatim-ui
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ohm.serviceLabels" (dict "ctx" . "name" "nominatim-ui") | nindent 8 }}
+    spec:
+      containers:
+        - name: nominatim-ui
+          image: "{{ .Values.nominatim.ui.image.repository }}:{{ .Values.nominatim.ui.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -x
+              echo "Nominatim_Config.Nominatim_API_Endpoint = '{{ .Values.nominatim.api.publicUrl }}/';" \
+                >> /usr/share/nginx/html/ui/theme/config.theme.js
+              nginx -g "daemon off;"
+          {{- if .Values.nominatim.ui.resources.enabled }}
+          resources:
+            requests:
+              {{- toYaml .Values.nominatim.ui.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.nominatim.ui.resources.limits | nindent 14 }}
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+{{- end }}
