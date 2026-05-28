@@ -1,0 +1,62 @@
+name: Build images (chartpress)
+
+# Runs chartpress: builds OHM-owned images, pushes to ghcr.io, and
+# rewrites image tags in ohm/values.yaml + k3s/values.yaml.
+# Uploads the modified chart state as an artifact for downstream
+# deploy workflows (deploy-eks.yaml, deploy-k3s.yaml).
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+      - 'deploy-*'
+      - 'build-*'
+      - 'k3s'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup git
+        run: |
+          git config --global user.email "noreply@developmentseed.org"
+          git config --global user.name "Github Action"
+
+      - name: Install chartpress
+        run: pip install chartpress==2.3.0 ruamel.yaml
+
+      - name: Run chartpress
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
+        run: chartpress --push
+
+      - name: Upload chart state (modified values + templates)
+        uses: actions/upload-artifact@v4
+        with:
+          name: chart-state
+          path: |
+            ohm/values.yaml
+            k3s/values.yaml
+            ohm/values.staging.template.yaml
+            ohm/values.production.template.yaml
+            k3s/values.staging.template.yaml
+            k3s/values.production.template.yaml
+          if-no-files-found: warn
+          retention-days: 7
