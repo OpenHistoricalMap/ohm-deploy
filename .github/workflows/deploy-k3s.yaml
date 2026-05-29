@@ -1,13 +1,7 @@
 name: Deploy k3s
 
-# Deploys the ohm/ chart to Hetzner k3s using k3s-specific values
-# (values.k3s.<env>.template.yaml). Triggered after build-images
-# completes on main / staging / k3s branches.
-
 on:
-  workflow_run:
-    workflows: ['Build images (chartpress)']
-    types: [completed]
+  push:
     branches:
       - main
       - staging
@@ -17,13 +11,11 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Resolve ref + env
+      - name: Resolve env
         id: src
         run: |
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-          SHA="${{ github.event.workflow_run.head_sha }}"
+          BRANCH="${GITHUB_REF##*/}"
           case "$BRANCH" in
             main)    ENV="production" ;;
             staging) ENV="staging" ;;
@@ -31,7 +23,6 @@ jobs:
             *)       ENV="staging" ;;
           esac
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "env=$ENV" >> $GITHUB_OUTPUT
           if [ "$ENV" = "production" ]; then
             echo "cf_id=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
@@ -48,16 +39,31 @@ jobs:
           fi
 
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.src.outputs.sha }}
 
-      - name: Download chart-state from build-images
-        uses: actions/download-artifact@v4
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          name: chart-state
-          path: .
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup git identity
+        run: |
+          git config --global user.email "noreply@developmentseed.org"
+          git config --global user.name "Github Action"
+
+      - name: Install chartpress
+        run: pip install chartpress==2.3.0 ruamel.yaml
+
+      - name: chartpress (build + push + rewrite tags)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
+        run: chartpress --push
 
       - name: Install cloudflared
         run: |
