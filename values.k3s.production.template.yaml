@@ -1,0 +1,216 @@
+osm-seed:
+
+  # ====================================================================================================
+  # ==================================Global Configurations=============================================
+  # ====================================================================================================
+  environment: production
+  # cloudProvider: k3s uses local-path dynamic provisioning (no hostPath setup needed)
+  cloudProvider: k3s
+
+  # Traffic is routed via Cloudflare Tunnel, which connects directly to ClusterIP Services.
+  # No Ingress resources or load balancers needed.
+  serviceType: ClusterIP
+  createClusterIssuer: false
+  ingressClassNameType: ""
+  ingressClassName: ""
+  domain: openhistoricalmap.org
+  adminEmail: admin@openhistoricalmap.org
+
+  # ====================================================================================================
+  # Heavy services disabled - live in EKS or not used in k3s
+  # ====================================================================================================
+  web:
+    enabled: false
+  db:
+    enabled: false
+  memcached:
+    enabled: false
+  cgimap:
+    enabled: false
+  fullHistory:
+    enabled: false
+  changesetsDump:
+    enabled: false
+  dbBackupRestore:
+    enabled: false
+  planetDump:
+    enabled: false
+  replicationJob:
+    enabled: false
+  populateApidb:
+    enabled: false
+  osmProcessor:
+    enabled: false
+  tilerDb:
+    enabled: false
+  tilerImposm:
+    enabled: false
+  tilerServer:
+    enabled: false
+  tilerServerCacheCleaner:
+    enabled: false
+  tilerCacheCleanerJob:
+    enabled: false
+  tmDb:
+    enabled: false
+  tmApi:
+    enabled: false
+  osmSimpleMetrics:
+    enabled: false
+  monitoringReplication:
+    enabled: false
+  changesetReplicationJob:
+    enabled: false
+  planetFiles:
+    enabled: false
+
+  # ====================================================================================================
+  # Overpass API
+  # ====================================================================================================
+  overpassApi:
+    enabled: true
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /db
+      localVolumeHostPath: /mnt/overpass-data
+      localVolumeSize: 500Gi
+    env:
+      OVERPASS_META: "attic"
+      OVERPASS_MODE: init
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/planet-history-260510_0442.osm.pbf
+      OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      OVERPASS_RULES_LOAD: "10"
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: "1900000"
+      OVERPASS_ALLOW_DUPLICATE_QUERIES: "no"
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "2"
+        memory: "8Gi"
+      limits:
+        enabled: true
+        cpu: "8"
+        memory: "32Gi"
+
+  # ====================================================================================================
+  # Taginfo
+  # ====================================================================================================
+  taginfoWeb:
+    enabled: true
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        enabled: true
+        cpu: "2"
+        memory: "4Gi"
+  taginfo:
+    enabled: true
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        enabled: true
+        cpu: "4"
+        memory: "8Gi"
+
+  # ====================================================================================================
+  # Nominatim
+  # ====================================================================================================
+  nominatimApi:
+    enabled: true
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/16/main
+      localVolumeHostPath: /mnt/nominatim-data
+      localVolumeSize: 300Gi
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "2"
+        memory: "8Gi"
+      limits:
+        enabled: true
+        cpu: "8"
+        memory: "32Gi"
+  nominatimUI:
+    enabled: true
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        enabled: true
+        cpu: "500m"
+        memory: "512Mi"
+
+  # ====================================================================================================
+  # OSMCha
+  # ====================================================================================================
+  osmchaApi:
+    enabled: true
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        enabled: true
+        cpu: "2"
+        memory: "4Gi"
+  osmchaWeb:
+    enabled: true
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        enabled: true
+        cpu: "500m"
+        memory: "512Mi"
+  osmchaDb:
+    enabled: true
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      localVolumeHostPath: /mnt/osmcha-db-data
+      localVolumeSize: 100Gi
+    resources:
+      enabled: true
+      requests:
+        enabled: true
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        enabled: true
+        cpu: "4"
+        memory: "8Gi"
+
+# ====================================================================================================
+# ohm-deploy parent chart - EKS-specific services disabled
+# ====================================================================================================
+ohm:
+  tilerCache:
+    enabled: false
+  tilerMonitor:
+    enabled: false
+  ohmxAdiffBuilder:
+    enabled: false
+  tilerServerMartin:
+    enabled: false

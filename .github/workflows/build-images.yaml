@@ -53,10 +53,9 @@ jobs:
           name: chart-state
           path: |
             ohm/values.yaml
-            k3s/values.yaml
-            ohm/values.staging.template.yaml
-            ohm/values.production.template.yaml
-            k3s/values.staging.template.yaml
-            k3s/values.production.template.yaml
+            values.staging.template.yaml
+            values.production.template.yaml
+            values.k3s.staging.template.yaml
+            values.k3s.production.template.yaml
           if-no-files-found: warn
           retention-days: 7

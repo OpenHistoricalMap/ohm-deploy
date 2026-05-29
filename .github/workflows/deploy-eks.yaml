@@ -1,0 +1,194 @@
+name: Deploy EKS
+
+# Deploys the ohm/ chart to AWS EKS. Triggered automatically after
+# the build-images workflow succeeds (workflow_run), or manually
+# via workflow_dispatch. Downloads the chart-state artifact produced
+# by build-images so it deploys with the freshly-rewritten image tags.
+
+on:
+  workflow_run:
+    workflows: ['Build images (chartpress)']
+    types: [completed]
+    branches:
+      - main
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    env:
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+    steps:
+      - name: Resolve ref + env from upstream workflow
+        id: src
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            BRANCH="${{ github.event.inputs.ref }}"
+            SHA="${{ github.event.inputs.ref }}"
+          else
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            SHA="${{ github.event.workflow_run.head_sha }}"
+          fi
+          case "$BRANCH" in
+            main)          ENV="production" ;;
+            staging)       ENV="staging" ;;
+            deploy-*)      ENV="staging" ;;
+            *)             ENV="staging" ;;
+          esac
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "Deploying ref=$BRANCH ($SHA) to $ENV"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.src.outputs.sha }}
+
+      - name: Download chart-state from build-images
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: chart-state
+          path: .
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      # ============================================================
+      # Substitute secrets per environment (staging / production)
+      # ============================================================
+      - name: Staging - substitute secrets
+        if: steps.src.outputs.env == 'staging'
+        uses: bluwy/substitute-string-action@v1
+        with:
+          _input-file: 'values.staging.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.staging.yaml'
+          STAGING_AWS_SSL_ARN: ${{ secrets.STAGING_AWS_SSL_ARN }}
+          STAGING_AWS_WAF_WEBACL_ARN: ${{ secrets.STAGING_AWS_WAF_WEBACL_ARN }}
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
+          MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
+          STAGING_DB: ${{ secrets.STAGING_DB }}
+          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
+          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
+          STAGING_DOMAIN_NAME: ohmstaging.org
+          STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
+          STAGING_ID_APPLICATION: ${{ secrets.STAGING_ID_APPLICATION }}
+          STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
+          STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
+          STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
+          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
+          STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
+          STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
+          STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
+          STAGING_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
+          STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
+          STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+          STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
+          STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
+          STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
+          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          STAGING_NOMINATIM_HOST: ${{ secrets.STAGING_NOMINATIM_HOST }}
+          STAGING_OVERPASS_HOST: ${{ secrets.STAGING_OVERPASS_HOST }}
+          STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
+          STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
+          STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
+          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
+
+      - name: Production - substitute secrets
+        if: steps.src.outputs.env == 'production'
+        uses: bluwy/substitute-string-action@v1
+        with:
+          _input-file: 'values.production.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.production.yaml'
+          PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
+          PRODUCTION_AWS_WAF_WEBACL_ARN: ${{ secrets.PRODUCTION_AWS_WAF_WEBACL_ARN }}
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+          MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+          PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
+          PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
+          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+          PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
+          PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
+          PRODUCTION_ID_APPLICATION: ${{ secrets.PRODUCTION_ID_APPLICATION }}
+          PRODUCTION_OAUTH_CLIENT_ID: ${{ secrets.PRODUCTION_OAUTH_CLIENT_ID }}
+          PRODUCTION_OAUTH_KEY: ${{ secrets.PRODUCTION_OAUTH_KEY }}
+          PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
+          PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
+          PRODUCTION_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.PRODUCTION_RAILS_CREDENTIALS_YML_ENC }}
+          PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
+          PRODUCTION_WIKIPEDIA_AUTH_ID: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_ID }}
+          PRODUCTION_WIKIPEDIA_AUTH_SECRET: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_SECRET }}
+          PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
+          PRODUCTION_TILER_SERVER_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
+          PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
+          PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
+          PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          PRODUCTION_TM_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_DB_PASSWORD }}
+          PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
+          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_NOMINATIM_HOST: ${{ secrets.PRODUCTION_NOMINATIM_HOST }}
+          PRODUCTION_OVERPASS_HOST: ${{ secrets.PRODUCTION_OVERPASS_HOST }}
+          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
+          PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+          PRODUCTION_OPENSTREETMAP_AUTH_ID: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_ID }}
+          PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
+
+      # ============================================================
+      # AWS / kubectl / helm + EKS deploy
+      # ============================================================
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Install kubectl, aws-iam-authenticator, helm
+        run: |
+          sudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl
+          sudo chmod +x /usr/bin/kubectl
+          sudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator
+          sudo chmod +x /usr/bin/aws-iam-authenticator
+          curl -L https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz -o helm.tar.gz
+          tar -xvzf helm.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin/
+          sudo chmod +x /usr/local/bin/helm
+          helm version
+
+      - name: Update kubeconfig (staging)
+        if: steps.src.outputs.env == 'staging'
+        run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
+
+      - name: Update kubeconfig (production)
+        if: steps.src.outputs.env == 'production'
+        run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
+
+      - name: Helm repo + deps
+        run: |
+          helm repo add osm-seed https://osm-seed.github.io/osm-seed-chart/
+          helm repo update
+          cd ohm && helm dep up
+
+      - name: Staging - helm deploy
+        if: steps.src.outputs.env == 'staging'
+        run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+
+      - name: Production - helm deploy
+        if: steps.src.outputs.env == 'production'
+        run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml

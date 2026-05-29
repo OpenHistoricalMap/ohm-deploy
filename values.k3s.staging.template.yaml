@@ -1,0 +1,213 @@
+osm-seed:
+  environment: staging
+  cloudProvider: k3s
+  serviceType: ClusterIP
+  createClusterIssuer: false
+  ingressClassNameType: ""
+  ingressClassName: ""
+  domain: ohmstaging.org
+  adminEmail: admin@openhistoricalmap.org
+
+  # Disable heavy services
+  web:
+    enabled: false
+  db:
+    enabled: false
+  memcached:
+    enabled: false
+  cgimap:
+    enabled: false
+  fullHistory:
+    enabled: false
+  changesetsDump:
+    enabled: false
+  dbBackupRestore:
+    enabled: false
+  planetDump:
+    enabled: false
+  replicationJob:
+    enabled: false
+  populateApidb:
+    enabled: false
+  osmProcessor:
+    enabled: false
+  tilerDb:
+    enabled: false
+  tilerImposm:
+    enabled: false
+  tilerServer:
+    enabled: false
+  tilerServerCacheCleaner:
+    enabled: false
+  tilerCacheCleanerJob:
+    enabled: false
+  tmDb:
+    enabled: false
+  tmApi:
+    enabled: false
+  osmSimpleMetrics:
+    enabled: false
+  monitoringReplication:
+    enabled: false
+  changesetReplicationJob:
+    enabled: false
+  planetFiles:
+    enabled: false
+
+  # Web frontend - serves taginfo HTTP UI, downloads .db files from S3
+  taginfoWeb:
+    enabled: false
+    image:
+      name: ghcr.io/osm-seed/taginfo-web
+      tag: "0.1.0-0.dev.git.990.hc495200"
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
+      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
+  taginfoDataProcessor:
+    enabled: false
+    image:
+      name: ghcr.io/osm-seed/taginfo
+      tag: "0.1.0-0.dev.git.990.hc495200"
+    schedule: "* * * * *"
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
+      URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
+      URL_PLANET_FILE: 'none'
+      URL_HISTORY_PLANET_FILE: 'none'
+      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
+      TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
+      DOWNLOAD_DB: 'languages wiki'
+      CREATE_DB: 'db projects chronology'
+      AWS_S3_BUCKET: planet.openhistoricalmap.org
+      ENVIRONMENT: production
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # ====================================================================================================
+  # Nominatim UI
+  # ====================================================================================================
+  nominatimUI:
+    enabled: false
+    image:
+      name: ghcr.io/openhistoricalmap/nominatim-ui
+      tag: a469b5e
+
+  # ====================================================================================================
+  # Nominatim API
+  # ====================================================================================================
+  nominatimApi:
+    enabled: false
+    image:
+      name: developmentseed/osmseed-nominatim
+      tag: 1.0.0-dev.hb293d54
+    priorityClass: medium-priority
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: nominatim.openhistoricalmap.org
+    replicaCount: 1
+    env:
+      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
+      REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
+      REPLICATION_UPDATE_INTERVAL: 60
+      REPLICATION_RECHECK_INTERVAL: 30
+      THREADS: 8
+      FREEZE: false
+      IMPORT_WIKIPEDIA: false
+      IMPORT_US_POSTCODES: false
+      IMPORT_GB_POSTCODES: false
+      IMPORT_TIGER_ADDRESSES: false
+      PGDATA: /var/lib/postgresql/16/main
+      OSMSEED_WEB_API_DOMAIN: www.${OHM_DOMAIN}
+      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
+      UPDATE_MODE: continuous
+      IMPORT_STYLE: extratags
+      EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
+    resources:
+      enabled: false
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/16/main
+      subPath: nominatim-pgdata
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # ====================================================================================================
+  # Overpass API
+  # ====================================================================================================
+  overpassApi:
+    enabled: true
+    image:
+      name: ghcr.io/openhistoricalmap/overpass-api
+      tag: 0.0.1-0.dev.git.3377.h318c42d7
+    priorityClass: medium-priority
+    env:
+      OVERPASS_META: attic
+      OVERPASS_MODE: init
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/planet-history-260510_0442.osm.pbf
+      OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      OVERPASS_RULES_LOAD: 10
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1900000
+      OVERPASS_ALLOW_DUPLICATE_QUERIES: no
+      OVERPASS_RATE_LIMIT: 2
+      OVERPASS_PLANET_PREPROCESS: "true"
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /db
+      localVolumeSize: 100Gi
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # ====================================================================================================
+  # OSMCha (disabled)
+  # ====================================================================================================
+  osmchaApi:
+    enabled: false
+  osmchaWeb:
+    enabled: false
+  osmchaDb:
+    enabled: false
+
+# ====================================================================================================
+# ohm-deploy parent chart - EKS-specific services disabled
+# ====================================================================================================
+ohm:
+  tilerCache:
+    enabled: false
+  tilerMonitor:
+    enabled: false
+  ohmxAdiffBuilder:
+    enabled: false
+  tilerServerMartin:
+    enabled: false
+  tilerCachePurge:
+    enabled: false
+  tilerCacheSeedCoverage:
+    enabled: false
+  tilerCacheSeedGlobal:
+    enabled: false

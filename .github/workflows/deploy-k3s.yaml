@@ -1,0 +1,120 @@
+name: Deploy k3s
+
+# Deploys the ohm/ chart to Hetzner k3s using k3s-specific values
+# (values.k3s.<env>.template.yaml). Triggered after build-images
+# completes on main / staging / k3s branches.
+
+on:
+  workflow_run:
+    workflows: ['Build images (chartpress)']
+    types: [completed]
+    branches:
+      - main
+      - staging
+      - k3s
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Resolve ref + env
+        id: src
+        run: |
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          SHA="${{ github.event.workflow_run.head_sha }}"
+          case "$BRANCH" in
+            main)    ENV="production" ;;
+            staging) ENV="staging" ;;
+            k3s)     ENV="staging" ;;
+            *)       ENV="staging" ;;
+          esac
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          if [ "$ENV" = "production" ]; then
+            echo "cf_id=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
+            echo "cf_secret=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+            echo "kubeconfig=${{ secrets.PRODUCTION_KUBECONFIG }}" >> $GITHUB_OUTPUT
+            echo "hostname=k3s.openhistoricalmap.org" >> $GITHUB_OUTPUT
+            echo "namespace=ohm-production" >> $GITHUB_OUTPUT
+          else
+            echo "cf_id=${{ secrets.STAGING_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
+            echo "cf_secret=${{ secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+            echo "kubeconfig=${{ secrets.STAGING_KUBECONFIG }}" >> $GITHUB_OUTPUT
+            echo "hostname=k3s.ohmstaging.org" >> $GITHUB_OUTPUT
+            echo "namespace=ohm-staging" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.src.outputs.sha }}
+
+      - name: Download chart-state from build-images
+        uses: actions/download-artifact@v4
+        with:
+          name: chart-state
+          path: .
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Install cloudflared
+        run: |
+          sudo curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o /usr/local/bin/cloudflared
+          sudo chmod +x /usr/local/bin/cloudflared
+
+      - name: Install helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.1
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ steps.src.outputs.kubeconfig }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Open Cloudflare Access tunnel
+        env:
+          TUNNEL_SERVICE_TOKEN_ID: ${{ steps.src.outputs.cf_id }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ steps.src.outputs.cf_secret }}
+        run: |
+          cloudflared access tcp \
+            --hostname ${{ steps.src.outputs.hostname }} \
+            --url 127.0.0.1:16443 &
+          for i in {1..30}; do
+            nc -z 127.0.0.1 16443 2>/dev/null && exit 0
+            sleep 2
+          done
+          echo "Tunnel failed to open" >&2
+          exit 1
+
+      - name: Verify access
+        run: |
+          kubectl get nodes
+          helm version --short
+
+      - name: Helm dep up (pull osm-seed subchart)
+        run: cd ohm && helm dep up
+
+      - name: Helm lint
+        run: |
+          helm lint ./ohm \
+            -f ./ohm/values.yaml \
+            -f ./values.k3s.${{ steps.src.outputs.env }}.template.yaml
+
+      - name: Helm deploy
+        run: |
+          helm upgrade --install ohm-services ./ohm \
+            -f ./ohm/values.yaml \
+            -f ./values.k3s.${{ steps.src.outputs.env }}.template.yaml \
+            -n ${{ steps.src.outputs.namespace }} --create-namespace \
+            --wait --timeout=15m
+
+      - name: Show release status
+        if: always()
+        run: |
+          helm -n ${{ steps.src.outputs.namespace }} list
+          kubectl -n ${{ steps.src.outputs.namespace }} get all
