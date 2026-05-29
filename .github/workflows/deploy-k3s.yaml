@@ -130,7 +130,6 @@ jobs:
           helm upgrade --install ohm-services ./ohm \
             -f ./ohm/values.yaml \
             -f ./values.k3s.${{ steps.src.outputs.env }}.yaml \
-            -n ${{ steps.src.outputs.namespace }} --create-namespace \
             --wait --timeout=15m
 
       - name: Show release status
