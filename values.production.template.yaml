@@ -657,10 +657,6 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    externalService:
-      enabled: false
-      ip: {{PRODUCTION_TILER_SERVER_HOST}}
-      port: 9090
     replicaCount: 4
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -852,11 +848,6 @@ osm-seed:
   # ====================================================================================================
   nominatimUI:
     enabled: false
-    ## Enable external service
-    externalService:
-      enabled: false
-      ip: {{PRODUCTION_NOMINATIM_HOST}}
-      port: 8084
     image:
       name: ghcr.io/openhistoricalmap/nominatim-ui
       tag: a469b5e
@@ -865,11 +856,6 @@ osm-seed:
   # ====================================================================================================
   nominatimApi:
     enabled: false
-    ## Enable external service
-    externalService:
-      enabled: false
-      ip: {{PRODUCTION_NOMINATIM_HOST}}
-      port: 8083
     priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -923,11 +909,6 @@ osm-seed:
 # ====================================================================================================
   overpassApi:
     enabled: false
-    ## Enable external service
-    externalService:
-      enabled: false
-      ip: {{PRODUCTION_OVERPASS_HOST}}
-      port: 8086
     priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"

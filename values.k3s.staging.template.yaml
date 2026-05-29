@@ -140,6 +140,7 @@ osm-seed:
       UPDATE_MODE: continuous
       IMPORT_STYLE: extratags
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
+      NOMINATIM_PASSWORD: "{{STAGING_NOMINATIM_PG_PASSWORD}}"
     resources:
       enabled: false
     persistenceDisk:

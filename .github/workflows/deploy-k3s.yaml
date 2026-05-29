@@ -98,6 +98,24 @@ jobs:
           kubectl get nodes
           helm version --short
 
+      - name: Staging - substitute secrets
+        if: steps.src.outputs.env == 'staging'
+        uses: bluwy/substitute-string-action@v3
+        with:
+          _input-file: 'values.k3s.staging.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.k3s.staging.yaml'
+          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+
+      - name: Production - substitute secrets
+        if: steps.src.outputs.env == 'production'
+        uses: bluwy/substitute-string-action@v3
+        with:
+          _input-file: 'values.k3s.production.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.k3s.production.yaml'
+          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+
       - name: Helm dep up (pull osm-seed subchart)
         run: cd ohm && helm dep up
 
@@ -105,13 +123,13 @@ jobs:
         run: |
           helm lint ./ohm \
             -f ./ohm/values.yaml \
-            -f ./values.k3s.${{ steps.src.outputs.env }}.template.yaml
+            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml
 
       - name: Helm deploy
         run: |
           helm upgrade --install ohm-services ./ohm \
             -f ./ohm/values.yaml \
-            -f ./values.k3s.${{ steps.src.outputs.env }}.template.yaml \
+            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml \
             -n ${{ steps.src.outputs.namespace }} --create-namespace \
             --wait --timeout=15m
 
