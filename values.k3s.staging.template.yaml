@@ -56,7 +56,7 @@ osm-seed:
 
   # Web frontend - serves taginfo HTTP UI, downloads .db files from S3
   taginfoWeb:
-    enabled: false
+    enabled: true
     image:
       name: ghcr.io/osm-seed/taginfo-web
       tag: "0.1.0-0.dev.git.990.hc495200"
@@ -157,7 +157,7 @@ osm-seed:
   # Overpass API
   # ====================================================================================================
   overpassApi:
-    enabled: true
+    enabled: false
     image:
       name: ghcr.io/openhistoricalmap/overpass-api
       tag: 0.0.1-0.dev.git.3377.h318c42d7
