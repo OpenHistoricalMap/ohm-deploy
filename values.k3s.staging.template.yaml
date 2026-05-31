@@ -75,11 +75,11 @@ osm-seed:
 
   # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
   taginfoDataProcessor:
-    enabled: false
+    enabled: true
     image:
       name: ghcr.io/osm-seed/taginfo
       tag: "0.1.0-0.dev.git.990.hc495200"
-    schedule: "* * * * *"
+    schedule: "0 2 */3 * *"
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
@@ -92,8 +92,10 @@ osm-seed:
       TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
       DOWNLOAD_DB: 'languages wiki'
       CREATE_DB: 'db projects chronology'
-      AWS_S3_BUCKET: planet.openhistoricalmap.org
+      AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
       ENVIRONMENT: production
+      AWS_ACCESS_KEY_ID: "{{AWS_ACCESS_KEY_ID}}"
+      AWS_SECRET_ACCESS_KEY: "{{AWS_SECRET_ACCESS_KEY}}"
     resources:
       enabled: false
     nodeSelector:

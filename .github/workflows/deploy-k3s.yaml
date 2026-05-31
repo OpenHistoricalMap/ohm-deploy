@@ -109,7 +109,6 @@ jobs:
           STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
       - name: Production - substitute secrets
         if: steps.src.outputs.env == 'production'
         uses: bluwy/substitute-string-action@v3
