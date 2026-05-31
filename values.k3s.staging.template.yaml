@@ -157,7 +157,7 @@ osm-seed:
   # Overpass API
   # ====================================================================================================
   overpassApi:
-    enabled: false
+    enabled: true
     image:
       name: ghcr.io/openhistoricalmap/overpass-api
       tag: 0.0.1-0.dev.git.3377.h318c42d7
