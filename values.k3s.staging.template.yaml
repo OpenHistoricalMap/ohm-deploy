@@ -57,9 +57,6 @@ osm-seed:
   # Web frontend - serves taginfo HTTP UI, downloads .db files from S3
   taginfoWeb:
     enabled: true
-    image:
-      name: ghcr.io/osm-seed/taginfo-web
-      tag: "0.1.0-0.dev.git.990.hc495200"
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
@@ -76,9 +73,9 @@ osm-seed:
   # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
   taginfoDataProcessor:
     enabled: true
-    image:
-      name: ghcr.io/osm-seed/taginfo
-      tag: "0.1.0-0.dev.git.990.hc495200"
+    # image:
+    #   name: ghcr.io/osm-seed/taginfo
+    #   tag: "0.1.0-0.dev.git.990.hc495200"
     schedule: "0 2 */3 * *"
     priorityClass: medium-priority
     serviceAccount:
@@ -117,9 +114,9 @@ osm-seed:
   # ====================================================================================================
   nominatimApi:
     enabled: true
-    image:
-      name: developmentseed/osmseed-nominatim
-      tag: 1.0.0-dev.hb293d54
+    # image:
+    #   name: developmentseed/osmseed-nominatim
+    #   tag: 1.0.0-dev.hb293d54
     priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -160,9 +157,9 @@ osm-seed:
   # ====================================================================================================
   overpassApi:
     enabled: true
-    image:
-      name: ghcr.io/openhistoricalmap/overpass-api
-      tag: 0.0.1-0.dev.git.3377.h318c42d7
+    # image:
+    #   name: ghcr.io/openhistoricalmap/overpass-api
+    #   tag: 0.0.1-0.dev.git.3377.h318c42d7
     priorityClass: medium-priority
     env:
       OVERPASS_META: attic
