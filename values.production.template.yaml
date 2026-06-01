@@ -491,7 +491,7 @@ osm-seed:
   tilerServerCacheCleaner:
     enabled: false
   # Tiler cache cleaner FastAPI service (/clean-cache). Set env.VARNISH_URL when enabled.
-  tilerCacheCleaner:
+  tilerCache:
     enabled: false
   # ====================================================================================================
   # Variables for Tasking Manager DB

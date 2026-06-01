@@ -35,6 +35,10 @@ osm-seed:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  tilerCache:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
 ohm:
   tilerCache:
     image:

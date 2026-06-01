@@ -653,7 +653,7 @@ osm-seed:
         key: "nodegroup_type"
         values: ["web"]
     # Tiler cache cleaner FastAPI service (/clean-cache). Set env.VARNISH_URL when enabled.
-    tilerCacheCleaner:
+    tilerCache:
       enabled: false
     # ====================================================================================================
     # Variables for Tasking Manager DB

@@ -17,7 +17,9 @@ charts:
       cgimap:
         valuesPath: osm-seed.cgimap.image
       tiler-cache:
-        valuesPath: ohm.tilerCache.image
+        valuesPath:
+          - ohm.tilerCache.image
+          - osm-seed.tilerCache.image
       tiler-monitor:
         valuesPath: ohm.tilerMonitor.image
       ohmx-adiff-builder:

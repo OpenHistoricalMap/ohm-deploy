@@ -194,9 +194,22 @@ osm-seed:
     enabled: false
   tilerCacheCleanerJob:
     enabled: false
-  # Tiler cache cleaner FastAPI service (/clean-cache). Set env.VARNISH_URL when enabled.
-  tilerCacheCleaner:
-    enabled: false
+    
+  tilerCache:
+    enabled: true
+    replicaCount: 1
+    env:
+      PORT: 8000
+      VARNISH_URL: ""
+      ZOOM_LEVELS_TO_DELETE: 13,14,15,16,17,18,19,20
+      SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
+      AWS_REGION_NAME: us-east-1
+      AWS_ACCESS_KEY_ID: {{SQS_AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{SQS_AWS_SECRET_ACCESS_KEY}}
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
   tmDb:
     enabled: false
   tmApi:
