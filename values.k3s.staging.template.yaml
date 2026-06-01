@@ -31,12 +31,161 @@ osm-seed:
     enabled: false
   osmProcessor:
     enabled: false
+
+
   tilerDb:
-    enabled: false
+    enabled: true
+    priorityClass: medium-priority
+    env:
+      POSTGRES_DB: tiler_osm_production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123456789"
+      POSTGRES_PORT: 5432
+    sharedMemorySize: 2Gi
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      subPath: postgresql-data
+    resources:
+      enabled: false
+    postgresqlConfig:
+      enabled: true
+      values: |
+        listen_addresses = '*'
+        max_connections = 100
+        shared_buffers = 10GB
+        work_mem = 256MB
+        maintenance_work_mem = 2GB
+        dynamic_shared_memory_type = posix
+        effective_io_concurrency = 300
+        max_wal_size = 4GB
+        min_wal_size = 512MB
+        random_page_cost = 1.0
+        effective_cache_size = 24GB
+        log_min_duration_statement = 15000
+        log_connections = on
+        log_disconnections = on
+        log_duration = off
+        log_lock_waits = on
+        log_statement = 'none'
+        log_timezone = 'Etc/UTC'
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        lc_messages = 'en_US.utf8'
+        lc_monetary = 'en_US.utf8'
+        lc_numeric = 'en_US.utf8'
+        lc_time = 'en_US.utf8'
+        default_text_search_config = 'pg_catalog.english'
+
+        # Parallelism settings
+        max_parallel_workers_per_gather = 8
+        max_parallel_workers = 16
+        max_worker_processes = 16
+        parallel_tuple_cost = 0.05
+        parallel_setup_cost = 500
+        min_parallel_table_scan_size = 8MB
+        min_parallel_index_scan_size = 512kB
+
+        # Enable auto_explain and pg_stat_statements
+        shared_preload_libraries = 'auto_explain'
+        auto_explain.log_min_duration = '10s'
+
+        # Timeout settings
+        tcp_keepalives_idle = 300
+        tcp_keepalives_interval = 60
+        tcp_keepalives_count = 10
+
+        # Disable join options for routes
+        enable_mergejoin = true
+        enable_hashjoin = true
+
+        # Timeout settings for queries
+        statement_timeout = '600s'
+        lock_timeout = '60s'
+        idle_in_transaction_session_timeout = '300s'
+
+        # pg_stat_statements settings
+        pg_stat_statements.max = 15000
+        pg_stat_statements.track = none
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   tilerImposm:
-    enabled: false
+    enabled: true
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      TILER_IMPORT_FROM: osm
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260531_0302.osm.pbf
+      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+      SEQUENCE_NUMBER: "1690000"
+      OVERWRITE_STATE: false
+      UPLOAD_EXPIRED_FILES: true
+      IMPORT_NATURAL_EARTH: true
+      IMPORT_OSM_LAND: true
+      IMPOSM3_IMPORT_LAYERS: "all"
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+      REFRESH_MVIEWS: true
+      RECREATE_MVIEWS_ON_UPDATE: false
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /mnt/data
+    resources:
+      enabled: true
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   tilerServer:
     enabled: false
+
+  tilerServerMartin:
+    enabled: true
+    image:
+      name: ghcr.io/openhistoricalmap/tiler-server-martin
+      tag: 0.0.1-0.dev.git.3374.hbd929883
+    priorityClass: medium-priority
+    replicaCount: 1
+    env:
+      OHM_DOMAIN: ohmstaging.org
+      MARTIN_WORKER_PROCESSES: 8
+      MARTIN_POOL_SIZE: 50
+      # Solo para subir vtiles_languages.geojson a S3 (si AWS_S3_BUCKET vacio, se salta)
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  tilerVarnish:
+    enabled: true
+    image:
+      name: varnish
+      tag: "7.5"
+    priorityClass: medium-priority
+    replicaCount: 1
+    dynamicSize: "4G"
+    staticSize: "1G"
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   tilerServerCacheCleaner:
     enabled: false
   tilerCacheCleanerJob:

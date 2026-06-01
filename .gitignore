@@ -42,3 +42,4 @@ imposm3_reimport.json
 images/tiler-server-martin/tilejson
 config.yaml
 images/tiler-server-martin/config/nginx.conf
+values.k3s.staging.direct.yaml
