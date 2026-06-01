@@ -47,6 +47,8 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-db-data
     resources:
       enabled: false
     postgresqlConfig:
@@ -138,6 +140,8 @@ osm-seed:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-imposm-data
     resources:
       enabled: true
     nodeSelector:
@@ -296,6 +300,8 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
+      staticHostPath: true
+      localVolumeHostPath: /mnt/nominatim-db-data
     nodeSelector:
       enabled: false
     nodeAffinity:
@@ -325,6 +331,8 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /db
       localVolumeSize: 100Gi
+      staticHostPath: true
+      localVolumeHostPath: /mnt/overpass-api-db-data
     resources:
       enabled: false
     nodeSelector:
