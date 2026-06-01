@@ -1,9 +1,19 @@
 name: Deploy EKS
 
-# Deploys the ohm/ chart to AWS EKS. Triggered automatically after
-# the build-images workflow succeeds (workflow_run), or manually
-# via workflow_dispatch. Downloads the chart-state artifact produced
-# by build-images so it deploys with the freshly-rewritten image tags.
+# Deploys the ohm/ chart to AWS EKS.
+#
+# Triggers:
+#   - workflow_run: after "Build images (chartpress)" finishes, so the
+#     images are already in ghcr.io before we reference them.
+#   - push (paths-ignore images/**): config-only changes, no build needed.
+#   - workflow_dispatch: manual deploy of a branch. NOTE: for a commit
+#     that changed images/**, build-images must have run first so the
+#     image exists in the registry.
+#
+# The deploy runs `chartpress --skip-build` itself to rewrite the
+# image tags in ohm/values.yaml. The tags are derived from git history,
+# so on the same commit they match exactly what build-images pushed.
+# No artifact is passed between workflows.
 
 on:
   workflow_run:
@@ -12,25 +22,42 @@ on:
     branches:
       - main
       - staging
+  push:
+    branches:
+      - main
+      - staging
+      - deploy-*
+    paths-ignore:
+      - 'images/**'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch to deploy
+        required: true
+        default: staging
 
 jobs:
   deploy:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     env:
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
-      - name: Resolve ref + env from upstream workflow
+      - name: Resolve ref + env
         id: src
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            BRANCH="${{ github.event.inputs.ref }}"
-            SHA="${{ github.event.inputs.ref }}"
-          else
-            BRANCH="${{ github.event.workflow_run.head_branch }}"
-            SHA="${{ github.event.workflow_run.head_sha }}"
-          fi
+          case "${{ github.event_name }}" in
+            workflow_dispatch)
+              BRANCH="${{ github.event.inputs.ref }}"
+              SHA="${{ github.event.inputs.ref }}" ;;
+            workflow_run)
+              BRANCH="${{ github.event.workflow_run.head_branch }}"
+              SHA="${{ github.event.workflow_run.head_sha }}" ;;
+            *)
+              BRANCH="${{ github.ref_name }}"
+              SHA="${{ github.sha }}" ;;
+          esac
           case "$BRANCH" in
             main)          ENV="production" ;;
             staging)       ENV="staging" ;;
@@ -45,15 +72,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.src.outputs.sha }}
+          fetch-depth: 0
 
-      - name: Download chart-state from build-images
-        if: github.event_name == 'workflow_run'
-        uses: actions/download-artifact@v4
+      # ============================================================
+      # Recompute image tags (no build/push). Same commit + full git
+      # history => same tags build-images pushed.
+      # ============================================================
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          name: chart-state
-          path: .
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          python-version: '3.11'
+
+      - name: Install chartpress
+        run: pip install chartpress==2.3.0 ruamel.yaml
+
+      - name: Run chartpress (rewrite image tags, no build)
+        run: chartpress --skip-build
 
       # ============================================================
       # Substitute secrets per environment (staging / production)

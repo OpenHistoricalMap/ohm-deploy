@@ -371,48 +371,11 @@ osm-seed:
   # ====================================================================================================
   populateApidb:
     enabled: false
-    priorityClass: low-priority
-    serviceAccount:
-      enabled: true
-      name: ohm-s3-bucket-access-production
-    env:
-      URL_FILE_TO_IMPORT: 'https://storage.googleapis.com/osm-seed/osm-processor/history-latest-to-import-output.pbf'
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: "1Gi"
-        cpu: "2"
-      limits:
-        enabled: false
-        memory: "2Gi"
-        cpu: "2.5"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web_helpers_medium
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
   # ====================================================================================================
   # Variables to start a pod to process osm files
   # ====================================================================================================
   osmProcessor:
     enabled: false
-    priorityClass: low-priority
-    env: 
-      URL_FILE_TO_PROCESS: 'https://storage.googleapis.com/osm-seed/planet/full-history/history-latest-to-import.pbf'
-      OSM_FILE_ACTION: simple_pbf
-    resources:
-      enabled: false
-      requests:
-        memory: "14Gi"
-        cpu: "4"
-      limits:
-        memory: "16Gi"
-        cpu: "4"
-
   # ====================================================================================================
   # Variables for restoring the DB
   # ====================================================================================================
@@ -509,237 +472,24 @@ osm-seed:
 
   tilerDb:
     enabled: false
-    priorityClass: medium-priority
-    useExternalHost: # When we are using useExternalHost.enabled= true other variables are giong to be disable ans use the external host config
-      enabled: true
-    env:
-      POSTGRES_HOST: {{PRODUCTION_TILER_DB_HOST}}
-      POSTGRES_DB: tiler_osm_production
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: {{PRODUCTION_TILER_DB_PASSWORD}}
-      POSTGRES_PORT: 5432
-    sharedMemorySize: 2Gi
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/data
-      subPath: postgresql-d
-      AWS_ElasticBlockStore_volumeID: vol-0e4d738f35f5361fe
-      AWS_ElasticBlockStore_size: 200Gi
-    resources:
-      enabled: true
-      requests:
-        enabled: false
-        memory: "29Gi"
-        cpu: "7500m"
-      limits:
-        enabled: false
-        memory: "29Gi"
-        cpu: "7600m"
-    postgresqlConfig:
-      enabled: true
-      values: |
-        listen_addresses = '*'
-        max_connections = 100
-        shared_buffers = 10GB
-        work_mem = 256MB
-        maintenance_work_mem = 2GB
-        dynamic_shared_memory_type = posix
-        effective_io_concurrency = 300
-        max_wal_size = 4GB
-        min_wal_size = 512MB
-        random_page_cost = 1.0
-        effective_cache_size = 24GB
-        log_min_duration_statement = 15000
-        log_connections = on
-        log_disconnections = on
-        log_duration = off
-        log_lock_waits = on
-        log_statement = 'none'
-        log_timezone = 'Etc/UTC'
-        datestyle = 'iso, mdy'
-        timezone = 'Etc/UTC'
-        lc_messages = 'en_US.utf8'
-        lc_monetary = 'en_US.utf8'
-        lc_numeric = 'en_US.utf8'
-        lc_time = 'en_US.utf8'
-        default_text_search_config = 'pg_catalog.english'
 
-        # Parallelism settings
-        max_parallel_workers_per_gather = 8
-        max_parallel_workers = 16
-        max_worker_processes = 16
-        parallel_tuple_cost = 0.05
-        parallel_setup_cost = 500
-        min_parallel_table_scan_size = 8MB
-        min_parallel_index_scan_size = 512kB
-
-        # Enable auto_explain and pg_stat_statements
-        shared_preload_libraries = 'auto_explain'
-        auto_explain.log_min_duration = '10s'
-
-        # Timeout settings
-        tcp_keepalives_idle = 300
-        tcp_keepalives_interval = 60
-        tcp_keepalives_count = 10
-
-        # Disable join options for routes
-        enable_mergejoin = true
-        enable_hashjoin = true
-
-        # Timeout settings for queries
-        statement_timeout = '600s'
-        lock_timeout = '60s'
-        idle_in_transaction_session_timeout = '300s'
-
-        # pg_stat_statements settings
-        pg_stat_statements.max = 15000
-        pg_stat_statements.track = none
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: tiler_db
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["tiler_db"]
   # ====================================================================================================
   # Variables for tiler-imposm
   # ====================================================================================================
 
   tilerImposm:
     enabled: false
-    priorityClass: medium-priority
-    serviceAccount:
-      enabled: true
-      name: ohm-s3-bucket-access-production
-    env:
-      TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-250117_0002.osm.pbf
-      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
-      SEQUENCE_NUMBER: "1690000"
-      OVERWRITE_STATE: false
-      UPLOAD_EXPIRED_FILES: true
-      IMPORT_NATURAL_EARTH: true
-      IMPORT_OSM_LAND: true
-      IMPOSM3_IMPORT_LAYERS: "all"
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /mnt/data
-      AWS_ElasticBlockStore_volumeID: vol-02dfd0aac5821f25b
-      AWS_ElasticBlockStore_size: 50Gi
-    resources:
-      enabled: true
-      requests:
-        enabled: false
-        memory: "2Gi"
-        cpu: "1"
-      limits:
-        enabled: false
-        memory: "2Gi"
-        cpu: "1"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: tiler_db
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["tiler_db"]
   # ====================================================================================================
   # Variables for tiler-server
   # ====================================================================================================
-
   tilerServer:
     enabled: false
-    priorityClass: medium-priority
-    serviceAccount:
-      enabled: true
-      name: ohm-s3-bucket-access-production
-    replicaCount: 4
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: vtiles.openhistoricalmap.org
-    env:
-      TILER_SERVER_PORT: 9090
-      TILER_CACHE_TYPE: s3
-      TILER_CACHE_BASEPATH: /mnt/data
-      TILER_CACHE_MAX_ZOOM: 22
-      # in case s3
-      TILER_CACHE_REGION: us-east-1
-      TILER_CACHE_BUCKET: tiler-cache-production
-      TILER_CACHE_AWS_ACCESS_KEY_ID: {{PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID}}
-      TILER_CACHE_AWS_SECRET_ACCESS_KEY: {{PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY}}
-      TILER_CACHE_AWS_ENDPOINT: ""
-      EXECUTE_REINDEX: false
-      EXECUTE_VACUUM_ANALYZE: false
-    # In case you use TILER_CACHE_TYPE: file with  persistenceDisk 
-    persistenceDisk:
-      enabled: false
-      accessMode: ReadWriteOnce
-      mountPath: /mnt/data
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: "2Gi"
-        cpu: "1"
-      limits:
-        enabled: false
-        memory: "4Gi"
-        cpu: "2"
-    autoscaling:
-      enabled: true
-      minReplicas: 4
-      maxReplicas: 6
-      cpuUtilization: 60 
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: tiler_db
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["tiler_db"] 
+
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
   tilerServerCacheCleaner:
     enabled: false
-    priorityClass: medium-priority
-    serviceAccount:
-      enabled: true
-      name: ohm-s3-bucket-access-production
-    replicaCount: 1
-    command: './cache_cleaner.sh'
-    resources:
-      enabled: true
-      requests:
-        enabled: false
-        memory: "1Gi"
-        cpu: "2"
-      limits:
-        enabled: false
-        memory: "2Gi"
-        cpu: "4"
-    env:
-      KILL_PROCESS: manually
-      MAX_NUM_PS: 5
-      PROCESS_NAME: tegola
-    autoscaling:
-      enabled: false
-      minReplicas: 1
-      maxReplicas: 1
-      cpuUtilization: 90
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: tiler_db
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["tiler_db"] 
   # ====================================================================================================
   # Variables for Tasking Manager DB
   # ====================================================================================================
@@ -848,149 +598,22 @@ osm-seed:
   # ====================================================================================================
   nominatimUI:
     enabled: false
-    image:
-      name: ghcr.io/openhistoricalmap/nominatim-ui
-      tag: a469b5e
   # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
   nominatimApi:
     enabled: false
-    priorityClass: medium-priority
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: nominatim.openhistoricalmap.org
-    replicaCount: 1
-    env:
-      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-230727_1030.osm.pbf
-      REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
-      REPLICATION_UPDATE_INTERVAL: 60
-      REPLICATION_RECHECK_INTERVAL: 30
-      FREEZE: false
-      IMPORT_WIKIPEDIA: false
-      IMPORT_US_POSTCODES: false
-      IMPORT_GB_POSTCODES: false
-      IMPORT_TIGER_ADDRESSES: false
-      THREADS: 8
-      NOMINATIM_PASSWORD: {{PRODUCTION_NOMINATIM_PG_PASSWORD}}
-      PGDATA: /var/lib/postgresql/16/main
-      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
-      UPDATE_MODE: continuous
-      OSMSEED_WEB_API_DOMAIN: www.openhistoricalmap.org
-      IMPORT_STYLE: extratags
-      EXTRA_TAGS: start_date,start_date:edtf,end_date,end_date:edtf
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        enabled: false
-        memory: '2Gi'
-        cpu: '2'
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/16/main
-      subPath: nominatim-pgdata
-      AWS_ElasticBlockStore_volumeID: vol-012355ce0247b5ccc
-      AWS_ElasticBlockStore_size: 50Gi
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
+
 # ====================================================================================================
 # Variables for overpass-api
 # ====================================================================================================
   overpassApi:
     enabled: false
-    priorityClass: medium-priority
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: overpass-api.openhistoricalmap.org
-    env:
-      OVERPASS_META: 'attic'
-      OVERPASS_MODE: 'init'
-      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-240715_0003.osm.pbf
-      OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
-      OVERPASS_RULES_LOAD: '10'
-      OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
-      OVERPASS_REPLICATION_SEQUENCE_NUMBER: '1484000'
-      OVERPASS_ALLOW_DUPLICATE_QUERIES: 'yes'
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      AWS_ElasticBlockStore_volumeID: vol-01d9060df5d14a903
-      AWS_ElasticBlockStore_size: 100Gi
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        enabled: false
-        memory: '2Gi'
-        cpu: '2'
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
 # ====================================================================================================
 # Variables for taginfo
 # ====================================================================================================
   taginfo:
     enabled: false
-    priorityClass: medium-priority
-    serviceAccount:
-      enabled: true
-      name: ohm-s3-bucket-access-production
-    serviceAnnotations:
-      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: taginfo.openhistoricalmap.org
-    env:
-      URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
-      URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
-      URL_PLANET_FILE: 'none'
-      URL_HISTORY_PLANET_FILE: 'none'
-      TIME_UPDATE_INTERVAL: 7d
-      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
-      TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
-      DOWNLOAD_DB: 'languages wiki'
-      CREATE_DB: 'db projects chronology'
-      ENVIRONMENT: production
-      AWS_S3_BUCKET: planet.openhistoricalmap.org
-      INTERVAL_DOWNLOAD_DATA: 7d
-      FETCH_DB_FILES: false
-      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
-    resources:
-      enabled: false
-    cronjob:
-      enabled: true
-      schedule: "0 2 */3 * *"
-      nodeAffinity:
-        enabled: true
-        key: "nodegroup_type"
-        values: ["job"]
-      resources:
-        enabled: true
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: true
-      key: "nodegroup_type"
-      values: ["web"]
 # ====================================================================================================
 # Variables for osm-simple-metrics
 # ====================================================================================================
@@ -1024,161 +647,40 @@ osm-seed:
   # ====================================================================================================
   monitoringReplication:
     enabled: false
-    priorityClass: medium-priority
-    serviceAccount:
-      enabled: true
-      name: ohm-s3-bucket-access-production
-    schedule: '*/30 * * * *'
-    env:
-      CREATE_MISSING_FILES: "empty"
-      REPLICATION_SEQUENCE_NUMBER: "000000"
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        enabled: false
-        memory: '2Gi'
-        cpu: '2'
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: true
-      key: "nodegroup_type"
-      values: ["web"]
+
   # ====================================================================================================
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   changesetReplicationJob:
     enabled: true
-    priorityClass: medium-priority
-    serviceAccount:
-      enabled: true
-      name: ohm-s3-bucket-access-production
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: '20Gi'
-        cpu: '8'
-      limits:
-        enabled: false
-        memory: '24Gi'
-        cpu: '10'
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: utils
-    nodeAffinity:
-      enabled: true
-      key: "nodegroup_type"
-      values: ["utils"]
 # ====================================================================================================
 # Variables for osmcha web
 # ====================================================================================================
   osmchaWeb:
     enabled: false
-    priorityClass: medium-priority
-    image:
-      name: ghcr.io/openhistoricalmap/osmcha-frontend
-      tag: df5e9b5
+
 # ====================================================================================================
 # Variables for osmcha Api
 # ====================================================================================================
   osmchaApi:
     enabled: false
-    priorityClass: medium-priority
-    image:
-      name: ghcr.io/openhistoricalmap/osmcha-django
-      tag: 1bd58e1
-    ingressDomain: osmcha.openhistoricalmap.org
-    env:
-      DJANGO_SETTINGS_MODULE: "config.settings.production"
-      OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-      DJANGO_SECRET_KEY: {{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}
-      DJANGO_SECURE_SSL_REDIRECT: "False"
-      OSM_SERVER_URL: https://www.openhistoricalmap.org
-      OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/authorized
-      OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
-      ## frontend
-      OSMCHA_URL: https://osmcha.openhistoricalmap.org
-      OSMCHA_API_URL: www.openhistoricalmap.org
-      OAUTH2_OSM_KEY: 0KWrkIIQtFBc4k_Blb2WuIi108w10GYXFwW30qvk-W8
-      OAUTH2_OSM_SECRET: UAnkzA3FqCP6ZYhqN1NEyQRdG36ALv46XGI7UtHJ0_o
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: "512Mi"
-        cpu: "1"
-      limits:
-        enabled: false
-        memory: "512Mi"
-        cpu: "1"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
+
 # ====================================================================================================
 # Variables for osmcha DB
 # ====================================================================================================
   osmchaDb:
     enabled: false
-    priorityClass: medium-priority
-    image:
-      name: postgis/postgis
-      tag: 17-3.5
-    env:
-      POSTGRES_DB: osmcha
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: {{PRODUCTION_OSMCHA_PG_PASSWORD}}
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: "20Gi"
-        cpu: "8"
-      limits:
-        enabled: false
-        memory: "24Gi"
-        cpu: "10"
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/data
-      AWS_ElasticBlockStore_volumeID: vol-033e4150d0378c45e
-      AWS_ElasticBlockStore_size: 10Gi
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
 # ====================================================================================================
 # Variables for osmcha osm-adiff-service
 # ====================================================================================================
   adiffService:
     enabled: false
-    priorityClass: medium-priority
-    image:
-      name: ghcr.io/openhistoricalmap/osm-adiff-service
-      tag: a343422497bb2ad4735ca7eada921b60eeb19e20
+
 # ====================================================================================================
 # Planet files server
 # ====================================================================================================
   planetFiles:
     enabled: false
-    priorityClass: low-priority
 
 # ====================================================================================================
 # Tiles cache SQS processor
@@ -1189,73 +691,16 @@ ohm:
     
   tilerCachePurge:
     enabled: false
-    env:
-      REGION_NAME: us-east-1
-      NAMESPACE: default # Namespace to run the job
-      SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: web_large # Nodegroup type to run the purge and seed job
-      # Maximum number of active jobs in high concurrency queue
-      MAX_ACTIVE_JOBS: 10 
-      DELETE_OLD_JOBS_AGE: 3600 # 1 hours
-      ## Execute purging
-      EXECUTE_PURGE: true
-      PURGE_CONCURRENCY: 64
-      PURGE_MIN_ZOOM: 3
-      PURGE_MAX_ZOOM: 10 # Purging zoom 15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
-      ## Execute seeding
-      EXECUTE_SEED: false
-      SEED_CONCURRENCY: 64
-      SEED_MIN_ZOOM: 0
-      SEED_MAX_ZOOM: 8
-      ## Remove tiles from s3 for zoom levels
-      ZOOM_LEVELS_TO_DELETE: 11,12,13,14,15,16,17,18,19,20
-      S3_BUCKET_CACHE_TILER: tiler-cache-production
-      S3_BUCKET_PATH_FILES: mnt/data/osm
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
 
   tilerCacheSeedGlobal:
     enabled: false
-    schedule: '0 * * * *'
-    env:
-      CONCURRENCY: 128
-      MIN_ZOOM: 0
-      MAX_ZOOM: 7
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
 
   tilerCacheSeedCoverage:
     enabled: false
-    schedule: '0 * * * *'
-    env:
-      CONCURRENCY: 128
-      TILE_LIST_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
-      MIN_ZOOM: 8
-      MAX_ZOOM: 14
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
-    nodeAffinity:
-      enabled: false
-      key: "nodegroup_type"
-      values: ["web"]
-      
+  
+# ====================================================================================================
+# Variables for ohmx-adiff-builder (osmcha augmented diff source)
+# ====================================================================================================
+  ohmxAdiffBuilder:
+    enabled: false
+  

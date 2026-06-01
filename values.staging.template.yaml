@@ -1084,4 +1084,39 @@ ohm:
       enabled: true
       label_key: nodegroup_type
       label_value: web_medium
-      
+
+# ====================================================================================================
+# Variables for ohmx-adiff-builder (osmcha augmented diff source)
+# ====================================================================================================
+  ohmxAdiffBuilder:
+    enabled: false
+    awsSecretName: ohmx-adiff-aws
+    serviceAccountName: ""
+    env:
+      API_URL: https://api.staging.openhistoricalmap.org
+      PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260418_0301.osm.pbf
+      MINUTE_REPLICATION_URL: https://planet.openhistoricalmap.org/?prefix=replication/minute/
+      OSMX_INITIAL_SEQNUM: "1900000"
+      AWS_S3_BUCKET: planet.openhistoricalmap.org
+      HEARTBEAT_DIR: /tmp/heartbeat
+      HEARTBEAT_STALE_SECONDS: "600"
+    persistenceDisk:
+      mountPath: /data
+      size: 100Gi
+      storageClassName: gp3
+    resources:
+      enabled: true
+      requests:
+        memory: "8Gi"
+        cpu: "2"
+      limits:
+        memory: "12Gi"
+        cpu: "4"
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web_medium
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web_medium"]
