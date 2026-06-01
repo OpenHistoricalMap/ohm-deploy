@@ -210,6 +210,33 @@ osm-seed:
       enabled: false
     nodeSelector:
       enabled: false
+  # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-cm.
+  tilerMonitorPipeline:
+    enabled: true
+    replicaCount: 1
+    env:
+      MONITOR_PORT: 8001
+      OHM_API_BASE: https://www.openhistoricalmap.org/api/0.6
+      CHANGESET_LIMIT: 30
+      TILER_MONITORING_CHECK_INTERVAL: "1h"
+      TILER_MONITORING_MISSING_THRESHOLD_PCT: 10
+      TILER_MONITORING_MAX_RETRIES: 3
+      TILER_MONITORING_FULL_CHECK_SAMPLE_PCT: 25
+      TILER_MONITORING_BASE_URL: "https://tiler-monitoring.ohmstaging.org"
+      TILER_MONITORING_SLACK_WEBHOOK_URL: ""
+      OHM_COMMENT_USER: ""
+      OHM_COMMENT_PASSWORD: ""
+      VERBOSE_LOGGING: "false"
+    persistenceDisk:
+      enabled: true
+      mountPath: /data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-monitor-pipeline-data
+      localVolumeSize: 1Gi
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
   tmDb:
     enabled: false
   tmApi:
