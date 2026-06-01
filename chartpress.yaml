@@ -20,8 +20,13 @@ charts:
         valuesPath:
           - ohm.tilerCache.image
           - osm-seed.tilerCache.image
-      tiler-monitor:
-        valuesPath: ohm.tilerMonitor.image
+      tiler-monitor-pipeline:
+        valuesPath:
+          - osm-seed.tilerMonitorPipeline.image
+      tiler-monitor-language:
+        valuesPath:
+          - ohm.tilerMonitor.image
+          - osm-seed.tilerMonitorLanguage.image
       ohmx-adiff-builder:
         valuesPath: osm-seed.osmxAdiffBuilder.image
       tiler-server-martin:
