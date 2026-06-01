@@ -12,25 +12,20 @@ charts:
         valuesPath: osm-seed.tilerImposm.image
       tiler-server:
         valuesPath: osm-seed.tilerServer.image
+      tiler-server-martin:
+        valuesPath: osm-seed.tilerServerMartin.image
       tasking-manager-api:
         valuesPath: osm-seed.tmApi.image
       cgimap:
         valuesPath: osm-seed.cgimap.image
       tiler-cache:
-        valuesPath:
-          - ohm.tilerCache.image
-          - osm-seed.tilerCache.image
+        valuesPath: osm-seed.tilerCache.image
       tiler-monitor-pipeline:
-        valuesPath:
-          - osm-seed.tilerMonitorPipeline.image
+        valuesPath: osm-seed.tilerMonitorPipeline.image
       tiler-monitor-language:
-        valuesPath:
-          - ohm.tilerMonitor.image
-          - osm-seed.tilerMonitorLanguage.image
+        valuesPath: osm-seed.tilerMonitorLanguage.image
       ohmx-adiff-builder:
         valuesPath: osm-seed.osmxAdiffBuilder.image
-      tiler-server-martin:
-        valuesPath: ohm.tilerServerMartin.image
       overpass-api:
         valuesPath: osm-seed.overpassApi.image
         

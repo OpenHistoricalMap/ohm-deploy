@@ -19,6 +19,10 @@ osm-seed:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
+  tilerServerMartin:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
   tmApi:
     image:
       name: chartpress_replace_me
@@ -47,22 +51,6 @@ osm-seed:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
-ohm:
-  tilerCache:
-    image:
-      name: chartpress_replace_me
-      tag: chartpress_replace_me
-  tilerMonitor:
-    image:
-      name: chartpress_replace_me
-      tag: chartpress_replace_me
-  ohmxAdiffBuilder:
-    image:
-      name: chartpress_replace_me
-      tag: chartpress_replace_me
-  tilerServerMartin:
-    image:
-      name: chartpress_replace_me
-      tag: chartpress_replace_me
+  
 
       

@@ -51,6 +51,9 @@ osm-seed:
     enabled: false
   tilerCacheCleanerJob:
     enabled: false
+  # Tiler cache cleaner FastAPI service (/clean-cache). Set env.VARNISH_URL when enabled.
+  tilerCache:
+    enabled: false
   tmDb:
     enabled: false
   tmApi:
@@ -203,16 +206,5 @@ osm-seed:
         enabled: true
         cpu: "4"
         memory: "8Gi"
-
-# ====================================================================================================
-# ohm-deploy parent chart - EKS-specific services disabled
-# ====================================================================================================
-ohm:
-  tilerCache:
-    enabled: false
-  tilerMonitor:
-    enabled: false
-  ohmxAdiffBuilder:
-    enabled: false
-  tilerServerMartin:
+  osmxAdiffBuilder:
     enabled: false

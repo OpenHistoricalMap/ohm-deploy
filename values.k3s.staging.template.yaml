@@ -135,7 +135,7 @@ osm-seed:
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
       REFRESH_MVIEWS: true
-      RECREATE_MVIEWS_ON_UPDATE: true
+      RECREATE_MVIEWS_ON_UPDATE: false
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -154,9 +154,6 @@ osm-seed:
 
   tilerServerMartin:
     enabled: true
-    image:
-      name: ghcr.io/openhistoricalmap/tiler-server-martin
-      tag: 0.0.1-0.dev.git.3374.hbd929883
     priorityClass: medium-priority
     replicaCount: 1
     env:
@@ -269,9 +266,6 @@ osm-seed:
   # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
   taginfoDataProcessor:
     enabled: true
-    # image:
-    #   name: ghcr.io/osm-seed/taginfo
-    #   tag: "0.1.0-0.dev.git.990.hc495200"
     schedule: "0 2 */3 * *"
     priorityClass: medium-priority
     serviceAccount:
@@ -471,14 +465,3 @@ osm-seed:
       enabled: false
     nodeSelector:
       enabled: false
-
-# ====================================================================================================
-# ohm-deploy parent chart - EKS-specific services disabled
-# ====================================================================================================
-ohm:
-  tilerCache:
-    enabled: false
-  tilerMonitor:
-    enabled: false
-  tilerServerMartin:
-    enabled: false
