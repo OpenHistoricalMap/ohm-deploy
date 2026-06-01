@@ -194,14 +194,14 @@ osm-seed:
     enabled: false
   tilerCacheCleanerJob:
     enabled: false
-    
+
   tilerCache:
     enabled: true
     replicaCount: 1
     env:
       PORT: 8000
       VARNISH_URL: ""
-      ZOOM_LEVELS_TO_DELETE: 13,14,15,16,17,18,19,20
+      ZOOM_LEVELS_TO_DELETE: 7,8,9,10,11,12,13,14,15,16,17,18,19,20
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
       AWS_REGION_NAME: us-east-1
       AWS_ACCESS_KEY_ID: {{SQS_AWS_ACCESS_KEY_ID}}
