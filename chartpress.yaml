@@ -21,7 +21,7 @@ charts:
       tiler-monitor:
         valuesPath: ohm.tilerMonitor.image
       ohmx-adiff-builder:
-        valuesPath: ohm.ohmxAdiffBuilder.image
+        valuesPath: osm-seed.osmxAdiffBuilder.image
       tiler-server-martin:
         valuesPath: ohm.tilerServerMartin.image
       overpass-api:
