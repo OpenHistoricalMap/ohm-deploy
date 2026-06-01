@@ -16,7 +16,11 @@ on:
       - 'build-*'
       - 'k3s'
     paths:
+      # chartpress.yaml and Chart.yaml are shared deps: changing them rebumps
+      # every image tag, so the build must run to push images at the new tag.
       - 'images/**'
+      - 'chartpress.yaml'
+      - 'ohm/Chart.yaml'
   workflow_dispatch:
 
 jobs:

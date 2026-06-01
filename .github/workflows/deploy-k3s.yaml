@@ -11,7 +11,9 @@ on:
       - main
       - staging
       - k3s
-  # Config-only changes (no images/**): deploy directly, no build needed.
+  # Config-only changes that do NOT rebump image tags: deploy directly.
+  # images/**, chartpress.yaml and Chart.yaml change tags, so they must go
+  # through "Build images" first and reach deploy via workflow_run.
   push:
     branches:
       - main
@@ -19,6 +21,8 @@ on:
       - k3s
     paths-ignore:
       - 'images/**'
+      - 'chartpress.yaml'
+      - 'ohm/Chart.yaml'
   workflow_dispatch:
     inputs:
       ref:

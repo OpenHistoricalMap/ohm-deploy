@@ -27,8 +27,12 @@ on:
       - main
       - staging
       - deploy-*
+    # images/**, chartpress.yaml and Chart.yaml rebump image tags, so they
+    # must go through "Build images" first and reach deploy via workflow_run.
     paths-ignore:
       - 'images/**'
+      - 'chartpress.yaml'
+      - 'ohm/Chart.yaml'
   workflow_dispatch:
     inputs:
       ref:
