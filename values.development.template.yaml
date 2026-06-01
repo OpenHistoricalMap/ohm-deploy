@@ -167,9 +167,3 @@ osm-seed:
 ohm:
   tilerCache:
     enabled: false
-  tilerCachePurge:
-    enabled: false
-  tilerCacheSeedGlobal:
-    enabled: false
-  tilerCacheSeedCoverage:
-    enabled: false

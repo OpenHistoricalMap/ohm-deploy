@@ -216,9 +216,3 @@ ohm:
     enabled: false
   tilerServerMartin:
     enabled: false
-  tilerCachePurge:
-    enabled: false
-  tilerCacheSeedCoverage:
-    enabled: false
-  tilerCacheSeedGlobal:
-    enabled: false

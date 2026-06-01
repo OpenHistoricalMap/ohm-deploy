@@ -1025,66 +1025,6 @@ ohm:
   tilerCache:
     enabled: false
     
-  tilerCachePurge:
-    enabled: false
-    env:
-      REGION_NAME: us-east-1
-      NAMESPACE: default # Namespace to run the job
-      SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
-      NODEGROUP_TYPE: web_medium # Nodegroup type to run the purge and seed job
-      # Maximum number of active jobs in high concurrency queue
-      MAX_ACTIVE_JOBS: 2 
-      DELETE_OLD_JOBS_AGE: 3600 # 1 hours
-      ## Execute purging
-      EXECUTE_PURGE: true
-      PURGE_CONCURRENCY: 64
-      PURGE_MIN_ZOOM: 3
-      PURGE_MAX_ZOOM: 12 # Purging zoom 15,16,17,18,19,20 takes hours to complete,we are going to remove direct from s3 the tiles for zoom 19-20
-      ## Execute seeding
-      EXECUTE_SEED: false
-      SEED_CONCURRENCY: 64
-      SEED_MIN_ZOOM: 0
-      SEED_MAX_ZOOM: 12
-      ## Remove tiles from s3 for zoom levels
-      ZOOM_LEVELS_TO_DELETE: 13,14,15,16,17,18,19,20
-      S3_BUCKET_CACHE_TILER: tiler-cache-staging
-      S3_BUCKET_PATH_FILES: mnt/data/osm
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_medium
-
-  tilerCacheSeedGlobal:
-    enabled: false
-    schedule: '0 * * * *'
-    env:
-      CONCURRENCY: 32
-      MIN_ZOOM: 0
-      MAX_ZOOM: 7
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_medium
-
-  tilerCacheSeedCoverage:
-    enabled: false
-    schedule: '0 * * * *'
-    env:
-      CONCURRENCY: 32
-      TILE_LIST_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/tile_coverage/tiles.list
-      MIN_ZOOM: 8
-      MAX_ZOOM: 14
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: true
-      label_key: nodegroup_type
-      label_value: web_medium
-
 # ====================================================================================================
 # Variables for ohmx-adiff-builder (osmcha augmented diff source)
 # ====================================================================================================

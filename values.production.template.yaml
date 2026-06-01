@@ -689,15 +689,6 @@ ohm:
   tilerCache:
     enabled: false
     
-  tilerCachePurge:
-    enabled: false
-
-  tilerCacheSeedGlobal:
-    enabled: false
-
-  tilerCacheSeedCoverage:
-    enabled: false
-  
 # ====================================================================================================
 # Variables for ohmx-adiff-builder (osmcha augmented diff source)
 # ====================================================================================================
