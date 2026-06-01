@@ -28,7 +28,10 @@ execute_sql_file() {
     log_message "${YELLOW}⚙️  Executing: $file"
 
     local start_time=$SECONDS
-    if psql "$PG_CONNECTION" -f "$file"; then
+    # Disable statement_timeout so large CREATE MATERIALIZED VIEW statements finish
+    # (the DB sets statement_timeout=10min, which cancels heavy mview builds).
+    # ON_ERROR_STOP surfaces failures instead of letting psql continue silently.
+    if psql "$PG_CONNECTION" -v ON_ERROR_STOP=1 -c "SET statement_timeout = 0" -f "$file"; then
         local elapsed=$((SECONDS - start_time))
         log_message "${GREEN}✅ Successfully executed: $file (Time: ${elapsed}s)"
     else
