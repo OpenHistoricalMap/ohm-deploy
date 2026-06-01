@@ -13,6 +13,8 @@ on:
       - 'deploy-*'
       - 'build-*'
       - 'k3s'
+    paths:
+      - 'images/**'
   workflow_dispatch:
 
 jobs:
