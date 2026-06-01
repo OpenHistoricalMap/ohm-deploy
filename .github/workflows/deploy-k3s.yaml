@@ -1,21 +1,36 @@
 name: Deploy k3s
 
 on:
-  push:
+  workflow_run:
+    workflows: ['Build images (chartpress)']
+    types: [completed]
     branches:
       - main
       - staging
       - k3s
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch to deploy
+        required: true
+        default: staging
 
 jobs:
   deploy:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Resolve env
         id: src
         run: |
-          BRANCH="${GITHUB_REF##*/}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            BRANCH="${{ github.event.inputs.ref }}"
+            SHA="${{ github.event.inputs.ref }}"
+          else
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            SHA="${{ github.event.workflow_run.head_sha }}"
+          fi
           case "$BRANCH" in
             main)    ENV="production" ;;
             staging) ENV="staging" ;;
@@ -23,6 +38,7 @@ jobs:
             *)       ENV="staging" ;;
           esac
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "env=$ENV" >> $GITHUB_OUTPUT
           echo "release=ohm-hetzner-$ENV" >> $GITHUB_OUTPUT
           if [ "$ENV" = "production" ]; then
@@ -30,29 +46,24 @@ jobs:
             echo "cf_secret=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
             echo "kubeconfig=${{ secrets.PRODUCTION_K3S_KUBECONFIG }}" >> $GITHUB_OUTPUT
             echo "hostname=k3s.openhistoricalmap.org" >> $GITHUB_OUTPUT
-            echo "namespace=ohm-production" >> $GITHUB_OUTPUT
           else
             echo "cf_id=${{ secrets.STAGING_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
             echo "cf_secret=${{ secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
             echo "kubeconfig=${{ secrets.STAGING_K3S_KUBECONFIG }}" >> $GITHUB_OUTPUT
             echo "hostname=k3s.ohmstaging.org" >> $GITHUB_OUTPUT
-            echo "namespace=ohm-staging" >> $GITHUB_OUTPUT
           fi
 
       - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          ref: ${{ steps.src.outputs.sha }}
 
-      - name: Install chartpress
-        run: pip install chartpress==2.3.0 ruamel.yaml
-
-      - name: chartpress --no-build (rewrite tags only)
-        # Assumes images already pushed to ghcr.io by build-images workflow
-        # on the same commit. Tags are deterministic from git history.
-        run: chartpress --no-build
+      - name: Download chart-state from build-images
+        uses: actions/download-artifact@v4
+        with:
+          name: chart-state
+          path: .
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Install cloudflared
         run: |
@@ -137,5 +148,5 @@ jobs:
       - name: Show release status
         if: always()
         run: |
-          helm -n ${{ steps.src.outputs.namespace }} list
-          kubectl -n ${{ steps.src.outputs.namespace }} get all
+          helm -n default list
+          kubectl -n default get all
