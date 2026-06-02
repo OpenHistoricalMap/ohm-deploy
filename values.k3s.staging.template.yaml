@@ -481,13 +481,13 @@ osm-seed:
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
     # resources enabled with high memory/cpu for the processing job;
     resources:
-      enabled: true
+      enabled: false
       requests:
         enabled: true
         memory: "7Gi"
         cpu: "1000m"
       limits:
-        enabled: true
+        enabled: false
         memory: "8Gi"
         cpu: "1500m"
     nodeSelector:
