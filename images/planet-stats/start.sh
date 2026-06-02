@@ -5,7 +5,6 @@ set -o errexit
 set -o pipefail
 set -x
 
-DATE="${RUN_DATE:-$(date +%Y-%m-%d)}"
 DASHDIR="${DASHBOARD_DIR:-/mnt/planet-stats}"
 STATE_S3="${PLANET_STATS_STATE_S3_URI:?set PLANET_STATS_STATE_S3_URI, e.g. s3://ohm-planet-stats}"
 
@@ -22,5 +21,6 @@ fi
 
 mkdir -p "$DASHDIR"
 s3cmd "${S3_ARGS[@]}" sync "${DEST}/" "$DASHDIR/" || echo "no prior state (first run)"
-./stats-pipeline.sh "$DATE" "$DASHDIR"
+# Planet + date are resolved inside stats-pipeline.sh from state.txt.
+./stats-pipeline.sh "$DASHDIR"
 s3cmd "${S3_ARGS[@]}" sync "$DASHDIR/" "${DEST}/"
