@@ -465,3 +465,6 @@ osm-seed:
       enabled: false
     nodeSelector:
       enabled: false
+
+  planetStats:
+    enabled: false
