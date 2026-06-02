@@ -71,19 +71,19 @@ execute_sql_file ./queries/utils/postgis_helpers.sql
 execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql
 execute_sql_file queries/ohm_mviews/admin_boundaries_centroids.sql
 
-execute_sql_file queries/ohm_mviews/landuse.sql &
+execute_sql_file queries/ohm_mviews/landuse.sql
 execute_sql_file queries/ohm_mviews/admin_boundaries_maritime.sql
 
-execute_sql_file queries/ohm_mviews/amenity.sql &
-execute_sql_file queries/ohm_mviews/buildings.sql &
+execute_sql_file queries/ohm_mviews/amenity.sql
+execute_sql_file queries/ohm_mviews/buildings.sql
 execute_sql_file queries/ohm_mviews/others.sql
-execute_sql_file queries/ohm_mviews/communication.sql &
+execute_sql_file queries/ohm_mviews/communication.sql
 
-execute_sql_file queries/ohm_mviews/places.sql &
-execute_sql_file queries/ohm_mviews/transport_areas.sql  &
+execute_sql_file queries/ohm_mviews/places.sql
+execute_sql_file queries/ohm_mviews/transport_areas.sql
 execute_sql_file queries/ohm_mviews/transport_lines.sql 
 
-execute_sql_file queries/ohm_mviews/water.sql 
+execute_sql_file queries/ohm_mviews/water.sql
 
 ## routes
 execute_sql_file queries/ohm_mviews/routes_01_merge_by_date.sql
@@ -95,3 +95,4 @@ execute_sql_file queries/ohm_mviews/non_admin_boundaries_areas.sql
 
 ## Addresses points
 execute_sql_file queries/ohm_mviews/addresses_points.sql
+
