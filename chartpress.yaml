@@ -26,6 +26,8 @@ charts:
         valuesPath: osm-seed.tilerMonitorLanguage.image
       ohmx-adiff-builder:
         valuesPath: osm-seed.osmxAdiffBuilder.image
+      planet-stats:
+        valuesPath: osm-seed.planetStats.image
       overpass-api:
         valuesPath: osm-seed.overpassApi.image
         

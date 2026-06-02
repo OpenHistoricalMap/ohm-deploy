@@ -485,6 +485,8 @@ osm-seed:
   tilerServer:
     enabled: false
 
+  tilerServerMartin:
+    enabled: false
   # ====================================================================================================
   # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3  
   # ====================================================================================================
@@ -689,4 +691,10 @@ osm-seed:
 # Variables for ohmx-adiff-builder (osmcha augmented diff source)
 # ====================================================================================================
   osmxAdiffBuilder:
+    enabled: false
+
+# ====================================================================================================
+# planet stats daily pipeline (dashboard + boundary viewer)
+# ====================================================================================================
+  planetStats:
     enabled: false
