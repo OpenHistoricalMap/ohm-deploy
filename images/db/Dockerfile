@@ -1,6 +1,7 @@
+# Stage 1: Compilar el plugin para PostgreSQL 17
 FROM postgres:17 AS builder
 
-# Install build dependencies
+# Instalar dependencias de compilación
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     build-essential \
@@ -17,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Clone and build osmdbt plugin for PostgreSQL 17
+# Clonar y compilar el plugin osmdbt para PostgreSQL 17
 RUN git clone https://github.com/openstreetmap/osmdbt.git /tmp/osmdbt && \
     cd /tmp/osmdbt && \
     git checkout v0.9 && \
@@ -27,15 +28,6 @@ RUN git clone https://github.com/openstreetmap/osmdbt.git /tmp/osmdbt && \
     make
 
 FROM postgres:17
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    postgresql-17-postgis-3 \
-    postgresql-17-postgis-3-scripts \
-    && rm -rf /var/lib/apt/lists/*
-
-# Auto-create required extensions on fresh initdb
-COPY ./scripts/init-extensions.sh /docker-entrypoint-initdb.d/10-extensions.sh
-RUN chmod +x /docker-entrypoint-initdb.d/10-extensions.sh
 
 COPY --from=builder /tmp/osmdbt/postgresql-plugin/build/osm-logical.so /usr/lib/postgresql/17/lib/osm-logical.so
 
