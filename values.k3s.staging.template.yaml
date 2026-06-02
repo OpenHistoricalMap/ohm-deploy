@@ -467,4 +467,22 @@ osm-seed:
       enabled: false
 
   planetStats:
-    enabled: false
+    enabled: true
+    priorityClass: medium-priority
+    schedule: '0 4 * * *'
+    serviceAccount:
+      enabled: false
+    env:
+      PUBLISH_TARGET: "s3"
+      DASHBOARD_DIR: "/mnt/planet-stats"
+      PLANET_STATS_STATE_S3_URI: "s3://planet-staging.openhistoricalmap.org"
+      AWS_S3_ENDPOINT: ""
+      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+      
