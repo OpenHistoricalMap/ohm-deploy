@@ -132,6 +132,15 @@ jobs:
             -H "CF-Access-Client-Id: $CF_ID" \
             -H "CF-Access-Client-Secret: $CF_SECRET")
           echo "access GET code: $code"
+          # Simulate the websocket upgrade cloudflared does. 101 = upgrade OK.
+          # Anything else (302/403/5xx) is the real reason for "bad handshake".
+          up=$(curl -sS -o /dev/null -w "%{http_code}" --http1.1 --max-time 12 \
+            -H "CF-Access-Client-Id: $CF_ID" \
+            -H "CF-Access-Client-Secret: $CF_SECRET" \
+            -H "Connection: Upgrade" -H "Upgrade: websocket" \
+            -H "Sec-WebSocket-Key: AAAAAAAAAAAAAAAAAAAAAA==" -H "Sec-WebSocket-Version: 13" \
+            "https://${{ steps.src.outputs.hostname }}/" || true)
+          echo "websocket upgrade code: $up"
 
       - name: Open Cloudflare Access tunnel
         env:
