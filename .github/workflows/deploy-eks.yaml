@@ -1,20 +1,6 @@
 name: Deploy EKS
 
 # Deploys the ohm/ chart to AWS EKS.
-#
-# Triggers:
-#   - workflow_run: after "Build images (chartpress)" finishes, so the
-#     images are already in ghcr.io before we reference them.
-#   - push (paths-ignore images/**): config-only changes, no build needed.
-#   - workflow_dispatch: manual deploy of a branch. NOTE: for a commit
-#     that changed images/**, build-images must have run first so the
-#     image exists in the registry.
-#
-# The deploy runs `chartpress --skip-build` itself to rewrite the
-# image tags in ohm/values.yaml. The tags are derived from git history,
-# so on the same commit they match exactly what build-images pushed.
-# No artifact is passed between workflows.
-
 on:
   workflow_run:
     workflows: ['Build images (chartpress)']
@@ -27,8 +13,6 @@ on:
       - main
       - staging
       - deploy-*
-    # images/**, chartpress.yaml and Chart.yaml rebump image tags, so they
-    # must go through "Build images" first and reach deploy via workflow_run.
     paths-ignore:
       - 'images/**'
       - 'chartpress.yaml'
