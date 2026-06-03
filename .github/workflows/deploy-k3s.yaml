@@ -139,9 +139,13 @@ jobs:
           TUNNEL_SERVICE_TOKEN_ID: ${{ steps.src.outputs.env == 'production' && secrets.PRODUCTION_CF_ACCESS_CLIENT_ID || secrets.STAGING_CF_ACCESS_CLIENT_ID }}
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ steps.src.outputs.env == 'production' && secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET || secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}
         run: |
+          cloudflared --version
           cloudflared access tcp \
             --hostname ${{ steps.src.outputs.hostname }} \
-            --url 127.0.0.1:16443 &
+            --url 127.0.0.1:16443 \
+            --service-token-id "$TUNNEL_SERVICE_TOKEN_ID" \
+            --service-token-secret "$TUNNEL_SERVICE_TOKEN_SECRET" \
+            --loglevel debug &
           CF_PID=$!
           # Probe the tunnel end-to-end: the local port binds even when the
           # websocket to origin fails, so check a real request, not just the port.
