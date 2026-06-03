@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Pull prior state -> run pipeline -> publish output. State round-trips via S3
-# because collate_stats.py globs all prior daily/ dirs.
 set -o errexit
 set -o pipefail
 set -x
@@ -21,6 +19,7 @@ fi
 
 mkdir -p "$DASHDIR"
 s3cmd "${S3_ARGS[@]}" sync "${DEST}/" "$DASHDIR/" || echo "no prior state (first run)"
-# Planet + date are resolved inside stats-pipeline.sh from state.txt.
-./stats-pipeline.sh "$DASHDIR"
+# Run on today's planet (UTC). If today's planet isn't published yet, the
+# pipeline fails instead of falling back to an older one.
+./stats-pipeline.sh "$(date -u +%Y-%m-%d)" "$DASHDIR"
 s3cmd "${S3_ARGS[@]}" sync "$DASHDIR/" "${DEST}/"
