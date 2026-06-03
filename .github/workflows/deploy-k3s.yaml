@@ -118,51 +118,14 @@ jobs:
           echo "kubeconfig size: $(wc -c < $HOME/.kube/config) bytes"
           grep -E "^(apiVersion|kind|server):" $HOME/.kube/config | sed 's/server: .*/server: <redacted>/'
 
-      - name: Debug Access token (temporary)
-        env:
-          # Read the secret directly (not via steps.src.outputs) to rule out GITHUB_OUTPUT masking.
-          CF_ID: ${{ steps.src.outputs.env == 'production' && secrets.PRODUCTION_CF_ACCESS_CLIENT_ID || secrets.STAGING_CF_ACCESS_CLIENT_ID }}
-          CF_SECRET: ${{ steps.src.outputs.env == 'production' && secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET || secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}
-        run: |
-          # Length reveals empty/whitespace/truncated values (real value stays masked).
-          echo "id length:     ${#CF_ID}"
-          echo "secret length: ${#CF_SECRET}"
-          # Same auth check we ran by hand. 200 = token good; 302 = token rejected.
-          code=$(curl -sS -o /dev/null -w "%{http_code}" "https://${{ steps.src.outputs.hostname }}/" \
-            -H "CF-Access-Client-Id: $CF_ID" \
-            -H "CF-Access-Client-Secret: $CF_SECRET")
-          echo "access GET code: $code"
-          # Simulate the websocket upgrade cloudflared does. 101 = upgrade OK.
-          # Anything else (302/403/5xx) is the real reason for "bad handshake".
-          up=$(curl -sS -o /dev/null -w "%{http_code}" --http1.1 --max-time 12 \
-            -H "CF-Access-Client-Id: $CF_ID" \
-            -H "CF-Access-Client-Secret: $CF_SECRET" \
-            -H "Connection: Upgrade" -H "Upgrade: websocket" \
-            -H "Sec-WebSocket-Key: AAAAAAAAAAAAAAAAAAAAAA==" -H "Sec-WebSocket-Version: 13" \
-            "https://${{ steps.src.outputs.hostname }}/" || true)
-          echo "websocket upgrade code: $up"
-
       - name: Open Cloudflare Access tunnel
         env:
-          # Read the secret directly (not via steps.src.outputs) to rule out GITHUB_OUTPUT masking.
-          TUNNEL_SERVICE_TOKEN_ID: ${{ steps.src.outputs.env == 'production' && secrets.PRODUCTION_CF_ACCESS_CLIENT_ID || secrets.STAGING_CF_ACCESS_CLIENT_ID }}
-          TUNNEL_SERVICE_TOKEN_SECRET: ${{ steps.src.outputs.env == 'production' && secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET || secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}
+          TUNNEL_SERVICE_TOKEN_ID: ${{ steps.src.outputs.cf_id }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ steps.src.outputs.cf_secret }}
         run: |
-          cloudflared --version
-          # Print the real status of the websocket upgrade (101 = OK; 302/403/5xx = the cause).
-          up=$(curl -sS -o /dev/null -w "%{http_code}" --http1.1 --max-time 12 \
-            -H "CF-Access-Client-Id: $TUNNEL_SERVICE_TOKEN_ID" \
-            -H "CF-Access-Client-Secret: $TUNNEL_SERVICE_TOKEN_SECRET" \
-            -H "Connection: Upgrade" -H "Upgrade: websocket" \
-            -H "Sec-WebSocket-Key: AAAAAAAAAAAAAAAAAAAAAA==" -H "Sec-WebSocket-Version: 13" \
-            "https://${{ steps.src.outputs.hostname }}/" || true)
-          echo ">>> websocket upgrade code: $up <<<"
           cloudflared access tcp \
             --hostname ${{ steps.src.outputs.hostname }} \
-            --url 127.0.0.1:16443 \
-            --service-token-id "$TUNNEL_SERVICE_TOKEN_ID" \
-            --service-token-secret "$TUNNEL_SERVICE_TOKEN_SECRET" \
-            --loglevel debug &
+            --url 127.0.0.1:16443 &
           CF_PID=$!
           # Probe the tunnel end-to-end: the local port binds even when the
           # websocket to origin fails, so check a real request, not just the port.
@@ -207,6 +170,15 @@ jobs:
           _format-key: '{{key}}'
           _output-file: 'values.k3s.production.yaml'
           PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
+          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
 
       - name: Helm dep up (pull osm-seed subchart)
         run: cd ohm && helm dep up
