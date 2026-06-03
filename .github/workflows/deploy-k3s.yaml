@@ -62,7 +62,7 @@ jobs:
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "release=ohm-hetzner-$ENV" >> $GITHUB_OUTPUT
+          echo "release=htz-$ENV" >> $GITHUB_OUTPUT
           if [ "$ENV" = "production" ]; then
             echo "cf_id=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
             echo "cf_secret=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
