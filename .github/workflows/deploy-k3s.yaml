@@ -149,6 +149,14 @@ jobs:
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ steps.src.outputs.env == 'production' && secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET || secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}
         run: |
           cloudflared --version
+          # Print the real status of the websocket upgrade (101 = OK; 302/403/5xx = the cause).
+          up=$(curl -sS -o /dev/null -w "%{http_code}" --http1.1 --max-time 12 \
+            -H "CF-Access-Client-Id: $TUNNEL_SERVICE_TOKEN_ID" \
+            -H "CF-Access-Client-Secret: $TUNNEL_SERVICE_TOKEN_SECRET" \
+            -H "Connection: Upgrade" -H "Upgrade: websocket" \
+            -H "Sec-WebSocket-Key: AAAAAAAAAAAAAAAAAAAAAA==" -H "Sec-WebSocket-Version: 13" \
+            "https://${{ steps.src.outputs.hostname }}/" || true)
+          echo ">>> websocket upgrade code: $up <<<"
           cloudflared access tcp \
             --hostname ${{ steps.src.outputs.hostname }} \
             --url 127.0.0.1:16443 \
