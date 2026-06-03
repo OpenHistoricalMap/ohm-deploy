@@ -320,9 +320,6 @@ osm-seed:
   # ====================================================================================================
   nominatimApi:
     enabled: true
-    # image:
-    #   name: developmentseed/osmseed-nominatim
-    #   tag: 1.0.0-dev.hb293d54
     priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
@@ -365,9 +362,6 @@ osm-seed:
   # ====================================================================================================
   overpassApi:
     enabled: true
-    # image:
-    #   name: ghcr.io/openhistoricalmap/overpass-api
-    #   tag: 0.0.1-0.dev.git.3377.h318c42d7
     priorityClass: medium-priority
     env:
       OVERPASS_META: attic
@@ -431,7 +425,7 @@ osm-seed:
       enabled: false
 
   osmchaDb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: postgis/postgis
@@ -456,7 +450,7 @@ osm-seed:
       enabled: false
 
   osmxAdiffBuilder:
-    enabled: false
+    enabled: true
     env:
       PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
       MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
@@ -483,7 +477,7 @@ osm-seed:
       enabled: false
         
   planetStats:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     schedule: '0 7 * * *'
     serviceAccount:

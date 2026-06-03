@@ -135,7 +135,7 @@ osm-seed:
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
       REFRESH_MVIEWS: true
-      RECREATE_MVIEWS_ON_UPDATE: true
+      RECREATE_MVIEWS_ON_UPDATE: false
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
