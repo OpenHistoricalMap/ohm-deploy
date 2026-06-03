@@ -9,6 +9,7 @@ on:
     types: [completed]
     branches:
       - main
+      - pre-production
       - staging
       - k3s
   # Config-only changes that do NOT rebump image tags: deploy directly.
@@ -17,6 +18,7 @@ on:
   push:
     branches:
       - main
+      - pre-production
       - staging
       - k3s
     paths-ignore:
@@ -51,10 +53,11 @@ jobs:
               SHA="${{ github.sha }}" ;;
           esac
           case "$BRANCH" in
-            main)    ENV="production" ;;
-            staging) ENV="staging" ;;
-            k3s)     ENV="staging" ;;
-            *)       ENV="staging" ;;
+            main)           ENV="production" ;;
+            pre-production) ENV="production" ;;
+            staging)        ENV="staging" ;;
+            k3s)            ENV="staging" ;;
+            *)              ENV="staging" ;;
           esac
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "sha=$SHA" >> $GITHUB_OUTPUT

@@ -1,14 +1,6 @@
 osm-seed:
-
-  # ====================================================================================================
-  # ==================================Global Configurations=============================================
-  # ====================================================================================================
   environment: production
-  # cloudProvider: k3s uses local-path dynamic provisioning (no hostPath setup needed)
   cloudProvider: k3s
-
-  # Traffic is routed via Cloudflare Tunnel, which connects directly to ClusterIP Services.
-  # No Ingress resources or load balancers needed.
   serviceType: ClusterIP
   createClusterIssuer: false
   ingressClassNameType: ""
@@ -16,9 +8,7 @@ osm-seed:
   domain: openhistoricalmap.org
   adminEmail: admin@openhistoricalmap.org
 
-  # ====================================================================================================
-  # Heavy services disabled - live in EKS or not used in k3s
-  # ====================================================================================================
+  # Disable heavy services
   web:
     enabled: false
   db:
@@ -41,19 +31,225 @@ osm-seed:
     enabled: false
   osmProcessor:
     enabled: false
+
+
   tilerDb:
-    enabled: false
+    enabled: true
+    priorityClass: medium-priority
+    env:
+      POSTGRES_DB: tiler_osm_production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123456789"
+      POSTGRES_PORT: 5432
+    sharedMemorySize: 2Gi
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      subPath: postgresql-data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-db-data
+    resources:
+      enabled: false
+    postgresqlConfig:
+      enabled: true
+      values: |
+        # CONNECTIONS AND AUTHENTICATION
+        listen_addresses = '*'
+        max_connections = 300
+        superuser_reserved_connections = 5 
+
+        # RESOURCE USAGE
+
+        # - Memory Configuration -
+        shared_buffers = 48GB
+        work_mem = 256MB     
+        maintenance_work_mem = 16GB     
+        autovacuum_work_mem = 2GB       
+        effective_cache_size = 130GB    
+
+        # - Disk Optimization for NVMe RAID1 -
+        random_page_cost = 1.0 
+        seq_page_cost = 1.0
+        effective_io_concurrency = 256  
+
+        # WRITE-AHEAD LOG (WAL)
+        wal_level = replica  
+        checkpoint_timeout = 15min      
+        checkpoint_completion_target = 0.9 
+        max_wal_size = 16GB  
+        min_wal_size = 2GB   
+        wal_compression = lz4
+        synchronous_commit = off
+        wal_buffers = 64MB   
+
+        # AUTOVACUUM SETTINGS
+        autovacuum_max_workers = 8      
+        autovacuum_naptime = 30s
+        autovacuum_vacuum_cost_limit = -1 
+        autovacuum_vacuum_scale_factor = 0.1       
+        autovacuum_analyze_scale_factor = 0.05     
+
+        # QUERY TUNING & PARALLELISM (CPU: W-2295, 18c / 36t)
+        parallel_tuple_cost = 0.001     
+        parallel_setup_cost = 100       
+        max_worker_processes = 36       
+        max_parallel_workers = 36       
+        max_parallel_workers_per_gather = 8 
+        max_parallel_maintenance_workers = 8       
+
+        # LOGGING (silent — production)
+        logging_collector = off
+        log_min_messages = fatal
+        log_min_error_statement = panic
+        log_statement = 'none'
+        log_duration = off
+        log_min_duration_statement = -1
+        log_error_verbosity = default
+        log_autovacuum_min_duration = -1
+        log_connections = off
+        log_disconnections = off
+        log_lock_waits = off
+        log_temp_files = -1
+        log_checkpoints = off
+        log_replication_commands = off
+
+        # CLIENT CONNECTION DEFAULTS
+        statement_timeout = 600000      
+        lock_timeout = 600000
+        idle_in_transaction_session_timeout = 600000 # Close idle transactions > 10 min
+
+        # LOCALE AND TIMING
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        lc_messages = 'en_US.utf8'
+        lc_monetary = 'en_US.utf8'
+        lc_numeric = 'en_US.utf8'
+        lc_time = 'en_US.utf8'
+
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   tilerImposm:
-    enabled: false
+    enabled: true
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      TILER_IMPORT_FROM: osm
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260602_0301.osm.pbf
+      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+      SEQUENCE_NUMBER: "1690000"
+      OVERWRITE_STATE: false
+      UPLOAD_EXPIRED_FILES: true
+      IMPORT_NATURAL_EARTH: true
+      IMPORT_OSM_LAND: true
+      IMPOSM3_IMPORT_LAYERS: "all"
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+      REFRESH_MVIEWS: true
+      RECREATE_MVIEWS_ON_UPDATE: false
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /mnt/data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-imposm-data
+    resources:
+      enabled: true
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   tilerServer:
     enabled: false
+
+  tilerServerMartin:
+    enabled: true
+    priorityClass: medium-priority
+    replicaCount: 1
+    env:
+      OHM_DOMAIN: openhistoricalmap.org
+      MARTIN_WORKER_PROCESSES: 16
+      MARTIN_POOL_SIZE: 10
+      AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  tilerVarnish:
+    enabled: true
+    image:
+      name: varnish
+      tag: "7.5"
+    priorityClass: medium-priority
+    replicaCount: 1
+    dynamicSize: "32G"
+    staticSize: "4G"
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   tilerServerCacheCleaner:
     enabled: false
   tilerCacheCleanerJob:
     enabled: false
-  # Tiler cache cleaner FastAPI service (/clean-cache). Set env.VARNISH_URL when enabled.
+
   tilerCache:
     enabled: false
+    replicaCount: 1
+    env:
+      PORT: 8000
+      VARNISH_URL: ""
+      ZOOM_LEVELS_TO_DELETE: 7,8,9,10,11,12,13,14,15,16,17,18,19,20
+      SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
+      AWS_REGION_NAME: us-east-1
+      AWS_ACCESS_KEY_ID: {{SQS_AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{SQS_AWS_SECRET_ACCESS_KEY}}
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+  # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-cm.
+  tilerMonitorPipeline:
+    enabled: true
+    replicaCount: 1
+    env:
+      MONITOR_PORT: 8001
+      OHM_API_BASE: https://www.openhistoricalmap.org/api/0.6
+      CHANGESET_LIMIT: 30
+      TILER_MONITORING_CHECK_INTERVAL: "1h"
+      TILER_MONITORING_MISSING_THRESHOLD_PCT: 10
+      TILER_MONITORING_MAX_RETRIES: 3
+      TILER_MONITORING_FULL_CHECK_SAMPLE_PCT: 25
+      TILER_MONITORING_BASE_URL: "https://tiler-monitoring.ohmstaging.org"
+      TILER_MONITORING_SLACK_WEBHOOK_URL: ""
+      OHM_COMMENT_USER: ""
+      OHM_COMMENT_PASSWORD: ""
+      VERBOSE_LOGGING: "false"
+    persistenceDisk:
+      enabled: true
+      mountPath: /data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-monitor-pipeline-data
+      localVolumeSize: 1Gi
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
   tmDb:
     enabled: false
   tmApi:
@@ -67,144 +263,251 @@ osm-seed:
   planetFiles:
     enabled: false
 
+  # Web frontend - serves taginfo HTTP UI, downloads .db files from S3
+  taginfoWeb:
+    enabled: true
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
+      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
+  taginfoDataProcessor:
+    enabled: true
+    schedule: "0 2 */3 * *"
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
+      URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
+      URL_PLANET_FILE: 'none'
+      URL_HISTORY_PLANET_FILE: 'none'
+      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
+      TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
+      DOWNLOAD_DB: 'languages wiki'
+      CREATE_DB: 'db projects chronology'
+      AWS_S3_BUCKET: planet.openhistoricalmap.org
+      ENVIRONMENT: production
+      AWS_ACCESS_KEY_ID: "{{AWS_ACCESS_KEY_ID}}"
+      AWS_SECRET_ACCESS_KEY: "{{AWS_SECRET_ACCESS_KEY}}"
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # ====================================================================================================
+  # Nominatim UI
+  # ====================================================================================================
+  nominatimUI:
+    enabled: true
+    image:
+      name: ghcr.io/openhistoricalmap/nominatim-ui
+      tag: a469b5e
+
+  # ====================================================================================================
+  # Nominatim API
+  # ====================================================================================================
+  nominatimApi:
+    enabled: true
+    # image:
+    #   name: developmentseed/osmseed-nominatim
+    #   tag: 1.0.0-dev.hb293d54
+    priorityClass: medium-priority
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    ingressDomain: nominatim.openhistoricalmap.org
+    replicaCount: 1
+    env:
+      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
+      REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
+      REPLICATION_UPDATE_INTERVAL: 60
+      REPLICATION_RECHECK_INTERVAL: 30
+      THREADS: 8
+      FREEZE: false
+      IMPORT_WIKIPEDIA: false
+      IMPORT_US_POSTCODES: false
+      IMPORT_GB_POSTCODES: false
+      IMPORT_TIGER_ADDRESSES: false
+      PGDATA: /var/lib/postgresql/16/main
+      OSMSEED_WEB_API_DOMAIN: www.${OHM_DOMAIN}
+      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
+      UPDATE_MODE: continuous
+      IMPORT_STYLE: extratags
+      EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
+      NOMINATIM_PASSWORD: "{{PRODUCTION_NOMINATIM_PG_PASSWORD}}"
+    resources:
+      enabled: false
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/16/main
+      subPath: nominatim-pgdata
+      staticHostPath: true
+      localVolumeHostPath: /mnt/nominatim-db-data
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   # ====================================================================================================
   # Overpass API
   # ====================================================================================================
   overpassApi:
     enabled: true
+    # image:
+    #   name: ghcr.io/openhistoricalmap/overpass-api
+    #   tag: 0.0.1-0.dev.git.3377.h318c42d7
+    priorityClass: medium-priority
+    env:
+      OVERPASS_META: attic
+      OVERPASS_MODE: init
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/planet-history-260510_0442.osm.pbf
+      OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      OVERPASS_RULES_LOAD: 10
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1900000
+      OVERPASS_ALLOW_DUPLICATE_QUERIES: no
+      OVERPASS_RATE_LIMIT: 2
+      OVERPASS_PLANET_PREPROCESS: "true"
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /db
-      localVolumeHostPath: /mnt/overpass-data
-      localVolumeSize: 500Gi
-    env:
-      OVERPASS_META: "attic"
-      OVERPASS_MODE: init
-      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/planet-history-260510_0442.osm.pbf
-      OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
-      OVERPASS_RULES_LOAD: "10"
-      OVERPASS_REPLICATION_SEQUENCE_NUMBER: "1900000"
-      OVERPASS_ALLOW_DUPLICATE_QUERIES: "no"
+      localVolumeSize: 100Gi
+      staticHostPath: true
+      localVolumeHostPath: /mnt/overpass-api-db-data
     resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "2"
-        memory: "8Gi"
-      limits:
-        enabled: true
-        cpu: "8"
-        memory: "32Gi"
-
-  # ====================================================================================================
-  # Taginfo
-  # ====================================================================================================
-  taginfoWeb:
-    enabled: true
-    resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "500m"
-        memory: "1Gi"
-      limits:
-        enabled: true
-        cpu: "2"
-        memory: "4Gi"
-  taginfo:
-    enabled: true
-    resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        enabled: true
-        cpu: "4"
-        memory: "8Gi"
-
-  # ====================================================================================================
-  # Nominatim
-  # ====================================================================================================
-  nominatimApi:
-    enabled: true
-    env:
-      NOMINATIM_PASSWORD: "{{PRODUCTION_NOMINATIM_PG_PASSWORD}}"
-    persistenceDisk:
-      enabled: true
-      accessMode: ReadWriteOnce
-      mountPath: /var/lib/postgresql/16/main
-      localVolumeHostPath: /mnt/nominatim-data
-      localVolumeSize: 300Gi
-    resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "2"
-        memory: "8Gi"
-      limits:
-        enabled: true
-        cpu: "8"
-        memory: "32Gi"
-  nominatimUI:
-    enabled: true
-    resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "100m"
-        memory: "128Mi"
-      limits:
-        enabled: true
-        cpu: "500m"
-        memory: "512Mi"
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
 
   # ====================================================================================================
   # OSMCha
   # ====================================================================================================
-  osmchaApi:
-    enabled: true
-    resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "500m"
-        memory: "1Gi"
-      limits:
-        enabled: true
-        cpu: "2"
-        memory: "4Gi"
   osmchaWeb:
-    enabled: true
+    enabled: false
+    priorityClass: medium-priority
+    image:
+      name: ghcr.io/openhistoricalmap/osmcha-frontend
+      tag: df5e9b5
+
+  osmchaApi:
+    enabled: false
+    priorityClass: medium-priority
+    image:
+      name: ghcr.io/openhistoricalmap/osmcha-django
+      tag: 1bd58e1
+    ingressDomain: osmcha.ohmstaging.org
+    env:
+      DJANGO_SETTINGS_MODULE: "config.settings.production"
+      OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
+      DJANGO_SECRET_KEY: "{{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}"
+      DJANGO_SECURE_SSL_REDIRECT: "False"
+      OSM_SERVER_URL: https://www.ohmstaging.org
+      OAUTH_REDIRECT_URI: https://osmcha.ohmstaging.org/authorized
+      OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
+      ## frontend
+      OSMCHA_URL: https://osmcha.ohmstaging.org
+      OSMCHA_API_URL: www.ohmstaging.org
+      OAUTH2_OSM_KEY: "{{PRODUCTION_OSMCHA_OAUTH2_OSM_KEY}}"
+      OAUTH2_OSM_SECRET: "{{PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET}}"
     resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "100m"
-        memory: "128Mi"
-      limits:
-        enabled: true
-        cpu: "500m"
-        memory: "512Mi"
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   osmchaDb:
-    enabled: true
+    enabled: false
+    priorityClass: medium-priority
+    image:
+      name: postgis/postgis
+      tag: 17-3.5
+    env:
+      POSTGRES_DB: osmcha
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "{{PRODUCTION_OSMCHA_PG_PASSWORD}}"
+    resources:
+      enabled: false
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
-      localVolumeHostPath: /mnt/osmcha-db-data
-      localVolumeSize: 100Gi
-    resources:
-      enabled: true
-      requests:
-        enabled: true
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        enabled: true
-        cpu: "4"
-        memory: "8Gi"
+      # Static hostPath on k3s: fixed dir = data identity, reusable across releases.
+      staticHostPath: true
+      localVolumeHostPath: /mnt/osmcha-data
+      localVolumeSize: 10Gi
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
   osmxAdiffBuilder:
     enabled: false
+    env:
+      PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
+      MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      API_URL: https://api.openhistoricalmap.org
+      OSMX_INITIAL_SEQNUM: "1912000"
+      AWS_S3_BUCKET: planet.openhistoricalmap.org
+      AWS_S3_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+      HEARTBEAT_DIR: /tmp/heartbeat
+      HEARTBEAT_STALE_SECONDS: "600"
+    persistenceDisk:
+      enabled: true
+      mountPath: /data
+      size: 50Gi
+      storageClassName: ""
+      # k3s: staticHostPath=true uses a fixed hostPath dir (reusable across releases); false = dynamic local-path
+      staticHostPath: true
+      localVolumeHostPath: /mnt/osmx-adiff-data
+      localVolumeSize: 50Gi
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+        
+  planetStats:
+    enabled: false
+    priorityClass: medium-priority
+    schedule: '0 7 * * *'
+    serviceAccount:
+      enabled: false
+    env:
+      PUBLISH_TARGET: "s3"
+      DASHBOARD_DIR: "/mnt/planet-stats"
+      PLANET_STATS_STATE_S3_URI: "s3://planet.openhistoricalmap.org"
+      AWS_S3_ENDPOINT: ""
+      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+    # resources enabled with high memory/cpu for the processing job;
+    resources:
+      enabled: false
+      requests:
+        enabled: true
+        memory: "7Gi"
+        cpu: "1000m"
+      limits:
+        enabled: false
+        memory: "8Gi"
+        cpu: "1500m"
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+      
