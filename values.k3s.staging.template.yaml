@@ -441,6 +441,10 @@ osm-seed:
 
   osmxAdiffBuilder:
     enabled: true
+    # Give the initial osmx build (download planet + build db) time before the
+    # liveness probe starts checking for the create_diff_files heartbeat.
+    livenessProbe:
+      initialDelaySeconds: 18000
     env:
       PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
       MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
