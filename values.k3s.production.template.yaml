@@ -235,7 +235,7 @@ osm-seed:
       TILER_MONITORING_MISSING_THRESHOLD_PCT: 10
       TILER_MONITORING_MAX_RETRIES: 3
       TILER_MONITORING_FULL_CHECK_SAMPLE_PCT: 25
-      TILER_MONITORING_BASE_URL: "https://tiler-monitoring.ohmstaging.org"
+      TILER_MONITORING_BASE_URL: "https://tiler-monitoring.openhistoricalmap.org"
       TILER_MONITORING_SLACK_WEBHOOK_URL: ""
       OHM_COMMENT_USER: ""
       OHM_COMMENT_PASSWORD: ""
@@ -391,30 +391,30 @@ osm-seed:
   # OSMCha
   # ====================================================================================================
   osmchaWeb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
       tag: df5e9b5
 
   osmchaApi:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-django
       tag: 1bd58e1
-    ingressDomain: osmcha.ohmstaging.org
+    ingressDomain: osmcha.openhistoricalmap.org
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
       DJANGO_SECRET_KEY: "{{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}"
       DJANGO_SECURE_SSL_REDIRECT: "False"
-      OSM_SERVER_URL: https://www.ohmstaging.org
-      OAUTH_REDIRECT_URI: https://osmcha.ohmstaging.org/authorized
+      OSM_SERVER_URL: https://www.openhistoricalmap.org
+      OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/authorized
       OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
       ## frontend
-      OSMCHA_URL: https://osmcha.ohmstaging.org
-      OSMCHA_API_URL: www.ohmstaging.org
+      OSMCHA_URL: https://osmcha.openhistoricalmap.org
+      OSMCHA_API_URL: www.openhistoricalmap.org
       OAUTH2_OSM_KEY: "{{PRODUCTION_OSMCHA_OAUTH2_OSM_KEY}}"
       OAUTH2_OSM_SECRET: "{{PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET}}"
     resources:
