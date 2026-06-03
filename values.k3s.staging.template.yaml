@@ -135,7 +135,7 @@ osm-seed:
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
       REFRESH_MVIEWS: true
-      RECREATE_MVIEWS_ON_UPDATE: true
+      RECREATE_MVIEWS_ON_UPDATE: false
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -159,7 +159,7 @@ osm-seed:
     env:
       OHM_DOMAIN: ohmstaging.org
       MARTIN_WORKER_PROCESSES: 8
-      MARTIN_POOL_SIZE: 50
+      MARTIN_POOL_SIZE: 10
       # Solo para subir vtiles_languages.geojson a S3 (si AWS_S3_BUCKET vacio, se salta)
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}

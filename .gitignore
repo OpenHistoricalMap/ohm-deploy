@@ -45,3 +45,4 @@ images/tiler-server-martin/config/nginx.conf
 values.k3s.staging.direct.yaml
 ohm/charts/
 k3s.sh
+*.zip

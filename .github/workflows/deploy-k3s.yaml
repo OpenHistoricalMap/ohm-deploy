@@ -9,6 +9,7 @@ on:
     types: [completed]
     branches:
       - main
+      - pre-production
       - staging
       - k3s
   # Config-only changes that do NOT rebump image tags: deploy directly.
@@ -17,6 +18,7 @@ on:
   push:
     branches:
       - main
+      - pre-production
       - staging
       - k3s
     paths-ignore:
@@ -51,15 +53,16 @@ jobs:
               SHA="${{ github.sha }}" ;;
           esac
           case "$BRANCH" in
-            main)    ENV="production" ;;
-            staging) ENV="staging" ;;
-            k3s)     ENV="staging" ;;
-            *)       ENV="staging" ;;
+            main)           ENV="production" ;;
+            pre-production) ENV="production" ;;
+            staging)        ENV="staging" ;;
+            k3s)            ENV="staging" ;;
+            *)              ENV="staging" ;;
           esac
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "release=ohm-hetzner-$ENV" >> $GITHUB_OUTPUT
+          echo "release=htz-$ENV" >> $GITHUB_OUTPUT
           if [ "$ENV" = "production" ]; then
             echo "cf_id=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
             echo "cf_secret=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
@@ -123,11 +126,18 @@ jobs:
           cloudflared access tcp \
             --hostname ${{ steps.src.outputs.hostname }} \
             --url 127.0.0.1:16443 &
+          CF_PID=$!
+          # Probe the tunnel end-to-end: the local port binds even when the
+          # websocket to origin fails, so check a real request, not just the port.
           for i in {1..30}; do
-            nc -z 127.0.0.1 16443 2>/dev/null && exit 0
+            if curl -sk -o /dev/null --max-time 5 https://127.0.0.1:16443/livez; then
+              echo "tunnel up (k3s reachable)"
+              exit 0
+            fi
             sleep 2
           done
-          echo "Tunnel failed to open" >&2
+          echo "Tunnel failed to reach k3s" >&2
+          kill $CF_PID 2>/dev/null || true
           exit 1
 
       - name: Verify access
@@ -160,6 +170,15 @@ jobs:
           _format-key: '{{key}}'
           _output-file: 'values.k3s.production.yaml'
           PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
+          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
 
       - name: Helm dep up (pull osm-seed subchart)
         run: cd ohm && helm dep up
