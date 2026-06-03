@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: db
     platform: linux/amd64
     image: ohm-db:v2
     build:
@@ -14,18 +15,17 @@ services:
       - web_network
 
   web:
+    container_name: web
     image: ohm-web:v1
     build:
       context: ./../images/web
       dockerfile: Dockerfile
     volumes:
-      - ./../../ohm-website/:/var/www/
-      - ./../images/web/config/settings.yml:/tmp/settings.yml:rw
       - ./../images/web/start.sh:/var/www/start.sh
     env_file:
       - ./../envs/.env.web
     ports:
-      - '3000:3000'
+      - '3000:80'
     networks:
       - web_network
     depends_on:
@@ -33,11 +33,30 @@ services:
       - memcached
 
   memcached:
+    container_name: memcached
     image: memcached:latest
     ports:
       - '11211:11211'
     networks:
       - web_network
+
+  # cgimap:
+  #   container_name: cgimap
+  #   image: ohm-cgimap:v1
+  #   build:
+  #     context: ./../images/cgimap
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - ./../envs/.env.web
+  #   environment:
+  #     MEMCACHE_SERVER: memcached:11211
+  #   # ports:
+  #   #   - '8000:8000'
+  #   networks:
+  #     - web_network
+  #   depends_on:
+  #     - db
+  #     - memcached
 
 networks:
   web_network:
