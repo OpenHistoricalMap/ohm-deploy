@@ -465,7 +465,7 @@ osm-seed:
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
       HEARTBEAT_DIR: /tmp/heartbeat
-      HEARTBEAT_STALE_SECONDS: "600"
+      HEARTBEAT_STALE_SECONDS: "18000"
     persistenceDisk:
       enabled: true
       mountPath: /data
