@@ -215,8 +215,8 @@ jobs:
 
       - name: Staging - helm deploy
         if: steps.src.outputs.env == 'staging'
-        run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
+        run: helm upgrade --install staging --wait --timeout 30m ohm/ -f values.staging.yaml -f ohm/values.yaml
 
       - name: Production - helm deploy
         if: steps.src.outputs.env == 'production'
-        run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
+        run: helm upgrade --install production --wait --timeout 30m ohm/ -f values.production.yaml -f ohm/values.yaml
