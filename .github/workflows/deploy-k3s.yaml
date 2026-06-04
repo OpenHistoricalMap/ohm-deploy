@@ -1,9 +1,11 @@
 name: Deploy k3s
 
 on:
-  # Images changed: wait for "Build images (chartpress)" to finish, then
-  # deploy. The deploy re-runs `chartpress --skip-build` to recompute the
-  # same tags build pushed (no artifact is passed between workflows).
+  # Deploy only after "Build images (chartpress)" finishes, never on push
+  # directly. A push runs build-images, which triggers this on success. That
+  # way the images always exist in the registry before the deploy uses them,
+  # even when a commit touches both config and images. The deploy re-runs
+  # `chartpress --skip-build` to recompute the same tags build pushed.
   workflow_run:
     workflows: ['Build images (chartpress)']
     types: [completed]
@@ -12,19 +14,6 @@ on:
       - pre-production
       - staging
       - k3s
-  # Config-only changes that do NOT rebump image tags: deploy directly.
-  # images/**, chartpress.yaml and Chart.yaml change tags, so they must go
-  # through "Build images" first and reach deploy via workflow_run.
-  push:
-    branches:
-      - main
-      - pre-production
-      - staging
-      - k3s
-    paths-ignore:
-      - 'images/**'
-      - 'chartpress.yaml'
-      - 'ohm/Chart.yaml'
   workflow_dispatch:
     inputs:
       ref:
