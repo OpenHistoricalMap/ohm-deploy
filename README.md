@@ -40,6 +40,58 @@ This is what the process of making changes to openhistoricalmap.org looks like:
 6. When we're all happy with the code on Staging, make a PR of `staging` into `main` branch in this OHM-deploy repo, which then kicks off deploy to production to make changes live on https://openhistoricalmap.org.
 
 
+## Cronjobs
+
+The chart defines a set of cronjobs. Each one is gated by an `enabled` flag and a
+`schedule` in the per-environment values files. EKS runs on AWS (current stack);
+k3s runs on Hetzner (new stack).
+
+Values files:
+- EKS: `values.production.template.yaml`, `values.staging.template.yaml`
+- k3s: `values.k3s.production.template.yaml`, `values.k3s.staging.template.yaml`
+
+The table below lists every cronjob, where it currently runs (which environment
+has it `enabled`), its schedule, and what it depends on. "main API DB" is the
+`<release>-db` service (the OSM/Rails database).
+
+| Cronjob | Runs on | Schedule | When | Depends on |
+|---|---|---|---|---|
+| dbBackup web-db | EKS prod | `0 0 * * *` | daily 00:00 | main API DB |
+| dbBackup tm-db | EKS prod | `0 1 * * *` | daily 01:00 | Tasking Manager DB |
+| osmSimpleMetrics | EKS prod | `0 2 * * *` | daily 02:00 | main API DB + cloud storage |
+| planetDump | EKS prod | `0 4 * * *` | daily 04:00 | main API DB + cloud storage (S3/GCP/Azure) |
+| fullHistory | EKS prod | `0 4 * * 0` | Sunday 04:00 | main API DB + cloud storage |
+| changesetsDump | EKS prod | `0 5 * * 0` | Sunday 05:00 | main API DB + cloud storage |
+| dbBackup osmcha-db | EKS prod | `0 0 * * *` | daily 00:00 | OSMCha DB |
+| taginfoDataProcessor | k3s prod + staging | `0 12 * * 0` | Sunday 12:00 | fullHistory output (full-history planet on S3) — must run after fullHistory uploads |
+| osmchaApi (fetch_changesets) | k3s prod + staging | `*/2 * * * *` | every 2 min | OSMCha DB + OSM changesets API |
+| osmchaApi (process_changesets) | k3s prod + staging | `*/2 * * * *` | every 2 min | OSMCha DB |
+| planetStats | k3s prod + staging ⚠️ | `0 7 * * *` | daily 07:00 | planet dump output (no template — see below) |
+
+EKS staging has every cronjob disabled, so nothing runs there.
+
+> Note: osmcha cron schedules are not set in the values files, so they fall back
+> to the chart defaults in `ohm/charts/osm-seed/values.yaml`
+> (`fetch_changesets_cronjob` / `process_changesets_cronjob`).
+
+> Ordering: `taginfoDataProcessor` reads the full-history planet from S3
+> (`URL_HISTORY_PLANET_FILE_STATE`), so it must run after `fullHistory` finishes
+> the dump and upload. `fullHistory` runs Sunday 04:00; taginfo runs Sunday 12:00
+> to leave ~8h of margin. If a full-history dump ever takes longer than that,
+> push taginfo later (e.g. `0 0 * * 1`, Monday 00:00).
+
+### Things to clean up
+
+- **planetStats has no CronJob template.** It is `enabled: true` on k3s and
+  `chartpress.yaml` builds the image, but no `kind: CronJob` renders it in the
+  chart, so it never deploys. Add the template or set it to `false`.
+- **k3s has no database backups.** `dbBackupRestore` is off on both k3s
+  environments. EKS production has them. If k3s becomes production, add backups.
+- **EKS staging schedules are leftover test values** (`* * * * *`). Clean them up
+  or align with production.
+- **Heavy jobs (planetDump, fullHistory, changesetsDump, osmSimpleMetrics) only
+  run on EKS production.** Decide if they should move to k3s.
+
 ## License
 
 This project is licensed under the BSD-2-Clause License. See the [LICENSE.txt](./LICENSE.txt) file for full details.
