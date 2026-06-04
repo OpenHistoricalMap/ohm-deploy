@@ -282,7 +282,7 @@ osm-seed:
   # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
   taginfoDataProcessor:
     enabled: true
-    schedule: "0 2 */3 * *"
+    schedule: "0 12 * * 0"
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
@@ -488,7 +488,6 @@ osm-seed:
       enabled: false
     env:
       PUBLISH_TARGET: "s3"
-      DASHBOARD_DIR: "/mnt/planet-stats"
       PLANET_STATS_STATE_S3_URI: "s3://planet.openhistoricalmap.org"
       AWS_S3_ENDPOINT: ""
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
