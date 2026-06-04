@@ -1,6 +1,0 @@
-services:
-  nominatim:
-    mem_limit: 16g
-    cpus: 4.0
-
-      

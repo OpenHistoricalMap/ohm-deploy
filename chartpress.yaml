@@ -10,8 +10,6 @@ charts:
         valuesPath: osm-seed.tilerDb.image
       tiler-imposm:
         valuesPath: osm-seed.tilerImposm.image
-      tiler-server:
-        valuesPath: osm-seed.tilerServer.image
       tiler-server-martin:
         valuesPath: osm-seed.tilerServerMartin.image
       tasking-manager-api:
