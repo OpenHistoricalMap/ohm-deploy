@@ -476,10 +476,18 @@ osm-seed:
       localVolumeHostPath: /mnt/osmx-adiff-data
       localVolumeSize: 50Gi
     resources:
-      enabled: false
+      enabled: true
+      requests:
+        enabled: true
+        memory: "20Gi"
+        cpu: "4"
+      limits:
+        enabled: true
+        memory: "25Gi"
+        cpu: "8"
     nodeSelector:
       enabled: false
-        
+
   planetStats:
     enabled: true
     priorityClass: medium-priority
