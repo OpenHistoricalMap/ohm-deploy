@@ -1,0 +1,58 @@
+name: Build images (chartpress)
+
+# Builds OHM-owned images with chartpress and pushes them to ghcr.io.
+# It does NOT pass any state to the deploy workflows. Each deploy
+# (deploy-eks.yaml, deploy-k3s.yaml) re-runs `chartpress --skip-build`
+# on the same commit to recompute the exact same image tags, so the
+# only job of this workflow is to make sure the images exist in the
+# registry before a deploy references them.
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+      - 'deploy-*'
+      - 'build-*'
+      - 'k3s'
+    paths:
+      # chartpress.yaml and Chart.yaml are shared deps: changing them rebumps
+      # every image tag, so the build must run to push images at the new tag.
+      - 'images/**'
+      - 'chartpress.yaml'
+      - 'ohm/Chart.yaml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup git
+        run: |
+          git config --global user.email "noreply@developmentseed.org"
+          git config --global user.name "Github Action"
+
+      - name: Install chartpress
+        run: pip install chartpress==2.3.0 ruamel.yaml
+
+      - name: Run chartpress
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
+        run: chartpress --push

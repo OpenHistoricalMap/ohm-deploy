@@ -57,7 +57,11 @@ def _get_auth_session():
 
     session = requests.Session()
     session.auth = (user, password)
-    session.headers.update({"Content-Type": "application/x-www-form-urlencoded"})
+    session.headers.update({
+        "Content-Type": "application/x-www-form-urlencoded",
+        # UA allowlisted in the Cloudflare OHM API protection rule (contains "ohm-pipeline-monitor")
+        "User-Agent": "ohm-pipeline-monitor/1.0",
+    })
     return session
 
 

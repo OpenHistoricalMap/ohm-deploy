@@ -23,6 +23,12 @@ ALTER ROLE imposm SUPERUSER;
 ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET work_mem = '${IMPOSM_WORK_MEM:-4GB}';
 ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET maintenance_work_mem = '${IMPOSM_MAINTENANCE_WORK_MEM:-24GB}';
 ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET temp_buffers = '${IMPOSM_TEMP_BUFFERS:-256MB}';
+
+-- Disable timeouts for imposm: bulk COPY/import can run far longer than the
+-- global statement_timeout (e.g. osm_water_areas). Only affects imposm connections.
+ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET statement_timeout = 0;
+ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET lock_timeout = 0;
+ALTER ROLE imposm IN DATABASE $POSTGRES_DB SET idle_in_transaction_session_timeout = 0;
 EOSQL
 
 log_message "Imposm role setup complete."

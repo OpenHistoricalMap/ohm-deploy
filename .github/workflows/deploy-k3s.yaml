@@ -1,0 +1,203 @@
+name: Deploy k3s
+
+on:
+  # Images changed: wait for "Build images (chartpress)" to finish, then
+  # deploy. The deploy re-runs `chartpress --skip-build` to recompute the
+  # same tags build pushed (no artifact is passed between workflows).
+  workflow_run:
+    workflows: ['Build images (chartpress)']
+    types: [completed]
+    branches:
+      - main
+      - pre-production
+      - staging
+      - k3s
+  # Config-only changes that do NOT rebump image tags: deploy directly.
+  # images/**, chartpress.yaml and Chart.yaml change tags, so they must go
+  # through "Build images" first and reach deploy via workflow_run.
+  push:
+    branches:
+      - main
+      - pre-production
+      - staging
+      - k3s
+    paths-ignore:
+      - 'images/**'
+      - 'chartpress.yaml'
+      - 'ohm/Chart.yaml'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch to deploy
+        required: true
+        default: staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Resolve env
+        id: src
+        run: |
+          case "${{ github.event_name }}" in
+            workflow_dispatch)
+              BRANCH="${{ github.event.inputs.ref }}"
+              SHA="${{ github.event.inputs.ref }}" ;;
+            workflow_run)
+              BRANCH="${{ github.event.workflow_run.head_branch }}"
+              SHA="${{ github.event.workflow_run.head_sha }}" ;;
+            *)
+              BRANCH="${{ github.ref_name }}"
+              SHA="${{ github.sha }}" ;;
+          esac
+          case "$BRANCH" in
+            main)           ENV="production" ;;
+            pre-production) ENV="production" ;;
+            staging)        ENV="staging" ;;
+            k3s)            ENV="staging" ;;
+            *)              ENV="staging" ;;
+          esac
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "release=htz-$ENV" >> $GITHUB_OUTPUT
+          if [ "$ENV" = "production" ]; then
+            echo "cf_id=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
+            echo "cf_secret=${{ secrets.PRODUCTION_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+            echo "kubeconfig=${{ secrets.PRODUCTION_K3S_KUBECONFIG }}" >> $GITHUB_OUTPUT
+            echo "hostname=k3s.openhistoricalmap.org" >> $GITHUB_OUTPUT
+          else
+            echo "cf_id=${{ secrets.STAGING_CF_ACCESS_CLIENT_ID }}" >> $GITHUB_OUTPUT
+            echo "cf_secret=${{ secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+            echo "kubeconfig=${{ secrets.STAGING_K3S_KUBECONFIG }}" >> $GITHUB_OUTPUT
+            echo "hostname=k3s.ohmstaging.org" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.src.outputs.sha }}
+          fetch-depth: 0
+
+      # Recompute image tags (no build/push). Same commit + full git
+      # history => same tags build-images pushed.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install chartpress
+        run: pip install chartpress==2.3.0 ruamel.yaml
+
+      - name: Run chartpress (rewrite image tags, no build)
+        run: chartpress --skip-build
+
+      - name: Install cloudflared
+        run: |
+          sudo curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o /usr/local/bin/cloudflared
+          sudo chmod +x /usr/local/bin/cloudflared
+
+      - name: Install helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.1
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          KCFG="${{ steps.src.outputs.kubeconfig }}"
+          if [ -z "$KCFG" ]; then
+            echo "ERROR: kubeconfig secret is empty (STAGING_K3S_KUBECONFIG or PRODUCTION_K3S_KUBECONFIG)" >&2
+            exit 1
+          fi
+          echo "$KCFG" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+          # debug: confirm file is valid YAML kubeconfig
+          echo "kubeconfig size: $(wc -c < $HOME/.kube/config) bytes"
+          grep -E "^(apiVersion|kind|server):" $HOME/.kube/config | sed 's/server: .*/server: <redacted>/'
+
+      - name: Open Cloudflare Access tunnel
+        env:
+          TUNNEL_SERVICE_TOKEN_ID: ${{ steps.src.outputs.cf_id }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ steps.src.outputs.cf_secret }}
+        run: |
+          cloudflared access tcp \
+            --hostname ${{ steps.src.outputs.hostname }} \
+            --url 127.0.0.1:16443 &
+          CF_PID=$!
+          # Probe the tunnel end-to-end: the local port binds even when the
+          # websocket to origin fails, so check a real request, not just the port.
+          for i in {1..30}; do
+            if curl -sk -o /dev/null --max-time 5 https://127.0.0.1:16443/livez; then
+              echo "tunnel up (k3s reachable)"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Tunnel failed to reach k3s" >&2
+          kill $CF_PID 2>/dev/null || true
+          exit 1
+
+      - name: Verify access
+        run: |
+          kubectl get nodes
+          helm version --short
+
+      - name: Staging - substitute secrets
+        if: steps.src.outputs.env == 'staging'
+        uses: bluwy/substitute-string-action@v3
+        with:
+          _input-file: 'values.k3s.staging.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.k3s.staging.yaml'
+          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
+          STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
+          STAGING_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_KEY }}
+          STAGING_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
+          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
+          STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
+      - name: Production - substitute secrets
+        if: steps.src.outputs.env == 'production'
+        uses: bluwy/substitute-string-action@v3
+        with:
+          _input-file: 'values.k3s.production.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.k3s.production.yaml'
+          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
+          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Helm dep up (pull osm-seed subchart)
+        run: cd ohm && helm dep up
+
+      - name: Helm lint
+        run: |
+          helm lint ./ohm \
+            -f ./ohm/values.yaml \
+            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml
+
+      - name: Helm deploy
+        run: |
+          helm upgrade --install ${{ steps.src.outputs.release }} ./ohm \
+            -f ./ohm/values.yaml \
+            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml \
+            --wait --timeout=15m
+
+      - name: Show release status
+        if: always()
+        run: |
+          helm -n default list
+          kubectl -n default get all
