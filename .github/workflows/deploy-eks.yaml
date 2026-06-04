@@ -1,78 +1,93 @@
-name: Chartpress Publish and Deploy
+name: Deploy EKS
+
+# Deploys the ohm/ chart to AWS EKS.
+#
+# Triggers:
+#   - workflow_run: the only automatic trigger. A push runs build-images
+#     first, which triggers this on success, so the images are always in
+#     ghcr.io before we use them — even when a commit changes both config
+#     and images.
+#   - workflow_dispatch: manual deploy of a branch. For a commit that changed
+#     images/**, build-images must have run first so the image exists.
+#
+# The deploy runs `chartpress --skip-build` itself to rewrite the
+# image tags in ohm/values.yaml. The tags are derived from git history,
+# so on the same commit they match exactly what build-images pushed.
+# No artifact is passed between workflows.
+
 on:
-  push:
+  workflow_run:
+    workflows: ['Build images (chartpress)']
+    types: [completed]
     branches:
-      - 'main'
-      - 'staging'
-      - 'deploy-*'
-      - 'build-*'
+      - main
+      - staging
+      - deploy-*
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch to deploy
+        required: true
+        default: staging
+
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-22.04
-    timeout-minutes: 120
+    timeout-minutes: 60
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     env:
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
-      - uses: actions/checkout@v1
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_GITHUB_TOKEN }}
-      - name: Setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-      - name: Setup git
-        run: git config --global user.email "noreply@developmentseed.org" && git config --global user.name "Github Action"
-      - name: Install Chartpress
+      - name: Resolve ref + env
+        id: src
         run: |
-          pip install chartpress==2.3.0 six ruamel.yaml
-      - name: Run Chartpress
-        run: chartpress --push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          _input-file: 'values.development.template.yaml'
-          _format-key: '{{key}}'
-          _output-file: 'values.development.yaml'
-          AWS_SSL_ARN: ${{ secrets.AWS_SSL_ARN }}
-          ## web
-          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
-          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
-          MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
-          MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
-          DEVELOPMENT_DB: ${{ secrets.STAGING_DB }}
-          DEVELOPMENT_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
-          DEVELOPMENT_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          DEVELOPMENT_DB_USER: ${{ secrets.STAGING_DB_USER }}
-          DEVELOPMENT_DOMAIN_NAME: ohmstaging.org
-          DEVELOPMENT_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
-          DEVELOPMENT_ID_APPLICATION: ${{ secrets.STAGING_ID_APPLICATION }}
-          DEVELOPMENT_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
-          DEVELOPMENT_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
-          DEVELOPMENT_S3_BUCKET: osmseed-dev
-          ## tiler
-          DEVELOPMENT_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
-          DEVELOPMENT_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
-          DEVELOPMENT_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
-          DEVELOPMENT_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
-          DEVELOPMENT_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
-          DEVELOPMENT_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
-          ## tm
-          DEVELOPMENT_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
-          DEVELOPMENT_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
-          ## nominatim
-          DEVELOPMENT_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
-          ## osmcha
-          DEVELOPMENT_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
-          DEVELOPMENT_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
-          DEVELOPMENT_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
-          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
-      ################ Staging secrets ################ 
+          case "${{ github.event_name }}" in
+            workflow_dispatch)
+              BRANCH="${{ github.event.inputs.ref }}"
+              SHA="${{ github.event.inputs.ref }}" ;;
+            workflow_run)
+              BRANCH="${{ github.event.workflow_run.head_branch }}"
+              SHA="${{ github.event.workflow_run.head_sha }}" ;;
+            *)
+              BRANCH="${{ github.ref_name }}"
+              SHA="${{ github.sha }}" ;;
+          esac
+          case "$BRANCH" in
+            main)          ENV="production" ;;
+            staging)       ENV="staging" ;;
+            deploy-*)      ENV="staging" ;;
+            *)             ENV="staging" ;;
+          esac
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "Deploying ref=$BRANCH ($SHA) to $ENV"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.src.outputs.sha }}
+          fetch-depth: 0
+
+      # ============================================================
+      # Recompute image tags (no build/push). Same commit + full git
+      # history => same tags build-images pushed.
+      # ============================================================
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install chartpress
+        run: pip install chartpress==2.3.0 ruamel.yaml
+
+      - name: Run chartpress (rewrite image tags, no build)
+        run: chartpress --skip-build
+
+      # ============================================================
+      # Substitute secrets per environment (staging / production)
+      # ============================================================
       - name: Staging - substitute secrets
-        if: github.ref == 'refs/heads/staging' || startsWith(github.ref, 'refs/heads/deploy-')
+        if: steps.src.outputs.env == 'staging'
         uses: bluwy/substitute-string-action@v1
         with:
           _input-file: 'values.staging.template.yaml'
@@ -80,7 +95,6 @@ jobs:
           _output-file: 'values.staging.yaml'
           STAGING_AWS_SSL_ARN: ${{ secrets.STAGING_AWS_SSL_ARN }}
           STAGING_AWS_WAF_WEBACL_ARN: ${{ secrets.STAGING_AWS_WAF_WEBACL_ARN }}
-          ## web
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
           MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
@@ -99,39 +113,26 @@ jobs:
           STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
           STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
           STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
-
-          ## tiler
           STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
           STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
           STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
-
-          ## tm
           STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
           STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
-
-          ## nominatim
           STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
           STAGING_NOMINATIM_HOST: ${{ secrets.STAGING_NOMINATIM_HOST }}
-
-          ## Overpass api external service
           STAGING_OVERPASS_HOST: ${{ secrets.STAGING_OVERPASS_HOST }}
-
-          ## osmcha
           STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
           STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
-
-          # ohm website
           STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
           STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
 
-      ################ Production secrets ################ 
       - name: Production - substitute secrets
-        if: github.ref == 'refs/heads/main'
+        if: steps.src.outputs.env == 'production'
         uses: bluwy/substitute-string-action@v1
         with:
           _input-file: 'values.production.template.yaml'
@@ -139,7 +140,6 @@ jobs:
           _output-file: 'values.production.yaml'
           PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
           PRODUCTION_AWS_WAF_WEBACL_ARN: ${{ secrets.PRODUCTION_AWS_WAF_WEBACL_ARN }}
-          ## web
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
           MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
@@ -159,47 +159,36 @@ jobs:
           PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
           PRODUCTION_WIKIPEDIA_AUTH_ID: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_ID }}
           PRODUCTION_WIKIPEDIA_AUTH_SECRET: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_SECRET }}
-          
-          ## tiler
           PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_SERVER_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
           PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
           PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
-
-          ## tm
           PRODUCTION_TM_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_DB_PASSWORD }}
           PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
-
-          ## nominatim and nominatim external service ip
           PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
           PRODUCTION_NOMINATIM_HOST: ${{ secrets.PRODUCTION_NOMINATIM_HOST }}
-
-          ## Overpass api external service
           PRODUCTION_OVERPASS_HOST: ${{ secrets.PRODUCTION_OVERPASS_HOST }}
-
-          ## osmcha
           PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
-
-          # ohm website
           PRODUCTION_OPENSTREETMAP_AUTH_ID: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_ID }}
           PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
-          
-      - name: AWS Credentials
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/deploy-')
-        uses: aws-actions/configure-aws-credentials@v1
+
+      # ============================================================
+      # AWS / kubectl / helm + EKS deploy
+      # ============================================================
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Setup Kubectl and Helm Dependencies
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/deploy-')
+
+      - name: Install kubectl, aws-iam-authenticator, helm
         run: |
-          sudo pip install awscli --ignore-installed six
           sudo curl -L -o /usr/bin/kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/kubectl
           sudo chmod +x /usr/bin/kubectl
           sudo curl -o /usr/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.7/2020-07-08/bin/linux/amd64/aws-iam-authenticator
@@ -210,26 +199,24 @@ jobs:
           sudo chmod +x /usr/local/bin/helm
           helm version
 
-      - name: Update kube-config staging
-        if: github.ref == 'refs/heads/staging' || startsWith(github.ref, 'refs/heads/deploy-')
+      - name: Update kubeconfig (staging)
+        if: steps.src.outputs.env == 'staging'
         run: aws eks --region us-east-1 update-kubeconfig --name osmseed-staging
-      - name: Update kube-config prod
-        if: github.ref == 'refs/heads/main'
+
+      - name: Update kubeconfig (production)
+        if: steps.src.outputs.env == 'production'
         run: aws eks --region us-east-1 update-kubeconfig --name osmseed-production-v2
-      - name: Add Helm repository
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/deploy-')
+
+      - name: Helm repo + deps
         run: |
           helm repo add osm-seed https://osm-seed.github.io/osm-seed-chart/
           helm repo update
-      - name: Install helm dependencies for
-        if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/deploy-')
-        run: cd ohm && helm dep up
-      # Staging
+          cd ohm && helm dep up
+
       - name: Staging - helm deploy
-        if: github.ref == 'refs/heads/staging' || startsWith(github.ref, 'refs/heads/deploy-')
+        if: steps.src.outputs.env == 'staging'
         run: helm upgrade --install staging --wait ohm/ -f values.staging.yaml -f ohm/values.yaml
-      # Production
+
       - name: Production - helm deploy
-        if: github.ref == 'refs/heads/main'
+        if: steps.src.outputs.env == 'production'
         run: helm upgrade --install production --wait ohm/ -f values.production.yaml -f ohm/values.yaml
-        

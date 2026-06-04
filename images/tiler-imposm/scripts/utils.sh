@@ -28,7 +28,12 @@ execute_sql_file() {
     log_message "${YELLOW}⚙️  Executing: $file"
 
     local start_time=$SECONDS
-    if psql "$PG_CONNECTION" -f "$file"; then
+    # Disable statement_timeout so large CREATE MATERIALIZED VIEW statements finish.
+    # The DB sets statement_timeout=10min, which cancels heavy mview builds (e.g.
+    # admin areas: 82k geoms + simplification + ~450 language columns take >10min),
+    # leaving the mview uncreated and the later refresh loop failing with
+    # "relation ... does not exist". refresh_mviews.sh already sets it to 0.
+    if PGOPTIONS="-c statement_timeout=0" psql "$PG_CONNECTION" -f "$file"; then
         local elapsed=$((SECONDS - start_time))
         log_message "${GREEN}✅ Successfully executed: $file (Time: ${elapsed}s)"
     else

@@ -1,6 +1,5 @@
 #!/bin/bash
 # Configuration file for ohmx-adiff-builder
-
 export WORKDIR=/data
 
 ## Database path
