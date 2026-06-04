@@ -8,19 +8,17 @@ name: Build images (chartpress)
 # registry before a deploy references them.
 
 on:
+  # Runs on every push, no path filter. This is the single entry point for a
+  # deploy: deploy-eks and deploy-k3s only fire via workflow_run once this
+  # finishes, so the images are always in the registry before a deploy uses
+  # them. chartpress skips the rebuild when nothing under images/** changed
+  # (tags come from git history), so config-only pushes stay cheap.
   push:
     branches:
       - 'main'
       - 'staging'
       - 'deploy-*'
       - 'build-*'
-      - 'k3s'
-    paths:
-      # chartpress.yaml and Chart.yaml are shared deps: changing them rebumps
-      # every image tag, so the build must run to push images at the new tag.
-      - 'images/**'
-      - 'chartpress.yaml'
-      - 'ohm/Chart.yaml'
   workflow_dispatch:
 
 jobs:
