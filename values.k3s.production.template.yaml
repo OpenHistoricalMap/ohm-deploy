@@ -209,7 +209,7 @@ osm-seed:
     enabled: false
 
   tilerCache:
-    enabled: false
+    enabled: true
     replicaCount: 1
     env:
       PORT: 8000
