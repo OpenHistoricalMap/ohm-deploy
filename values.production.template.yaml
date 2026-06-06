@@ -266,11 +266,11 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "6Gi"
+        memory: "8Gi"
         cpu: "3500m"
       limits:
         enabled: false
-        memory: "8Gi"
+        memory: "16Gi"
         cpu: "4000m"
     nodeSelector:
       enabled: false
@@ -300,11 +300,11 @@ osm-seed:
       enabled: true
       requests:
         enabled: true
-        memory: "6Gi"
+        memory: "8Gi"
         cpu: "3500m"
       limits:
         enabled: false
-        memory: "8Gi"
+        memory: "16Gi"
         cpu: "4000m"
     nodeSelector:
       enabled: false
