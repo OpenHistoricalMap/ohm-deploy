@@ -2,7 +2,7 @@ FROM ghcr.io/bdon/osmexpress:045a515132e91a3679ce3df27329937c9b8b221a
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-RUN apk add --no-cache python3 py3-pip git bash curl aws-cli py3-lxml make libxml2
+RUN apk add --no-cache python3 py3-pip git bash curl aws-cli py3-lxml make libxml2 libgcc
 
 RUN apk add --no-cache --virtual .build-deps \
       build-base patch python3-dev cmake zlib-dev expat-dev bzip2-dev boost-dev \
@@ -15,6 +15,9 @@ RUN apk add --no-cache --virtual .build-deps \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
       | sh -s -- -y --profile minimal --default-toolchain stable && \
     export LIBCLANG_PATH=/usr/lib && \
+    # musl defaults to static linking; bindgen's build script must dlopen
+    # libclang, which a static binary can't do. Link dynamically instead.
+    export RUSTFLAGS="-C target-feature=-crt-static" && \
     \
     echo "--- Build osm-cli (jake-low) with OpenHistoricalMap replication URLs ---" && \
     git clone https://github.com/jake-low/osm-cli.git /tmp/osm-cli && \
