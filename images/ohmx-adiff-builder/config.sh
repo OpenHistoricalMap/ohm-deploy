@@ -13,7 +13,7 @@ export PLANET_FILE_PATH=$WORKDIR/planet.osm.pbf
 
 # Services
 export REPLICATION_URL="${REPLICATION_URL:-https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute}"
-export API_URL=${API_URL:-https://api.openstreetmap.org}
+export API_URL=${API_URL:-https://api.openhistoricalmap.org}
 
 # Working directories
 export SPLIT_ADIFFS_DIR=$WORKDIR/stage-data/split-adiffs   # per-changeset fragments

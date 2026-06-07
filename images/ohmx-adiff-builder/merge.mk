@@ -11,7 +11,7 @@
 SPLIT_ADIFFS_DIR ?= stage-data/split-adiffs
 CHANGESET_DIR ?= stage-data/changesets
 BUCKET_DIR ?= bucket-data/replication/minute
-API_URL ?= https://api.openstreetmap.org
+API_URL ?= https://api.openhistoricalmap.org
 
 
 MAKEDIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
