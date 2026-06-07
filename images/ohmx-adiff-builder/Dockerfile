@@ -6,7 +6,7 @@ RUN apk add --no-cache python3 py3-pip git bash curl aws-cli py3-lxml make libxm
 
 RUN apk add --no-cache --virtual .build-deps \
       build-base patch python3-dev cmake zlib-dev expat-dev bzip2-dev boost-dev \
-      capnproto libxml2-dev pkgconfig && \
+      capnproto-dev libxml2-dev pkgconfig && \
     \
     pip install --break-system-packages osmx requests osmium && \
     \
