@@ -6,7 +6,7 @@ RUN apk add --no-cache python3 py3-pip git bash curl aws-cli py3-lxml make libxm
 
 RUN apk add --no-cache --virtual .build-deps \
       build-base patch python3-dev cmake zlib-dev expat-dev bzip2-dev boost-dev \
-      capnproto-dev libxml2-dev pkgconfig && \
+      capnproto-dev clang-dev libxml2-dev pkgconfig && \
     \
     pip install --break-system-packages osmx requests osmium && \
     \
@@ -14,6 +14,7 @@ RUN apk add --no-cache --virtual .build-deps \
     # so pull a current stable toolchain via rustup instead of the apk packages.
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
       | sh -s -- -y --profile minimal --default-toolchain stable && \
+    export LIBCLANG_PATH=/usr/lib && \
     \
     echo "--- Build osm-cli (jake-low) with OpenHistoricalMap replication URLs ---" && \
     git clone https://github.com/jake-low/osm-cli.git /tmp/osm-cli && \
