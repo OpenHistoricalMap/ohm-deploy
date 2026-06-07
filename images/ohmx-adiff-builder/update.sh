@@ -1,61 +1,55 @@
 #!/bin/bash
+# For each new replication file: build per-changeset adiffs with osmx-rs --split,
+# then apply the change to the osmx db. Runs once and exits; start.sh loops it.
+#
+# Usage: update.sh <osmx_db> <split_adiffs_dir> <bad_changesets_dir> [start_seqno]
 set -euo pipefail
-
-# This script is base  on https://github.com/OSMCha/osmx-adiff-builder/blob/main/update.sh
-
+cd "$(dirname "$0")"
+source ./config.sh
 export PATH="$PATH:$PWD"
 
-if [ "$#" -lt 3 ]; then
-    echo "Usage: $0 <osmx_db_path> <replication_adiffs_dir> <bad_changesets_dir> [initial_seqnum]"
-    exit 1
-fi
+# Args are optional overrides; defaults come from config.sh (the /data layout).
+OSMX_DB_PATH=${1:-$OSMX_DB_PATH}
+SPLIT_ADIFFS_DIR=${2:-$SPLIT_ADIFFS_DIR}
+BAD_CHANGESETS_DIR=${3:-$BAD_CHANGESETS_DIR}
+START_SEQNO=${4:-${START_SEQNO:-}}
 
-OSMX_DB_PATH=$1
-REPLICATION_ADIFFS_DIR=$2
-BAD_CHANGESETS_DIR=$3
-INITIAL_SEQNUM=${4:-}
+command -v mise >/dev/null 2>&1 && eval "$(mise activate bash --shims)"
 
-eval "$(mise activate bash --shims)"
+# Preflight: a missing tool is a setup error, not a bad changeset. Fail fast and
+# loud instead of silently dumping every .osc into bad_changesets.
+for bin in "$OSMX_BIN" "$OSMX_RS_BIN" osm; do
+  command -v "$bin" >/dev/null 2>&1 || { echo "FATAL: required binary '$bin' not found in PATH" >&2; exit 127; }
+done
 
-if [ -n "${INITIAL_SEQNUM:-}" ]; then
-  seqno_start="$INITIAL_SEQNUM"
-else
-  seqno_start="$(osmx query "$OSMX_DB_PATH" seqnum)"
-fi
+mkdir -p "$SPLIT_ADIFFS_DIR" "$BAD_CHANGESETS_DIR"
+seqno_start=${START_SEQNO:-$("$OSMX_BIN" query "$OSMX_DB_PATH" seqnum)}
+echo ">>> starting from seqno=$seqno_start"
 
-echo ">>> Starting from seqno=$seqno_start"
+osm replication minute --seqno "$seqno_start" | while read -r seqno timestamp url; do
+  [ -z "${seqno:-}" ] && { echo ">>> end of stream"; break; }
 
-osm replication minute --seqno "$seqno_start" \
-| while read -r seqno timestamp url; do
-    # Exit if seqno is empty
-    if [ -z "${seqno:-}" ]; then
-      echo ">>> seqno is empty, end of stream"; break
-    fi
+  echo ">>> [$seqno] fetching $url"
+  if ! curl -fsSL --retry 3 --retry-delay 2 --max-time 120 "$url" | gzip -d > "$seqno.osc"; then
+    echo "!!! [$seqno] download failed, skipping"; rm -f "$seqno.osc"; continue
+  fi
 
-    echo ">>> [$seqno] fetching $url"
-    # Robust curl with retries and timeout
-    if ! curl -fsSL --retry 3 --retry-delay 2 --max-time 120 "$url" | gzip -d > "${seqno}.osc"; then
-      echo "!!! [$seqno] failed to download or decompress. skipping..."
-      continue
-    fi
+  # Generate one adiff per changeset into a tmp dir, then file each fragment under
+  # split-adiffs/<changeset>/<seqno>.adiff so they accumulate across replication files.
+  tmpdir=$(mktemp -d)
+  if ! "$OSMX_RS_BIN" augmented-diff --split "$OSMX_DB_PATH" "$seqno.osc" "$tmpdir"; then
+    rm -rf "$tmpdir"; mv "$seqno.osc" "$BAD_CHANGESETS_DIR/"
+    echo "!!! [$seqno] osmx-rs failed, osc moved to $BAD_CHANGESETS_DIR"; continue
+  fi
+  for f in "$tmpdir"/*.adiff; do
+    [ -e "$f" ] || continue
+    cs=$(basename -s .adiff "$f")
+    mkdir -p "$SPLIT_ADIFFS_DIR/$cs"
+    mv "$f" "$SPLIT_ADIFFS_DIR/$cs/$seqno.adiff"
+  done
+  rm -rf "$tmpdir"
 
-    echo ">>> [$seqno] building adiff"
-    tmpfile="$(mktemp)"
-    if augmented_diff.py "$OSMX_DB_PATH" "${seqno}.osc" \
-       | xmlstarlet format > "$tmpfile"; then
-        mv "$tmpfile" "$REPLICATION_ADIFFS_DIR/${seqno}.adiff"
-        echo ">>> [$seqno] adiff OK -> ${REPLICATION_ADIFFS_DIR}/${seqno}.adiff"
-    else
-        rm -f "$tmpfile"
-        mv "${seqno}.osc" "$BAD_CHANGESETS_DIR/${seqno}.osc"
-        echo "!!! [$seqno] error generating adiff (possible invalid XML). OSC moved to $BAD_CHANGESETS_DIR. Continuing..."
-        continue
-    fi
-
-    echo ">>> [$seqno] osmx update"
-    osmx update "$OSMX_DB_PATH" "${seqno}.osc" "$seqno" "$timestamp" --commit || {
-      echo "!!! [$seqno] osmx update failed"; exit 1;
-    }
-    rm -f "${seqno}.osc"
-    echo ">>> [$seqno] done"
+  echo ">>> [$seqno] osmx update"
+  "$OSMX_BIN" update "$OSMX_DB_PATH" "$seqno.osc" "$seqno" "$timestamp" --commit
+  rm -f "$seqno.osc"
 done

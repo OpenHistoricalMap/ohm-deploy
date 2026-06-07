@@ -1,185 +1,88 @@
 #!/bin/bash
-# set -e
+# Runs the pipeline as two loops plus a watchdog:
+#   make_diffs : update.sh turns replication files into per-changeset adiffs
+#   publish    : merge fragments -> upload to S3 -> garbage-collect
+#   watchdog   : if a loop stalls, exit so docker restarts the container
+set -uo pipefail
+cd "$(dirname "$0")"
+source ./config.sh
 
-WORKDIR=/data
-
-## Database path
-OSMX_DB_DIR=$WORKDIR/db/
-OSMX_DB_PATH=$OSMX_DB_DIR/osmx.db
-PLANET_FILE_PATH=$WORKDIR/planet.osm.pbf
-
-## URLs services
-REPLICATION_URL="${REPLICATION_URL:-https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute}"
-API_URL=${API_URL:-https://api.openstreetmap.org}
-
-## Reqeuiried directories
-REPLICATION_ADIFFS_DIR=$WORKDIR/stage-data/replication-adiffs
-SPLIT_ADIFFS_DIR=$WORKDIR/stage-data/split-adiffs
-CHANGESET_DIR=$WORKDIR/stage-data/changesets
-BUCKET_DIR=$WORKDIR/stage-data/bucket-data
-UPLOAD_TRACK_FILE=$WORKDIR/stage-data/uploaded_files.md5
-BAD_CHANGESETS_DIR=$WORKDIR/stage-data/bad_changesets
-
-## Liveness — heartbeats that the watchdog and the healthcheck check
-HEARTBEAT_DIR=${HEARTBEAT_DIR:-/tmp/heartbeat}
-HEARTBEAT_STALE_SECONDS=${HEARTBEAT_STALE_SECONDS:-600}
-
-## Sequence number
-OSMX_INITIAL_SEQNUM=${OSMX_INITIAL_SEQNUM:-0}
-
-## Process diff files from the last 60 min
-FILTER_ADIFF_FILES=60
-
-mkdir -p "$OSMX_DB_DIR" "$REPLICATION_ADIFFS_DIR" "$SPLIT_ADIFFS_DIR" \
-         "$CHANGESET_DIR" "$BUCKET_DIR" "$BAD_CHANGESETS_DIR" "$HEARTBEAT_DIR" \
-         "$BUCKET_DIR/replication/minute" \
-         /app/bucket-data/replication/minute
-
+mkdir -p "$OSMX_DB_DIR" "$SPLIT_ADIFFS_DIR" "$CHANGESET_DIR" \
+         "$BUCKET_DIR" "$BAD_CHANGESETS_DIR" "$HEARTBEAT_DIR"
 beat() { touch "$HEARTBEAT_DIR/$1"; }
 
+# Tag every line from a loop with "time [component]" so the parallel loops
+# (make_diffs, publish, watchdog) stay readable in the combined log and can be
+# grepped apart, e.g. `kubectl logs ... | grep '\[merge\]'`.
+log_prefix() {
+  local tag="$1"
+  while IFS= read -r line; do
+    printf '%s [%-10s] %s\n' "$(date '+%F %T')" "$tag" "$line"
+  done
+}
+
 create_database() {
-  if [ ! -f "$OSMX_DB_PATH" ]; then
-    # Download the planet file if it doesn't exist and a URL is provided
-    if [ ! -f "$PLANET_FILE_PATH" ] && [ -n "$PLANET_PBF_URL" ]; then
-      wget -O "$PLANET_FILE_PATH" "$PLANET_PBF_URL"
-    elif [ ! -f "$PLANET_FILE_PATH" ]; then
-      echo "ERROR: Planet file not found at $PLANET_FILE_PATH and PLANET_PBF_URL is not set."
-      exit 1
-    fi
-    osmx expand "$PLANET_FILE_PATH" "$OSMX_DB_PATH"
-    echo "Database created successfully."
-
-    ## Update database with initial sequence number and get adiff files, starts at OSMX_INITIAL_SEQNU
-    ./update.sh $OSMX_DB_PATH $REPLICATION_ADIFFS_DIR $BAD_CHANGESETS_DIR $OSMX_INITIAL_SEQNUM
-    ## Start generating files with no initial sequence number
-    create_diff_files
-
-  else
-    echo "Database already exists. Skipping creation."
+  [ -f "$OSMX_DB_PATH" ] && { echo "Database already exists."; return; }
+  if [ ! -f "$PLANET_FILE_PATH" ]; then
+    [ -n "${PLANET_PBF_URL:-}" ] || { echo "ERROR: no planet file and PLANET_PBF_URL unset"; exit 1; }
+    wget -O "$PLANET_FILE_PATH" "$PLANET_PBF_URL"
   fi
+  "$OSMX_BIN" expand "$PLANET_FILE_PATH" "$OSMX_DB_PATH"
+  START_SEQNO="$OSMX_INITIAL_SEQNUM" ./update.sh   # seed from the initial seqno
 }
 
-
-create_diff_files() {
+make_diffs() {
   while true; do
-    beat create_diff_files
-    echo "Running update.sh at $(date)..."
-    if ! ./update.sh "$OSMX_DB_PATH" "$REPLICATION_ADIFFS_DIR" "$BAD_CHANGESETS_DIR"; then
-      echo "update.sh failed at $(date), restarting..."
-    else
-      echo "update.sh completed successfully at $(date)"
-    fi
-
+    beat make_diffs
+    # timeout caps a run below the watchdog limit, so a stalled replication stream
+    # gets killed and retried instead of wedging the loop. The db is transactional,
+    # so the next run just resumes from the last committed seqno.
+    timeout "$UPDATE_TIMEOUT" ./update.sh || echo "update.sh failed/timed out, retrying"
     sleep 60
   done
 }
 
-process_diff_files() {
+publish() {
   while true; do
-    beat process_diff_files
-    echo "Processing diff files at $(date)..."
-    if ! ./process.sh \
-      "$REPLICATION_ADIFFS_DIR" \
-      "$SPLIT_ADIFFS_DIR" \
-      "$CHANGESET_DIR" \
-      "$BUCKET_DIR" \
-      "$API_URL" \
-      "$FILTER_ADIFF_FILES"; then
-      echo "process.sh failed at $(date), restarting..."
-    else
-      echo "process.sh completed successfully at $(date)"
-    fi
-
+    beat publish
+    echo "STEP merge: building changeset-aligned adiffs from split fragments"
+    make -f merge.mk SPLIT_ADIFFS_DIR="$SPLIT_ADIFFS_DIR" CHANGESET_DIR="$CHANGESET_DIR" \
+                     BUCKET_DIR="$BUCKET_DIR" API_URL="$API_URL" || echo "merge failed"
+    echo "STEP upload: pushing merged adiffs to s3"
+    upload_changesets
+    echo "STEP gc: removing changesets older than the retention window"
+    ./gc.sh "$SPLIT_ADIFFS_DIR" "$CHANGESET_DIR"
+    echo "STEP idle: sleeping 60s"
     sleep 60
   done
 }
 
-upload_diff_files() {
-  mkdir -p "$(dirname "$UPLOAD_TRACK_FILE")"
-  touch "$UPLOAD_TRACK_FILE"
-
-  declare -A uploaded_md5s
-  while read -r line; do
-    file=$(echo "$line" | awk '{print $1}')
-    hash=$(echo "$line" | awk '{print $2}')
-    uploaded_md5s["$file"]="$hash"
-  done < "$UPLOAD_TRACK_FILE"
-
-  while true; do
-    beat upload_diff_files
-    echo "Uploading files at $(date)..."
-    # NOTE: use process substitution (< <(...)) instead of "find | while" because
-    # the pipe runs the while in a subshell and changes to the uploaded_md5s array
-    # would be lost on exit, causing infinite re-uploads.
-    while read -r filepath; do
-      filename=$(basename "$filepath")
-      current_md5=$(md5sum "$filepath" | awk '{print $1}')
-
-      if [[ -n "${uploaded_md5s[$filename]}" ]]; then
-        if [[ "${uploaded_md5s[$filename]}" == "$current_md5" ]]; then
-          echo "Skipping unchanged: $filename"
-          continue
-        else
-          echo "File changed: $filename — reuploading"
-        fi
-      else
-        echo "New file: $filename — uploading"
-      fi
-
-      if aws s3 cp "$filepath" "s3://$AWS_S3_BUCKET/ohm-augmented-diffs/changesets/$filename" \
-        --content-type "application/xml" \
-        --content-encoding "gzip"; then
-        uploaded_md5s["$filename"]="$current_md5"
-      else
-        echo "Upload failed for $filename, will retry next loop"
-      fi
-    done < <(find "$BUCKET_DIR" -type f -name '*.adiff' -mmin -60)
-
-    # Update tracking file
-    : > "$UPLOAD_TRACK_FILE"
-    for fname in "${!uploaded_md5s[@]}"; do
-      echo "$fname ${uploaded_md5s[$fname]}" >> "$UPLOAD_TRACK_FILE"
-    done
-
-    sleep 15
+# Upload each merged adiff; delete it locally only after S3 confirms, so a failed
+# upload is simply retried next pass and never lost.
+upload_changesets() {
+  [ -n "${AWS_S3_BUCKET:-}" ] || { echo "AWS_S3_BUCKET unset, skipping upload"; return; }
+  find "$BUCKET_DIR" -type f -name '*.adiff' | while read -r f; do
+    aws s3 cp "$f" "s3://$AWS_S3_BUCKET/$S3_PREFIX/$(basename "$f")" \
+      --content-type application/xml --content-encoding gzip && rm -f "$f"
   done
 }
 
-# Watchdog: if any heartbeat goes stale, we exit -> docker restarts
 watchdog() {
-  while true; do
-    sleep 60
+  while sleep 60; do
     now=$(date +%s)
-    for name in create_diff_files process_diff_files upload_diff_files; do
-      hb="$HEARTBEAT_DIR/$name"
-      [ -f "$hb" ] || continue
-      mtime=$(stat -c %Y "$hb")
-      age=$(( now - mtime ))
-      if [ "$age" -gt "$HEARTBEAT_STALE_SECONDS" ]; then
-        echo "[$(date)] FATAL: heartbeat '$name' stale (${age}s > ${HEARTBEAT_STALE_SECONDS}s). Exiting so docker restarts the container." >&2
-        exit 1
+    for name in make_diffs publish; do
+      hb="$HEARTBEAT_DIR/$name"; [ -f "$hb" ] || continue
+      if [ $(( now - $(stat -c %Y "$hb") )) -gt "$HEARTBEAT_STALE_SECONDS" ]; then
+        echo "FATAL: '$name' stalled, exiting for restart" >&2; kill 0
       fi
     done
   done
 }
 
-## Start process diff files
 create_database
-
-create_diff_files &
-CREATE_PID=$!
-process_diff_files &
-PROCESS_PID=$!
-upload_diff_files &
-UPLOAD_PID=$!
-watchdog &
-WATCH_PID=$!
-
-echo "[$(date)] PIDs: create=$CREATE_PID process=$PROCESS_PID upload=$UPLOAD_PID watchdog=$WATCH_PID"
-
-# If ANY background process dies, exit with error -> docker restarts
+make_diffs 2>&1 | log_prefix create  &
+publish    2>&1 | log_prefix merge   &
+watchdog   2>&1 | log_prefix watchdog &
 wait -n
-EXIT_CODE=$?
-echo "[$(date)] FATAL: a background process exited (exit=$EXIT_CODE). Killing the others and exiting." >&2
-kill "$CREATE_PID" "$PROCESS_PID" "$UPLOAD_PID" "$WATCH_PID" 2>/dev/null
-exit "$EXIT_CODE"
+echo "FATAL: a loop exited, exiting for restart" >&2
+kill 0
