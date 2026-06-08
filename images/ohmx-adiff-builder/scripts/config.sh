@@ -24,9 +24,6 @@ export BAD_CHANGESETS_DIR=$WORKDIR/stage-data/bad_changesets
 # Upload target: s3://$AWS_S3_BUCKET/$S3_PREFIX/<changeset>.adiff
 export S3_PREFIX=${S3_PREFIX:-ohm-augmented-diffs/changesets}
 
-# Seqno to start from when building the database from scratch
-export OSMX_INITIAL_SEQNUM=${OSMX_INITIAL_SEQNUM:-0}
-
 # Liveness (watchdog in start.sh + healthcheck.sh)
 export HEARTBEAT_DIR=${HEARTBEAT_DIR:-/tmp/heartbeat}
 export HEARTBEAT_STALE_SECONDS=${HEARTBEAT_STALE_SECONDS:-600}

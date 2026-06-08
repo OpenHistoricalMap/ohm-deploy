@@ -28,7 +28,18 @@ create_database() {
     wget -O "$PLANET_FILE_PATH" "$PLANET_PBF_URL"
   fi
   "$OSMX_BIN" expand "$PLANET_FILE_PATH" "$OSMX_DB_PATH"
-  START_SEQNO="$OSMX_INITIAL_SEQNUM" ./update.sh   # seed from the initial seqno
+
+  # planet-dump writes osmosis_replication_sequence_number into the PBF header.
+  # Read it (the helper falls back to deriving from the timestamp for old planets)
+  # and seed the db with an empty changeset. We seed explicitly instead of relying
+  # on osmx expand to pick up the header, so the db position is deterministic.
+  # After this the db is the single source of truth: update.sh reads osmx query seqnum.
+  read -r SEED_SEQNO SEED_TS < <(python3 ./seqno_from_planet.py "$PLANET_FILE_PATH" "$REPLICATION_URL")
+  [ -n "$SEED_SEQNO" ] || { echo "FATAL: could not resolve seqno from planet" >&2; exit 1; }
+  echo "Seeding db seqnum=$SEED_SEQNO timestamp=$SEED_TS"
+  printf '%s' '<?xml version="1.0" encoding="UTF-8"?><osmChange version="0.6" generator="seqno-seed"></osmChange>' > /tmp/seed.osc
+  "$OSMX_BIN" update "$OSMX_DB_PATH" /tmp/seed.osc "$SEED_SEQNO" "$SEED_TS" --commit
+  rm -f /tmp/seed.osc
 }
 
 make_diffs() {

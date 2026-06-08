@@ -12,7 +12,6 @@ export PATH="$PATH:$PWD"
 OSMX_DB_PATH=${1:-$OSMX_DB_PATH}
 SPLIT_ADIFFS_DIR=${2:-$SPLIT_ADIFFS_DIR}
 BAD_CHANGESETS_DIR=${3:-$BAD_CHANGESETS_DIR}
-START_SEQNO=${4:-${START_SEQNO:-}}
 
 command -v mise >/dev/null 2>&1 && eval "$(mise activate bash --shims)"
 
@@ -23,7 +22,9 @@ for bin in "$OSMX_BIN" "$OSMX_RS_BIN" osm; do
 done
 
 mkdir -p "$SPLIT_ADIFFS_DIR" "$BAD_CHANGESETS_DIR"
-seqno_start=${START_SEQNO:-$("$OSMX_BIN" query "$OSMX_DB_PATH" seqnum)}
+# The db is the single source of truth for position: create_database seeds the
+# seqnum from the planet header, every osmx update --commit advances it.
+seqno_start=$("$OSMX_BIN" query "$OSMX_DB_PATH" seqnum)
 echo ">>> starting from seqno=$seqno_start"
 
 osm replication minute --seqno "$seqno_start" | while read -r seqno timestamp url; do
