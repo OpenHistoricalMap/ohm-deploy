@@ -29,17 +29,18 @@ create_database() {
   fi
   "$OSMX_BIN" expand "$PLANET_FILE_PATH" "$OSMX_DB_PATH"
 
-  # planet-dump writes osmosis_replication_sequence_number into the PBF header.
-  # Read it (the helper falls back to deriving from the timestamp for old planets)
-  # and seed the db with an empty changeset. We seed explicitly instead of relying
-  # on osmx expand to pick up the header, so the db position is deterministic.
-  # After this the db is the single source of truth: update.sh reads osmx query seqnum.
-  read -r SEED_SEQNO SEED_TS < <(python3 ./seqno_from_planet.py "$PLANET_FILE_PATH" "$REPLICATION_URL")
-  [ -n "$SEED_SEQNO" ] || { echo "FATAL: could not resolve seqno from planet" >&2; exit 1; }
-  echo "Seeding db seqnum=$SEED_SEQNO timestamp=$SEED_TS"
-  printf '%s' '<?xml version="1.0" encoding="UTF-8"?><osmChange version="0.6" generator="seqno-seed"></osmChange>' > /tmp/seed.osc
-  "$OSMX_BIN" update "$OSMX_DB_PATH" /tmp/seed.osc "$SEED_SEQNO" "$SEED_TS" --commit
-  rm -f /tmp/seed.osc
+  # osmx expand copies osmosis_replication_sequence_number from the PBF header into
+  # the db (OSMExpress src/expand.cpp), so the db already knows its position.
+  # planet-dump writes that seqno into the header, so there is nothing else to seed:
+  # update.sh resumes from `osmx query seqnum`.
+  local seqnum
+  seqnum=$("$OSMX_BIN" query "$OSMX_DB_PATH" seqnum 2>/dev/null || true)
+  if [ -z "$seqnum" ] || [ "$seqnum" = "0" ]; then
+    echo "FATAL: planet has no replication sequence number in its header." >&2
+    echo "Regenerate the planet with planet-dump so the header carries the seqno." >&2
+    exit 1
+  fi
+  echo "Database ready at seqnum=$seqnum (from planet header)"
 }
 
 make_diffs() {
