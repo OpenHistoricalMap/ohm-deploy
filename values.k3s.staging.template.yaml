@@ -265,7 +265,7 @@ osm-seed:
 
   # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
   taginfoDataProcessor:
-    enabled: true
+    enabled: false
     schedule: "0 2 */3 * *"
     priorityClass: medium-priority
     serviceAccount:
@@ -440,7 +440,7 @@ osm-seed:
       enabled: false
 
   osmxAdiffBuilder:
-    enabled: true
+    enabled: false
     # Give the initial osmx build (download planet + build db) time before the
     # liveness probe starts checking for the create_diff_files heartbeat.
     livenessProbe:
@@ -449,7 +449,6 @@ osm-seed:
       PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
       MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
       API_URL: https://api.openhistoricalmap.org
-      OSMX_INITIAL_SEQNUM: "1912000"
       AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
       AWS_S3_REGION: us-east-1
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
@@ -471,7 +470,7 @@ osm-seed:
       enabled: false
         
   planetStats:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     schedule: '0 7 * * *'
     serviceAccount:

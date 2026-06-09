@@ -396,6 +396,8 @@ osm-seed:
         BACKUP_CLOUD_FOLDER: database/web-api-db
         BACKUP_CLOUD_FILE: ohm-api-web-db
         AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
+        # OHM replication stream, read at backup time to store the seqno next to the dump
+        MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
         # Clean up backups options
         CLEANUP_BACKUPS: true
         RETENTION_DAYS: '30'
