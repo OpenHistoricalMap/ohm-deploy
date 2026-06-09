@@ -1,0 +1,46 @@
+name: Build and Publish OHM Stats Dashboard
+
+on:
+  push:
+    branches:
+      - "main"
+      - "deploy-stats-dashboard"
+  workflow_dispatch:
+
+env:
+  DASHBOARD_REPO: danvk/ohm
+  DASHBOARD_GITSHA: 58c9bca6894a76158242b2025bfcba29ada6ddd8
+  CLOUDFLARE_PROJECT: ohm-planet-stats-dashboard
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.13.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout dashboard repo
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.DASHBOARD_REPO }}
+          ref: ${{ env.DASHBOARD_GITSHA }}
+          path: ohm
+
+      - name: Prepare publish dir
+        run: |
+          mkdir -p site/dashboard
+          cp ohm/index.html site/
+          cp -r ohm/dashboard/. site/dashboard/
+          ls -la site site/dashboard
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.DEPLOY_CLOUDFLARE_PAGES_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ env.CLOUDFLARE_PROJECT }} --branch=${{ github.ref_name }}
