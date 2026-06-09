@@ -13,7 +13,7 @@ if [ ! -d "$HEARTBEAT_DIR" ]; then
 fi
 
 now=$(date +%s)
-for name in create_diff_files process_diff_files upload_diff_files; do
+for name in make_diffs publish; do
   hb="$HEARTBEAT_DIR/$name"
   if [ ! -f "$hb" ]; then
     echo "unhealthy: no heartbeat for $name"

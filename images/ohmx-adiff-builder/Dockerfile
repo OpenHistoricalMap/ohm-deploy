@@ -1,39 +1,47 @@
-FROM ghcr.io/bdon/osmexpress:latest
+FROM ghcr.io/bdon/osmexpress:045a515132e91a3679ce3df27329937c9b8b221a
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-RUN apk add --no-cache python3 py3-pip git bash xmlstarlet curl aws-cli py3-lxml
+RUN apk add --no-cache python3 py3-pip git bash curl aws-cli py3-lxml make libxml2 libgcc
 
-RUN apk add --no-cache --virtual .build-deps build-base patch python3-dev make cmake zlib-dev expat-dev bzip2-dev boost-dev rust cargo && \
+RUN apk add --no-cache --virtual .build-deps \
+      build-base patch python3-dev cmake zlib-dev expat-dev bzip2-dev boost-dev \
+      capnproto-dev clang-dev libxml2-dev pkgconfig && \
     \
     pip install --break-system-packages osmx requests osmium && \
     \
-    echo "--- Clonando y modificando osm-cli para OpenHistoricalMap ---" && \
+    # Alpine's rust/cargo lag behind crate MSRVs (osmpbf/home now need rustc 1.88+),
+    # so pull a current stable toolchain via rustup instead of the apk packages.
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+      | sh -s -- -y --profile minimal --default-toolchain stable && \
+    export LIBCLANG_PATH=/usr/lib && \
+    # musl defaults to static linking; bindgen's build script must dlopen
+    # libclang, which a static binary can't do. Link dynamically instead.
+    export RUSTFLAGS="-C target-feature=-crt-static" && \
+    \
+    echo "--- Build osm-cli (jake-low) with OpenHistoricalMap replication URLs ---" && \
     git clone https://github.com/jake-low/osm-cli.git /tmp/osm-cli && \
     cd /tmp/osm-cli && \
-    echo "Cambiando URL en src/replication.rs" && \
     sed -i 's|https://planet.openstreetmap.org/replication/minute|https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute|g' src/replication.rs && \
-    echo "Cambiando URL en src/main.rs" && \
     sed -i 's|https://www.openstreetmap.org|https://www.openhistoricalmap.org|g' src/main.rs && \
-    echo "Compilando osm-cli desde la fuente modificada..." && \
-    cargo install --path . && \
-    cd / && \
-    rm -rf /tmp/osm-cli && \
+    cargo install --root /usr/local --path . && \
+    cd / && rm -rf /tmp/osm-cli && \
     \
-    apk del .build-deps && \
-    apk add make
+    echo "--- Build osmx-rs (jake-low) for augmented-diff --split ---" && \
+    cargo install --root /usr/local --git https://github.com/jake-low/osmx-rs.git osmx-rs && \
+    \
+    # Binaries now live in /usr/local/bin, so the whole toolchain can go.
+    rustup self uninstall -y && \
+    apk del .build-deps
 
 RUN curl https://mise.jdx.dev/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
 
-# RUN echo "Update repo 08/08/2025"
-
-RUN git clone https://github.com/OpenHistoricalMap/osmx-adiff-builder.git /app
-
-COPY *.sh .
-COPY *.py .
+# Pipeline scripts come from OSMCha/osmx-adiff-builder (Rust path), customized
+# for OpenHistoricalMap and copied in directly instead of cloned.
+COPY scripts/*.sh scripts/*.py scripts/*.mk /app/
 
 RUN chmod +x /app/*.sh && chmod +x /app/*.py
 

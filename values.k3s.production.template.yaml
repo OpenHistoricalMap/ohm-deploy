@@ -459,7 +459,6 @@ osm-seed:
       PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
       MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
       API_URL: https://api.openhistoricalmap.org
-      OSMX_INITIAL_SEQNUM: "1912000"
       AWS_S3_BUCKET: planet.openhistoricalmap.org
       AWS_S3_REGION: us-east-1
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
