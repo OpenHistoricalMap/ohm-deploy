@@ -265,7 +265,7 @@ osm-seed:
 
   # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
   taginfoDataProcessor:
-    enabled: true
+    enabled: false
     schedule: "0 2 */3 * *"
     priorityClass: medium-priority
     serviceAccount:
@@ -440,7 +440,7 @@ osm-seed:
       enabled: false
 
   osmxAdiffBuilder:
-    enabled: true
+    enabled: false
     # Give the initial osmx build (download planet + build db) time before the
     # liveness probe starts checking for the create_diff_files heartbeat.
     livenessProbe:
@@ -470,7 +470,7 @@ osm-seed:
       enabled: false
         
   planetStats:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     schedule: '0 7 * * *'
     serviceAccount:
