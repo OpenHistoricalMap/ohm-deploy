@@ -21,16 +21,15 @@ all: changesets
 
 changesets: $(shell find $(SPLIT_ADIFFS_DIR)/ -mindepth 1 -type d | sed 's|$(SPLIT_ADIFFS_DIR)|$(CHANGESET_DIR)/|g' | sed 's|$$|.adiff.md5|')
 
-# bucket-data/changesets/%.adiff: $$(wildcard stage-data/split-adiffs/%/*)
+# merge_adiffs.py can fail if it is given no input files or if one or more of its
+# input files are not found. Either can happen if the split-adiffs/*/ directory is
+# deleted by gc.sh while Make runs this script. So we only move the adiff into
+# bucket-data and update the stamp file if the merged output is nonempty (-s).
+# The leading @ (with .ONESHELL) silences command echo so the log stays readable.
 $(CHANGESET_DIR)/%.adiff.md5: $$(wildcard $(SPLIT_ADIFFS_DIR)/%/*)
-	tmpfile=$$(mktemp)
+	@tmpfile=$$(mktemp)
 	python merge_adiffs.py $^ > $$tmpfile
 	if [ -s $$tmpfile ]; then
-		# merge_adiffs.py can fail if it is given no input files or if one or more
-		# of its input files are not found. Either of these can happen if the input
-		# split-adiffs/*/ directory is deleted by gc.sh while Make is running this
-		# script. So we only move the adiff file into bucket-data and update the
-		# stamp file if the merged output file is nonempty (-s).
 		md5sum < $$tmpfile > $@
 		gzip -c < $$tmpfile > $$tmpfile.gz
 		mv $$tmpfile.gz $(BUCKET_DIR)/$*.adiff && rm $$tmpfile
