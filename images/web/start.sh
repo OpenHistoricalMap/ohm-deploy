@@ -130,11 +130,14 @@ setup_production() {
 
   # Update map styles. This line should be removed later, as the configuration should come from the module.
   SERVER_URL_="${SERVER_URL/www./}"
+  # Tiler host. Defaults to vtiles.<server domain>; override VTILES_DOMAIN to use a
+  # shared tiler (e.g. a preview that has no tiler of its own).
+  VTILES_DOMAIN="${VTILES_DOMAIN:-vtiles.${SERVER_URL_}}"
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|openhistoricalmap.github.io|${SERVER_URL}|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|www.openhistoricalmap.org|${SERVER_URL}|g" {} +
-  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
-  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.openhistoricalmap.org|${VTILES_DOMAIN}|g" {} +
+  find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|${VTILES_DOMAIN}|g" {} +
 
   # Replace URLs in the public directory
   find "/var/www/public" -type f \( \
@@ -152,8 +155,8 @@ setup_production() {
       -e "s|openhistoricalmap.github.io|${SERVER_URL}|g" \
       -e "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" \
       -e "s|www.openhistoricalmap.org|${SERVER_URL}|g" \
-      -e "s|vtiles.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
-      -e "s|vtiles.staging.openhistoricalmap.org|vtiles.${SERVER_URL_}|g" \
+      -e "s|vtiles.openhistoricalmap.org|${VTILES_DOMAIN}|g" \
+      -e "s|vtiles.staging.openhistoricalmap.org|${VTILES_DOMAIN}|g" \
       "$file"
   done
 

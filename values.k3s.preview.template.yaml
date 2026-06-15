@@ -31,6 +31,8 @@ osm-seed:
       MAILER_FROM: web@noreply.openhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
+      VTILES_DOMAIN: vtiles.openhistoricalmap.org
+
       NEW_RELIC_LICENSE_KEY: "none"
       NEW_RELIC_APP_NAME: "none"
       ORGANIZATION_NAME: OpenHistoricalMap
@@ -39,7 +41,6 @@ osm-seed:
       RAILS_MASTER_KEY: "ceadf340a26657419e5343d46b60798c"
       RAILS_ENV: production
       RAILS_LOG_LEVEL: debug
-
       OPENSTREETMAP_id_key: "tCygIMWpJVZ2c-vWYC_kI_YnMow3WmGbKLp2Rq_WgHI"
       OAUTH_CLIENT_ID: "Zj5OnOQLXJKgGYFMwsisuhsHR-FAg1khf-wr0nE3OWo"
       OAUTH_KEY: "OGNWJkSOmeJ8X08iL6Srv0oTaETIcwftD5OyFPbbY3A"
