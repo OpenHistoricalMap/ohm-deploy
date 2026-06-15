@@ -9,8 +9,8 @@ on:
         description: web-* branch to preview
         required: true
       backup_url:
-        description: apidb backup .sql.gz URL to load
-        required: true
+        description: apidb backup URL (.sql or .sql.gz); blank = PREVIEW_BACKUP_URL secret
+        required: false
   push:
     branches:
       - 'web-*'
@@ -154,8 +154,9 @@ jobs:
           BACKUP_URL: ${{ github.event.inputs.backup_url || secrets.PREVIEW_BACKUP_URL }}
         run: |
           if [ -z "$BACKUP_URL" ]; then
-            echo "::error::no backup_url input and PREVIEW_BACKUP_URL secret is empty"; exit 1
+            echo "::error::set the PREVIEW_BACKUP_URL secret (or pass backup_url on dispatch)"; exit 1
           fi
+          echo "backup: $BACKUP_URL"
           WEB_IMAGE="$(helm -n "$NS" get values "$RELEASE" -a -o json \
             | python3 -c 'import sys,json;w=json.load(sys.stdin)["osm-seed"]["web"]["image"];print(f"{w[\"name\"]}:{w[\"tag\"]}")')"
           echo "restore image: $WEB_IMAGE"
@@ -186,8 +187,11 @@ jobs:
                         echo "waiting for db..."
                         until pg_isready -h $RELEASE-db -p 5432; do sleep 2; done
                         echo "downloading + restoring backup..."
-                        curl -fsSL "\$BACKUP_URL" | gunzip -c \
-                          | psql -h $RELEASE-db -U postgres -d openhistoricalmap
+                        # handle both plain .sql and gzipped .sql.gz
+                        case "\$BACKUP_URL" in
+                          *.gz) curl -fsSL "\$BACKUP_URL" | gunzip -c | psql -h $RELEASE-db -U postgres -d openhistoricalmap ;;
+                          *)    curl -fsSL "\$BACKUP_URL" | psql -h $RELEASE-db -U postgres -d openhistoricalmap ;;
+                        esac
                         echo "restore done"
           EOF
           kubectl -n "$NS" wait --for=condition=complete --timeout=30m job/$RELEASE-restore \

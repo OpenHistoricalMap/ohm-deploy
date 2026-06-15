@@ -54,7 +54,6 @@ osm-seed:
       OPENSTREETMAP_AUTH_SECRET: "none"
       WIKIPEDIA_AUTH_ID: "none"
       WIKIPEDIA_AUTH_SECRET: "none"
-      BACKUP_FILE_URL: "https://osmseed-dev.s3.amazonaws.com/backup_test_ohm.sql"
     resources:
       enabled: false
     autoscaling:
