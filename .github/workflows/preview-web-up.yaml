@@ -158,7 +158,7 @@ jobs:
           fi
           echo "backup: $BACKUP_URL"
           WEB_IMAGE="$(helm -n "$NS" get values "$RELEASE" -a -o json \
-            | python3 -c 'import sys,json;w=json.load(sys.stdin)["osm-seed"]["web"]["image"];print(f"{w[\"name\"]}:{w[\"tag\"]}")')"
+            | python3 -c 'import sys,json;w=json.load(sys.stdin)["osm-seed"]["web"]["image"];print(w["name"]+":"+w["tag"])')"
           echo "restore image: $WEB_IMAGE"
           kubectl -n "$NS" delete job "$RELEASE-restore" --ignore-not-found
           cat <<EOF | kubectl -n "$NS" apply -f -
