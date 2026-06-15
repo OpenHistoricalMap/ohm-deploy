@@ -39,7 +39,8 @@ jobs:
           echo "branch=$BRANCH"            >> $GITHUB_OUTPUT
           echo "slug=$SLUG"                >> $GITHUB_OUTPUT
           echo "release=$SLUG"             >> $GITHUB_OUTPUT
-          echo "namespace=preview-$SLUG"   >> $GITHUB_OUTPUT
+          # one shared namespace for all previews; each branch is its own release
+          echo "namespace=preview"         >> $GITHUB_OUTPUT
           echo "host=$SLUG.ohmstaging.org" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v4

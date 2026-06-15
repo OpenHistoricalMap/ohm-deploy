@@ -33,7 +33,8 @@ jobs:
           echo "skip=false"               >> $GITHUB_OUTPUT
           echo "branch=$BRANCH"           >> $GITHUB_OUTPUT
           echo "release=$SLUG"            >> $GITHUB_OUTPUT
-          echo "namespace=preview-$SLUG"  >> $GITHUB_OUTPUT
+          # shared namespace for all previews; only the release is per-branch
+          echo "namespace=preview"        >> $GITHUB_OUTPUT
           echo "host=$SLUG.ohmstaging.org" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v4
@@ -72,8 +73,10 @@ jobs:
           done
           echo "Tunnel failed to reach k3s" >&2; exit 1
           
-      - name: Helm uninstall + delete namespace
+      # Uninstall only this branch's release. The shared `preview` namespace and
+      # its middleware stay (other previews live there).
+      - name: Helm uninstall
         if: steps.r.outputs.skip != 'true'
         run: |
           helm -n ${{ steps.r.outputs.namespace }} uninstall ${{ steps.r.outputs.release }} || echo "release already gone"
-          kubectl delete namespace ${{ steps.r.outputs.namespace }} --ignore-not-found
+          kubectl -n ${{ steps.r.outputs.namespace }} delete job ${{ steps.r.outputs.release }}-restore --ignore-not-found

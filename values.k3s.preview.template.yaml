@@ -29,8 +29,8 @@ osm-seed:
       MAILER_USERNAME: "{{MAILER_USERNAME}}"
       MAILER_PASSWORD: "{{MAILER_PASSWORD}}"
       MAILER_FROM: web@noreply.openhistoricalmap.org
-      NOMINATIM_URL: nominatim.ohmstaging.org
-      OVERPASS_URL: overpass-api.ohmstaging.org
+      NOMINATIM_URL: nominatim.openhistoricalmap.org
+      OVERPASS_URL: overpass-api.openhistoricalmap.org
       NEW_RELIC_LICENSE_KEY: "none"
       NEW_RELIC_APP_NAME: "none"
       ORGANIZATION_NAME: OpenHistoricalMap
