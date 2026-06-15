@@ -46,3 +46,5 @@ values.k3s.staging.direct.yaml
 ohm/charts/
 k3s.sh
 *.zip
+test-preview.sh
+values.k3s.preview.yaml
