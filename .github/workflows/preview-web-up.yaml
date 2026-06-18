@@ -186,6 +186,12 @@ jobs:
                         set -euo pipefail
                         echo "waiting for db..."
                         until pg_isready -h $RELEASE-db -p 5432; do sleep 2; done
+                        # the db is ephemeral but survives a helm upgrade that does not
+                        # restart it; skip the restore if it already has data.
+                        if [ "\$(psql -h $RELEASE-db -U postgres -d openhistoricalmap -tAc "SELECT to_regclass('public.users') IS NOT NULL")" = "t" ]; then
+                          echo "db already populated; skipping restore"
+                          exit 0
+                        fi
                         echo "downloading + restoring backup..."
                         # handle both plain .sql and gzipped .sql.gz
                         case "\$BACKUP_URL" in
@@ -224,6 +230,29 @@ jobs:
             -f ./ohm/values.yaml \
             -f ./values.k3s.preview.yaml \
             --wait --timeout=20m
+
+      # The web image rewrites fingerprinted assets at startup (same URL, new
+      # content), so Cloudflare can serve stale JS after a redeploy. Purge the
+      # preview host's cache. Purge-by-host needs an Enterprise plan; on other
+      # plans this is a no-op warning (use a "bypass cache" Cache Rule instead).
+      - name: Purge Cloudflare cache for the preview host
+        continue-on-error: true
+        env:
+          CF_TOKEN: ${{ secrets.STAGING_CF_API_TOKEN }}
+          CF_ZONE: ${{ secrets.STAGING_CF_ZONE_ID }}
+          HOST: ${{ steps.n.outputs.host }}
+        run: |
+          if [ -z "$CF_TOKEN" ] || [ -z "$CF_ZONE" ]; then
+            echo "no STAGING_CF_API_TOKEN / STAGING_CF_ZONE_ID; skipping purge"; exit 0
+          fi
+          resp=$(curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE/purge_cache" \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "{\"hosts\":[\"$HOST\"]}")
+          echo "$resp"
+          echo "$resp" | grep -q '"success":true' \
+            || echo "::warning::cache purge failed (purge-by-host needs Enterprise; or set a bypass Cache Rule for web-*.ohmstaging.org)"
 
       - name: Summary
         if: always()
