@@ -1,6 +1,6 @@
 name: Preview website (k3s)
 
-# Throwaway website preview for a web-* branch on k3s staging, reachable at
+# Website preview for a web-* branch on k3s staging, reachable at
 # web-<branch>.ohmstaging.org.
 on:
   workflow_dispatch:
@@ -231,10 +231,6 @@ jobs:
             -f ./values.k3s.preview.yaml \
             --wait --timeout=20m
 
-      # The web image rewrites fingerprinted assets at startup (same URL, new
-      # content), so Cloudflare can serve stale JS after a redeploy. Purge the
-      # preview host's cache. Purge-by-host needs an Enterprise plan; on other
-      # plans this is a no-op warning (use a "bypass cache" Cache Rule instead).
       - name: Purge Cloudflare cache for the preview host
         continue-on-error: true
         env:
