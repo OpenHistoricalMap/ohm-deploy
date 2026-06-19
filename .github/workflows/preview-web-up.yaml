@@ -1,0 +1,264 @@
+name: Preview website (k3s)
+
+# Website preview for a web-* branch on k3s staging, reachable at
+# web-<branch>.ohmstaging.org.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: web-* branch to preview
+        required: true
+      backup_url:
+        description: apidb backup URL (.sql or .sql.gz); blank = PREVIEW_BACKUP_URL secret
+        required: false
+  push:
+    branches:
+      - 'web-*'
+
+concurrency:
+  # one run per branch; a new push cancels the in-flight preview build
+  group: preview-web-${{ github.event.inputs.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Resolve names
+        id: n
+        run: |
+          BRANCH="${{ github.event.inputs.ref || github.ref_name }}"
+          case "$BRANCH" in
+            web-*) ;;
+            *) echo "::error::branch '$BRANCH' must start with web-"; exit 1 ;;
+          esac
+          # DNS-safe slug: lowercase, non-alnum -> '-', trim, max 40 chars.
+          SLUG="$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' \
+            | sed 's/[^a-z0-9]/-/g; s/-\+/-/g; s/^-//; s/-$//' | cut -c1-40 | sed 's/-$//')"
+          echo "branch=$BRANCH"            >> $GITHUB_OUTPUT
+          echo "slug=$SLUG"                >> $GITHUB_OUTPUT
+          echo "release=$SLUG"             >> $GITHUB_OUTPUT
+          # one shared namespace for all previews; each branch is its own release
+          echo "namespace=preview"         >> $GITHUB_OUTPUT
+          echo "host=$SLUG.ohmstaging.org" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.n.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup git
+        run: |
+          git config --global user.email "noreply@developmentseed.org"
+          git config --global user.name "Github Action"
+
+      - name: Install chartpress
+        run: pip install chartpress==2.3.0 ruamel.yaml
+
+      - name: Run chartpress (build + push)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_GITHUB_TOKEN }}
+        run: chartpress --push
+
+      - name: Install cloudflared
+        run: |
+          sudo curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o /usr/local/bin/cloudflared
+          sudo chmod +x /usr/local/bin/cloudflared
+
+      - name: Install helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.1
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          KCFG="${{ secrets.STAGING_K3S_KUBECONFIG }}"
+          if [ -z "$KCFG" ]; then
+            echo "ERROR: STAGING_K3S_KUBECONFIG is empty" >&2; exit 1
+          fi
+          echo "$KCFG" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Open Cloudflare Access tunnel to k3s API
+        env:
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.STAGING_CF_ACCESS_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.STAGING_CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          cloudflared access tcp --hostname k3s.ohmstaging.org --url 127.0.0.1:16443 &
+          CF_PID=$!
+          for i in {1..30}; do
+            if curl -sk -o /dev/null --max-time 5 https://127.0.0.1:16443/livez; then
+              echo "tunnel up (k3s reachable)"; exit 0
+            fi
+            sleep 2
+          done
+          echo "Tunnel failed to reach k3s" >&2; kill $CF_PID 2>/dev/null || true; exit 1
+
+      - name: Verify access
+        run: kubectl get nodes
+
+      - name: Substitute secrets into preview values
+        uses: bluwy/substitute-string-action@v3
+        with:
+          _input-file: 'values.k3s.preview.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.k3s.preview.yaml'
+          PREVIEW_HOST: ${{ steps.n.outputs.host }}
+          PREVIEW_NS: ${{ steps.n.outputs.namespace }}
+          PREVIEW_DB_PASSWORD: ${{ secrets.PREVIEW_DB_PASSWORD }}
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+          MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
+          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
+          STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
+          STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
+          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
+          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Helm dep up
+        run: cd ohm && helm dep up
+
+      # Step 1: bring up db + memcached + cgimap, web OFF, so the restore can
+      # load the apidb before web boots and runs migrations.
+      - name: Deploy data tier (web off)
+        run: |
+          helm upgrade --install ${{ steps.n.outputs.release }} ./ohm \
+            -n ${{ steps.n.outputs.namespace }} --create-namespace \
+            -f ./ohm/values.yaml \
+            -f ./values.k3s.preview.yaml \
+            --set osm-seed.web.enabled=false \
+            --wait --timeout=10m
+
+      - name: Restore apidb from backup
+        env:
+          NS: ${{ steps.n.outputs.namespace }}
+          RELEASE: ${{ steps.n.outputs.release }}
+          BACKUP_URL: ${{ github.event.inputs.backup_url || secrets.PREVIEW_BACKUP_URL }}
+        run: |
+          if [ -z "$BACKUP_URL" ]; then
+            echo "::error::set the PREVIEW_BACKUP_URL secret (or pass backup_url on dispatch)"; exit 1
+          fi
+          echo "backup: $BACKUP_URL"
+          WEB_IMAGE="$(helm -n "$NS" get values "$RELEASE" -a -o json \
+            | python3 -c 'import sys,json;w=json.load(sys.stdin)["osm-seed"]["web"]["image"];print(w["name"]+":"+w["tag"])')"
+          echo "restore image: $WEB_IMAGE"
+          kubectl -n "$NS" delete job "$RELEASE-restore" --ignore-not-found
+          cat <<EOF | kubectl -n "$NS" apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: $RELEASE-restore
+          spec:
+            backoffLimit: 1
+            ttlSecondsAfterFinished: 600
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: restore
+                    image: $WEB_IMAGE
+                    env:
+                      - name: PGPASSWORD
+                        value: "${{ secrets.PREVIEW_DB_PASSWORD }}"
+                      - name: BACKUP_URL
+                        value: "$BACKUP_URL"
+                    command: ["bash","-c"]
+                    args:
+                      - |
+                        set -euo pipefail
+                        echo "waiting for db..."
+                        until pg_isready -h $RELEASE-db -p 5432; do sleep 2; done
+                        # the db is ephemeral but survives a helm upgrade that does not
+                        # restart it; skip the restore if it already has data.
+                        if [ "\$(psql -h $RELEASE-db -U postgres -d openhistoricalmap -tAc "SELECT to_regclass('public.users') IS NOT NULL")" = "t" ]; then
+                          echo "db already populated; skipping restore"
+                          exit 0
+                        fi
+                        echo "downloading + restoring backup..."
+                        # handle both plain .sql and gzipped .sql.gz
+                        case "\$BACKUP_URL" in
+                          *.gz) curl -fsSL "\$BACKUP_URL" | gunzip -c | psql -h $RELEASE-db -U postgres -d openhistoricalmap ;;
+                          *)    curl -fsSL "\$BACKUP_URL" | psql -h $RELEASE-db -U postgres -d openhistoricalmap ;;
+                        esac
+                        echo "restore done"
+          EOF
+          kubectl -n "$NS" wait --for=condition=complete --timeout=30m job/$RELEASE-restore \
+            || { kubectl -n "$NS" logs job/$RELEASE-restore --tail=80; exit 1; }
+
+      # The chart renders the web Ingress (osm-seed.web.ingress.enabled) with a
+      # router.middlewares annotation pointing at this Middleware, so create it
+      # first. It forces X-Forwarded-Proto=https: Cloudflare already terminated
+      # TLS, but Traefik would otherwise send http and the app's force_ssl would
+      # redirect to https forever.
+      - name: Create Traefik middleware (force https proto)
+        run: |
+          cat <<EOF | kubectl -n ${{ steps.n.outputs.namespace }} apply -f -
+          apiVersion: traefik.io/v1alpha1
+          kind: Middleware
+          metadata:
+            name: https-proto
+          spec:
+            headers:
+              customRequestHeaders:
+                X-Forwarded-Proto: https
+          EOF
+
+      # Step 2: enable web. It waits for db, runs rails db:migrate on the restored
+      # data, then serves. The chart renders the Traefik Ingress for the host.
+      - name: Deploy web
+        run: |
+          helm upgrade --install ${{ steps.n.outputs.release }} ./ohm \
+            -n ${{ steps.n.outputs.namespace }} \
+            -f ./ohm/values.yaml \
+            -f ./values.k3s.preview.yaml \
+            --wait --timeout=20m
+
+      - name: Purge Cloudflare cache for the preview host
+        continue-on-error: true
+        env:
+          CF_TOKEN: ${{ secrets.STAGING_CF_API_TOKEN }}
+          CF_ZONE: ${{ secrets.STAGING_CF_ZONE_ID }}
+          HOST: ${{ steps.n.outputs.host }}
+        run: |
+          if [ -z "$CF_TOKEN" ] || [ -z "$CF_ZONE" ]; then
+            echo "no STAGING_CF_API_TOKEN / STAGING_CF_ZONE_ID; skipping purge"; exit 0
+          fi
+          resp=$(curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE/purge_cache" \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "{\"hosts\":[\"$HOST\"]}")
+          echo "$resp"
+          echo "$resp" | grep -q '"success":true' \
+            || echo "::warning::cache purge failed (purge-by-host needs Enterprise; or set a bypass Cache Rule for web-*.ohmstaging.org)"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Preview"
+            echo ""
+            echo "- branch: \`${{ steps.n.outputs.branch }}\`"
+            echo "- url: https://${{ steps.n.outputs.host }}"
+            echo "- release: \`${{ steps.n.outputs.release }}\` (ns \`${{ steps.n.outputs.namespace }}\`)"
+            echo ""
+            echo "Tear it down with the **Preview website teardown** workflow."
+          } >> $GITHUB_STEP_SUMMARY
