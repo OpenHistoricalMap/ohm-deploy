@@ -112,6 +112,8 @@ osm-seed:
   # ====================================================================================================
   web:
     enabled: true
+    ingress:
+      enabled: false
     priorityClass: high-priority
     serviceAccount:
       enabled: true
@@ -119,7 +121,6 @@ osm-seed:
     replicaCount: 2
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: www.openhistoricalmap.org
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: openhistoricalmap.org
@@ -542,11 +543,12 @@ osm-seed:
 
   tmApi:
     enabled: true
+    ingress:
+      enabled: false
     priorityClass: medium-priority
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
-    ingressDomain: tm-api.openhistoricalmap.org
     healthCheckPath: /api/docs
     env:
       TM_ORG_NAME: OpenHistoricalMap

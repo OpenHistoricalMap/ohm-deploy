@@ -115,12 +115,13 @@ osm-seed:
     # ====================================================================================================
     web:
       enabled: true
+      ingress:
+        enabled: false
       priorityClass: "high-priority"
       serviceAccount:
         enabled: true
-        name: ohm-s3-bucket-access-staging    
+        name: ohm-s3-bucket-access-staging
       replicaCount: 1
-      ingressDomain: www.ohmstaging.org
       env:
         MAILER_ADDRESS: {{MAILER_ADDRESS}}
         MAILER_DOMAIN: ohmstaging.org
@@ -490,7 +491,6 @@ osm-seed:
       enabled: false
       priorityClass: medium-priority
       replicaCount: 1
-      ingressDomain: tm-api.ohmstaging.org
       healthCheckPath: /health
       env:
         TM_ORG_NAME: OpenHistoricalMap
