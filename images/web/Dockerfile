@@ -1,4 +1,4 @@
-FROM ruby:3.3-slim AS builder
+FROM ruby:3.4-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
@@ -14,9 +14,9 @@ WORKDIR $workdir
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git curl gnupg build-essential \
-    libarchive-dev zlib1g-dev libcurl4-openssl-dev \
+    libarchive-dev zlib1g-dev libcurl4-openssl-dev libgd-dev \
     apache2 apache2-dev libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
-    postgresql-client libpq-dev libxml2-dev libyaml-dev libgd-dev \
+    postgresql-client libpq-dev libxml2-dev libyaml-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip\
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
@@ -31,7 +31,7 @@ RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && 
     mv /tmp/ohm-website-$OPENHISTORICALMAP_WEBSITE_GITSHA/* $workdir && \
     rm -rf /tmp/*
 
-RUN gem install bundler && \
+RUN gem install bundler -v 4.0.11 --no-document && \
     bundle install && \
     yarn install && \
     bundle exec rake yarn:install
@@ -77,7 +77,7 @@ RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git
     cp leaflet-ohm-timeslider.* $workdir/app/assets/stylesheets/ && \
     cp assets/* $workdir/app/assets/images/
 
-FROM ruby:3.3-slim
+FROM ruby:3.4-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     workdir=/var/www \
@@ -116,6 +116,7 @@ RUN BUILD_DEPS=" \
     gifsicle \
     postgresql-client \
     curl \
+    git \
     libvips \
     nodejs \
     \
@@ -123,7 +124,7 @@ RUN BUILD_DEPS=" \
     \
     # Install Passenger as a gem and compile the Apache module
     \
-    && gem install passenger --no-document \
+    && gem install passenger -v 6.1.3 --no-document \
     && yes | passenger-install-apache2-module --auto --languages ruby \
     && passenger-config validate-install --auto \
     \
@@ -151,6 +152,10 @@ RUN a2enmod headers setenvif proxy proxy_http proxy_fcgi fcgid rewrite lbmethod_
     a2ensite production && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     apache2ctl configtest
+
+# Install bundler matching ohm-website Gemfile.lock to avoid Passenger preloader Gem::LoadError.
+RUN gem install bundler -v 4.0.11 --no-document
+
 
 RUN echo '#!/bin/bash\nexec /usr/local/bin/ruby --yjit --yjit-exec-mem-size=64 "$@"' > /usr/local/bin/ruby_yjit && \
     chmod +x /usr/local/bin/ruby_yjit
