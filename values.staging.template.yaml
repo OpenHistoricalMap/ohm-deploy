@@ -132,6 +132,8 @@ osm-seed:
         OAUTH_CLIENT_ID: CiBBpurbtUj1np_QZOTngIePlS7K9uGvKDW2Pcw5O7Y
         OAUTH_KEY: 1O8WtBWivoefehDMT6sbm9TNUU_h_EXznI4cM5XMyJw
         MAILER_FROM: web@noreply.openhistoricalmap.org
+        SERVER_URL: www.ohmstaging.org
+        SERVER_PROTOCOL: https
         NOMINATIM_URL: nominatim.ohmstaging.org
         OVERPASS_URL: overpass-api.ohmstaging.org	
         VTILES_DOMAIN: vtiles.ohmstaging.org
