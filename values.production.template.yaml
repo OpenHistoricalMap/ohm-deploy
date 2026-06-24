@@ -129,7 +129,9 @@ osm-seed:
       OPENSTREETMAP_id_key: {{PRODUCTION_ID_APPLICATION}}
       OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
       OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
-      MAILER_FROM: web@noreply.penhistoricalmap.org
+      MAILER_FROM: web@noreply.openhistoricalmap.org
+      SERVER_URL: www.openhistoricalmap.org
+      SERVER_PROTOCOL: https
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
       VTILES_DOMAIN: vtiles.openhistoricalmap.org
