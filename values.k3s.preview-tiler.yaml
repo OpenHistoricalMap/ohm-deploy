@@ -1,17 +1,3 @@
-# Tiler-only preview overlay for a vtiles-* branch on k3s staging.
-#
-# Deployed as helm release `tiler-<slug>` in the `preview` namespace by
-# preview-tiler-up.yaml. It builds an independent tiler stack (db + imposm +
-# martin) on its own host disks, so it never touches the live tiler:
-#   /mnt/tiler-db-data-<slug>      (postgres data)
-#   /mnt/tiler-imposm-data-<slug>  (imposm cache + replication state)
-#
-# imposm runs a full import from the PBF with the branch's mappings, then
-# builds the mviews. Martin is exposed at tiler-<slug>.ohmstaging.org through a
-# standalone Ingress created by the workflow (the chart does not template an
-# ingress for martin).
-#
-# Placeholders: {{SLUG}} {{AWS_ACCESS_KEY_ID}} {{AWS_SECRET_ACCESS_KEY}}
 osm-seed:
   environment: staging
   cloudProvider: k3s
@@ -59,11 +45,15 @@ osm-seed:
   # --- tiler build chain ON, on per-branch disks ---
   tilerDb:
     enabled: true
+    image:
+      repository: ghcr.io/openhistoricalmap/tiler-db
+      tag: 0.0.1-0.dev.git.3389.h62b55811
     priorityClass: medium-priority
     env:
       POSTGRES_DB: tiler_osm_production
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "123456789"
+      # injected at install time via --set from $POSTGRES_PASSWORD
+      POSTGRES_PASSWORD: ""
       POSTGRES_PORT: 5432
     sharedMemorySize: 2Gi
     persistenceDisk:
@@ -72,18 +62,21 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-db-data-{{SLUG}}
+      localVolumeHostPath: /mnt/tiler-db-data-vtiles-features
     resources:
       enabled: false
 
   tilerImposm:
     enabled: true
+    image:
+      repository: ghcr.io/openhistoricalmap/tiler-imposm
+      tag: 0.0.1-0.dev.git.3408.h8684e92a
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260531_0302.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260629_0001.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
@@ -103,7 +96,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-imposm-data-{{SLUG}}
+      localVolumeHostPath: /mnt/tiler-imposm-data-vtiles-features
     resources:
       enabled: true
     nodeSelector:
@@ -112,7 +105,7 @@ osm-seed:
       enabled: false
 
   tilerServerMartin:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     replicaCount: 1
     env:

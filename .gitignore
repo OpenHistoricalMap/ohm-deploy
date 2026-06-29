@@ -48,3 +48,4 @@ k3s.sh
 *.zip
 test-preview.sh
 values.k3s.preview.yaml
+tiler-preview.sh
