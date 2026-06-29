@@ -215,6 +215,7 @@ BEGIN
             ELSE type
         END AS type,
         NULLIF(tags->'construction', '') AS construction,
+        NULLIF(tags->'golf', '') AS golf,
         class,
         NULLIF(name, '') AS name,
         NULLIF(tunnel, 0) AS tunnel,
@@ -262,6 +263,7 @@ BEGIN
             ELSE type
         END AS type,
         NULLIF(tags->'construction', '') AS construction,
+        NULLIF(tags->'golf', '') AS golf,
         class,
         NULLIF(name, '') AS name,
         NULLIF(tunnel, 0) AS tunnel,

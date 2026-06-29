@@ -87,6 +87,18 @@
           "exclude": [
             "water"
           ]
+        },
+        "golf": {
+          "mapping": {
+            "golf": [
+              "green",
+              "bunker",
+              "fairway",
+              "rough",
+              "tee",
+              "driving_range"
+            ]
+          }
         }
       }
     }
