@@ -46,7 +46,7 @@ osm-seed:
   tilerDb:
     enabled: true
     image:
-      repository: ghcr.io/openhistoricalmap/tiler-db
+      name: ghcr.io/openhistoricalmap/tiler-db
       tag: 0.0.1-0.dev.git.3389.h62b55811
     priorityClass: medium-priority
     env:
@@ -56,27 +56,55 @@ osm-seed:
       POSTGRES_PASSWORD: ""
       POSTGRES_PORT: 5432
     sharedMemorySize: 2Gi
+    # Without this the db runs on postgres defaults (128MB shared_buffers, 64MB
+    # maintenance_work_mem), which makes a full import + building ~50 mviews very
+    # slow. maintenance_work_mem is the big lever for mview/index creation.
+    postgresqlConfig:
+      enabled: true
+      values: |
+        listen_addresses = '*'
+        max_connections = 100
+        shared_buffers = 8GB
+        work_mem = 256MB
+        maintenance_work_mem = 4GB
+        effective_cache_size = 16GB
+        max_wal_size = 8GB
+        min_wal_size = 1GB
+        random_page_cost = 1.0
+        checkpoint_completion_target = 0.9
+        dynamic_shared_memory_type = posix
+        effective_io_concurrency = 300
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        default_text_search_config = 'pg_catalog.english'
+        # Parallelism: faster import + mview/index builds
+        max_parallel_workers_per_gather = 4
+        max_parallel_maintenance_workers = 4
+        max_parallel_workers = 8
+        max_worker_processes = 8
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-db-data-vtiles-features
+      localVolumeHostPath: /mnt/tiler-db-data-v2
     resources:
       enabled: false
 
   tilerImposm:
     enabled: true
     image:
-      repository: ghcr.io/openhistoricalmap/tiler-imposm
+      name: ghcr.io/openhistoricalmap/tiler-imposm
       tag: 0.0.1-0.dev.git.3408.h8684e92a
     priorityClass: medium-priority
+    livenessProbe:
+      initialDelaySeconds: 14400
     serviceAccount:
       enabled: false
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260629_0001.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260630_0001.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
@@ -90,13 +118,13 @@ osm-seed:
       AWS_ACCESS_KEY_ID: ""
       AWS_SECRET_ACCESS_KEY: ""
       REFRESH_MVIEWS: true
-      RECREATE_MVIEWS_ON_UPDATE: false
+      RECREATE_MVIEWS_ON_UPDATE: true
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-imposm-data-vtiles-features
+      localVolumeHostPath: /mnt/tiler-imposm-data-v2
     resources:
       enabled: true
     nodeSelector:
