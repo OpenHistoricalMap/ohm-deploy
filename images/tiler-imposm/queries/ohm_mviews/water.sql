@@ -27,9 +27,9 @@ select create_mview_centroid_from_mview('mv_water_areas_z8_9','mv_water_areas_ce
 -- Water lines Materialized Views for Multiple Zoom Levels
 -- ============================================================================
 
-SELECT create_lines_mview('osm_water_lines', 'mv_water_lines_z16_20', 0, 0, 'id, osm_id, type', 'type IN (''river'', ''canal'', ''cliff'', ''dam'', ''stream'', ''ditch'', ''drain'')');
-SELECT create_mview_line_from_mview('mv_water_lines_z16_20', 'mv_water_lines_z13_15', 5, 'type IN (''river'', ''canal'', ''cliff'', ''dam'', ''stream'')');
-SELECT create_mview_line_from_mview('mv_water_lines_z13_15', 'mv_water_lines_z10_12', 20, 'type IN (''river'', ''canal'', ''cliff'', ''dam'')');
+SELECT create_lines_mview('osm_water_lines', 'mv_water_lines_z16_20', 0, 0, 'id, osm_id, type', 'type IN (''river'', ''canal'', ''dam'', ''stream'', ''ditch'', ''drain'')');
+SELECT create_mview_line_from_mview('mv_water_lines_z16_20', 'mv_water_lines_z13_15', 5, 'type IN (''river'', ''canal'', ''dam'', ''stream'')');
+SELECT create_mview_line_from_mview('mv_water_lines_z13_15', 'mv_water_lines_z10_12', 20, 'type IN (''river'', ''canal'', ''dam'')');
 SELECT create_mview_line_from_mview('mv_water_lines_z10_12', 'mv_water_lines_z8_9', 100, 'type IN (''river'', ''canal'')');
 
 -- Refresh areas views
