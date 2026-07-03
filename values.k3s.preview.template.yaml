@@ -1,0 +1,176 @@
+osm-seed:
+  environment: staging
+  cloudProvider: k3s
+  serviceType: ClusterIP
+  createClusterIssuer: false
+  ingressClassName: ""
+  domain: ohmstaging.org
+  adminEmail: admin@openhistoricalmap.org
+
+  web:
+    enabled: true
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    replicaCount: 1
+    ingress:
+      enabled: true
+      className: traefik
+      hosts:
+        - "{{PREVIEW_HOST}}"
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: "{{PREVIEW_NS}}-https-proto@kubernetescrd"
+    livenessProbeExec: true
+    env:
+      SERVER_URL: "{{PREVIEW_HOST}}"
+      SERVER_PROTOCOL: "https"
+      MAILER_ADDRESS: "{{MAILER_ADDRESS}}"
+      MAILER_DOMAIN: ohmstaging.org
+      MAILER_USERNAME: "{{MAILER_USERNAME}}"
+      MAILER_PASSWORD: "{{MAILER_PASSWORD}}"
+      MAILER_FROM: web@noreply.openhistoricalmap.org
+      NOMINATIM_URL: nominatim.openhistoricalmap.org
+      OVERPASS_URL: overpass-api.openhistoricalmap.org
+      VTILES_DOMAIN: vtiles.openhistoricalmap.org
+
+      NEW_RELIC_LICENSE_KEY: "none"
+      NEW_RELIC_APP_NAME: "none"
+      ORGANIZATION_NAME: OpenHistoricalMap
+      WEBSITE_STATUS: "online"
+      RAILS_CREDENTIALS_YML_ENC: "cAkSjhiOMk1I7JYLHJFdA20ceYwoV4UarL3mp4L6LnclUbuqKY7lj9+5OnN6oSsfBGQj3gxE2IY9uD533q+strxnllbpViFcxFNIFJR+pfKXs24GLeZYtJGOOJ2NcSIxpsI0d+53Bm1/QekjLVfauGSF9rc3BRLwJHxGubxILlAOfiK3ArXBMADsAR8Hc//efRmtlo0gFXQ15DO9j3Mq//FO--RP4fuggOTjlj/NeD--fX2NTz6KLYly7/rSvJC81Q=="
+      RAILS_MASTER_KEY: "ceadf340a26657419e5343d46b60798c"
+      RAILS_ENV: production
+      RAILS_LOG_LEVEL: debug
+      OPENSTREETMAP_id_key: "tCygIMWpJVZ2c-vWYC_kI_YnMow3WmGbKLp2Rq_WgHI"
+      OAUTH_CLIENT_ID: "Zj5OnOQLXJKgGYFMwsisuhsHR-FAg1khf-wr0nE3OWo"
+      OAUTH_KEY: "OGNWJkSOmeJ8X08iL6Srv0oTaETIcwftD5OyFPbbY3A"
+
+      RAILS_STORAGE_SERVICE: s3
+      RAILS_STORAGE_REGION: us-east-1
+      RAILS_STORAGE_BUCKET: osmseed-dev
+      AWS_ACCESS_KEY_ID: "{{AWS_ACCESS_KEY_ID}}"
+      AWS_SECRET_ACCESS_KEY: "{{AWS_SECRET_ACCESS_KEY}}"
+      PASSENGER_MAX_POOL_SIZE: 3
+      OPENSTREETMAP_AUTH_ID: "none"
+      OPENSTREETMAP_AUTH_SECRET: "none"
+      WIKIPEDIA_AUTH_ID: "none"
+      WIKIPEDIA_AUTH_SECRET: "none"
+    resources:
+      enabled: false
+    autoscaling:
+      enabled: false
+    sharedMemorySize: 16Mi
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+    podAntiAffinity:
+      enabled: false
+
+  db:
+    enabled: true
+    priorityClass: medium-priority
+    env:
+      POSTGRES_DB: openhistoricalmap
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "{{PREVIEW_DB_PASSWORD}}"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    persistenceDisk:
+      enabled: false
+    sharedMemorySize: 256Mi
+    resources:
+      enabled: false
+    postgresqlConfig:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  memcached:
+    enabled: true
+    priorityClass: medium-priority
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  cgimap:
+    enabled: true
+    priorityClass: medium-priority
+    resources:
+      enabled: false
+    autoscaling:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # ----- Everything else OFF --------------------------------------------------
+  fullHistory:
+    enabled: false
+  changesetsDump:
+    enabled: false
+  dbBackupRestore:
+    enabled: false
+  planetDump:
+    enabled: false
+  replicationJob:
+    enabled: false
+  populateApidb:
+    enabled: false
+  osmProcessor:
+    enabled: false
+  tilerDb:
+    enabled: false
+  tilerImposm:
+    enabled: false
+  tilerServer:
+    enabled: false
+  tilerServerMartin:
+    enabled: false
+  tilerVarnish:
+    enabled: false
+  tilerCacheCleanerJob:
+    enabled: false
+  tilerCache:
+    enabled: false
+  tilerMonitorPipeline:
+    enabled: false
+  tilerMonitorLanguage:
+    enabled: false
+  tmDb:
+    enabled: false
+  tmApi:
+    enabled: false
+  osmSimpleMetrics:
+    enabled: false
+  monitoringReplication:
+    enabled: false
+  changesetReplicationJob:
+    enabled: false
+  planetFiles:
+    enabled: false
+  taginfoWeb:
+    enabled: false
+  taginfoDataProcessor:
+    enabled: false
+  nominatimUI:
+    enabled: false
+  nominatimApi:
+    enabled: false
+  overpassApi:
+    enabled: false
+  osmchaWeb:
+    enabled: false
+  osmchaApi:
+    enabled: false
+  osmchaDb:
+    enabled: false
+  osmxAdiffBuilder:
+    enabled: false
+  planetStats:
+    enabled: false

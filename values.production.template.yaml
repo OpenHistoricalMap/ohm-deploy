@@ -112,25 +112,30 @@ osm-seed:
   # ====================================================================================================
   web:
     enabled: true
+    ingress:
+      enabled: false
     priorityClass: high-priority
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    replicaCount: 2
+    replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: www.openhistoricalmap.org
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: openhistoricalmap.org
       MAILER_USERNAME: {{MAILER_USERNAME}}
       MAILER_PASSWORD: {{MAILER_PASSWORD}}
-      OSM_id_key: {{PRODUCTION_ID_APPLICATION}}
+      OPENSTREETMAP_id_key: {{PRODUCTION_ID_APPLICATION}}
       OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
       OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
-      MAILER_FROM: web@noreply.penhistoricalmap.org
+      MAILER_FROM: web@noreply.openhistoricalmap.org
+      SERVER_URL: www.openhistoricalmap.org
+      SERVER_PROTOCOL: https
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
+      VTILES_DOMAIN: vtiles.openhistoricalmap.org
+
       NEW_RELIC_LICENSE_KEY: 'none'
       NEW_RELIC_APP_NAME: 'none'
       ORGANIZATION_NAME: OpenHistoricalMap
@@ -142,7 +147,6 @@ osm-seed:
       RAILS_STORAGE_SERVICE: s3
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
-      EXTERNAL_CGIMAP: true
       PASSENGER_MAX_POOL_SIZE: 6
       OPENSTREETMAP_AUTH_ID: {{PRODUCTION_OPENSTREETMAP_AUTH_ID}}
       OPENSTREETMAP_AUTH_SECRET: {{PRODUCTION_OPENSTREETMAP_AUTH_SECRET}}
@@ -541,11 +545,12 @@ osm-seed:
 
   tmApi:
     enabled: true
+    ingress:
+      enabled: false
     priorityClass: medium-priority
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '300'
-    ingressDomain: tm-api.openhistoricalmap.org
     healthCheckPath: /api/docs
     env:
       TM_ORG_NAME: OpenHistoricalMap
