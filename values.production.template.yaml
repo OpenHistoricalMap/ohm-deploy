@@ -118,7 +118,7 @@ osm-seed:
     serviceAccount:
       enabled: true
       name: ohm-s3-bucket-access-production
-    replicaCount: 1
+    replicaCount: 2
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     env:
