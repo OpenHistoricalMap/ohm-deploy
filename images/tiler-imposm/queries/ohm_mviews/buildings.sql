@@ -28,7 +28,8 @@ SELECT create_points_mview(
         'FALSE::boolean AS hide_3d',
         'NULL::text AS roof_material',
         'NULL::text AS roof_colour',
-        'NULL::text AS roof_shape'
+        'NULL::text AS roof_shape',
+        'NULLIF(tags->''golf'', '''') AS golf'
     ],
     NULL
 );
