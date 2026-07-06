@@ -118,6 +118,8 @@ osm-seed:
   tilerImposm:
     enabled: true
     priorityClass: medium-priority
+    livenessProbe:
+      enabled: true
     serviceAccount:
       enabled: false
     env:

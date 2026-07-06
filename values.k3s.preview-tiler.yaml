@@ -1,4 +1,4 @@
-osm-seed:
+#osm-seed:
   environment: staging
   cloudProvider: k3s
   serviceType: ClusterIP
@@ -20,7 +20,6 @@ osm-seed:
   populateApidb: { enabled: false }
   osmProcessor: { enabled: false }
   tilerServer: { enabled: false }
-  tilerVarnish: { enabled: false }
   tilerServerCacheCleaner: { enabled: false }
   tilerCacheCleanerJob: { enabled: false }
   tilerCache: { enabled: false }
@@ -55,7 +54,7 @@ osm-seed:
       # injected at install time via --set from $POSTGRES_PASSWORD
       POSTGRES_PASSWORD: ""
       POSTGRES_PORT: 5432
-    sharedMemorySize: 2Gi
+    sharedMemorySize: 4Gi
     # Without this the db runs on postgres defaults (128MB shared_buffers, 64MB
     # maintenance_work_mem), which makes a full import + building ~50 mviews very
     # slow. maintenance_work_mem is the big lever for mview/index creation.
@@ -64,12 +63,12 @@ osm-seed:
       values: |
         listen_addresses = '*'
         max_connections = 100
-        shared_buffers = 8GB
-        work_mem = 256MB
-        maintenance_work_mem = 4GB
-        effective_cache_size = 16GB
-        max_wal_size = 8GB
-        min_wal_size = 1GB
+        shared_buffers = 16GB
+        work_mem = 512MB
+        maintenance_work_mem = 10GB
+        effective_cache_size = 32GB
+        max_wal_size = 24GB
+        min_wal_size = 2GB
         random_page_cost = 1.0
         checkpoint_completion_target = 0.9
         dynamic_shared_memory_type = posix
@@ -77,7 +76,13 @@ osm-seed:
         datestyle = 'iso, mdy'
         timezone = 'Etc/UTC'
         default_text_search_config = 'pg_catalog.english'
-        # Parallelism: faster import + mview/index builds
+        # Disposable preview import DB: trade crash durability for import speed.
+        # synchronous_commit=off only risks losing the last few txns on a crash
+        # (no corruption). full_page_writes=off is the bigger win but can leave
+        # torn pages after a crash; safe here only because we rebuild from scratch.
+        synchronous_commit = off
+        full_page_writes = off
+        # Parallelism: sized to the 8-core node (freed after staging tiler is gone)
         max_parallel_workers_per_gather = 4
         max_parallel_maintenance_workers = 4
         max_parallel_workers = 8
@@ -96,15 +101,15 @@ osm-seed:
     enabled: true
     image:
       name: ghcr.io/openhistoricalmap/tiler-imposm
-      tag: 0.0.1-0.dev.git.3408.h8684e92a
+      tag: 0.0.1-0.dev.git.3415.hb6a77ee2
     priorityClass: medium-priority
     livenessProbe:
-      initialDelaySeconds: 14400
+      enabled: false
     serviceAccount:
       enabled: false
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260630_0001.osm.pbf
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260704_0001.osm.pbf
       REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
       SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
@@ -119,6 +124,7 @@ osm-seed:
       AWS_SECRET_ACCESS_KEY: ""
       REFRESH_MVIEWS: true
       RECREATE_MVIEWS_ON_UPDATE: true
+      STARTUP_GRACE_SECONDS: "86400"
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -134,14 +140,40 @@ osm-seed:
 
   tilerServerMartin:
     enabled: false
+    image:
+      name: ghcr.io/openhistoricalmap/tiler-server-martin
+      tag: 0.0.1-0.dev.git.3413.hab2776d4
     priorityClass: medium-priority
     replicaCount: 1
+    # POSTGRES_* come from the tiler-db configmap (envFrom), so martin connects
+    # to the DB built by tilerImposm above.
     env:
-      OHM_DOMAIN: ohmstaging.org
+      OHM_DOMAIN: preview-tiler.ohmstaging.org
       MARTIN_WORKER_PROCESSES: 8
       MARTIN_POOL_SIZE: 10
       # empty bucket = skip the vtiles_languages.geojson upload to S3
       AWS_S3_BUCKET: ""
+    resources:
+      enabled: false
+    nodeSelector:
+      enabled: false
+    nodeAffinity:
+      enabled: false
+
+  # Cache in front of martin (VCL backend = <release>-tiler-server-martin).
+  # Serves tiles on port 6081 at /maps/ohm/{z}/{x}/{y}. Ingress stays off:
+  # reach it with a port-forward. Set ingress.enabled + hosts to expose it.
+  tilerVarnish:
+    enabled: false
+    ingress:
+      enabled: false
+    image:
+      name: varnish
+      tag: "7.5"
+    priorityClass: medium-priority
+    replicaCount: 1
+    dynamicSize: "4G"
+    staticSize: "1G"
     resources:
       enabled: false
     nodeSelector:
