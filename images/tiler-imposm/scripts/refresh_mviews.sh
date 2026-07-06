@@ -228,6 +228,13 @@ water_views=(
     mv_water_lines_z8_9
 )
 
+# natural lines (cliff, ...) — split out of water_lines (#1345)
+natural_views=(
+    mv_natural_lines_z16_20
+    mv_natural_lines_z13_15
+    mv_natural_lines_z10_12
+)
+
 buildings_views=(
     # areas
     mv_buildings_areas_z14_15
@@ -293,6 +300,7 @@ refresh_mviews_group "OTHERS" 180 light "${others_views[@]}" &
 refresh_mviews_group "COMMUNICATION" 180 light "${communication_views[@]}" &
 refresh_mviews_group "PLACES" 180 light "${places_views[@]}" &
 refresh_mviews_group "WATER" 180 light "${water_views[@]}" &
+refresh_mviews_group "NATURAL" 180 light "${natural_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
 refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
 refresh_mviews_group "NO_ADMIN_BOUNDARIES" 180 light "${no_admin_boundaries_views[@]}" &

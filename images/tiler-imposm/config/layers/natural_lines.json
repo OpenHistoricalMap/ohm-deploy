@@ -9,7 +9,7 @@
   },
   "generalized_tables": {},
   "tables": {
-    "water_lines": {
+    "natural_lines": {
       "fields": [
         {
           "type": "id",
@@ -38,11 +38,6 @@
         },
         {
           "type": "string",
-          "name": "bridge",
-          "key": "bridge"
-        },
-        {
-          "type": "string",
           "name": "start_date",
           "key": "start_date"
         },
@@ -59,11 +54,8 @@
       ],
       "type": "linestring",
       "mapping": {
-        "waterway": [
-          "__any__"
-        ],
-        "barrier": [
-          "ditch"
+        "natural": [
+          "cliff"
         ]
       }
     }

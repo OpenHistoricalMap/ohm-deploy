@@ -53,8 +53,8 @@
       "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
     },
     "natural": {
-      "tables": ["osm_landuse_areas", "osm_landuse_lines", "osm_landuse_points", "osm_water_areas", "osm_water_lines"],
-      "views": ["mv_landuse_areas_z6_7", "mv_landuse_areas_z16_20", "mv_landuse_lines_z14_15", "mv_landuse_lines_z16_20", "mv_landuse_points", "mv_landuse_points_centroids_z6_7", "mv_landuse_points_centroids_z16_20", "mv_water_areas_z0_2", "mv_water_areas_z16_20", "mv_water_areas_centroids_z8_9", "mv_water_areas_centroids_z16_20", "mv_water_lines_z8_9", "mv_water_lines_z16_20"]
+      "tables": ["osm_landuse_areas", "osm_landuse_lines", "osm_landuse_points", "osm_water_areas", "osm_water_lines", "osm_natural_lines"],
+      "views": ["mv_landuse_areas_z6_7", "mv_landuse_areas_z16_20", "mv_landuse_lines_z14_15", "mv_landuse_lines_z16_20", "mv_landuse_points", "mv_landuse_points_centroids_z6_7", "mv_landuse_points_centroids_z16_20", "mv_water_areas_z0_2", "mv_water_areas_z16_20", "mv_water_areas_centroids_z8_9", "mv_water_areas_centroids_z16_20", "mv_water_lines_z8_9", "mv_water_lines_z16_20", "mv_natural_lines_z10_12", "mv_natural_lines_z16_20"]
     },
     "place": {
       "tables": ["osm_place_areas", "osm_place_points"],

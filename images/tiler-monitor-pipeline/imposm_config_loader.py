@@ -45,6 +45,7 @@ _TABLE_TO_VIEWS = {
     "osm_landuse_points": ["mv_landuse_points", "mv_landuse_points_centroids_z6_7", "mv_landuse_points_centroids_z16_20"],
     "osm_water_areas": ["mv_water_areas_z0_2", "mv_water_areas_z16_20", "mv_water_areas_centroids_z8_9", "mv_water_areas_centroids_z16_20"],
     "osm_water_lines": ["mv_water_lines_z8_9", "mv_water_lines_z16_20"],
+    "osm_natural_lines": ["mv_natural_lines_z10_12", "mv_natural_lines_z16_20"],
     "osm_other_areas": ["mv_other_areas_z8_9", "mv_other_areas_z16_20"],
     "osm_other_lines": ["mv_other_lines_z14_15", "mv_other_lines_z16_20"],
     "osm_other_points": ["mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"],
