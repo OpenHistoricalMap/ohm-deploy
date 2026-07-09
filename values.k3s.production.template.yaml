@@ -346,7 +346,7 @@ osm-seed:
       IMPORT_TIGER_ADDRESSES: false
       PGDATA: /var/lib/postgresql/16/main
       OSMSEED_WEB_API_DOMAIN: www.${OHM_DOMAIN}
-      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
+      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/nominatim/address-levels.json
       UPDATE_MODE: continuous
       IMPORT_STYLE: extratags
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
