@@ -319,6 +319,16 @@ osm-seed:
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     replicaCount: 1
+    # Give the initial planet import time to finish (5h) before the liveness
+    # probe starts checking the API.
+    livenessProbe:
+      httpGet:
+        path: /status
+        port: 8080
+      initialDelaySeconds: 18000
+      periodSeconds: 60
+      timeoutSeconds: 30
+      failureThreshold: 6
     env:
       NOMINATIM_API_ENDPOINT: nominatim.ohmstaging.org
       PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
@@ -333,9 +343,8 @@ osm-seed:
       IMPORT_TIGER_ADDRESSES: false
       PGDATA: /var/lib/postgresql/16/main
       OSMSEED_WEB_API_DOMAIN: www.${OHM_DOMAIN}
-      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
       UPDATE_MODE: continuous
-      IMPORT_STYLE: extratags
+      IMPORT_STYLE: /app/ohm-import.lua
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
       NOMINATIM_PASSWORD: "{{STAGING_NOMINATIM_PG_PASSWORD}}"
     resources:
