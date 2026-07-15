@@ -197,7 +197,7 @@ osm-seed:
     enabled: false
 
   tilerCache:
-    enabled: true
+    enabled: false
     replicaCount: 1
     env:
       PORT: 8000
@@ -213,7 +213,7 @@ osm-seed:
       enabled: false
   # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-cm.
   tilerMonitorPipeline:
-    enabled: true
+    enabled: false
     replicaCount: 1
     env:
       MONITOR_PORT: 8001
@@ -253,7 +253,7 @@ osm-seed:
 
   # Web frontend - serves taginfo HTTP UI, downloads .db files from S3
   taginfoWeb:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -360,7 +360,7 @@ osm-seed:
   # Overpass API
   # ====================================================================================================
   overpassApi:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
     # image:
@@ -395,14 +395,14 @@ osm-seed:
   # OSMCha
   # ====================================================================================================
   osmchaWeb:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
       tag: df5e9b5
 
   osmchaApi:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -430,7 +430,7 @@ osm-seed:
       enabled: false
 
   osmchaDb:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     image:
       name: postgis/postgis
