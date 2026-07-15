@@ -28,4 +28,6 @@ charts:
         valuesPath: osm-seed.planetStats.image
       overpass-api:
         valuesPath: osm-seed.overpassApi.image
+      nominatim:
+        valuesPath: osm-seed.nominatimApi.image
         
