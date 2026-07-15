@@ -312,15 +312,10 @@ osm-seed:
     enabled: true
     ingress:
       enabled: false
-    # image:
-    #   name: developmentseed/osmseed-nominatim
-    #   tag: 1.0.0-dev.hb293d54
     priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     replicaCount: 1
-    # Give the initial planet import time to finish (5h) before the liveness
-    # probe starts checking the API.
     livenessProbe:
       httpGet:
         path: /status
@@ -331,7 +326,7 @@ osm-seed:
       failureThreshold: 6
     env:
       NOMINATIM_API_ENDPOINT: nominatim.ohmstaging.org
-      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
+      PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260714_0001.osm.pbf
       REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
       REPLICATION_UPDATE_INTERVAL: 60
       REPLICATION_RECHECK_INTERVAL: 30
@@ -355,7 +350,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
       staticHostPath: true
-      localVolumeHostPath: /mnt/nominatim-db-data
+      localVolumeHostPath: /mnt/nominatim-db-data-v2
     nodeSelector:
       enabled: false
     nodeAffinity:
