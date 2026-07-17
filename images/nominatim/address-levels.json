@@ -111,7 +111,8 @@
           "" : [20, 0]
       },
       "historic" : {
-          "neighbourhood" : [22, 0]
+          "neighbourhood" : [22, 0],
+          "chronology" : [25, 0]
       }
   }
 }
