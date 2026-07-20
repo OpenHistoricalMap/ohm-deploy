@@ -39,7 +39,7 @@ osm-seed:
     env:
       POSTGRES_DB: tiler_osm_production
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "123456789"
+      POSTGRES_PASSWORD: "{{STAGING_TILER_DB_PASSWORD}}"
       POSTGRES_PORT: 5432
     sharedMemorySize: 2Gi
     persistenceDisk:
