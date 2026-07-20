@@ -79,6 +79,15 @@
               "__any__"
             ]
           }
+        },
+        "golf": {
+          "mapping": {
+            "golf": [
+              "pin",
+              "hole",
+              "tee"
+            ]
+          }
         }
       }
     }

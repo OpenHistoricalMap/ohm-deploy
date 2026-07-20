@@ -125,6 +125,12 @@ function uploadExpiredFiles() {
 
 # Function to upload last state file
 function uploadLastState() {
+    # Skip when no bucket is configured (e.g. preview builds with empty
+    # AWS_S3_BUCKET). Without this, `aws s3 cp` runs with an empty target and
+    # fails every loop with "Invalid argument type".
+    if [ -z "$AWS_S3_BUCKET" ]; then
+        return
+    fi
     # Path to the last.state.txt file
     local state_file="$DIFF_DIR/last.state.txt"
     local s3_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"

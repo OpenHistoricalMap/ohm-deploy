@@ -95,16 +95,14 @@ SELECT log_notice('STEP 3: Backfill for osm_route_multilines');
 SET statement_timeout = 2400000;
 UPDATE osm_route_multilines
 SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
-    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
-WHERE ST_GeometryType(geometry) IN ('ST_LineString', 'ST_MultiLineString');
+    end_decdate = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE);
 
 
 --- osm_route_lines
 SET statement_timeout = 2400000;
 UPDATE osm_route_lines
 SET start_decdate = isodatetodecimaldate(pad_date(start_date::TEXT, 'start')::TEXT, FALSE),
-    end_decdate   = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE)
-WHERE ST_GeometryType(geometry) IN ('ST_LineString', 'ST_MultiLineString');
+    end_decdate   = isodatetodecimaldate(pad_date(end_date::TEXT, 'end')::TEXT, FALSE);
 
 -- ============================================================================
 -- STEP 4: Create Materialized View for merged routes per continuous temporal range
@@ -124,6 +122,12 @@ WITH union_sources AS (
     me_highway AS highway
   FROM osm_route_multilines
   WHERE geometry IS NOT NULL
+    -- Fail-safe: drop rows whose date is present but invalid (text exists but did not
+    -- parse to a decimal date). An absent date stays NULL and keeps its unbounded
+    -- meaning; an invalid date would otherwise become unbounded and render the route
+    -- across all time (see issues #1369 / #1362). Hide it until the data is fixed.
+    AND NOT (COALESCE(start_date, '') <> '' AND start_decdate IS NULL)
+    AND NOT (COALESCE(end_date, '')   <> '' AND end_decdate   IS NULL)
 
   UNION ALL
 
@@ -136,6 +140,9 @@ WITH union_sources AS (
     highway
   FROM osm_route_lines
   WHERE geometry IS NOT NULL
+    -- Fail-safe: drop rows whose date is present but invalid (see multi-lines branch above).
+    AND NOT (COALESCE(start_date, '') <> '' AND start_decdate IS NULL)
+    AND NOT (COALESCE(end_date, '')   <> '' AND end_decdate   IS NULL)
 ),
 -- CTE to identify ways that DO have at least one date
 ways_with_dates AS (

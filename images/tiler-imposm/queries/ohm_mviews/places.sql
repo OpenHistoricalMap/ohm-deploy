@@ -195,7 +195,7 @@ SELECT create_place_points_centroids_mview (
 
 SELECT create_place_points_centroids_mview (
     'mv_place_points_centroids_z11_20',
-    ARRAY ['plot', 'square', 'islet'],
+    ARRAY ['plot', 'square', 'islet', 'island'],
     ARRAY ['state', 'province', 'region', 'county', 'municipality', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood', 'district', 'borough', 'quarter', 'isolated_dwelling', 'farm']
   );
 
@@ -204,7 +204,7 @@ SELECT create_place_points_centroids_mview (
 -- ============================================================================
 SELECT create_place_areas_mview(
   'mv_place_areas_z14_20',
-  ARRAY['plot', 'square', 'islet']
+  ARRAY['plot', 'square', 'islet', 'island']
 );
 
 -- Refresh centroids views

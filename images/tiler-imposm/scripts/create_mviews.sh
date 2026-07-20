@@ -85,6 +85,9 @@ execute_sql_file queries/ohm_mviews/transport_lines.sql
 
 execute_sql_file queries/ohm_mviews/water.sql
 
+## natural lines (cliff, ...) — split out of water_lines (#1345)
+execute_sql_file queries/ohm_mviews/natural_lines.sql
+
 ## routes
 execute_sql_file queries/ohm_mviews/routes_01_merge_by_date.sql
 execute_sql_file queries/ohm_mviews/routes_02_indexed.sql

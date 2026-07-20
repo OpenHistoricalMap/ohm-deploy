@@ -105,6 +105,17 @@
           ]
         },
         {
+          "function_name": "natural_lines",
+          "source_layer": "natural_lines",
+          "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 10,
+          "zoom_mapping": [
+            [12, "mv_natural_lines_z10_12"],
+            [15, "mv_natural_lines_z13_15"],
+            [null, "mv_natural_lines_z16_20"]
+          ]
+        },
+        {
           "function_name": "transport_areas",
           "source_layer": "transport_areas",
           "exclude_columns": ["geometry", "tags"],
