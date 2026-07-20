@@ -50,3 +50,4 @@ test-preview.sh
 values.k3s.preview.yaml
 tiler-preview.sh
 values.k3s.preview-nominatim.yaml
+preview.sh
