@@ -13,7 +13,7 @@ SELECT create_areas_mview(
     1000000,
     'id, osm_id, type',
     NULL,
-    NULL,
+    'NULLIF(tags->''religion'', '''') AS religion, NULLIF(tags->''denomination'', '''') AS denomination',
     NULL
 );
 SELECT create_points_centroids_mview(
@@ -32,7 +32,7 @@ SELECT create_areas_mview(
     50000,
     'id, osm_id, type',
     NULL,
-    NULL,
+    'NULLIF(tags->''religion'', '''') AS religion, NULLIF(tags->''denomination'', '''') AS denomination',
     NULL
 );
 SELECT create_points_centroids_mview(
@@ -50,7 +50,10 @@ SELECT create_points_mview(
     'osm_other_points',
     'mv_other_points',
     'id, source, osm_id',
-    NULL,
+    ARRAY[
+        'NULLIF(tags->''religion'', '''') AS religion',
+        'NULLIF(tags->''denomination'', '''') AS denomination'
+    ],
     NULL
 );
 
@@ -65,7 +68,7 @@ SELECT create_areas_mview(
     5000,
     'id, osm_id, type',
     NULL,
-    NULL,
+    'NULLIF(tags->''religion'', '''') AS religion, NULLIF(tags->''denomination'', '''') AS denomination',
     NULL
 );
 SELECT create_points_centroids_mview(
@@ -87,7 +90,7 @@ SELECT create_areas_mview(
     0,
     'id, osm_id, type',
     NULL,
-    NULL,
+    'NULLIF(tags->''religion'', '''') AS religion, NULLIF(tags->''denomination'', '''') AS denomination',
     NULL
 );
 SELECT create_points_centroids_mview(
