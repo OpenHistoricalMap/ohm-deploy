@@ -526,7 +526,7 @@ osm-seed:
       className: ""
       annotations: {}
       hosts:
-        - level0-dev.ohmstaging.org
+        - level0.ohmstaging.org
       tls:
         enabled: false
         secretName: ""
