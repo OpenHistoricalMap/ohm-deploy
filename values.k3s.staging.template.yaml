@@ -513,3 +513,45 @@ osm-seed:
     nodeAffinity:
       enabled: false
       
+  level0:
+    enabled: true
+    replicas: 1
+    priorityClass: "medium-priority"
+    serviceAccount:
+      enabled: false
+      name: ""
+    serviceAnnotations: {}
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - level0.ohmstaging.org
+      tls:
+        enabled: false
+        secretName: ""
+    env:
+      OSM_WEBSITE_URL: https://www.ohmstaging.org
+      OSM_API_URL: https://www.ohmstaging.org/api/0.6/
+      OAUTH2_CLIENT_ID: "Zt8qjPDUx9H_upbhNrR0Q91hkw2Pl1VzM3pxjRxGnUU"
+      OAUTH2_CLIENT_SECRET: "hokGQq7NznsxA2tQ5Hij7a1vn8rKItf6ApVaxd08dCc"
+      OVERPASS_API: "overpass-api.openhistoricalmap.org"
+      MAX_REQUEST_OBJECTS: "500"
+    resources:
+      enabled: false
+      requests:
+        enabled: false
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        enabled: false
+        memory: "512Mi"
+        cpu: "1"
+    nodeSelector:
+      enabled: false
+      label_key: nodegroup_type
+      label_value: web
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
