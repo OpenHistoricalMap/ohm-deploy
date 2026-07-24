@@ -22,10 +22,17 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ARG OVERPASS_VERSION
-ADD http://dev.overpass-api.de/releases/osm-3s_v0.7.62.9.tar.gz /tmp/src.tar.gz
+# Build from the b1tw153 fork (v0.7.62.11), which includes the security fixes
+# from drolbr/Overpass-API PRs #796 and #797 that are not merged upstream yet.
+ENV OVERPASS_API_GITSHA=dc87da313256ad0fc81370793608e0d989b4714a
+ENV OVERPASS_API_URL=https://github.com/b1tw153/Overpass-API/archive/${OVERPASS_API_GITSHA}.tar.gz
+ADD ${OVERPASS_API_URL} /tmp/src.tar.gz
 
 WORKDIR /tmp/src
 RUN tar -x -z --strip-components 1 -f /tmp/src.tar.gz
+
+# The GitHub archive keeps the sources under src/, unlike the release tarball
+WORKDIR /tmp/src/src
 
 # Use OHM copyright and URLs instead of OSM defaults. See issue #558.
 RUN sed -i \
@@ -43,7 +50,7 @@ RUN autoreconf -f -i \
     && make -j "$(nproc)" \
     && make install \
     && mkdir -p /app/etc \
-    && cp -r /tmp/src/rules /app/etc/rules \
+    && cp -r /tmp/src/src/rules /app/etc/rules \
     && rm -rf /tmp/src /tmp/src.tar.gz
 
 ARG WIKTORN_TAG
