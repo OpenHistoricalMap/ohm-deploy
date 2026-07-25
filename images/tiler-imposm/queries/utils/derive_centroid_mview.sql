@@ -11,9 +11,6 @@
 --     (it must expose the same columns as the source mview).
 --   - Deduplicates with DISTINCT ON (id, source, osm_id).
 --
---   Replaces the pre-standardization functions create_mview_centroid_from_mview
---   and create_points_centroids_mview (issue #1372).
---
 -- Parameters:
 --   source        TEXT     - Name of the source materialized view to read from (must contain area geometries)
 --   target        TEXT     - Name of the target materialized view to create/replace (will contain point geometries)
@@ -29,7 +26,6 @@
 --   - Adds a spatial index (GiST) on geometry and a unique index on (id, source, osm_id)
 --   - union_source rows are filtered only by geometry IS NOT NULL
 -- ============================================================================
--- Legacy names/signatures are removed by drop_legacy_functions.sql (issue #1372)
 DROP FUNCTION IF EXISTS derive_centroid_mview;
 
 CREATE OR REPLACE FUNCTION derive_centroid_mview(

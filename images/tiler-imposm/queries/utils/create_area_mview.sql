@@ -29,7 +29,6 @@
 --   - column_overrides replaces the default expression for a column (including the
 --     NULLIF text-wrapping), and the alias is kept as the column name
 -- ============================================================================
--- Legacy names/signatures are removed by drop_legacy_functions.sql (issue #1372)
 DROP FUNCTION IF EXISTS create_area_mview;
 
 CREATE OR REPLACE FUNCTION create_area_mview(

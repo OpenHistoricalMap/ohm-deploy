@@ -29,7 +29,6 @@
 --   - column_overrides expressions are used as-is; use double single quotes ('')
 --     inside expressions for string literals
 -- ============================================================================
--- Legacy names/signatures are removed by drop_legacy_functions.sql (issue #1372)
 DROP FUNCTION IF EXISTS create_point_mview;
 
 CREATE OR REPLACE FUNCTION create_point_mview(
