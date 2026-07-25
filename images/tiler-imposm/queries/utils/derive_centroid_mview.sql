@@ -29,10 +29,8 @@
 --   - Adds a spatial index (GiST) on geometry and a unique index on (id, source, osm_id)
 --   - union_source rows are filtered only by geometry IS NOT NULL
 -- ============================================================================
--- Legacy signatures (pre-standardization, issue #1372)
-DROP FUNCTION IF EXISTS create_mview_centroid_from_mview(TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS create_points_centroids_mview(TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS derive_centroid_mview(TEXT, TEXT, TEXT, TEXT, BOOLEAN);
+-- Legacy names/signatures are removed by drop_legacy_functions.sql (issue #1372)
+DROP FUNCTION IF EXISTS derive_centroid_mview;
 
 CREATE OR REPLACE FUNCTION derive_centroid_mview(
     source        TEXT,

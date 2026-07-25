@@ -29,12 +29,8 @@
 --   - column_overrides replaces the default expression for a column (including the
 --     NULLIF text-wrapping), and the alias is kept as the column name
 -- ============================================================================
--- Legacy signatures (pre-standardization, issue #1372)
-DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
-DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT);
-DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT, JSONB);
-DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT, JSONB, TEXT[]);
-DROP FUNCTION IF EXISTS create_area_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT[], TEXT, JSONB, TEXT[]);
+-- Legacy names/signatures are removed by drop_legacy_functions.sql (issue #1372)
+DROP FUNCTION IF EXISTS create_area_mview;
 
 CREATE OR REPLACE FUNCTION create_area_mview(
     source           TEXT,

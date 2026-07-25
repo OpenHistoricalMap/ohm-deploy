@@ -27,9 +27,8 @@
 --   - Adds a spatial index (GiST) on geometry and a unique index on unique_columns
 --   - where_filter is combined with AND, so pass conditions like "highway != 'abandoned'"
 -- ============================================================================
--- Legacy signatures (pre-standardization, issue #1372)
-DROP FUNCTION IF EXISTS create_lines_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
-DROP FUNCTION IF EXISTS create_line_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT[], TEXT, JSONB, TEXT[]);
+-- Legacy names/signatures are removed by drop_legacy_functions.sql (issue #1372)
+DROP FUNCTION IF EXISTS create_line_mview;
 
 CREATE OR REPLACE FUNCTION create_line_mview(
     source           TEXT,

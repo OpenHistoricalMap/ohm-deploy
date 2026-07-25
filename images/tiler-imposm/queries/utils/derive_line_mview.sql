@@ -20,10 +20,8 @@
 --   unique_columns  TEXT[]            - Columns for the unique index (default: ARRAY['id', 'osm_id'])
 --   where_filter    TEXT              - Optional WHERE clause filter (e.g., "type IN ('river', 'stream')"). NULL = no filter
 -- ============================================================================
--- Legacy signatures (pre-standardization, issue #1372)
-DROP FUNCTION IF EXISTS create_mview_line_from_mview(TEXT, TEXT, DOUBLE PRECISION, TEXT);
-DROP FUNCTION IF EXISTS derive_line_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT);
-DROP FUNCTION IF EXISTS derive_line_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT[], TEXT);
+-- Legacy names/signatures are removed by drop_legacy_functions.sql (issue #1372)
+DROP FUNCTION IF EXISTS derive_line_mview;
 
 CREATE OR REPLACE FUNCTION derive_line_mview(
     source          TEXT,

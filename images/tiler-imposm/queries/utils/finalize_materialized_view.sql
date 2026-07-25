@@ -25,9 +25,6 @@
 -- ============================================================================
 DROP FUNCTION IF EXISTS finalize_materialized_view;
 
--- Removed helpers (issue #1372): create_generic_mview had no callers.
-DROP FUNCTION IF EXISTS create_generic_mview(TEXT, TEXT, TEXT[]);
-
 CREATE OR REPLACE FUNCTION finalize_materialized_view(
     tmp_mview_name TEXT,
     mview_name TEXT,
