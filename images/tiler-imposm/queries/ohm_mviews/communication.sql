@@ -89,19 +89,19 @@ CREATE INDEX idx_mv_communication_z16_20_geometry ON mv_communication_z16_20 USI
 -- ============================================================================
 -- Zoom 14-15: Slight simplification (5m tolerance)
 -- ============================================================================
-SELECT create_mview_line_from_mview(
-    'mv_communication_z16_20',
-    'mv_communication_z13_15',
-    5
+SELECT derive_line_mview(
+    source           => 'mv_communication_z16_20',
+    target           => 'mv_communication_z13_15',
+    simplify_tol     => 5
 );
 
 -- ============================================================================
 -- Zoom 10-13: More simplification (20m tolerance)
 -- ============================================================================
-SELECT create_mview_line_from_mview(
-    'mv_communication_z13_15',
-    'mv_communication_z10_12',
-    20
+SELECT derive_line_mview(
+    source           => 'mv_communication_z13_15',
+    target           => 'mv_communication_z10_12',
+    simplify_tol     => 20
 );
 
 -- Refresh views

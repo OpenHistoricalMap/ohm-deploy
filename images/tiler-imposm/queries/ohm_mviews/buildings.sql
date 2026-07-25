@@ -13,25 +13,23 @@ CREATE INDEX IF NOT EXISTS osm_buildings_relation_members_outline_idx
 -- so the UNION with polygon centroids in mv_buildings_points_centroids_*
 -- lines up column-for-column.
 -- ============================================================================
-SELECT create_points_mview(
-    'osm_buildings_points',
-    'mv_buildings_points',
-    'id, source, osm_id',
-    ARRAY[
-        'NULL::double precision AS render_height',
-        'NULL::double precision AS render_min_height',
-        'NULL::double precision AS roof_height',
-        'NULL::text AS building_material',
-        'NULL::text AS building_colour',
-        'NULL::text AS building_part',
-        'FALSE::boolean AS is_building_part',
-        'FALSE::boolean AS hide_3d',
-        'NULL::text AS roof_material',
-        'NULL::text AS roof_colour',
-        'NULL::text AS roof_shape',
-        'NULLIF(tags->''golf'', '''') AS golf'
-    ],
-    NULL
+SELECT create_point_mview(
+    source           => 'osm_buildings_points',
+    target           => 'mv_buildings_points',
+    column_overrides => '{
+        "render_height": "NULL::double precision",
+        "render_min_height": "NULL::double precision",
+        "roof_height": "NULL::double precision",
+        "building_material": "NULL::text",
+        "building_colour": "NULL::text",
+        "building_part": "NULL::text",
+        "is_building_part": "FALSE::boolean",
+        "hide_3d": "FALSE::boolean",
+        "roof_material": "NULL::text",
+        "roof_colour": "NULL::text",
+        "roof_shape": "NULL::text",
+        "golf": "NULLIF(tags->''golf'', '''')"
+    }'::jsonb
 );
 
 
@@ -45,47 +43,46 @@ SELECT create_points_mview(
 -- needs it on its own. Lower zooms inherit this schema.
 -- ============================================================================
 
-SELECT create_areas_mview(
-    'osm_buildings',
-    'mv_buildings_areas_z16_20',
-    0,
-    0,
-    'id, osm_id, type',
-    NULL,
-    '(class = ''building:part'') AS is_building_part,
-     EXISTS (SELECT 1 FROM osm_buildings_relation_members obrm WHERE obrm.member = ABS(osm_buildings.osm_id) AND obrm.role = ''outline'') AS hide_3d,
-     render_height(height, building_height, building_levels) AS render_height,
-     render_min_height(min_height, building_min_level) AS render_min_height,
-     NULLIF(tags->''golf'', '''') AS golf',
-    '{"roof_height": "parse_to_meters(roof_height)"}'::jsonb,
-    ARRAY['height', 'min_height', 'building_height', 'building_levels', 'building_min_level']
+SELECT create_area_mview(
+    source           => 'osm_buildings',
+    target           => 'mv_buildings_areas_z16_20',
+    column_overrides => '{
+        "is_building_part": "(class = ''building:part'')",
+        "hide_3d": "EXISTS (SELECT 1 FROM osm_buildings_relation_members obrm WHERE obrm.member = ABS(osm_buildings.osm_id) AND obrm.role = ''outline'')",
+        "render_height": "render_height(height, building_height, building_levels)",
+        "render_min_height": "render_min_height(min_height, building_min_level)",
+        "golf": "NULLIF(tags->''golf'', '''')",
+        "roof_height": "parse_to_meters(roof_height)"
+    }'::jsonb,
+    exclude_columns  => ARRAY['height', 'min_height', 'building_height', 'building_levels', 'building_min_level']
 );
 
 -- ============================================================================
 -- Areas z14-15, derived from z16-20.
 -- Light 5m simplification, drops buildings under 5,000 m².
 -- ============================================================================
-SELECT create_area_mview_from_mview(
-    'mv_buildings_areas_z16_20',
-    'mv_buildings_areas_z14_15',
-    5,
-    5000,
-    NULL
+SELECT derive_area_mview(
+    source           => 'mv_buildings_areas_z16_20',
+    target           => 'mv_buildings_areas_z14_15',
+    simplify_tol     => 5,
+    min_metric       => 5000
 );
 
 -- ============================================================================
 -- Centroid mviews per zoom. Each one UNIONs polygon centroids with
 -- point-tagged buildings.
 -- ============================================================================
-SELECT create_points_centroids_mview(
-    'mv_buildings_areas_z16_20',
-    'mv_buildings_points_centroids_z16_20',
-    'mv_buildings_points'
+SELECT derive_centroid_mview(
+    source           => 'mv_buildings_areas_z16_20',
+    target           => 'mv_buildings_points_centroids_z16_20',
+    union_source     => 'mv_buildings_points',
+    require_name     => TRUE
 );
-SELECT create_points_centroids_mview(
-    'mv_buildings_areas_z14_15',
-    'mv_buildings_points_centroids_z14_15',
-    'mv_buildings_points'
+SELECT derive_centroid_mview(
+    source           => 'mv_buildings_areas_z14_15',
+    target           => 'mv_buildings_points_centroids_z14_15',
+    union_source     => 'mv_buildings_points',
+    require_name     => TRUE
 );
 
 

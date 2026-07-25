@@ -1,15 +1,13 @@
 -- ============================================================================
 -- Prepare points materialized view for higher zoom levels (12+)
 -- ============================================================================
-SELECT create_points_mview(
-    'osm_amenity_points',
-    'mv_amenity_points',
-    'id, source, osm_id',
-    ARRAY[
-        'NULLIF(tags->''religion'', '''') AS religion',
-        'NULLIF(tags->''denomination'', '''') AS denomination'
-    ],
-    NULL
+SELECT create_point_mview(
+    source           => 'osm_amenity_points',
+    target           => 'mv_amenity_points',
+    column_overrides => '{
+        "religion": "NULLIF(tags->''religion'', '''')",
+        "denomination": "NULLIF(tags->''denomination'', '''')"
+    }'::jsonb
 );
 
 -- ============================================================================
@@ -17,20 +15,21 @@ SELECT create_points_mview(
 -- Very low simplification (5m)
 -- Very small areas (>5K m² = 0.005 km²)
 -- ============================================================================
-SELECT create_areas_mview(
-    'osm_amenity_areas',
-    'mv_amenity_areas_z14_15',
-    5,
-    5000,
-    'id, osm_id, type',
-    NULL,
-    'NULLIF(tags->''religion'', '''') AS religion, NULLIF(tags->''denomination'', '''') AS denomination',
-    NULL
+SELECT create_area_mview(
+    source           => 'osm_amenity_areas',
+    target           => 'mv_amenity_areas_z14_15',
+    simplify_tol     => 5,
+    min_metric       => 5000,
+    column_overrides => '{
+        "religion": "NULLIF(tags->''religion'', '''')",
+        "denomination": "NULLIF(tags->''denomination'', '''')"
+    }'::jsonb
 );
-SELECT create_points_centroids_mview(
-    'mv_amenity_areas_z14_15',
-    'mv_amenity_points_centroids_z14_15',
-    'mv_amenity_points'
+SELECT derive_centroid_mview(
+    source           => 'mv_amenity_areas_z14_15',
+    target           => 'mv_amenity_points_centroids_z14_15',
+    union_source     => 'mv_amenity_points',
+    require_name     => TRUE
 );
 
 -- ============================================================================
@@ -38,20 +37,19 @@ SELECT create_points_centroids_mview(
 -- No simplification
 -- All areas
 -- ============================================================================
-SELECT create_areas_mview(
-    'osm_amenity_areas',
-    'mv_amenity_areas_z16_20',
-    0,
-    0,
-    'id, osm_id, type',
-    NULL,
-    'NULLIF(tags->''religion'', '''') AS religion, NULLIF(tags->''denomination'', '''') AS denomination',
-    NULL
+SELECT create_area_mview(
+    source           => 'osm_amenity_areas',
+    target           => 'mv_amenity_areas_z16_20',
+    column_overrides => '{
+        "religion": "NULLIF(tags->''religion'', '''')",
+        "denomination": "NULLIF(tags->''denomination'', '''')"
+    }'::jsonb
 );
-SELECT create_points_centroids_mview(
-    'mv_amenity_areas_z16_20',
-    'mv_amenity_points_centroids_z16_20',
-    'mv_amenity_points'
+SELECT derive_centroid_mview(
+    source           => 'mv_amenity_areas_z16_20',
+    target           => 'mv_amenity_points_centroids_z16_20',
+    union_source     => 'mv_amenity_points',
+    require_name     => TRUE
 );
 
 -- Refresh areas views

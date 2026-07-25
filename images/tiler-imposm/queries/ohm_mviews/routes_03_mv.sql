@@ -396,12 +396,31 @@ $$ LANGUAGE plpgsql;
 DROP MATERIALIZED VIEW IF EXISTS mv_routes_indexed_z16_20 CASCADE;
 
 SELECT create_mv_routes_by_length('mv_routes_indexed_z16_20', 0);
-SELECT create_mview_line_from_mview('mv_routes_indexed_z16_20', 'mv_routes_indexed_z13_15', 5, NULL);
-SELECT create_mview_line_from_mview('mv_routes_indexed_z13_15', 'mv_routes_indexed_z10_12', 20, NULL);
-SELECT create_mview_line_from_mview('mv_routes_indexed_z10_12', 'mv_routes_indexed_z8_9', 100, NULL);
-SELECT create_mview_line_from_mview('mv_routes_indexed_z8_9', 'mv_routes_indexed_z6_7', 200, NULL);
-SELECT create_mview_line_from_mview('mv_routes_indexed_z6_7', 'mv_routes_indexed_z5', 1000, NULL);
-
+SELECT derive_line_mview(
+    source           => 'mv_routes_indexed_z16_20',
+    target           => 'mv_routes_indexed_z13_15',
+    simplify_tol     => 5
+);
+SELECT derive_line_mview(
+    source           => 'mv_routes_indexed_z13_15',
+    target           => 'mv_routes_indexed_z10_12',
+    simplify_tol     => 20
+);
+SELECT derive_line_mview(
+    source           => 'mv_routes_indexed_z10_12',
+    target           => 'mv_routes_indexed_z8_9',
+    simplify_tol     => 100
+);
+SELECT derive_line_mview(
+    source           => 'mv_routes_indexed_z8_9',
+    target           => 'mv_routes_indexed_z6_7',
+    simplify_tol     => 200
+);
+SELECT derive_line_mview(
+    source           => 'mv_routes_indexed_z6_7',
+    target           => 'mv_routes_indexed_z5',
+    simplify_tol     => 1000
+);
 -- SELECT create_mv_routes_by_length('mv_routes_indexed_z5', 1000);
 -- SELECT create_mv_routes_by_length('mv_routes_indexed_z6_7', 200);
 -- SELECT create_mv_routes_by_length('mv_routes_indexed_z8_9', 100);

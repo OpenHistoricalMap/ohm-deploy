@@ -1,5 +1,5 @@
 -- ============================================================================
--- Function: create_areas_mview
+-- Function: create_area_mview
 -- Description:
 --   Creates a materialized view from a source table with configurable geometry
 --   simplification and minimum area filtering.
@@ -11,74 +11,77 @@
 --   - Includes temporal fields: start_date, end_date, and their decimal equivalents
 --
 -- Parameters:
---   source_table    TEXT              - Name of the source table or materialized view
---   view_name       TEXT              - Name of the materialized view to create
---   simplify_tol    DOUBLE PRECISION  - Simplification tolerance (0 = no simplification)
---   min_area        DOUBLE PRECISION  - Minimum area in m² to include (0 = no filter)
---   unique_columns  TEXT              - Comma-separated columns for unique index (default: 'id, osm_id, type')
---   where_filter    TEXT              - Optional WHERE clause filter (e.g., "type != 'barrier'" or "class NOT IN ('power', 'military')"). NULL = no filter
---   tag_columns     TEXT              - Optional extra columns from tags (e.g., "tags->'religion' AS religion, tags->'denomination' AS denomination"). NULL = none
---   column_overrides JSONB            - Optional mapping {column_name: sql_expression} to override how an existing column is selected (e.g., '{"ref": "COALESCE(faa, iata, icao, NULLIF(ref, ''''))"}'). NULL = no overrides
---   exclude_columns TEXT[]            - Optional list of source-table column names to omit from the mview output (e.g., ARRAY['building_height'] to suppress a deprecated column). NULL = no exclusions
+--   source           TEXT              - Name of the source table
+--   target           TEXT              - Name of the materialized view to create
+--   simplify_tol     DOUBLE PRECISION  - Simplification tolerance (0 = no simplification)
+--   min_metric       DOUBLE PRECISION  - Minimum area in m² to include (0 = no filter)
+--   unique_columns   TEXT[]            - Columns for the unique index (default: ARRAY['id', 'osm_id', 'type'])
+--   where_filter     TEXT              - Optional WHERE clause filter (e.g., "type != 'barrier'"). NULL = no filter
+--   column_overrides JSONB             - Optional mapping {column_name: sql_expression}. If the column exists
+--                                        in the source table its default expression is replaced; if it does
+--                                        not exist, it is added as a new column. NULL = none
+--   exclude_columns  TEXT[]            - Optional list of source-table columns to omit from the mview output. NULL = none
 --
 -- Notes:
 --   - Creates the materialized view using a temporary swap mechanism
 --   - Adds a spatial index (GiST) on geometry and a unique index on unique_columns
---   - Useful for creating views at different zoom levels with variable simplification
---   - where_filter is appended to WHERE clause with AND, so use conditions like "type != 'barrier'" not "AND type != 'barrier'"
---   - column_overrides replaces the default expression for a column (including the NULLIF text-wrapping), and the alias is kept as the column name
+--   - where_filter is combined with AND, so pass conditions like "type != 'barrier'"
+--   - column_overrides replaces the default expression for a column (including the
+--     NULLIF text-wrapping), and the alias is kept as the column name
 -- ============================================================================
+-- Legacy signatures (pre-standardization, issue #1372)
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT);
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT);
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT, JSONB);
 DROP FUNCTION IF EXISTS create_areas_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT, TEXT, TEXT, JSONB, TEXT[]);
+DROP FUNCTION IF EXISTS create_area_mview(TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION, TEXT[], TEXT, JSONB, TEXT[]);
 
-CREATE OR REPLACE FUNCTION create_areas_mview(
-    source_table TEXT,
-    view_name TEXT,
-    simplify_tol DOUBLE PRECISION DEFAULT 0,
-    min_area DOUBLE PRECISION DEFAULT 0,
-    unique_columns TEXT DEFAULT 'id, osm_id, type',
-    where_filter TEXT DEFAULT NULL,
-    tag_columns TEXT DEFAULT NULL,
+CREATE OR REPLACE FUNCTION create_area_mview(
+    source           TEXT,
+    target           TEXT,
+    simplify_tol     DOUBLE PRECISION DEFAULT 0,
+    min_metric       DOUBLE PRECISION DEFAULT 0,
+    unique_columns   TEXT[] DEFAULT ARRAY['id', 'osm_id', 'type'],
+    where_filter     TEXT DEFAULT NULL,
     column_overrides JSONB DEFAULT NULL,
-    exclude_columns TEXT[] DEFAULT NULL
+    exclude_columns  TEXT[] DEFAULT NULL
 )
 RETURNS void AS $$
-DECLARE 
+DECLARE
     lang_columns TEXT;
-    tmp_view_name TEXT := view_name || '_tmp';
+    tmp_view_name TEXT := target || '_tmp';
     sql_create TEXT;
     simplify_expr TEXT;
     area_filter TEXT;
     custom_filter TEXT;
     all_cols TEXT;
+    override_key TEXT;
+    override_expr TEXT;
 BEGIN
     -- Language columns will always be available
     lang_columns := get_language_columns();
-    
+
     -- Build simplification expression
     IF simplify_tol > 0 THEN
         simplify_expr := format('ST_SimplifyPreserveTopology(geometry, %s)', simplify_tol);
     ELSE
         simplify_expr := 'geometry';
     END IF;
-    
+
     -- Build area filter
-    IF min_area > 0 THEN
-        area_filter := format('AND ST_Area(geometry) > %s', min_area);
+    IF min_metric > 0 THEN
+        area_filter := format('AND ST_Area(geometry) > %s', min_metric);
     ELSE
         area_filter := '';
     END IF;
-    
+
     -- Build custom WHERE filter (if provided)
-    -- Note: custom_filter includes leading space and AND, so it can be concatenated directly
     IF where_filter IS NOT NULL AND where_filter <> '' THEN
         custom_filter := format(' AND (%s)', where_filter);
     ELSE
         custom_filter := '';
     END IF;
-    
+
     -- Build SQL - get all columns from source table and replace geometry, handle special columns
     -- Exclude start_decdate and end_decdate because they will be recalculated
     -- column_overrides (if provided) takes precedence and fully replaces the default expression for a column
@@ -99,22 +102,32 @@ BEGIN
     INTO all_cols
     FROM information_schema.columns
     WHERE table_schema = 'public'
-      AND table_name = source_table
+      AND table_name = source
       AND column_name NOT IN ('start_decdate', 'end_decdate')
       AND (exclude_columns IS NULL OR NOT (column_name = ANY(exclude_columns)));
-    
+
     -- Always add calculated date columns
     all_cols := all_cols || ', public.isodatetodecimaldate(public.pad_date(start_date, ''start''), FALSE) AS start_decdate';
     all_cols := all_cols || ', public.isodatetodecimaldate(public.pad_date(end_date, ''end''), FALSE) AS end_decdate';
-    
+
     -- Add language columns (always available)
     all_cols := all_cols || ', ' || lang_columns;
     -- Add source column to identify origin (polygon)
     all_cols := all_cols || ', ''polygon'' AS source';
 
-    -- Add optional tag columns (e.g. "tags->'religion' AS religion, tags->'denomination' AS denomination")
-    IF tag_columns IS NOT NULL AND tag_columns <> '' THEN
-        all_cols := all_cols || ', ' || tag_columns;
+    -- Override keys that do not exist in the source table are added as new columns
+    IF column_overrides IS NOT NULL THEN
+        FOR override_key, override_expr IN SELECT key, value FROM jsonb_each_text(column_overrides)
+        LOOP
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = source
+                  AND column_name = override_key
+            ) THEN
+                all_cols := all_cols || format(', %s AS %I', override_expr, override_key);
+            END IF;
+        END LOOP;
     END IF;
 
     sql_create := format($sql$
@@ -124,12 +137,12 @@ BEGIN
         FROM %I
         WHERE geometry IS NOT NULL
         %s%s;
-    $sql$, tmp_view_name, all_cols, source_table, area_filter, custom_filter);
+    $sql$, tmp_view_name, all_cols, source, area_filter, custom_filter);
 
     PERFORM finalize_materialized_view(
         tmp_view_name,
-        view_name,
-        unique_columns,
+        target,
+        array_to_string(unique_columns, ', '),
         sql_create
     );
 END;

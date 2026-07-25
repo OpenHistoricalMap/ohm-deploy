@@ -6,32 +6,98 @@
 -- Delete existing views, in cascade
 DROP MATERIALIZED VIEW IF EXISTS mv_water_areas_z16_20 CASCADE;
 
-SELECT create_areas_mview('osm_water_areas', 'mv_water_areas_z16_20', 0, 0, 'id, osm_id, type', NULL, 'NULLIF(tags->''golf'', '''') AS golf', NULL);
-SELECT create_area_mview_from_mview('mv_water_areas_z16_20','mv_water_areas_z13_15',5,0.0,NULL);
-SELECT create_area_mview_from_mview('mv_water_areas_z13_15','mv_water_areas_z10_12',20,100, 'type IN (''water'',''pond'',''basin'',''canal'',''mill_pond'',''riverbank'')');
-SELECT create_area_mview_from_mview('mv_water_areas_z10_12','mv_water_areas_z8_9',100,10000, NULL);
-SELECT create_area_mview_from_mview('mv_water_areas_z8_9','mv_water_areas_z6_7',200,1000000, NULL);
-SELECT create_area_mview_from_mview('mv_water_areas_z6_7','mv_water_areas_z3_5',1000,50000000, NULL);
-SELECT create_area_mview_from_mview('mv_water_areas_z3_5','mv_water_areas_z0_2',5000,100000000, 'type IN (''water'',''riverbank'')');
-
+SELECT create_area_mview(
+    source           => 'osm_water_areas',
+    target           => 'mv_water_areas_z16_20',
+    column_overrides => '{"golf": "NULLIF(tags->''golf'', '''')"}'::jsonb
+);
+SELECT derive_area_mview(
+    source           => 'mv_water_areas_z16_20',
+    target           => 'mv_water_areas_z13_15',
+    simplify_tol     => 5
+);
+SELECT derive_area_mview(
+    source           => 'mv_water_areas_z13_15',
+    target           => 'mv_water_areas_z10_12',
+    simplify_tol     => 20,
+    min_metric       => 100,
+    where_filter     => 'type IN (''water'',''pond'',''basin'',''canal'',''mill_pond'',''riverbank'')'
+);
+SELECT derive_area_mview(
+    source           => 'mv_water_areas_z10_12',
+    target           => 'mv_water_areas_z8_9',
+    simplify_tol     => 100,
+    min_metric       => 10000
+);
+SELECT derive_area_mview(
+    source           => 'mv_water_areas_z8_9',
+    target           => 'mv_water_areas_z6_7',
+    simplify_tol     => 200,
+    min_metric       => 1000000
+);
+SELECT derive_area_mview(
+    source           => 'mv_water_areas_z6_7',
+    target           => 'mv_water_areas_z3_5',
+    simplify_tol     => 1000,
+    min_metric       => 50000000
+);
+SELECT derive_area_mview(
+    source           => 'mv_water_areas_z3_5',
+    target           => 'mv_water_areas_z0_2',
+    simplify_tol     => 5000,
+    min_metric       => 100000000,
+    where_filter     => 'type IN (''water'',''riverbank'')'
+);
 -- ============================================================================
 -- Water Areas Centroids Materialized Views for Multiple Zoom Levels
 -- ============================================================================
-select create_mview_centroid_from_mview('mv_water_areas_z16_20','mv_water_areas_centroids_z16_20', 'name IS NOT NULL AND name <> ''''');
-select create_mview_centroid_from_mview('mv_water_areas_z13_15','mv_water_areas_centroids_z13_15', 'name IS NOT NULL AND name <> ''''');
-select create_mview_centroid_from_mview('mv_water_areas_z10_12','mv_water_areas_centroids_z10_12', 'name IS NOT NULL AND name <> ''''');
-select create_mview_centroid_from_mview('mv_water_areas_z8_9','mv_water_areas_centroids_z8_9', 'name IS NOT NULL AND name <> ''''');
-
-
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z16_20',
+    target           => 'mv_water_areas_centroids_z16_20',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z13_15',
+    target           => 'mv_water_areas_centroids_z13_15',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z10_12',
+    target           => 'mv_water_areas_centroids_z10_12',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z8_9',
+    target           => 'mv_water_areas_centroids_z8_9',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
 -- ============================================================================
 -- Water lines Materialized Views for Multiple Zoom Levels
 -- ============================================================================
 
-SELECT create_lines_mview('osm_water_lines', 'mv_water_lines_z16_20', 0, 0, 'id, osm_id, type', 'type IN (''river'', ''canal'', ''dam'', ''stream'', ''ditch'', ''drain'')');
-SELECT create_mview_line_from_mview('mv_water_lines_z16_20', 'mv_water_lines_z13_15', 5, 'type IN (''river'', ''canal'', ''dam'', ''stream'')');
-SELECT create_mview_line_from_mview('mv_water_lines_z13_15', 'mv_water_lines_z10_12', 20, 'type IN (''river'', ''canal'', ''dam'')');
-SELECT create_mview_line_from_mview('mv_water_lines_z10_12', 'mv_water_lines_z8_9', 100, 'type IN (''river'', ''canal'')');
-
+SELECT create_line_mview(
+    source           => 'osm_water_lines',
+    target           => 'mv_water_lines_z16_20',
+    where_filter     => 'type IN (''river'', ''canal'', ''dam'', ''stream'', ''ditch'', ''drain'')'
+);
+SELECT derive_line_mview(
+    source           => 'mv_water_lines_z16_20',
+    target           => 'mv_water_lines_z13_15',
+    simplify_tol     => 5,
+    where_filter     => 'type IN (''river'', ''canal'', ''dam'', ''stream'')'
+);
+SELECT derive_line_mview(
+    source           => 'mv_water_lines_z13_15',
+    target           => 'mv_water_lines_z10_12',
+    simplify_tol     => 20,
+    where_filter     => 'type IN (''river'', ''canal'', ''dam'')'
+);
+SELECT derive_line_mview(
+    source           => 'mv_water_lines_z10_12',
+    target           => 'mv_water_lines_z8_9',
+    simplify_tol     => 100,
+    where_filter     => 'type IN (''river'', ''canal'')'
+);
 -- Refresh areas views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY  mv_water_areas_z16_20;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY  mv_water_areas_z13_15;

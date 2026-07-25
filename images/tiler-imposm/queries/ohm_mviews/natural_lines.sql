@@ -8,10 +8,23 @@
 
 DROP MATERIALIZED VIEW IF EXISTS mv_natural_lines_z16_20 CASCADE;
 
-SELECT create_lines_mview('osm_natural_lines', 'mv_natural_lines_z16_20', 0, 0, 'id, osm_id, type', 'type IN (''cliff'')');
-SELECT create_mview_line_from_mview('mv_natural_lines_z16_20', 'mv_natural_lines_z13_15', 5, 'type IN (''cliff'')');
-SELECT create_mview_line_from_mview('mv_natural_lines_z13_15', 'mv_natural_lines_z10_12', 20, 'type IN (''cliff'')');
-
+SELECT create_line_mview(
+    source           => 'osm_natural_lines',
+    target           => 'mv_natural_lines_z16_20',
+    where_filter     => 'type IN (''cliff'')'
+);
+SELECT derive_line_mview(
+    source           => 'mv_natural_lines_z16_20',
+    target           => 'mv_natural_lines_z13_15',
+    simplify_tol     => 5,
+    where_filter     => 'type IN (''cliff'')'
+);
+SELECT derive_line_mview(
+    source           => 'mv_natural_lines_z13_15',
+    target           => 'mv_natural_lines_z10_12',
+    simplify_tol     => 20,
+    where_filter     => 'type IN (''cliff'')'
+);
 -- Refresh lines views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_natural_lines_z16_20;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_natural_lines_z13_15;
