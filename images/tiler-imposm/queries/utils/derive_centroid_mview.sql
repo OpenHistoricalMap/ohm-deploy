@@ -21,7 +21,7 @@
 --                            (e.g., "type IN ('water', 'pond')"). NULL = no filter
 --   union_source  TEXT     - Optional name of a point mview to merge via UNION ALL
 --                            (must have the same columns as source). NULL = no merge
---   require_name  BOOLEAN  - When TRUE, keeps only source rows with a non-empty name
+--   only_named    BOOLEAN  - When TRUE, keeps only source rows with a non-empty name
 --                            or at least one non-null name_* column. Default FALSE
 --
 -- Notes:
@@ -39,7 +39,7 @@ CREATE OR REPLACE FUNCTION derive_centroid_mview(
     target        TEXT,
     where_filter  TEXT DEFAULT NULL,
     union_source  TEXT DEFAULT NULL,
-    require_name  BOOLEAN DEFAULT FALSE
+    only_named    BOOLEAN DEFAULT FALSE
 )
 RETURNS void AS $$
 DECLARE
@@ -53,7 +53,7 @@ DECLARE
     tmp_mview_name TEXT := target || '_tmp';
     unique_cols    TEXT := 'id, source, osm_id';
 BEGIN
-    RAISE NOTICE '==> [MVIEW CENTROID] Creating % from % (where_filter: %s, union_source: %s, require_name: %s)', target, source, where_filter, union_source, require_name;
+    RAISE NOTICE '==> [MVIEW CENTROID] Creating % from % (where_filter: %s, union_source: %s, only_named: %s)', target, source, where_filter, union_source, only_named;
 
     -- Get ALL columns from the source mview, converting geometry to its centroid.
     -- Use pg_attribute which is more reliable for materialized views than information_schema.
@@ -89,7 +89,7 @@ BEGIN
       AND NOT a.attisdropped;
 
     -- Build name filter: keep only rows with a name or at least one name_* column
-    IF require_name THEN
+    IF only_named THEN
         SELECT COALESCE(string_agg(
             format('%I IS NOT NULL', a.attname),
             ' OR '

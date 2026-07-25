@@ -55,37 +55,37 @@ SELECT derive_area_mview(
 SELECT derive_centroid_mview(
     source           => 'mv_non_admin_boundaries_areas_z16_20',
     target           => 'mv_non_admin_boundaries_centroids_z16_20',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_non_admin_boundaries_areas_z13_15',
     target           => 'mv_non_admin_boundaries_centroids_z13_15',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_non_admin_boundaries_areas_z10_12',
     target           => 'mv_non_admin_boundaries_centroids_z10_12',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_non_admin_boundaries_areas_z8_9',
     target           => 'mv_non_admin_boundaries_centroids_z8_9',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_non_admin_boundaries_areas_z6_7',
     target           => 'mv_non_admin_boundaries_centroids_z6_7',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_non_admin_boundaries_areas_z3_5',
     target           => 'mv_non_admin_boundaries_centroids_z3_5',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_non_admin_boundaries_areas_z0_2',
     target           => 'mv_non_admin_boundaries_centroids_z0_2',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_non_admin_boundaries_areas_z16_20;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_non_admin_boundaries_areas_z13_15;

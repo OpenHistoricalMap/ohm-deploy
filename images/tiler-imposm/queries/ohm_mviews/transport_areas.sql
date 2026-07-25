@@ -37,18 +37,18 @@ SELECT derive_centroid_mview(
     source           => 'mv_transport_areas_z16_20',
     target           => 'mv_transport_points_centroids_z16_20',
     union_source     => 'mv_transport_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_transport_areas_z13_15',
     target           => 'mv_transport_points_centroids_z13_15',
     union_source     => 'mv_transport_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_transport_areas_z10_12',
     target           => 'mv_transport_points_centroids_z10_12',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 -- Refresh areas views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_transport_areas_z16_20;

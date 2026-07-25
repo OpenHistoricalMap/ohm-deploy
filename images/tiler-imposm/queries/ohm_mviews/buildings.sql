@@ -76,13 +76,13 @@ SELECT derive_centroid_mview(
     source           => 'mv_buildings_areas_z16_20',
     target           => 'mv_buildings_points_centroids_z16_20',
     union_source     => 'mv_buildings_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_buildings_areas_z14_15',
     target           => 'mv_buildings_points_centroids_z14_15',
     union_source     => 'mv_buildings_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 
 

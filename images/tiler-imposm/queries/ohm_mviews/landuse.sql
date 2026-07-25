@@ -58,28 +58,28 @@ SELECT derive_centroid_mview(
     source           => 'mv_landuse_areas_z16_20',
     target           => 'mv_landuse_points_centroids_z16_20',
     union_source     => 'mv_landuse_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_landuse_areas_z13_15',
     target           => 'mv_landuse_points_centroids_z13_15',
     union_source     => 'mv_landuse_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_landuse_areas_z10_12',
     target           => 'mv_landuse_points_centroids_z10_12',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_landuse_areas_z8_9',
     target           => 'mv_landuse_points_centroids_z8_9',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 SELECT derive_centroid_mview(
     source           => 'mv_landuse_areas_z6_7',
     target           => 'mv_landuse_points_centroids_z6_7',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 -- ============================================================================
 -- Landuse lines

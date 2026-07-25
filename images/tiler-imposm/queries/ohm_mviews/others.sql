@@ -19,7 +19,7 @@ SELECT create_area_mview(
 SELECT derive_centroid_mview(
     source           => 'mv_other_areas_z8_9',
     target           => 'mv_other_points_centroids_z8_9',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 
 -- ============================================================================
@@ -38,7 +38,7 @@ SELECT create_area_mview(
 SELECT derive_centroid_mview(
     source           => 'mv_other_areas_z10_12',
     target           => 'mv_other_points_centroids_z10_12',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 
 -- ============================================================================
@@ -73,7 +73,7 @@ SELECT derive_centroid_mview(
     source           => 'mv_other_areas_z13_15',
     target           => 'mv_other_points_centroids_z13_15',
     union_source     => 'mv_other_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 
 -- ============================================================================
@@ -94,7 +94,7 @@ SELECT derive_centroid_mview(
     source           => 'mv_other_areas_z16_20',
     target           => 'mv_other_points_centroids_z16_20',
     union_source     => 'mv_other_points',
-    require_name     => TRUE
+    only_named       => TRUE
 );
 
 -- ============================================================================
