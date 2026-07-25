@@ -53,7 +53,7 @@ DECLARE
     tmp_mview_name TEXT := target || '_tmp';
     unique_cols    TEXT := 'id, source, osm_id';
 BEGIN
-    RAISE NOTICE '==> [MVIEW CENTROID] Creating % from % (where_filter: %s, union_source: %s, only_named: %s)', target, source, where_filter, union_source, only_named;
+    RAISE NOTICE '==> [MVIEW CENTROID] Creating % from % (where_filter: %, union_source: %, only_named: %)', target, source, where_filter, union_source, only_named;
 
     -- Get ALL columns from the source mview, converting geometry to its centroid.
     -- Use pg_attribute which is more reliable for materialized views than information_schema.

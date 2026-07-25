@@ -59,7 +59,6 @@ execute_sql_file ./queries/utils/postgis_helpers.sql
 execute_sql_file queries/utils/finalize_materialized_view.sql
 
 ## Functions to create mviews from imposm tables
-execute_sql_file queries/utils/create_generic_mview.sql
 execute_sql_file queries/utils/create_area_mview.sql
 execute_sql_file queries/utils/create_point_mview.sql
 execute_sql_file queries/utils/create_line_mview.sql

@@ -25,6 +25,9 @@
 -- ============================================================================
 DROP FUNCTION IF EXISTS finalize_materialized_view;
 
+-- Removed helpers (issue #1372): create_generic_mview had no callers.
+DROP FUNCTION IF EXISTS create_generic_mview(TEXT, TEXT, TEXT[]);
+
 CREATE OR REPLACE FUNCTION finalize_materialized_view(
     tmp_mview_name TEXT,
     mview_name TEXT,
@@ -65,7 +68,7 @@ BEGIN
     EXECUTE format('DROP INDEX IF EXISTS %I;', geom_index_tmp);
     EXECUTE format('CREATE INDEX %I ON %I USING GIST (geometry);', geom_index_tmp, tmp_mview_name);
 
-    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (%s) (tmp)', unique_columns;
+    RAISE NOTICE '==> [INDEX] Creating UNIQUE index on (%) (tmp)', unique_columns;
     EXECUTE format('DROP INDEX IF EXISTS %I;', uid_index_tmp);
     EXECUTE format('CREATE UNIQUE INDEX %I ON %I (%s);', uid_index_tmp, tmp_mview_name, unique_columns);
 
