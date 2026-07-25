@@ -6,7 +6,6 @@
 -- to the import without automatically showing up at every zoom.
 -- ============================================================================
 
-DROP MATERIALIZED VIEW IF EXISTS mv_natural_lines_z16_20 CASCADE;
 
 SELECT create_line_mview(
     source           => 'osm_natural_lines',

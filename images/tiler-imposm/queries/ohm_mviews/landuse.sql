@@ -4,7 +4,6 @@
 -- Create  landuse areas materialized views with simplification and filtering
 -- Exclude natrual=water https://github.com/OpenHistoricalMap/issues/issues/1197
 -- ============================================================================
-DROP MATERIALIZED VIEW IF EXISTS mv_landuse_areas_z16_20 CASCADE;
 
 
 SELECT create_area_mview(

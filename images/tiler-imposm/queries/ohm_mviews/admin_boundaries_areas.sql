@@ -9,7 +9,6 @@ ON osm_admin_areas (admin_level) WHERE geometry IS NOT NULL;
 -- Enable parallel workers on source table
 ALTER TABLE osm_admin_areas SET (parallel_workers = 4);
 
-DROP MATERIALIZED VIEW IF EXISTS mv_admin_boundaries_areas_z16_20 CASCADE;
 
 SELECT create_area_mview(
     source           => 'osm_admin_areas',

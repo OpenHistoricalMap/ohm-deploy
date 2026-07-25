@@ -20,7 +20,6 @@
 --
 --   All derived zoom-level views (z13_15, z10_12, etc.) cascade from this one.
 -- ============================================================================
-DROP MATERIALIZED VIEW IF EXISTS mv_transport_lines_z16_20 CASCADE;
 
 DO $do$
 DECLARE

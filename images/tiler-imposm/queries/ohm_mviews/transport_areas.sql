@@ -2,7 +2,6 @@
 -- Exclude closed highways from https://github.com/OpenHistoricalMap/issues/issues/1194
 -- -- We include aerodrome to start at zoom 10 from https://github.com/OpenHistoricalMap/issues/issues/1083
 -- -- From https://github.com/OpenHistoricalMap/issues/issues/1141 add 'apron', 'terminal'
-DROP MATERIALIZED VIEW IF EXISTS mv_transport_areas_z16_20 CASCADE;
 
 -- ref is overridden with a coalesce over airport coding schemes so a single
 -- field can be used for labeling (faa > iata > icao > ref). See

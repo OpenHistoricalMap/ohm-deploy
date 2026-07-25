@@ -3,8 +3,6 @@
 -- Creates a pyramid of materialized views for water areas, optimized for
 -- ============================================================================
 
--- Delete existing views, in cascade
-DROP MATERIALIZED VIEW IF EXISTS mv_water_areas_z16_20 CASCADE;
 
 SELECT create_area_mview(
     source           => 'osm_water_areas',

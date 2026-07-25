@@ -1,7 +1,6 @@
 -- ============================================================================
 -- Create materialized  views for non-admin boundaries areas https://github.com/OpenHistoricalMap/issues/issues/1251
 -- ============================================================================
-DROP MATERIALIZED VIEW IF EXISTS mv_non_admin_boundaries_areas_z16_20 CASCADE;
 
 SELECT create_area_mview(
     source           => 'osm_admin_areas',
