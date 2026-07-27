@@ -25,25 +25,32 @@ for arg in "$@"; do
   fi
 done
 
+##################### Helper functions #####################
+# Always (re)load helper functions first: every section below, including the
+# --all block, relies on them.
+log_message "Loading mview helper functions"
+execute_sql_file queries/utils/postgis_helpers.sql
+
+## Shared finalization helper used by the create_*_mview functions
+execute_sql_file queries/utils/finalize_materialized_view.sql
+
+## Functions to create mviews from imposm tables
+execute_sql_file queries/utils/create_area_mview.sql
+execute_sql_file queries/utils/create_point_mview.sql
+execute_sql_file queries/utils/create_line_mview.sql
+
+## Functions to create mviews from existing mviews (generalization chains)
+execute_sql_file queries/utils/derive_area_mview.sql
+execute_sql_file queries/utils/derive_line_mview.sql
+execute_sql_file queries/utils/derive_centroid_mview.sql
+
 if [[ "$ALL" == true ]]; then
   ##################### Utils #####################
   log_message "Creating utility functions and generic materialized views"
-  execute_sql_file queries/utils/utils.sql 
+  execute_sql_file queries/utils/utils.sql
 
   # This will populate languages, NOTE make sure run this first
   execute_sql_file queries/utils/fetch_db_languages.sql
-
-  ## Funtions  to create simplified areas and centroids
-  execute_sql_file queries/utils/create_generic_mview.sql 
-  execute_sql_file queries/utils/create_01_areas_mview.sql 
-  execute_sql_file queries/utils/create_02_points_mview.sql
-  execute_sql_file queries/utils/create_03_points_centroids_mview.sql
-  execute_sql_file queries/utils/create_04_lines_mviews.sql
-
-  ## Functions to create simplified areas, lines and centroids from existing materialized views
-  execute_sql_file queries/utils/create_mview_line_mview.sql
-  execute_sql_file queries/utils/create_mview_centroid_mview.sql
-  execute_sql_file queries/utils/create_mview_area_mview.sql
 
   # Route priority
   execute_sql_file queries/utils/route_priority.sql
@@ -62,10 +69,6 @@ fi
 
 ##################### OHM #####################
 log_message "Creating materialized views for OSM data"
-
-# Always (re)load helper functions so mview SQL can rely on them after
-# upgrades or reimports without re-running the full --all path.
-execute_sql_file ./queries/utils/postgis_helpers.sql
 
 ## Admin boundaries areas
 execute_sql_file queries/ohm_mviews/admin_boundaries_areas.sql

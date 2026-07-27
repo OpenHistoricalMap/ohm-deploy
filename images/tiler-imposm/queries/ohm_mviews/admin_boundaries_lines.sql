@@ -508,13 +508,41 @@ ON mv_admin_boundaries_lines_z16_20 (admin_level);
 CREATE INDEX IF NOT EXISTS mv_admin_boundaries_lines_z16_20_geometry_idx 
 ON mv_admin_boundaries_lines_z16_20 USING GIST (geometry);
 
-SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z16_20', 'mv_admin_boundaries_lines_z13_15', 5, 'admin_level IN (1,2,3,4,5,6,7,8,9,10)');
-SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z13_15', 'mv_admin_boundaries_lines_z10_12', 20, NULL);
-SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z10_12', 'mv_admin_boundaries_lines_z8_9', 100, 'admin_level IN (1,2,3,4,5,6,7,8,9)');
-SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z8_9', 'mv_admin_boundaries_lines_z6_7', 200, 'admin_level IN (1,2,3,4,5,6)');
-SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z6_7', 'mv_admin_boundaries_lines_z3_5', 1000, 'admin_level IN (1,2,3,4)');
-SELECT create_mview_line_from_mview('mv_admin_boundaries_lines_z3_5', 'mv_admin_boundaries_lines_z0_2', 5000, 'admin_level IN (1,2)');
-
+SELECT derive_line_mview(
+    source           => 'mv_admin_boundaries_lines_z16_20',
+    target           => 'mv_admin_boundaries_lines_z13_15',
+    simplify_tol     => 5,
+    where_filter     => 'admin_level IN (1,2,3,4,5,6,7,8,9,10)'
+);
+SELECT derive_line_mview(
+    source           => 'mv_admin_boundaries_lines_z13_15',
+    target           => 'mv_admin_boundaries_lines_z10_12',
+    simplify_tol     => 20
+);
+SELECT derive_line_mview(
+    source           => 'mv_admin_boundaries_lines_z10_12',
+    target           => 'mv_admin_boundaries_lines_z8_9',
+    simplify_tol     => 100,
+    where_filter     => 'admin_level IN (1,2,3,4,5,6,7,8,9)'
+);
+SELECT derive_line_mview(
+    source           => 'mv_admin_boundaries_lines_z8_9',
+    target           => 'mv_admin_boundaries_lines_z6_7',
+    simplify_tol     => 200,
+    where_filter     => 'admin_level IN (1,2,3,4,5,6)'
+);
+SELECT derive_line_mview(
+    source           => 'mv_admin_boundaries_lines_z6_7',
+    target           => 'mv_admin_boundaries_lines_z3_5',
+    simplify_tol     => 1000,
+    where_filter     => 'admin_level IN (1,2,3,4)'
+);
+SELECT derive_line_mview(
+    source           => 'mv_admin_boundaries_lines_z3_5',
+    target           => 'mv_admin_boundaries_lines_z0_2',
+    simplify_tol     => 5000,
+    where_filter     => 'admin_level IN (1,2)'
+);
 -- Refresh lines views
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_relation_members_boundaries;
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_relations_ways;
