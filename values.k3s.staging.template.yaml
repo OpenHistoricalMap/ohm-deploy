@@ -360,7 +360,7 @@ osm-seed:
   # Overpass API
   # ====================================================================================================
   overpassApi:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     # image:

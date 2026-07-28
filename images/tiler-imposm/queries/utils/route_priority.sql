@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS route_priority(text, text, text);
-
+-- mv_routes_indexed depends on this function; if the signature ever changes,
+-- drop and rebuild the dependent mviews first.
 CREATE OR REPLACE FUNCTION route_priority(type TEXT, network TEXT, ref TEXT)
 RETURNS NUMERIC AS $$
 DECLARE
