@@ -16,7 +16,7 @@ RUN apt-get update && \
     git curl gnupg build-essential \
     libarchive-dev zlib1g-dev libcurl4-openssl-dev libgd-dev \
     apache2 apache2-dev libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
-    postgresql-client libpq-dev libxml2-dev libyaml-dev \
+    postgresql-client libpq-dev libxml2-dev libyaml-dev libvips \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip\
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
