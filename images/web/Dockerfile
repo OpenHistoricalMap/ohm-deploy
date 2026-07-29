@@ -38,6 +38,7 @@ RUN rm -rf $workdir/* && \
     rm -rf /tmp/*
 
 RUN gem install bundler -v 4.0.11 --no-document && \
+    bundle config set frozen false && \
     bundle install && \
     yarn install && \
     bundle exec rake yarn:install
