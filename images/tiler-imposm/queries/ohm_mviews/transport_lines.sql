@@ -152,7 +152,10 @@ BEGIN
         GREATEST(isodatetodecimaldate(pad_date(tm.start_date, 'start'), FALSE), mw.w_s)::double precision AS s_dec,
         LEAST(isodatetodecimaldate(pad_date(NULLIF(tm.end_date, ''), 'end'), FALSE), mw.w_e)::double precision AS e_dec
       FROM osm_transport_multilines AS tm
-      INNER JOIN mline_member_ways AS mw ON mw.osm_id = tm.member::bigint
+      -- LEFT JOIN, not INNER: a multilinestring relation can group UNTAGGED
+      -- ways (geometry only, no highway) that are not in osm_transport_lines.
+      -- For those, mw is NULL -> no clip -> the relation renders on its own dates.
+      LEFT JOIN mline_member_ways AS mw ON mw.osm_id = tm.member::bigint
       WHERE ST_GeometryType(tm.geometry) = 'ST_LineString' AND tm.geometry IS NOT NULL
     ),
     -- STEP 3 — the periods no relation covers. range_agg joins the clipped
