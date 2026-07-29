@@ -31,7 +31,7 @@ ENV OHM_PATCHES_GITSHA=cd1ce31c8277440fe2021f58b2628cbb5cc1a3f6
 RUN rm -rf $workdir/* && \
     curl -fsSL https://github.com/openstreetmap/openstreetmap-website/archive/${OSM_WEBSITE_GITSHA}.zip -o /tmp/osm-website.zip && \
     unzip -q /tmp/osm-website.zip -d /tmp && \
-    mv /tmp/openstreetmap-website-${OSM_WEBSITE_GITSHA}/* $workdir && \
+    cp -a /tmp/openstreetmap-website-${OSM_WEBSITE_GITSHA}/. $workdir/ && \
     curl -fsSL https://github.com/OpenHistoricalMap/ohm-website-patches/archive/${OHM_PATCHES_GITSHA}.zip -o /tmp/ohm-patches.zip && \
     unzip -q /tmp/ohm-patches.zip -d /tmp && \
     bash /tmp/ohm-website-patches-${OHM_PATCHES_GITSHA}/scripts/apply.sh $workdir && \
