@@ -27,7 +27,7 @@ RUN apt-get update && \
 # OSM_WEBSITE_GITSHA must match UPSTREAM_BASE in ohm-website-patches — the
 # patches are guaranteed to apply cleanly against exactly that commit.
 ENV OSM_WEBSITE_GITSHA=502e4c28b3612095adb8860380a0225f26882dec
-ENV OHM_PATCHES_GITSHA=cd1ce31c8277440fe2021f58b2628cbb5cc1a3f6
+ENV OHM_PATCHES_GITSHA=98016a5bed2ef4f7425eeb2b92bece8a2802bcd0
 RUN rm -rf $workdir/* && \
     curl -fsSL https://github.com/openstreetmap/openstreetmap-website/archive/${OSM_WEBSITE_GITSHA}.zip -o /tmp/osm-website.zip && \
     unzip -q /tmp/osm-website.zip -d /tmp && \
@@ -38,7 +38,6 @@ RUN rm -rf $workdir/* && \
     rm -rf /tmp/*
 
 RUN gem install bundler -v 4.0.11 --no-document && \
-    bundle config set frozen false && \
     bundle install && \
     yarn install && \
     bundle exec rake yarn:install
