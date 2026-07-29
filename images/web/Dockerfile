@@ -23,12 +23,18 @@ RUN apt-get update && \
     && npm install -g yarn svgo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Download OHM Website using gitsha, faster than cloning
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=57b6a7badd7450234a93cd092c5b7d3bb2261b56
-ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
-RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
-    unzip /tmp/ohm-website.zip -d /tmp && \
-    mv /tmp/ohm-website-$OPENHISTORICALMAP_WEBSITE_GITSHA/* $workdir && \
+# Build the site from upstream openstreetmap-website + OHM patches.
+# OSM_WEBSITE_GITSHA must match UPSTREAM_BASE in ohm-website-patches — the
+# patches are guaranteed to apply cleanly against exactly that commit.
+ENV OSM_WEBSITE_GITSHA=502e4c28b3612095adb8860380a0225f26882dec
+ENV OHM_PATCHES_GITSHA=cd1ce31c8277440fe2021f58b2628cbb5cc1a3f6
+RUN rm -rf $workdir/* && \
+    curl -fsSL https://github.com/openstreetmap/openstreetmap-website/archive/${OSM_WEBSITE_GITSHA}.zip -o /tmp/osm-website.zip && \
+    unzip -q /tmp/osm-website.zip -d /tmp && \
+    mv /tmp/openstreetmap-website-${OSM_WEBSITE_GITSHA}/* $workdir && \
+    curl -fsSL https://github.com/OpenHistoricalMap/ohm-website-patches/archive/${OHM_PATCHES_GITSHA}.zip -o /tmp/ohm-patches.zip && \
+    unzip -q /tmp/ohm-patches.zip -d /tmp && \
+    bash /tmp/ohm-website-patches-${OHM_PATCHES_GITSHA}/scripts/apply.sh $workdir && \
     rm -rf /tmp/*
 
 RUN gem install bundler -v 4.0.11 --no-document && \
