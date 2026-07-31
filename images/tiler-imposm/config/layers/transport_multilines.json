@@ -108,6 +108,11 @@
         },
         {
           "type": "string",
+          "name": "street_running",
+          "key": "street_running"
+        },
+        {
+          "type": "string",
           "name": "railway",
           "key": "railway"
         },

@@ -69,6 +69,7 @@ BEGIN
           OR (NULLIF(sm.electrified,'')IS NOT NULL AND sm.electrified  IS DISTINCT FROM tl.electrified)
           OR (NULLIF(sm.highspeed, '') IS NOT NULL AND sm.highspeed    IS DISTINCT FROM tl.highspeed)
           OR (NULLIF(sm.usage, '')     IS NOT NULL AND sm.usage        IS DISTINCT FROM tl.usage)
+          OR (NULLIF(sm.street_running, '') IS NOT NULL AND sm.street_running IS DISTINCT FROM tl.street_running)
           OR (NULLIF(sm.railway, '')   IS NOT NULL AND sm.railway      IS DISTINCT FROM tl.railway)
           OR (NULLIF(sm.aeroway, '')   IS NOT NULL AND sm.aeroway      IS DISTINCT FROM tl.aeroway)
           OR (NULLIF(sm.route, '')     IS NOT NULL AND sm.route        IS DISTINCT FROM tl.route)
@@ -88,7 +89,7 @@ BEGIN
         COALESCE(CAST(tl.id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '') AS id,
         tl.osm_id, tl.geometry, tl.highway, tl.type, tl.class, tl.name,
         tl.tunnel, tl.bridge, tl.oneway, tl.ref, tl.z_order, tl.access, tl.service,
-        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.railway, tl.aeroway,
+        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.street_running, tl.railway, tl.aeroway,
         tl.route, tl.expressway, tl.tags,
         tl.start_date,
         NULLIF(tl.end_date, '') AS end_date,
@@ -123,7 +124,7 @@ BEGIN
       SELECT DISTINCT
         tl.osm_id, tl.geometry, tl.highway, tl.type, tl.class,
         tl.tunnel, tl.bridge, tl.oneway, tl.ref, tl.z_order, tl.access, tl.service,
-        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.railway, tl.aeroway,
+        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.street_running, tl.railway, tl.aeroway,
         tl.route, tl.expressway, tl.tags,
         isodatetodecimaldate(pad_date(tl.start_date, 'start'), FALSE) AS w_s,
         isodatetodecimaldate(pad_date(NULLIF(tl.end_date, ''), 'end'), FALSE) AS w_e
@@ -144,7 +145,7 @@ BEGIN
         tm.id AS rel_id, tm.osm_id AS rel_osm_id, tm.member::bigint AS member_osm_id,
         tm.geometry, tm.highway, tm.type, tm.class, tm.name,
         tm.tunnel, tm.bridge, tm.oneway, tm.ref, tm.z_order, tm.access, tm.service,
-        tm.ford, tm.electrified, tm.highspeed, tm.usage, tm.railway, tm.aeroway,
+        tm.ford, tm.electrified, tm.highspeed, tm.usage, tm.street_running, tm.railway, tm.aeroway,
         tm.route, tm.expressway, tm.tags,
         tm.start_date AS rel_start_date, NULLIF(tm.end_date, '') AS rel_end_date,
         isodatetodecimaldate(pad_date(tm.start_date, 'start'), FALSE) AS rel_s_dec,
@@ -165,7 +166,7 @@ BEGIN
       SELECT
         mw.osm_id, mw.geometry, mw.highway, mw.type, mw.class,
         mw.tunnel, mw.bridge, mw.oneway, mw.ref, mw.z_order, mw.access, mw.service,
-        mw.ford, mw.electrified, mw.highspeed, mw.usage, mw.railway, mw.aeroway,
+        mw.ford, mw.electrified, mw.highspeed, mw.usage, mw.street_running, mw.railway, mw.aeroway,
         mw.route, mw.expressway, mw.tags,
         lower(g)::double precision AS s_dec, upper(g)::double precision AS e_dec,
         row_number() OVER (PARTITION BY mw.osm_id ORDER BY lower(g)) AS gap_n
@@ -209,7 +210,7 @@ BEGIN
       SELECT DISTINCT
         tl.osm_id, tl.geometry, tl.highway, tl.type, tl.class, tl.name AS way_name,
         tl.tunnel, tl.bridge, tl.oneway, tl.ref, tl.z_order, tl.access, tl.service,
-        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.railway, tl.aeroway,
+        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.street_running, tl.railway, tl.aeroway,
         tl.route, tl.expressway, tl.tags,
         isodatetodecimaldate(pad_date(tl.start_date, 'start'), FALSE) AS w_s,
         isodatetodecimaldate(pad_date(NULLIF(tl.end_date, ''), 'end'), FALSE) AS w_e
@@ -242,6 +243,7 @@ BEGIN
         COALESCE(NULLIF(sm.electrified, ''), mw.electrified) AS electrified,
         COALESCE(NULLIF(sm.highspeed, ''), mw.highspeed) AS highspeed,
         COALESCE(NULLIF(sm.usage, ''), mw.usage) AS usage,
+        COALESCE(NULLIF(sm.street_running, ''), mw.street_running) AS street_running,
         COALESCE(NULLIF(sm.railway, ''), mw.railway) AS railway,
         COALESCE(NULLIF(sm.aeroway, ''), mw.aeroway) AS aeroway,
         COALESCE(NULLIF(sm.route, ''), mw.route) AS route,
@@ -264,7 +266,7 @@ BEGIN
       SELECT
         mw.osm_id, mw.geometry, mw.highway, mw.type, mw.class, mw.way_name,
         mw.tunnel, mw.bridge, mw.oneway, mw.ref, mw.z_order, mw.access, mw.service,
-        mw.ford, mw.electrified, mw.highspeed, mw.usage, mw.railway, mw.aeroway,
+        mw.ford, mw.electrified, mw.highspeed, mw.usage, mw.street_running, mw.railway, mw.aeroway,
         mw.route, mw.expressway, mw.tags,
         lower(g)::double precision AS s_dec, upper(g)::double precision AS e_dec,
         row_number() OVER (PARTITION BY mw.osm_id ORDER BY lower(g)) AS gap_n
@@ -315,6 +317,7 @@ BEGIN
         NULLIF(electrified, '') AS electrified,
         NULLIF(highspeed, '') AS highspeed,
         NULLIF(usage, '') AS usage,
+        NULLIF(street_running, '') AS street_running,
         NULLIF(railway, '') AS railway,
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
@@ -360,6 +363,7 @@ BEGIN
         NULLIF(electrified, '') AS electrified,
         NULLIF(highspeed, '') AS highspeed,
         NULLIF(usage, '') AS usage,
+        NULLIF(street_running, '') AS street_running,
         NULLIF(railway, '') AS railway,
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
@@ -412,6 +416,7 @@ BEGIN
         NULLIF(electrified, '') AS electrified,
         NULLIF(highspeed, '') AS highspeed,
         NULLIF(usage, '') AS usage,
+        NULLIF(street_running, '') AS street_running,
         NULLIF(railway, '') AS railway,
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
@@ -457,6 +462,7 @@ BEGIN
         NULLIF(electrified, '') AS electrified,
         NULLIF(highspeed, '') AS highspeed,
         NULLIF(usage, '') AS usage,
+        NULLIF(street_running, '') AS street_running,
         NULLIF(railway, '') AS railway,
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
@@ -506,6 +512,7 @@ BEGIN
         NULLIF(electrified, '') AS electrified,
         NULLIF(highspeed, '') AS highspeed,
         NULLIF(usage, '') AS usage,
+        NULLIF(street_running, '') AS street_running,
         NULLIF(railway, '') AS railway,
         NULLIF(aeroway, '') AS aeroway,
         NULLIF(highway, '') AS highway,
