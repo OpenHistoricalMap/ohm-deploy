@@ -2,24 +2,37 @@
 -- Materialized view: mv_transport_lines_z16_20
 -- Description:
 --   Base materialized view that merges transport lines from:
---     - osm_transport_lines (ways: e.g. highway, railway),
---     - osm_transport_multilines (relations: e.g. route relations),
---     - osm_street_multilines (type=street relations, via street_multilines.json).
+--     - osm_transport_lines (ways: e.g. highway, railway; via transport_lines.json),
+--     - osm_transport_multilines (relations: e.g. route relations; via transport_multilines.json),
+--     - osm_street_multilines (type=street relations; via street_multilines.json).
 --
---   Ways that are members of type=street relations are expanded: each
---   (way, street-relation) pair produces one feature. The relation's values
---   override the way's values:
---     - name      : relation's name if present, else way's name (fallback).
---     - start_date: always from the relation when one exists, else from way.
---     - end_date  : always from the relation when one exists, else from way.
---     - other tags: relation's tags applied on top (way tags as base).
---   Ways with no type=street membership produce a single unchanged feature.
+-- osm_transport_lines       = the WAYS. The physical geometry of the road/line.
+--                             1 row per way. highway=*, railway=*.
+--                             ALWAYS present when there is a road. <- the base
+
+-- osm_transport_multilines  = ROUTE relations. They group ways.
+--                             1 row per (relation, member way).
+--                             e.g. numbered route, rail line.
+
+-- osm_street_multilines     = STREET relations (type=street). They group ways
+--                             under a street name. 1 row per (relation, member).
+--                             e.g. "Main Street".
+
+--   A way that belongs to a street or route relation is handled by clipping:
+--   the relation renames/reclassifies the way only WITHIN the way's own date
+--   range (never outside it), and the way fills any period no relation covers
+--   (keeping its own name). A way with no relation renders as-is.
+--     - name      : relation's name during its period, else the way's name.
+--     - start_date/end_date: the overlap of the relation and the way.
+--     - other tags: relation's tags on top of the way's (way tags as base).
 --
---   Each row gets a concatenated id (id + osm_id) and is marked with a
---   source_type ('way' or 'relation'). Multilingual name columns are added.
+--   Each row gets a concatenated id (id + osm_id) and a source_type
+--   ('way' or 'relation'). Multilingual name columns are added.
 --
 --   All derived zoom-level views (z13_15, z10_12, etc.) cascade from this one.
 -- ============================================================================
+
+SET statement_timeout = 0;
 
 DO $do$
 DECLARE
@@ -32,11 +45,12 @@ BEGIN
     -- -----------------------------------------------------------------------
     -- CTE: attr_diff_pairs
     --
-    -- Identifies (way, street-relation) pairs where the relation overrides
-    -- at least one attribute compared to the way. Only these pairs produce
-    -- separate relation-expanded features and trigger date trimming on the
-    -- standalone way. When all attributes match, the way keeps its original
-    -- date range and no expanded feature is emitted.
+    -- Find (way, street-relation) pairs where the relation changes something
+    -- on the way (a name, a highway type, etc).
+    --
+    -- Example: an unnamed way belongs to a street relation named "Main Road".
+    --          The name changes -> keep this pair (the way is a street member).
+    -- If the relation changes nothing, the way is left alone (a plain way).
     -- -----------------------------------------------------------------------
     attr_diff_pairs AS (
       SELECT sm.member::bigint AS way_osm_id, sm.osm_id AS rel_osm_id, sm.start_date AS rel_start_date
@@ -65,144 +79,217 @@ BEGIN
         )
     ),
     -- -----------------------------------------------------------------------
-    -- CTE: street_rel_dates
-    --
-    -- For each way with attribute-changing street relations, computes the
-    -- earliest relation start_date. Used to trim the standalone way's
-    -- end_date so it doesn't overlap with the relation's time period.
-    -- Relations with identical attributes are excluded (the way keeps its
-    -- original date range for those).
+    -- plain_ways — ways with NO street/route relation membership. They render
+    -- as-is, with their own dates. (Street members are handled by the STREET
+    -- block below; transport-multiline members by the ROUTE block below.)
     -- -----------------------------------------------------------------------
-    street_rel_dates AS (
-      SELECT
-        way_osm_id,
-        MIN(NULLIF(rel_start_date, '')) AS earliest_rel_start
-      FROM attr_diff_pairs
-      WHERE NULLIF(rel_start_date, '') IS NOT NULL
-      GROUP BY way_osm_id
-    ),
-    -- -----------------------------------------------------------------------
-    -- CTE: way_street_expanded
-    --
-    -- Produces all transport line features from ways, always including the
-    -- standalone way feature plus any street-relation-expanded features.
-    --
-    -- Part 1 (standalone ways):
-    --   Every way from osm_transport_lines appears as-is with its own
-    --   properties. When the way belongs to a street relation that changes
-    --   attributes, the way's end_date is trimmed to the earliest such
-    --   relation's start_date so the time periods do not overlap. When the
-    --   relation has identical attributes, the way keeps its original dates
-    --   (no split needed).
-    --
-    -- Part 2 (street-relation-expanded):
-    --   Only produced when the relation changes at least one attribute.
-    --   The relation's values override the way's:
-    --     - name      : relation's name if present, else way's name.
-    --     - start_date: from the relation.
-    --     - end_date  : from the relation.
-    --     - tags      : relation tags merged on top of way tags.
-    --
-    -- Example A (relation changes name → split):
-    --   Way 100 (start_date=1915, name="Old Road") belongs to street
-    --   relation -5000 (start_date=1984, name="Oak Street").
-    --
-    --   Result (no overlapping time periods):
-    --   ┌──────────────┬────────┬──────────────┬────────────┬──────────┬──────────────────┐
-    --   │ id           │ osm_id │ name         │ start_date │ end_date │ street_rel_osm_id│
-    --   ├──────────────┼────────┼──────────────┼────────────┼──────────┼──────────────────┤
-    --   │ 1_100        │ 100    │ Old Road     │ 1915       │ 1984     │ NULL             │  ← way trimmed
-    --   │ -5000_100    │ 100    │ Oak Street   │ 1984       │          │ -5000            │  ← relation overrides
-    --   └──────────────┴────────┴──────────────┴────────────┴──────────┴──────────────────┘
-    --
-    -- Example B (relation has same attributes → merged):
-    --   Way 100 (start_date=1915, name="Oak Street") belongs to street
-    --   relation -5000 (start_date=1984, name="Oak Street"). All attributes
-    --   are identical, so no expanded feature is produced.
-    --
-    --   Result (single feature with full date range):
-    --   ┌──────────────┬────────┬──────────────┬────────────┬──────────┬──────────────────┐
-    --   │ id           │ osm_id │ name         │ start_date │ end_date │ street_rel_osm_id│
-    --   ├──────────────┼────────┼──────────────┼────────────┼──────────┼──────────────────┤
-    --   │ 1_100        │ 100    │ Oak Street   │ 1915       │          │ NULL             │  ← way untrimmed
-    --   └──────────────┴────────┴──────────────┴────────────┴──────────┴──────────────────┘
-    -- -----------------------------------------------------------------------
-    way_street_expanded AS (
-      -- Part 1: Standalone ways (always present)
+    plain_ways AS (
       SELECT
         COALESCE(CAST(tl.id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '') AS id,
-        tl.osm_id,
-        tl.geometry,
-        tl.highway,
-        tl.type,
-        tl.class,
-        tl.name,
-        tl.tunnel,
-        tl.bridge,
-        tl.oneway,
-        tl.ref,
-        tl.z_order,
-        tl.access,
-        tl.service,
-        tl.ford,
-        tl.electrified,
-        tl.highspeed,
-        tl.usage,
-        tl.railway,
-        tl.aeroway,
-        tl.route,
-        tl.expressway,
-        tl.tags,
+        tl.osm_id, tl.geometry, tl.highway, tl.type, tl.class, tl.name,
+        tl.tunnel, tl.bridge, tl.oneway, tl.ref, tl.z_order, tl.access, tl.service,
+        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.railway, tl.aeroway,
+        tl.route, tl.expressway, tl.tags,
         tl.start_date,
-        LEAST(NULLIF(tl.end_date, ''), srd.earliest_rel_start) AS end_date,
+        NULLIF(tl.end_date, '') AS end_date,
         NULL::bigint AS street_rel_osm_id
       FROM osm_transport_lines AS tl
-      LEFT JOIN street_rel_dates AS srd ON srd.way_osm_id = tl.osm_id
       WHERE tl.geometry IS NOT NULL
-
-      UNION ALL
-
-      -- Part 2: Street-relation-expanded features
-      SELECT
-        COALESCE(CAST(sm.osm_id AS TEXT), '') || '_' || COALESCE(CAST(tl.osm_id AS TEXT), '') AS id,
-        tl.osm_id,
-        tl.geometry,
-        COALESCE(NULLIF(sm.highway, ''), tl.highway)       AS highway,
-        tl.type,
-        tl.class,
-        COALESCE(NULLIF(sm.name, ''), NULLIF(tl.name, '')) AS name,
-        COALESCE(sm.tunnel,                tl.tunnel)                AS tunnel,
-        COALESCE(sm.bridge,                tl.bridge)                AS bridge,
-        COALESCE(sm.oneway,                tl.oneway)                AS oneway,
-        COALESCE(NULLIF(sm.ref,  ''),      tl.ref)                   AS ref,
-        COALESCE(sm.z_order,               tl.z_order)               AS z_order,
-        COALESCE(NULLIF(sm.access,  ''),   tl.access)                AS access,
-        COALESCE(NULLIF(sm.service, ''),   tl.service)               AS service,
-        COALESCE(NULLIF(sm.ford,    ''),   tl.ford)                  AS ford,
-        COALESCE(NULLIF(sm.electrified,''),tl.electrified)           AS electrified,
-        COALESCE(NULLIF(sm.highspeed,''),  tl.highspeed)             AS highspeed,
-        COALESCE(NULLIF(sm.usage,   ''),   tl.usage)                 AS usage,
-        COALESCE(NULLIF(sm.railway, ''),   tl.railway)               AS railway,
-        COALESCE(NULLIF(sm.aeroway, ''),   tl.aeroway)               AS aeroway,
-        COALESCE(NULLIF(sm.route,   ''),   tl.route)                 AS route,
-        COALESCE(sm.expressway, tl.expressway)                       AS expressway,
-        sm.tags || tl.tags AS tags,
-        sm.start_date,
-        sm.end_date,
-        sm.osm_id AS street_rel_osm_id
+        AND NOT EXISTS (
+          SELECT 1 FROM osm_transport_multilines AS tm
+          WHERE tm.member::bigint = tl.osm_id AND ST_GeometryType(tm.geometry) = 'ST_LineString'
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM attr_diff_pairs AS adp WHERE adp.way_osm_id = tl.osm_id
+        )
+    ),
+    -- =======================================================================
+    -- ROUTE / TRANSPORT RELATIONS (osm_transport_multilines) — fix #1320
+    --
+    -- A relation can rename or reclassify a way for a time period. The relation
+    -- only counts while the way itself exists. So we clip the relation to the
+    -- way's dates, and the way fills the time the relation does not cover.
+    --
+    -- Example: way exists 1900-2000. Relation "Main St" says 1850-1950.
+    --   -> "Main St" shows 1900-1950 (clipped to the way).
+    --   -> the way shows 1950-2000 (the gap after the relation).
+    --
+    -- STEP 1: list the member ways with their own dates.
+    -- STEP 2: clip each relation to the member way's dates.
+    -- STEP 3: fill the periods no relation covers with the way itself.
+    -- =======================================================================
+    -- STEP 1 — member ways with their own life span (as decimal dates).
+    mline_member_ways AS (
+      SELECT DISTINCT
+        tl.osm_id, tl.geometry, tl.highway, tl.type, tl.class,
+        tl.tunnel, tl.bridge, tl.oneway, tl.ref, tl.z_order, tl.access, tl.service,
+        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.railway, tl.aeroway,
+        tl.route, tl.expressway, tl.tags,
+        isodatetodecimaldate(pad_date(tl.start_date, 'start'), FALSE) AS w_s,
+        isodatetodecimaldate(pad_date(NULLIF(tl.end_date, ''), 'end'), FALSE) AS w_e
       FROM osm_transport_lines AS tl
-      INNER JOIN osm_street_multilines AS sm
-        ON sm.member::bigint = tl.osm_id
-        AND ST_GeometryType(sm.geometry) = 'ST_LineString'
       WHERE tl.geometry IS NOT NULL
         AND EXISTS (
-          SELECT 1 FROM attr_diff_pairs AS adp
-          WHERE adp.way_osm_id = tl.osm_id AND adp.rel_osm_id = sm.osm_id
+          SELECT 1 FROM osm_transport_multilines AS tm
+          WHERE tm.member::bigint = tl.osm_id
+            AND ST_GeometryType(tm.geometry) = 'ST_LineString'
         )
+    ),
+    -- STEP 2 — clip each relation to the member way's dates. GREATEST/LEAST
+    -- keep only the overlap, so a relation never shows outside the way.
+    -- (rel_*_dec keep the un-clipped dates, so we keep the original text when
+    -- the clip did not actually move a boundary.)
+    mline_rels_clipped AS (
+      SELECT
+        tm.id AS rel_id, tm.osm_id AS rel_osm_id, tm.member::bigint AS member_osm_id,
+        tm.geometry, tm.highway, tm.type, tm.class, tm.name,
+        tm.tunnel, tm.bridge, tm.oneway, tm.ref, tm.z_order, tm.access, tm.service,
+        tm.ford, tm.electrified, tm.highspeed, tm.usage, tm.railway, tm.aeroway,
+        tm.route, tm.expressway, tm.tags,
+        tm.start_date AS rel_start_date, NULLIF(tm.end_date, '') AS rel_end_date,
+        isodatetodecimaldate(pad_date(tm.start_date, 'start'), FALSE) AS rel_s_dec,
+        isodatetodecimaldate(pad_date(NULLIF(tm.end_date, ''), 'end'), FALSE) AS rel_e_dec,
+        GREATEST(isodatetodecimaldate(pad_date(tm.start_date, 'start'), FALSE), mw.w_s)::double precision AS s_dec,
+        LEAST(isodatetodecimaldate(pad_date(NULLIF(tm.end_date, ''), 'end'), FALSE), mw.w_e)::double precision AS e_dec
+      FROM osm_transport_multilines AS tm
+      -- LEFT JOIN, not INNER: a multilinestring relation can group UNTAGGED
+      -- ways (geometry only, no highway) that are not in osm_transport_lines.
+      -- For those, mw is NULL -> no clip -> the relation renders on its own dates.
+      LEFT JOIN mline_member_ways AS mw ON mw.osm_id = tm.member::bigint
+      WHERE ST_GeometryType(tm.geometry) = 'ST_LineString' AND tm.geometry IS NOT NULL
+    ),
+    -- STEP 3 — the periods no relation covers. range_agg joins the clipped
+    -- relation ranges; we subtract them from the way's range, and each leftover
+    -- piece renders the way itself.
+    mline_gaps AS (
+      SELECT
+        mw.osm_id, mw.geometry, mw.highway, mw.type, mw.class,
+        mw.tunnel, mw.bridge, mw.oneway, mw.ref, mw.z_order, mw.access, mw.service,
+        mw.ford, mw.electrified, mw.highspeed, mw.usage, mw.railway, mw.aeroway,
+        mw.route, mw.expressway, mw.tags,
+        lower(g)::double precision AS s_dec, upper(g)::double precision AS e_dec,
+        row_number() OVER (PARTITION BY mw.osm_id ORDER BY lower(g)) AS gap_n
+      FROM mline_member_ways AS mw
+      CROSS JOIN LATERAL (
+        SELECT unnest(
+          -- Guard against bad data (start_date > end_date): an inverted way
+          -- range would make numrange() throw and abort the whole mview. Such
+          -- ways get no gap fill (their clipped relations still render).
+          (CASE
+             WHEN mw.w_s IS NOT NULL AND mw.w_e IS NOT NULL AND mw.w_s > mw.w_e
+               THEN '{}'::nummultirange
+             ELSE nummultirange(numrange(mw.w_s::numeric, mw.w_e::numeric))
+           END)
+          - COALESCE(range_agg(numrange(rc.s_dec::numeric, rc.e_dec::numeric)), '{}'::nummultirange)
+        ) AS g
+        FROM mline_rels_clipped AS rc
+        WHERE rc.member_osm_id = mw.osm_id
+          AND (rc.s_dec IS NULL OR rc.e_dec IS NULL OR rc.s_dec < rc.e_dec)
+      ) AS gaps_expand
+    ),
+    -- =======================================================================
+    -- STREET RELATIONS (osm_street_multilines) — fix #1320
+    --
+    -- Same 3 steps as the route block above, but for type=street relations.
+    -- A street relation names/reclassifies the way for a time period; we clip
+    -- it to the way's dates, and the way (with its OWN name) fills the rest.
+    --
+    -- Example: way "Old Road" 1900-2000. Street relation "New Ave" 1950-1980.
+    --   -> "New Ave" shows 1950-1980. "Old Road" shows 1900-1950 and 1980-2000.
+    --
+    -- STEP 1: list the street-member ways with their own dates.
+    -- STEP 2: clip each street relation to the member way's dates.
+    -- STEP 3: fill the periods no street relation covers with the way itself.
+    -- (Transport-multiline members are handled above, not here.)
+    -- =======================================================================
+    -- STEP 1 — street-member ways with their own attributes and dates. Only
+    -- ways whose street relation changes something (attr_diff_pairs) are here;
+    -- ways whose street relation changes nothing render as plain ways below.
+    smember_ways AS (
+      SELECT DISTINCT
+        tl.osm_id, tl.geometry, tl.highway, tl.type, tl.class, tl.name AS way_name,
+        tl.tunnel, tl.bridge, tl.oneway, tl.ref, tl.z_order, tl.access, tl.service,
+        tl.ford, tl.electrified, tl.highspeed, tl.usage, tl.railway, tl.aeroway,
+        tl.route, tl.expressway, tl.tags,
+        isodatetodecimaldate(pad_date(tl.start_date, 'start'), FALSE) AS w_s,
+        isodatetodecimaldate(pad_date(NULLIF(tl.end_date, ''), 'end'), FALSE) AS w_e
+      FROM osm_transport_lines AS tl
+      WHERE tl.geometry IS NOT NULL
+        AND EXISTS (SELECT 1 FROM attr_diff_pairs AS adp WHERE adp.way_osm_id = tl.osm_id)
+        AND NOT EXISTS (
+          SELECT 1 FROM osm_transport_multilines AS tm
+          WHERE tm.member::bigint = tl.osm_id AND ST_GeometryType(tm.geometry) = 'ST_LineString'
+        )
+    ),
+    -- STEP 2 — clip each street relation to the member way's dates. The
+    -- relation's attributes (name, highway, ...) win over the way's; dates are
+    -- clipped with GREATEST/LEAST. (rel_*_dec keep the un-clipped dates, so we
+    -- keep the original text when the clip did not move a boundary.)
+    smline_rels_clipped AS (
+      SELECT
+        sm.osm_id AS rel_osm_id, sm.member::bigint AS member_osm_id, mw.geometry,
+        COALESCE(NULLIF(sm.highway, ''), mw.highway) AS highway,
+        mw.type, mw.class,
+        COALESCE(NULLIF(sm.name, ''), NULLIF(mw.way_name, '')) AS name,
+        COALESCE(sm.tunnel, mw.tunnel) AS tunnel,
+        COALESCE(sm.bridge, mw.bridge) AS bridge,
+        COALESCE(sm.oneway, mw.oneway) AS oneway,
+        COALESCE(NULLIF(sm.ref, ''), mw.ref) AS ref,
+        COALESCE(sm.z_order, mw.z_order) AS z_order,
+        COALESCE(NULLIF(sm.access, ''), mw.access) AS access,
+        COALESCE(NULLIF(sm.service, ''), mw.service) AS service,
+        COALESCE(NULLIF(sm.ford, ''), mw.ford) AS ford,
+        COALESCE(NULLIF(sm.electrified, ''), mw.electrified) AS electrified,
+        COALESCE(NULLIF(sm.highspeed, ''), mw.highspeed) AS highspeed,
+        COALESCE(NULLIF(sm.usage, ''), mw.usage) AS usage,
+        COALESCE(NULLIF(sm.railway, ''), mw.railway) AS railway,
+        COALESCE(NULLIF(sm.aeroway, ''), mw.aeroway) AS aeroway,
+        COALESCE(NULLIF(sm.route, ''), mw.route) AS route,
+        COALESCE(sm.expressway, mw.expressway) AS expressway,
+        (sm.tags || mw.tags) AS tags,
+        sm.start_date AS rel_start_date, NULLIF(sm.end_date, '') AS rel_end_date,
+        isodatetodecimaldate(pad_date(sm.start_date, 'start'), FALSE) AS rel_s_dec,
+        isodatetodecimaldate(pad_date(NULLIF(sm.end_date, ''), 'end'), FALSE) AS rel_e_dec,
+        GREATEST(isodatetodecimaldate(pad_date(sm.start_date, 'start'), FALSE), mw.w_s)::double precision AS s_dec,
+        LEAST(isodatetodecimaldate(pad_date(NULLIF(sm.end_date, ''), 'end'), FALSE), mw.w_e)::double precision AS e_dec
+      FROM osm_street_multilines AS sm
+      INNER JOIN smember_ways AS mw ON mw.osm_id = sm.member::bigint
+      INNER JOIN attr_diff_pairs AS adp ON adp.way_osm_id = sm.member::bigint AND adp.rel_osm_id = sm.osm_id
+      WHERE ST_GeometryType(sm.geometry) = 'ST_LineString' AND sm.geometry IS NOT NULL
+    ),
+    -- STEP 3 — the periods no street relation covers. Subtract the clipped
+    -- relation ranges from the way's range; each leftover piece renders the
+    -- way itself, keeping its own name.
+    smline_gaps AS (
+      SELECT
+        mw.osm_id, mw.geometry, mw.highway, mw.type, mw.class, mw.way_name,
+        mw.tunnel, mw.bridge, mw.oneway, mw.ref, mw.z_order, mw.access, mw.service,
+        mw.ford, mw.electrified, mw.highspeed, mw.usage, mw.railway, mw.aeroway,
+        mw.route, mw.expressway, mw.tags,
+        lower(g)::double precision AS s_dec, upper(g)::double precision AS e_dec,
+        row_number() OVER (PARTITION BY mw.osm_id ORDER BY lower(g)) AS gap_n
+      FROM smember_ways AS mw
+      CROSS JOIN LATERAL (
+        SELECT unnest(
+          -- Guard against bad data (start_date > end_date): an inverted way
+          -- range would make numrange() throw and abort the whole mview. Such
+          -- ways get no gap fill (their clipped relations still render).
+          (CASE
+             WHEN mw.w_s IS NOT NULL AND mw.w_e IS NOT NULL AND mw.w_s > mw.w_e
+               THEN '{}'::nummultirange
+             ELSE nummultirange(numrange(mw.w_s::numeric, mw.w_e::numeric))
+           END)
+          - COALESCE(range_agg(numrange(rc.s_dec::numeric, rc.e_dec::numeric)), '{}'::nummultirange)
+        ) AS g
+        FROM smline_rels_clipped AS rc
+        WHERE rc.member_osm_id = mw.osm_id
+          AND (rc.s_dec IS NULL OR rc.e_dec IS NULL OR rc.s_dec < rc.e_dec)
+      ) AS gaps_expand
     ),
     combined AS (
       -- -------------------------------------------------------------------
-      -- Ways (possibly expanded by street relations)
+      -- Plain ways — no attribute-changing street relation. Street-member
+      -- ways are handled by the clip + gap branches below.
       -- -------------------------------------------------------------------
       SELECT
         id,
@@ -241,20 +328,17 @@ BEGIN
         ABS(street_rel_osm_id) AS relation,
         'way' AS source_type,
         %s
-      FROM way_street_expanded
-      WHERE NOT EXISTS (
-        SELECT 1 FROM osm_transport_multilines AS tm
-        WHERE tm.member::bigint = way_street_expanded.osm_id
-      )
+      FROM plain_ways
 
       UNION ALL
 
       -- -------------------------------------------------------------------
-      -- Transport relation members (route relations, etc.)
+      -- #1320 Part 1 — Transport/route/street relation members, CLIPPED to the
+      -- member way's date range so nothing renders outside the way's life span.
       -- -------------------------------------------------------------------
       SELECT
-        (COALESCE(CAST(id AS TEXT), '') || '_' || COALESCE(CAST(osm_id AS TEXT), '')) AS id,
-        ABS(member::bigint) AS osm_id,
+        (COALESCE(CAST(rel_id AS TEXT), '') || '_' || COALESCE(CAST(rel_osm_id AS TEXT), '')) AS id,
+        ABS(member_osm_id) AS osm_id,
         geometry,
         CASE
             WHEN highway = 'construction' THEN
@@ -281,20 +365,165 @@ BEGIN
         NULLIF(highway, '') AS highway,
         NULLIF(route, '') AS route,
         NULLIF(expressway, 0) AS expressway,
-        NULLIF(start_date, '') AS start_date,
-        NULLIF(end_date, '') AS end_date,
-        isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
-        isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
+        -- Keep the original relation text when the clip did not move the
+        -- boundary; convert from the clipped decimal only when it did.
+        CASE WHEN s_dec IS DISTINCT FROM rel_s_dec THEN NULLIF(decimaldatetoisodate(s_dec), '')
+             ELSE NULLIF(rel_start_date, '') END AS start_date,
+        CASE WHEN e_dec IS DISTINCT FROM rel_e_dec
+             THEN CASE WHEN e_dec IS NULL THEN NULL ELSE NULLIF(decimaldatetoisodate(e_dec), '') END
+             ELSE rel_end_date END AS end_date,
+        s_dec AS start_decdate,
+        e_dec AS end_decdate,
         tags,
-        ABS(osm_id) AS relation,
+        ABS(rel_osm_id) AS relation,
         'relation' AS source_type,
         %s
-      FROM osm_transport_multilines
-      WHERE ST_GeometryType(geometry) = 'ST_LineString' AND geometry IS NOT NULL
+      FROM mline_rels_clipped
+      WHERE (s_dec IS NULL OR e_dec IS NULL OR s_dec < e_dec)
+
+      UNION ALL
+
+      -- -------------------------------------------------------------------
+      -- #1320 Part 2 (gap-fill) — the member way itself, for periods not
+      -- covered by any relation, so the road stays visible across its full
+      -- life span. Remove this UNION ALL block to ship Part 1 only.
+      -- -------------------------------------------------------------------
+      SELECT
+        (COALESCE(CAST(osm_id AS TEXT), '') || '_gap_' || gap_n::text) AS id,
+        ABS(osm_id) AS osm_id,
+        geometry,
+        CASE
+            WHEN highway = 'construction' THEN
+                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
+            ELSE type
+        END AS type,
+        NULLIF(tags->'construction', '') AS construction,
+        NULLIF(tags->'golf', '') AS golf,
+        class,
+        NULL::text AS name,
+        NULLIF(tunnel, 0) AS tunnel,
+        NULLIF(bridge, 0) AS bridge,
+        NULLIF(oneway, 0) AS oneway,
+        NULLIF(ref, '') AS ref,
+        z_order,
+        NULLIF(access, '') AS access,
+        NULLIF(service, '') AS service,
+        NULLIF(ford, '') AS ford,
+        NULLIF(electrified, '') AS electrified,
+        NULLIF(highspeed, '') AS highspeed,
+        NULLIF(usage, '') AS usage,
+        NULLIF(railway, '') AS railway,
+        NULLIF(aeroway, '') AS aeroway,
+        NULLIF(highway, '') AS highway,
+        NULLIF(route, '') AS route,
+        NULLIF(expressway, 0) AS expressway,
+        CASE WHEN s_dec IS NULL THEN NULL ELSE NULLIF(decimaldatetoisodate(s_dec), '') END AS start_date,
+        CASE WHEN e_dec IS NULL THEN NULL ELSE NULLIF(decimaldatetoisodate(e_dec), '') END AS end_date,
+        s_dec AS start_decdate,
+        e_dec AS end_decdate,
+        tags,
+        NULL::bigint AS relation,
+        'way' AS source_type,
+        %s
+      FROM mline_gaps
+
+      UNION ALL
+
+      -- -------------------------------------------------------------------
+      -- #1320 Part 1 (street) — street relation members, CLIPPED to the
+      -- member way's date range.
+      -- -------------------------------------------------------------------
+      SELECT
+        (COALESCE(CAST(rel_osm_id AS TEXT), '') || '_' || COALESCE(CAST(member_osm_id AS TEXT), '')) AS id,
+        ABS(member_osm_id) AS osm_id,
+        geometry,
+        CASE
+            WHEN highway = 'construction' THEN
+                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
+            ELSE type
+        END AS type,
+        NULLIF(tags->'construction', '') AS construction,
+        NULLIF(tags->'golf', '') AS golf,
+        class,
+        NULLIF(name, '') AS name,
+        NULLIF(tunnel, 0) AS tunnel,
+        NULLIF(bridge, 0) AS bridge,
+        NULLIF(oneway, 0) AS oneway,
+        NULLIF(ref, '') AS ref,
+        z_order,
+        NULLIF(access, '') AS access,
+        NULLIF(service, '') AS service,
+        NULLIF(ford, '') AS ford,
+        NULLIF(electrified, '') AS electrified,
+        NULLIF(highspeed, '') AS highspeed,
+        NULLIF(usage, '') AS usage,
+        NULLIF(railway, '') AS railway,
+        NULLIF(aeroway, '') AS aeroway,
+        NULLIF(highway, '') AS highway,
+        NULLIF(route, '') AS route,
+        NULLIF(expressway, 0) AS expressway,
+        CASE WHEN s_dec IS DISTINCT FROM rel_s_dec THEN NULLIF(decimaldatetoisodate(s_dec), '')
+             ELSE NULLIF(rel_start_date, '') END AS start_date,
+        CASE WHEN e_dec IS DISTINCT FROM rel_e_dec
+             THEN CASE WHEN e_dec IS NULL THEN NULL ELSE NULLIF(decimaldatetoisodate(e_dec), '') END
+             ELSE rel_end_date END AS end_date,
+        s_dec AS start_decdate,
+        e_dec AS end_decdate,
+        tags,
+        ABS(rel_osm_id) AS relation,
+        'way' AS source_type,
+        %s
+      FROM smline_rels_clipped
+      WHERE (s_dec IS NULL OR e_dec IS NULL OR s_dec < e_dec)
+
+      UNION ALL
+
+      -- -------------------------------------------------------------------
+      -- #1320 Part 2 (street gap-fill) — the member way itself (with its own
+      -- name) for periods not covered by any street relation.
+      -- -------------------------------------------------------------------
+      SELECT
+        (COALESCE(CAST(osm_id AS TEXT), '') || '_sgap_' || gap_n::text) AS id,
+        ABS(osm_id) AS osm_id,
+        geometry,
+        CASE
+            WHEN highway = 'construction' THEN
+                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
+            ELSE type
+        END AS type,
+        NULLIF(tags->'construction', '') AS construction,
+        NULLIF(tags->'golf', '') AS golf,
+        class,
+        NULLIF(way_name, '') AS name,
+        NULLIF(tunnel, 0) AS tunnel,
+        NULLIF(bridge, 0) AS bridge,
+        NULLIF(oneway, 0) AS oneway,
+        NULLIF(ref, '') AS ref,
+        z_order,
+        NULLIF(access, '') AS access,
+        NULLIF(service, '') AS service,
+        NULLIF(ford, '') AS ford,
+        NULLIF(electrified, '') AS electrified,
+        NULLIF(highspeed, '') AS highspeed,
+        NULLIF(usage, '') AS usage,
+        NULLIF(railway, '') AS railway,
+        NULLIF(aeroway, '') AS aeroway,
+        NULLIF(highway, '') AS highway,
+        NULLIF(route, '') AS route,
+        NULLIF(expressway, 0) AS expressway,
+        CASE WHEN s_dec IS NULL THEN NULL ELSE NULLIF(decimaldatetoisodate(s_dec), '') END AS start_date,
+        CASE WHEN e_dec IS NULL THEN NULL ELSE NULLIF(decimaldatetoisodate(e_dec), '') END AS end_date,
+        s_dec AS start_decdate,
+        e_dec AS end_decdate,
+        tags,
+        NULL::bigint AS relation,
+        'way' AS source_type,
+        %s
+      FROM smline_gaps
     )
     SELECT DISTINCT ON (id) *
     FROM combined;
-  $sql$, lang_columns, lang_columns);
+  $sql$, lang_columns, lang_columns, lang_columns, lang_columns, lang_columns);
 
   PERFORM finalize_materialized_view(
     'mv_transport_lines_z16_20_tmp',
