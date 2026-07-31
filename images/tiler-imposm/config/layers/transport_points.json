@@ -95,6 +95,13 @@
             ]
           }
         },
+        "aerialway": {
+          "mapping": {
+            "aerialway": [
+              "__any__"
+            ]
+          }
+        },
         "route": {
           "mapping": {
             "route": [

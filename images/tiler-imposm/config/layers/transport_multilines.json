@@ -123,6 +123,11 @@
         },
         {
           "type": "string",
+          "name": "aerialway",
+          "key": "aerialway"
+        },
+        {
+          "type": "string",
           "name": "highway",
           "key": "highway"
         },

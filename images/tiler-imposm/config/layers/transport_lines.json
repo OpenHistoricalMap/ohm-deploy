@@ -108,6 +108,11 @@
         },
         {
           "type": "string",
+          "name": "aerialway",
+          "key": "aerialway"
+        },
+        {
+          "type": "string",
           "name": "highway",
           "key": "highway"
         },
@@ -161,6 +166,13 @@
         "aeroway": {
           "mapping": {
             "aeroway": [
+              "__any__"
+            ]
+          }
+        },
+        "aerialway": {
+          "mapping": {
+            "aerialway": [
               "__any__"
             ]
           }
