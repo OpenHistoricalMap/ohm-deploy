@@ -139,7 +139,9 @@ setup_production() {
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.openhistoricalmap.org|${VTILES_DOMAIN}|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|vtiles.staging.openhistoricalmap.org|${VTILES_DOMAIN}|g" {} +
 
-  # Replace URLs in the public directory
+  # Replace URLs in the public directory.
+  # Skip id-*.js: iD resolves its API URL at runtime (preauth); rewriting
+  # the literal makes staging call the production API (401).
   find "/var/www/public" -type f \( \
       -name "mapstyle.js" -o \
       -name "index.html" -o \
@@ -147,7 +149,6 @@ setup_production() {
       -name "application-*.js" -o \
       -name "embed-*.js" -o \
       -name "ohm.style-*.js" -o \
-      -name "id-*.js" -o \
       -name "index-*.js" \
   \) | while read -r file; do
     echo "Updating $file"
