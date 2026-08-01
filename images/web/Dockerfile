@@ -17,18 +17,18 @@ RUN apt-get update && \
     libarchive-dev zlib1g-dev libcurl4-openssl-dev libgd-dev \
     apache2 apache2-dev libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
     postgresql-client libpq-dev libxml2-dev libyaml-dev \
-    pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip\
+    pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip libvips \
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g yarn svgo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download OHM Website using gitsha, faster than cloning
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=57b6a7badd7450234a93cd092c5b7d3bb2261b56
-ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
+ENV OPENHISTORICALMAP_WEBSITE_MERGED_GITSHA=087d0db5847434f55463a1297643914fc5933386
+ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website-merged/archive/${OPENHISTORICALMAP_WEBSITE_MERGED_GITSHA}.zip
 RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
     unzip /tmp/ohm-website.zip -d /tmp && \
-    mv /tmp/ohm-website-$OPENHISTORICALMAP_WEBSITE_GITSHA/* $workdir && \
+    mv /tmp/ohm-website-merged-$OPENHISTORICALMAP_WEBSITE_MERGED_GITSHA/* $workdir && \
     rm -rf /tmp/*
 
 RUN gem install bundler -v 4.0.11 --no-document && \
