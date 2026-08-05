@@ -69,6 +69,9 @@ RUN apt-get update \
 COPY docker-entrypoint.sh fix-permissions.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh /app/fix-permissions.sh
 
+# nginx config that accepts a trailing slash on /api/ paths. See issue #891.
+COPY etc/nginx-overpass.conf.template /etc/nginx/nginx.conf.template
+
 EXPOSE 80
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
