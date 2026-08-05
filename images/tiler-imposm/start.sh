@@ -37,6 +37,8 @@ TRACKING_FILE="$WORKDIR/uploaded_files.log"
 
 # Create config map for imposm
 python build_imposm3_config.py
+# Build the taginfo project file for taginfo to read. See issue #604.
+python build_taginfo_project.py
 
 # Upload compiled imposm config to S3 for the tiler-monitor to read
 if [ -n "$AWS_S3_BUCKET" ]; then
@@ -44,6 +46,10 @@ if [ -n "$AWS_S3_BUCKET" ]; then
     aws s3 cp ./config/imposm3.json "${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/imposm3.json" --acl public-read && \
         log_message "imposm3.json uploaded to S3 successfully." || \
         log_message "Warning: Failed to upload imposm3.json to S3. Monitor will use cached version."
+    log_message "Uploading taginfo-project.json to S3..."
+    aws s3 cp ./taginfo-project.json "${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/taginfo-project.json" --acl public-read && \
+        log_message "taginfo-project.json uploaded to S3 successfully." || \
+        log_message "Warning: Failed to upload taginfo-project.json to S3. Taginfo will use the previous version."
 fi
 
 # Create config file for imposm
