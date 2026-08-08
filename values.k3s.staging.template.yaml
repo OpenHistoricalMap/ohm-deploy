@@ -326,7 +326,7 @@ osm-seed:
       failureThreshold: 6
     env:
       NOMINATIM_API_ENDPOINT: nominatim.ohmstaging.org
-      PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260714_0001.osm.pbf
+      PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260808_0031.osm.pbf
       REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
       REPLICATION_UPDATE_INTERVAL: 60
       REPLICATION_RECHECK_INTERVAL: 30
@@ -350,7 +350,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
       staticHostPath: true
-      localVolumeHostPath: /mnt/nominatim-db-data-v2
+      localVolumeHostPath: /mnt/nominatim-db-data-v003
     nodeSelector:
       enabled: false
     nodeAffinity:
