@@ -34,8 +34,10 @@ OHM customizations that stay in this directory:
   style. It indexes `type=street` relations
   ([#1308](https://github.com/OpenHistoricalMap/issues/issues/1308)),
   `type=collection` relations
-  ([#452](https://github.com/OpenHistoricalMap/issues/issues/452)) and
-  `type=route` + `route=railway` relations by name.
+  ([#452](https://github.com/OpenHistoricalMap/issues/issues/452)),
+  `type=chronology` relations
+  ([#640](https://github.com/OpenHistoricalMap/issues/issues/640)) and
+  `type=route` + `route=road` relations by name.
 - `address-levels.json`: OHM search and address ranks, baked into the image.
   This directory is the source of truth for the file; changing it requires an
   image rebuild.
@@ -44,6 +46,21 @@ The import style only applies at import time and during replication updates.
 Street and collection relations that already exist in the database are not
 indexed until they are edited or the database is reimported from a planet
 file.
+
+### Upgrading an existing database
+
+Nominatim 5 can migrate a database imported with 4.5, so the schema alone does
+not force a reimport:
+
+```
+nominatim admin --migrate
+nominatim refresh --functions
+```
+
+That is enough for changes that only affect query time, such as the date-aware
+address calculation. It is not enough for changes to `ohm-import.lua` or
+`address-levels.json`, which only take effect on import. Plan a full reimport
+from a planet file when the import style changes.
 
 
 ### Log outputs in the container
