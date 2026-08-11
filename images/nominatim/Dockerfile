@@ -1,6 +1,6 @@
 FROM mediagis/nominatim:5.3.2
 
-ENV OPENHISTORICALMAP_NOMINATIM_GITSHA=35135e988d6e9f9c3579e5b141713790387dd764
+ENV OPENHISTORICALMAP_NOMINATIM_GITSHA=0106a3174db172ff3f7ceff0d5568e791ca7e0cf
 ENV OHM_NOMINATIM_URL=https://codeload.github.com/OpenHistoricalMap/Nominatim/tar.gz/${OPENHISTORICALMAP_NOMINATIM_GITSHA}
 ENV COUNTRY_GRID_URL=https://www.nominatim.org/data/country_grid.sql.gz
 # use DateFunctions-plpgsql for Nominatim  as we do in imposm
