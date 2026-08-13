@@ -1,6 +1,6 @@
 FROM mediagis/nominatim:5.3.2
 
-ENV OPENHISTORICALMAP_NOMINATIM_GITSHA=35135e988d6e9f9c3579e5b141713790387dd764
+ENV OPENHISTORICALMAP_NOMINATIM_GITSHA=0106a3174db172ff3f7ceff0d5568e791ca7e0cf
 ENV OHM_NOMINATIM_URL=https://codeload.github.com/OpenHistoricalMap/Nominatim/tar.gz/${OPENHISTORICALMAP_NOMINATIM_GITSHA}
 ENV COUNTRY_GRID_URL=https://www.nominatim.org/data/country_grid.sql.gz
 # use DateFunctions-plpgsql for Nominatim  as we do in imposm
@@ -44,6 +44,10 @@ ENV IMPORT_STYLE=/app/ohm-import.lua
 
 # Ensure scripts are executable
 RUN chmod +x /app/docker-entrypoint.sh /app/update.sh
+
+# start.sh runs replication with a single indexing thread by default.
+# Inject --threads so it uses the THREADS env var (falls back to 4).
+RUN sed -i 's|nominatim replication --project-dir ${PROJECT_DIR}|& --threads ${THREADS:-4}|' /app/start.sh
 
 RUN echo "* * * * * bash /app/update.sh >> /var/log/cron.log 2>&1" | crontab -
 

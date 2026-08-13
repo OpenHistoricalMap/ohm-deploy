@@ -11,5 +11,8 @@ if [[ ! -z "$OSMSEED_WEB_API_DOMAIN" ]]; then
         xargs -0 perl -pi -e "s/www\.openstreetmap\.org/${OSMSEED_WEB_API_DOMAIN}/g"
 fi
 
+# Cron runs with a minimal environment, so save THREADS for update.sh
+echo "export THREADS=${THREADS:-4}" > /app/cron-env.sh
+
 # Cron job is going activate updates even if the script fails once, next time it will start again
 cron & /app/start.sh
