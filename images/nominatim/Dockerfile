@@ -45,6 +45,10 @@ ENV IMPORT_STYLE=/app/ohm-import.lua
 # Ensure scripts are executable
 RUN chmod +x /app/docker-entrypoint.sh /app/update.sh
 
+# start.sh runs replication with a single indexing thread by default.
+# Inject --threads so it uses the THREADS env var (falls back to 4).
+RUN sed -i 's|nominatim replication --project-dir ${PROJECT_DIR}|& --threads ${THREADS:-4}|' /app/start.sh
+
 RUN echo "* * * * * bash /app/update.sh >> /var/log/cron.log 2>&1" | crontab -
 
 CMD ["/app/docker-entrypoint.sh"]
