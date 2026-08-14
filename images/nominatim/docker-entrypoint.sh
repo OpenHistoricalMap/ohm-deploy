@@ -4,7 +4,7 @@ CONFIG_FILE=${PROJECT_DIR}/.env
 # Address levels config is baked into the image
 echo NOMINATIM_ADDRESS_LEVEL_CONFIG=/app/address-levels.json >> ${CONFIG_FILE}
 
-# Nominatim reads node 1 from the OSM API to date the database, so point it at OHM
+# Nominatim dates the database by fetching its newest node from the API, so rewrite the OSM URLs to query the OHM API instead
 if [[ ! -z "$OSMSEED_WEB_API_DOMAIN" ]]; then
     SITE_PACKAGES=$(python3 -c "import nominatim_db, pathlib; print(pathlib.Path(nominatim_db.__file__).parent.parent)")
     find "${SITE_PACKAGES}/nominatim_db" "${SITE_PACKAGES}/nominatim_api" -name '*.py' -print0 |
