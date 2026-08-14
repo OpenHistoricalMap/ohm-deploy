@@ -363,7 +363,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
       staticHostPath: true
-      localVolumeHostPath: /mnt/nominatim-db-data-v2
+      localVolumeHostPath: /mnt/nominatim-db-data-v003
     nodeSelector:
       enabled: false
     nodeAffinity:
