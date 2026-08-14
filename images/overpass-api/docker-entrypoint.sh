@@ -11,6 +11,7 @@ OVERPASS_CLONE_SOURCE=${OVERPASS_CLONE_SOURCE:-https://dev.overpass-api.de/api_d
 
 # this is used by other processes, so needs to be exported
 export OVERPASS_MAX_TIMEOUT=${OVERPASS_MAX_TIMEOUT:-1000s}
+export OVERPASS_MAX_SIZE=${OVERPASS_MAX_SIZE:-1M}
 
 if [[ "$OVERPASS_META" == "attic" ]]; then
 	META="--keep-attic"
@@ -137,7 +138,7 @@ fi
 /app/fix-permissions.sh
 
 # shellcheck disable=SC2016 # ignore SC2016 (variables within single quotes) as this is exactly what we want to do here
-envsubst '${OVERPASS_MAX_TIMEOUT}' </etc/nginx/nginx.conf.template >/etc/nginx/nginx.conf
+envsubst '${OVERPASS_MAX_TIMEOUT} ${OVERPASS_MAX_SIZE}' </etc/nginx/nginx.conf.template >/etc/nginx/nginx.conf
 
 echo "Starting supervisord process"
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

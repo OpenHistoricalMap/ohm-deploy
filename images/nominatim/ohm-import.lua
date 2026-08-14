@@ -30,25 +30,25 @@ flex.RELATION_TYPES['site'] = relation_as_any
 
 -- Street, road route and chronology relations often carry only identity tags
 -- (type, name, dates), so give them a main tag or flex-base drops them.
--- This must hook process_tags, not osm2pgsql.process_relation: osm2pgsql
--- captures the process_* callbacks on the Lua stack before this file can
--- override them, so a reassignment of osm2pgsql.process_relation is never
--- called. process_tags is looked up dynamically on the flex module table,
--- so wrapping it here does take effect.
-local original_process_tags = flex.process_tags
+-- The tag has to be there before the place is built: Nominatim copies the
+-- object tags into the place at that point, and a place with no main tag is
+-- skipped without ever reaching process_tags. So hook process_relation, which
+-- runs first, and point osm2pgsql at the wrapper because the module already
+-- handed it the original function.
+local original_process_relation = flex.process_relation
 
-function flex.process_tags(o)
-    if o.object.type == 'relation' then
-        local tags = o.object.tags
-        if tags.type == 'street' and tags.highway == nil then
-            tags.highway = 'road'
-        elseif tags.type == 'route' and tags.route == 'road' and tags.highway == nil then
-            tags.highway = 'road'
-        elseif tags.type == 'chronology' and tags.historic == nil then
-            tags.historic = 'chronology'
-        end
+function flex.process_relation(object)
+    local tags = object.tags
+    if tags.type == 'street' and tags.highway == nil then
+        tags.highway = 'road'
+    elseif tags.type == 'route' and tags.route == 'road' and tags.highway == nil then
+        tags.highway = 'road'
+    elseif tags.type == 'chronology' and tags.historic == nil then
+        tags.historic = 'chronology'
     end
-    original_process_tags(o)
+    original_process_relation(object)
 end
+
+osm2pgsql.process_relation = flex.process_relation
 
 return flex

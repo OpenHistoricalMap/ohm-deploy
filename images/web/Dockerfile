@@ -24,7 +24,7 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download OHM Website using gitsha, faster than cloning
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=57b6a7badd7450234a93cd092c5b7d3bb2261b56
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c7d674d9c25aa2e97681c45c7c3631f64f2660af
 ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
 RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
     unzip /tmp/ohm-website.zip -d /tmp && \
@@ -67,7 +67,7 @@ RUN SECRET_KEY_BASE_DUMMY=1  \
     bundle exec rails assets:precompile
 
 # Leaflet timeslider assets
-ENV LEAFLET_OHM_TIMESLIDER_V2=dd0acbdc9432fae6a4d09a17a4848c391e5064f0
+ENV LEAFLET_OHM_TIMESLIDER_V2=4e09a0fc1b15b44cc202a6b8d6731ed10264d6b9
 RUN git clone https://github.com/OpenHistoricalMap/leaflet-ohm-timeslider-v2.git public/leaflet-ohm-timeslider-v2 && \
     cd public/leaflet-ohm-timeslider-v2 && \
     git checkout $LEAFLET_OHM_TIMESLIDER_V2 && \

@@ -332,14 +332,11 @@ osm-seed:
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     replicaCount: 1
+    startupProbe:
+      enabled: true
+      failureThreshold: 1440
     livenessProbe:
-      httpGet:
-        path: /status
-        port: 8080
-      initialDelaySeconds: 18000
-      periodSeconds: 60
-      timeoutSeconds: 30
-      failureThreshold: 6
+      enabled: true
     env:
       NOMINATIM_API_ENDPOINT: nominatim.openhistoricalmap.org
       PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260714_0001.osm.pbf
@@ -366,7 +363,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
       staticHostPath: true
-      localVolumeHostPath: /mnt/nominatim-db-data-v2
+      localVolumeHostPath: /mnt/nominatim-db-data-v003
     nodeSelector:
       enabled: false
     nodeAffinity:
