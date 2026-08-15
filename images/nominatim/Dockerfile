@@ -1,6 +1,6 @@
 FROM mediagis/nominatim:5.3.2
 
-ENV OPENHISTORICALMAP_NOMINATIM_GITSHA=0106a3174db172ff3f7ceff0d5568e791ca7e0cf
+ENV OPENHISTORICALMAP_NOMINATIM_GITSHA=2db8361aba7528de56310e3391a023193fa4597f
 ENV OHM_NOMINATIM_URL=https://codeload.github.com/OpenHistoricalMap/Nominatim/tar.gz/${OPENHISTORICALMAP_NOMINATIM_GITSHA}
 ENV COUNTRY_GRID_URL=https://www.nominatim.org/data/country_grid.sql.gz
 # use DateFunctions-plpgsql for Nominatim  as we do in imposm
@@ -26,12 +26,13 @@ RUN set -eux; \
         /tmp/nominatim-src/packaging/nominatim-api; \
     rm -rf /tmp/nominatim.tar.gz /tmp/nominatim-src
 
-# OHM date functions, added to the SQL that Nominatim loads with `refresh --functions`.
-# start.sh runs that on every boot, so the functions are created before the API starts.
+# OHM date functions from DateFunctions-plpgsql, inserted before ohm_dates.sql
+# so its check finds them when `refresh --functions` runs on boot.
 RUN set -eux; \
     SQLDIR=$(python3 -c "import nominatim_db, pathlib; print(pathlib.Path(nominatim_db.__file__).parent / 'resources' / 'lib-sql')"); \
     curl -fsSL "${DATEFUNCTIONS_URL}" -o "${SQLDIR}/functions/ohm-datefunctions.sql"; \
-    echo "{% include('functions/ohm-datefunctions.sql') %}" >> "${SQLDIR}/functions.sql"
+    sed -i "s|{% include('functions/ohm_dates.sql') %}|{% include('functions/ohm-datefunctions.sql') %}\n&|" "${SQLDIR}/functions.sql"; \
+    grep -q "ohm-datefunctions" "${SQLDIR}/functions.sql"
 
 COPY docker-entrypoint.sh /app/
 COPY update.sh /app/
