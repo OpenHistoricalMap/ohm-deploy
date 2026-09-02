@@ -171,7 +171,7 @@
           "exclude_columns": ["geometry", "tags"],
           "min_zoom": 14,
           "zoom_mapping": [
-            [15, "mv_amenity_areas_z14_15"],
+            [14, "mv_amenity_areas_z14_15"],
             [null, "mv_amenity_areas_z16_20"]
           ]
         },
@@ -191,7 +191,7 @@
           "exclude_columns": ["geometry", "tags"],
           "min_zoom": 14,
           "zoom_mapping": [
-            [15, "mv_buildings_areas_z14_15"],
+            [14, "mv_buildings_areas_z14_15"],
             [null, "mv_buildings_areas_z16_20"]
           ]
         },
