@@ -15,6 +15,8 @@
 --   min_metric      DOUBLE PRECISION  - Minimum area to include, uses the 'area' column (0 = no filter)
 --   unique_columns  TEXT[]            - Columns for the unique index (default: ARRAY['id', 'osm_id'])
 --   where_filter    TEXT              - Optional WHERE clause filter (e.g., "type IN ('water', 'pond')"). NULL = no filter
+--   exclude_columns TEXT[]            - Optional column names to drop. NULL = none
+--   exclude_patterns TEXT[]           - Optional LIKE patterns to drop columns, e.g. 'name\_%'. NULL = none
 -- ============================================================================
 DROP FUNCTION IF EXISTS derive_area_mview;
 
@@ -24,7 +26,9 @@ CREATE OR REPLACE FUNCTION derive_area_mview(
     simplify_tol    DOUBLE PRECISION DEFAULT 0,
     min_metric      DOUBLE PRECISION DEFAULT 0,
     unique_columns  TEXT[] DEFAULT ARRAY['id', 'osm_id'],
-    where_filter    TEXT DEFAULT NULL
+    where_filter    TEXT DEFAULT NULL,
+    exclude_columns TEXT[] DEFAULT NULL,
+    exclude_patterns TEXT[] DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE
@@ -44,7 +48,9 @@ BEGIN
       AND c.relname = source
       AND a.attnum > 0
       AND NOT a.attisdropped
-      AND attname <> 'geometry';
+      AND attname <> 'geometry'
+      AND (exclude_columns IS NULL OR NOT (attname = ANY(exclude_columns)))
+      AND (exclude_patterns IS NULL OR NOT (attname LIKE ANY(exclude_patterns)));
 
     IF cols_no_geom IS NULL THEN
         RAISE EXCEPTION 'No columns found for %. Make sure the materialized view exists.', source;

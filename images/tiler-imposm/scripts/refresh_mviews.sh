@@ -237,8 +237,8 @@ natural_views=(
 
 buildings_views=(
     # areas
-    mv_buildings_areas_z14_15
     mv_buildings_areas_z16_20
+    mv_buildings_areas_z14_15
     # points
     mv_buildings_points
     # points centroids
