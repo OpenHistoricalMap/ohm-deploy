@@ -44,7 +44,7 @@ SELECT derive_centroid_mview(
 -- ============================================================================
 -- Prepare points materialized view for higher zoom levels (12+)
 -- ============================================================================
--- Prepare points table with necessary columns (start_decdate, end_decdate, area_m2, area_km2, etc.)
+-- Prepare points table with necessary columns (start_decdate, end_decdate, area, etc.)
 -- This must be done before creating centroids views that include points
 SELECT create_point_mview(
     source           => 'osm_other_points',

@@ -4,8 +4,6 @@
 --   Creates a points materialized view by adding necessary columns:
 --   - start_decdate: calculated from start_date
 --   - end_decdate: calculated from end_date
---   - area_m2: NULL (points don't have area)
---   - area_km2: NULL (points don't have area)
 --   - Language columns from tags using get_language_columns()
 --   - source: 'point' to identify the origin
 --
@@ -84,10 +82,8 @@ BEGIN
     all_cols := all_cols || ', public.isodatetodecimaldate(public.pad_date(start_date, ''start''), FALSE) AS start_decdate';
     all_cols := all_cols || ', public.isodatetodecimaldate(public.pad_date(end_date, ''end''), FALSE) AS end_decdate';
 
-    -- Add area columns (NULL for points) - must match the polygon mview structure
-    all_cols := all_cols || ', NULL::numeric AS area';
-    all_cols := all_cols || ', NULL::numeric AS area_m2';
-    all_cols := all_cols || ', NULL::numeric AS area_km2';
+    -- Add area column (NULL for points) - must match the polygon mview structure
+    all_cols := all_cols || ', NULL::bigint AS area';
 
     -- Add language columns (always available)
     all_cols := all_cols || ', ' || lang_columns;
