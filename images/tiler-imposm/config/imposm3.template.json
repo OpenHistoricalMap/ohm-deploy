@@ -87,7 +87,6 @@
       "parking:*",
       "lit",
       "smoothness",
-      "direction",
       "ele"
     ]
   },

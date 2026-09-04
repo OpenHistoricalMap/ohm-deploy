@@ -9,7 +9,7 @@
       "views": ["mv_transport_lines_z5", "mv_transport_lines_z16_20", "mv_transport_areas_z10_12", "mv_transport_areas_z16_20", "mv_transport_points", "mv_transport_points_centroids_z16_20"]
     },
     "barrier": {
-      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points", "osm_water_lines"],
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_multilines", "osm_other_points", "osm_water_lines"],
       "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z16_20", "mv_water_lines_z8_9", "mv_water_lines_z16_20"]
     },
     "boundary": {
@@ -33,7 +33,7 @@
       "views": ["mv_transport_lines_z5", "mv_transport_lines_z16_20", "mv_transport_areas_z10_12", "mv_transport_areas_z16_20", "mv_transport_points", "mv_transport_points_centroids_z10_12", "mv_transport_points_centroids_z16_20"]
     },
     "historic": {
-      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_multilines", "osm_other_points"],
       "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
     },
     "landuse": {
@@ -45,11 +45,11 @@
       "views": ["mv_landuse_areas_z6_7", "mv_landuse_areas_z16_20", "mv_landuse_lines_z14_15", "mv_landuse_lines_z16_20", "mv_landuse_points", "mv_landuse_points_centroids_z6_7", "mv_landuse_points_centroids_z16_20"]
     },
     "man_made": {
-      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_multilines", "osm_other_points"],
       "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
     },
     "military": {
-      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_multilines", "osm_other_points"],
       "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
     },
     "natural": {
@@ -61,7 +61,7 @@
       "views": ["mv_place_areas_z14_20", "mv_place_points_centroids_z0_2", "mv_place_points_centroids_z11_20"]
     },
     "power": {
-      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_points"],
+      "tables": ["osm_other_areas", "osm_other_lines", "osm_other_multilines", "osm_other_points"],
       "views": ["mv_other_areas_z8_9", "mv_other_areas_z16_20", "mv_other_lines_z14_15", "mv_other_lines_z16_20", "mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"]
     },
     "railway": {
