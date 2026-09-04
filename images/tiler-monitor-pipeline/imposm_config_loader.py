@@ -48,6 +48,7 @@ _TABLE_TO_VIEWS = {
     "osm_natural_lines": ["mv_natural_lines_z10_12", "mv_natural_lines_z16_20"],
     "osm_other_areas": ["mv_other_areas_z8_9", "mv_other_areas_z16_20"],
     "osm_other_lines": ["mv_other_lines_z14_15", "mv_other_lines_z16_20"],
+    "osm_other_multilines": ["mv_other_lines_z14_15", "mv_other_lines_z16_20"],
     "osm_other_points": ["mv_other_points", "mv_other_points_centroids_z8_9", "mv_other_points_centroids_z16_20"],
     "osm_place_areas": ["mv_place_areas_z14_20"],
     "osm_place_points": ["mv_place_points_centroids_z0_2", "mv_place_points_centroids_z11_20"],
