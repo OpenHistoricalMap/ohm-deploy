@@ -9,7 +9,8 @@
   },
   "generalized_tables": {},
   "tables": {
-    "transport_points": {
+    "other_multilines": {
+      "type": "relation_member",
       "fields": [
         {
           "type": "id",
@@ -32,26 +33,6 @@
           "key": null
         },
         {
-          "type": "string",
-          "name": "ref",
-          "key": "ref"
-        },
-        {
-          "type": "string",
-          "name": "iata",
-          "key": "iata"
-        },
-        {
-          "type": "string",
-          "name": "icao",
-          "key": "icao"
-        },
-        {
-          "type": "string",
-          "name": "faa",
-          "key": "faa"
-        },
-        {
           "type": "mapping_key",
           "name": "class",
           "key": null
@@ -70,49 +51,72 @@
           "type": "hstore_tags",
           "name": "tags",
           "key": null
+        },
+        {
+          "type": "member_id",
+          "name": "member"
+        },
+        {
+          "type": "member_role",
+          "name": "role"
+        },
+        {
+          "type": "string",
+          "name": "me_name",
+          "key": "name",
+          "from_member": true
+        },
+        {
+          "type": "string",
+          "name": "me_start_date",
+          "key": "start_date",
+          "from_member": true
+        },
+        {
+          "type": "string",
+          "name": "me_end_date",
+          "key": "end_date",
+          "from_member": true
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
         }
       ],
-      "type": "point",
       "mappings": {
-        "railway": {
+        "barrier": {
           "mapping": {
-            "railway": [
+            "barrier": [
               "__any__"
             ]
           }
         },
-        "highway": {
+        "historic": {
           "mapping": {
-            "highway": [
+            "historic": [
               "__any__"
             ]
           }
         },
-        "aeroway": {
+        "man_made": {
           "mapping": {
-            "aeroway": [
+            "man_made": [
               "__any__"
             ]
           }
         },
-        "aerialway": {
+        "power": {
           "mapping": {
-            "aerialway": [
+            "power": [
               "__any__"
             ]
           }
         },
-        "route": {
+        "military": {
           "mapping": {
-            "route": [
+            "military": [
               "__any__"
-            ]
-          }
-        },
-        "junction": {
-          "mapping": {
-            "junction": [
-              "yes"
             ]
           }
         }

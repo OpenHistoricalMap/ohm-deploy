@@ -20,6 +20,8 @@
 --                            (must have the same columns as source). NULL = no merge
 --   only_named    BOOLEAN  - When TRUE, keeps only source rows with a non-empty name
 --                            or at least one non-null name_* column. Default FALSE
+--   min_metric    DOUBLE PRECISION - Minimum 'area' to keep a centroid (0 = no filter).
+--                            Applies to the polygon branch only; union_source rows are points.
 --
 -- Notes:
 --   - Creates the materialized view using a temporary swap mechanism
@@ -33,7 +35,8 @@ CREATE OR REPLACE FUNCTION derive_centroid_mview(
     target        TEXT,
     where_filter  TEXT DEFAULT NULL,
     union_source  TEXT DEFAULT NULL,
-    only_named    BOOLEAN DEFAULT FALSE
+    only_named    BOOLEAN DEFAULT FALSE,
+    min_metric    DOUBLE PRECISION DEFAULT 0
 )
 RETURNS void AS $$
 DECLARE
@@ -42,6 +45,7 @@ DECLARE
     name_columns   TEXT;
     name_filter    TEXT := '';
     custom_filter  TEXT := '';
+    area_filter    TEXT := '';
     union_query    TEXT;
     sql_create     TEXT;
     tmp_mview_name TEXT := target || '_tmp';
@@ -110,14 +114,19 @@ BEGIN
         custom_filter := format(' AND (%s)', where_filter);
     END IF;
 
+    -- Build area filter (polygon branch only)
+    IF min_metric > 0 THEN
+        area_filter := format(' AND area >= %s', min_metric);
+    END IF;
+
     -- Centroids branch (source mview)
     union_query := format($sql$
         SELECT %s
         FROM %I
         WHERE geometry IS NOT NULL
           AND ST_GeometryType(geometry) IN ('ST_Polygon', 'ST_MultiPolygon')
-        %s%s
-    $sql$, all_cols, source, name_filter, custom_filter);
+        %s%s%s
+    $sql$, all_cols, source, name_filter, custom_filter, area_filter);
 
     -- Add UNION ALL with the point materialized view only if provided
     IF union_source IS NOT NULL THEN
