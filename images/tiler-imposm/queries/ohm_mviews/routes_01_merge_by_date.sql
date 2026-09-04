@@ -215,12 +215,34 @@ data_for_dated_ways AS (
      AND (u.start_decdate IS NULL OR u.start_decdate < COALESCE(s.seg_end, 9999)) -- active before segment end
      AND (u.end_decdate   IS NULL OR u.end_decdate   > s.seg_start)              -- active after segment start
   ),
-  -- Create a clean source by removing duplicate routes
-  -- within the same time segment.
+  -- Merge routes that are identical except for direction within the same time
+  -- segment. A numbered route is usually mapped as two relations (one per
+  -- direction), and a two-way road is a member of both. We want a single route
+  -- per way, not one per relation (issue #1162).
+  -- direction is kept only when every merged relation agrees on it. A relation
+  -- without direction counts as a different value, so east + (none) -> NULL.
   distinct_active_routes AS (
-    SELECT DISTINCT ON (way_id, seg_start, seg_end, ref, network, direction)
-      *
+    SELECT
+      way_id,
+      seg_start,
+      seg_end,
+      ref,
+      network,
+      route,
+      MIN(osm_id)           AS osm_id,
+      MIN(network_wikidata) AS network_wikidata,
+      MIN(name)             AS name,
+      MIN(type)             AS type,
+      MIN(operator)         AS operator,
+      CASE
+        WHEN COUNT(DISTINCT COALESCE(direction, '')) = 1 THEN MIN(direction)
+        ELSE NULL
+      END                   AS direction,
+      (ARRAY_AGG(tags))[1]     AS tags,     -- hstore has no MIN; all rows share the way, pick one
+      (ARRAY_AGG(geometry))[1] AS geometry, -- same way geometry for every row
+      MAX(highway)          AS highway
     FROM active
+    GROUP BY way_id, seg_start, seg_end, ref, network, route
   ),
 
   base AS (
