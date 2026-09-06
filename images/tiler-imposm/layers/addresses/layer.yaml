@@ -1,0 +1,11 @@
+name: addresses
+description: "Address points."
+tables: [address_points]
+sql:
+  - addresses_points.sql
+refresh:
+  - name: ADDRESSES
+    profile: light
+    interval: 180
+    mviews:
+      - mv_address_points_z16_20

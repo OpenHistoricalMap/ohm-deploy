@@ -1,0 +1,24 @@
+name: transport
+description: "Roads, railways, aeroways and their areas and points. Street and route relations are merged into the lines."
+tables: [transport_areas, transport_lines, transport_points, transport_multilines, street_multilines]
+sql:
+  - transport_areas.sql
+  - transport_lines.sql
+refresh:
+  - name: TRANSPORTS
+    profile: heavy
+    interval: 180
+    mviews:
+      - mv_transport_lines_z16_20
+      - mv_transport_lines_z13_15
+      - mv_transport_lines_z10_12
+      - mv_transport_lines_z8_9
+      - mv_transport_lines_z6_7
+      - mv_transport_lines_z5
+      - mv_transport_areas_z16_20
+      - mv_transport_areas_z13_15
+      - mv_transport_areas_z10_12
+      - mv_transport_points
+      - mv_transport_points_centroids_z16_20
+      - mv_transport_points_centroids_z13_15
+      - mv_transport_points_centroids_z10_12

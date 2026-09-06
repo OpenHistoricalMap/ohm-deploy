@@ -1,0 +1,16 @@
+# Build order of the layers in layers/. Each directory has a layer.yaml, its SQL and (if imported by imposm) a mapping.json.
+layers:
+  - base
+  - admin
+  - landuse
+  - amenity
+  - buildings
+  - others
+  - communication
+  - places
+  - transport
+  - water
+  - natural
+  - routes
+  - addresses
+

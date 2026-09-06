@@ -1,0 +1,15 @@
+name: amenity
+description: "Amenity areas and points."
+tables: [amenity_areas, amenity_points]
+sql:
+  - amenity.sql
+refresh:
+  - name: AMENITY
+    profile: light
+    interval: 180
+    mviews:
+      - mv_amenity_areas_z14_15
+      - mv_amenity_areas_z16_20
+      - mv_amenity_points
+      - mv_amenity_points_centroids_z14_15
+      - mv_amenity_points_centroids_z16_20

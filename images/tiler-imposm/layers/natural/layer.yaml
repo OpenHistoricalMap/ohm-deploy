@@ -1,0 +1,13 @@
+name: natural
+description: "Natural lines such as cliffs and ridges."
+tables: [natural_lines]
+sql:
+  - natural_lines.sql
+refresh:
+  - name: NATURAL
+    profile: light
+    interval: 180
+    mviews:
+      - mv_natural_lines_z16_20
+      - mv_natural_lines_z13_15
+      - mv_natural_lines_z10_12

@@ -1,0 +1,21 @@
+name: others
+description: "Barrier, historic, man_made, power and military features: areas, lines, points and relation members."
+tables: [other_areas, other_lines, other_points, other_multilines]
+sql:
+  - others.sql
+refresh:
+  - name: OTHERS
+    profile: light
+    interval: 180
+    mviews:
+      - mv_other_areas_z8_9
+      - mv_other_areas_z10_12
+      - mv_other_areas_z13_15
+      - mv_other_areas_z16_20
+      - mv_other_points
+      - mv_other_points_centroids_z8_9
+      - mv_other_points_centroids_z10_12
+      - mv_other_points_centroids_z13_15
+      - mv_other_points_centroids_z16_20
+      - mv_other_lines_z16_20
+      - mv_other_lines_z14_15

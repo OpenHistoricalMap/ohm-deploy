@@ -138,6 +138,9 @@ osm-seed:
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
       REFRESH_MVIEWS: true
       RECREATE_MVIEWS_ON_UPDATE: false
+      # One-shot per value, see images/tiler-imposm/layers/README.md
+      # REIMPORT_LAYERS: "others"        # reimport the tables of these layers from the PBF, then their views
+      # REBUILD_MVIEWS: "others,routes"  # rebuild only the views of these layers ("all" for every view)
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce

@@ -1,0 +1,20 @@
+name: routes
+description: "Route relations merged by date and indexed per zoom."
+tables: [route_lines, route_multilines]
+sql:
+  - routes_01_merge_by_date.sql
+  - routes_02_indexed.sql
+  - routes_03_mv.sql
+refresh:
+  - name: ROUTES
+    profile: light
+    interval: 180
+    mviews:
+      - mv_routes_normalized
+      - mv_routes_indexed
+      - mv_routes_indexed_z16_20
+      - mv_routes_indexed_z13_15
+      - mv_routes_indexed_z10_12
+      - mv_routes_indexed_z8_9
+      - mv_routes_indexed_z6_7
+      - mv_routes_indexed_z5

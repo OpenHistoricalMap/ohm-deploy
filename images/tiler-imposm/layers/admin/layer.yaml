@@ -1,0 +1,67 @@
+name: admin
+description: "Administrative boundaries: areas, lines, centroids, maritime lines and non-admin boundaries."
+tables: [admin_areas, admin_lines, admin_relation_members]
+sql_init:
+  - admin_boundaries_lines.sql
+sql:
+  - admin_boundaries_areas.sql
+  - admin_boundaries_centroids.sql
+  - admin_boundaries_maritime.sql
+  - non_admin_boundaries_areas.sql
+refresh:
+  - name: ADMIN_BOUNDARIES_LINES
+    profile: heavy
+    interval: 180
+    mviews:
+      - mv_relation_members_boundaries
+      - mv_admin_boundaries_relations_ways
+      - mv_admin_boundaries_lines_z16_20
+      - mv_admin_boundaries_lines_z13_15
+      - mv_admin_boundaries_lines_z10_12
+      - mv_admin_boundaries_lines_z8_9
+      - mv_admin_boundaries_lines_z6_7
+      - mv_admin_boundaries_lines_z3_5
+      - mv_admin_boundaries_lines_z0_2
+  - name: ADMIN_BOUNDARIES_AREAS_CENTROIDS
+    profile: heavy
+    interval: 180
+    mviews:
+      - mv_admin_boundaries_areas_z16_20
+      - mv_admin_boundaries_areas_z13_15
+      - mv_admin_boundaries_areas_z10_12
+      - mv_admin_boundaries_areas_z8_9
+      - mv_admin_boundaries_areas_z6_7
+      - mv_admin_boundaries_areas_z3_5
+      - mv_admin_boundaries_areas_z0_2
+      - mv_admin_boundaries_centroids_z16_20
+      - mv_admin_boundaries_centroids_z13_15
+      - mv_admin_boundaries_centroids_z10_12
+      - mv_admin_boundaries_centroids_z8_9
+      - mv_admin_boundaries_centroids_z6_7
+      - mv_admin_boundaries_centroids_z3_5
+      - mv_admin_boundaries_centroids_z0_2
+  - name: ADMIN_MARITIME_LINES
+    profile: light
+    interval: 180
+    mviews:
+      - mv_admin_maritime_lines_z0_5_v2
+      - mv_admin_maritime_lines_z6_9
+      - mv_admin_maritime_lines_z10_15
+  - name: NO_ADMIN_BOUNDARIES
+    profile: light
+    interval: 180
+    mviews:
+      - mv_non_admin_boundaries_areas_z16_20
+      - mv_non_admin_boundaries_areas_z13_15
+      - mv_non_admin_boundaries_areas_z10_12
+      - mv_non_admin_boundaries_areas_z8_9
+      - mv_non_admin_boundaries_areas_z6_7
+      - mv_non_admin_boundaries_areas_z3_5
+      - mv_non_admin_boundaries_areas_z0_2
+      - mv_non_admin_boundaries_centroids_z16_20
+      - mv_non_admin_boundaries_centroids_z13_15
+      - mv_non_admin_boundaries_centroids_z10_12
+      - mv_non_admin_boundaries_centroids_z8_9
+      - mv_non_admin_boundaries_centroids_z6_7
+      - mv_non_admin_boundaries_centroids_z3_5
+      - mv_non_admin_boundaries_centroids_z0_2

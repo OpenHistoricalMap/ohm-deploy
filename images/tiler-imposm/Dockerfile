@@ -26,7 +26,7 @@ RUN apt-get -y update && apt-get install -y \
 
 RUN python3 -m pip install --no-cache-dir \
     --break-system-packages \
-    awscli psycopg2-binary setuptools && \
+    awscli psycopg2-binary pyyaml setuptools && \
     rm -rf /root/.cache /var/cache/apk/*
 
 RUN apt-get update && apt-get install -y postgresql-client && \

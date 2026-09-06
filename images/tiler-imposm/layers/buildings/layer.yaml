@@ -1,0 +1,15 @@
+name: buildings
+description: "Buildings as areas, points and relation members."
+tables: [buildings, buildings_points, buildings_relation_members]
+sql:
+  - buildings.sql
+refresh:
+  - name: BUILDINGS
+    profile: light
+    interval: 180
+    mviews:
+      - mv_buildings_areas_z16_20
+      - mv_buildings_areas_z14_15
+      - mv_buildings_points
+      - mv_buildings_points_centroids_z14_15
+      - mv_buildings_points_centroids_z16_20

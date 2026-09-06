@@ -1,0 +1,315 @@
+{
+  "tables": {
+    "buildings": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "height",
+          "key": "height"
+        },
+        {
+          "type": "string",
+          "name": "min_height",
+          "key": "min_height"
+        },
+        {
+          "type": "string",
+          "name": "building_height",
+          "key": "building:height"
+        },
+        {
+          "type": "string",
+          "name": "building_min_level",
+          "key": "building:min_level"
+        },
+        {
+          "type": "string",
+          "name": "building_use",
+          "key": "building:use"
+        },
+        {
+          "type": "string",
+          "name": "building_material",
+          "key": "building:material"
+        },
+        {
+          "type": "string",
+          "name": "building_levels",
+          "key": "building:levels"
+        },
+        {
+          "type": "string",
+          "name": "building_colour",
+          "key": "building:colour"
+        },
+        {
+          "type": "string",
+          "name": "building_part",
+          "key": "building:part"
+        },
+        {
+          "type": "string",
+          "name": "roof_material",
+          "key": "roof:material"
+        },
+        {
+          "type": "string",
+          "name": "roof_colour",
+          "key": "roof:colour"
+        },
+        {
+          "type": "string",
+          "name": "roof_shape",
+          "key": "roof:shape"
+        },
+        {
+          "type": "string",
+          "name": "roof_height",
+          "key": "roof:height"
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "string",
+          "name": "addr_housenumber",
+          "key": "addr:housenumber"
+        },
+        {
+          "type": "string",
+          "name": "addr_housename",
+          "key": "addr:housename"
+        },
+        {
+          "type": "string",
+          "name": "addr_unit",
+          "key": "addr:unit"
+        },
+        {
+          "type": "string",
+          "name": "addr_street",
+          "key": "addr:street"
+        },
+        {
+          "type": "string",
+          "name": "addr_city",
+          "key": "addr:city"
+        },
+        {
+          "type": "string",
+          "name": "addr_postcode",
+          "key": "addr:postcode"
+        },
+        {
+          "type": "area",
+          "name": "area",
+          "key": null
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "polygon",
+      "mapping": {
+        "building": [
+          "__any__"
+        ],
+        "building:part": [
+          "__any__"
+        ]
+      },
+      "filters": {
+        "reject": {
+          "building": [
+            "no",
+            "none",
+            "No"
+          ],
+          "building:part": [
+            "no",
+            "none",
+            "No"
+          ]
+        }
+      }
+    },
+    "buildings_points": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "building_use",
+          "key": "building:use"
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "string",
+          "name": "addr_housenumber",
+          "key": "addr:housenumber"
+        },
+        {
+          "type": "string",
+          "name": "addr_housename",
+          "key": "addr:housename"
+        },
+        {
+          "type": "string",
+          "name": "addr_unit",
+          "key": "addr:unit"
+        },
+        {
+          "type": "string",
+          "name": "addr_street",
+          "key": "addr:street"
+        },
+        {
+          "type": "string",
+          "name": "addr_city",
+          "key": "addr:city"
+        },
+        {
+          "type": "string",
+          "name": "addr_postcode",
+          "key": "addr:postcode"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "point",
+      "mapping": {
+        "building": [
+          "__any__"
+        ]
+      }
+    },
+    "buildings_relation_members": {
+      "type": "relation_member",
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "name": "geometry",
+          "type": "geometry"
+        },
+        {
+          "name": "member",
+          "type": "member_id"
+        },
+        {
+          "name": "role",
+          "type": "member_role"
+        },
+        {
+          "name": "me_building",
+          "type": "string",
+          "key": "building",
+          "from_member": true
+        },
+        {
+          "name": "me_building_part",
+          "type": "string",
+          "key": "building:part",
+          "from_member": true
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
+        }
+      ],
+      "mapping": {
+        "type": [
+          "building"
+        ]
+      }
+    }
+  }
+}

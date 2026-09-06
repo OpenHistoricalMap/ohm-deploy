@@ -1,0 +1,256 @@
+{
+  "tables": {
+    "admin_areas": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "integer",
+          "name": "admin_level",
+          "key": "admin_level"
+        },
+        {
+          "type": "boolint",
+          "name": "has_label",
+          "key": false
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "area",
+          "name": "area",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "border_type",
+          "key": "border_type"
+        },
+        {
+          "type": "string",
+          "name": "indefinite",
+          "key": "indefinite"
+        },
+        {
+          "type": "string",
+          "name": "disputed",
+          "key": "disputed"
+        },
+        {
+          "type": "string",
+          "name": "disputed_by",
+          "key": "disputed_by"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "polygon",
+      "mapping": {
+        "boundary": [
+          "__any__"
+        ]
+      }
+    },
+    "admin_lines": {
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "geometry",
+          "name": "geometry",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "integer",
+          "name": "admin_level",
+          "key": "admin_level"
+        },
+        {
+          "type": "string",
+          "name": "maritime",
+          "key": "maritime"
+        },
+        {
+          "type": "string",
+          "name": "indefinite",
+          "key": "indefinite"
+        },
+        {
+          "type": "string",
+          "name": "disputed",
+          "key": "disputed"
+        },
+        {
+          "type": "string",
+          "name": "disputed_by",
+          "key": "disputed_by"
+        },
+        {
+          "type": "boolint",
+          "name": "has_label",
+          "key": false
+        },
+        {
+          "type": "string",
+          "name": "start_date",
+          "key": "start_date"
+        },
+        {
+          "type": "string",
+          "name": "end_date",
+          "key": "end_date"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        }
+      ],
+      "type": "linestring",
+      "mapping": {
+        "boundary": [
+          "__any__"
+        ]
+      }
+    },
+    "admin_relation_members": {
+      "type": "relation_member",
+      "fields": [
+        {
+          "type": "id",
+          "name": "osm_id",
+          "key": null
+        },
+        {
+          "type": "string",
+          "name": "name",
+          "key": "name"
+        },
+        {
+          "type": "mapping_value",
+          "name": "type",
+          "key": null
+        },
+        {
+          "type": "mapping_key",
+          "name": "class",
+          "key": null
+        },
+        {
+          "type": "integer",
+          "name": "admin_level",
+          "key": "admin_level"
+        },
+        {
+          "key": "start_date",
+          "name": "start_date",
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "name": "end_date",
+          "type": "string"
+        },
+        {
+          "type": "hstore_tags",
+          "name": "tags",
+          "key": null
+        },
+        {
+          "name": "geometry",
+          "type": "geometry"
+        },
+        {
+          "name": "member",
+          "type": "member_id"
+        },
+        {
+          "name": "role",
+          "type": "member_role"
+        },
+        {
+          "name": "me_maritime",
+          "type": "string",
+          "key": "maritime",
+          "from_member": true
+        },
+        {
+          "name": "me_indefinite",
+          "type": "string",
+          "key": "indefinite",
+          "from_member": true
+        },
+        {
+          "name": "me_disputed",
+          "type": "string",
+          "key": "disputed",
+          "from_member": true
+        },
+        {
+          "name": "me_disputed_by",
+          "type": "string",
+          "key": "disputed_by",
+          "from_member": true
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
+        },
+        {
+          "name": "me_name",
+          "key": "name",
+          "type": "string",
+          "from_member": true
+        }
+      ],
+      "mapping": {
+        "boundary": [
+          "__any__"
+        ]
+      }
+    }
+  }
+}

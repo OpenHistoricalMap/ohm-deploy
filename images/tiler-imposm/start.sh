@@ -35,8 +35,8 @@ rm -f /tmp/imposm_ready
 TRACKING_FILE="$WORKDIR/uploaded_files.log"
 [ -f "$TRACKING_FILE" ] || touch "$TRACKING_FILE"
 
-# Create config map for imposm
-python build_imposm3_config.py
+# Build the imposm mapping from layers/*/mapping.json (IMPOSM3_IMPORT_LAYERS=all or a list of layer names)
+python3 scripts/layers.py imposm
 
 # Upload compiled imposm config to S3 for the tiler-monitor to read
 if [ -n "$AWS_S3_BUCKET" ]; then
@@ -233,45 +233,68 @@ function monitorImposmErrors() {
     done
 }
 
-function importMissingLayers() {
-    # Layers added after the initial import have no table yet and "imposm run" fails on them.
-    local missing_layers
-    missing_layers=$(psql "$PG_CONNECTION" -At -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';" | python3 -c '
-import glob, json, sys
-existing = set(sys.stdin.read().split())
-mapped = json.load(open("./config/imposm3.json"))["tables"]
-layers = [p.split("/")[-1][:-5] for p in sorted(glob.glob("./config/layers/*.json"))
-          if any(t in mapped and "osm_" + t not in existing for t in json.load(open(p))["tables"])]
-print(" ".join(layers))')
+function prepareLayers() {
+    ### Decide which layers to import and which views to rebuild before "imposm run".
+    ###   - layers whose tables are missing in the database (added after the initial import) are always imported
+    ###   - REIMPORT_LAYERS="others,routes"  reimports those layers (e.g. after a mapping.json change)
+    ###   - REBUILD_MVIEWS="all" | "others,routes"  rebuilds the views of every layer or of those layers
+    ###   - RECREATE_MVIEWS_ON_UPDATE=true  same as REBUILD_MVIEWS=all
+    ### REIMPORT_LAYERS and REBUILD_MVIEWS run once per value (remembered in $WORKDIR/*.done), so a
+    ### container restart does not repeat them. Change or clear the value to run them again.
+    local missing_layers reimport_layers rebuild
+    missing_layers=$(psql "$PG_CONNECTION" -At -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';" | python3 scripts/layers.py missing | tr '
+' ' ')
+    reimport_layers="$missing_layers"
+    if [ -n "$REIMPORT_LAYERS" ] && [ "$(cat "$WORKDIR/reimport_layers.done" 2>/dev/null)" != "$REIMPORT_LAYERS" ]; then
+        reimport_layers="$reimport_layers ${REIMPORT_LAYERS//,/ }"
+    fi
 
-    if [ -n "$missing_layers" ]; then
-        log_message "Importing missing layers: $missing_layers"
+    reimport_layers=$(echo $reimport_layers)  # trim
+    if [ -n "$reimport_layers" ]; then
+        log_message "Importing layers: $reimport_layers"
         getData
-        if ! ./scripts/reimport_layer.sh $missing_layers; then
-            log_message "ERROR: Failed to import missing layers: $missing_layers"
+        if ! ./scripts/reimport_layer.sh $reimport_layers; then
+            log_message "ERROR: Failed to import layers: $reimport_layers"
             exit 1
         fi
-        touch "$WORKDIR/mviews_pending"
+        echo "$reimport_layers" >> "$WORKDIR/mviews_pending"
+        [ -n "$REIMPORT_LAYERS" ] && echo "$REIMPORT_LAYERS" > "$WORKDIR/reimport_layers.done"
     fi
 
-    # The marker survives a restart in the middle of create_mviews.sh, so the views get retried.
-    if [ -f "$WORKDIR/mviews_pending" ] && [ "$RECREATE_MVIEWS_ON_UPDATE" != "true" ]; then
-        ./scripts/create_mviews.sh && rm -f "$WORKDIR/mviews_pending"
+    rebuild=""
+    if [ "$RECREATE_MVIEWS_ON_UPDATE" = "true" ]; then
+        rebuild="all"
+    elif [ -n "$REBUILD_MVIEWS" ] && [ "$(cat "$WORKDIR/rebuild_mviews.done" 2>/dev/null)" != "$REBUILD_MVIEWS" ]; then
+        rebuild="${REBUILD_MVIEWS//,/ }"
     fi
+    # The marker holds the layers just imported and survives a restart in the middle of create_mviews.sh
+    if [ -f "$WORKDIR/mviews_pending" ]; then
+        rebuild="$rebuild $(cat "$WORKDIR/mviews_pending")"
+    fi
+    rebuild=$(echo $rebuild)  # trim
+    if [ -z "$rebuild" ]; then
+        log_message "No materialized views to rebuild"
+        return 0
+    fi
+
+    case " $rebuild " in
+        *" all "*)
+            log_message "Recreating all materialized views..."
+            ./scripts/create_mviews.sh --all=true ;;
+        *)
+            log_message "Rebuilding materialized views for layers: $rebuild"
+            ./scripts/create_mviews.sh $rebuild ;;
+    esac
+    rm -f "$WORKDIR/mviews_pending"
+    [ -n "$REBUILD_MVIEWS" ] && echo "$REBUILD_MVIEWS" > "$WORKDIR/rebuild_mviews.done"
+    return 0
 }
 
 function updateData() {
     log_message "Starting database update process..."
 
-    importMissingLayers
-
-    # Step 0: Recreate materialized views if RECREATE_MVIEWS_ON_UPDATE is enabled
-    if [ "$RECREATE_MVIEWS_ON_UPDATE" = "true" ]; then
-        log_message "Recreating materialized views before update..."
-        ./scripts/create_mviews.sh --all=true
-    else
-        log_message "Skipping materialized views recreation (RECREATE_MVIEWS_ON_UPDATE=$RECREATE_MVIEWS_ON_UPDATE)"
-    fi
+    # Step 0: import new or requested layers and rebuild their views
+    prepareLayers
 
     # Step 1: Refreshing materialized views
     if [ "$REFRESH_MVIEWS" = "true" ]; then

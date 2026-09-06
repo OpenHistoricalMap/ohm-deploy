@@ -2,42 +2,36 @@
 set -e
 source ./scripts/utils.sh
 
-# Usage: ./scripts/reimport_layer.sh <layer1> [layer2] ...
-# Example: ./scripts/reimport_layer.sh communication_lines communication_multilines
+# ------------------------------------------------------------------------------
+# Script: reimport_layer.sh
+# Description:
+#   Imports only the given layers (layers/<name>/mapping.json) from the PBF in
+#   /mnt/data and deploys their tables to production. Tables of other layers are
+#   not touched. Run ./scripts/create_mviews.sh <layer> afterwards to rebuild
+#   the views of those layers.
+#
+# Usage:
+#   ./scripts/reimport_layer.sh <layer> [layer ...]
+# Example:
+#   ./scripts/reimport_layer.sh others routes
+# ------------------------------------------------------------------------------
 
 WORKDIR=/mnt/data
 PBFFILE="${WORKDIR}/osm.pbf"
-LAYERS_DIR="./config/layers"
 TMP_MAPPING="./config/imposm3_reimport.json"
 TMP_CONFIG="./config/config_reimport.json"
 TMP_CACHE="./cachedir_reimport"
 
-# Validate arguments
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 <layer1> [layer2] ..."
+    echo "Usage: $0 <layer> [layer ...]"
     echo "Available layers:"
-    ls "$LAYERS_DIR"/*.json | xargs -I{} basename {} .json | sort | sed 's/^/  - /'
+    ls layers | sed 's/^/  - /'
     exit 1
 fi
 
-# Validate layers exist
-for layer in "$@"; do
-    [ -f "$LAYERS_DIR/${layer}.json" ] || { echo "Layer not found: $layer"; exit 1; }
-done
+# Mapping with only the requested layers (fails on unknown layer names)
+python3 scripts/layers.py imposm --layers "$(IFS=,; echo "$*")" -o "$TMP_MAPPING"
 
-# Build mapping config with only the specified layers
-python3 -c "
-import json, os
-t = json.load(open('./config/imposm3.template.json'))
-for l in '$*'.split():
-    c = json.load(open(f'$LAYERS_DIR/{l}.json'))
-    t.get('generalized_tables',{}).update(c.get('generalized_tables',{}))
-    t.get('tables',{}).update(c.get('tables',{}))
-json.dump(t, open('$TMP_MAPPING','w'), indent=2)
-print('Tables:', list(t['tables'].keys()))
-"
-
-# Create imposm config
 cat <<EOF >"$TMP_CONFIG"
 {
     "cachedir": "$TMP_CACHE",
@@ -50,13 +44,11 @@ EOF
 
 mkdir -p "$TMP_CACHE"
 
-# Import and deploy
 log_message "Reimporting layers: $*"
 imposm import -config "$TMP_CONFIG" -read "$PBFFILE" -write -cachedir "$TMP_CACHE" -overwritecache -optimize
 imposm import -config "$TMP_CONFIG" -deployproduction
 
-# Cleanup
 rm -f "$TMP_MAPPING" "$TMP_CONFIG"
 rm -rf "$TMP_CACHE"
 
-log_message "$Done: $*"
+log_message "Done: $*"

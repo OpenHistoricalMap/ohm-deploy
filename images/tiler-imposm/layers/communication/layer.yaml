@@ -1,0 +1,13 @@
+name: communication
+description: "Communication lines (ways and relation members)."
+tables: [communication_lines, communication_multilines]
+sql:
+  - communication.sql
+refresh:
+  - name: COMMUNICATION
+    profile: light
+    interval: 180
+    mviews:
+      - mv_communication_z16_20
+      - mv_communication_z13_15
+      - mv_communication_z10_12

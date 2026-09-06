@@ -1,0 +1,7 @@
+name: base
+description: "OSM land polygons and Natural Earth lakes. Loaded by scripts/osm_land.sh and scripts/natural_earth.sh, not by imposm."
+tables: []
+sql_init:
+  - lakes.sql
+  - land.sql
+sql: []
