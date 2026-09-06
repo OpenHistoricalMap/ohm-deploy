@@ -48,7 +48,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-db-data-v6
+      localVolumeHostPath: /mnt/tiler-db-data-v7
     resources:
       enabled: false
     postgresqlConfig:
@@ -160,7 +160,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-imposm-data-v6
+      localVolumeHostPath: /mnt/tiler-imposm-data-v7
     resources:
       enabled: true
     nodeSelector:
