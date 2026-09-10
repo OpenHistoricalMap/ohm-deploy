@@ -28,6 +28,13 @@ flex.RELATION_TYPES['collection'] = relation_as_any
 flex.RELATION_TYPES['chronology'] = relation_as_any
 flex.RELATION_TYPES['site'] = relation_as_any
 
+-- Named rail lines are mapped as route=railway (the line) and route=tracks
+-- (the physical tracks) relations. route=* is not a main tag in Nominatim, so
+-- those relations were dropped unless they had another main tag. Individual
+-- railway=rail ways and multilinestrings stay out, as in upstream.
+-- https://github.com/OpenHistoricalMap/issues/issues/1418
+flex.modify_main_tags{route = {railway = 'named', tracks = 'named'}}
+
 -- Street, road route and chronology relations often carry only identity tags
 -- (type, name, dates), so give them a main tag or flex-base drops them.
 -- The tag has to be there before the place is built: Nominatim copies the
