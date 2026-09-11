@@ -9,9 +9,9 @@ osm-seed:
   adminEmail: admin@openhistoricalmap.org
 
   # Disable heavy services
-  web:
+  webApi:
     enabled: false
-  db:
+  webDb:
     enabled: false
   memcached:
     enabled: false
@@ -211,7 +211,7 @@ osm-seed:
       enabled: false
     nodeSelector:
       enabled: false
-  # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-cm.
+  # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-env.
   tilerMonitorPipeline:
     enabled: false
     replicaCount: 1
