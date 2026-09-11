@@ -3,9 +3,9 @@ charts:
     imagePrefix: ghcr.io/openhistoricalmap/
     images:
       web:
-        valuesPath: osm-seed.web.image
+        valuesPath: osm-seed.webApi.image
       db:
-        valuesPath: osm-seed.db.image
+        valuesPath: osm-seed.webDb.image
       tiler-db:
         valuesPath: osm-seed.tilerDb.image
       tiler-imposm:

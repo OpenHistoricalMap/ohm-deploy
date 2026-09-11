@@ -144,7 +144,7 @@ jobs:
             -n ${{ steps.n.outputs.namespace }} --create-namespace \
             -f ./ohm/values.yaml \
             -f ./values.k3s.preview.yaml \
-            --set osm-seed.web.enabled=false \
+            --set osm-seed.webApi.enabled=false \
             --wait --timeout=10m
 
       - name: Restore apidb from backup
@@ -203,7 +203,7 @@ jobs:
           kubectl -n "$NS" wait --for=condition=complete --timeout=30m job/$RELEASE-restore \
             || { kubectl -n "$NS" logs job/$RELEASE-restore --tail=80; exit 1; }
 
-      # The chart renders the web Ingress (osm-seed.web.ingress.enabled) with a
+      # The chart renders the web Ingress (osm-seed.webApi.ingress.enabled) with a
       # router.middlewares annotation pointing at this Middleware, so create it
       # first. It forces X-Forwarded-Proto=https: Cloudflare already terminated
       # TLS, but Traefik would otherwise send http and the app's force_ssl would

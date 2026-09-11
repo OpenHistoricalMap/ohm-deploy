@@ -7,7 +7,7 @@ osm-seed:
   domain: ohmstaging.org
   adminEmail: admin@openhistoricalmap.org
 
-  web:
+  webApi:
     enabled: true
     priorityClass: medium-priority
     serviceAccount:
@@ -67,7 +67,7 @@ osm-seed:
     podAntiAffinity:
       enabled: false
 
-  db:
+  webDb:
     enabled: true
     priorityClass: medium-priority
     env:
