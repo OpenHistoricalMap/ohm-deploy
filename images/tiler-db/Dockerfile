@@ -1,9 +1,5 @@
 FROM postgis/postgis:17-3.5
 
-RUN apt-get update
-RUN apt-get install -y git ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
 COPY ./scripts/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN mkdir -p /docker-entrypoint-initdb.d
