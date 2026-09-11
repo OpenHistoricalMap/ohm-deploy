@@ -98,6 +98,7 @@ osm-seed:
         shared_preload_libraries = 'osm-logical'
         wal_level=logical
         max_replication_slots=1
+        output_plugin_libraries = 'pgoutput, test_decoding, osm-logical'
     nodeSelector:
       enabled: false
       label_key: nodegroup_type
