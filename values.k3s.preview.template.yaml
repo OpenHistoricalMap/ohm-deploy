@@ -174,3 +174,5 @@ osm-seed:
     enabled: false
   planetStats:
     enabled: false
+  level0:
+    enabled: false
