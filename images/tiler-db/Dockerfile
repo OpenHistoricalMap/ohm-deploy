@@ -1,6 +1,8 @@
 FROM postgis/postgis:17-3.5
 
-RUN apt-get install -y git ca-certificates && \
+# Base image is Debian bullseye (EOL); its security Release file is expired
+RUN apt-get -o Acquire::Check-Valid-Until=false update && \
+    apt-get install -y --no-install-recommends git ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./scripts/docker-entrypoint.sh /usr/local/bin/
