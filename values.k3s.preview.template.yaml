@@ -4,7 +4,6 @@ osm-seed:
   serviceType: ClusterIP
   createClusterIssuer: false
   ingressClassName: ""
-  domain: ohmstaging.org
   adminEmail: admin@openhistoricalmap.org
 
   webApi:
@@ -55,13 +54,11 @@ osm-seed:
       OPENSTREETMAP_AUTH_SECRET: "none"
       WIKIPEDIA_AUTH_ID: "none"
       WIKIPEDIA_AUTH_SECRET: "none"
-    resources:
-      enabled: false
+    resources: {}
     autoscaling:
       enabled: false
     sharedMemorySize: 16Mi
-    nodeSelector:
-      enabled: false
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
     podAntiAffinity:
@@ -78,34 +75,28 @@ osm-seed:
     persistenceDisk:
       enabled: false
     sharedMemorySize: 256Mi
-    resources:
-      enabled: false
+    resources: {}
     postgresqlConfig:
       enabled: false
-    nodeSelector:
-      enabled: false
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
   memcached:
     enabled: true
     priorityClass: medium-priority
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
   cgimap:
     enabled: true
     priorityClass: medium-priority
-    resources:
-      enabled: false
+    resources: {}
     autoscaling:
       enabled: false
-    nodeSelector:
-      enabled: false
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -133,8 +124,6 @@ osm-seed:
   tilerServerMartin:
     enabled: false
   tilerVarnish:
-    enabled: false
-  tilerCacheCleanerJob:
     enabled: false
   tilerCache:
     enabled: false
