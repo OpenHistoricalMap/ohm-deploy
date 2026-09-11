@@ -34,7 +34,7 @@ osm-seed:
     # ====================================================================================================
     # Variables for osm-seed database
     # ====================================================================================================
-    db:
+    webDb:
       enabled: true
       priorityClass: "high-priority"
       env:
@@ -113,7 +113,7 @@ osm-seed:
     # ====================================================================================================
     # Variables for osm-seed website
     # ====================================================================================================
-    web:
+    webApi:
       enabled: true
       ingress:
         enabled: false
@@ -135,7 +135,7 @@ osm-seed:
         SERVER_URL: www.ohmstaging.org
         SERVER_PROTOCOL: https
         NOMINATIM_URL: nominatim.ohmstaging.org
-        OVERPASS_URL: overpass-api.ohmstaging.org	
+        OVERPASS_URL: overpass-api.ohmstaging.org
         VTILES_DOMAIN: vtiles.ohmstaging.org
 
         NEW_RELIC_LICENSE_KEY: "none"
@@ -660,4 +660,9 @@ osm-seed:
 # planet stats daily pipeline (dashboard + boundary viewer)
 # ====================================================================================================
     planetStats:
+      enabled: false
+# ====================================================================================================
+# Level0 editor. Runs on Hetzner only; keep it off on EKS.
+# ====================================================================================================
+    level0:
       enabled: false

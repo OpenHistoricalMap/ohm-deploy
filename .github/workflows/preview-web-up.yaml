@@ -144,7 +144,7 @@ jobs:
             -n ${{ steps.n.outputs.namespace }} --create-namespace \
             -f ./ohm/values.yaml \
             -f ./values.k3s.preview.yaml \
-            --set osm-seed.web.enabled=false \
+            --set osm-seed.webApi.enabled=false \
             --wait --timeout=10m
 
       - name: Restore apidb from backup
@@ -158,7 +158,7 @@ jobs:
           fi
           echo "backup: $BACKUP_URL"
           WEB_IMAGE="$(helm -n "$NS" get values "$RELEASE" -a -o json \
-            | python3 -c 'import sys,json;w=json.load(sys.stdin)["osm-seed"]["web"]["image"];print(w["name"]+":"+w["tag"])')"
+            | python3 -c 'import sys,json;w=json.load(sys.stdin)["osm-seed"]["webApi"]["image"];print(w["name"]+":"+w["tag"])')"
           echo "restore image: $WEB_IMAGE"
           kubectl -n "$NS" delete job "$RELEASE-restore" --ignore-not-found
           cat <<EOF | kubectl -n "$NS" apply -f -
@@ -185,25 +185,25 @@ jobs:
                       - |
                         set -euo pipefail
                         echo "waiting for db..."
-                        until pg_isready -h $RELEASE-db -p 5432; do sleep 2; done
+                        until pg_isready -h $RELEASE-web-db -p 5432; do sleep 2; done
                         # the db is ephemeral but survives a helm upgrade that does not
                         # restart it; skip the restore if it already has data.
-                        if [ "\$(psql -h $RELEASE-db -U postgres -d openhistoricalmap -tAc "SELECT to_regclass('public.users') IS NOT NULL")" = "t" ]; then
+                        if [ "\$(psql -h $RELEASE-web-db -U postgres -d openhistoricalmap -tAc "SELECT to_regclass('public.users') IS NOT NULL")" = "t" ]; then
                           echo "db already populated; skipping restore"
                           exit 0
                         fi
                         echo "downloading + restoring backup..."
                         # handle both plain .sql and gzipped .sql.gz
                         case "\$BACKUP_URL" in
-                          *.gz) curl -fsSL "\$BACKUP_URL" | gunzip -c | psql -h $RELEASE-db -U postgres -d openhistoricalmap ;;
-                          *)    curl -fsSL "\$BACKUP_URL" | psql -h $RELEASE-db -U postgres -d openhistoricalmap ;;
+                          *.gz) curl -fsSL "\$BACKUP_URL" | gunzip -c | psql -h $RELEASE-web-db -U postgres -d openhistoricalmap ;;
+                          *)    curl -fsSL "\$BACKUP_URL" | psql -h $RELEASE-web-db -U postgres -d openhistoricalmap ;;
                         esac
                         echo "restore done"
           EOF
           kubectl -n "$NS" wait --for=condition=complete --timeout=30m job/$RELEASE-restore \
             || { kubectl -n "$NS" logs job/$RELEASE-restore --tail=80; exit 1; }
 
-      # The chart renders the web Ingress (osm-seed.web.ingress.enabled) with a
+      # The chart renders the web Ingress (osm-seed.webApi.ingress.enabled) with a
       # router.middlewares annotation pointing at this Middleware, so create it
       # first. It forces X-Forwarded-Proto=https: Cloudflare already terminated
       # TLS, but Traefik would otherwise send http and the app's force_ssl would
