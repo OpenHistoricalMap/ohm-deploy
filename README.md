@@ -52,7 +52,7 @@ Values files:
 
 The table below lists every cronjob, where it currently runs (which environment
 has it `enabled`), its schedule, and what it depends on. "main API DB" is the
-`<release>-db` service (the OSM/Rails database).
+`<release>-web-db` service (the OSM/Rails database).
 
 | Cronjob | Runs on | Schedule | When | Depends on |
 |---|---|---|---|---|

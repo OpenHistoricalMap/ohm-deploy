@@ -17,7 +17,6 @@ osm-seed:
   # Traffic is routed via Cloudflare Tunnel, which connects directly to ClusterIP Services.
   # No Ingress resources or load balancers (ALB/NLB) are needed.
   serviceType: ClusterIP
-  domain: openhistoricalmap.org
 
   # ====================================================================================================
   # Configuration for Lets Encrypt setup
@@ -30,7 +29,7 @@ osm-seed:
   # ====================================================================================================
   # Variables for osm-seed database
   # ====================================================================================================
-  db:
+  webDb:
     enabled: true
     priorityClass: high-priority
     env:
@@ -47,15 +46,9 @@ osm-seed:
       AWS_ElasticBlockStore_volumeID: vol-0595bcb6ac2ba84a3
       AWS_ElasticBlockStore_size: 600Gi
     resources:
-      enabled: true
       requests:
-        enabled: true
         memory: "14Gi"
         cpu: "1000m"
-      limits:
-        enabled: false
-        memory: "6Gi"
-        cpu: "1700m"
     sharedMemorySize: 2Gi
     postgresqlConfig:
       enabled: true
@@ -98,10 +91,8 @@ osm-seed:
         shared_preload_libraries = 'osm-logical'
         wal_level=logical
         max_replication_slots=1
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: api_db_xlarge
+        output_plugin_libraries = 'pgoutput, test_decoding, osm-logical'
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -110,7 +101,7 @@ osm-seed:
   # ====================================================================================================
   # Variables for osm-seed website
   # ====================================================================================================
-  web:
+  webApi:
     enabled: true
     ingress:
       enabled: false
@@ -153,13 +144,10 @@ osm-seed:
       WIKIPEDIA_AUTH_ID: {{PRODUCTION_WIKIPEDIA_AUTH_ID}}
       WIKIPEDIA_AUTH_SECRET: {{PRODUCTION_WIKIPEDIA_AUTH_SECRET}}
     resources:
-      enabled: true
       requests:
-        enabled: true
         memory: "2.5Gi"
         cpu: "1200m"
       limits:
-        enabled: true
         memory: "3Gi"
         cpu: "1500m"
     autoscaling:
@@ -183,10 +171,7 @@ osm-seed:
           periodSeconds: 60                    # This decrease limit applies within a 60-second window.
     sharedMemorySize: 512Mi
     livenessProbeExec: true
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web_medium
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -199,20 +184,8 @@ osm-seed:
   memcached:
     enabled: true
     priorityClass: high-priority
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: "8Gi"
-        cpu: "2"
-      limits:
-        enabled: false
-        memory: "8Gi"
-        cpu: "2"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: utils
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -227,13 +200,10 @@ osm-seed:
       tag: 0.0.1-0.dev.git.2463.hb0e1e7f
     priorityClass: "high-priority"
     resources:
-      enabled: true
       requests:
-        enabled: true
         memory: "0.5Gi"
         cpu: "100m"
       limits:
-        enabled: true
         memory: "1Gi"
         cpu: "300m"
     autoscaling:
@@ -242,10 +212,7 @@ osm-seed:
       maxReplicas: 10
       cpuUtilization: 50
       memoryUtilization: 50
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web_helpers_medium
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -267,19 +234,10 @@ osm-seed:
       PLANET_EPOCH_DATE: '1970-01-01'
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
     resources:
-      enabled: true
       requests:
-        enabled: true
         memory: "8Gi"
         cpu: "3500m"
-      limits:
-        enabled: false
-        memory: "16Gi"
-        cpu: "4000m"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: job
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -301,19 +259,10 @@ osm-seed:
       PLANET_EPOCH_DATE: '1970-01-01'
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
     resources:
-      enabled: true
       requests:
-        enabled: true
         memory: "8Gi"
         cpu: "3500m"
-      limits:
-        enabled: false
-        memory: "16Gi"
-        cpu: "4000m"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: job_xlarge
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -329,8 +278,7 @@ osm-seed:
       enabled: true
       name: ohm-s3-bucket-access-production
     schedule: "0 5 * * 0"
-    resources:
-      enabled: false
+    resources: {}
     env:
       OVERWRITE_CHANGESETS_FILE: false
       DUMP_CLOUD_URL: s3://osmseed-production-db/database/web-api-db/state.txt
@@ -352,20 +300,8 @@ osm-seed:
     env:
       ENABLE_SEND_SLACK_MESSAGE: "true"
       SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: "20Gi"
-        cpu: "8"
-      limits:
-        enabled: false
-        memory: "24Gi"
-        cpu: "10"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: utils
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -405,12 +341,8 @@ osm-seed:
         # Clean up backups options
         CLEANUP_BACKUPS: true
         RETENTION_DAYS: '30'
-      resources:
-        enabled: false
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: job_xlarge
+      resources: {}
+      nodeSelector: {}
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
@@ -429,18 +361,8 @@ osm-seed:
         BACKUP_CLOUD_FOLDER: database/tm-db
         BACKUP_CLOUD_FILE: ohm-tm-db
         AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
-      resources:
-        enabled: false
-        requests:
-          memory: '300Mi'
-          cpu: '0.5'
-        limits:
-          memory: '400Mi'
-          cpu: '0.6'
-      nodeSelector:
-        enabled: false
-        label_key: nodegroup_type
-        label_value: job
+      resources: {}
+      nodeSelector: {}
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
@@ -462,12 +384,9 @@ osm-seed:
         # Clean up backups options
         CLEANUP_BACKUPS: true
         RETENTION_DAYS: '30'
-      resources:
-        enabled: false
+      resources: {}
       nodeSelector:
-        enabled: true
-        label_key: nodegroup_type
-        label_value: job
+        nodegroup_type: job
       nodeAffinity:
         enabled: false
         key: "nodegroup_type"
@@ -521,20 +440,8 @@ osm-seed:
       subPath: postgresql-d
       AWS_ElasticBlockStore_volumeID: vol-05d28e1a06628bcb8
       AWS_ElasticBlockStore_size: 20Gi
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: "1Gi"
-        cpu: "2"
-      limits:
-        enabled: false
-        memory: "2Gi"
-        cpu: "2"
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: utils
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -587,20 +494,8 @@ osm-seed:
       TM_ORG_INSTAGRAM: https://www.openhistoricalmap.org
       TM_ORG_TWITTER: https://x.com/OpenHistoricalMap
       TM_ORG_YOUTUBE: https://www.youtube.com/playlist?list=PLOi35w6_Hpx_CYdYBUpPeuiJ1djn5-wIx
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: 1Gi
-        cpu: '2'
-      limits:
-        enabled: false
-        memory: 2Gi
-        cpu: '2'
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: utils
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -636,20 +531,8 @@ osm-seed:
       enabled: true
       name: ohm-s3-bucket-access-production
     schedule: '0 2 * * *'
-    resources:
-      enabled: false
-      requests:
-        enabled: false
-        memory: '1Gi'
-        cpu: '2'
-      limits:
-        enabled: false
-        memory: '2Gi'
-        cpu: '2'
-    nodeSelector:
-      enabled: false
-      label_key: nodegroup_type
-      label_value: web
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -707,4 +590,9 @@ osm-seed:
 # planet stats daily pipeline (dashboard + boundary viewer)
 # ====================================================================================================
   planetStats:
+    enabled: false
+# ====================================================================================================
+# Level0 editor. Runs on Hetzner only; keep it off on EKS.
+# ====================================================================================================
+  level0:
     enabled: false
