@@ -126,6 +126,7 @@ osm-seed:
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
       VTILES_DOMAIN: vtiles.openhistoricalmap.org
+      API_DOMAIN: api.openhistoricalmap.org
 
       NEW_RELIC_LICENSE_KEY: 'none'
       NEW_RELIC_APP_NAME: 'none'
