@@ -26,3 +26,5 @@ imagery_blacklist:
 overpass_url: "https://overpass-api.openhistoricalmap.org/api/interpreter"
 # Mastodon url for verification
 mastodon_url: "https://mapstodon.space/@ohm"
+# URL to donation form
+donation_url: "https://openstreetmap.app.neoncrm.com/forms/ohm"

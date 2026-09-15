@@ -1,5 +1,12 @@
 name: Deploy k3s
 
+# Show the source branch and commit message in the run list, so it is easy
+# to tell which push each deploy belongs to.
+run-name: >-
+  ${{ github.event_name == 'workflow_run'
+      && format('Deploy k3s — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
+      || format('Deploy k3s — manual: {0}', inputs.ref) }}
+
 on:
   # Deploy only after "Build images (chartpress)" finishes, never on push
   # directly. A push runs build-images, which triggers this on success. That
@@ -142,6 +149,7 @@ jobs:
           _format-key: '{{key}}'
           _output-file: 'values.k3s.staging.yaml'
           STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
           STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
           STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           STAGING_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_KEY }}
@@ -159,6 +167,7 @@ jobs:
           _format-key: '{{key}}'
           _output-file: 'values.k3s.production.yaml'
           PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
           PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_KEY }}

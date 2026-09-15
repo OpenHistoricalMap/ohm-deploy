@@ -1,5 +1,12 @@
 name: Deploy EKS
 
+# Show the source branch and commit message in the run list, so it is easy
+# to tell which push each deploy belongs to.
+run-name: >-
+  ${{ github.event_name == 'workflow_run'
+      && format('Deploy EKS — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
+      || format('Deploy EKS — manual: {0}', inputs.ref) }}
+
 # Deploys the ohm/ chart to AWS EKS.
 #
 # Triggers:

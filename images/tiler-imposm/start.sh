@@ -125,6 +125,12 @@ function uploadExpiredFiles() {
 
 # Function to upload last state file
 function uploadLastState() {
+    # Skip when no bucket is configured (e.g. preview builds with empty
+    # AWS_S3_BUCKET). Without this, `aws s3 cp` runs with an empty target and
+    # fails every loop with "Invalid argument type".
+    if [ -z "$AWS_S3_BUCKET" ]; then
+        return
+    fi
     # Path to the last.state.txt file
     local state_file="$DIFF_DIR/last.state.txt"
     local s3_path="${AWS_S3_BUCKET}/${BUCKET_IMPOSM_FOLDER}/last.state.txt"
@@ -227,8 +233,37 @@ function monitorImposmErrors() {
     done
 }
 
+function importMissingLayers() {
+    # Layers added after the initial import have no table yet and "imposm run" fails on them.
+    local missing_layers
+    missing_layers=$(psql "$PG_CONNECTION" -At -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';" | python3 -c '
+import glob, json, sys
+existing = set(sys.stdin.read().split())
+mapped = json.load(open("./config/imposm3.json"))["tables"]
+layers = [p.split("/")[-1][:-5] for p in sorted(glob.glob("./config/layers/*.json"))
+          if any(t in mapped and "osm_" + t not in existing for t in json.load(open(p))["tables"])]
+print(" ".join(layers))')
+
+    if [ -n "$missing_layers" ]; then
+        log_message "Importing missing layers: $missing_layers"
+        getData
+        if ! ./scripts/reimport_layer.sh $missing_layers; then
+            log_message "ERROR: Failed to import missing layers: $missing_layers"
+            exit 1
+        fi
+        touch "$WORKDIR/mviews_pending"
+    fi
+
+    # The marker survives a restart in the middle of create_mviews.sh, so the views get retried.
+    if [ -f "$WORKDIR/mviews_pending" ] && [ "$RECREATE_MVIEWS_ON_UPDATE" != "true" ]; then
+        ./scripts/create_mviews.sh && rm -f "$WORKDIR/mviews_pending"
+    fi
+}
+
 function updateData() {
     log_message "Starting database update process..."
+
+    importMissingLayers
 
     # Step 0: Recreate materialized views if RECREATE_MVIEWS_ON_UPDATE is enabled
     if [ "$RECREATE_MVIEWS_ON_UPDATE" = "true" ]; then

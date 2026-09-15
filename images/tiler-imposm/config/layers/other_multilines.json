@@ -9,7 +9,8 @@
   },
   "generalized_tables": {},
   "tables": {
-    "landuse_points": {
+    "other_multilines": {
+      "type": "relation_member",
       "fields": [
         {
           "type": "id",
@@ -32,11 +33,6 @@
           "key": null
         },
         {
-          "type": "area",
-          "name": "area",
-          "key": null
-        },
-        {
           "type": "mapping_key",
           "name": "class",
           "key": null
@@ -55,37 +51,72 @@
           "type": "hstore_tags",
           "name": "tags",
           "key": null
+        },
+        {
+          "type": "member_id",
+          "name": "member"
+        },
+        {
+          "type": "member_role",
+          "name": "role"
+        },
+        {
+          "type": "string",
+          "name": "me_name",
+          "key": "name",
+          "from_member": true
+        },
+        {
+          "type": "string",
+          "name": "me_start_date",
+          "key": "start_date",
+          "from_member": true
+        },
+        {
+          "type": "string",
+          "name": "me_end_date",
+          "key": "end_date",
+          "from_member": true
+        },
+        {
+          "type": "hstore_tags",
+          "name": "me_tags",
+          "from_member": true
         }
       ],
-      "type": "point",
       "mappings": {
-        "landuse": {
+        "barrier": {
           "mapping": {
-            "landuse": [
+            "barrier": [
               "__any__"
             ]
           }
         },
-        "leisure": {
+        "historic": {
           "mapping": {
-            "leisure": [
+            "historic": [
               "__any__"
             ]
           }
         },
-        "natural": {
+        "man_made": {
           "mapping": {
-            "natural": [
+            "man_made": [
               "__any__"
             ]
           }
         },
-        "golf": {
+        "power": {
           "mapping": {
-            "golf": [
-              "pin",
-              "hole",
-              "tee"
+            "power": [
+              "__any__"
+            ]
+          }
+        },
+        "military": {
+          "mapping": {
+            "military": [
+              "__any__"
             ]
           }
         }

@@ -5,13 +5,12 @@ osm-seed:
   createClusterIssuer: false
   ingressClassNameType: ""
   ingressClassName: ""
-  domain: ohmstaging.org
   adminEmail: admin@openhistoricalmap.org
 
   # Disable heavy services
-  web:
+  webApi:
     enabled: false
-  db:
+  webDb:
     enabled: false
   memcached:
     enabled: false
@@ -39,7 +38,7 @@ osm-seed:
     env:
       POSTGRES_DB: tiler_osm_production
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "123456789"
+      POSTGRES_PASSWORD: "{{STAGING_TILER_DB_PASSWORD}}"
       POSTGRES_PORT: 5432
     sharedMemorySize: 2Gi
     persistenceDisk:
@@ -48,9 +47,8 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-db-data
-    resources:
-      enabled: false
+      localVolumeHostPath: /mnt/tiler-db-data-v6
+    resources: {}
     postgresqlConfig:
       enabled: true
       values: |
@@ -110,14 +108,15 @@ osm-seed:
         # pg_stat_statements settings
         pg_stat_statements.max = 15000
         pg_stat_statements.track = none
-    nodeSelector:
-      enabled: false
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
   tilerImposm:
     enabled: true
     priorityClass: medium-priority
+    livenessProbe:
+      enabled: true
     serviceAccount:
       enabled: false
     env:
@@ -141,11 +140,9 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-imposm-data
-    resources:
-      enabled: true
-    nodeSelector:
-      enabled: false
+      localVolumeHostPath: /mnt/tiler-imposm-data-v6
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -164,10 +161,8 @@ osm-seed:
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -182,20 +177,15 @@ osm-seed:
     replicaCount: 1
     dynamicSize: "4G"
     staticSize: "1G"
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
   tilerServerCacheCleaner:
     enabled: false
-  tilerCacheCleanerJob:
-    enabled: false
-
   tilerCache:
-    enabled: true
+    enabled: false
     replicaCount: 1
     env:
       PORT: 8000
@@ -205,13 +195,11 @@ osm-seed:
       AWS_REGION_NAME: us-east-1
       AWS_ACCESS_KEY_ID: {{SQS_AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{SQS_AWS_SECRET_ACCESS_KEY}}
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
-  # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-cm.
+    resources: {}
+    nodeSelector: {}
+  # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-env.
   tilerMonitorPipeline:
-    enabled: true
+    enabled: false
     replicaCount: 1
     env:
       MONITOR_PORT: 8001
@@ -232,10 +220,8 @@ osm-seed:
       staticHostPath: true
       localVolumeHostPath: /mnt/tiler-monitor-pipeline-data
       localVolumeSize: 1Gi
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
   tmDb:
     enabled: false
   tmApi:
@@ -251,7 +237,7 @@ osm-seed:
 
   # Web frontend - serves taginfo HTTP UI, downloads .db files from S3
   taginfoWeb:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -260,10 +246,8 @@ osm-seed:
     env:
       OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
       TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -287,10 +271,8 @@ osm-seed:
       ENVIRONMENT: production
       AWS_ACCESS_KEY_ID: "{{AWS_ACCESS_KEY_ID}}"
       AWS_SECRET_ACCESS_KEY: "{{AWS_SECRET_ACCESS_KEY}}"
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -298,7 +280,7 @@ osm-seed:
   # Nominatim UI
   # ====================================================================================================
   nominatimUI:
-    enabled: true
+    enabled: false
     image:
       name: ghcr.io/openhistoricalmap/nominatim-ui
       tag: a469b5e
@@ -307,19 +289,21 @@ osm-seed:
   # Nominatim API
   # ====================================================================================================
   nominatimApi:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
-    # image:
-    #   name: developmentseed/osmseed-nominatim
-    #   tag: 1.0.0-dev.hb293d54
     priorityClass: medium-priority
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
     replicaCount: 1
+    startupProbe:
+      enabled: true
+      failureThreshold: 1440
+    livenessProbe:
+      enabled: true
     env:
       NOMINATIM_API_ENDPOINT: nominatim.ohmstaging.org
-      PBF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260408_0307.osm.pbf
+      PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260808_0031.osm.pbf
       REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
       REPLICATION_UPDATE_INTERVAL: 60
       REPLICATION_RECHECK_INTERVAL: 30
@@ -331,22 +315,19 @@ osm-seed:
       IMPORT_TIGER_ADDRESSES: false
       PGDATA: /var/lib/postgresql/16/main
       OSMSEED_WEB_API_DOMAIN: www.${OHM_DOMAIN}
-      NOMINATIM_ADDRESS_LEVEL_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/nominatim-ui/master/address-levels.json
       UPDATE_MODE: continuous
-      IMPORT_STYLE: extratags
+      IMPORT_STYLE: /app/ohm-import.lua
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
       NOMINATIM_PASSWORD: "{{STAGING_NOMINATIM_PG_PASSWORD}}"
-    resources:
-      enabled: false
+    resources: {}
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
       staticHostPath: true
-      localVolumeHostPath: /mnt/nominatim-db-data
-    nodeSelector:
-      enabled: false
+      localVolumeHostPath: /mnt/nominatim-db-data-v003
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -354,7 +335,7 @@ osm-seed:
   # Overpass API
   # ====================================================================================================
   overpassApi:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
     # image:
@@ -378,10 +359,8 @@ osm-seed:
       localVolumeSize: 100Gi
       staticHostPath: true
       localVolumeHostPath: /mnt/overpass-api-db-data
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -389,14 +368,14 @@ osm-seed:
   # OSMCha
   # ====================================================================================================
   osmchaWeb:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
       tag: df5e9b5
 
   osmchaApi:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -416,15 +395,13 @@ osm-seed:
       OSMCHA_API_URL: www.ohmstaging.org
       OAUTH2_OSM_KEY: "{{STAGING_OSMCHA_OAUTH2_OSM_KEY}}"
       OAUTH2_OSM_SECRET: "{{STAGING_OSMCHA_OAUTH2_OSM_SECRET}}"
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
   osmchaDb:
-    enabled: true
+    enabled: false
     priorityClass: medium-priority
     image:
       name: postgis/postgis
@@ -433,8 +410,7 @@ osm-seed:
       POSTGRES_DB: osmcha
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "{{STAGING_OSMCHA_PG_PASSWORD}}"
-    resources:
-      enabled: false
+    resources: {}
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -443,8 +419,7 @@ osm-seed:
       staticHostPath: true
       localVolumeHostPath: /mnt/osmcha-data
       localVolumeSize: 10Gi
-    nodeSelector:
-      enabled: false
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
 
@@ -473,10 +448,8 @@ osm-seed:
       staticHostPath: true
       localVolumeHostPath: /mnt/osmx-adiff-data
       localVolumeSize: 50Gi
-    resources:
-      enabled: false
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
         
   planetStats:
     enabled: false
@@ -492,18 +465,38 @@ osm-seed:
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
     # resources enabled with high memory/cpu for the processing job;
-    resources:
-      enabled: false
-      requests:
-        enabled: true
-        memory: "7Gi"
-        cpu: "1000m"
-      limits:
-        enabled: false
-        memory: "8Gi"
-        cpu: "1500m"
-    nodeSelector:
-      enabled: false
+    resources: {}
+    nodeSelector: {}
     nodeAffinity:
       enabled: false
       
+  level0:
+    enabled: false
+    replicas: 1
+    priorityClass: "medium-priority"
+    serviceAccount:
+      enabled: false
+      name: ""
+    serviceAnnotations: {}
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - level0.ohmstaging.org
+      tls:
+        enabled: false
+        secretName: ""
+    env:
+      OSM_WEBSITE_URL: https://www.ohmstaging.org
+      OSM_API_URL: https://www.ohmstaging.org/api/0.6/
+      OAUTH2_CLIENT_ID: "Zt8qjPDUx9H_upbhNrR0Q91hkw2Pl1VzM3pxjRxGnUU"
+      OAUTH2_CLIENT_SECRET: "hokGQq7NznsxA2tQ5Hij7a1vn8rKItf6ApVaxd08dCc"
+      OVERPASS_API: "overpass-api.openhistoricalmap.org"
+      MAX_REQUEST_OBJECTS: "500"
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]

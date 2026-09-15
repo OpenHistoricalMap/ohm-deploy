@@ -7,10 +7,10 @@
 --   converts the geometry to a centroid point.
 --
 -- Parameters:
---   source_mview  TEXT - Source materialized view name (e.g., mv_admin_boundaries_areas_z16_20).
---   mview_name    TEXT - Name of the final materialized view to create.
---   unique_columns TEXT - Comma-separated list of columns for uniqueness
---                        (default: 'id, osm_id, type').
+--   source         TEXT   - Source materialized view name (e.g., mv_admin_boundaries_areas_z16_20).
+--   target         TEXT   - Name of the final materialized view to create.
+--   unique_columns TEXT[] - Columns for the unique index
+--                          (default: ARRAY['id', 'osm_id', 'type']).
 --   where_filter   TEXT - Optional WHERE filter condition to apply
 --                        (e.g., 'admin_level IN (1,2)').
 --
@@ -25,14 +25,14 @@
 
 DROP FUNCTION IF EXISTS create_admin_boundaries_centroids_mview;
 CREATE OR REPLACE FUNCTION create_admin_boundaries_centroids_mview(
-  source_mview TEXT,
-  mview_name TEXT,
-  unique_columns TEXT DEFAULT 'id, osm_id, type',
-  where_filter TEXT DEFAULT NULL
+  source         TEXT,
+  target         TEXT,
+  unique_columns TEXT[] DEFAULT ARRAY['id', 'osm_id', 'type'],
+  where_filter   TEXT DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE
-  tmp_mview_name TEXT := mview_name || '_tmp';
+  tmp_mview_name TEXT := target || '_tmp';
   sql_create TEXT;
   all_cols TEXT;
   custom_filter TEXT;
@@ -58,12 +58,12 @@ BEGIN
   JOIN pg_class c ON a.attrelid = c.oid
   JOIN pg_namespace n ON c.relnamespace = n.oid
   WHERE n.nspname = 'public'
-    AND c.relname = source_mview
+    AND c.relname = source
     AND a.attnum > 0
     AND NOT a.attisdropped;
 
   IF all_cols IS NULL THEN
-    RAISE EXCEPTION 'No columns found for %. Make sure the materialized view exists.', source_mview;
+    RAISE EXCEPTION 'No columns found for %. Make sure the materialized view exists.', source;
   END IF;
 
   sql_create := format($sql$
@@ -75,13 +75,13 @@ BEGIN
       AND osm_id NOT IN (
         SELECT osm_id FROM osm_admin_relation_members WHERE role = 'label' AND type = 'administrative'
       )%s;
-  $sql$, tmp_mview_name, all_cols, source_mview, custom_filter);
+  $sql$, tmp_mview_name, all_cols, source, custom_filter);
 
   -- Finalize the materialized view and its indexes
   PERFORM finalize_materialized_view(
     tmp_mview_name,
-    mview_name,
-    unique_columns,
+    target,
+    array_to_string(unique_columns, ', '),
     sql_create
   );
 END;
@@ -92,14 +92,34 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Create centroids from corresponding area materialized views
 -- The where_filter is no longer needed as the area views already have the appropriate filters
-SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z0_2', 'mv_admin_boundaries_centroids_z0_2', 'id, osm_id, type', NULL);
-SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z3_5', 'mv_admin_boundaries_centroids_z3_5', 'id, osm_id, type', NULL);
-SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z6_7', 'mv_admin_boundaries_centroids_z6_7', 'id, osm_id, type', NULL);
-SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z8_9', 'mv_admin_boundaries_centroids_z8_9', 'id, osm_id, type', NULL);
-SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z10_12', 'mv_admin_boundaries_centroids_z10_12', 'id, osm_id, type', NULL);
-SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z13_15', 'mv_admin_boundaries_centroids_z13_15', 'id, osm_id, type', NULL);
-SELECT create_admin_boundaries_centroids_mview('mv_admin_boundaries_areas_z16_20', 'mv_admin_boundaries_centroids_z16_20', 'id, osm_id, type', NULL);
-
+SELECT create_admin_boundaries_centroids_mview(
+    source           => 'mv_admin_boundaries_areas_z0_2',
+    target           => 'mv_admin_boundaries_centroids_z0_2'
+);
+SELECT create_admin_boundaries_centroids_mview(
+    source           => 'mv_admin_boundaries_areas_z3_5',
+    target           => 'mv_admin_boundaries_centroids_z3_5'
+);
+SELECT create_admin_boundaries_centroids_mview(
+    source           => 'mv_admin_boundaries_areas_z6_7',
+    target           => 'mv_admin_boundaries_centroids_z6_7'
+);
+SELECT create_admin_boundaries_centroids_mview(
+    source           => 'mv_admin_boundaries_areas_z8_9',
+    target           => 'mv_admin_boundaries_centroids_z8_9'
+);
+SELECT create_admin_boundaries_centroids_mview(
+    source           => 'mv_admin_boundaries_areas_z10_12',
+    target           => 'mv_admin_boundaries_centroids_z10_12'
+);
+SELECT create_admin_boundaries_centroids_mview(
+    source           => 'mv_admin_boundaries_areas_z13_15',
+    target           => 'mv_admin_boundaries_centroids_z13_15'
+);
+SELECT create_admin_boundaries_centroids_mview(
+    source           => 'mv_admin_boundaries_areas_z16_20',
+    target           => 'mv_admin_boundaries_centroids_z16_20'
+);
 -- Refresh centroids views
 
 -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_admin_boundaries_centroids_z16_20;

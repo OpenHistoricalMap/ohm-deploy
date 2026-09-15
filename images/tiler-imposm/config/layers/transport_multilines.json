@@ -108,6 +108,11 @@
         },
         {
           "type": "string",
+          "name": "street_running",
+          "key": "street_running"
+        },
+        {
+          "type": "string",
           "name": "railway",
           "key": "railway"
         },
@@ -115,6 +120,11 @@
           "type": "string",
           "name": "aeroway",
           "key": "aeroway"
+        },
+        {
+          "type": "string",
+          "name": "aerialway",
+          "key": "aerialway"
         },
         {
           "type": "string",

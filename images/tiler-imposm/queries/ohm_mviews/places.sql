@@ -6,8 +6,8 @@
 --
 --   Includes:
 --     - Centroids of polygonal areas (from `osm_place_areas`) calculated using
---       ST_MaximumInscribedCircle, with area in m² stored in `area_m2`.
---     - Direct points (from `osm_place_points`) with NULL for `area_m2`.
+--       ST_MaximumInscribedCircle, with area in m² stored in `area`.
+--     - Direct points (from `osm_place_points`) with NULL for `area`.
 --
 --   Both sources include:
 --     - Name (only non-empty)
@@ -18,7 +18,7 @@
 --     - Language-specific name columns dynamically from the `languages` table
 --
 -- Parameters:
---   view_name             TEXT     - Name of the materialized view to create.
+--   target                TEXT     - Name of the materialized view to create.
 --   allowed_types_areas   TEXT[]   - Optional filter for types from `osm_place_areas`.
 --   allowed_types_points  TEXT[]   - Optional filter for types from `osm_place_points`.
 --
@@ -33,14 +33,14 @@
 DROP FUNCTION IF EXISTS create_place_points_centroids_mview;
 
 CREATE OR REPLACE FUNCTION create_place_points_centroids_mview(
-  view_name TEXT,
+  target TEXT,
   allowed_types_areas TEXT[] DEFAULT ARRAY[]::TEXT[],
   allowed_types_points TEXT[] DEFAULT ARRAY[]::TEXT[]
 )
 RETURNS void AS $$
 DECLARE 
   lang_columns TEXT := get_language_columns();
-  tmp_view_name TEXT := view_name || '_tmp';
+  tmp_view_name TEXT := target || '_tmp';
   sql_create TEXT;
   type_filter_areas TEXT := '';
   type_filter_points TEXT := '';
@@ -65,7 +65,7 @@ BEGIN
       NULLIF(end_date, '') AS end_date,
       isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
       isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-      ROUND(area)::bigint AS area_m2,
+      ROUND(area)::bigint AS area,
       tags->'capital' AS capital,
       %s
     FROM osm_place_areas
@@ -82,7 +82,7 @@ BEGIN
       NULLIF(end_date, '') AS end_date,
       isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
       isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-      NULL AS area_m2,
+      NULL::bigint AS area,
       tags->'capital' AS capital,
       %s
     FROM osm_place_points
@@ -91,7 +91,7 @@ BEGIN
 
   PERFORM finalize_materialized_view(
     tmp_view_name,
-    view_name,
+    target,
     unique_columns,
     sql_create
   );
@@ -111,13 +111,13 @@ $$ LANGUAGE plpgsql;
 --     - Temporal fields `start_date` and `end_date` (as-is),
 --     - Precomputed fields `start_decdate` and `end_decdate` using the
 --       `isodatetodecimaldate` function for date filtering,
---     - Area in square meters (`area_m2`),
+--     - Area in square meters (`area`),
 --     - `capital` tag (if available),
 --     - Complete `tags` column,
 --     - Multilingual name columns dynamically generated from the `languages` table.
 --
 -- Parameters:
---   view_name            TEXT     - Name of the materialized view to be created.
+--   target               TEXT     - Name of the materialized view to be created.
 --   allowed_types_areas  TEXT[]   - Optional list of place types (e.g., 'square', 'islet').
 --                                   If NULL or empty, all types are included.
 --
@@ -130,12 +130,12 @@ $$ LANGUAGE plpgsql;
 DROP FUNCTION IF EXISTS create_place_areas_mview;
 
 CREATE OR REPLACE FUNCTION create_place_areas_mview(
-    view_name TEXT,
+    target TEXT,
     allowed_types_areas TEXT[] DEFAULT NULL
 )
 RETURNS void AS $$
 DECLARE 
-    tmp_view_name TEXT := view_name || '_tmp';
+    tmp_view_name TEXT := target || '_tmp';
     lang_columns TEXT := get_language_columns();
     type_filter_areas TEXT := 'TRUE';
     sql_create TEXT;
@@ -156,7 +156,7 @@ BEGIN
             NULLIF(end_date, '') AS end_date,
             isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-            ROUND(ST_Area(geometry))::bigint AS area_m2,
+            ROUND(ST_Area(geometry))::bigint AS area,
             tags->'capital' AS capital,
             %s
         FROM osm_place_areas
@@ -165,7 +165,7 @@ BEGIN
 
     PERFORM finalize_materialized_view(
         tmp_view_name,
-        view_name,
+        target,
         unique_columns,
         sql_create
     );
@@ -175,36 +175,36 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- Create materialized views for place points centroids
 -- ============================================================================
-SELECT create_place_points_centroids_mview (
-    'mv_place_points_centroids_z0_2',
-    ARRAY ['island'],
-    ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory']
-  );
+SELECT create_place_points_centroids_mview(
+    target               => 'mv_place_points_centroids_z0_2',
+    allowed_types_areas  => ARRAY ['island'],
+    allowed_types_points => ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory']
+);
 
-SELECT create_place_points_centroids_mview (
-    'mv_place_points_centroids_z3_5',
-    ARRAY ['island'],
-    ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region']
-  );
+SELECT create_place_points_centroids_mview(
+    target               => 'mv_place_points_centroids_z3_5',
+    allowed_types_areas  => ARRAY ['island'],
+    allowed_types_points => ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region']
+);
 
-SELECT create_place_points_centroids_mview (
-    'mv_place_points_centroids_z6_10',
-    ARRAY ['island'],
-    ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town']
-  );
+SELECT create_place_points_centroids_mview(
+    target               => 'mv_place_points_centroids_z6_10',
+    allowed_types_areas  => ARRAY ['island'],
+    allowed_types_points => ARRAY ['ocean', 'sea', 'archipelago', 'country', 'territory', 'unorganized territory', 'state', 'province', 'region', 'county', 'municipality', 'city', 'town']
+);
 
-SELECT create_place_points_centroids_mview (
-    'mv_place_points_centroids_z11_20',
-    ARRAY ['plot', 'square', 'islet'],
-    ARRAY ['state', 'province', 'region', 'county', 'municipality', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood', 'district', 'borough', 'quarter', 'isolated_dwelling', 'farm']
-  );
+SELECT create_place_points_centroids_mview(
+    target               => 'mv_place_points_centroids_z11_20',
+    allowed_types_areas  => ARRAY ['plot', 'square', 'islet', 'island'],
+    allowed_types_points => ARRAY ['state', 'province', 'region', 'county', 'municipality', 'city', 'town', 'village', 'suburb', 'locality', 'hamlet', 'islet', 'neighbourhood', 'district', 'borough', 'quarter', 'isolated_dwelling', 'farm']
+);
 
 -- ============================================================================
 -- Create materialized views for place areas
 -- ============================================================================
 SELECT create_place_areas_mview(
-  'mv_place_areas_z14_20',
-  ARRAY['plot', 'square', 'islet']
+    target              => 'mv_place_areas_z14_20',
+    allowed_types_areas => ARRAY['plot', 'square', 'islet', 'island']
 );
 
 -- Refresh centroids views

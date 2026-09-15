@@ -698,7 +698,7 @@
       const features = map.queryRenderedFeatures(bbox)
         .filter(f => {
           if (!f.layer.id.startsWith('lyr-')) return false;
-          const key = `${f.layer.id}:${f.sourceLayer}:${f.id ?? ''}:${f.properties.osm_id ?? ''}`;
+          const key = `${f.layer.id}:${f.sourceLayer}:${f.id ?? ''}:${f.properties.osm_id ?? ''}:${f.properties.class ?? ''}:${f.properties.type ?? ''}`;
           if (seen.has(key)) return false;
           seen.add(key);
           return true;

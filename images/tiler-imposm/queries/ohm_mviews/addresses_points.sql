@@ -7,12 +7,10 @@
 -- as a secondary attribute there, not as a duplicate point here.
 -- See issue #1304.
 -- ============================================================================
-SELECT create_points_mview(
-    'osm_address_points',
-    'mv_address_points_z16_20',
-    'id, osm_id',
-    NULL,
-    NULL
+SELECT create_point_mview(
+    source           => 'osm_address_points',
+    target           => 'mv_address_points_z16_20',
+    unique_columns   => ARRAY['id', 'osm_id']
 );
 
 -- Refresh:

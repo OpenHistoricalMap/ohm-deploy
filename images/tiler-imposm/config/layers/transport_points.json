@@ -95,10 +95,24 @@
             ]
           }
         },
+        "aerialway": {
+          "mapping": {
+            "aerialway": [
+              "__any__"
+            ]
+          }
+        },
         "route": {
           "mapping": {
             "route": [
               "__any__"
+            ]
+          }
+        },
+        "junction": {
+          "mapping": {
+            "junction": [
+              "yes"
             ]
           }
         }

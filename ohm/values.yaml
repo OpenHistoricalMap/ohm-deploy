@@ -1,9 +1,9 @@
 osm-seed:
-  db:
+  webDb:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
-  web:
+  webApi:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
@@ -28,6 +28,10 @@ osm-seed:
       name: chartpress_replace_me
       tag: chartpress_replace_me
   overpassApi:
+    image:
+      name: chartpress_replace_me
+      tag: chartpress_replace_me
+  nominatimApi:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
