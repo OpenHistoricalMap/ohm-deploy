@@ -124,6 +124,7 @@ osm-seed:
       NOMINATIM_URL: nominatim.ohmstaging.org
       OVERPASS_URL: overpass-api.ohmstaging.org
       VTILES_DOMAIN: vtiles.ohmstaging.org
+      API_DOMAIN: api.ohmstaging.org
 
       NEW_RELIC_LICENSE_KEY: "none"
       NEW_RELIC_APP_NAME: "none"
