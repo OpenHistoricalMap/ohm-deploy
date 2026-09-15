@@ -30,7 +30,9 @@ osm-seed:
       MAILER_FROM: web@noreply.openhistoricalmap.org
       NOMINATIM_URL: nominatim.openhistoricalmap.org
       OVERPASS_URL: overpass-api.openhistoricalmap.org
-      VTILES_DOMAIN: vtiles.ohmstaging.org
+      VTILES_DOMAIN: vtiles.openhistoricalmap.org
+      # preview has no api.* host; iD talks to the same host
+      API_DOMAIN: "{{PREVIEW_HOST}}"
 
       # NEW_RELIC_LICENSE_KEY: "none"
       # NEW_RELIC_APP_NAME: "none"
