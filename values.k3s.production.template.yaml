@@ -173,7 +173,7 @@ osm-seed:
     env:
       OHM_DOMAIN: openhistoricalmap.org
       MARTIN_WORKER_PROCESSES: 16
-      MARTIN_POOL_SIZE: 10
+      MARTIN_POOL_SIZE: 25
       AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
