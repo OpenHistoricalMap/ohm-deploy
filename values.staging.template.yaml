@@ -97,6 +97,10 @@ osm-seed:
       enabled: true
       key: "nodegroup_type"
       values: ["web"]
+    # IAM role for S3 (IRSA), used by pgbackrest
+    serviceAccount:
+      enabled: true
+      name: ohm-s3-database-backup-access-staging
     # WAL archiving (every minute) and daily base backups to S3 with pgBackRest
     pgbackrest:
       enabled: true
@@ -104,8 +108,13 @@ osm-seed:
       s3Region: us-east-1
       s3Endpoint: s3.amazonaws.com
       s3Path: /staging/database/web-db-pgbackrest
-      # Use the node IAM role, the nodes already have S3 access
-      s3KeyType: auto
+      # IRSA through webDb.serviceAccount, same role as the db backup cronjob
+      s3KeyType: web-id
+      # k3s (no IRSA): set webDb.serviceAccount.enabled=false and use static keys.
+      # Keep the same bucket, path and cipherPass to restore from the EKS backups.
+      # s3KeyType: shared
+      # s3Key: "{{STAGING_PGBACKREST_S3_KEY}}"
+      # s3KeySecret: "{{STAGING_PGBACKREST_S3_KEY_SECRET}}"
       cipherPass: "{{STAGING_PGBACKREST_CIPHER_PASS}}"
       retentionFull: 2
       archiveTimeout: 60

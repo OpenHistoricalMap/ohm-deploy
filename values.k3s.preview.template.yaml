@@ -80,6 +80,9 @@ osm-seed:
     resources: {}
     postgresqlConfig:
       enabled: false
+    # Ephemeral db, no S3 backups
+    pgbackrest:
+      enabled: false
     nodeSelector: {}
     nodeAffinity:
       enabled: false
