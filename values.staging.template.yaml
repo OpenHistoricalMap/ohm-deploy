@@ -104,7 +104,7 @@ osm-seed:
     # WAL archiving (every minute) and daily base backups to S3 with pgBackRest
     pgbackrest:
       enabled: true
-      s3Bucket: ohm-db-replication
+      s3Bucket: osmseed-staging
       s3Region: us-east-1
       s3Endpoint: s3.amazonaws.com
       s3Path: /staging/database/web-db-pgbackrest
