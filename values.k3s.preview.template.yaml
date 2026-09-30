@@ -62,7 +62,9 @@ osm-seed:
     sharedMemorySize: 16Mi
     nodeSelector: {}
     nodeAffinity:
-      enabled: false
+      enabled: true
+      key: nodegroup_type
+      values: ["web"]
     podAntiAffinity:
       enabled: false
 
@@ -85,7 +87,9 @@ osm-seed:
       enabled: false
     nodeSelector: {}
     nodeAffinity:
-      enabled: false
+      enabled: true
+      key: nodegroup_type
+      values: ["web"]
 
   memcached:
     enabled: true
@@ -93,7 +97,9 @@ osm-seed:
     resources: {}
     nodeSelector: {}
     nodeAffinity:
-      enabled: false
+      enabled: true
+      key: nodegroup_type
+      values: ["web"]
 
   cgimap:
     enabled: true
@@ -103,7 +109,9 @@ osm-seed:
       enabled: false
     nodeSelector: {}
     nodeAffinity:
-      enabled: false
+      enabled: true
+      key: nodegroup_type
+      values: ["web"]
 
   # ----- Everything else OFF --------------------------------------------------
   fullHistory:
