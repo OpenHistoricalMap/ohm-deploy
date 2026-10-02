@@ -1,22 +1,31 @@
-name: Deploy k3s cluster
+name: Deploy k3s
+
+# Show the source branch and commit message in the run list, so it is easy
+# to tell which push each deploy belongs to.
+run-name: >-
+  ${{ github.event_name == 'workflow_run'
+      && format('Deploy k3s — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
+      || format('Deploy k3s — manual: {0}', inputs.ref) }}
+
 on:
   workflow_run:
     workflows: ['Build images (chartpress)']
     types: [completed]
     branches:
+      - main
+      - staging
       - staging-new
-      - deploy-*
   workflow_dispatch:
     inputs:
       ref:
         description: Branch to deploy
         required: true
-        default: staging-new
+        default: staging
 
 jobs:
   deploy:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    timeout-minutes: 30
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Resolve env
@@ -29,18 +38,23 @@ jobs:
             workflow_run)
               BRANCH="${{ github.event.workflow_run.head_branch }}"
               SHA="${{ github.event.workflow_run.head_sha }}" ;;
+            *)
+              BRANCH="${{ github.ref_name }}"
+              SHA="${{ github.sha }}" ;;
           esac
-          # Only staging lives on this cluster for now.
           case "$BRANCH" in
-            staging-new) ENV="staging" ;;
-            deploy-*)    ENV="staging" ;;
-            *)         echo "::error::$BRANCH does not deploy to the k3s cluster"; exit 1 ;;
+            main)           ENV="production" ;;
+            pre-production) ENV="production" ;;
+            staging)        ENV="staging" ;;
+            staging-new)    ENV="staging" ;;
+            *)              ENV="staging" ;;
           esac
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "release=$ENV-new" >> $GITHUB_OUTPUT
-          echo "namespace=$ENV-new" >> $GITHUB_OUTPUT
+          echo "release=htz-$ENV" >> $GITHUB_OUTPUT
+          # Prefix of the cluster secrets: STAGING_K3S_CLUSTER_*, PRODUCTION_K3S_CLUSTER_*
+          echo "prefix=$(echo "$ENV" | tr a-z A-Z)" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v4
         with:
@@ -65,13 +79,20 @@ jobs:
         with:
           version: v3.15.1
 
+      # The k3s API is not public: the runner opens an ssh forward as the
+      # `deploy` user of the Hetzner k3s cluster. The four secrets come from
+      # k3s-cluster/scripts/local/ci-secrets.sh in ohm-deployment.
       - name: Open the k3s API
         env:
-          SSH_KEY: ${{ secrets.STAGING_K3S_CLUSTER_SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.STAGING_K3S_CLUSTER_KNOWN_HOSTS }}
-          TARGET: ${{ secrets.STAGING_K3S_CLUSTER_SSH_TARGET }}
-          KUBECONFIG_DATA: ${{ secrets.STAGING_K3S_CLUSTER_KUBECONFIG }}
+          SSH_KEY: ${{ secrets[format('{0}_K3S_CLUSTER_SSH_KEY', steps.src.outputs.prefix)] }}
+          KNOWN_HOSTS: ${{ secrets[format('{0}_K3S_CLUSTER_KNOWN_HOSTS', steps.src.outputs.prefix)] }}
+          TARGET: ${{ secrets[format('{0}_K3S_CLUSTER_SSH_TARGET', steps.src.outputs.prefix)] }}
+          KUBECONFIG_DATA: ${{ secrets[format('{0}_K3S_CLUSTER_KUBECONFIG', steps.src.outputs.prefix)] }}
         run: |
+          if [ -z "$SSH_KEY" ] || [ -z "$TARGET" ] || [ -z "$KUBECONFIG_DATA" ]; then
+            echo "ERROR: ${{ steps.src.outputs.prefix }}_K3S_CLUSTER_* secrets are empty" >&2
+            exit 1
+          fi
           install -d -m 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
@@ -81,39 +102,47 @@ jobs:
           printf '%s\n' "$KUBECONFIG_DATA" > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
 
-      # The CI token cannot list nodes: check the namespace it deploys to.
       - name: Verify access
         run: |
-          kubectl get namespace ${{ steps.src.outputs.namespace }}
+          kubectl get namespace default
           helm version --short
 
       - name: Staging - substitute secrets
         if: steps.src.outputs.env == 'staging'
         uses: bluwy/substitute-string-action@v3
         with:
-          _input-file: 'values.staging.template.yaml'
+          _input-file: 'values.k3s.staging.template.yaml'
           _format-key: '{{key}}'
-          _output-file: 'values.staging.yaml'
-          # The restored copy of production, with the password set on promote.
-          STAGING_DB: openstreetmap
-          STAGING_DB_USER: postgres
-          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          # Mail off: the database has real users. This host does not resolve.
-          MAILER_ADDRESS: mail.disabled.invalid
-          MAILER_USERNAME: none
-          MAILER_PASSWORD: none
-          # The rest as in deploy-eks.yaml.
-          STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
-          STAGING_PGBACKREST_CIPHER_PASS: ${{ secrets.STAGING_PGBACKREST_CIPHER_PASS }}
-          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
-          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
-          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
-          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
-          STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
-          STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
-          STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
-          STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
-          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+          _output-file: 'values.k3s.staging.yaml'
+          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
+          STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
+          STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
+          STAGING_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_KEY }}
+          STAGING_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
+          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
+          STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
+      - name: Production - substitute secrets
+        if: steps.src.outputs.env == 'production'
+        uses: bluwy/substitute-string-action@v3
+        with:
+          _input-file: 'values.k3s.production.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.k3s.production.yaml'
+          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
+          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
+          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
 
       - name: Helm dep up (pull osm-seed subchart)
         run: cd ohm && helm dep up
@@ -122,18 +151,17 @@ jobs:
         run: |
           helm lint ./ohm \
             -f ./ohm/values.yaml \
-            -f ./values.${{ steps.src.outputs.env }}.yaml
+            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml
 
       - name: Helm deploy
         run: |
           helm upgrade --install ${{ steps.src.outputs.release }} ./ohm \
-            -n ${{ steps.src.outputs.namespace }} \
             -f ./ohm/values.yaml \
-            -f ./values.${{ steps.src.outputs.env }}.yaml \
+            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml \
             --wait --timeout=15m
 
       - name: Show release status
         if: always()
         run: |
-          helm -n ${{ steps.src.outputs.namespace }} list
-          kubectl -n ${{ steps.src.outputs.namespace }} get all
+          helm -n default list
+          kubectl -n default get all
