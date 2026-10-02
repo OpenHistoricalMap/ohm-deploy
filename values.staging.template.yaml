@@ -103,7 +103,8 @@ osm-seed:
       values: ["web"]
     # IAM role for S3 (IRSA), used by pgbackrest
     serviceAccount:
-      enabled: true
+      # k3s has no IRSA: these IAM-bound accounts only exist on EKS.
+      enabled: false
       name: ohm-s3-database-backup-access-staging
     # WAL archiving (every minute) and daily base backups to S3 with pgBackRest
     pgbackrest:
@@ -135,7 +136,8 @@ osm-seed:
       enabled: false
     priorityClass: "high-priority"
     serviceAccount:
-      enabled: true
+      # k3s has no IRSA: these IAM-bound accounts only exist on EKS.
+      enabled: false
       name: ohm-s3-bucket-access-staging
     replicaCount: 1
     env:
@@ -216,9 +218,6 @@ osm-seed:
   # ====================================================================================================
   cgimap:
     enabled: true
-    image:
-      name: ghcr.io/openhistoricalmap/cgimap
-      tag: 0.0.1-0.dev.git.2463.hb0e1e7f
     priorityClass: "high-priority"
     resources: {}
     autoscaling:
