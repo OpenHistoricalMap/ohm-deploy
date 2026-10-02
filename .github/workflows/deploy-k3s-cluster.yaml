@@ -1,19 +1,33 @@
-name: Deploy k3s
+name: Deploy k3s cluster - New
 
 # Show the source branch and commit message in the run list, so it is easy
 # to tell which push each deploy belongs to.
 run-name: >-
   ${{ github.event_name == 'workflow_run'
-      && format('Deploy k3s — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
-      || format('Deploy k3s — manual: {0}', inputs.ref) }}
+      && format('Deploy k3s cluster — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
+      || format('Deploy k3s cluster — manual: {0}', inputs.ref) }}
+
+# Deploys the ohm/ chart to the Hetzner k3s cluster (ohm-deployment/k3s-cluster).
+# Same as deploy-eks.yaml, except how it reaches the cluster.
+#
+# Triggers:
+#   - workflow_run: the only automatic trigger. A push runs build-images
+#     first, which triggers this on success, so the images are always in
+#     ghcr.io before we use them — even when a commit changes both config
+#     and images.
+#   - workflow_dispatch: manual deploy of a branch. For a commit that changed
+#     images/**, build-images must have run first so the image exists.
+#
+# The deploy runs `chartpress --skip-build` itself to rewrite the
+# image tags in ohm/values.yaml. The tags are derived from git history,
+# so on the same commit they match exactly what build-images pushed.
+# No artifact is passed between workflows.
 
 on:
   workflow_run:
     workflows: ['Build images (chartpress)']
     types: [completed]
     branches:
-      - main
-      - staging
       - staging-new
   workflow_dispatch:
     inputs:
@@ -25,10 +39,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    env:
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
-      - name: Resolve env
+      - name: Resolve ref + env
         id: src
         run: |
           case "${{ github.event_name }}" in
@@ -43,26 +59,25 @@ jobs:
               SHA="${{ github.sha }}" ;;
           esac
           case "$BRANCH" in
-            main)           ENV="production" ;;
-            pre-production) ENV="production" ;;
-            staging)        ENV="staging" ;;
-            staging-new)    ENV="staging" ;;
-            *)              ENV="staging" ;;
+            main)          ENV="production" ;;
+            staging)       ENV="staging" ;;
+            staging-new)   ENV="staging" ;;
+            *)             ENV="staging" ;;
           esac
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "release=htz-$ENV" >> $GITHUB_OUTPUT
-          # Prefix of the cluster secrets: STAGING_K3S_CLUSTER_*, PRODUCTION_K3S_CLUSTER_*
-          echo "prefix=$(echo "$ENV" | tr a-z A-Z)" >> $GITHUB_OUTPUT
+          echo "Deploying ref=$BRANCH ($SHA) to $ENV"
 
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.src.outputs.sha }}
           fetch-depth: 0
 
+      # ============================================================
       # Recompute image tags (no build/push). Same commit + full git
       # history => same tags build-images pushed.
+      # ============================================================
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -74,94 +89,142 @@ jobs:
       - name: Run chartpress (rewrite image tags, no build)
         run: chartpress --skip-build
 
-      - name: Install helm
-        uses: azure/setup-helm@v4
+      # ============================================================
+      # Substitute secrets per environment (staging / production)
+      # ============================================================
+      - name: Staging - substitute secrets
+        if: steps.src.outputs.env == 'staging'
+        uses: bluwy/substitute-string-action@v1
         with:
-          version: v3.15.1
+          _input-file: 'values.staging.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.staging.yaml'
+          STAGING_AWS_SSL_ARN: ${{ secrets.STAGING_AWS_SSL_ARN }}
+          STAGING_AWS_WAF_WEBACL_ARN: ${{ secrets.STAGING_AWS_WAF_WEBACL_ARN }}
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
+          MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
+          STAGING_DB: ${{ secrets.STAGING_DB }}
+          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
+          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
+          STAGING_PGBACKREST_CIPHER_PASS: ${{ secrets.STAGING_PGBACKREST_CIPHER_PASS }}
+          STAGING_DOMAIN_NAME: ohmstaging.org
+          STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
+          STAGING_ID_APPLICATION: ${{ secrets.STAGING_ID_APPLICATION }}
+          STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
+          STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
+          STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
+          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
+          STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
+          STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
+          STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
+          STAGING_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
+          STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
+          STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+          STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
+          STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
+          STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
+          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          STAGING_NOMINATIM_HOST: ${{ secrets.STAGING_NOMINATIM_HOST }}
+          STAGING_OVERPASS_HOST: ${{ secrets.STAGING_OVERPASS_HOST }}
+          STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
+          STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
+          STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
+          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
 
-      # The k3s API is not public: the runner opens an ssh forward as the
-      # `deploy` user of the Hetzner k3s cluster. The four secrets come from
-      # k3s-cluster/scripts/local/ci-secrets.sh in ohm-deployment.
+      - name: Production - substitute secrets
+        if: steps.src.outputs.env == 'production'
+        uses: bluwy/substitute-string-action@v1
+        with:
+          _input-file: 'values.production.template.yaml'
+          _format-key: '{{key}}'
+          _output-file: 'values.production.yaml'
+          PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
+          PRODUCTION_AWS_WAF_WEBACL_ARN: ${{ secrets.PRODUCTION_AWS_WAF_WEBACL_ARN }}
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+          MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+          PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
+          PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
+          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+          PRODUCTION_PGBACKREST_CIPHER_PASS: ${{ secrets.PRODUCTION_PGBACKREST_CIPHER_PASS }}
+          PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
+          PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
+          PRODUCTION_ID_APPLICATION: ${{ secrets.PRODUCTION_ID_APPLICATION }}
+          PRODUCTION_OAUTH_CLIENT_ID: ${{ secrets.PRODUCTION_OAUTH_CLIENT_ID }}
+          PRODUCTION_OAUTH_KEY: ${{ secrets.PRODUCTION_OAUTH_KEY }}
+          PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
+          PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
+          PRODUCTION_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.PRODUCTION_RAILS_CREDENTIALS_YML_ENC }}
+          PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
+          PRODUCTION_WIKIPEDIA_AUTH_ID: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_ID }}
+          PRODUCTION_WIKIPEDIA_AUTH_SECRET: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_SECRET }}
+          PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
+          PRODUCTION_TILER_SERVER_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
+          PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
+          PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
+          PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          PRODUCTION_TM_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_DB_PASSWORD }}
+          PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
+          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          PRODUCTION_NOMINATIM_HOST: ${{ secrets.PRODUCTION_NOMINATIM_HOST }}
+          PRODUCTION_OVERPASS_HOST: ${{ secrets.PRODUCTION_OVERPASS_HOST }}
+          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
+          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
+          PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
+          PRODUCTION_OPENSTREETMAP_AUTH_ID: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_ID }}
+          PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
+
+      # ============================================================
+      # helm + k3s cluster deploy
+      # ============================================================
+      - name: Install helm
+        run: |
+          curl -L https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz -o helm.tar.gz
+          tar -xvzf helm.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin/
+          sudo chmod +x /usr/local/bin/helm
+          helm version
+
+      # The k3s API is not public: open an ssh forward as the `deploy` user.
+      # Secrets <ENV>_K3S_CLUSTER_* come from ci-secrets.sh in ohm-deployment.
       - name: Open the k3s API
         env:
-          SSH_KEY: ${{ secrets[format('{0}_K3S_CLUSTER_SSH_KEY', steps.src.outputs.prefix)] }}
-          KNOWN_HOSTS: ${{ secrets[format('{0}_K3S_CLUSTER_KNOWN_HOSTS', steps.src.outputs.prefix)] }}
-          TARGET: ${{ secrets[format('{0}_K3S_CLUSTER_SSH_TARGET', steps.src.outputs.prefix)] }}
-          KUBECONFIG_DATA: ${{ secrets[format('{0}_K3S_CLUSTER_KUBECONFIG', steps.src.outputs.prefix)] }}
+          PREFIX: ${{ steps.src.outputs.env == 'production' && 'PRODUCTION' || 'STAGING' }}
+          SSH_KEY: ${{ secrets[format('{0}_K3S_CLUSTER_SSH_KEY', steps.src.outputs.env == 'production' && 'PRODUCTION' || 'STAGING')] }}
+          KNOWN_HOSTS: ${{ secrets[format('{0}_K3S_CLUSTER_KNOWN_HOSTS', steps.src.outputs.env == 'production' && 'PRODUCTION' || 'STAGING')] }}
+          TARGET: ${{ secrets[format('{0}_K3S_CLUSTER_SSH_TARGET', steps.src.outputs.env == 'production' && 'PRODUCTION' || 'STAGING')] }}
+          KUBECONFIG_DATA: ${{ secrets[format('{0}_K3S_CLUSTER_KUBECONFIG', steps.src.outputs.env == 'production' && 'PRODUCTION' || 'STAGING')] }}
         run: |
-          if [ -z "$SSH_KEY" ] || [ -z "$TARGET" ] || [ -z "$KUBECONFIG_DATA" ]; then
-            echo "ERROR: ${{ steps.src.outputs.prefix }}_K3S_CLUSTER_* secrets are empty" >&2
-            exit 1
-          fi
+          [ -n "$SSH_KEY" ] && [ -n "$TARGET" ] && [ -n "$KUBECONFIG_DATA" ] || { echo "ERROR: ${PREFIX}_K3S_CLUSTER_* secrets are empty" >&2; exit 1; }
           install -d -m 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          ssh -fN -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
-            -L 6443:127.0.0.1:6443 "$TARGET"
+          ssh -fN -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 6443:127.0.0.1:6443 "$TARGET"
           mkdir -p "$HOME/.kube"
           printf '%s\n' "$KUBECONFIG_DATA" > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
 
-      - name: Verify access
+      - name: Helm repo + deps
         run: |
-          kubectl get namespace default
-          helm version --short
+          helm repo add osm-seed https://osm-seed.github.io/osm-seed-chart/
+          helm repo update
+          cd ohm && helm dep up
 
-      - name: Staging - substitute secrets
+      - name: Staging - helm deploy
         if: steps.src.outputs.env == 'staging'
-        uses: bluwy/substitute-string-action@v3
-        with:
-          _input-file: 'values.k3s.staging.template.yaml'
-          _format-key: '{{key}}'
-          _output-file: 'values.k3s.staging.yaml'
-          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
-          STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
-          STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
-          STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
-          STAGING_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_KEY }}
-          STAGING_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_SECRET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
-          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
-          STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
-      - name: Production - substitute secrets
+        run: helm upgrade --install staging --wait --timeout 30m ohm/ -f values.staging.yaml -f ohm/values.yaml
+
+      - name: Production - helm deploy
         if: steps.src.outputs.env == 'production'
-        uses: bluwy/substitute-string-action@v3
-        with:
-          _input-file: 'values.k3s.production.template.yaml'
-          _format-key: '{{key}}'
-          _output-file: 'values.k3s.production.yaml'
-          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
-          PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
-          PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
-          PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
-          PRODUCTION_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_KEY }}
-          PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET }}
-          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
-          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
-
-      - name: Helm dep up (pull osm-seed subchart)
-        run: cd ohm && helm dep up
-
-      - name: Helm lint
-        run: |
-          helm lint ./ohm \
-            -f ./ohm/values.yaml \
-            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml
-
-      - name: Helm deploy
-        run: |
-          helm upgrade --install ${{ steps.src.outputs.release }} ./ohm \
-            -f ./ohm/values.yaml \
-            -f ./values.k3s.${{ steps.src.outputs.env }}.yaml \
-            --wait --timeout=15m
-
-      - name: Show release status
-        if: always()
-        run: |
-          helm -n default list
-          kubectl -n default get all
+        run: helm upgrade --install production --wait --timeout 30m ohm/ -f values.production.yaml -f ohm/values.yaml
