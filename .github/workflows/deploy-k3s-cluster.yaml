@@ -1,4 +1,4 @@
-name: Deploy k3s cluster - New
+name: Deploy k3s cluster
 run-name: >-
   ${{ github.event_name == 'workflow_run'
       && format('Deploy k3s cluster — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
