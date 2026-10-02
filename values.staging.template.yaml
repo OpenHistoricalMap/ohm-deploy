@@ -10,7 +10,7 @@ osm-seed:
 
   environment: staging
   # cloudProvider is provider where you are going to deploy osm-seed, it could be: aws, gcp, minikube
-  cloudProvider: aws
+  cloudProvider: k3s
 
   # ====================================================================================================
   # AWS: In case you are using the cloudProvider=aws set the below variables, We are assuming the nodes has a policies access to S3
@@ -47,6 +47,10 @@ osm-seed:
       subPath: postgresql-db
       AWS_ElasticBlockStore_volumeID: vol-025cab988ae190a7b
       AWS_ElasticBlockStore_size: 200Gi
+      # k3s: the folder pgbackrest-restore left on the worker
+      staticHostPath: true
+      localVolumeHostPath: /mnt/web-db-data-20261001
+      localVolumeSize: 300Gi
     resources: {}
     sharedMemorySize: 256Mi
     livenessProbeExec: true
@@ -103,7 +107,9 @@ osm-seed:
       name: ohm-s3-database-backup-access-staging
     # WAL archiving (every minute) and daily base backups to S3 with pgBackRest
     pgbackrest:
-      enabled: true
+      # Off on k3s: this database is a copy of production, it must not archive
+      # into the staging repo.
+      enabled: false
       s3Bucket: osmseed-staging
       s3Region: us-east-1
       s3Endpoint: s3.amazonaws.com
@@ -142,12 +148,12 @@ osm-seed:
       OAUTH_CLIENT_ID: CiBBpurbtUj1np_QZOTngIePlS7K9uGvKDW2Pcw5O7Y
       OAUTH_KEY: 1O8WtBWivoefehDMT6sbm9TNUU_h_EXznI4cM5XMyJw
       MAILER_FROM: web@noreply.openhistoricalmap.org
-      SERVER_URL: www.ohmstaging.org
+      SERVER_URL: staging-new.ohmstaging.org
       SERVER_PROTOCOL: https
       NOMINATIM_URL: nominatim.ohmstaging.org
       OVERPASS_URL: overpass-api.ohmstaging.org
       VTILES_DOMAIN: vtiles.ohmstaging.org
-      API_DOMAIN: api.ohmstaging.org
+      API_DOMAIN: staging-new.ohmstaging.org
 
       NEW_RELIC_LICENSE_KEY: "none"
       NEW_RELIC_APP_NAME: "none"
