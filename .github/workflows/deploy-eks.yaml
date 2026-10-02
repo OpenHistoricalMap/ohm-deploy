@@ -106,10 +106,9 @@ jobs:
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
           MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
           MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
-          STAGING_DB: ${{ secrets.STAGING_DB }}
-          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
+          STAGING_DB: openstreetmap
           STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
+          STAGING_DB_USER: postgres
           STAGING_PGBACKREST_CIPHER_PASS: ${{ secrets.STAGING_PGBACKREST_CIPHER_PASS }}
           STAGING_DOMAIN_NAME: ohmstaging.org
           STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
