@@ -97,7 +97,7 @@ jobs:
           # The restored copy of production, with the password set on promote.
           STAGING_DB: openstreetmap
           STAGING_DB_USER: postgres
-          STAGING_DB_PASSWORD: ${{ secrets.STAGING_NEW_DB_PASSWORD }}
+          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
           # Mail off: the database has real users. This host does not resolve.
           MAILER_ADDRESS: mail.disabled.invalid
           MAILER_USERNAME: none
