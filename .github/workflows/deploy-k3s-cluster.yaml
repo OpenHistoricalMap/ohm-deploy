@@ -25,7 +25,7 @@ on:
     workflows: ['Build images (chartpress)']
     types: [completed]
     branches:
-      - staging-new
+      - k3s-staging
   workflow_dispatch:
     inputs:
       ref:
@@ -58,7 +58,7 @@ jobs:
           case "$BRANCH" in
             main)          ENV="production" ;;
             staging)       ENV="staging" ;;
-            staging-new)   ENV="staging" ;;
+            k3s-staging)   ENV="staging" ;;
             *)             ENV="staging" ;;
           esac
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
