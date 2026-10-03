@@ -296,7 +296,7 @@ osm-seed:
     serviceAccount:
       enabled: false
       name: ohm-s3-bucket-access-staging
-    schedule: "* * * * *"
+    schedule: "0 5 * * 0"
     resources: {}
     env:
       # --- Settings
