@@ -96,6 +96,9 @@ jobs:
           _input-file: 'values.staging.template.yaml'
           _format-key: '{{key}}'
           _output-file: 'values.staging.yaml'
+          # ======================== AWS keys ========================
+          STAGING_AWS_KEY: ${{ secrets.STAGING_AWS_KEY }}
+          STAGING_AWS_KEY_SECRET: ${{ secrets.STAGING_AWS_KEY_SECRET }}
           # ======================== Web database (web-db) ========================
           STAGING_DB: openstreetmap
           STAGING_DB_USER: postgres
@@ -103,8 +106,6 @@ jobs:
           STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
           # ======================== Web database backups (pgBackRest) ========================
           STAGING_PGBACKREST_CIPHER_PASS: ${{ secrets.STAGING_PGBACKREST_CIPHER_PASS }}
-          STAGING_PGBACKREST_S3_KEY: ${{ secrets.STAGING_PGBACKREST_S3_KEY }}
-          STAGING_PGBACKREST_S3_KEY_SECRET: ${{ secrets.STAGING_PGBACKREST_S3_KEY_SECRET }}
           # ======================== Website (web-api) ========================
           STAGING_DOMAIN_NAME: ohmstaging.org
           STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
@@ -117,8 +118,6 @@ jobs:
           STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
           STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
           STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
-          STAGING_WEB_S3_KEY: ${{ secrets.STAGING_WEB_S3_KEY }}
-          STAGING_WEB_S3_KEY_SECRET: ${{ secrets.STAGING_WEB_S3_KEY_SECRET }}
           # ======================== Mail (web-api, tasking manager) ========================
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
@@ -128,11 +127,7 @@ jobs:
           STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
-          STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
-          STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
           STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
-          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
-          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
           # ======================== Tasking manager ========================
           STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
           STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
@@ -147,9 +142,7 @@ jobs:
           STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
           STAGING_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_KEY }}
           STAGING_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_SECRET }}
-          # ======================== Shared AWS keys (tiler imposm/martin, dumps) ========================
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # ======================== Shared (S3 bucket) ========================
           STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
           # ======================== Monitoring ========================
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
@@ -164,6 +157,9 @@ jobs:
           _input-file: 'values.production.template.yaml'
           _format-key: '{{key}}'
           _output-file: 'values.production.yaml'
+          # ======================== AWS keys ========================
+          PRODUCTION_AWS_KEY: ${{ secrets.PRODUCTION_AWS_KEY }}
+          PRODUCTION_AWS_KEY_SECRET: ${{ secrets.PRODUCTION_AWS_KEY_SECRET }}
           # ======================== Web database (web-db) ========================
           PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
           PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
@@ -172,8 +168,6 @@ jobs:
           PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
           # ======================== Web database backups (pgBackRest) ========================
           PRODUCTION_PGBACKREST_CIPHER_PASS: ${{ secrets.PRODUCTION_PGBACKREST_CIPHER_PASS }}
-          # PRODUCTION_PGBACKREST_S3_KEY: ${{ secrets.PRODUCTION_PGBACKREST_S3_KEY }}
-          # PRODUCTION_PGBACKREST_S3_KEY_SECRET: ${{ secrets.PRODUCTION_PGBACKREST_S3_KEY_SECRET }}
           # ======================== Website (web-api) ========================
           PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
           PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
@@ -186,8 +180,6 @@ jobs:
           PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
           PRODUCTION_WIKIPEDIA_AUTH_ID: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_ID }}
           PRODUCTION_WIKIPEDIA_AUTH_SECRET: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_SECRET }}
-          # PRODUCTION_WEB_S3_KEY: ${{ secrets.PRODUCTION_WEB_S3_KEY }}
-          # PRODUCTION_WEB_S3_KEY_SECRET: ${{ secrets.PRODUCTION_WEB_S3_KEY_SECRET }}
           # ======================== Mail (web-api, tasking manager) ========================
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}

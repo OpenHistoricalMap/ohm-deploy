@@ -114,8 +114,8 @@ osm-seed:
       # k3s (no IRSA): set webDb.serviceAccount.enabled=false and use static keys.
       # Keep the same bucket, path and cipherPass to restore from the EKS backups.
       s3KeyType: shared
-      s3Key: "{{STAGING_PGBACKREST_S3_KEY}}"
-      s3KeySecret: "{{STAGING_PGBACKREST_S3_KEY_SECRET}}"
+      s3Key: "{{STAGING_AWS_KEY}}"
+      s3KeySecret: "{{STAGING_AWS_KEY_SECRET}}"
       cipherPass: "{{STAGING_PGBACKREST_CIPHER_PASS}}"
       retentionFull: 2
       archiveTimeout: 60
@@ -162,8 +162,8 @@ osm-seed:
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-staging
       # k3s (no IRSA): static keys for the bucket above
-      AWS_ACCESS_KEY_ID: {{STAGING_WEB_S3_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_WEB_S3_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
       PASSENGER_MAX_POOL_SIZE: 3
       OPENSTREETMAP_AUTH_ID: {{STAGING_OPENSTREETMAP_AUTH_ID}}
       OPENSTREETMAP_AUTH_SECRET: {{STAGING_OPENSTREETMAP_AUTH_SECRET}}
@@ -496,8 +496,8 @@ osm-seed:
       IMPOSM3_IMPORT_LAYERS: "all"
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
-      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
       REFRESH_MVIEWS: true
       RECREATE_MVIEWS_ON_UPDATE: false
     persistenceDisk:
@@ -526,8 +526,8 @@ osm-seed:
       MARTIN_POOL_SIZE: 10
       # Solo para subir vtiles_languages.geojson a S3 (si AWS_S3_BUCKET vacio, se salta)
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
-      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -564,8 +564,8 @@ osm-seed:
       ZOOM_LEVELS_TO_DELETE: 7,8,9,10,11,12,13,14,15,16,17,18,19,20
       SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
       AWS_REGION_NAME: us-east-1
-      AWS_ACCESS_KEY_ID: {{SQS_AWS_ACCESS_KEY_ID}}
-      AWS_SECRET_ACCESS_KEY: {{SQS_AWS_SECRET_ACCESS_KEY}}
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
   # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-env.
@@ -797,8 +797,8 @@ osm-seed:
       CREATE_DB: 'db projects chronology'
       AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
       ENVIRONMENT: production
-      AWS_ACCESS_KEY_ID: "{{AWS_ACCESS_KEY_ID}}"
-      AWS_SECRET_ACCESS_KEY: "{{AWS_SECRET_ACCESS_KEY}}"
+      AWS_ACCESS_KEY_ID: "{{STAGING_AWS_KEY}}"
+      AWS_SECRET_ACCESS_KEY: "{{STAGING_AWS_KEY_SECRET}}"
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -949,8 +949,8 @@ osm-seed:
       API_URL: https://api.openhistoricalmap.org
       AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
       AWS_S3_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
-      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
       HEARTBEAT_DIR: /tmp/heartbeat
       HEARTBEAT_STALE_SECONDS: "600"
     persistenceDisk:
@@ -983,8 +983,8 @@ osm-seed:
       DASHBOARD_DIR: "/mnt/planet-stats"
       PLANET_STATS_STATE_S3_URI: "s3://planet-staging.openhistoricalmap.org"
       AWS_S3_ENDPOINT: ""
-      AWS_ACCESS_KEY_ID: {{AWS_ACCESS_KEY_ID}}
-      AWS_SECRET_ACCESS_KEY: {{AWS_SECRET_ACCESS_KEY}}
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     # resources enabled with high memory/cpu for the processing job;
     resources: {}
     nodeSelector: {}
