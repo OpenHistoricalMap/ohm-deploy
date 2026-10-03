@@ -132,7 +132,7 @@ osm-seed:
     serviceAccount:
       enabled: false
       name: ohm-s3-bucket-access-staging
-    replicaCount: 1
+    replicaCount: 2
     env:
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: ohmstaging.org
@@ -195,9 +195,11 @@ osm-seed:
       enabled: true
       key: "nodegroup_type"
       values: ["web"]
-    podAntiAffinity: # To set that no two pods are scheduled on the same node
-      # false on k3s: one web node, so a new pod could never start during a rollout
-      enabled: false
+    # true: with several web-api replicas, try to put them on different nodes;
+    #       with no other node, they share one.
+    # false: no preference, all replicas may land on the same node.
+    podAntiAffinity:
+      enabled: true
   # ====================================================================================================
   # Variables for memcached. Memcached is used to store session cookies
   # ====================================================================================================
