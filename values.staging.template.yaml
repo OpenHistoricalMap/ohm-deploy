@@ -362,7 +362,7 @@ osm-seed:
       serviceAccount:
         enabled: false
         name: ohm-s3-database-backup-access-staging
-      schedule: '* * * * *'
+      schedule: '0 22 * * *'
       env:
         # --- Settings
         # backup/restore
@@ -387,7 +387,7 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["job"]
+        values: ["web"]
     - name: tm-db
       enabled: false
       serviceAccount:
@@ -412,7 +412,7 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["job"]
+        values: ["web"]
     - name: osmcha-db
       enabled: false
       serviceAccount:
@@ -436,8 +436,11 @@ osm-seed:
         AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
         AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
       resources: {}
-      nodeSelector:
-        nodegroup_type: job
+      nodeSelector: {}
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
 
   # ====================================================================================================
   # Tiler: runs on the downstream node, where /mnt/tiler-* lives
