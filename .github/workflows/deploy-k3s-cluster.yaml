@@ -96,48 +96,66 @@ jobs:
           _input-file: 'values.staging.template.yaml'
           _format-key: '{{key}}'
           _output-file: 'values.staging.yaml'
-          STAGING_AWS_SSL_ARN: ${{ secrets.STAGING_AWS_SSL_ARN }}
-          STAGING_AWS_WAF_WEBACL_ARN: ${{ secrets.STAGING_AWS_WAF_WEBACL_ARN }}
-          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
-          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
-          MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
-          MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
+          # ======================== Web database (web-db) ========================
           STAGING_DB: openstreetmap
-          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
-          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
           STAGING_DB_USER: postgres
+          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
+          # ======================== Web database backups (pgBackRest) ========================
           STAGING_PGBACKREST_CIPHER_PASS: ${{ secrets.STAGING_PGBACKREST_CIPHER_PASS }}
           STAGING_PGBACKREST_S3_KEY: ${{ secrets.STAGING_PGBACKREST_S3_KEY }}
           STAGING_PGBACKREST_S3_KEY_SECRET: ${{ secrets.STAGING_PGBACKREST_S3_KEY_SECRET }}
+          # ======================== Website (web-api) ========================
           STAGING_DOMAIN_NAME: ohmstaging.org
           STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
           STAGING_ID_APPLICATION: ${{ secrets.STAGING_ID_APPLICATION }}
           STAGING_OAUTH_CLIENT_ID: ${{ secrets.STAGING_OAUTH_CLIENT_ID }}
           STAGING_OAUTH_KEY: ${{ secrets.STAGING_OAUTH_KEY }}
-          STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
-          STAGING_WEB_S3_KEY: ${{ secrets.STAGING_WEB_S3_KEY }}
-          STAGING_WEB_S3_KEY_SECRET: ${{ secrets.STAGING_WEB_S3_KEY_SECRET }}
           STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
           STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
+          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
+          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
           STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
           STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
+          STAGING_WEB_S3_KEY: ${{ secrets.STAGING_WEB_S3_KEY }}
+          STAGING_WEB_S3_KEY_SECRET: ${{ secrets.STAGING_WEB_S3_KEY_SECRET }}
+          # ======================== Mail (web-api, tasking manager) ========================
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
+          MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
+          # ======================== Tiler (tiler-db, imposm, martin, cache) ========================
           STAGING_TILER_DB_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_SERVER_HOST: ${{ secrets.STAGING_TILER_DB_HOST }}
           STAGING_TILER_DB_PASSWORD: ${{ secrets.STAGING_TILER_DB_PASSWORD }}
           STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_TILER_CACHE_AWS_ACCESS_KEY_ID }}
           STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
           STAGING_SQS_QUEUE_URL: ${{ secrets.STAGING_SQS_QUEUE_URL }}
+          SQS_AWS_ACCESS_KEY_ID: ${{ secrets.SQS_AWS_ACCESS_KEY_ID }}
+          SQS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SQS_AWS_SECRET_ACCESS_KEY }}
+          # ======================== Tasking manager ========================
           STAGING_TM_DB_PASSWORD: ${{ secrets.STAGING_TM_DB_PASSWORD }}
           STAGING_TM_API_SECRET: ${{ secrets.STAGING_TM_API_SECRET }}
-          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          # ======================== Nominatim ========================
           STAGING_NOMINATIM_HOST: ${{ secrets.STAGING_NOMINATIM_HOST }}
+          STAGING_NOMINATIM_PG_PASSWORD: ${{ secrets.STAGING_NOMINATIM_PG_PASSWORD }}
+          # ======================== Overpass ========================
           STAGING_OVERPASS_HOST: ${{ secrets.STAGING_OVERPASS_HOST }}
+          # ======================== OSMCha ========================
           STAGING_OSMCHA_PG_PASSWORD: ${{ secrets.STAGING_OSMCHA_PG_PASSWORD }}
           STAGING_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.STAGING_OSMCHA_DJANGO_SECRET_KEY }}
           STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          STAGING_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_KEY }}
+          STAGING_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.STAGING_OSMCHA_OAUTH2_OSM_SECRET }}
+          # ======================== Shared AWS keys (tiler imposm/martin, dumps) ========================
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+          # ======================== Monitoring ========================
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
-          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
-          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
+          # ======================== EKS only (ALB/WAF), unused on k3s ========================
+          STAGING_AWS_SSL_ARN: ${{ secrets.STAGING_AWS_SSL_ARN }}
+          STAGING_AWS_WAF_WEBACL_ARN: ${{ secrets.STAGING_AWS_WAF_WEBACL_ARN }}
 
       - name: Production - substitute secrets
         if: steps.src.outputs.env == 'production'
@@ -146,49 +164,61 @@ jobs:
           _input-file: 'values.production.template.yaml'
           _format-key: '{{key}}'
           _output-file: 'values.production.yaml'
-          PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
-          PRODUCTION_AWS_WAF_WEBACL_ARN: ${{ secrets.PRODUCTION_AWS_WAF_WEBACL_ARN }}
-          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
-          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
-          MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
-          MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+          # ======================== Web database (web-db) ========================
           PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
-          PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
-          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
           PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
+          PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
+          # ======================== Web database backups (pgBackRest) ========================
           PRODUCTION_PGBACKREST_CIPHER_PASS: ${{ secrets.PRODUCTION_PGBACKREST_CIPHER_PASS }}
           # PRODUCTION_PGBACKREST_S3_KEY: ${{ secrets.PRODUCTION_PGBACKREST_S3_KEY }}
           # PRODUCTION_PGBACKREST_S3_KEY_SECRET: ${{ secrets.PRODUCTION_PGBACKREST_S3_KEY_SECRET }}
+          # ======================== Website (web-api) ========================
           PRODUCTION_DOMAIN_NAME: ${{ secrets.PRODUCTION_DOMAIN_NAME }}
           PRODUCTION_ID_KEY: ${{ secrets.PRODUCTION_ID_KEY }}
           PRODUCTION_ID_APPLICATION: ${{ secrets.PRODUCTION_ID_APPLICATION }}
           PRODUCTION_OAUTH_CLIENT_ID: ${{ secrets.PRODUCTION_OAUTH_CLIENT_ID }}
           PRODUCTION_OAUTH_KEY: ${{ secrets.PRODUCTION_OAUTH_KEY }}
-          PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
-          # PRODUCTION_WEB_S3_KEY: ${{ secrets.PRODUCTION_WEB_S3_KEY }}
-          # PRODUCTION_WEB_S3_KEY_SECRET: ${{ secrets.PRODUCTION_WEB_S3_KEY_SECRET }}
-          PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
           PRODUCTION_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.PRODUCTION_RAILS_CREDENTIALS_YML_ENC }}
           PRODUCTION_RAILS_MASTER_KEY: ${{ secrets.PRODUCTION_RAILS_MASTER_KEY }}
+          PRODUCTION_OPENSTREETMAP_AUTH_ID: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_ID }}
+          PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
           PRODUCTION_WIKIPEDIA_AUTH_ID: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_ID }}
           PRODUCTION_WIKIPEDIA_AUTH_SECRET: ${{ secrets.PRODUCTION_WIKIPEDIA_AUTH_SECRET }}
+          # PRODUCTION_WEB_S3_KEY: ${{ secrets.PRODUCTION_WEB_S3_KEY }}
+          # PRODUCTION_WEB_S3_KEY_SECRET: ${{ secrets.PRODUCTION_WEB_S3_KEY_SECRET }}
+          # ======================== Mail (web-api, tasking manager) ========================
+          MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
+          MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
+          MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
+          MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
+          # ======================== Tiler (tiler-db, imposm, martin, cache) ========================
           PRODUCTION_TILER_DB_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_SERVER_HOST: ${{ secrets.PRODUCTION_TILER_DB_HOST }}
           PRODUCTION_TILER_DB_PASSWORD: ${{ secrets.PRODUCTION_TILER_DB_PASSWORD }}
           PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_ACCESS_KEY_ID }}
-          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
           PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_TILER_CACHE_AWS_SECRET_ACCESS_KEY }}
+          PRODUCTION_SQS_QUEUE_URL: ${{ secrets.PRODUCTION_SQS_QUEUE_URL }}
+          # ======================== Tasking manager ========================
           PRODUCTION_TM_DB_PASSWORD: ${{ secrets.PRODUCTION_TM_DB_PASSWORD }}
           PRODUCTION_TM_API_SECRET: ${{ secrets.PRODUCTION_TM_API_SECRET }}
-          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          # ======================== Nominatim ========================
           PRODUCTION_NOMINATIM_HOST: ${{ secrets.PRODUCTION_NOMINATIM_HOST }}
+          PRODUCTION_NOMINATIM_PG_PASSWORD: ${{ secrets.PRODUCTION_NOMINATIM_PG_PASSWORD }}
+          # ======================== Overpass ========================
           PRODUCTION_OVERPASS_HOST: ${{ secrets.PRODUCTION_OVERPASS_HOST }}
+          # ======================== OSMCha ========================
           PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          # ======================== Shared (S3 bucket) ========================
+          PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
+          # ======================== Monitoring ========================
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
-          PRODUCTION_OPENSTREETMAP_AUTH_ID: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_ID }}
-          PRODUCTION_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.PRODUCTION_OPENSTREETMAP_AUTH_SECRET }}
+          # ======================== EKS only (ALB/WAF), unused on k3s ========================
+          PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
+          PRODUCTION_AWS_WAF_WEBACL_ARN: ${{ secrets.PRODUCTION_AWS_WAF_WEBACL_ARN }}
 
       # ============================================================
       # helm + k3s cluster deploy
