@@ -11,14 +11,6 @@ osm-seed:
   #   nodegroup_type=downstream  ohm-production-worker-02: tiler, nominatim, overpass, osmcha, heavy jobs
   # k3s has no IRSA: every serviceAccount is off and the pods use one AWS key,
   # PRODUCTION_AWS_KEY (ohm-k3s-cluster/aws/production.json).
-  #
-  # Phase 1 (now): only the downstream services run here, moved from the old
-  # single box. The website and its database are still on EKS, so everything
-  # pinned to "web" is off: webDb, webApi, memcached, cgimap, the planet and
-  # replication jobs, the database backups and the tasking manager.
-  # Do NOT turn webDb on before its cutover: a standby of the EKS database runs
-  # on /mnt/web-db-data-production, and a second postgres there corrupts it.
-  # The replication jobs must also have one writer only, and today it is EKS.
 
   environment: production
   # Where the disks live: k3s (folders on the node) or aws (EBS)
@@ -41,7 +33,7 @@ osm-seed:
   # Variables for osm-seed database
   # ====================================================================================================
   webDb:
-    enabled: false
+    enabled: true
     priorityClass: high-priority
     env:
       POSTGRES_DB: {{PRODUCTION_DB}}
@@ -139,7 +131,7 @@ osm-seed:
   # Variables for osm-seed website
   # ====================================================================================================
   webApi:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     priorityClass: high-priority
@@ -231,7 +223,7 @@ osm-seed:
   # Variables for memcached. Memcached is used to store session cookies
   # ====================================================================================================
   memcached:
-    enabled: false
+    enabled: true
     priorityClass: high-priority
     resources: {}
     nodeSelector: {}
@@ -243,7 +235,7 @@ osm-seed:
   # Cgimap
   # ====================================================================================================
   cgimap:
-    enabled: false
+    enabled: true
     priorityClass: "high-priority"
     resources:
       requests:
@@ -267,7 +259,7 @@ osm-seed:
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
   # ====================================================================================================
   planetDump:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
@@ -300,7 +292,7 @@ osm-seed:
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: false
+    enabled: true
     priorityClass: low-priority
     serviceAccount:
       enabled: false
@@ -332,7 +324,7 @@ osm-seed:
   # Variables for changesets-dump container
   # ====================================================================================================
   changesetsDump:
-    enabled: false
+    enabled: true
     priorityClass: "low-priority"
     serviceAccount:
       enabled: false
@@ -358,7 +350,7 @@ osm-seed:
   # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   replicationJob:
-    enabled: false
+    enabled: true
     priorityClass: high-priority
     serviceAccount:
       enabled: false
@@ -400,7 +392,7 @@ osm-seed:
   dbBackupRestore:
     cronjobs:
     - name: web-db
-      enabled: false
+      enabled: true
       serviceAccount:
         enabled: false
         name: ohm-s3-database-backup-access-production
@@ -430,7 +422,7 @@ osm-seed:
         key: "nodegroup_type"
         values: ["downstream"]
     - name: tm-db
-      enabled: false
+      enabled: true
       serviceAccount:
         enabled: false
         name: ohm-s3-database-backup-access-production
@@ -485,11 +477,6 @@ osm-seed:
 
   # ====================================================================================================
   # Tiler: runs on the downstream node, where /mnt/tiler-* lives.
-  #
-  # Everything from here to level0 that is pinned to "downstream" comes from the
-  # old single box (5.9.84.77, release htz-production). That box joins this
-  # cluster as ohm-production-worker-02 with nodegroup_type=downstream, and
-  # keeps its /mnt folders: they are the ones named below.
   # ====================================================================================================
   tilerDb:
     enabled: true
@@ -723,7 +710,7 @@ osm-seed:
   # Variables for Tasking Manager DB
   # ====================================================================================================
   tmDb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: "postgis/postgis"
@@ -752,7 +739,7 @@ osm-seed:
   # ====================================================================================================
 
   tmApi:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -937,7 +924,7 @@ osm-seed:
   # Variables for osm-simple-metrics
   # ====================================================================================================
   osmSimpleMetrics:
-    enabled: false
+    enabled: true
     env:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
@@ -969,7 +956,7 @@ osm-seed:
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   changesetReplicationJob:
-    enabled: false
+    enabled: true
     env:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
