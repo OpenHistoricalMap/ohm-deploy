@@ -204,6 +204,8 @@ jobs:
           PRODUCTION_OSMCHA_PG_PASSWORD: ${{ secrets.PRODUCTION_OSMCHA_PG_PASSWORD }}
           PRODUCTION_OSMCHA_DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_OSMCHA_DJANGO_SECRET_KEY }}
           PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN: ${{ secrets.PRODUCTION_OSMCHA_REACT_APP_MAPBOX_ACCESS_TOKEN }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_KEY: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_KEY }}
+          PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET: ${{ secrets.PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET }}
           # ======================== Shared (S3 bucket) ========================
           PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
           # ======================== Monitoring ========================
