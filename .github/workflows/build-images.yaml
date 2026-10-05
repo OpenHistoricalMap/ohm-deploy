@@ -17,6 +17,7 @@ on:
     branches:
       - 'main'
       - 'staging'
+      - 'staging-new'
       - 'deploy-*'
       - 'build-*'
   workflow_dispatch:

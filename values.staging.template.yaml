@@ -9,13 +9,8 @@ osm-seed:
   # The version of the image group in osm-seed, get it here: https://github.com/orgs/osm-seed/packages
 
   environment: staging
-  # cloudProvider is provider where you are going to deploy osm-seed, it could be: aws, gcp, minikube
-  cloudProvider: aws
-
-  # ====================================================================================================
-  # AWS: In case you are using the cloudProvider=aws set the below variables, We are assuming the nodes has a policies access to S3
-  # ====================================================================================================
-  AWS_S3_BUCKET: {{STAGING_S3_BUCKET}}
+  # Where the disks live: k3s (folders on the node) or aws (EBS)
+  storageProvider: k3s
 
   # Traffic is routed via Cloudflare Tunnel, which connects directly to ClusterIP Services.
   # No Ingress resources or load balancers (ALB/NLB) are needed.
@@ -45,8 +40,9 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-db
-      AWS_ElasticBlockStore_volumeID: vol-025cab988ae190a7b
-      AWS_ElasticBlockStore_size: 200Gi
+      staticHostPath: true
+      localVolumeHostPath: /mnt/web-db-data-staging-20261002
+      localVolumeSize: 300Gi
     resources: {}
     sharedMemorySize: 256Mi
     livenessProbeExec: true
@@ -99,7 +95,7 @@ osm-seed:
       values: ["web"]
     # IAM role for S3 (IRSA), used by pgbackrest
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-database-backup-access-staging
     # WAL archiving (every minute) and daily base backups to S3 with pgBackRest
     pgbackrest:
@@ -107,14 +103,14 @@ osm-seed:
       s3Bucket: osmseed-staging
       s3Region: us-east-1
       s3Endpoint: s3.amazonaws.com
-      s3Path: /staging/database/web-db-pgbackrest
+      s3Path: /database/web-db-pgbackrest-k3s
       # IRSA through webDb.serviceAccount, same role as the db backup cronjob
-      s3KeyType: web-id
+      # s3KeyType: web-id
       # k3s (no IRSA): set webDb.serviceAccount.enabled=false and use static keys.
       # Keep the same bucket, path and cipherPass to restore from the EKS backups.
-      # s3KeyType: shared
-      # s3Key: "{{STAGING_PGBACKREST_S3_KEY}}"
-      # s3KeySecret: "{{STAGING_PGBACKREST_S3_KEY_SECRET}}"
+      s3KeyType: shared
+      s3Key: "{{STAGING_AWS_KEY}}"
+      s3KeySecret: "{{STAGING_AWS_KEY_SECRET}}"
       cipherPass: "{{STAGING_PGBACKREST_CIPHER_PASS}}"
       retentionFull: 2
       archiveTimeout: 60
@@ -129,45 +125,54 @@ osm-seed:
       enabled: false
     priorityClass: "high-priority"
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
-    replicaCount: 1
+    replicaCount: 2
     env:
+      # --- Domains
+      SERVER_URL: www.ohmstaging.org
+      SERVER_PROTOCOL: https
+      API_DOMAIN: api.ohmstaging.org
+      NOMINATIM_URL: nominatim.ohmstaging.org
+      OVERPASS_URL: overpass-api.ohmstaging.org
+      VTILES_DOMAIN: vtiles.ohmstaging.org
+      # --- Site
+      ORGANIZATION_NAME: OpenHistoricalMap
+      WEBSITE_STATUS: "online"
+      # --- Rails
+      RAILS_ENV: production
+      RAILS_LOG_LEVEL: debug
+      RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
+      RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
+      PASSENGER_MAX_POOL_SIZE: 3
+      # --- Mail
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
       MAILER_DOMAIN: ohmstaging.org
       MAILER_USERNAME: {{MAILER_USERNAME}}
       MAILER_PASSWORD: {{MAILER_PASSWORD}}
       # MAILER_PORT: "587"
+      MAILER_FROM: web@noreply.openhistoricalmap.org
+      # --- Login: OAuth apps (iD, website) and external providers
       OPENSTREETMAP_id_key: 7E0Rn-ZjZpEW5cjM-CheEQAbp8nDiCuyB_UmIZOHysA
       OAUTH_CLIENT_ID: CiBBpurbtUj1np_QZOTngIePlS7K9uGvKDW2Pcw5O7Y
       OAUTH_KEY: 1O8WtBWivoefehDMT6sbm9TNUU_h_EXznI4cM5XMyJw
-      MAILER_FROM: web@noreply.openhistoricalmap.org
-      SERVER_URL: www.ohmstaging.org
-      SERVER_PROTOCOL: https
-      NOMINATIM_URL: nominatim.ohmstaging.org
-      OVERPASS_URL: overpass-api.ohmstaging.org
-      VTILES_DOMAIN: vtiles.ohmstaging.org
-      API_DOMAIN: api.ohmstaging.org
-
-      NEW_RELIC_LICENSE_KEY: "none"
-      NEW_RELIC_APP_NAME: "none"
-      ORGANIZATION_NAME: OpenHistoricalMap
-      WEBSITE_STATUS: "online"
-      RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
-      RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
-      RAILS_ENV: production
-      RAILS_LOG_LEVEL: debug
-      RAILS_STORAGE_SERVICE: s3
-      RAILS_STORAGE_REGION: us-east-1
-      RAILS_STORAGE_BUCKET: ohm-website-staging
-      PASSENGER_MAX_POOL_SIZE: 3
       OPENSTREETMAP_AUTH_ID: {{STAGING_OPENSTREETMAP_AUTH_ID}}
       OPENSTREETMAP_AUTH_SECRET: {{STAGING_OPENSTREETMAP_AUTH_SECRET}}
       WIKIPEDIA_AUTH_ID: {{STAGING_WIKIPEDIA_AUTH_ID}}
       WIKIPEDIA_AUTH_SECRET: {{STAGING_WIKIPEDIA_AUTH_SECRET}}
+      # --- Uploads (avatars, GPX traces) to S3
+      RAILS_STORAGE_SERVICE: s3
+      RAILS_STORAGE_REGION: us-east-1
+      RAILS_STORAGE_BUCKET: ohm-website-staging
+      # k3s (no IRSA): static keys for the bucket above
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      # --- Monitoring
+      NEW_RELIC_LICENSE_KEY: "none"
+      NEW_RELIC_APP_NAME: "none"
     resources: {}
     autoscaling:
-      enabled: true
+      enabled: false
       minReplicas: 1
       maxReplicas: 2
       cpuUtilization:
@@ -191,7 +196,10 @@ osm-seed:
       enabled: true
       key: "nodegroup_type"
       values: ["web"]
-    podAntiAffinity: # To set that no two pods are scheduled on the same node
+    # true: with several web-api replicas, try to put them on different nodes;
+    #       with no other node, they share one.
+    # false: no preference, all replicas may land on the same node.
+    podAntiAffinity:
       enabled: true
   # ====================================================================================================
   # Variables for memcached. Memcached is used to store session cookies
@@ -210,9 +218,6 @@ osm-seed:
   # ====================================================================================================
   cgimap:
     enabled: true
-    image:
-      name: ghcr.io/openhistoricalmap/cgimap
-      tag: 0.0.1-0.dev.git.2463.hb0e1e7f
     priorityClass: "high-priority"
     resources: {}
     autoscaling:
@@ -230,77 +235,101 @@ osm-seed:
   # Variables for osm-seed for osmosis, this configuration os to get the planet dump files from apidb
   # ====================================================================================================
   planetDump:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
     schedule: '0 * * * *'
     env:
+      # --- Settings
       OVERWRITE_PLANET_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
       DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
       PLANET_EPOCH_DATE: '1970-01-01'
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
+      # --- Upload to S3
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["job"]
+      values: ["web"]
   # ====================================================================================================
   # Variables for full-history container
   # ====================================================================================================
   fullHistory:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
     schedule: "0 5 */3 * *"
     env:
+      # --- Settings
       OVERWRITE_FHISTORY_FILE: false
       PLANET_EXPORT_METHOD: planet-dump-ng
       DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
       PLANET_EPOCH_DATE: '1970-01-01'
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/staging/images/planet-dump/metadata.yml
+      # --- Upload to S3
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["job"]
+      values: ["web"]
 
   # ====================================================================================================
   # Variables for changesets-dump container
   # ====================================================================================================
   changesetsDump:
-    enabled: false
+    enabled: true
     priorityClass: "low-priority"
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
-    schedule: "* * * * *"
+    schedule: "0 5 * * 0"
     resources: {}
     env:
+      # --- Settings
       OVERWRITE_CHANGESETS_FILE: false
       DUMP_CLOUD_URL: s3://osmseed-staging/database/web-api-db/state.txt
       PLANET_EPOCH_DATE: '1970-01-01'
+      # --- Upload to S3
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["job"]
+      values: ["web"]
   # ====================================================================================================
   # Variables for replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   replicationJob:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
     env:
+      # --- Settings
       ENABLE_SEND_SLACK_MESSAGE: "false"
       SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
+      # --- Upload to S3
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -317,6 +346,11 @@ osm-seed:
   # ====================================================================================================
   osmProcessor:
     enabled: false
+    env:
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
 
   # ====================================================================================================
   # Variables for restoring the DB
@@ -324,106 +358,310 @@ osm-seed:
   dbBackupRestore:
     cronjobs:
     - name: web-db
-      enabled: false
+      enabled: true
       serviceAccount:
-        enabled: true
+        enabled: false
         name: ohm-s3-database-backup-access-staging
-      schedule: '* * * * *'
+      schedule: '0 22 * * *'
       env:
+        # --- Settings
         # backup/restore
         DB_ACTION: backup
         # Naming backup files
         SET_DATE_AT_NAME: true
         BACKUP_CLOUD_FOLDER: database/web-api-db
         BACKUP_CLOUD_FILE: ohm-api-web-db
-        AWS_S3_BUCKET: osmseed-staging
         # OHM replication stream, read at backup time to store the seqno next to the dump
         MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
         # Clean up backups options
         CLEANUP_BACKUPS: true
         RETENTION_DAYS: '30'
         RESTORE_URL_FILE: https://osmseed.s3.amazonaws.com/test.sql.gz
+        # --- Upload to S3
+        CLOUDPROVIDER: aws
+        AWS_S3_BUCKET: osmseed-staging
+        AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["job"]
+        values: ["web"]
     - name: tm-db
       enabled: false
       serviceAccount:
-        enabled: true
+        enabled: false
         name: ohm-s3-database-backup-access-staging
       schedule: '0 1 * * *'
       env:
+        # --- Settings
         # backup/restore
         DB_ACTION: backup
         # Naming backup files
         SET_DATE_AT_NAME: true
         BACKUP_CLOUD_FOLDER: database/tm-db
         BACKUP_CLOUD_FILE: ohm-tm-db
+        # --- Upload to S3
+        CLOUDPROVIDER: aws
         AWS_S3_BUCKET: osmseed-staging
+        AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["job"]
+        values: ["web"]
     - name: osmcha-db
       enabled: false
       serviceAccount:
-        enabled: true
+        enabled: false
         name: ohm-s3-database-backup-access-staging
       schedule: '0 1 * * *'
       env:
+        # --- Settings
         # backup/restore
         DB_ACTION: backup
         # Naming backup files
         SET_DATE_AT_NAME: 'true'
         BACKUP_CLOUD_FOLDER: database/osmcha-db
         BACKUP_CLOUD_FILE: osmseed-osmcha-db
-        AWS_S3_BUCKET: osmseed-staging
         # Clean up backups options
         CLEANUP_BACKUPS: true
         RETENTION_DAYS: '30'
+        # --- Upload to S3
+        CLOUDPROVIDER: aws
+        AWS_S3_BUCKET: osmseed-staging
+        AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
       resources: {}
-      nodeSelector:
-        nodegroup_type: job
+      nodeSelector: {}
+      nodeAffinity:
+        enabled: true
+        key: "nodegroup_type"
+        values: ["web"]
 
   # ====================================================================================================
-  # Variables for tiler-db
+  # Tiler: runs on the downstream node, where /mnt/tiler-* lives
   # ====================================================================================================
-
   tilerDb:
-    enabled: false
-  # ====================================================================================================
-  # Variables for tiler-imposm
-  # ====================================================================================================
+    enabled: true
+    priorityClass: medium-priority
+    env:
+      POSTGRES_DB: tiler_osm_production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "{{STAGING_TILER_DB_PASSWORD}}"
+      POSTGRES_PORT: 5432
+    sharedMemorySize: 2Gi
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      subPath: postgresql-data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-db-data-v6
+    resources: {}
+    postgresqlConfig:
+      enabled: true
+      values: |
+        listen_addresses = '*'
+        max_connections = 100
+        shared_buffers = 10GB
+        work_mem = 256MB
+        maintenance_work_mem = 2GB
+        dynamic_shared_memory_type = posix
+        effective_io_concurrency = 300
+        max_wal_size = 4GB
+        min_wal_size = 512MB
+        random_page_cost = 1.0
+        effective_cache_size = 24GB
+        log_min_duration_statement = 15000
+        log_connections = on
+        log_disconnections = on
+        log_duration = off
+        log_lock_waits = on
+        log_statement = 'none'
+        log_timezone = 'Etc/UTC'
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        lc_messages = 'en_US.utf8'
+        lc_monetary = 'en_US.utf8'
+        lc_numeric = 'en_US.utf8'
+        lc_time = 'en_US.utf8'
+        default_text_search_config = 'pg_catalog.english'
+
+        # Parallelism settings
+        max_parallel_workers_per_gather = 8
+        max_parallel_workers = 16
+        max_worker_processes = 16
+        parallel_tuple_cost = 0.05
+        parallel_setup_cost = 500
+        min_parallel_table_scan_size = 8MB
+        min_parallel_index_scan_size = 512kB
+
+        # Enable auto_explain and pg_stat_statements
+        shared_preload_libraries = 'auto_explain'
+        auto_explain.log_min_duration = '10s'
+
+        # Timeout settings
+        tcp_keepalives_idle = 300
+        tcp_keepalives_interval = 60
+        tcp_keepalives_count = 10
+
+        # Disable join options for routes
+        enable_mergejoin = true
+        enable_hashjoin = true
+
+        # Timeout settings for queries
+        statement_timeout = '600s'
+        lock_timeout = '60s'
+        idle_in_transaction_session_timeout = '300s'
+
+        # pg_stat_statements settings
+        pg_stat_statements.max = 15000
+        pg_stat_statements.track = none
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
 
   tilerImposm:
-    enabled: false
-  # ====================================================================================================
-  # Variables for tiler-server
-  # ====================================================================================================
+    enabled: true
+    priorityClass: medium-priority
+    livenessProbe:
+      enabled: true
+    serviceAccount:
+      enabled: false
+    env:
+      # --- Settings
+      TILER_IMPORT_FROM: osm
+      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260531_0302.osm.pbf
+      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+      SEQUENCE_NUMBER: "1690000"
+      OVERWRITE_STATE: false
+      UPLOAD_EXPIRED_FILES: true
+      IMPORT_NATURAL_EARTH: true
+      IMPORT_OSM_LAND: true
+      IMPOSM3_IMPORT_LAYERS: "all"
+      REFRESH_MVIEWS: true
+      RECREATE_MVIEWS_ON_UPDATE: false
+      # --- Upload to S3
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /mnt/data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-imposm-data-v6
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
 
   tilerServer:
     enabled: false
 
   tilerServerMartin:
-    enabled: false
-  # ====================================================================================================
-  # Variables for tiler-server cache cleaner, only avaliable in case the TILER_CACHE_TYPE = s3
-  # ====================================================================================================
+    enabled: true
+    priorityClass: medium-priority
+    replicaCount: 1
+    env:
+      # --- Settings
+      OHM_DOMAIN: ohmstaging.org
+      MARTIN_WORKER_PROCESSES: 8
+      MARTIN_POOL_SIZE: 10
+      # --- Upload to S3
+      # Solo para subir vtiles_languages.geojson a S3 (si AWS_S3_BUCKET vacio, se salta)
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
+
+  tilerVarnish:
+    enabled: true
+    ingress:
+      enabled: false
+    image:
+      name: varnish
+      tag: "7.5"
+    priorityClass: medium-priority
+    replicaCount: 1
+    dynamicSize: "4G"
+    staticSize: "1G"
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
+
   tilerServerCacheCleaner:
-    enabled: false
-  # Tiler cache cleaner FastAPI service (/clean-cache). Set env.VARNISH_URL when enabled.
+    enabled: true
   tilerCache:
     enabled: false
+    replicaCount: 1
+    env:
+      # --- Settings
+      PORT: 8000
+      VARNISH_URL: ""
+      ZOOM_LEVELS_TO_DELETE: 7,8,9,10,11,12,13,14,15,16,17,18,19,20
+      SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
+      # --- Upload to S3
+      AWS_REGION_NAME: us-east-1
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
+  # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-env.
+  tilerMonitorPipeline:
+    enabled: false
+    replicaCount: 1
+    env:
+      MONITOR_PORT: 8001
+      OHM_API_BASE: https://www.openhistoricalmap.org/api/0.6
+      CHANGESET_LIMIT: 30
+      TILER_MONITORING_CHECK_INTERVAL: "1h"
+      TILER_MONITORING_MISSING_THRESHOLD_PCT: 10
+      TILER_MONITORING_MAX_RETRIES: 3
+      TILER_MONITORING_FULL_CHECK_SAMPLE_PCT: 25
+      TILER_MONITORING_BASE_URL: "https://tiler-monitoring.ohmstaging.org"
+      TILER_MONITORING_SLACK_WEBHOOK_URL: ""
+      OHM_COMMENT_USER: ""
+      OHM_COMMENT_PASSWORD: ""
+      VERBOSE_LOGGING: "false"
+    persistenceDisk:
+      enabled: true
+      mountPath: /data
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tiler-monitor-pipeline-data
+      localVolumeSize: 1Gi
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
   # ====================================================================================================
   # Variables for Tasking Manager DB
   # ====================================================================================================
   tmDb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: "postgis/postgis"
@@ -437,8 +675,9 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-d
-      AWS_ElasticBlockStore_volumeID: vol-0169f38dca95874a0
-      AWS_ElasticBlockStore_size: 20Gi
+      staticHostPath: true
+      localVolumeHostPath: /mnt/tm-db-data-staging-20261003
+      localVolumeSize: 20Gi
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -450,7 +689,7 @@ osm-seed:
   # ====================================================================================================
 
   tmApi:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     replicaCount: 1
     healthCheckPath: /health
@@ -468,7 +707,8 @@ osm-seed:
       TM_SECRET: {{STAGING_TM_API_SECRET}}
       TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
       TM_EMAIL_CONTACT_ADDRESS: dev@openhistoricalmap.org
-      TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
+      # Mail off: the database is a copy of production, with real users. This host does not resolve.
+      TM_SMTP_HOST: mail.disabled.invalid
       TM_SMTP_PORT: 25
       TM_SMTP_USER: {{MAILER_USERNAME}}
       TM_SMTP_PASSWORD: {{MAILER_PASSWORD}}
@@ -501,29 +741,151 @@ osm-seed:
   # ====================================================================================================
   nominatimUI:
     enabled: false
+    image:
+      name: ghcr.io/openhistoricalmap/nominatim-ui
+      tag: a469b5e
   # ====================================================================================================
   # Variables for nominatim api
   # ====================================================================================================
   nominatimApi:
     enabled: false
+    ingress:
+      enabled: false
+    priorityClass: medium-priority
+    serviceAnnotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+    replicaCount: 1
+    startupProbe:
+      enabled: true
+      failureThreshold: 1440
+    livenessProbe:
+      enabled: true
+    env:
+      NOMINATIM_API_ENDPOINT: nominatim.ohmstaging.org
+      PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260808_0031.osm.pbf
+      REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
+      REPLICATION_UPDATE_INTERVAL: 60
+      REPLICATION_RECHECK_INTERVAL: 30
+      THREADS: 8
+      FREEZE: false
+      IMPORT_WIKIPEDIA: false
+      IMPORT_US_POSTCODES: false
+      IMPORT_GB_POSTCODES: false
+      IMPORT_TIGER_ADDRESSES: false
+      PGDATA: /var/lib/postgresql/16/main
+      OSMSEED_WEB_API_DOMAIN: www.${OHM_DOMAIN}
+      UPDATE_MODE: continuous
+      IMPORT_STYLE: /app/ohm-import.lua
+      EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
+      NOMINATIM_PASSWORD: "{{STAGING_NOMINATIM_PG_PASSWORD}}"
+    resources: {}
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/16/main
+      subPath: nominatim-pgdata
+      staticHostPath: true
+      localVolumeHostPath: /mnt/nominatim-db-data-v003
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
   # ====================================================================================================
   # Variables for overpass-api
   # ====================================================================================================
   overpassApi:
     enabled: false
+    ingress:
+      enabled: false
+    # image:
+    #   name: ghcr.io/openhistoricalmap/overpass-api
+    #   tag: 0.0.1-0.dev.git.3377.h318c42d7
+    priorityClass: medium-priority
+    env:
+      OVERPASS_META: attic
+      OVERPASS_MODE: init
+      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/planet-history-260510_0442.osm.pbf
+      OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      OVERPASS_RULES_LOAD: 10
+      OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1900000
+      OVERPASS_ALLOW_DUPLICATE_QUERIES: no
+      OVERPASS_RATE_LIMIT: 2
+      OVERPASS_PLANET_PREPROCESS: "true"
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /db
+      localVolumeSize: 100Gi
+      staticHostPath: true
+      localVolumeHostPath: /mnt/overpass-api-db-data
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
   # ====================================================================================================
   # Variables for taginfo
   # ====================================================================================================
   taginfo:
     enabled: false
+  taginfoWeb:
+    enabled: false
+    ingress:
+      enabled: false
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
+      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
+  taginfoDataProcessor:
+    enabled: false
+    schedule: "0 2 */3 * *"
+    priorityClass: medium-priority
+    serviceAccount:
+      enabled: false
+    env:
+      # --- Settings
+      URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
+      URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
+      URL_PLANET_FILE: 'none'
+      URL_HISTORY_PLANET_FILE: 'none'
+      OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
+      TAGINFO_PROJECT_REPO: https://github.com/OpenHistoricalMap/taginfo-projects.git
+      DOWNLOAD_DB: 'languages wiki'
+      CREATE_DB: 'db projects chronology'
+      ENVIRONMENT: production
+      # --- Upload to S3
+      AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: "{{STAGING_AWS_KEY}}"
+      AWS_SECRET_ACCESS_KEY: "{{STAGING_AWS_KEY_SECRET}}"
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
   # ====================================================================================================
   # Variables for osm-simple-metrics
   # ====================================================================================================
   osmSimpleMetrics:
     enabled: false
+    env:
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     priorityClass: medium-priority
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
     schedule: '0 2 * * *'
     resources: {}
@@ -539,12 +901,18 @@ osm-seed:
     enabled: false
     priorityClass: medium-priority
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
     schedule: '*/30 * * * *'
     env:
+      # --- Settings
       CREATE_MISSING_FILES: "empty"
       REPLICATION_SEQUENCE_NUMBER: "000000"
+      # --- Upload to S3
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -556,9 +924,14 @@ osm-seed:
   # ====================================================================================================
   changesetReplicationJob:
     enabled: false
+    env:
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     priorityClass: medium-priority
     serviceAccount:
-      enabled: true
+      enabled: false
       name: ohm-s3-bucket-access-staging
     resources: {}
     nodeSelector: {}
@@ -571,16 +944,67 @@ osm-seed:
   # ====================================================================================================
   osmchaWeb:
     enabled: false
+    priorityClass: medium-priority
+    image:
+      name: ghcr.io/openhistoricalmap/osmcha-frontend
+      tag: df5e9b5
   # ====================================================================================================
   # Variables for osmcha Api, We hard code the container id.
   # ====================================================================================================
   osmchaApi:
     enabled: false
+    ingress:
+      enabled: false
+    priorityClass: medium-priority
+    image:
+      name: ghcr.io/openhistoricalmap/osmcha-django
+      tag: 1bd58e1
+    env:
+      DJANGO_SETTINGS_MODULE: "config.settings.production"
+      OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
+      DJANGO_SECRET_KEY: "{{STAGING_OSMCHA_DJANGO_SECRET_KEY}}"
+      DJANGO_SECURE_SSL_REDIRECT: "False"
+      OSM_SERVER_URL: https://www.ohmstaging.org
+      OAUTH_REDIRECT_URI: https://osmcha.ohmstaging.org/authorized
+      OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
+      ## frontend
+      OSMCHA_URL: https://osmcha.ohmstaging.org
+      OSMCHA_API_URL: www.ohmstaging.org
+      OAUTH2_OSM_KEY: "{{STAGING_OSMCHA_OAUTH2_OSM_KEY}}"
+      OAUTH2_OSM_SECRET: "{{STAGING_OSMCHA_OAUTH2_OSM_SECRET}}"
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
   # ====================================================================================================
   # Variables for osmcha DB
   # ====================================================================================================
   osmchaDb:
     enabled: false
+    priorityClass: medium-priority
+    image:
+      name: postgis/postgis
+      tag: 17-3.5
+    env:
+      POSTGRES_DB: osmcha
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "{{STAGING_OSMCHA_PG_PASSWORD}}"
+    resources: {}
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      # Static hostPath on k3s: fixed dir = data identity, reusable across releases.
+      staticHostPath: true
+      localVolumeHostPath: /mnt/osmcha-data
+      localVolumeSize: 10Gi
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
 
   # ====================================================================================================
   # Variables for osmcha osm-adiff-service
@@ -599,14 +1023,95 @@ osm-seed:
   # ====================================================================================================
   osmxAdiffBuilder:
     enabled: false
+    # Give the initial osmx build (download planet + build db) time before the
+    # liveness probe starts checking for the create_diff_files heartbeat.
+    livenessProbe:
+      initialDelaySeconds: 18000
+    env:
+      # --- Settings
+      PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
+      MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      API_URL: https://api.openhistoricalmap.org
+      HEARTBEAT_DIR: /tmp/heartbeat
+      HEARTBEAT_STALE_SECONDS: "600"
+      # --- Upload to S3
+      AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
+      AWS_S3_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+    persistenceDisk:
+      enabled: true
+      mountPath: /data
+      size: 50Gi
+      storageClassName: ""
+      # k3s: staticHostPath=true uses a fixed hostPath dir (reusable across releases); false = dynamic local-path
+      staticHostPath: true
+      localVolumeHostPath: /mnt/osmx-adiff-data
+      localVolumeSize: 50Gi
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
 
   # ====================================================================================================
   # planet stats daily pipeline (dashboard + boundary viewer)
   # ====================================================================================================
   planetStats:
     enabled: false
+    priorityClass: medium-priority
+    schedule: '0 7 * * *'
+    serviceAccount:
+      enabled: false
+    env:
+      # --- Settings
+      PUBLISH_TARGET: "s3"
+      DASHBOARD_DIR: "/mnt/planet-stats"
+      PLANET_STATS_STATE_S3_URI: "s3://planet-staging.openhistoricalmap.org"
+      # --- Upload to S3
+      CLOUDPROVIDER: aws
+      AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      AWS_S3_ENDPOINT: ""
+      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+    # resources enabled with high memory/cpu for the processing job;
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
   # ====================================================================================================
   # Level0 editor. Runs on Hetzner only; keep it off on EKS.
   # ====================================================================================================
   level0:
     enabled: false
+    replicas: 1
+    priorityClass: "medium-priority"
+    serviceAccount:
+      enabled: false
+      name: ""
+    serviceAnnotations: {}
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - level0.ohmstaging.org
+      tls:
+        enabled: false
+        secretName: ""
+    env:
+      OSM_WEBSITE_URL: https://www.ohmstaging.org
+      OSM_API_URL: https://www.ohmstaging.org/api/0.6/
+      OAUTH2_CLIENT_ID: "Zt8qjPDUx9H_upbhNrR0Q91hkw2Pl1VzM3pxjRxGnUU"
+      OAUTH2_CLIENT_SECRET: "hokGQq7NznsxA2tQ5Hij7a1vn8rKItf6ApVaxd08dCc"
+      OVERPASS_API: "overpass-api.openhistoricalmap.org"
+      MAX_REQUEST_OBJECTS: "500"
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: false
+      key: "nodegroup_type"
+      values: ["web"]
