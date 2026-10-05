@@ -477,15 +477,9 @@ osm-seed:
 
   # ====================================================================================================
   # Tiler: runs on the downstream node, where /mnt/tiler-* lives.
-  #
-  # Everything from here to level0 that is pinned to "downstream" runs today on
-  # the old single box (5.9.84.77), as the htz-production release from
-  # values.k3s.production.template.yaml. It stays off here until that box joins
-  # this cluster as ohm-production-worker-02 with nodegroup_type=downstream:
-  # its /mnt folders are the ones named below. Then turn each one on.
   # ====================================================================================================
   tilerDb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     env:
       POSTGRES_DB: tiler_osm_production
@@ -583,7 +577,7 @@ osm-seed:
       values: ["downstream"]
 
   tilerImposm:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     livenessProbe:
       enabled: true
@@ -624,7 +618,7 @@ osm-seed:
     enabled: false
 
   tilerServerMartin:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     replicaCount: 1
     env:
@@ -644,7 +638,7 @@ osm-seed:
       values: ["downstream"]
 
   tilerVarnish:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     image:
@@ -665,7 +659,7 @@ osm-seed:
     enabled: false
   # Tiler cache cleaner FastAPI service (/clean-cache). Reads the expired tiles from SQS.
   tilerCache:
-    enabled: false
+    enabled: true
     replicaCount: 1
     env:
       # --- Settings
@@ -685,7 +679,7 @@ osm-seed:
       values: ["downstream"]
   # Tiler monitor (pipeline): image filled by chartpress; POSTGRES_* from tiler-db-env.
   tilerMonitorPipeline:
-    enabled: false
+    enabled: true
     replicaCount: 1
     env:
       MONITOR_PORT: 8001
@@ -796,7 +790,7 @@ osm-seed:
   # Variables for nominatim ui
   # ====================================================================================================
   nominatimUI:
-    enabled: false
+    enabled: true
     image:
       name: ghcr.io/openhistoricalmap/nominatim-ui
       tag: a469b5e
@@ -804,7 +798,7 @@ osm-seed:
   # Variables for nominatim api
   # ====================================================================================================
   nominatimApi:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -849,7 +843,7 @@ osm-seed:
   # Variables for overpass-api
   # ====================================================================================================
   overpassApi:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -883,7 +877,7 @@ osm-seed:
     enabled: false
   # Web frontend - serves taginfo HTTP UI, downloads .db files from S3
   taginfoWeb:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -900,7 +894,7 @@ osm-seed:
       values: ["downstream"]
   # Data processor - CronJob, downloads planet/builds DBs/uploads to S3
   taginfoDataProcessor:
-    enabled: false
+    enabled: true
     schedule: "0 12 * * 0"
     priorityClass: medium-priority
     serviceAccount:
@@ -982,7 +976,7 @@ osm-seed:
   # Variables for osmcha web
   # ====================================================================================================
   osmchaWeb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
@@ -991,7 +985,7 @@ osm-seed:
   # Variables for osmcha Api, We hard code the container id.
   # ====================================================================================================
   osmchaApi:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -1021,7 +1015,7 @@ osm-seed:
   # Variables for osmcha DB
   # ====================================================================================================
   osmchaDb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: postgis/postgis
@@ -1061,7 +1055,7 @@ osm-seed:
   # Variables for ohmx-adiff-builder (osmcha augmented diff source)
   # ====================================================================================================
   osmxAdiffBuilder:
-    enabled: false
+    enabled: true
     # Give the initial osmx build (download planet + build db) time before the
     # liveness probe starts checking for the create_diff_files heartbeat.
     livenessProbe:
@@ -1104,7 +1098,7 @@ osm-seed:
   # planet stats daily pipeline (dashboard + boundary viewer)
   # ====================================================================================================
   planetStats:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     schedule: '0 7 * * *'
     serviceAccount:
@@ -1129,7 +1123,7 @@ osm-seed:
   # Level0 editor
   # ====================================================================================================
   level0:
-    enabled: false
+    enabled: true
     replicas: 1
     priorityClass: "medium-priority"
     serviceAccount:

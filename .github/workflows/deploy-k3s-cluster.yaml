@@ -60,6 +60,9 @@ jobs:
           esac
           case "$BRANCH" in
             main)          ENV="production" ;;
+            # The branch that moves production to this cluster, one part at a
+            # time: for now only the downstream services (tiler, nominatim...).
+            k3s-production) ENV="production" ;;
             staging)       ENV="staging" ;;
             k3s-staging)   ENV="staging" ;;
             *)             ENV="staging" ;;
