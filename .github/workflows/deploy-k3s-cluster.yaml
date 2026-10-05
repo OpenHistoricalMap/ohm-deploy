@@ -4,8 +4,11 @@ run-name: >-
       && format('Deploy k3s cluster — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
       || format('Deploy k3s cluster — manual: {0}', inputs.ref) }}
 
-# Deploys the ohm/ chart to the Hetzner k3s cluster (ohm-deployment/k3s-cluster).
+# Deploys the ohm/ chart to the Hetzner k3s cluster (ohm-k3s-cluster repo).
 # Same as deploy-eks.yaml, except how it reaches the cluster.
+#
+# A push to staging deploys staging here. Production is manual until its
+# cutover from EKS: only then add main to the branches below.
 #
 # Triggers:
 #   - workflow_run: the only automatic trigger. A push runs build-images
@@ -25,7 +28,7 @@ on:
     workflows: ['Build images (chartpress)']
     types: [completed]
     branches:
-      - k3s-staging
+      - staging
   workflow_dispatch:
     inputs:
       ref:

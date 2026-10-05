@@ -8,19 +8,12 @@ run-name: >-
       || format('Deploy k3s — manual: {0}', inputs.ref) }}
 
 on:
-  # Deploy only after "Build images (chartpress)" finishes, never on push
-  # directly. A push runs build-images, which triggers this on success. That
-  # way the images always exist in the registry before the deploy uses them,
-  # even when a commit touches both config and images. The deploy re-runs
-  # `chartpress --skip-build` to recompute the same tags build pushed.
-  workflow_run:
-    workflows: ['Build images (chartpress)']
-    types: [completed]
-    branches:
-      - main
-      - pre-production
-      - staging
-      - k3s
+  # Manual only: no push deploys to the old single boxes any more. The staging
+  # box already joined the k3s cluster (deploy-k3s-cluster.yaml). The production
+  # box still serves tiler, nominatim, overpass and osmcha as htz-production
+  # until it joins too: a manual run with ref main can still deploy to it, from
+  # values.k3s.production.template.yaml. For a commit that changed images/**,
+  # build-images must have run first.
   workflow_dispatch:
     inputs:
       ref:
