@@ -7,8 +7,8 @@ run-name: >-
       && format('Deploy EKS — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
       || format('Deploy EKS — manual: {0}', inputs.ref) }}
 
-# Deployed the ohm/ chart to AWS EKS. Off: nothing triggers it, and a manual
-# run stops at the first step.
+# Deployed the ohm/ chart to AWS EKS. Off: nothing triggers it, and the job
+# has `if: false`, so a manual run does nothing.
 #
 # Staging and production moved to the Hetzner k3s cluster and deploy with
 # deploy-k3s-cluster.yaml. values.staging.template.yaml and
@@ -31,7 +31,8 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # Off: the job never runs, not even from a manual run.
+    if: false
     env:
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:

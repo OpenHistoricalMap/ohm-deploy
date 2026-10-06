@@ -8,12 +8,11 @@ run-name: >-
       || format('Deploy k3s — manual: {0}', inputs.ref) }}
 
 on:
-  # Manual only: no push deploys to the old single boxes any more. The staging
-  # box already joined the k3s cluster (deploy-k3s-cluster.yaml). The production
-  # box still serves tiler, nominatim, overpass and osmcha as htz-production
-  # until it joins too: a manual run with ref main can still deploy to it, from
-  # values.k3s.production.template.yaml. For a commit that changed images/**,
-  # build-images must have run first.
+  # Off: nothing triggers it, and the job below has `if: false`, so a manual
+  # run does nothing. It deployed to the old single boxes. The production box
+  # (htz-production) still serves tiler, nominatim, overpass and osmcha from
+  # values.k3s.production.template.yaml: to deploy to it again, remove
+  # `if: false`.
   workflow_dispatch:
     inputs:
       ref:
@@ -25,7 +24,8 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # Off: the job never runs, not even from a manual run.
+    if: false
     steps:
       - name: Resolve env
         id: src
