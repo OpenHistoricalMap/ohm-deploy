@@ -50,10 +50,14 @@ osm-seed:
       staticHostPath: true
       localVolumeHostPath: /mnt/web-db-data-production
       localVolumeSize: 600Gi
+    # Shares the 64 GB / 12 thread web node with 5 web-api pods (15 Gi of
+    # limits) and cgimap: about 34 Gi stay for postgres and the page cache.
+    # On EKS (15 GB node) the cache hit ratio was 93%: give it room here.
+    # No limits: a CPU limit throttles postgres, a memory limit OOM-kills it.
     resources:
       requests:
-        memory: "14Gi"
-        cpu: "1000m"
+        memory: "24Gi"
+        cpu: "3000m"
     sharedMemorySize: 2Gi
     livenessProbeExec: true
     postgresqlConfig:
@@ -61,15 +65,15 @@ osm-seed:
       values: |
         listen_addresses = '*'
         max_connections = 200
-        shared_buffers = 4GB
-        work_mem = 20MB
-        maintenance_work_mem = 1GB
+        shared_buffers = 12GB
+        work_mem = 32MB
+        maintenance_work_mem = 2GB
         dynamic_shared_memory_type = posix
         effective_io_concurrency = 200
         max_wal_size = 2GB
         min_wal_size = 512MB
         random_page_cost = 1.1
-        effective_cache_size = 12GB
+        effective_cache_size = 32GB
         log_min_duration_statement = 3000
         log_connections = on
         log_disconnections = on
@@ -85,9 +89,9 @@ osm-seed:
         lc_time = 'en_US.utf8'
         default_text_search_config = 'pg_catalog.english'
         # Parallelism settings
-        max_parallel_workers_per_gather = 1
-        max_parallel_workers = 2
-        max_worker_processes = 2
+        max_parallel_workers_per_gather = 2
+        max_parallel_workers = 4
+        max_worker_processes = 4
         parallel_tuple_cost = 0.05
         parallel_setup_cost = 500
         min_parallel_table_scan_size = 2MB
@@ -138,8 +142,9 @@ osm-seed:
     serviceAccount:
       enabled: false
       name: ohm-s3-bucket-access-production
-    # One web node: a fixed number instead of the autoscaler.
-    replicaCount: 4
+    # One web node: a fixed number instead of the autoscaler. Passenger runs 6
+    # processes per pod, so 5 pods serve 30 Rails requests at once.
+    replicaCount: 5
     env:
       # --- Domains
       SERVER_URL: www.openhistoricalmap.org
@@ -225,7 +230,14 @@ osm-seed:
   memcached:
     enabled: true
     priorityClass: high-priority
-    resources: {}
+    # memcached caps its cache at 64 MB by default (no -m flag): ~70 Mi RSS.
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
     nodeSelector: {}
     nodeAffinity:
       enabled: true
@@ -237,15 +249,18 @@ osm-seed:
   cgimap:
     enabled: true
     priorityClass: "high-priority"
+    # One web node: a fixed number instead of the autoscaler. On EKS 4 pods
+    # used 50-85m CPU and 15-100 Mi each.
+    replicaCount: 4
     resources:
       requests:
-        memory: "0.5Gi"
-        cpu: "100m"
+        memory: "128Mi"
+        cpu: "200m"
       limits:
-        memory: "1Gi"
-        cpu: "300m"
+        memory: "512Mi"
+        cpu: "1000m"
     autoscaling:
-      enabled: true
+      enabled: false
       minReplicas: 2
       maxReplicas: 10
       cpuUtilization: 50
@@ -445,7 +460,7 @@ osm-seed:
       nodeAffinity:
         enabled: true
         key: "nodegroup_type"
-        values: ["web"]
+        values: ["downstream"]
     - name: osmcha-db
       enabled: false
       serviceAccount:
@@ -940,7 +955,7 @@ osm-seed:
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
-      values: ["web"]
+      values: ["downstream"]
   # ====================================================================================================
   # Variables for replication nomitoring task
   # ====================================================================================================

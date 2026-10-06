@@ -7,8 +7,7 @@ run-name: >-
 # Deploys the ohm/ chart to the Hetzner k3s cluster (ohm-k3s-cluster repo).
 # Same as deploy-eks.yaml, except how it reaches the cluster.
 #
-# A push to staging deploys staging here. Production is manual until its
-# cutover from EKS: only then add main to the branches below.
+# A push to staging deploys staging, a push to main deploys production.
 #
 # Triggers:
 #   - workflow_run: the only automatic trigger. A push runs build-images
@@ -28,6 +27,7 @@ on:
     workflows: ['Build images (chartpress)']
     types: [completed]
     branches:
+      - main
       - staging
   workflow_dispatch:
     inputs:
@@ -60,9 +60,6 @@ jobs:
           esac
           case "$BRANCH" in
             main)          ENV="production" ;;
-            # The branch that moves production to this cluster, one part at a
-            # time: for now only the downstream services (tiler, nominatim...).
-            k3s-production) ENV="production" ;;
             staging)       ENV="staging" ;;
             k3s-staging)   ENV="staging" ;;
             *)             ENV="staging" ;;
