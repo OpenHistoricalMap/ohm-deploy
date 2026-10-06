@@ -138,8 +138,8 @@ osm-seed:
       enabled: false
     env:
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260602_0301.osm.pbf
-      REPLICATION_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/
+      TILER_IMPORT_PBF_URL: https://planet.openhistoricalmap.org/planet/planet-260602_0301.osm.pbf
+      REPLICATION_URL: https://planet.openhistoricalmap.org/replication/minute/
       SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
       UPLOAD_EXPIRED_FILES: true
@@ -261,7 +261,7 @@ osm-seed:
       enabled: false
     env:
       OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
-      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org.s3.amazonaws.com/taginfo
+      TAGINFO_DB_BASE_URL: https://planet.openhistoricalmap.org/taginfo
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -275,8 +275,8 @@ osm-seed:
     serviceAccount:
       enabled: false
     env:
-      URL_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/state.txt
-      URL_HISTORY_PLANET_FILE_STATE: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/state.txt
+      URL_PLANET_FILE_STATE: https://planet.openhistoricalmap.org/planet/state.txt
+      URL_HISTORY_PLANET_FILE_STATE: https://planet.openhistoricalmap.org/planet/full-history/state.txt
       URL_PLANET_FILE: 'none'
       URL_HISTORY_PLANET_FILE: 'none'
       OVERWRITE_CONFIG_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/main/images/taginfo/taginfo-config-production.json
@@ -319,8 +319,8 @@ osm-seed:
       enabled: true
     env:
       NOMINATIM_API_ENDPOINT: nominatim.openhistoricalmap.org
-      PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260714_0001.osm.pbf
-      REPLICATION_URL: http://planet.openhistoricalmap.org.s3.amazonaws.com/replication/minute
+      PBF_URL: https://planet.openhistoricalmap.org/planet/planet-260714_0001.osm.pbf
+      REPLICATION_URL: https://planet.openhistoricalmap.org/replication/minute
       REPLICATION_UPDATE_INTERVAL: 60
       REPLICATION_RECHECK_INTERVAL: 30
       THREADS: 8
@@ -358,8 +358,8 @@ osm-seed:
     env:
       OVERPASS_META: attic
       OVERPASS_MODE: init
-      OVERPASS_PLANET_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/full-history/planet-history-260510_0442.osm.pbf
-      OVERPASS_DIFF_URL: http://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      OVERPASS_PLANET_URL: https://planet.openhistoricalmap.org/planet/full-history/planet-history-260510_0442.osm.pbf
+      OVERPASS_DIFF_URL: https://planet.openhistoricalmap.org/replication/minute
       OVERPASS_RULES_LOAD: 10
       OVERPASS_REPLICATION_SEQUENCE_NUMBER: 1900000
       OVERPASS_ALLOW_DUPLICATE_QUERIES: no
@@ -402,7 +402,7 @@ osm-seed:
       DJANGO_SECURE_SSL_REDIRECT: "False"
       OSM_SERVER_URL: https://www.openhistoricalmap.org
       OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/authorized
-      OSM_PLANET_BASE_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/changesets/
+      OSM_PLANET_BASE_URL: https://planet.openhistoricalmap.org/replication/changesets/
       ## frontend
       OSMCHA_URL: https://osmcha.openhistoricalmap.org
       OSMCHA_API_URL: www.openhistoricalmap.org
@@ -443,8 +443,8 @@ osm-seed:
     livenessProbe:
       initialDelaySeconds: 18000
     env:
-      PLANET_PBF_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
-      MINUTE_REPLICATION_URL: https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute
+      PLANET_PBF_URL: https://planet.openhistoricalmap.org/planet/planet-260601_0301.osm.pbf
+      MINUTE_REPLICATION_URL: https://planet.openhistoricalmap.org/replication/minute
       API_URL: https://api.openhistoricalmap.org
       AWS_S3_BUCKET: planet.openhistoricalmap.org
       AWS_S3_REGION: us-east-1
