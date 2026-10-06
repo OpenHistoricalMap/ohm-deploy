@@ -5,7 +5,6 @@ run-name: >-
       || format('Deploy k3s cluster — manual: {0}', inputs.ref) }}
 
 # Deploys the ohm/ chart to the Hetzner k3s cluster (ohm-k3s-cluster repo).
-# Same as deploy-eks.yaml, except how it reaches the cluster.
 #
 # A push to staging deploys staging, a push to main deploys production.
 #
@@ -106,7 +105,6 @@ jobs:
           STAGING_DB: openstreetmap
           STAGING_DB_USER: postgres
           STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
           # ======================== Web database backups (pgBackRest) ========================
           STAGING_PGBACKREST_CIPHER_PASS: ${{ secrets.STAGING_PGBACKREST_CIPHER_PASS }}
           # ======================== Website (web-api) ========================
@@ -149,9 +147,6 @@ jobs:
           STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
           # ======================== Monitoring ========================
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
-          # ======================== EKS only (ALB/WAF), unused on k3s ========================
-          STAGING_AWS_SSL_ARN: ${{ secrets.STAGING_AWS_SSL_ARN }}
-          STAGING_AWS_WAF_WEBACL_ARN: ${{ secrets.STAGING_AWS_WAF_WEBACL_ARN }}
 
       - name: Production - substitute secrets
         if: steps.src.outputs.env == 'production'
@@ -167,7 +162,6 @@ jobs:
           PRODUCTION_DB: ${{ secrets.PRODUCTION_DB }}
           PRODUCTION_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
           PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
-          PRODUCTION_DB_EBS: ${{ secrets.PRODUCTION_DB_EBS }}
           PRODUCTION_DB_BACKUP_S3_BUCKET: ${{ secrets.PRODUCTION_DB_BACKUP_S3_BUCKET }}
           # ======================== Web database backups (pgBackRest) ========================
           PRODUCTION_PGBACKREST_CIPHER_PASS: ${{ secrets.PRODUCTION_PGBACKREST_CIPHER_PASS }}
@@ -213,9 +207,6 @@ jobs:
           PRODUCTION_S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
           # ======================== Monitoring ========================
           OHM_SLACK_WEBHOOK_URL: ${{ secrets.OHM_SLACK_WEBHOOK_URL }}
-          # ======================== EKS only (ALB/WAF), unused on k3s ========================
-          PRODUCTION_AWS_SSL_ARN: ${{ secrets.PRODUCTION_AWS_SSL_ARN }}
-          PRODUCTION_AWS_WAF_WEBACL_ARN: ${{ secrets.PRODUCTION_AWS_WAF_WEBACL_ARN }}
 
       # ============================================================
       # helm + k3s cluster deploy
