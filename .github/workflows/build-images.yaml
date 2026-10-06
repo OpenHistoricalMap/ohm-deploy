@@ -1,15 +1,15 @@
 name: Build images (chartpress)
 
 # Builds OHM-owned images with chartpress and pushes them to ghcr.io.
-# It does NOT pass any state to the deploy workflows. Each deploy
-# (deploy-eks.yaml, deploy-k3s.yaml) re-runs `chartpress --skip-build`
+# It does NOT pass any state to the deploy workflow. The deploy
+# (deploy-k3s-cluster.yaml) re-runs `chartpress --skip-build`
 # on the same commit to recompute the exact same image tags, so the
 # only job of this workflow is to make sure the images exist in the
 # registry before a deploy references them.
 
 on:
   # Runs on every push, no path filter. This is the single entry point for a
-  # deploy: deploy-eks and deploy-k3s only fire via workflow_run once this
+  # deploy: deploy-k3s-cluster only fires via workflow_run once this
   # finishes, so the images are always in the registry before a deploy uses
   # them. chartpress skips the rebuild when nothing under images/** changed
   # (tags come from git history), so config-only pushes stay cheap.

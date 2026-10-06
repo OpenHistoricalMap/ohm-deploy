@@ -50,8 +50,8 @@ osm-seed:
       staticHostPath: true
       localVolumeHostPath: /mnt/web-db-data-production
       localVolumeSize: 600Gi
-    # Shares the 64 GB / 12 thread web node with 5 web-api pods (15 Gi of
-    # limits) and cgimap: about 34 Gi stay for postgres and the page cache.
+    # Shares the 64 GB / 12 thread web node with 5 web-api pods (20 Gi of
+    # limits) and cgimap: about 29 Gi stay for postgres and the page cache.
     # On EKS (15 GB node) the cache hit ratio was 93%: give it room here.
     # No limits: a CPU limit throttles postgres, a memory limit OOM-kills it.
     resources:
@@ -190,8 +190,10 @@ osm-seed:
       requests:
         memory: "2.5Gi"
         cpu: "1200m"
+      # 3Gi was too low: the 6 Passenger processes reach it and the pod is
+      # OOM-killed.
       limits:
-        memory: "3Gi"
+        memory: "4Gi"
         cpu: "1500m"
     autoscaling:
       enabled: false

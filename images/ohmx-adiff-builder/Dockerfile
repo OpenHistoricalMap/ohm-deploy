@@ -22,7 +22,7 @@ RUN apk add --no-cache --virtual .build-deps \
     echo "--- Build osm-cli (jake-low) with OpenHistoricalMap replication URLs ---" && \
     git clone https://github.com/jake-low/osm-cli.git /tmp/osm-cli && \
     cd /tmp/osm-cli && \
-    sed -i 's|https://planet.openstreetmap.org/replication/minute|https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute|g' src/replication.rs && \
+    sed -i 's|https://planet.openstreetmap.org/replication/minute|https://planet.openhistoricalmap.org/replication/minute|g' src/replication.rs && \
     sed -i 's|https://www.openstreetmap.org|https://www.openhistoricalmap.org|g' src/main.rs && \
     cargo install --root /usr/local --path . && \
     cd / && rm -rf /tmp/osm-cli && \

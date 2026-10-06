@@ -12,7 +12,7 @@ export OSMX_DB_PATH=$OSMX_DB_DIR/osmx.db
 export PLANET_FILE_PATH=$WORKDIR/planet.osm.pbf
 
 # Services
-export REPLICATION_URL="${REPLICATION_URL:-https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute}"
+export REPLICATION_URL="${REPLICATION_URL:-https://planet.openhistoricalmap.org/replication/minute}"
 export API_URL=${API_URL:-https://api.openhistoricalmap.org}
 
 # Working directories
