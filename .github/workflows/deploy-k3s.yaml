@@ -8,19 +8,11 @@ run-name: >-
       || format('Deploy k3s — manual: {0}', inputs.ref) }}
 
 on:
-  # Deploy only after "Build images (chartpress)" finishes, never on push
-  # directly. A push runs build-images, which triggers this on success. That
-  # way the images always exist in the registry before the deploy uses them,
-  # even when a commit touches both config and images. The deploy re-runs
-  # `chartpress --skip-build` to recompute the same tags build pushed.
-  workflow_run:
-    workflows: ['Build images (chartpress)']
-    types: [completed]
-    branches:
-      - main
-      - pre-production
-      - staging
-      - k3s
+  # Off: nothing triggers it, and the job below has `if: false`, so a manual
+  # run does nothing. It deployed to the old single boxes. The production box
+  # (htz-production) still serves tiler, nominatim, overpass and osmcha from
+  # values.k3s.production.template.yaml: to deploy to it again, remove
+  # `if: false`.
   workflow_dispatch:
     inputs:
       ref:
@@ -32,7 +24,8 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # Off: the job never runs, not even from a manual run.
+    if: false
     steps:
       - name: Resolve env
         id: src

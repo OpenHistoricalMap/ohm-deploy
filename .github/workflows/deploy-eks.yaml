@@ -7,41 +7,32 @@ run-name: >-
       && format('Deploy EKS — {0}: {1}', github.event.workflow_run.head_branch, github.event.workflow_run.head_commit.message)
       || format('Deploy EKS — manual: {0}', inputs.ref) }}
 
-# Deploys the ohm/ chart to AWS EKS.
+# Deployed the ohm/ chart to AWS EKS. Off: nothing triggers it, and the job
+# has `if: false`, so a manual run does nothing.
 #
-# Triggers:
-#   - workflow_run: the only automatic trigger. A push runs build-images
-#     first, which triggers this on success, so the images are always in
-#     ghcr.io before we use them — even when a commit changes both config
-#     and images.
-#   - workflow_dispatch: manual deploy of a branch. For a commit that changed
-#     images/**, build-images must have run first so the image exists.
+# Staging and production moved to the Hetzner k3s cluster and deploy with
+# deploy-k3s-cluster.yaml. values.staging.template.yaml and
+# values.production.template.yaml are written for k3s now (folders on the node,
+# no IRSA, k3s node labels): sent to EKS they would replace the database disk
+# with an empty folder.
 #
-# The deploy runs `chartpress --skip-build` itself to rewrite the
-# image tags in ohm/values.yaml. The tags are derived from git history,
-# so on the same commit they match exactly what build-images pushed.
-# No artifact is passed between workflows.
+# To deploy to EKS again, for a fix before production is cut over, run this
+# workflow from a commit before this change, with the values of that commit.
 
 on:
-  workflow_run:
-    workflows: ['Build images (chartpress)']
-    types: [completed]
-    branches:
-      - main
-      - staging
-      - deploy-*
   workflow_dispatch:
     inputs:
       ref:
         description: Branch to deploy
         required: true
-        default: staging
+        default: main
 
 jobs:
   deploy:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # Off: the job never runs, not even from a manual run.
+    if: false
     env:
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
@@ -59,12 +50,8 @@ jobs:
               BRANCH="${{ github.ref_name }}"
               SHA="${{ github.sha }}" ;;
           esac
-          case "$BRANCH" in
-            main)          ENV="production" ;;
-            staging)       ENV="staging" ;;
-            deploy-*)      ENV="staging" ;;
-            *)             ENV="staging" ;;
-          esac
+          echo "::error::$BRANCH does not deploy to EKS. Staging and production values are for the k3s cluster now: use deploy-k3s-cluster.yaml."
+          exit 1
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "env=$ENV" >> $GITHUB_OUTPUT
@@ -106,10 +93,9 @@ jobs:
           MAILER_DOMAIN: ${{ secrets.MAILER_DOMAIN }}
           MAILER_PASSWORD: ${{ secrets.STAGING_MAILER_PASSWORD }}
           MAILER_USERNAME: ${{ secrets.STAGING_MAILER_USERNAME }}
-          STAGING_DB: ${{ secrets.STAGING_DB }}
-          STAGING_DB_EBS: ${{ secrets.STAGING_DB_EBS }}
+          STAGING_DB: openstreetmap
           STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          STAGING_DB_USER: ${{ secrets.STAGING_DB_USER }}
+          STAGING_DB_USER: postgres
           STAGING_PGBACKREST_CIPHER_PASS: ${{ secrets.STAGING_PGBACKREST_CIPHER_PASS }}
           STAGING_DOMAIN_NAME: ohmstaging.org
           STAGING_ID_KEY: ${{ secrets.STAGING_ID_KEY }}
