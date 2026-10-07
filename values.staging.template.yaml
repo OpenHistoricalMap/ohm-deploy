@@ -923,7 +923,7 @@ osm-seed:
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
   # ====================================================================================================
   changesetReplicationJob:
-    enabled: false
+    enabled: true
     env:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
@@ -943,7 +943,7 @@ osm-seed:
   # Variables for osmcha web
   # ====================================================================================================
   osmchaWeb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
@@ -952,7 +952,7 @@ osm-seed:
   # Variables for osmcha Api, We hard code the container id.
   # ====================================================================================================
   osmchaApi:
-    enabled: false
+    enabled: true
     ingress:
       enabled: false
     priorityClass: medium-priority
@@ -966,7 +966,7 @@ osm-seed:
       DJANGO_SECURE_SSL_REDIRECT: "False"
       OSM_SERVER_URL: https://www.ohmstaging.org
       OAUTH_REDIRECT_URI: https://osmcha.ohmstaging.org/authorized
-      OSM_PLANET_BASE_URL: https://planet.openhistoricalmap.org/replication/changesets/
+      OSM_PLANET_BASE_URL: https://planet.ohmstaging.org/replication/changesets/
       ## frontend
       OSMCHA_URL: https://osmcha.ohmstaging.org
       OSMCHA_API_URL: www.ohmstaging.org
@@ -982,7 +982,7 @@ osm-seed:
   # Variables for osmcha DB
   # ====================================================================================================
   osmchaDb:
-    enabled: false
+    enabled: true
     priorityClass: medium-priority
     image:
       name: postgis/postgis
