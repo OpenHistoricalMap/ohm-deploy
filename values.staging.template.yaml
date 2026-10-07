@@ -99,7 +99,7 @@ osm-seed:
       name: ohm-s3-database-backup-access-staging
     # WAL archiving (every minute) and daily base backups to S3 with pgBackRest
     pgbackrest:
-      enabled: true
+      enabled: false
       s3Bucket: osmseed-staging
       s3Region: us-east-1
       s3Endpoint: s3.amazonaws.com
