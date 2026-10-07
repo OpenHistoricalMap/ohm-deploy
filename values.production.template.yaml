@@ -979,6 +979,9 @@ osm-seed:
       AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
       AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      COPYRIGHT_OWNER: "OpenHistoricalMap is dedicated to the public domain except where otherwise noted."
+      ATTRIBUTION_URL: "https://www.openhistoricalmap.org/copyright"
+      LICENSE_URL: "https://creativecommons.org/public-domain/cc0/"
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
