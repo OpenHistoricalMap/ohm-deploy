@@ -929,6 +929,9 @@ osm-seed:
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      COPYRIGHT_OWNER: "OpenHistoricalMap is dedicated to the public domain except where otherwise noted."
+      ATTRIBUTION_URL: "https://www.openhistoricalmap.org/copyright"
+      LICENSE_URL: "https://creativecommons.org/public-domain/cc0/"
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
