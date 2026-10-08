@@ -12,6 +12,10 @@ class Config:
         map(int, os.getenv("ZOOM_LEVELS_TO_DELETE", "10,11,12,13,14,15,16,17,18,19,20").split(","))
     )
 
+    # Base URL to download the imposm expire files, e.g. https://planet.openhistoricalmap.org
+    # When empty, files are read from the path-style S3 URL.
+    EXPIRED_TILES_BASE_URL = os.getenv("EXPIRED_TILES_BASE_URL", "").rstrip("/")
+
     # PostgreSQL Database Settings
     POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
