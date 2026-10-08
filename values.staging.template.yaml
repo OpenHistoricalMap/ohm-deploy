@@ -610,7 +610,7 @@ osm-seed:
   tilerServerCacheCleaner:
     enabled: true
   tilerCache:
-    enabled: false
+    enabled: true
     replicaCount: 1
     env:
       # --- Settings
