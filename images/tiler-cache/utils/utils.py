@@ -1,6 +1,7 @@
 import sys
 import logging
 import psycopg2
+import requests
 from psycopg2 import OperationalError
 from config import Config
 
@@ -61,14 +62,31 @@ def get_logger(name="default_logger"):
 
     return logger
 
+# Cloudflare blocks the default python-requests User-Agent
+USER_AGENT = "ohm-tiler-cache/1.0"
+
+
 def s3_path_to_url(s3_path, region="us-east-1"):
     """
-    Convert an S3 path (s3://bucket/key) to a path-style S3 URL.
-    Example: s3://bucket/key → https://s3.region.amazonaws.com/bucket/key
+    Convert an S3 path (s3://bucket/key) to a download URL.
+    With EXPIRED_TILES_BASE_URL set: s3://bucket/key → {base_url}/key
+    Otherwise, path-style S3 URL: s3://bucket/key → https://s3.region.amazonaws.com/bucket/key
     """
     if not s3_path.startswith("s3://"):
         raise ValueError("Invalid S3 path. Must start with s3://")
 
     bucket, key = s3_path.replace("s3://", "").split("/", 1)
+    if Config.EXPIRED_TILES_BASE_URL:
+        return f"{Config.EXPIRED_TILES_BASE_URL}/{key}"
     url = f"https://s3.{region}.amazonaws.com/{bucket}/{key}"
     return url
+
+
+def get_list_expired_tiles(url, chunk_size=1000):
+    """Download an imposm expire file and return its unique tiles in chunks."""
+    response = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=30)
+    response.raise_for_status()
+
+    unique_tiles = sorted(set(response.text.split()))
+    logging.info(f"Number of unique expired tiles: {len(unique_tiles)}")
+    return [unique_tiles[i : i + chunk_size] for i in range(0, len(unique_tiles), chunk_size)]

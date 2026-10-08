@@ -684,6 +684,7 @@ osm-seed:
       VARNISH_URL: ""
       ZOOM_LEVELS_TO_DELETE: 7,8,9,10,11,12,13,14,15,16,17,18,19,20
       SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
+      EXPIRED_TILES_BASE_URL: https://planet.openhistoricalmap.org
       # --- AWS
       AWS_REGION_NAME: us-east-1
       AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
