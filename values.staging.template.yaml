@@ -150,7 +150,7 @@ osm-seed:
       MAILER_DOMAIN: ohmstaging.org
       MAILER_USERNAME: {{MAILER_USERNAME}}
       MAILER_PASSWORD: {{MAILER_PASSWORD}}
-      # MAILER_PORT: "587"
+      MAILER_PORT: "587"
       MAILER_FROM: web@noreply.openhistoricalmap.org
       # --- Login: OAuth apps (iD, website) and external providers
       OPENSTREETMAP_id_key: 7E0Rn-ZjZpEW5cjM-CheEQAbp8nDiCuyB_UmIZOHysA

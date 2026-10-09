@@ -168,6 +168,7 @@ osm-seed:
       MAILER_USERNAME: {{MAILER_USERNAME}}
       MAILER_PASSWORD: {{MAILER_PASSWORD}}
       MAILER_FROM: web@noreply.openhistoricalmap.org
+      MAILER_PORT: "587"
       # --- Login: OAuth apps (iD, website) and external providers
       OPENSTREETMAP_id_key: {{PRODUCTION_ID_APPLICATION}}
       OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
