@@ -16,9 +16,13 @@ BEGIN
   END IF;
 END $$;
 
-CREATE INDEX IF NOT EXISTS osm_admin_relation_members_non_admin_member_idx
+-- CONCURRENTLY does not block imposm, it only waits for its open transaction to end.
+-- lock_timeout would cancel that wait and leave the index invalid.
+SET lock_timeout = 0;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS osm_admin_relation_members_non_admin_member_idx
 ON osm_admin_relation_members (member)
 WHERE type <> 'administrative';
+RESET lock_timeout;
 
 -- ============================================================================
 -- Source view: polygons plus the boundaries that imposm could not close
