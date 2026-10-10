@@ -105,6 +105,8 @@ https://vtiles.openhistoricalmap.org/maps/osm_land/{z}/{x}/{y}
 | `non_admin_boundaries_areas` | z0–20 |
 | `non_admin_boundaries_centroids` | z0–20 |
 
+`non_admin_boundaries_areas` also has the boundaries that do not close into a polygon (open ways and incomplete relations). These features are lines and have `source=line`; polygons have `source=polygon`.
+
 ### `osm_land` — Land polygons (static)
 
 | Layer | Zoom Range |
