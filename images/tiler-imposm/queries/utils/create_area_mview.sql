@@ -108,15 +108,8 @@ BEGIN
 
     -- Add language columns (always available)
     all_cols := all_cols || ', ' || lang_columns;
-    -- Add source column to identify origin (polygon), unless the source table already has one
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_schema = 'public'
-          AND table_name = source
-          AND column_name = 'source'
-    ) THEN
-        all_cols := all_cols || ', ''polygon'' AS source';
-    END IF;
+    -- Add source column to identify origin (polygon)
+    all_cols := all_cols || ', ''polygon'' AS source';
 
     -- Override keys that do not exist in the source table are added as new columns
     IF column_overrides IS NOT NULL THEN

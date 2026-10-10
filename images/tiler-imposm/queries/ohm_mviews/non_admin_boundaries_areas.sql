@@ -31,8 +31,7 @@ WHERE type <> 'administrative';
 CREATE OR REPLACE VIEW osm_non_admin_boundaries AS
 SELECT
     id, osm_id, name, type, admin_level, has_label, start_date, end_date, area,
-    border_type, indefinite, disputed, disputed_by, tags, geometry,
-    'polygon'::text AS source
+    border_type, indefinite, disputed, disputed_by, tags, geometry
 FROM osm_admin_areas
 WHERE type <> 'administrative'
 
@@ -53,8 +52,7 @@ SELECT
     (m.tags->'disputed')::varchar AS disputed,
     (m.tags->'disputed_by')::varchar AS disputed_by,
     m.tags,
-    ST_LineMerge(ST_Collect(m.geometry)) AS geometry,
-    'line'::text AS source
+    ST_LineMerge(ST_Collect(m.geometry)) AS geometry
 FROM osm_admin_relation_members m
 WHERE m.type <> 'administrative'
   AND ST_GeometryType(m.geometry) = 'ST_LineString'
@@ -78,8 +76,7 @@ SELECT
     l.disputed,
     l.disputed_by,
     l.tags,
-    l.geometry,
-    'line'::text AS source
+    l.geometry
 FROM osm_admin_lines l
 WHERE l.type <> 'administrative'
   AND NOT EXISTS (SELECT 1 FROM osm_admin_areas a WHERE a.osm_id = l.osm_id)
