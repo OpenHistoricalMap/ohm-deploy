@@ -279,6 +279,16 @@ no_admin_boundaries_views=(
     mv_non_admin_boundaries_centroids_z0_2
 )
 
+no_admin_boundaries_lines_views=(
+    mv_non_admin_boundaries_lines_z16_20
+    mv_non_admin_boundaries_lines_z13_15
+    mv_non_admin_boundaries_lines_z10_12
+    mv_non_admin_boundaries_lines_z8_9
+    mv_non_admin_boundaries_lines_z6_7
+    mv_non_admin_boundaries_lines_z3_5
+    mv_non_admin_boundaries_lines_z0_2
+)
+
 addresses_views=(
     mv_address_points_z16_20
 )
@@ -304,4 +314,5 @@ refresh_mviews_group "NATURAL" 180 light "${natural_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
 refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
 refresh_mviews_group "NO_ADMIN_BOUNDARIES" 180 light "${no_admin_boundaries_views[@]}" &
+refresh_mviews_group "NO_ADMIN_BOUNDARIES_LINES" 180 light "${no_admin_boundaries_lines_views[@]}" &
 refresh_mviews_group "ADDRESSES" 180 light "${addresses_views[@]}" &

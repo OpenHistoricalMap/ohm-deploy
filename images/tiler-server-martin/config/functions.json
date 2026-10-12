@@ -9,13 +9,13 @@
           "exclude_columns": ["geometry"],
           "min_zoom": 0,
           "zoom_mapping": [
-            [2, "mv_admin_boundaries_lines_z0_2"],
-            [5, "mv_admin_boundaries_lines_z3_5"],
-            [7, "mv_admin_boundaries_lines_z6_7"],
-            [9, "mv_admin_boundaries_lines_z8_9"],
-            [12, "mv_admin_boundaries_lines_z10_12"],
-            [15, "mv_admin_boundaries_lines_z13_15"],
-            [null, "mv_admin_boundaries_lines_z16_20"]
+            [2, "land_ohm_lines_z0_2"],
+            [5, "land_ohm_lines_z3_5"],
+            [7, "land_ohm_lines_z6_7"],
+            [9, "land_ohm_lines_z8_9"],
+            [12, "land_ohm_lines_z10_12"],
+            [15, "land_ohm_lines_z13_15"],
+            [null, "land_ohm_lines_z16_20"]
           ]
         },
         {
