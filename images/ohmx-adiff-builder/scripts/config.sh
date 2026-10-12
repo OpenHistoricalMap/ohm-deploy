@@ -30,3 +30,9 @@ export HEARTBEAT_STALE_SECONDS=${HEARTBEAT_STALE_SECONDS:-600}
 
 # Kill one update.sh run if it exceeds this (must be < HEARTBEAT_STALE_SECONDS)
 export UPDATE_TIMEOUT=${UPDATE_TIMEOUT:-540}
+
+# Caps for one osmx-rs run on one .osc (update.sh). Over either limit, osmx-rs is
+# killed, that file gets no adiff, and the db update still runs.
+# Keep ADIFF_MAX_RSS_MB well below the container memory limit.
+export ADIFF_MAX_RSS_MB=${ADIFF_MAX_RSS_MB:-10240}
+export ADIFF_TIMEOUT=${ADIFF_TIMEOUT:-300}
