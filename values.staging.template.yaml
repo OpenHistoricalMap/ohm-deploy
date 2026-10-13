@@ -951,7 +951,7 @@ osm-seed:
     priorityClass: medium-priority
     image:
       name: ghcr.io/openhistoricalmap/osmcha-frontend
-      tag: df5e9b5
+      tag: d7aec32
   # ====================================================================================================
   # Variables for osmcha Api, We hard code the container id.
   # ====================================================================================================
@@ -1038,6 +1038,13 @@ osm-seed:
       API_URL: https://api.openhistoricalmap.org
       HEARTBEAT_DIR: /tmp/heartbeat
       HEARTBEAT_STALE_SECONDS: "600"
+      # --- Limits for one replication file. Over any of them, osmx-rs is killed
+      # and that file gets no adiff; the osmx db is still updated.
+      ADIFF_MAX_RSS_MB: "10240"
+      ADIFF_TIMEOUT: "300"
+      # Uncompressed adiff size in MB. Also the limit for all the fragments of
+      # one changeset: a bigger changeset is not published to S3.
+      ADIFF_MAX_OUTPUT_MB: "256"
       # --- Upload to S3
       AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
       AWS_S3_REGION: us-east-1

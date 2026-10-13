@@ -27,8 +27,12 @@ RUN apk add --no-cache --virtual .build-deps \
     cargo install --root /usr/local --path . && \
     cd / && rm -rf /tmp/osm-cli && \
     \
-    echo "--- Build osmx-rs (jake-low) for augmented-diff --split ---" && \
-    cargo install --root /usr/local --git https://github.com/jake-low/osmx-rs.git osmx-rs && \
+    # OpenHistoricalMap fork of jake-low/osmx-rs: it writes the adiff as a stream,
+    # so a changeset that edits many large relations no longer runs out of memory.
+    # Pinned to a commit so a rebuild cannot pull in a different binary.
+    echo "--- Build osmx-rs (OpenHistoricalMap fork) for augmented-diff --split ---" && \
+    cargo install --root /usr/local --git https://github.com/OpenHistoricalMap/osmx-rs.git \
+      --rev c9abb9b05148f19373f2f9df7d2f4223d9b55ad8 osmx-rs && \
     \
     # Binaries now live in /usr/local/bin, so the whole toolchain can go.
     rustup self uninstall -y && \
