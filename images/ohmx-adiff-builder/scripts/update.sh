@@ -22,25 +22,32 @@ for bin in "$OSMX_BIN" "$OSMX_RS_BIN" osm; do
 done
 
 mkdir -p "$SPLIT_ADIFFS_DIR" "$BAD_CHANGESETS_DIR"
+# Only one update.sh runs at a time, so anything left in the work dir comes from
+# a run that start.sh killed on timeout. Remove it, or it piles up on disk.
+rm -rf "$ADIFF_WORK_DIR" && mkdir -p "$ADIFF_WORK_DIR"
 # The db is the single source of truth for position: create_database seeds the
 # seqnum from the planet header, every osmx update --commit advances it.
 seqno_start=$("$OSMX_BIN" query "$OSMX_DB_PATH" seqnum)
 echo ">>> starting from seqno=$seqno_start"
 
-# Run osmx-rs for one .osc with a memory and a time cap. A changeset that edits
-# many large relations can make osmx-rs grow until the container is OOM-killed,
-# and then the pod restarts on the same seqno forever. Killing only osmx-rs lets
-# the loop skip the adiff and keep going. The cap uses RssAnon because the LMDB
-# mmap of the db counts as file pages and is not a leak.
+# Run osmx-rs for one .osc with memory, output size and time caps. A changeset
+# that edits many large relations can make osmx-rs grow until the container is
+# OOM-killed, and then the pod restarts on the same seqno forever. It can also
+# write an adiff of many GB per minute, which fills the disk and is too big for
+# OSMCha to load. Killing only osmx-rs lets the loop skip the adiff and keep
+# going. The memory cap uses RssAnon because the LMDB mmap of the db counts as
+# file pages and is not a leak.
 run_adiff() {
-  local osc=$1 outdir=$2 pid start rss elapsed
+  local osc=$1 outdir=$2 pid start rss elapsed out_mb
   "$OSMX_RS_BIN" augmented-diff --split "$OSMX_DB_PATH" "$osc" "$outdir" &
   pid=$!; start=$SECONDS
   while kill -0 "$pid" 2>/dev/null; do
     rss=$(awk '/^RssAnon:/{print int($2/1024)}' "/proc/$pid/status" 2>/dev/null || true)
+    out_mb=$(du -sm "$outdir" 2>/dev/null | cut -f1 || true)
     elapsed=$((SECONDS - start))
-    if [ "${rss:-0}" -gt "$ADIFF_MAX_RSS_MB" ] || [ "$elapsed" -gt "$ADIFF_TIMEOUT" ]; then
-      echo "!!! osmx-rs over limit (rss=${rss:-0}MB, ${elapsed}s), killing it"
+    if [ "${rss:-0}" -gt "$ADIFF_MAX_RSS_MB" ] || [ "${out_mb:-0}" -gt "$ADIFF_MAX_OUTPUT_MB" ] ||
+       [ "$elapsed" -gt "$ADIFF_TIMEOUT" ]; then
+      echo "!!! osmx-rs over limit (rss=${rss:-0}MB, output=${out_mb:-0}MB, ${elapsed}s), killing it"
       kill -KILL "$pid" 2>/dev/null || true
       break
     fi
@@ -61,7 +68,7 @@ osm replication minute --seqno "$seqno_start" | while read -r seqno timestamp ur
 
   # Generate one adiff per changeset into a tmp dir, then file each fragment under
   # split-adiffs/<changeset>/<seqno>.adiff so they accumulate across replication files.
-  tmpdir=$(mktemp -d)
+  tmpdir=$(mktemp -d -p "$ADIFF_WORK_DIR")
   if run_adiff "$seqno.osc" "$tmpdir"; then
     for f in "$tmpdir"/*.adiff; do
       [ -e "$f" ] || continue
