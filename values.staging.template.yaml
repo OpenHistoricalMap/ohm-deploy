@@ -547,6 +547,9 @@ osm-seed:
       IMPOSM3_IMPORT_LAYERS: "all"
       REFRESH_MVIEWS: true
       RECREATE_MVIEWS_ON_UPDATE: false
+      # Water centerlines for lake labels (#1374), interval in seconds
+      WATER_CENTERLINES: true
+      WATER_CENTERLINES_INTERVAL: "604800"
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
