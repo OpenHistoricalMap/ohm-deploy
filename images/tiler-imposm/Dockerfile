@@ -21,12 +21,17 @@ RUN apt-get -y update && apt-get install -y \
     ca-certificates \
     software-properties-common \
     python3-pip \
+    python3-shapely \
+    python3-scipy \
+    python3-networkx \
+    python3-tqdm \
     postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install --no-cache-dir \
     --break-system-packages \
     awscli psycopg2-binary setuptools && \
+    python3 -m pip install --no-cache-dir --break-system-packages --no-deps label_centerlines && \
     rm -rf /root/.cache /var/cache/apk/*
 
 RUN apt-get update && apt-get install -y postgresql-client && \
