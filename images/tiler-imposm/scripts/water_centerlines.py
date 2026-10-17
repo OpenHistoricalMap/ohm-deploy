@@ -10,6 +10,11 @@ here; names and dates are joined from osm_water_areas by osm_id in the mviews.
 Runs incrementally: polygons whose geometry hash did not change are skipped,
 and rows for polygons that are no longer candidates are removed.
 
+Changed lines are not seen by imposm, so the script writes its own expire
+file (same format as imposm: z14 "z/x/y" lines) into IMPOSM3_EXPIRE_DIR.
+start.sh uploads it with the imposm expire files and tiler-cache bans those
+tiles in Varnish.
+
 Usage:
   python3 scripts/water_centerlines.py            # update the table
   python3 scripts/water_centerlines.py --dry-run  # write GeoJSON to stdout, no DB writes
@@ -17,8 +22,10 @@ Usage:
 import argparse
 import json
 import logging
+import math
 import os
 import sys
+from datetime import datetime, timezone
 
 import networkx as nx
 import numpy as np
@@ -42,6 +49,10 @@ OUTLINE_POINTS = int(os.getenv("CENTERLINE_OUTLINE_POINTS", "5000"))
 MIN_PART_SHARE = float(os.getenv("CENTERLINE_MIN_PART_SHARE", "0.1"))
 # Gaussian smoothing of the output line, in number of vertices.
 SMOOTH_SIGMA = float(os.getenv("CENTERLINE_SMOOTH_SIGMA", "3"))
+# Where to write the expire file. Unset = no expire file (e.g. local runs).
+EXPIRE_DIR = os.getenv("IMPOSM3_EXPIRE_DIR")
+EXPIRE_ZOOM = 14
+WEB_MERCATOR_MAX = 20037508.342789244
 
 # Rivers already get labels along waterway lines, so skip them.
 CANDIDATES_SQL = """
@@ -158,6 +169,41 @@ def build_centerline(geom):
     return lines[0] if len(lines) == 1 else MultiLineString(lines)
 
 
+def line_tiles(geom, zoom=EXPIRE_ZOOM):
+    """z/x/y tiles touched by a line in EPSG:3857, plus their neighbors so
+    labels that spill over a tile edge are also refreshed."""
+    tile_size = 2 * WEB_MERCATOR_MAX / 2 ** zoom
+    max_index = 2 ** zoom - 1
+    coords = shapely.get_coordinates(shapely.segmentize(geom, tile_size / 2))
+    tiles = set()
+    for x, y in coords:
+        tx = int((x + WEB_MERCATOR_MAX) // tile_size)
+        ty = int((WEB_MERCATOR_MAX - y) // tile_size)
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                nx_, ny_ = tx + dx, ty + dy
+                if 0 <= nx_ <= max_index and 0 <= ny_ <= max_index:
+                    tiles.add(f"{zoom}/{nx_}/{ny_}")
+    return tiles
+
+
+def write_expire_file(tiles):
+    """Write tiles in the imposm expire format: <dir>/YYYYMMDD/HHMMSS.mmm.tiles"""
+    if not EXPIRE_DIR or not tiles:
+        return
+    now = datetime.now(timezone.utc)
+    day_dir = os.path.join(EXPIRE_DIR, now.strftime("%Y%m%d"))
+    os.makedirs(day_dir, exist_ok=True)
+    path = os.path.join(day_dir, now.strftime("%H%M%S.") + f"{now.microsecond // 1000:03d}.tiles")
+    # Write outside the expire dir and rename, so the uploader never sees a
+    # partial file. Same filesystem, so the rename is atomic.
+    tmp_path = os.path.join(os.path.dirname(EXPIRE_DIR.rstrip("/")), ".water_centerlines_expire.tmp")
+    with open(tmp_path, "w") as f:
+        f.write("\n".join(sorted(tiles)) + "\n")
+    os.replace(tmp_path, path)
+    log.info("Expire file: %s (%s tiles)", path, len(tiles))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--dry-run", action="store_true",
@@ -189,13 +235,15 @@ def main():
 
     existing = {}
     if not args.dry_run:
-        cur.execute(f"SELECT osm_id, geom_hash FROM {TABLE}")
-        existing = dict(cur.fetchall())
+        cur.execute(f"SELECT osm_id, geom_hash, ST_AsBinary(geometry) FROM {TABLE}")
+        existing = {row[0]: (row[1], row[2]) for row in cur.fetchall()}
 
     features = []
+    expired_tiles = set()
     done = skipped = failed = 0
     for osm_id, geom_hash, geom_wkb in candidates:
-        if existing.get(osm_id) == geom_hash:
+        old = existing.get(osm_id)
+        if old and old[0] == geom_hash:
             skipped += 1
             continue
         try:
@@ -212,6 +260,10 @@ def main():
         else:
             cur.execute(UPSERT_SQL, (osm_id, geom_hash, psycopg2.Binary(line.wkb)))
             conn.commit()
+            # Refresh tiles of the new line and of the old one it replaces.
+            expired_tiles |= line_tiles(line)
+            if old:
+                expired_tiles |= line_tiles(wkb.loads(bytes(old[1])))
         done += 1
 
     if args.dry_run:
@@ -219,9 +271,20 @@ def main():
     elif not args.osm_id:
         # Drop centerlines of polygons that were deleted or are no longer candidates.
         keep = [c[0] for c in candidates]
-        cur.execute(f"DELETE FROM {TABLE} WHERE NOT (osm_id = ANY(%s))", (keep,))
-        log.info("Removed: %s", cur.rowcount)
+        cur.execute(
+            f"DELETE FROM {TABLE} WHERE NOT (osm_id = ANY(%s)) RETURNING ST_AsBinary(geometry)",
+            (keep,),
+        )
+        removed = cur.fetchall()
+        for (geom_wkb,) in removed:
+            expired_tiles |= line_tiles(wkb.loads(bytes(geom_wkb)))
+        log.info("Removed: %s", len(removed))
         conn.commit()
+
+    # On the first run (empty table) the layer is new and nothing is cached
+    # with lines yet, so skip a huge expire file.
+    if not args.dry_run and existing:
+        write_expire_file(expired_tiles)
 
     log.info("Generated: %s, unchanged: %s, failed: %s", done, skipped, failed)
     conn.close()

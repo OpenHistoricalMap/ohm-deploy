@@ -70,6 +70,40 @@ SELECT derive_centroid_mview(
     where_filter     => 'name IS NOT NULL AND name <> '''''
 );
 -- ============================================================================
+-- Water Areas Centerlines Materialized Views (#1374)
+-- Lines along elongated lakes for labels. The table is filled by
+-- scripts/water_centerlines.py; it is created here so the mviews (and the
+-- Martin layer) exist even before the script runs.
+-- Keep this DDL in sync with CREATE_SQL in scripts/water_centerlines.py.
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS water_areas_centerlines (
+    osm_id BIGINT PRIMARY KEY,
+    geom_hash TEXT NOT NULL,
+    geometry geometry(Geometry, 3857) NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS water_areas_centerlines_geom_idx ON water_areas_centerlines USING GIST (geometry);
+
+SELECT derive_centerline_mview(
+    source           => 'mv_water_areas_z16_20',
+    target           => 'mv_water_areas_centerlines_z16_20'
+);
+SELECT derive_centerline_mview(
+    source           => 'mv_water_areas_z13_15',
+    target           => 'mv_water_areas_centerlines_z13_15',
+    simplify_tol     => 5
+);
+SELECT derive_centerline_mview(
+    source           => 'mv_water_areas_z10_12',
+    target           => 'mv_water_areas_centerlines_z10_12',
+    simplify_tol     => 20
+);
+SELECT derive_centerline_mview(
+    source           => 'mv_water_areas_z8_9',
+    target           => 'mv_water_areas_centerlines_z8_9',
+    simplify_tol     => 100
+);
+-- ============================================================================
 -- Water lines Materialized Views for Multiple Zoom Levels
 -- ============================================================================
 

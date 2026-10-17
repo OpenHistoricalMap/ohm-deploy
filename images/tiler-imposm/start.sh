@@ -284,7 +284,7 @@ function updateData() {
     # Step 1b: Generate water centerlines in background (#1374)
     if [ "$WATER_CENTERLINES" = "true" ]; then
         log_message "Starting water centerlines loop (interval ${WATER_CENTERLINES_INTERVAL:-604800}s)..."
-        ./scripts/water_centerlines.sh &
+        IMPOSM3_EXPIRE_DIR="$IMPOSM3_EXPIRE_DIR" ./scripts/water_centerlines.sh &
     else
         log_message "Skipping water centerlines (WATER_CENTERLINES=$WATER_CENTERLINES)"
     fi
