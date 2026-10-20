@@ -1,0 +1,66 @@
+{{- $r := .Values.ohmRouting | default dict -}}
+{{- if and $r.enabled ($r.web | default dict).enabled }}
+{{- $name := include "routing.name" . -}}
+{{- $page := .Files.Get "files/routing/index.html" -}}
+# Test page: pick A and B on the map and a date
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-web
+  labels:
+    {{- include "routing.labels" . | nindent 4 }}
+data:
+  index.html: |-
+    {{- $page | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-web
+  labels:
+    {{- include "routing.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: routing
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        {{- include "routing.labels" . | nindent 8 }}
+        app.kubernetes.io/component: web
+      annotations:
+        checksum/page: {{ $page | sha256sum }}
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - { name: http, containerPort: 80 }
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { memory: 64Mi }
+          volumeMounts:
+            - { name: page, mountPath: /usr/share/nginx/html }
+      volumes:
+        - name: page
+          configMap:
+            name: {{ $name }}-web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-web
+  labels:
+    {{- include "routing.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: routing
+    app.kubernetes.io/component: web
+  ports:
+    - { name: http, port: 80, targetPort: http }
+{{- end }}

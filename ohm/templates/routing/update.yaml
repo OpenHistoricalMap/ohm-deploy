@@ -1,0 +1,83 @@
+{{- $r := .Values.ohmRouting | default dict -}}
+{{- $update := $r.update | default dict -}}
+{{- if and $r.enabled $update.enabled }}
+{{- $name := include "routing.name" . -}}
+# Applies replication diffs, builds a new graph and restarts the server
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $name }}-update
+  labels:
+    {{- include "routing.labels" . | nindent 4 }}
+    app.kubernetes.io/component: update
+spec:
+  schedule: {{ $update.schedule | default "0 */2 * * *" | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            {{- include "routing.labels" . | nindent 12 }}
+            app.kubernetes.io/component: update
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ $name }}-update
+          {{- include "routing.scheduling" . | nindent 10 }}
+          containers:
+            - name: update
+              image: {{ include "routing.image" . }}
+              command: ["/app/scripts/update.sh"]
+              env:
+                - { name: JAVA_OPTS, value: {{ $update.javaOpts | default "-Xmx6g" | quote }} }
+                - { name: FULL_REFRESH_DAYS, value: {{ $update.fullRefreshDays | default 7 | quote }} }
+                - { name: RESTART_DEPLOYMENT, value: {{ $name }}-server }
+              {{- with $update.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              volumeMounts:
+                - { name: data, mountPath: /data }
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: {{ $name }}-data
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}-update
+  labels:
+    {{- include "routing.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}-update
+  labels:
+    {{- include "routing.labels" . | nindent 4 }}
+rules:
+  # Only to restart the server after a new graph is built
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["{{ $name }}-server"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}-update
+  labels:
+    {{- include "routing.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}-update
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}-update
+    namespace: {{ .Release.Namespace }}
+{{- end }}

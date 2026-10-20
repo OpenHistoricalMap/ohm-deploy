@@ -1126,3 +1126,34 @@ osm-seed:
       enabled: false
       key: "nodegroup_type"
       values: ["web"]
+
+# ====================================================================================================
+# Routing over OHM data by date (GraphHopper), images/routing + ohm/templates/routing
+# ====================================================================================================
+ohmRouting:
+  enabled: true
+  priorityClass: medium-priority
+  nodeSelector: {}
+  persistence:
+    storageClass: local-path
+    size: 20Gi
+  server:
+    replicas: 1
+    javaOpts: "-Xms1g -Xmx3g"
+    resources:
+      requests: { cpu: 500m, memory: 3Gi }
+      limits: { memory: 5Gi }
+  update:
+    enabled: true
+    schedule: "0 */2 * * *"
+    javaOpts: "-Xmx6g"
+    fullRefreshDays: 7
+    resources:
+      requests: { cpu: "2", memory: 4Gi }
+      limits: { memory: 8Gi }
+  web:
+    enabled: true
+  ingress:
+    enabled: true
+    className: traefik
+    host: routing.ohmstaging.org

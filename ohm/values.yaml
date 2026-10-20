@@ -55,6 +55,10 @@ osm-seed:
     image:
       name: chartpress_replace_me
       tag: chartpress_replace_me
-  
 
-      
+# Only the image here: this file is passed last to helm, so anything else would
+# override values.<env>.yaml
+ohmRouting:
+  image:
+    name: chartpress_replace_me
+    tag: chartpress_replace_me

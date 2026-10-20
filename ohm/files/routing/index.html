@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OHM Routing Test</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@openhistoricalmap/maplibre-gl-dates@1.4.0/index.js"></script>
+<style>
+  :root { --bg:#fff; --fg:#1d2328; --muted:#5f6b75; --line:#e2e6ea; --accent:#7b2cbf; --ok:#2b8a3e; --err:#c92a2a; --hl:#f5edfc; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.4 system-ui, sans-serif; color:var(--fg); background:var(--bg); display:flex; height:100vh; }
+  aside { width:380px; max-width:100%; border-right:1px solid var(--line); display:flex; flex-direction:column; }
+  header { padding:14px 16px; border-bottom:1px solid var(--line); }
+  h1 { font-size:16px; margin:0 0 4px; }
+  .muted { color:var(--muted); font-size:12px; }
+  .controls { padding:12px 16px; display:grid; gap:10px; border-bottom:1px solid var(--line); }
+  label { display:grid; gap:4px; font-size:12px; color:var(--muted); }
+  input, select, button { font:inherit; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  input[type=range] { padding:0; }
+  .row { display:flex; gap:8px; align-items:end; }
+  .row > * { flex:1; }
+  button { cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  #summary { padding:10px 16px; border-bottom:1px solid var(--line); min-height:44px; }
+  #summary.err { color:var(--err); }
+  #ways { overflow:auto; flex:1; margin:0; padding:0; list-style:none; }
+  #ways li { padding:8px 16px; border-bottom:1px solid var(--line); cursor:default; }
+  #ways li:hover { background:var(--hl); }
+  #ways .name { font-weight:600; }
+  #ways .dates { font-family:ui-monospace, monospace; font-size:12px; }
+  #ways a { color:var(--accent); font-size:12px; }
+  #map { flex:1; }
+  .pin { width:22px; height:22px; border-radius:50%; color:#fff; font-weight:700; font-size:12px; display:grid; place-items:center; border:2px solid #fff; box-shadow:0 1px 3px #0006; }
+  .legend { display:flex; gap:12px; font-size:12px; color:var(--muted); }
+  .sw { display:inline-block; width:18px; height:4px; vertical-align:middle; margin-right:4px; }
+  @media (max-width: 700px) { body { flex-direction:column-reverse; } aside { width:100%; height:50vh; } }
+</style>
+</head>
+<body>
+<aside>
+  <header>
+    <h1>OHM routing test</h1>
+    <div class="muted">Click the map to set A, then B. GraphHopper over OHM data, filtered by start_date/end_date.</div>
+  </header>
+  <div class="controls">
+    <div class="row">
+      <label>Date <input id="date" type="date" value="1950-01-01" min="0001-01-01"></label>
+      <label>Profile
+        <select id="profile"><option value="car">car</option><option value="foot">foot</option><option value="horse">horse</option><option value="carriage">carriage</option></select>
+      </label>
+    </div>
+    <label>Year <input id="year" type="range" min="1700" max="2026" value="1950"></label>
+    <div class="row">
+      <label style="flex-direction:row;display:flex;gap:6px;align-items:center"><input id="compare" type="checkbox" checked> Show route without date filter</label>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>with date</span><span><i class="sw" style="background:#999"></i>no filter</span></div>
+  </div>
+  <div id="summary" class="muted">Pick two points.</div>
+  <ul id="ways"></ul>
+</aside>
+<div id="map"></div>
+<script>
+const OHM_API = 'https://www.openhistoricalmap.org/api/0.6';
+const $ = id => document.getElementById(id);
+const pts = [];
+const markers = [];
+const tagCache = new Map();
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://www.openhistoricalmap.org/map-styles/main/main.json',
+  center: [2.3522, 48.8566],
+  zoom: 12,
+  hash: true,
+});
+map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+map.on('load', () => {
+  for (const [id, color, width, dash] of [['plain', '#999', 4, [2, 1]], ['dated', '#7b2cbf', 5, null], ['hl', '#ffd43b', 9, null]]) {
+    map.addSource(id, { type: 'geojson', data: empty() });
+    map.addLayer({ id, type: 'line', source: id, layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': color, 'line-width': width, ...(dash ? { 'line-dasharray': dash } : {}) } });
+  }
+  map.moveLayer('dated');
+  applyMapDate();
+});
+
+function empty() { return { type: 'FeatureCollection', features: [] }; }
+
+function applyMapDate() {
+  try { if (map.filterByDate) map.filterByDate($('date').value); } catch (e) { console.warn('date filter', e); }
+}
+
+// Same conversion as the tiler and the GraphHopper plugin (noon of the day, ISO year 0 = 1 BCE)
+function isLeap(y) { if (y <= 0) y += 1; return y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0); }
+function toDecimal(iso) {
+  const m = /^(-?\d+)-(\d\d)-(\d\d)$/.exec(iso);
+  if (!m) return null;
+  let y = +m[1]; const mo = +m[2], d = +m[3];
+  if (y <= 0) y -= 1;
+  const dim = [31, isLeap(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let yday = d; for (let i = 0; i < mo - 1; i++) yday += dim[i];
+  const frac = (yday - 0.5) / (isLeap(y) ? 366 : 365);
+  return y < 0 ? 2 + y - (1 - frac) : y + frac;
+}
+function fmtDec(v) {
+  if (v === null || v === undefined) return '∞';
+  if (!isFinite(v)) return '∞';
+  if (v <= -5999) return '−∞';
+  return v.toFixed(2);
+}
+
+map.on('click', e => {
+  if (pts.length === 2) reset(false);
+  pts.push([e.lngLat.lng, e.lngLat.lat]);
+  const el = document.createElement('div');
+  el.className = 'pin';
+  el.style.background = pts.length === 1 ? '#2b8a3e' : '#c92a2a';
+  el.textContent = pts.length === 1 ? 'A' : 'B';
+  const mk = new maplibregl.Marker({ element: el, draggable: true }).setLngLat(e.lngLat).addTo(map);
+  const idx = pts.length - 1;
+  mk.on('dragend', () => { const p = mk.getLngLat(); pts[idx] = [p.lng, p.lat]; route(); });
+  markers.push(mk);
+  route();
+});
+
+function reset(clearMarkers = true) {
+  markers.splice(0).forEach(m => m.remove());
+  pts.splice(0);
+  for (const id of ['plain', 'dated', 'hl']) map.getSource(id)?.setData(empty());
+  $('ways').innerHTML = '';
+  setSummary('Pick two points.');
+}
+$('reset').onclick = () => reset();
+
+$('year').oninput = () => {
+  const cur = $('date').value.split('-');
+  $('date').value = String($('year').value).padStart(4, '0') + '-' + (cur[1] || '01') + '-' + (cur[2] || '01');
+  onDateChange();
+};
+$('date').onchange = () => { const y = parseInt($('date').value, 10); if (!isNaN(y)) $('year').value = y; onDateChange(); };
+$('profile').onchange = route;
+$('compare').onchange = route;
+
+let debounce;
+function onDateChange() { applyMapDate(); clearTimeout(debounce); debounce = setTimeout(route, 250); }
+
+function setSummary(html, err) { $('summary').innerHTML = html; $('summary').className = err ? 'err' : ''; }
+
+async function gh(withDate) {
+  const body = {
+    points: pts, profile: $('profile').value, points_encoded: false, instructions: false,
+    details: ['osm_way_id', 'street_name', 'road_class', 'ohm_start', 'ohm_end'],
+  };
+  if (withDate) {
+    const d = toDecimal($('date').value);
+    body.custom_model = { priority: [{ if: `ohm_start > ${d} || ohm_end < ${d}`, multiply_by: '0' }] };
+  }
+  const r = await fetch('/route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.message || r.status);
+  return j.paths[0];
+}
+
+let seq = 0;
+async function route() {
+  if (pts.length < 2) return;
+  const my = ++seq;
+  setSummary('Routing…');
+  const [dated, plain] = await Promise.allSettled([gh(true), $('compare').checked ? gh(false) : Promise.resolve(null)]);
+  if (my !== seq) return;
+  const line = p => p ? { type: 'Feature', geometry: p.points, properties: {} } : null;
+  map.getSource('plain').setData(plain.status === 'fulfilled' && plain.value ? line(plain.value) : empty());
+  map.getSource('hl').setData(empty());
+  const plainTxt = plain.status === 'fulfilled' && plain.value ? ` · no filter: ${km(plain.value.distance)}` : '';
+  if (dated.status === 'rejected') {
+    map.getSource('dated').setData(empty());
+    $('ways').innerHTML = '';
+    setSummary(`No route on ${$('date').value}: ${dated.reason.message}${plainTxt}`, true);
+    return;
+  }
+  const p = dated.value;
+  map.getSource('dated').setData(line(p));
+  setSummary(`<b>${km(p.distance)}</b> · ${Math.round(p.time / 60000)} min on ${$('date').value}${plainTxt}`);
+  renderWays(p);
+}
+
+function km(m) { return (m / 1000).toFixed(1) + ' km'; }
+
+// Group consecutive path segments by OSM way id
+function segments(p) {
+  const by = {};
+  for (const k of ['street_name', 'road_class', 'ohm_start', 'ohm_end']) by[k] = p.details[k] || [];
+  const at = (k, i) => { const iv = by[k].find(([a, b]) => i >= a && i < b); return iv ? iv[2] : null; };
+  return (p.details.osm_way_id || []).reduce((acc, [from, to, id]) => {
+    const last = acc[acc.length - 1];
+    if (last && last.id === id) { last.to = to; return acc; }
+    acc.push({ id, from, to, name: at('street_name', from), cls: at('road_class', from), start: at('ohm_start', from), end: at('ohm_end', from) });
+    return acc;
+  }, []);
+}
+
+async function renderWays(p) {
+  const segs = segments(p);
+  const ul = $('ways');
+  ul.innerHTML = '';
+  for (const s of segs) {
+    const li = document.createElement('li');
+    li.dataset.id = s.id;
+    li.innerHTML = `<div class="name">${esc(s.name) || '<span class="muted">(no name)</span>'} <span class="muted">${esc(s.cls || '')}</span></div>
+      <div class="dates" data-dates>${fmtDec(s.start)} → ${fmtDec(s.end)}</div>
+      <a href="https://www.openhistoricalmap.org/way/${s.id}" target="_blank" rel="noopener">way/${s.id}</a>`;
+    li.onmouseenter = () => map.getSource('hl').setData({ type: 'Feature', properties: {},
+      geometry: { type: 'LineString', coordinates: p.points.coordinates.slice(s.from, s.to + 1) } });
+    li.onmouseleave = () => map.getSource('hl').setData(empty());
+    ul.appendChild(li);
+  }
+  // Show the raw start_date/end_date tags from the OHM API
+  const ids = [...new Set(segs.map(s => s.id))].filter(id => !tagCache.has(id));
+  for (let i = 0; i < ids.length; i += 100) {
+    try {
+      const r = await fetch(`${OHM_API}/ways.json?ways=${ids.slice(i, i + 100).join(',')}`);
+      if (!r.ok) break;
+      for (const el of (await r.json()).elements) tagCache.set(el.id, el.tags || {});
+    } catch (e) { console.warn('OHM API', e); break; }
+  }
+  for (const li of ul.children) {
+    const t = tagCache.get(+li.dataset.id);
+    if (t) li.querySelector('[data-dates]').textContent = `${t.start_date || '…'} → ${t.end_date || '…'}  (${t.highway || '?'})`;
+  }
+}
+
+function esc(s) { return s ? String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])) : ''; }
+</script>
+</body>
+</html>
