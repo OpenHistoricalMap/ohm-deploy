@@ -6,6 +6,10 @@ source ./scripts/utils.sh
 # Regenerates water centerlines (#1374) every GENERATE_WATER_CENTERLINES_INTERVAL_SECONDS seconds.
 # The Python script is incremental, so runs after the first one only process
 # water bodies whose geometry changed.
+#
+# This runs as a background loop inside the tiler-imposm container on purpose.
+# It keeps the job next to imposm, with the same DB access, expire dir and
+# status file. A separate CronJob would need its own chart outside osm-seed.
 
 INTERVAL="${GENERATE_WATER_CENTERLINES_INTERVAL_SECONDS:-604800}"
 
