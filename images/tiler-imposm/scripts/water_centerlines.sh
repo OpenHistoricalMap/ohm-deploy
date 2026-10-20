@@ -3,11 +3,11 @@ set -e
 
 source ./scripts/utils.sh
 
-# Regenerates water centerlines (#1374) every WATER_CENTERLINES_INTERVAL seconds.
+# Regenerates water centerlines (#1374) every GENERATE_WATER_CENTERLINES_INTERVAL_SECONDS seconds.
 # The Python script is incremental, so runs after the first one only process
 # water bodies whose geometry changed.
 
-INTERVAL="${WATER_CENTERLINES_INTERVAL:-604800}"
+INTERVAL="${GENERATE_WATER_CENTERLINES_INTERVAL_SECONDS:-604800}"
 
 while true; do
     log_message "${YELLOW}Generating water centerlines..."

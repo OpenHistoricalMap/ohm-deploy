@@ -41,7 +41,7 @@ TABLE = "water_areas_centerlines"
 # Minimum polygon area in m2 and minimum elongation ratio, defined as
 # polygon area / area of the maximum inscribed circle. A circle is 1,
 # Lake Tahoe ~2.4, Lake Mead ~11.8.
-MIN_AREA = float(os.getenv("CENTERLINE_MIN_AREA", "10000000"))
+MIN_AREA = float(os.getenv("CENTERLINE_MIN_AREA", "2000000"))
 MIN_RATIO = float(os.getenv("CENTERLINE_MIN_RATIO", "5"))
 # Number of outline points per polygon used to build the Voronoi diagram.
 OUTLINE_POINTS = int(os.getenv("CENTERLINE_OUTLINE_POINTS", "5000"))
@@ -54,24 +54,32 @@ EXPIRE_DIR = os.getenv("IMPOSM3_EXPIRE_DIR")
 EXPIRE_ZOOM = 14
 WEB_MERCATOR_MAX = 20037508.342789244
 
-# Rivers already get labels along waterway lines, so skip them.
+# Rivers usually get labels along their waterway lines, so river polygons are
+# only used when no waterway line with the same name crosses them.
 CANDIDATES_SQL = """
-SELECT DISTINCT ON (osm_id)
-    osm_id,
-    md5(ST_AsBinary(geometry)) AS geom_hash,
-    ST_AsBinary(geometry) AS geom
-FROM osm_water_areas
-WHERE name <> ''
-  AND area > %(min_area)s
-  AND type NOT IN ('river', 'riverbank')
-  AND COALESCE(tags->'water', '') NOT IN
-      ('river', 'riverbank', 'canal', 'stream', 'ditch', 'drain', 'moat', 'wastewater')
-  AND ST_GeometryType(geometry) IN ('ST_Polygon', 'ST_MultiPolygon')
-  AND ST_Area(geometry) / NULLIF(
+SELECT DISTINCT ON (a.osm_id)
+    a.osm_id,
+    md5(ST_AsBinary(a.geometry)) AS geom_hash,
+    ST_AsBinary(a.geometry) AS geom
+FROM osm_water_areas a
+WHERE a.name <> ''
+  AND a.area > %(min_area)s
+  AND ST_GeometryType(a.geometry) IN ('ST_Polygon', 'ST_MultiPolygon')
+  AND (
+    (a.type NOT IN ('river', 'riverbank')
+     AND COALESCE(a.tags->'water', '') NOT IN
+         ('river', 'riverbank', 'canal', 'stream', 'ditch', 'drain', 'moat', 'wastewater'))
+    OR NOT EXISTS (
+      SELECT 1 FROM osm_water_lines l
+      WHERE l.name = a.name
+        AND ST_Intersects(l.geometry, a.geometry)
+    )
+  )
+  AND ST_Area(a.geometry) / NULLIF(
         pi() * power((ST_MaximumInscribedCircle(
-            ST_SimplifyPreserveTopology(geometry, 100))).radius, 2), 0
+            ST_SimplifyPreserveTopology(a.geometry, 100))).radius, 2), 0
       ) >= %(min_ratio)s
-ORDER BY osm_id, area DESC
+ORDER BY a.osm_id, a.area DESC
 """
 
 CREATE_SQL = f"""
