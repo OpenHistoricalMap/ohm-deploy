@@ -511,7 +511,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-db-data-v7
+      localVolumeHostPath: /mnt/tiler-db-data-001
     resources: {}
     postgresqlConfig:
       enabled: true
@@ -604,7 +604,7 @@ osm-seed:
     env:
       # --- Settings
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://planet.openhistoricalmap.org/planet/planet-260602_0301.osm.pbf
+      TILER_IMPORT_PBF_URL: https://planet.openhistoricalmap.org/planet/planet-261021_0000.osm.pbf
       REPLICATION_URL: https://planet.openhistoricalmap.org/replication/minute/
       SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
@@ -624,7 +624,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-imposm-data-v7
+      localVolumeHostPath: /mnt/tiler-imposm-data-001
     resources: {}
     nodeSelector: {}
     nodeAffinity:
