@@ -93,15 +93,15 @@
           ]
         },
         {
-          "function_name": "water_areas_centerlines",
-          "source_layer": "water_areas_centerlines",
+          "function_name": "water_name",
+          "source_layer": "water_name",
           "exclude_columns": ["geometry", "tags"],
           "min_zoom": 8,
           "zoom_mapping": [
-            [9, "mv_water_areas_centerlines_z8_9"],
-            [12, "mv_water_areas_centerlines_z10_12"],
-            [15, "mv_water_areas_centerlines_z13_15"],
-            [null, "mv_water_areas_centerlines_z16_20"]
+            [9, "mv_water_areas_centroids_z8_9"],
+            [12, "mv_water_areas_centroids_z10_12"],
+            [15, "mv_water_areas_centroids_z13_15"],
+            [null, "mv_water_areas_centroids_z16_20"]
           ]
         },
         {

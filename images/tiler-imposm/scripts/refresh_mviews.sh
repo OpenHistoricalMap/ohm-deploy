@@ -216,16 +216,16 @@ water_views=(
     mv_water_areas_z6_7
     mv_water_areas_z3_5
     mv_water_areas_z0_2
+    # centerlines (#1374), before centroids because they are merged into them
+    mv_water_areas_centerlines_z16_20
+    mv_water_areas_centerlines_z13_15
+    mv_water_areas_centerlines_z10_12
+    mv_water_areas_centerlines_z8_9
     # centroids
     mv_water_areas_centroids_z16_20
     mv_water_areas_centroids_z13_15
     mv_water_areas_centroids_z10_12
     mv_water_areas_centroids_z8_9
-    # centerlines (#1374)
-    mv_water_areas_centerlines_z16_20
-    mv_water_areas_centerlines_z13_15
-    mv_water_areas_centerlines_z10_12
-    mv_water_areas_centerlines_z8_9
     # lines
     mv_water_lines_z16_20
     mv_water_lines_z13_15
