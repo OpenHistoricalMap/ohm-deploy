@@ -1,0 +1,33 @@
+{{- if and .Values.ohmRouting.enabled .Values.ohmRouting.web.enabled }}
+# Test page (images/routing/web): pick A and B on the map and a date
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-routing-web
+  labels:
+    {{- include "routing.labels" (dict "root" . "component" "routing-web") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "routing.selector" (dict "root" . "component" "routing-web") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "routing.selector" (dict "root" . "component" "routing-web") | nindent 8 }}
+    spec:
+      {{- include "routing.priorityClass" . | nindent 6 }}
+      {{- include "routing.nodeSelector" .Values.ohmRouting | nindent 6 }}
+      containers:
+        - name: {{ .Release.Name }}-routing-web
+          image: {{ include "routing.image" . }}
+          command: ["python3", "-m", "http.server", "8080", "--directory", "/app/web"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          {{- include "routing.resources" .Values.ohmRouting.web | nindent 10 }}
+{{- end }}

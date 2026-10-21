@@ -1181,3 +1181,41 @@ osm-seed:
       enabled: true
       key: "nodegroup_type"
       values: ["downstream"]
+
+# ====================================================================================================
+# Routing over OHM data by date (GraphHopper), images/routing + ohm/templates/routing
+# ====================================================================================================
+ohmRouting:
+  enabled: false
+  priorityClass: medium-priority
+  nodeSelector: {}
+  # Planet and graphs live on one node, so pin all routing pods to it.
+  # The label must match one node only.
+  nodeAffinity:
+    enabled: true
+    key: "nodegroup_type"
+    values: ["web"]
+  persistenceDisk:
+    mountPath: /data
+    staticHostPath: true
+    localVolumeHostPath: /mnt/routing-data-production
+    localVolumeSize: 20Gi
+  server:
+    replicaCount: 1
+    javaOpts: "-Xms1g -Xmx3g"
+    resources:
+      requests: { cpu: 500m, memory: 3Gi }
+      limits: { memory: 5Gi }
+  update:
+    enabled: true
+    schedule: "0 */2 * * *"
+    javaOpts: "-Xmx6g"
+    fullRefreshDays: 7
+    resources:
+      requests: { cpu: "2", memory: 4Gi }
+      limits: { memory: 8Gi }
+  web:
+    enabled: false
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits: { memory: 128Mi }
