@@ -7,8 +7,8 @@ PLANET_FILE=${PLANET_FILE:-$DATA_DIR/planet.osm.pbf}
 GRAPHS_DIR=${GRAPHS_DIR:-$DATA_DIR/graphs}
 CURRENT_LINK=$GRAPHS_DIR/current
 LOCK_FILE=$DATA_DIR/.update.lock
-PLANET_BUCKET_URL=${PLANET_BUCKET_URL:-https://s3.amazonaws.com/planet.openhistoricalmap.org}
 PLANET_DOWNLOAD_URL=${PLANET_DOWNLOAD_URL:-https://planet.openhistoricalmap.org}
+PLANET_MAX_AGE_DAYS=${PLANET_MAX_AGE_DAYS:-30}
 REPLICATION_URL=${REPLICATION_URL:-https://planet.openhistoricalmap.org/replication/minute}
 # Download a fresh planet after this many days, instead of only applying diffs
 FULL_REFRESH_DAYS=${FULL_REFRESH_DAYS:-7}
@@ -37,19 +37,23 @@ planet_sequence() {
   python3 -I -c "import osmium,sys; h=osmium.io.Reader(sys.argv[1], osmium.osm.osm_entity_bits.NOTHING).header(); print(h.get('osmosis_replication_sequence_number', ''))" "$PLANET_FILE"
 }
 
-# There is no planet-latest file, so list this month and last month in the bucket
+# There is no planet-latest file. Planets are named planet-YYMMDD_0000.osm.pbf,
+# but not every day has one, so try each day back from today.
 latest_planet_key() {
-  local prefix
-  for prefix in "planet/planet-$(date -u +%y%m)" "planet/planet-$(date -u -d 'last month' +%y%m)"; do
-    curl -fsS "$PLANET_BUCKET_URL?prefix=$prefix" \
-      | grep -o '<Key>[^<]*\.osm\.pbf</Key>' | sed 's/<[^>]*>//g' | sort | tail -1
-  done | sort | tail -1
+  local i key
+  for i in $(seq 0 "$PLANET_MAX_AGE_DAYS"); do
+    key="planet/planet-$(date -u -d "$i days ago" +%y%m%d)_0000.osm.pbf"
+    if curl -fsI -A "$USER_AGENT" -o /dev/null "$PLANET_DOWNLOAD_URL/$key"; then
+      echo "$key"
+      return 0
+    fi
+  done
 }
 
 download_planet() {
   local key
   key=$(latest_planet_key)
-  [ -n "$key" ] || { log "no planet file found in $PLANET_BUCKET_URL"; return 1; }
+  [ -n "$key" ] || { log "no planet file in the last $PLANET_MAX_AGE_DAYS days on $PLANET_DOWNLOAD_URL"; return 1; }
   log "downloading $key"
   curl -fsSL -A "$USER_AGENT" -o "$PLANET_FILE.tmp" "$PLANET_DOWNLOAD_URL/$key"
   mv "$PLANET_FILE.tmp" "$PLANET_FILE"
