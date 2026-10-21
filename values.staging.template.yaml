@@ -1134,11 +1134,19 @@ ohmRouting:
   enabled: true
   priorityClass: medium-priority
   nodeSelector: {}
-  persistence:
-    storageClass: local-path
-    size: 20Gi
+  # Planet and graphs live on one node, so pin all routing pods to it.
+  # The label must match one node only.
+  nodeAffinity:
+    enabled: true
+    key: "nodegroup_type"
+    values: ["web"]
+  persistenceDisk:
+    mountPath: /data
+    staticHostPath: true
+    localVolumeHostPath: /mnt/routing-data-staging
+    localVolumeSize: 20Gi
   server:
-    replicas: 1
+    replicaCount: 1
     javaOpts: "-Xms1g -Xmx3g"
     resources:
       requests: { cpu: 500m, memory: 3Gi }
@@ -1153,3 +1161,6 @@ ohmRouting:
       limits: { memory: 8Gi }
   web:
     enabled: true
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits: { memory: 128Mi }

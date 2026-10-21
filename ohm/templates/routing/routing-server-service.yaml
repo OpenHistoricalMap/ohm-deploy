@@ -1,0 +1,17 @@
+{{- if .Values.ohmRouting.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-routing-server
+  labels:
+    {{- include "routing.labels" (dict "root" . "component" "routing-server") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "routing.selector" (dict "root" . "component" "routing-server") | nindent 4 }}
+  ports:
+    - name: http
+      port: 8989
+      targetPort: http
+      protocol: TCP
+{{- end }}
