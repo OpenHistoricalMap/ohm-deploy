@@ -1,0 +1,44 @@
+{{- if .Values.ohmRouting.enabled }}
+{{- $p := .Values.ohmRouting.persistenceDisk }}
+{{- $labels := include "routing.labels" (dict "root" . "component" "routing") }}
+# Planet and graphs, shared by the server and the update job
+{{- if $p.staticHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Release.Name }}-routing-data
+  labels:
+    {{- $labels | nindent 4 }}
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: {{ $p.localVolumeSize }}
+  hostPath:
+    path: {{ $p.localVolumeHostPath | quote }}
+    type: DirectoryOrCreate
+---
+{{- end }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-routing-data
+  annotations:
+    "helm.sh/resource-policy": keep
+  labels:
+    {{- $labels | nindent 4 }}
+spec:
+  {{- if $p.staticHostPath }}
+  storageClassName: ""
+  volumeName: {{ .Release.Name }}-routing-data
+  {{- else }}
+  storageClassName: local-path
+  {{- end }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $p.localVolumeSize }}
+{{- end }}

@@ -30,4 +30,5 @@ charts:
         valuesPath: osm-seed.overpassApi.image
       nominatim:
         valuesPath: osm-seed.nominatimApi.image
-        
+      routing:
+        valuesPath: ohmRouting.image
