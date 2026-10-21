@@ -1208,7 +1208,3 @@ ohmRouting:
       limits: { memory: 8Gi }
   web:
     enabled: false
-  ingress:
-    enabled: false
-    className: traefik
-    host: routing.openhistoricalmap.org

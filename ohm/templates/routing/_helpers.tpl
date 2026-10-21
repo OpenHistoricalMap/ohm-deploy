@@ -18,6 +18,6 @@ nodeSelector:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- with $r.priorityClass }}
-priorityClassName: {{ . }}
+priorityClassName: {{ $.Release.Name }}-{{ . }}
 {{- end }}
 {{- end -}}

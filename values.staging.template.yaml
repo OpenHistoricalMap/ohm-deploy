@@ -1153,7 +1153,3 @@ ohmRouting:
       limits: { memory: 8Gi }
   web:
     enabled: true
-  ingress:
-    enabled: true
-    className: traefik
-    host: routing.ohmstaging.org

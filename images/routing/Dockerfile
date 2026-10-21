@@ -38,6 +38,7 @@ COPY --from=build /graphhopper.jar /app/graphhopper.jar
 COPY --from=build /graph-version /app/graph-version
 COPY config/ /app/config/
 COPY scripts/ /app/scripts/
+COPY web/ /app/web/
 RUN chmod +x /app/scripts/*.sh
 EXPOSE 8989
 CMD ["/app/scripts/start.sh"]

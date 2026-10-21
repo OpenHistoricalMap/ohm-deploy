@@ -7,6 +7,7 @@ GraphHopper with an OHM plugin that stores `start_date`/`end_date` of each way, 
 - `config/` GraphHopper config and the `car`, `foot`, `horse` and `carriage` profiles.
 - `scripts/start.sh` starts the server from the current graph, or builds one first if there is none for this image version.
 - `scripts/update.sh` runs from a CronJob: applies replication diffs to the planet, builds a new graph and does a rolling restart of the server.
+- `web/` test page: pick A and B on the map and a date. Served from the same image.
 
 The volume keeps the planet and the graphs:
 
