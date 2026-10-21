@@ -75,6 +75,7 @@ https://vtiles.openhistoricalmap.org/maps/osm_land/{z}/{x}/{y}
 | `place_points_centroids` | z0–20 |
 | `water_areas` | z0–20 |
 | `water_areas_centroids` | z8–20 |
+| `water_name` | z8–20 |
 | `water_lines` | z8–20 |
 | `transport_areas` | z10–20 |
 | `transport_lines` | z5–20 |

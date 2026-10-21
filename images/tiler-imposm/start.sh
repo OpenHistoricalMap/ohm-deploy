@@ -281,6 +281,14 @@ function updateData() {
         log_message "Skipping materialized views refresh (REFRESH_MVIEWS=$REFRESH_MVIEWS)"
     fi
 
+    # Step 1b: Generate water centerlines in background (#1374)
+    if [ "$GENERATE_WATER_CENTERLINES" = "true" ]; then
+        log_message "Starting water centerlines loop (interval ${GENERATE_WATER_CENTERLINES_INTERVAL_SECONDS:-604800}s)..."
+        IMPOSM3_EXPIRE_DIR="$IMPOSM3_EXPIRE_DIR" ./scripts/water_centerlines.sh &
+    else
+        log_message "Skipping water centerlines (GENERATE_WATER_CENTERLINES=$GENERATE_WATER_CENTERLINES)"
+    fi
+
     local local_last_state_path="$DIFF_DIR/last.state.txt"
 
     # Step 2: Handle last.state.txt if OVERWRITE_STATE is enabled
