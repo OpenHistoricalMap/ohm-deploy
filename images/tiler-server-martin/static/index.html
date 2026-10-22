@@ -166,6 +166,44 @@
     const COLORS = ['#4fc3f7','#e91e63','#ffa726','#66bb6a','#ab47bc','#ef5350','#26c6da','#fdd835',
                      '#78909c','#ff7043','#9ccc65','#5c6bc0','#ec407a','#29b6f6','#d4e157','#8d6e63'];
 
+    // Colors by theme so layers are easy to recognize: water in light blue,
+    // landuse in green, amenities in yellow, and so on. First match wins;
+    // layers with no match fall back to COLORS.
+    const THEME_COLORS = [
+      [/^(water|ne_lakes)/,                  '#4fc3f7'],
+      [/^landuse/,                           '#66bb6a'],
+      [/^amenity/,                           '#fdd835'],
+      [/^buildings/,                         '#bcaaa4'],
+      [/^route/,                             '#ab47bc'],
+      [/^transport/,                         '#ff9800'],
+      [/^land_ohm_maritime/,                 '#5c6bc0'],
+      [/^(land_ohm|boundaries|non_admin)/,   '#e91e63'],
+      [/^place/,                             '#eeeeee'],
+      [/^natural/,                           '#8d6e63'],
+      [/^communication/,                     '#78909c'],
+      [/^address/,                           '#9e9e9e'],
+      [/^land_polygons/,                     '#d7ccc8'],
+      [/^other/,                             '#ce93d8'],
+    ];
+    function themeColor(fnName) {
+      const match = THEME_COLORS.find(([re]) => re.test(fnName));
+      return match ? match[1] : null;
+    }
+
+    // A source layer can mix geometries (e.g. water_areas_centroids has points and
+    // centerlines), so draw each feature by its geometry type, not by the layer name.
+    // "$type" also matches Multi* geometries.
+    function geometryLayerSpecs(color) {
+      return [
+        { type: 'fill', filter: ['==', '$type', 'Polygon'],
+          paint: { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color } },
+        { type: 'line', filter: ['==', '$type', 'LineString'],
+          paint: { 'line-color': color, 'line-width': 1, 'line-opacity': 1 } },
+        { type: 'circle', filter: ['==', '$type', 'Point'],
+          paint: { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 } },
+      ];
+    }
+
     // ---- Cache debug mode (?debug=cache) — must be registered before map init ----
     // Uses addProtocol instead of window.fetch because MapLibre fetches vector tiles
     // from a Web Worker, which bypasses the main-thread fetch override.
@@ -344,7 +382,7 @@
           const fns = vls.map(vl => vl.description || vl.id);
           fns.forEach((fnName, i) => {
             const vl = vls[i];
-            sourceColors[fnName] = COLORS[colorIdx % COLORS.length];
+            sourceColors[fnName] = themeColor(fnName) || COLORS[colorIdx % COLORS.length];
             colorIdx++;
             sourceZoomRanges[fnName] = {
               min: vl.minzoom != null ? vl.minzoom : 0,
@@ -489,36 +527,21 @@
         const layerByFn = {};
         const layers = group.functions;
 
-        // Build specs first so we can sort: fills/lines first, circles (centroids/points) last
-        // so points always render on top while preserving the relative order within each type.
-        const specs = layers.map((fnName, i) => {
+        // One style layer per geometry type for each source layer. Draw fills first,
+        // then lines, then circles so points stay on top.
+        const specs = layers.flatMap((fnName, i) => {
           const color = sourceColors[fnName] || COLORS[i % COLORS.length];
           const sourceLayer = sourceLayerNames[fnName] || fnName;
-          const slName = fnName.toLowerCase();
-          let type, paint;
-          if (slName.includes('centroids') || slName.includes('points')) {
-            type = 'circle';
-            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
-          } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime') || slName.includes('communication')) {
-            type = 'line';
-            paint = { 'line-color': color, 'line-width': 1, 'line-opacity': 1 };
-          } else {
-            type = 'fill';
-            paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
-          }
-          return { fnName, sourceLayer, type, paint, i };
+          return geometryLayerSpecs(color).map(g => ({ ...g, fnName, sourceLayer, i }));
         });
 
-        const ordered = [
-          ...specs.filter(s => s.type !== 'circle'),
-          ...specs.filter(s => s.type === 'circle'),
-        ];
-
-        ordered.forEach(spec => {
-          const layerId = `lyr-composite-${spec.fnName}-${spec.i}`;
-          map.addLayer({ id: layerId, type: spec.type, source: sourceId, 'source-layer': spec.sourceLayer, paint: spec.paint });
-          layerIds.push(layerId);
-          layerByFn[spec.fnName] = layerId;
+        ['fill', 'line', 'circle'].forEach(type => {
+          specs.filter(s => s.type === type).forEach(spec => {
+            const layerId = `lyr-composite-${spec.fnName}~${spec.type}-${spec.i}`;
+            map.addLayer({ id: layerId, type: spec.type, source: sourceId, 'source-layer': spec.sourceLayer, filter: spec.filter, paint: spec.paint });
+            layerIds.push(layerId);
+            (layerByFn[spec.fnName] = layerByFn[spec.fnName] || []).push(layerId);
+          });
         });
 
         activeSources['__composite__'] = { sourceId, layerIds, layerByFn, color: '#4fc3f7' };
@@ -536,9 +559,10 @@
     function toggleCompositeLayer(fnName, visible) {
       const composite = activeSources['__composite__'];
       if (!composite) return;
-      const layerId = composite.layerByFn && composite.layerByFn[fnName];
-      if (!layerId || !map.getLayer(layerId)) return;
-      map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+      const ids = (composite.layerByFn && composite.layerByFn[fnName]) || [];
+      ids.forEach(layerId => {
+        if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+      });
     }
 
     function removeSource(name) {
@@ -644,28 +668,18 @@
         }
 
         layers.forEach((sourceLayer, i) => {
-          const slName = sourceLayer.toLowerCase();
-          let type, paint;
-          if (slName.includes('centroids') || slName.includes('points')) {
-            type = 'circle';
-            paint = { 'circle-color': color, 'circle-radius': 3, 'circle-opacity': 0.8 };
-          } else if (slName.includes('line') || slName.includes('route') || slName.includes('maritime') || slName.includes('communication')) {
-            type = 'line';
-            paint = { 'line-color': color, 'line-width': 1, 'line-opacity': 1 };
-          } else {
-            type = 'fill';
-            paint = { 'fill-color': color, 'fill-opacity': 0.35, 'fill-outline-color': color };
-          }
-
-          const layerId = `lyr-${name}-${i}`;
-          map.addLayer({
-            id: layerId,
-            type: type,
-            source: sourceId,
-            'source-layer': sourceLayer,
-            paint: paint,
+          geometryLayerSpecs(color).forEach(spec => {
+            const layerId = `lyr-${name}~${spec.type}-${i}`;
+            map.addLayer({
+              id: layerId,
+              type: spec.type,
+              source: sourceId,
+              'source-layer': sourceLayer,
+              filter: spec.filter,
+              paint: spec.paint,
+            });
+            layerIds.push(layerId);
           });
-          layerIds.push(layerId);
         });
       } catch (e) {
         console.error(`Failed to add source ${name}:`, e);
@@ -716,7 +730,7 @@
       features.forEach(f => {
         const entries = Object.entries(f.properties)
           .filter(([k, v]) => v !== null && v !== '' && v !== undefined);
-        const srcName = f.layer.id.replace(/^lyr-/, '').replace(/-\d+$/, '');
+        const srcName = f.layer.id.replace(/^lyr-/, '').replace(/-\d+$/, '').replace(/~\w+$/, '');
         const color = sourceColors[srcName] || '#4fc3f7';
         const osmId = f.properties.osm_id;
 
