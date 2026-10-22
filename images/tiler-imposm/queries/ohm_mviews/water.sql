@@ -50,7 +50,7 @@ SELECT derive_area_mview(
 -- Water Areas Centerlines Materialized Views (#1374)
 -- Lines along elongated lakes for labels. The table is filled by
 -- scripts/water_centerlines.py; it is created here so the mviews exist even
--- before the script runs. These mviews are merged into the centroids mviews
+-- before the script runs. These mviews are merged into the water_name mviews
 -- below, so they must be created first.
 -- Keep this DDL in sync with CREATE_SQL in scripts/water_centerlines.py.
 -- ============================================================================
@@ -83,31 +83,55 @@ SELECT derive_centerline_mview(
 );
 -- ============================================================================
 -- Water Areas Centroids Materialized Views for Multiple Zoom Levels
--- Lakes with a centerline are labeled with the line instead of the point:
--- their centroid is skipped and the centerline is merged in (#1374).
--- The layer has points and lines, MapLibre places labels on both.
+-- One point per named water body, same as before #1374.
 -- ============================================================================
 SELECT derive_centroid_mview(
     source           => 'mv_water_areas_z16_20',
     target           => 'mv_water_areas_centroids_z16_20',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z13_15',
+    target           => 'mv_water_areas_centroids_z13_15',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z10_12',
+    target           => 'mv_water_areas_centroids_z10_12',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z8_9',
+    target           => 'mv_water_areas_centroids_z8_9',
+    where_filter     => 'name IS NOT NULL AND name <> '''''
+);
+-- ============================================================================
+-- Water Name Materialized Views (#1374)
+-- Labels for water bodies: a point for regular lakes, a centerline for
+-- elongated ones (never both). Styles draw points with symbol-placement
+-- point and lines with symbol-placement line.
+-- ============================================================================
+SELECT derive_centroid_mview(
+    source           => 'mv_water_areas_z16_20',
+    target           => 'mv_water_name_z16_20',
     where_filter     => 'name IS NOT NULL AND name <> '''' AND osm_id NOT IN (SELECT osm_id FROM water_areas_centerlines)',
     union_source     => 'mv_water_areas_centerlines_z16_20'
 );
 SELECT derive_centroid_mview(
     source           => 'mv_water_areas_z13_15',
-    target           => 'mv_water_areas_centroids_z13_15',
+    target           => 'mv_water_name_z13_15',
     where_filter     => 'name IS NOT NULL AND name <> '''' AND osm_id NOT IN (SELECT osm_id FROM water_areas_centerlines)',
     union_source     => 'mv_water_areas_centerlines_z13_15'
 );
 SELECT derive_centroid_mview(
     source           => 'mv_water_areas_z10_12',
-    target           => 'mv_water_areas_centroids_z10_12',
+    target           => 'mv_water_name_z10_12',
     where_filter     => 'name IS NOT NULL AND name <> '''' AND osm_id NOT IN (SELECT osm_id FROM water_areas_centerlines)',
     union_source     => 'mv_water_areas_centerlines_z10_12'
 );
 SELECT derive_centroid_mview(
     source           => 'mv_water_areas_z8_9',
-    target           => 'mv_water_areas_centroids_z8_9',
+    target           => 'mv_water_name_z8_9',
     where_filter     => 'name IS NOT NULL AND name <> '''' AND osm_id NOT IN (SELECT osm_id FROM water_areas_centerlines)',
     union_source     => 'mv_water_areas_centerlines_z8_9'
 );
