@@ -511,7 +511,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-db-data-001
+      localVolumeHostPath: /mnt/tiler-db-data-002
     resources: {}
     postgresqlConfig:
       enabled: true
@@ -614,6 +614,10 @@ osm-seed:
       IMPOSM3_IMPORT_LAYERS: "all"
       REFRESH_MVIEWS: true
       RECREATE_MVIEWS_ON_UPDATE: false
+      # Generate centerlines for elongated lakes, so labels follow the lake shape (#1374)
+      GENERATE_WATER_CENTERLINES: true
+      # How often to regenerate the centerlines, in seconds (604800 = 7 days)
+      GENERATE_WATER_CENTERLINES_INTERVAL_SECONDS: "604800"
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
@@ -624,7 +628,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-imposm-data-001
+      localVolumeHostPath: /mnt/tiler-imposm-data-002
     resources: {}
     nodeSelector: {}
     nodeAffinity:
