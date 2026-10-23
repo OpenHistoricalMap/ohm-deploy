@@ -1,0 +1,43 @@
+{{- if and .Values.ohmRouting.enabled .Values.ohmRouting.update.enabled }}
+{{- $update := .Values.ohmRouting.update }}
+# Applies replication diffs, builds a new graph and restarts the server
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-routing-update
+  labels:
+    {{- include "routing.labels" (dict "root" . "component" "routing-update") | nindent 4 }}
+spec:
+  schedule: {{ $update.schedule | default "0 */2 * * *" | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            {{- include "routing.selector" (dict "root" . "component" "routing-update") | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ .Release.Name }}-routing-update
+          {{- include "routing.scheduling" . | nindent 10 }}
+          containers:
+            - name: {{ .Release.Name }}-routing-update
+              image: {{ include "routing.image" . }}
+              command: ["/app/scripts/update.sh"]
+              env:
+                - name: JAVA_OPTS
+                  value: {{ $update.javaOpts | default "-Xmx6g" | quote }}
+                - name: FULL_REFRESH_DAYS
+                  value: {{ $update.fullRefreshDays | default 7 | quote }}
+                - name: RESTART_DEPLOYMENT
+                  value: {{ .Release.Name }}-routing-server
+              {{- include "routing.resources" $update | nindent 14 }}
+              volumeMounts:
+                - name: routing-data
+                  mountPath: {{ .Values.ohmRouting.persistenceDisk.mountPath }}
+          volumes:
+            {{- include "routing.dataVolume" . | nindent 12 }}
+{{- end }}

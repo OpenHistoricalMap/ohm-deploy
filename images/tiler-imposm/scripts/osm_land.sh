@@ -45,7 +45,12 @@ for i in "${!dataurls[@]}"; do
 	url=${dataurls[$i]}
 
 	echo "fetching $url";
-	curl $url > $i.zip;
+	# osmdata.openstreetmap.de is sometimes down; fall back to our copy on planet.openhistoricalmap.org.
+	if ! curl -fSL --connect-timeout 30 --retry 2 -o $i.zip "$url"; then
+		fallback="https://planet.openhistoricalmap.org/osmdata/$(basename "$url")"
+		echo "fetch failed, trying $fallback"
+		curl -fSL --connect-timeout 30 --retry 2 -o $i.zip "$fallback"
+	fi
 	unzip $i -d $i
 
 	shape_file=$(find $i -type f -name "*.shp")

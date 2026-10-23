@@ -43,6 +43,7 @@ execute_sql_file queries/utils/create_line_mview.sql
 execute_sql_file queries/utils/derive_area_mview.sql
 execute_sql_file queries/utils/derive_line_mview.sql
 execute_sql_file queries/utils/derive_centroid_mview.sql
+execute_sql_file queries/utils/derive_centerline_mview.sql
 
 if [[ "$ALL" == true ]]; then
   ##################### Utils #####################

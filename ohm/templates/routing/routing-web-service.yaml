@@ -1,0 +1,17 @@
+{{- if and .Values.ohmRouting.enabled .Values.ohmRouting.web.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-routing-web
+  labels:
+    {{- include "routing.labels" (dict "root" . "component" "routing-web") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "routing.selector" (dict "root" . "component" "routing-web") | nindent 4 }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+{{- end }}

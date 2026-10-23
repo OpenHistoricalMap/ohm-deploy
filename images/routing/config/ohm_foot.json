@@ -1,0 +1,9 @@
+{
+  "priority": [
+    { "if": "!foot_access", "multiply_by": "0" },
+    { "else": "", "multiply_by": "foot_priority" }
+  ],
+  "speed": [
+    { "if": "true", "limit_to": "foot_average_speed" }
+  ]
+}

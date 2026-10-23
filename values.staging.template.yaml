@@ -460,7 +460,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/data
       subPath: postgresql-data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-db-data-v6
+      localVolumeHostPath: /mnt/tiler-db-data-001
     resources: {}
     postgresqlConfig:
       enabled: true
@@ -537,7 +537,7 @@ osm-seed:
     env:
       # --- Settings
       TILER_IMPORT_FROM: osm
-      TILER_IMPORT_PBF_URL: https://planet.openhistoricalmap.org/planet/planet-260531_0302.osm.pbf
+      TILER_IMPORT_PBF_URL: https://planet.openhistoricalmap.org/planet/planet-261021_0000.osm.pbf
       REPLICATION_URL: https://planet.openhistoricalmap.org/replication/minute/
       SEQUENCE_NUMBER: "1690000"
       OVERWRITE_STATE: false
@@ -547,6 +547,10 @@ osm-seed:
       IMPOSM3_IMPORT_LAYERS: "all"
       REFRESH_MVIEWS: true
       RECREATE_MVIEWS_ON_UPDATE: false
+      # Generate centerlines for elongated lakes, so labels follow the lake shape (#1374)
+      GENERATE_WATER_CENTERLINES: true
+      # How often to regenerate the centerlines, in seconds (604800 = 7 days)
+      GENERATE_WATER_CENTERLINES_INTERVAL_SECONDS: "604800"
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
@@ -557,7 +561,7 @@ osm-seed:
       accessMode: ReadWriteOnce
       mountPath: /mnt/data
       staticHostPath: true
-      localVolumeHostPath: /mnt/tiler-imposm-data-v6
+      localVolumeHostPath: /mnt/tiler-imposm-data-001
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -1126,3 +1130,41 @@ osm-seed:
       enabled: false
       key: "nodegroup_type"
       values: ["web"]
+
+# ====================================================================================================
+# Routing over OHM data by date (GraphHopper), images/routing + ohm/templates/routing
+# ====================================================================================================
+ohmRouting:
+  enabled: true
+  priorityClass: medium-priority
+  nodeSelector: {}
+  # Planet and graphs live on one node, so pin all routing pods to it.
+  # The label must match one node only.
+  nodeAffinity:
+    enabled: true
+    key: "nodegroup_type"
+    values: ["web"]
+  persistenceDisk:
+    mountPath: /data
+    staticHostPath: true
+    localVolumeHostPath: /mnt/routing-data-staging
+    localVolumeSize: 20Gi
+  server:
+    replicaCount: 1
+    javaOpts: "-Xms1g -Xmx3g"
+    resources:
+      requests: { cpu: 500m, memory: 3Gi }
+      limits: { memory: 5Gi }
+  update:
+    enabled: true
+    schedule: "0 */2 * * *"
+    javaOpts: "-Xmx6g"
+    fullRefreshDays: 7
+    resources:
+      requests: { cpu: "2", memory: 4Gi }
+      limits: { memory: 8Gi }
+  web:
+    enabled: true
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits: { memory: 128Mi }
