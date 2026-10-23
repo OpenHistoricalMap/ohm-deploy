@@ -1190,7 +1190,7 @@ osm-seed:
 # Routing over OHM data by date (GraphHopper), images/routing + ohm/templates/routing
 # ====================================================================================================
 ohmRouting:
-  enabled: false
+  enabled: true
   priorityClass: medium-priority
   nodeSelector: {}
   # Planet and graphs live on one node, so pin all routing pods to it.
