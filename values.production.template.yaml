@@ -1219,7 +1219,7 @@ ohmRouting:
       requests: { cpu: "2", memory: 4Gi }
       limits: { memory: 8Gi }
   web:
-    enabled: false
+    enabled: true
     resources:
       requests: { cpu: 10m, memory: 32Mi }
       limits: { memory: 128Mi }
