@@ -32,3 +32,5 @@ charts:
         valuesPath: osm-seed.nominatimApi.image
       routing:
         valuesPath: ohmRouting.image
+      coastline:
+        valuesPath: ohmCoastline.image
