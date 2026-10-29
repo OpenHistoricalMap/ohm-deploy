@@ -251,6 +251,7 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      PUBLIC_BASE_URL: https://planet-staging.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
@@ -279,6 +280,7 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      PUBLIC_BASE_URL: https://planet-staging.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     resources: {}
@@ -306,6 +308,7 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+      PUBLIC_BASE_URL: https://planet-staging.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
     nodeAffinity:

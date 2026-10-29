@@ -293,6 +293,7 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+      PUBLIC_BASE_URL: https://planet.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
     resources:
@@ -326,6 +327,7 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+      PUBLIC_BASE_URL: https://planet.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
     resources:
@@ -357,6 +359,7 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+      PUBLIC_BASE_URL: https://planet.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
     nodeAffinity:
