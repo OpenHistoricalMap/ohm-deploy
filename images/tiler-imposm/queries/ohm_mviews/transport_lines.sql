@@ -26,6 +26,10 @@
 --     - start_date/end_date: the overlap of the relation and the way.
 --     - other tags: relation's tags on top of the way's (way tags as base).
 --
+--   Railway lines (type=route + route=railway, #1248) do not rename the way.
+--   They add route_name / route_ref / route_operator for the years the line
+--   exists (see RAILWAY LINES block at the end).
+--
 --   Each row gets a concatenated id (id + osm_id) and a source_type
 --   ('way' or 'relation'). Multilingual name columns are added.
 --
@@ -100,6 +104,7 @@ BEGIN
         AND NOT EXISTS (
           SELECT 1 FROM osm_transport_multilines AS tm
           WHERE tm.member::bigint = tl.osm_id AND ST_GeometryType(tm.geometry) = 'ST_LineString'
+            AND tm.class IS DISTINCT FROM 'route'
         )
         AND NOT EXISTS (
           SELECT 1 FROM attr_diff_pairs AS adp WHERE adp.way_osm_id = tl.osm_id
@@ -135,6 +140,7 @@ BEGIN
           SELECT 1 FROM osm_transport_multilines AS tm
           WHERE tm.member::bigint = tl.osm_id
             AND ST_GeometryType(tm.geometry) = 'ST_LineString'
+            AND tm.class IS DISTINCT FROM 'route'
         )
     ),
     -- STEP 2 — clip each relation to the member way's dates. GREATEST/LEAST
@@ -159,6 +165,7 @@ BEGIN
       -- For those, mw is NULL -> no clip -> the relation renders on its own dates.
       LEFT JOIN mline_member_ways AS mw ON mw.osm_id = tm.member::bigint
       WHERE ST_GeometryType(tm.geometry) = 'ST_LineString' AND tm.geometry IS NOT NULL
+        AND tm.class IS DISTINCT FROM 'route'
     ),
     -- STEP 3 — the periods no relation covers. range_agg joins the clipped
     -- relation ranges; we subtract them from the way's range, and each leftover
@@ -221,6 +228,7 @@ BEGIN
         AND NOT EXISTS (
           SELECT 1 FROM osm_transport_multilines AS tm
           WHERE tm.member::bigint = tl.osm_id AND ST_GeometryType(tm.geometry) = 'ST_LineString'
+            AND tm.class IS DISTINCT FROM 'route'
         )
     ),
     -- STEP 2 — clip each street relation to the member way's dates. The
@@ -332,8 +340,7 @@ BEGIN
         isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
         tags,
         ABS(street_rel_osm_id) AS relation,
-        'way' AS source_type,
-        %s
+        'way' AS source_type
       FROM plain_ways
 
       UNION ALL
@@ -384,8 +391,7 @@ BEGIN
         e_dec AS end_decdate,
         tags,
         ABS(rel_osm_id) AS relation,
-        'relation' AS source_type,
-        %s
+        'relation' AS source_type
       FROM mline_rels_clipped
       WHERE (s_dec IS NULL OR e_dec IS NULL OR s_dec < e_dec)
 
@@ -433,8 +439,7 @@ BEGIN
         e_dec AS end_decdate,
         tags,
         NULL::bigint AS relation,
-        'way' AS source_type,
-        %s
+        'way' AS source_type
       FROM mline_gaps
 
       UNION ALL
@@ -483,8 +488,7 @@ BEGIN
         e_dec AS end_decdate,
         tags,
         ABS(rel_osm_id) AS relation,
-        'way' AS source_type,
-        %s
+        'way' AS source_type
       FROM smline_rels_clipped
       WHERE (s_dec IS NULL OR e_dec IS NULL OR s_dec < e_dec)
 
@@ -531,13 +535,118 @@ BEGIN
         e_dec AS end_decdate,
         tags,
         NULL::bigint AS relation,
-        'way' AS source_type,
-        %s
+        'way' AS source_type
       FROM smline_gaps
+    ),
+    -- =======================================================================
+    -- RAILWAY LINES (type=route + route=railway) — #1248
+    --
+    -- A railway line relation groups the tracks of one line (e.g. "Erie
+    -- Mainline"). It does not change the track: the way keeps its own name,
+    -- class and type. The line only adds route_name / route_ref /
+    -- route_operator, and only for the years the line exists.
+    --
+    -- Example: way "Graham Line" 1909-. Line "Erie Mainline" 1850-1960.
+    --   -> 1909-1960: name=Graham Line, route_name=Erie Mainline
+    --   -> 1960-    : name=Graham Line, no route_name (gap)
+    --
+    -- These rows come from osm_transport_multilines with class='route'
+    -- (mapping route=railway). Each row from "combined" is split by the dates
+    -- of its lines. A way in two lines at the same time gets one row per line.
+    -- =======================================================================
+    rail_lines AS (
+      SELECT
+        tm.osm_id AS rel_osm_id,
+        tm.member::bigint AS member_osm_id,
+        NULLIF(tm.name, '') AS route_name,
+        NULLIF(tm.ref, '') AS route_ref,
+        NULLIF(tm.tags->'operator', '') AS route_operator,
+        isodatetodecimaldate(pad_date(tm.start_date, 'start'), FALSE)::double precision AS s_dec,
+        isodatetodecimaldate(pad_date(NULLIF(tm.end_date, ''), 'end'), FALSE)::double precision AS e_dec
+      FROM osm_transport_multilines AS tm
+      WHERE tm.class = 'route'
+        AND tm.geometry IS NOT NULL
+        AND ST_GeometryType(tm.geometry) = 'ST_LineString'
+    ),
+    rail_lines_valid AS (
+      SELECT * FROM rail_lines
+      WHERE s_dec IS NULL OR e_dec IS NULL OR s_dec < e_dec
+    ),
+    -- Rows to split: the way is in a railway line and its own dates are valid.
+    -- Rows with inverted dates (bad data) pass through as they are.
+    combined_split AS (
+      SELECT c.* FROM combined AS c
+      WHERE EXISTS (SELECT 1 FROM rail_lines_valid AS rl WHERE rl.member_osm_id = c.osm_id)
+        AND (c.start_decdate IS NULL OR c.end_decdate IS NULL OR c.start_decdate <= c.end_decdate)
+    ),
+    rail_final AS (
+      -- Rows with no railway line: unchanged.
+      SELECT c.*,
+        NULL::text AS route_name, NULL::text AS route_ref, NULL::text AS route_operator
+      FROM combined AS c
+      WHERE NOT (
+        EXISTS (SELECT 1 FROM rail_lines_valid AS rl WHERE rl.member_osm_id = c.osm_id)
+        AND (c.start_decdate IS NULL OR c.end_decdate IS NULL OR c.start_decdate <= c.end_decdate)
+      )
+
+      UNION ALL
+
+      -- Overlap of the row and the line. GREATEST/LEAST skip NULL, so a NULL
+      -- date keeps its open-ended meaning.
+      SELECT
+        c.id || '_rl_' || ABS(rl.rel_osm_id)::text AS id,
+        c.osm_id, c.geometry, c.type, c.construction, c.golf, c.class, c.name,
+        c.tunnel, c.bridge, c.oneway, c.ref, c.z_order, c.access, c.service,
+        c.ford, c.electrified, c.highspeed, c.usage, c.street_running, c.railway,
+        c.aeroway, c.aerialway, c.highway, c.route, c.expressway,
+        CASE WHEN o.s IS NOT DISTINCT FROM c.start_decdate THEN c.start_date
+             ELSE NULLIF(decimaldatetoisodate(o.s), '') END AS start_date,
+        CASE WHEN o.e IS NOT DISTINCT FROM c.end_decdate THEN c.end_date
+             ELSE NULLIF(decimaldatetoisodate(o.e), '') END AS end_date,
+        o.s AS start_decdate,
+        o.e AS end_decdate,
+        c.tags, c.relation, c.source_type,
+        rl.route_name, rl.route_ref, rl.route_operator
+      FROM combined_split AS c
+      JOIN rail_lines_valid AS rl ON rl.member_osm_id = c.osm_id
+      CROSS JOIN LATERAL (
+        SELECT GREATEST(c.start_decdate, rl.s_dec) AS s, LEAST(c.end_decdate, rl.e_dec) AS e
+      ) AS o
+      WHERE o.s IS NULL OR o.e IS NULL OR o.s < o.e
+
+      UNION ALL
+
+      -- The periods of the row that no line covers: the row as it was.
+      SELECT
+        c.id || '_rlgap_' || g.n::text AS id,
+        c.osm_id, c.geometry, c.type, c.construction, c.golf, c.class, c.name,
+        c.tunnel, c.bridge, c.oneway, c.ref, c.z_order, c.access, c.service,
+        c.ford, c.electrified, c.highspeed, c.usage, c.street_running, c.railway,
+        c.aeroway, c.aerialway, c.highway, c.route, c.expressway,
+        CASE WHEN g.s IS NULL THEN NULL
+             WHEN c.start_decdate IS NOT NULL AND abs(g.s - c.start_decdate) < 1e-9 THEN c.start_date
+             ELSE NULLIF(decimaldatetoisodate(g.s), '') END AS start_date,
+        CASE WHEN g.e IS NULL THEN NULL
+             WHEN c.end_decdate IS NOT NULL AND abs(g.e - c.end_decdate) < 1e-9 THEN c.end_date
+             ELSE NULLIF(decimaldatetoisodate(g.e), '') END AS end_date,
+        g.s AS start_decdate,
+        g.e AS end_decdate,
+        c.tags, c.relation, c.source_type,
+        NULL::text AS route_name, NULL::text AS route_ref, NULL::text AS route_operator
+      FROM combined_split AS c
+      CROSS JOIN LATERAL (
+        SELECT lower(r)::double precision AS s, upper(r)::double precision AS e,
+               row_number() OVER (ORDER BY lower(r) NULLS FIRST) AS n
+        FROM unnest(
+          nummultirange(numrange(c.start_decdate::numeric, c.end_decdate::numeric))
+          - (SELECT range_agg(numrange(rl.s_dec::numeric, rl.e_dec::numeric))
+             FROM rail_lines_valid AS rl WHERE rl.member_osm_id = c.osm_id)
+        ) AS r
+      ) AS g
     )
-    SELECT DISTINCT ON (id) *
-    FROM combined;
-  $sql$, lang_columns, lang_columns, lang_columns, lang_columns, lang_columns);
+    SELECT DISTINCT ON (id) *, %s
+    FROM rail_final;
+  $sql$, lang_columns);
 
   PERFORM finalize_materialized_view(
     'mv_transport_lines_z16_20_tmp',
