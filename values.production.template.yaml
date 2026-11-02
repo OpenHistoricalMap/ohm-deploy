@@ -626,6 +626,7 @@ osm-seed:
       AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      LAND_POLYGONS_URL: https://planet.openhistoricalmap.org/osmdata/land-polygons-split-3857.zip
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -1226,3 +1227,33 @@ ohmRouting:
     resources:
       requests: { cpu: 10m, memory: 32Mi }
       limits: { memory: 128Mi }
+
+# ====================================================================================================
+# Land polygons from OHM coastlines (osmcoastline), images/coastline + ohm/templates/coastline
+# ====================================================================================================
+ohmCoastline:
+  # Off until it is tested on staging
+  enabled: false
+  schedule: "0 3 * * 0"
+  priorityClass: medium-priority
+  nodeSelector: {}
+  nodeAffinity:
+    enabled: true
+    key: "nodegroup_type"
+    values: ["downstream"]
+  diskSize: 20Gi
+  resources:
+    requests: { cpu: "1", memory: 2Gi }
+    limits: { memory: 6Gi }
+  env:
+    # Planet to read the coastlines from
+    PLANET_DOWNLOAD_URL: https://planet.openhistoricalmap.org
+    # Publish to S3. PUBLIC_URL must point to the same bucket, the drop check reads the last json from there
+    AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+    S3_PREFIX: coastline
+    PUBLIC_URL: https://planet.openhistoricalmap.org/coastline
+    AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
+    AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+    # Load the zip into the tiler DB (land_polygons) after the build, so the map gets the new coastlines
+    LOAD_TILER_DB: "true"
+    MAX_DROP_PCT: "20"
