@@ -1,0 +1,56 @@
+{{- if .Values.ohmCoastline.enabled }}
+{{- $c := .Values.ohmCoastline }}
+# Builds land-polygons-split-3857.zip from the OHM coastlines, publishes it to S3
+# and, with LOAD_TILER_DB=true, loads it into the tiler DB
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-coastline
+  labels:
+    {{- include "coastline.labels" (dict "root" . "component" "coastline") | nindent 4 }}
+spec:
+  schedule: {{ $c.schedule | default "0 3 * * 0" | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            {{- include "coastline.labels" (dict "root" . "component" "coastline") | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          {{- include "coastline.scheduling" . | nindent 10 }}
+          containers:
+            - name: {{ .Release.Name }}-coastline
+              image: {{ include "coastline.image" . }}
+              command: ["/app/scripts/run.sh"]
+              env:
+                # Empty values are skipped
+                {{- range $k, $v := $c.env }}
+                {{- if ne (toString $v) "" }}
+                - name: {{ $k }}
+                  value: {{ $v | quote }}
+                {{- end }}
+                {{- end }}
+              envFrom:
+                # POSTGRES_* of the tiler DB, used by load.sh
+                - configMapRef:
+                    name: {{ .Release.Name }}-tiler-db-env
+                    optional: true
+              {{- with $c.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              volumeMounts:
+                - name: coastline-data
+                  mountPath: /data
+          volumes:
+            # Only the planet and temp files, nothing to keep between runs
+            - name: coastline-data
+              emptyDir:
+                sizeLimit: {{ $c.diskSize | default "20Gi" }}
+{{- end }}
