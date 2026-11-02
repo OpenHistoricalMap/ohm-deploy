@@ -88,6 +88,7 @@ map.on('load', () => {
   }
   map.moveLayer('dated');
   applyMapDate();
+  loadFromUrl();
 });
 
 function empty() { return { type: 'FeatureCollection', features: [] }; }
@@ -115,19 +116,44 @@ function fmtDec(v) {
   return v.toFixed(2);
 }
 
-map.on('click', e => {
-  if (pts.length === 2) reset(false);
-  pts.push([e.lngLat.lng, e.lngLat.lat]);
+function addPoint(lngLat) {
+  pts.push([lngLat.lng, lngLat.lat]);
   const el = document.createElement('div');
   el.className = 'pin';
   el.style.background = pts.length === 1 ? '#2b8a3e' : '#c92a2a';
   el.textContent = pts.length === 1 ? 'A' : 'B';
-  const mk = new maplibregl.Marker({ element: el, draggable: true }).setLngLat(e.lngLat).addTo(map);
+  const mk = new maplibregl.Marker({ element: el, draggable: true }).setLngLat(lngLat).addTo(map);
   const idx = pts.length - 1;
   mk.on('dragend', () => { const p = mk.getLngLat(); pts[idx] = [p.lng, p.lat]; route(); });
   markers.push(mk);
+}
+
+map.on('click', e => {
+  if (pts.length === 2) reset(false);
+  addPoint(e.lngLat);
   route();
 });
+
+// Read ?point=lat,lng&point=lat,lng&profile=car&date=1850-01-01 (used by the "More details" link on openhistoricalmap.org)
+function loadFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const profile = params.get('profile');
+  if ([...$('profile').options].some(o => o.value === profile)) $('profile').value = profile;
+  const date = params.get('date');
+  if (toDecimal(date || '') !== null) {
+    $('date').value = date;
+    $('year').value = parseInt(date, 10);
+    applyMapDate();
+  }
+  const points = params.getAll('point')
+    .map(p => p.split(',').map(Number))
+    .filter(([lat, lng]) => isFinite(lat) && isFinite(lng))
+    .slice(0, 2);
+  if (points.length < 2) return;
+  for (const [lat, lng] of points) addPoint({ lat, lng });
+  map.fitBounds(points.map(([lat, lng]) => [lng, lat]), { padding: 80, duration: 0 });
+  route();
+}
 
 function reset(clearMarkers = true) {
   markers.splice(0).forEach(m => m.remove());

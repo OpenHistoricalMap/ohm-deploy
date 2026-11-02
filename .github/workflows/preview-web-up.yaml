@@ -96,8 +96,9 @@ jobs:
           printf '%s\n' "$KUBECONFIG_DATA" > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
 
+      # The CI user cannot list nodes: it only has rights in its namespaces.
       - name: Verify access
-        run: kubectl get nodes
+        run: kubectl get namespace ${{ steps.n.outputs.namespace }}
 
       - name: Substitute secrets into preview values
         uses: bluwy/substitute-string-action@v3
