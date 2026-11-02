@@ -25,6 +25,8 @@ osm-seed:
       SERVER_PROTOCOL: "https"
       MAILER_ADDRESS: "{{MAILER_ADDRESS}}"
       MAILER_DOMAIN: ohmstaging.org
+      # Hetzner blocks outgoing port 25
+      MAILER_PORT: "587"
       MAILER_USERNAME: "{{MAILER_USERNAME}}"
       MAILER_PASSWORD: "{{MAILER_PASSWORD}}"
       MAILER_FROM: web@noreply.openhistoricalmap.org
