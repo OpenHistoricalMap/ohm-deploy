@@ -4,6 +4,8 @@ Builds `land-polygons-split-3857.zip` from the OHM `natural=coastline` ways with
 
 osmcoastline does not read `start_date`/`end_date`, and coastlines from different periods overlap. So `filter_by_date.py` keeps only the ways that exist on `COASTLINE_DATE` (default: today) before running it.
 
+osmcoastline only makes land from closed rings, so a continent with one gap in OHM has no land. With `OSM_FILL=true` (default), `merge_osm.sh` fills that land with the [osmdata](https://osmdata.openstreetmap.de/data/land-polygons.html) polygons: every OHM polygon is kept, OSM pieces that touch no OHM land are copied, and the rest are cut by the OHM land grown by `OSM_CUT_BUFFER` (default 200). When a coast is closed in OHM, it replaces OSM there with no change in the job.
+
 - `scripts/build.sh` planet -> coastline ways -> date filter -> osmcoastline -> checks -> zip. Publishes to `$AWS_S3_BUCKET/$S3_PREFIX/`:
   - `land-polygons-split-3857.zip` land polygons in EPSG:3857, split at `MAX_POINTS`
   - `coastline-errors.zip` `error_points` and `error_lines` as GeoJSON, to fix in the editor

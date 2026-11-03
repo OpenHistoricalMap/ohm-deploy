@@ -1248,7 +1248,7 @@ ohmCoastline:
   env:
     # Planet to read the coastlines from
     PLANET_DOWNLOAD_URL: https://planet.openhistoricalmap.org
-    # Publish to S3. PUBLIC_URL must point to the same bucket, the drop check reads the last json from there
+    # Publish to S3. The drop check reads the last json from the same bucket
     AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
     S3_PREFIX: coastline
     PUBLIC_URL: https://planet.openhistoricalmap.org/coastline

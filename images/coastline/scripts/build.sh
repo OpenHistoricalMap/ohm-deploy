@@ -50,7 +50,14 @@ if [ "${count:-0}" -lt "$MIN_LAND_POLYGONS" ]; then
 fi
 
 # A broken coastline makes the sea flood the land, so do not publish a big drop
-prev=$(curl -fsS -A "$USER_AGENT" "$PUBLIC_URL/$META_NAME" 2>/dev/null | jq -r '.land_polygons // empty' || true)
+# Read the last json from the bucket when we have one, the staging bucket has no public URL
+if [ -n "$AWS_S3_BUCKET" ]; then
+  prev_json=$(aws s3 cp "$AWS_S3_BUCKET/$S3_PREFIX/$META_NAME" - 2>/dev/null || true)
+else
+  prev_json=$(curl -fsS -A "$USER_AGENT" "$PUBLIC_URL/$META_NAME" 2>/dev/null || true)
+fi
+prev=$(echo "$prev_json" | jq -r '.land_polygons // empty' 2>/dev/null || true)
+log "last published land polygons: ${prev:-none}"
 if [ -n "$prev" ] && [ "${FORCE:-false}" != "true" ]; then
   min=$(( prev * (100 - MAX_DROP_PCT) / 100 ))
   if [ "$count" -lt "$min" ]; then
@@ -59,11 +66,20 @@ if [ -n "$prev" ] && [ "${FORCE:-false}" != "true" ]; then
   fi
 fi
 
+land_db=$work/coastline.db
+total=$count
+if [ "$OSM_FILL" = "true" ]; then
+  "$APP_DIR/scripts/merge_osm.sh" "$work/coastline.db" "$work/merged.gpkg"
+  land_db=$work/merged.gpkg
+  total=$(layer_count "$land_db" land_polygons)
+  log "land polygons: ohm=$count total with OSM fill=$total"
+fi
+
 log "writing $ZIP_NAME"
 shp_dir=$work/land-polygons-split-3857
 mkdir -p "$shp_dir"
 # The .shp name becomes the table name in the tiler DB
-ogr2ogr -f "ESRI Shapefile" "$shp_dir/land_polygons.shp" "$work/coastline.db" land_polygons
+ogr2ogr -f "ESRI Shapefile" "$shp_dir/land_polygons.shp" "$land_db" land_polygons
 (cd "$work" && zip -qr "$OUT_DIR/$ZIP_NAME.tmp" land-polygons-split-3857)
 mv "$OUT_DIR/$ZIP_NAME.tmp" "$OUT_DIR/$ZIP_NAME"
 
@@ -82,10 +98,13 @@ jq -n \
   --arg date "$COASTLINE_DATE" \
   --argjson rc "$rc" \
   --argjson land "$count" \
+  --argjson total "$total" \
+  --argjson osm_fill "$([ "$OSM_FILL" = "true" ] && echo true || echo false)" \
   --argjson points "${error_points:-0}" \
   --argjson lines "${error_lines:-0}" \
   '{created: $created, planet: $planet, coastline_date: $date, osmcoastline_rc: $rc,
-    land_polygons: $land, error_points: $points, error_lines: $lines}' > "$OUT_DIR/$META_NAME"
+    land_polygons: $land, osm_fill: $osm_fill, total_polygons: $total,
+    error_points: $points, error_lines: $lines}' > "$OUT_DIR/$META_NAME"
 cat "$OUT_DIR/$META_NAME"
 
 if [ -n "$AWS_S3_BUCKET" ]; then
