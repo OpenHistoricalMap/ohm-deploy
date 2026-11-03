@@ -3,8 +3,7 @@
 # Same format as https://osmdata.openstreetmap.de/download/land-polygons-split-3857.zip,
 # so the tiler loads it the same way. Also publishes the osmcoastline errors as GeoJSON.
 #
-# Steps: planet -> natural=coastline ways -> ways on COASTLINE_DATE -> osmcoastline
-#        -> checks -> zip -> S3
+# Steps: planet -> natural=coastline ways -> osmcoastline -> OSM fill -> checks -> zip -> S3
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 
@@ -21,10 +20,7 @@ elif [ "${SKIP_PLANET_DOWNLOAD:-false}" != "true" ] || [ ! -f "$PLANET_FILE" ]; 
 fi
 
 log "filtering natural=coastline"
-osmium tags-filter "$PLANET_FILE" w/natural=coastline -o "$work/coastline-all.osm.pbf" --overwrite
-
-log "keeping coastlines that exist on $COASTLINE_DATE"
-python3 -I "$APP_DIR/scripts/filter_by_date.py" "$work/coastline-all.osm.pbf" "$work/coastline.osm.pbf" "$COASTLINE_DATE"
+osmium tags-filter "$PLANET_FILE" w/natural=coastline -o "$work/coastline.osm.pbf" --overwrite
 
 # Exit codes: 0 ok, 1 warnings, 2 errors (output still usable), 3 fatal
 log "running osmcoastline"
@@ -95,14 +91,13 @@ mv "$OUT_DIR/$ERRORS_NAME.tmp" "$OUT_DIR/$ERRORS_NAME"
 jq -n \
   --arg created "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --arg planet "${PLANET_KEY:-$PLANET_FILE}" \
-  --arg date "$COASTLINE_DATE" \
   --argjson rc "$rc" \
   --argjson land "$count" \
   --argjson total "$total" \
   --argjson osm_fill "$([ "$OSM_FILL" = "true" ] && echo true || echo false)" \
   --argjson points "${error_points:-0}" \
   --argjson lines "${error_lines:-0}" \
-  '{created: $created, planet: $planet, coastline_date: $date, osmcoastline_rc: $rc,
+  '{created: $created, planet: $planet, osmcoastline_rc: $rc,
     land_polygons: $land, osm_fill: $osm_fill, total_polygons: $total,
     error_points: $points, error_lines: $lines}' > "$OUT_DIR/$META_NAME"
 cat "$OUT_DIR/$META_NAME"
