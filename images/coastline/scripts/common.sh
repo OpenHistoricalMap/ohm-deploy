@@ -10,8 +10,6 @@ PLANET_MAX_AGE_DAYS=${PLANET_MAX_AGE_DAYS:-30}
 USER_AGENT=${USER_AGENT:-ohm-coastline}
 APP_DIR=${APP_DIR:-/app}
 
-# Only coastlines that exist on this date are used. Default: today.
-COASTLINE_DATE=${COASTLINE_DATE:-$(date -u +%Y-%m-%d)}
 # osmcoastline splits polygons bigger than this, same as the osmdata split files
 MAX_POINTS=${MAX_POINTS:-1000}
 # Fail when there are fewer land polygons than this
