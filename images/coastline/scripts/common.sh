@@ -19,6 +19,12 @@ MIN_LAND_POLYGONS=${MIN_LAND_POLYGONS:-1}
 # Fail when the land polygon count drops more than this % from the last published run
 MAX_DROP_PCT=${MAX_DROP_PCT:-20}
 
+# Fill the land that OHM does not have yet (open coastlines) with OSM land polygons
+OSM_FILL=${OSM_FILL:-true}
+OSM_LAND_URL=${OSM_LAND_URL:-https://osmdata.openstreetmap.de/download/land-polygons-split-3857.zip}
+# OSM land closer than this to OHM land is removed, in EPSG:3857 units (about meters)
+OSM_CUT_BUFFER=${OSM_CUT_BUFFER:-200}
+
 # Publish to $AWS_S3_BUCKET/$S3_PREFIX/. Read back from $PUBLIC_URL.
 AWS_S3_BUCKET=${AWS_S3_BUCKET:-}
 S3_PREFIX=${S3_PREFIX:-coastline}

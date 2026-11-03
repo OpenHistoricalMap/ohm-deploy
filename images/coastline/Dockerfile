@@ -9,7 +9,7 @@ RUN apt-get update \
     python3 python3-venv \
  && rm -rf /var/lib/apt/lists/* \
  && python3 -m venv /opt/venv \
- && /opt/venv/bin/pip install --no-cache-dir osmium==4.0.2 awscli==1.36.40 \
+ && /opt/venv/bin/pip install --no-cache-dir osmium==4.0.2 awscli==1.36.40 shapely==2.0.6 pyogrio==0.10.0 \
  && osmcoastline --version
 ENV PATH=/opt/venv/bin:$PATH \
     DATA_DIR=/data
