@@ -626,6 +626,7 @@ osm-seed:
       AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
       AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
       AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      LAND_POLYGONS_URL: https://planet.openhistoricalmap.org/osmdata/land-polygons-split-3857.zip
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -1226,3 +1227,30 @@ ohmRouting:
     resources:
       requests: { cpu: 10m, memory: 32Mi }
       limits: { memory: 128Mi }
+
+# ====================================================================================================
+# Land polygons from OHM coastlines (osmcoastline), images/coastline + ohm/templates/coastline
+# ====================================================================================================
+ohmCoastline:
+  # Off until it is tested on staging
+  enabled: true
+  schedule: "0 3 * * 0"
+  priorityClass: medium-priority
+  nodeSelector: {}
+  nodeAffinity:
+    enabled: true
+    key: "nodegroup_type"
+    values: ["downstream"]
+  diskSize: 20Gi
+  resources:
+    requests: { cpu: "1", memory: 2Gi }
+    limits: { memory: 6Gi }
+  env:
+    PLANET_DOWNLOAD_URL: https://planet.openhistoricalmap.org
+    AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
+    S3_PREFIX: coastline
+    PUBLIC_URL: https://planet.openhistoricalmap.org/coastline
+    AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
+    AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+    LOAD_TILER_DB: "false"
+    MAX_DROP_PCT: "20"

@@ -1171,3 +1171,28 @@ ohmRouting:
     resources:
       requests: { cpu: 10m, memory: 32Mi }
       limits: { memory: 128Mi }
+
+# ====================================================================================================
+# Land polygons from OHM coastlines (osmcoastline), images/coastline + ohm/templates/coastline
+# ====================================================================================================
+ohmCoastline:
+  enabled: true
+  schedule: "0 3 * * 0"
+  priorityClass: medium-priority
+  nodeSelector: {}
+  nodeAffinity:
+    enabled: true
+    key: "nodegroup_type"
+    values: ["web"]
+  diskSize: 20Gi
+  resources:
+    requests: { cpu: "1", memory: 2Gi }
+    limits: { memory: 6Gi }
+  env:
+    PLANET_DOWNLOAD_URL: https://planet.openhistoricalmap.org
+    AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
+    S3_PREFIX: coastline
+    AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
+    AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+    LOAD_TILER_DB: "true"
+    MAX_DROP_PCT: "20"
