@@ -1233,7 +1233,7 @@ ohmRouting:
 # ====================================================================================================
 ohmCoastline:
   # Off until it is tested on staging
-  enabled: false
+  enabled: true
   schedule: "0 3 * * 0"
   priorityClass: medium-priority
   nodeSelector: {}
@@ -1246,14 +1246,11 @@ ohmCoastline:
     requests: { cpu: "1", memory: 2Gi }
     limits: { memory: 6Gi }
   env:
-    # Planet to read the coastlines from
     PLANET_DOWNLOAD_URL: https://planet.openhistoricalmap.org
-    # Publish to S3. The drop check reads the last json from the same bucket
-    AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+    AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
     S3_PREFIX: coastline
     PUBLIC_URL: https://planet.openhistoricalmap.org/coastline
     AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
     AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
-    # Load the zip into the tiler DB (land_polygons) after the build, so the map gets the new coastlines
-    LOAD_TILER_DB: "true"
+    LOAD_TILER_DB: "false"
     MAX_DROP_PCT: "20"
