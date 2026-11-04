@@ -138,7 +138,7 @@ osm-seed:
     enabled: true
     ingress:
       enabled: false
-    priorityClass: high-priority
+    priorityClass: medium-priority
     serviceAccount:
       enabled: false
       name: ohm-s3-bucket-access-production
@@ -251,7 +251,7 @@ osm-seed:
   # ====================================================================================================
   cgimap:
     enabled: true
-    priorityClass: "high-priority"
+    priorityClass: "medium-priority"
     # One web node: a fixed number instead of the autoscaler. On EKS 4 pods
     # used 50-85m CPU and 15-100 Mi each.
     replicaCount: 4

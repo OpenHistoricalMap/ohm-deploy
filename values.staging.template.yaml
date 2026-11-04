@@ -123,7 +123,7 @@ osm-seed:
     enabled: true
     ingress:
       enabled: false
-    priorityClass: "high-priority"
+    priorityClass: "medium-priority"
     serviceAccount:
       enabled: false
       name: ohm-s3-bucket-access-staging
@@ -218,7 +218,7 @@ osm-seed:
   # ====================================================================================================
   cgimap:
     enabled: true
-    priorityClass: "high-priority"
+    priorityClass: "medium-priority"
     resources: {}
     autoscaling:
       enabled: true
