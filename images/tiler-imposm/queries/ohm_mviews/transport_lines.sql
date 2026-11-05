@@ -643,6 +643,9 @@ BEGIN
              FROM rail_lines_valid AS rl WHERE rl.member_osm_id = c.osm_id)
         ) AS r
       ) AS g
+      -- Skip gaps shorter than 2 days. They are not real: when one line ends in
+      -- 1901 and the next starts in 1902, the decimal dates leave a 1 day gap.
+      WHERE g.s IS NULL OR g.e IS NULL OR g.e - g.s > 2.0 / 365
     )
     SELECT DISTINCT ON (id) *, %s
     FROM rail_final;
