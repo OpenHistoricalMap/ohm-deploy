@@ -1037,7 +1037,7 @@ osm-seed:
       values: ["downstream"]
   # ====================================================================================================
   # Variables for MapRoulette API
-  # OAuth2 app in www.ohmstaging.org: redirect URI https://maproulette.ohmstaging.org/auth/callback
+  # OAuth2 app in www.ohmstaging.org: redirect URI https://maproulette.ohmstaging.org
   # Scopes: read_prefs write_prefs write_api
   # ====================================================================================================
   maprouletteApi:
