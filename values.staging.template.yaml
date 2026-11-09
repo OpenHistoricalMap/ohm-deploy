@@ -1056,7 +1056,7 @@ osm-seed:
       APPLICATION_SECRET: "{{STAGING_MAPROULETTE_APPLICATION_SECRET}}"
       MAPROULETTE_SECRET_KEY: "{{STAGING_MAPROULETTE_SECRET_KEY}}"
       # OSM user IDs with admin rights, comma separated
-      MR_SUPER_ACCOUNTS: ""
+      MR_SUPER_ACCOUNTS: "1,675,1525"
       JAVA_OPTS: "-Xms512m -Xmx2g"
     resources: {}
     nodeSelector: {}
