@@ -1029,6 +1029,13 @@ osm-seed:
       MR_URL: https://maproulette.ohmstaging.org
       MR_OSM_SERVER: https://www.ohmstaging.org
       MR_OSM_API_SERVER: https://www.ohmstaging.org
+      MR_ID_EDITOR_URL: https://www.ohmstaging.org/edit
+      MR_RAPID_EDITOR_URL: https://rapid.ohmstaging.org
+      # Any REACT_APP_* key here replaces the same key in the frontend env.json
+      REACT_APP_LEVEL0_EDITOR_SERVER_URL: https://level0.ohmstaging.org/index.php
+      REACT_APP_OSMCHA_SERVER: https://osmcha.ohmstaging.org
+      REACT_APP_TAGINFO_SERVER_URL: https://taginfo.openhistoricalmap.org
+      REACT_APP_IMAGERY_OPENSTREETCAM: disabled
     resources: {}
     nodeSelector: {}
     nodeAffinity:
