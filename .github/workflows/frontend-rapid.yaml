@@ -81,9 +81,9 @@ jobs:
           npm run dist
           sed -e "s|i.client_id|i.client_id,client_secret:\"${OHM_CLIENT_SECRET}\"|g" dist/rapid.min.js > tmpfile && mv tmpfile dist/rapid.min.js
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
 
       - name: Install aws cli
         run: |
