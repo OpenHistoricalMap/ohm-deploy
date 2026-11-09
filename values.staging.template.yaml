@@ -1018,6 +1018,81 @@ osm-seed:
       values: ["downstream"]
 
   # ====================================================================================================
+  # Variables for MapRoulette web (frontend + nginx proxy to maprouletteApi)
+  # ====================================================================================================
+  maprouletteWeb:
+    enabled: true
+    priorityClass: medium-priority
+    ingress:
+      enabled: false
+    env:
+      MR_URL: https://maproulette.ohmstaging.org
+      MR_OSM_SERVER: https://www.ohmstaging.org
+      MR_OSM_API_SERVER: https://www.ohmstaging.org
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
+  # ====================================================================================================
+  # Variables for MapRoulette API
+  # OAuth2 app in www.ohmstaging.org: redirect URI https://maproulette.ohmstaging.org
+  # Scopes: read_prefs write_prefs write_api
+  # ====================================================================================================
+  maprouletteApi:
+    enabled: true
+    priorityClass: medium-priority
+    overpassUrl: https://overpass-api.openhistoricalmap.org/api/interpreter
+    # Set true only on the first start with an empty database
+    bootstrap: true
+    env:
+      MR_OSM_SERVER: https://www.ohmstaging.org
+      MR_FRONTEND_URL: https://maproulette.ohmstaging.org
+      MR_PUBLIC_ORIGIN: https://maproulette.ohmstaging.org
+      MR_OAUTH_CONSUMER_KEY: "I-JsJ09m9kzMnRcgNIY4TgawA1EnZpyykmCjXUt4s3M"
+      MR_OAUTH_CONSUMER_SECRET: "GHV9O9uWCDSPG3ecnYvflLoBoOwO2aNwW5Kpr3vvURc"
+      MR_OSM_OAUTH2SCOPE: "read_prefs write_prefs write_api"
+      APPLICATION_SECRET: "{{STAGING_MAPROULETTE_APPLICATION_SECRET}}"
+      MAPROULETTE_SECRET_KEY: "{{STAGING_MAPROULETTE_SECRET_KEY}}"
+      # OSM user IDs with admin rights, comma separated
+      MR_SUPER_ACCOUNTS: "1,675,1525"
+      JAVA_OPTS: "-Xms512m -Xmx2g"
+    resources: {}
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
+  # ====================================================================================================
+  # Variables for MapRoulette DB
+  # ====================================================================================================
+  maprouletteDb:
+    enabled: true
+    priorityClass: medium-priority
+    image:
+      name: postgis/postgis
+      tag: 17-3.5
+    env:
+      POSTGRES_DB: mrdata
+      POSTGRES_USER: mrdbuser
+      POSTGRES_PASSWORD: "{{STAGING_MAPROULETTE_PG_PASSWORD}}"
+    resources: {}
+    persistenceDisk:
+      enabled: true
+      accessMode: ReadWriteOnce
+      mountPath: /var/lib/postgresql/data
+      # Static hostPath on k3s: fixed dir = data identity, reusable across releases.
+      staticHostPath: true
+      localVolumeHostPath: /mnt/maproulette-data
+      localVolumeSize: 10Gi
+    nodeSelector: {}
+    nodeAffinity:
+      enabled: true
+      key: "nodegroup_type"
+      values: ["downstream"]
+
+  # ====================================================================================================
   # Variables for osmcha osm-adiff-service
   # ====================================================================================================
   adiffService:
