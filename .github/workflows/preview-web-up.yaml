@@ -9,7 +9,7 @@ on:
         description: web-* branch to preview
         required: true
       backup_url:
-        description: apidb backup URL (.sql or .sql.gz); blank = PREVIEW_BACKUP_URL secret
+        description: apidb backup URL (.sql or .sql.gz); blank = PREVIEW_BACKUP_URL var (preview env)
         required: false
   push:
     branches:
@@ -24,6 +24,8 @@ jobs:
   preview:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    # preview values (WEB_* rails key, iD client) live in the "preview" environment as vars
+    environment: preview
     steps:
       - name: Resolve names
         id: n
@@ -112,12 +114,11 @@ jobs:
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
           MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
-          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
-          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
-          STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
-          STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
-          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
-          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
+          WEB_RAILS_CREDENTIALS_YML_ENC: ${{ vars.WEB_RAILS_CREDENTIALS_YML_ENC }}
+          WEB_RAILS_MASTER_KEY: ${{ vars.WEB_RAILS_MASTER_KEY }}
+          WEB_ID_APPLICATION: ${{ vars.WEB_ID_APPLICATION }}
+          WEB_OAUTH_CLIENT_ID: ${{ vars.WEB_OAUTH_CLIENT_ID }}
+          WEB_OAUTH_KEY: ${{ vars.WEB_OAUTH_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -139,10 +140,10 @@ jobs:
         env:
           NS: ${{ steps.n.outputs.namespace }}
           RELEASE: ${{ steps.n.outputs.release }}
-          BACKUP_URL: ${{ github.event.inputs.backup_url || secrets.PREVIEW_BACKUP_URL }}
+          BACKUP_URL: ${{ github.event.inputs.backup_url || vars.PREVIEW_BACKUP_URL }}
         run: |
           if [ -z "$BACKUP_URL" ]; then
-            echo "::error::set the PREVIEW_BACKUP_URL secret (or pass backup_url on dispatch)"; exit 1
+            echo "::error::set the PREVIEW_BACKUP_URL var in the preview environment (or pass backup_url on dispatch)"; exit 1
           fi
           echo "backup: $BACKUP_URL"
           WEB_IMAGE="$(helm -n "$NS" get values "$RELEASE" -a -o json \

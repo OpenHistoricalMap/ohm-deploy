@@ -85,16 +85,18 @@ getFormattedDate() {
 function uploadExpiredFiles() {
     log_message "Checking for expired files to upload..."
 
-    # Upload the expired files to the cloud provider
-    for file in $(find "$IMPOSM3_EXPIRE_DIR" -type f -cmin -1); do
-        bucketFile=${file#*"$WORKDIR"}
-        getFormattedDate "$file"
-
-        # Check if the file has already been uploaded
-        if grep -Fxq "$file" "$TRACKING_FILE"; then
-            log_message "File ${file} has already been uploaded. Skipping..."
+    # Upload the expired files to the cloud provider.
+    # Look back 3 hours instead of 1 minute, so a slow loop does not miss files.
+    # The tracking file skips files that were already uploaded.
+    # Skip files changed in the last 10 seconds, imposm may still be writing them.
+    for file in $(find "$IMPOSM3_EXPIRE_DIR" -type f -mmin -180 ! -newermt "10 seconds ago" | sort); do
+        # Tracking lines look like "<date> - <file>", so match the path as a substring
+        if grep -Fq -- "$file" "$TRACKING_FILE"; then
             continue
         fi
+
+        bucketFile=${file#*"$WORKDIR"}
+        getFormattedDate "$file"
 
         # UPLOAD_EXPIRED_FILES=true to upload the expired files to cloud provider
         if [ "$UPLOAD_EXPIRED_FILES" == "true" ]; then

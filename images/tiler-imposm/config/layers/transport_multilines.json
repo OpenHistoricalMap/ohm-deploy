@@ -176,6 +176,13 @@
               "__any__"
             ]
           }
+        },
+        "route_railway": {
+          "mapping": {
+            "route": [
+              "railway"
+            ]
+          }
         }
       }
     }

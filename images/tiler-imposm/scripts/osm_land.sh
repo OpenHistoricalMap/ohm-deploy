@@ -33,9 +33,11 @@ fi
 # check our connection string before we do any downloading
 psql "dbname='postgres' host='$DB_HOST' port='$DB_PORT' user='$DB_USER' password='$DB_PW'" -c "\q"
 
-# array of natural earth dataset URLs
- dataurls=(
-	"https://osmdata.openstreetmap.de/download/land-polygons-split-3857.zip"
+# Land polygons zip. Default: OSM land from osmdata. For OHM land use the zip
+# from the coastline job, e.g. https://planet.openhistoricalmap.org/coastline/land-polygons-split-3857.zip
+OSMDATA_LAND_URL="https://osmdata.openstreetmap.de/download/land-polygons-split-3857.zip"
+dataurls=(
+	"${LAND_POLYGONS_URL:-$OSMDATA_LAND_URL}"
 )
 
 psql "dbname='postgres' host='$DB_HOST' port='$DB_PORT' user='$DB_USER' password='$DB_PW'" -c "DROP TABLE IF EXISTS land_polygons"
@@ -46,7 +48,9 @@ for i in "${!dataurls[@]}"; do
 
 	echo "fetching $url";
 	# osmdata.openstreetmap.de is sometimes down; fall back to our copy on planet.openhistoricalmap.org.
+	# No fallback for a custom LAND_POLYGONS_URL, so a broken OHM zip is not replaced by OSM land.
 	if ! curl -fSL --connect-timeout 30 --retry 2 -o $i.zip "$url"; then
+		[ "$url" = "$OSMDATA_LAND_URL" ] || exit 1
 		fallback="https://planet.openhistoricalmap.org/osmdata/$(basename "$url")"
 		echo "fetch failed, trying $fallback"
 		curl -fSL --connect-timeout 30 --retry 2 -o $i.zip "$fallback"
