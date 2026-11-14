@@ -645,13 +645,13 @@ SELECT derive_line_mview(
     source           => 'mv_transport_lines_z16_20',
     target           => 'mv_transport_lines_z13_15',
     simplify_tol     => 5,
-    where_filter     => 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'', ''ferry'', ''track'', ''path'', ''footway'', ''cycleway'', ''pedestrian'', ''living_street'', ''steps'', ''bridleway'') OR class IN (''railway'', ''aerialway'')'
+    where_filter     => 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''raceway'', ''residential'', ''service'', ''unclassified'', ''ferry'', ''track'', ''path'', ''footway'', ''cycleway'', ''pedestrian'', ''living_street'', ''steps'', ''bridleway'') OR type LIKE ''%\_construction'' OR class IN (''railway'', ''aerialway'')'
 );
 SELECT derive_line_mview(
     source           => 'mv_transport_lines_z13_15',
     target           => 'mv_transport_lines_z10_12',
     simplify_tol     => 20,
-    where_filter     => 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''ferry'') OR class IN (''railway'')'
+    where_filter     => 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''tertiary'', ''tertiary_link'', ''miniature'', ''narrow_gauge'', ''dismantled'', ''abandoned'', ''disused'', ''razed'', ''light_rail'', ''preserved'', ''proposed'', ''tram'', ''funicular'', ''monorail'', ''taxiway'', ''runway'', ''ferry'') OR type LIKE ''%\_construction'' OR class IN (''railway'')'
 );
 SELECT derive_line_mview(
     source           => 'mv_transport_lines_z10_12',
@@ -662,7 +662,7 @@ SELECT derive_line_mview(
     source           => 'mv_transport_lines_z8_9',
     target           => 'mv_transport_lines_z6_7',
     simplify_tol     => 200,
-    where_filter     => 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''ferry'') OR class IN (''railway'')'
+    where_filter     => 'type IN (''motorway'', ''motorway_link'', ''trunk'', ''trunk_link'', ''construction'', ''primary'', ''primary_link'', ''rail'', ''secondary'', ''secondary_link'', ''ferry'') OR type LIKE ''%\_construction'' OR class IN (''railway'')'
 );
 SELECT derive_line_mview(
     source           => 'mv_transport_lines_z6_7',
