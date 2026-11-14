@@ -25,7 +25,8 @@ python3 /app/scripts/generate_functions.py
 
 # Generate config.yaml from environment variables
 echo "Generating Martin config..."
-cat > /app/config/config.yaml <<EOF
+mkdir -p /etc/martin
+cat > /etc/martin/config.yaml <<EOF
 listen_addresses: '0.0.0.0:${MARTIN_INTERNAL_PORT}'
 worker_processes: ${MARTIN_WORKER_PROCESSES:-8}
 # Disable Martin's internal tile cache so tiles are always generated fresh.
@@ -52,7 +53,7 @@ mkdir -p /run/nginx /var/log/nginx /var/cache/nginx/tiles /var/cache/nginx/stati
 
 # Start Martin in background
 echo "Starting Martin on port ${MARTIN_INTERNAL_PORT}..."
-martin --config /app/config/config.yaml &
+martin --config /etc/martin/config.yaml &
 MARTIN_PID=$!
 
 # Wait for Martin to be ready

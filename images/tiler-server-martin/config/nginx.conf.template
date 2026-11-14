@@ -51,8 +51,9 @@ http {
 
         ##PERLAYER_ROUTES##
 
-        location /config/ {
-            alias /app/config/;
+        # Only expose functions.json. /app/config also holds nginx.conf.
+        location = /config/functions.json {
+            alias /app/config/functions.json;
             add_header Content-Type application/json;
         }
 
