@@ -9,7 +9,7 @@ on:
         description: web-* branch to preview
         required: true
       backup_url:
-        description: apidb backup URL (.sql or .sql.gz); blank = PREVIEW_BACKUP_URL secret
+        description: apidb backup URL (.sql or .sql.gz); blank = PREVIEW_BACKUP_URL var (preview env)
         required: false
   push:
     branches:
@@ -140,10 +140,10 @@ jobs:
         env:
           NS: ${{ steps.n.outputs.namespace }}
           RELEASE: ${{ steps.n.outputs.release }}
-          BACKUP_URL: ${{ github.event.inputs.backup_url || secrets.PREVIEW_BACKUP_URL }}
+          BACKUP_URL: ${{ github.event.inputs.backup_url || vars.PREVIEW_BACKUP_URL }}
         run: |
           if [ -z "$BACKUP_URL" ]; then
-            echo "::error::set the PREVIEW_BACKUP_URL secret (or pass backup_url on dispatch)"; exit 1
+            echo "::error::set the PREVIEW_BACKUP_URL var in the preview environment (or pass backup_url on dispatch)"; exit 1
           fi
           echo "backup: $BACKUP_URL"
           WEB_IMAGE="$(helm -n "$NS" get values "$RELEASE" -a -o json \
