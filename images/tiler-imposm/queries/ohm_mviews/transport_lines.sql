@@ -307,11 +307,7 @@ BEGIN
         id,
         ABS(osm_id) AS osm_id,
         geometry,
-        CASE
-            WHEN highway = 'construction' THEN
-                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
-            ELSE type
-        END AS type,
+        type,
         NULLIF(tags->'construction', '') AS construction,
         NULLIF(tags->'golf', '') AS golf,
         class,
@@ -353,11 +349,7 @@ BEGIN
         (COALESCE(CAST(rel_id AS TEXT), '') || '_' || COALESCE(CAST(rel_osm_id AS TEXT), '')) AS id,
         ABS(member_osm_id) AS osm_id,
         geometry,
-        CASE
-            WHEN highway = 'construction' THEN
-                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
-            ELSE type
-        END AS type,
+        type,
         NULLIF(tags->'construction', '') AS construction,
         NULLIF(tags->'golf', '') AS golf,
         class,
@@ -406,11 +398,7 @@ BEGIN
         (COALESCE(CAST(osm_id AS TEXT), '') || '_gap_' || gap_n::text) AS id,
         ABS(osm_id) AS osm_id,
         geometry,
-        CASE
-            WHEN highway = 'construction' THEN
-                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
-            ELSE type
-        END AS type,
+        type,
         NULLIF(tags->'construction', '') AS construction,
         NULLIF(tags->'golf', '') AS golf,
         class,
@@ -452,11 +440,7 @@ BEGIN
         (COALESCE(CAST(rel_osm_id AS TEXT), '') || '_' || COALESCE(CAST(member_osm_id AS TEXT), '')) AS id,
         ABS(member_osm_id) AS osm_id,
         geometry,
-        CASE
-            WHEN highway = 'construction' THEN
-                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
-            ELSE type
-        END AS type,
+        type,
         NULLIF(tags->'construction', '') AS construction,
         NULLIF(tags->'golf', '') AS golf,
         class,
@@ -502,11 +486,7 @@ BEGIN
         (COALESCE(CAST(osm_id AS TEXT), '') || '_sgap_' || gap_n::text) AS id,
         ABS(osm_id) AS osm_id,
         geometry,
-        CASE
-            WHEN highway = 'construction' THEN
-                COALESCE(NULLIF(tags->'construction', '') || '_construction', 'road_construction')
-            ELSE type
-        END AS type,
+        type,
         NULLIF(tags->'construction', '') AS construction,
         NULLIF(tags->'golf', '') AS golf,
         class,
