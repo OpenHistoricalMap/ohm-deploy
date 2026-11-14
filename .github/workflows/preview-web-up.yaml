@@ -24,7 +24,7 @@ jobs:
   preview:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    # preview values (rails key, iD client) live in the "preview" environment as vars
+    # preview values (WEB_* rails key, iD client) live in the "preview" environment as vars
     environment: preview
     steps:
       - name: Resolve names
@@ -114,10 +114,11 @@ jobs:
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
           MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
-          RAILS_CREDENTIALS_YML_ENC: ${{ vars.RAILS_CREDENTIALS_YML_ENC }}
-          RAILS_MASTER_KEY: ${{ vars.RAILS_MASTER_KEY }}
-          ID_OAUTH_CLIENT_ID: ${{ vars.ID_OAUTH_CLIENT_ID }}
-          ID_OAUTH_KEY: ${{ vars.ID_OAUTH_KEY }}
+          WEB_RAILS_CREDENTIALS_YML_ENC: ${{ vars.WEB_RAILS_CREDENTIALS_YML_ENC }}
+          WEB_RAILS_MASTER_KEY: ${{ vars.WEB_RAILS_MASTER_KEY }}
+          WEB_ID_APPLICATION: ${{ vars.WEB_ID_APPLICATION }}
+          WEB_OAUTH_CLIENT_ID: ${{ vars.WEB_OAUTH_CLIENT_ID }}
+          WEB_OAUTH_KEY: ${{ vars.WEB_OAUTH_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
