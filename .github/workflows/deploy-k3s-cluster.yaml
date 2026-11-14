@@ -105,24 +105,22 @@ jobs:
           AWS_KEY: ${{ secrets.AWS_KEY }}
           AWS_KEY_SECRET: ${{ secrets.AWS_KEY_SECRET }}
           # ======================== Web database (web-db) ========================
-          DB: ${{ vars.DB }}
-          DB_USER: ${{ vars.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_BACKUP_S3_BUCKET: ${{ vars.DB_BACKUP_S3_BUCKET }}
+          WEB_DB: ${{ vars.WEB_DB }}
+          WEB_DB_USER: ${{ vars.WEB_DB_USER }}
+          WEB_DB_PASSWORD: ${{ secrets.WEB_DB_PASSWORD }}
+          WEB_DB_BACKUP_S3_BUCKET: ${{ vars.WEB_DB_BACKUP_S3_BUCKET }}
           # ======================== Web database backups (pgBackRest) ========================
-          PGBACKREST_CIPHER_PASS: ${{ secrets.PGBACKREST_CIPHER_PASS }}
+          WEB_PGBACKREST_CIPHER_PASS: ${{ secrets.WEB_PGBACKREST_CIPHER_PASS }}
           # ======================== Website (web-api) ========================
-          ID_APPLICATION: ${{ vars.ID_APPLICATION }}
-          OAUTH_CLIENT_ID: ${{ vars.OAUTH_CLIENT_ID }}
-          OAUTH_KEY: ${{ secrets.OAUTH_KEY }}
-          ID_OAUTH_CLIENT_ID: ${{ vars.ID_OAUTH_CLIENT_ID }}
-          ID_OAUTH_KEY: ${{ vars.ID_OAUTH_KEY }}
-          RAILS_CREDENTIALS_YML_ENC: ${{ secrets.RAILS_CREDENTIALS_YML_ENC }}
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          OPENSTREETMAP_AUTH_ID: ${{ vars.OPENSTREETMAP_AUTH_ID }}
-          OPENSTREETMAP_AUTH_SECRET: ${{ secrets.OPENSTREETMAP_AUTH_SECRET }}
-          WIKIPEDIA_AUTH_ID: ${{ vars.WIKIPEDIA_AUTH_ID }}
-          WIKIPEDIA_AUTH_SECRET: ${{ secrets.WIKIPEDIA_AUTH_SECRET }}
+          WEB_ID_APPLICATION: ${{ vars.WEB_ID_APPLICATION }}
+          WEB_OAUTH_CLIENT_ID: ${{ vars.WEB_OAUTH_CLIENT_ID }}
+          WEB_OAUTH_KEY: ${{ secrets.WEB_OAUTH_KEY }}
+          WEB_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.WEB_RAILS_CREDENTIALS_YML_ENC }}
+          WEB_RAILS_MASTER_KEY: ${{ secrets.WEB_RAILS_MASTER_KEY }}
+          WEB_OPENSTREETMAP_AUTH_ID: ${{ vars.WEB_OPENSTREETMAP_AUTH_ID }}
+          WEB_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.WEB_OPENSTREETMAP_AUTH_SECRET }}
+          WEB_WIKIPEDIA_AUTH_ID: ${{ vars.WEB_WIKIPEDIA_AUTH_ID }}
+          WEB_WIKIPEDIA_AUTH_SECRET: ${{ secrets.WEB_WIKIPEDIA_AUTH_SECRET }}
           # ======================== Mail (web-api, tasking manager) ========================
           # staging overrides MAILER_USERNAME / MAILER_PASSWORD in its environment
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
