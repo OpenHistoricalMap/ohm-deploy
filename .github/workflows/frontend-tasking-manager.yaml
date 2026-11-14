@@ -7,6 +7,8 @@ on:
 jobs:
   tm:
     runs-on: ubuntu-latest
+    # TM_CLIENT_ID (var) / TM_CLIENT_SECRET (secret) come from the GitHub environment
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.8.0
@@ -41,8 +43,8 @@ jobs:
           POTLATCH2_EDITOR_URL: https://staging.openhistoricalmap.org/edit?editor=potlatch2
           TM_APP_API_URL: https://tm-api.staging.openhistoricalmap.org
           TM_APP_BASE_URL: https://tasks.staging.openhistoricalmap.org
-          TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
-          TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
+          TM_CLIENT_ID: ${{ vars.TM_CLIENT_ID }}
+          TM_CLIENT_SECRET: ${{ secrets.TM_CLIENT_SECRET }}
           TM_REDIRECT_URI: https://tasks.staging.openhistoricalmap.org/authorized
           TM_APP_API_VERSION: v2
           AWS_S3_BUCKET: tasks-staging.openhistoricalmap.org
@@ -62,8 +64,8 @@ jobs:
           POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
           TM_APP_API_URL: https://tm-api.openhistoricalmap.org
           TM_APP_BASE_URL: https://tasks.openhistoricalmap.org
-          TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
-          TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
+          TM_CLIENT_ID: ${{ vars.TM_CLIENT_ID }}
+          TM_CLIENT_SECRET: ${{ secrets.TM_CLIENT_SECRET }}
           TM_REDIRECT_URI: https://tasks.openhistoricalmap.org/authorized
           TM_APP_API_VERSION: v2
           AWS_S3_BUCKET: tasks.openhistoricalmap.org

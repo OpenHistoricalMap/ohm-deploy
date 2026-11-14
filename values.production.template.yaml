@@ -36,9 +36,9 @@ osm-seed:
     enabled: true
     priorityClass: high-priority
     env:
-      POSTGRES_DB: {{PRODUCTION_DB}}
-      POSTGRES_USER: {{PRODUCTION_DB_USER}}
-      POSTGRES_PASSWORD: {{PRODUCTION_DB_PASSWORD}}
+      POSTGRES_DB: {{DB}}
+      POSTGRES_USER: {{DB_USER}}
+      POSTGRES_PASSWORD: {{DB_PASSWORD}}
       LOG_STATEMENT: "none"
       PGDATA: /var/lib/postgresql/data/pgdata
     persistenceDisk:
@@ -123,9 +123,9 @@ osm-seed:
       s3Path: /database/web-db-pgbackrest-k3s
       # k3s (no IRSA): static keys
       s3KeyType: shared
-      s3Key: "{{PRODUCTION_AWS_KEY}}"
-      s3KeySecret: "{{PRODUCTION_AWS_KEY_SECRET}}"
-      cipherPass: "{{PRODUCTION_PGBACKREST_CIPHER_PASS}}"
+      s3Key: "{{AWS_KEY}}"
+      s3KeySecret: "{{AWS_KEY_SECRET}}"
+      cipherPass: "{{PGBACKREST_CIPHER_PASS}}"
       retentionFull: 2
       archiveTimeout: 60
       backupIntervalHours: 24
@@ -159,8 +159,8 @@ osm-seed:
       # --- Rails
       RAILS_ENV: production
       RAILS_LOG_LEVEL: warn
-      RAILS_CREDENTIALS_YML_ENC: {{PRODUCTION_RAILS_CREDENTIALS_YML_ENC}}
-      RAILS_MASTER_KEY: {{PRODUCTION_RAILS_MASTER_KEY}}
+      RAILS_CREDENTIALS_YML_ENC: {{RAILS_CREDENTIALS_YML_ENC}}
+      RAILS_MASTER_KEY: {{RAILS_MASTER_KEY}}
       PASSENGER_MAX_POOL_SIZE: 6
       # --- Mail
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
@@ -170,20 +170,20 @@ osm-seed:
       MAILER_FROM: web@noreply.openhistoricalmap.org
       MAILER_PORT: "587"
       # --- Login: OAuth apps (iD, website) and external providers
-      OPENSTREETMAP_id_key: {{PRODUCTION_ID_APPLICATION}}
-      OAUTH_CLIENT_ID: {{PRODUCTION_OAUTH_CLIENT_ID}}
-      OAUTH_KEY: {{PRODUCTION_OAUTH_KEY}}
-      OPENSTREETMAP_AUTH_ID: {{PRODUCTION_OPENSTREETMAP_AUTH_ID}}
-      OPENSTREETMAP_AUTH_SECRET: {{PRODUCTION_OPENSTREETMAP_AUTH_SECRET}}
-      WIKIPEDIA_AUTH_ID: {{PRODUCTION_WIKIPEDIA_AUTH_ID}}
-      WIKIPEDIA_AUTH_SECRET: {{PRODUCTION_WIKIPEDIA_AUTH_SECRET}}
+      OPENSTREETMAP_id_key: {{ID_APPLICATION}}
+      OAUTH_CLIENT_ID: {{OAUTH_CLIENT_ID}}
+      OAUTH_KEY: {{OAUTH_KEY}}
+      OPENSTREETMAP_AUTH_ID: {{OPENSTREETMAP_AUTH_ID}}
+      OPENSTREETMAP_AUTH_SECRET: {{OPENSTREETMAP_AUTH_SECRET}}
+      WIKIPEDIA_AUTH_ID: {{WIKIPEDIA_AUTH_ID}}
+      WIKIPEDIA_AUTH_SECRET: {{WIKIPEDIA_AUTH_SECRET}}
       # --- Uploads (avatars, GPX traces) to S3
       RAILS_STORAGE_SERVICE: s3
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-production
       # k3s (no IRSA): static keys for the bucket above
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       # --- Monitoring
       NEW_RELIC_LICENSE_KEY: 'none'
       NEW_RELIC_APP_NAME: 'none'
@@ -292,10 +292,10 @@ osm-seed:
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
       # --- Upload to S3
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
       PUBLIC_BASE_URL: https://planet.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources:
       requests:
         memory: "8Gi"
@@ -326,10 +326,10 @@ osm-seed:
       PLANET_DUMP_NG_METADATA_URL: https://raw.githubusercontent.com/OpenHistoricalMap/ohm-deploy/refs/heads/main/images/planet-dump/metadata.yml
       # --- Upload to S3
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
       PUBLIC_BASE_URL: https://planet.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources:
       requests:
         memory: "8Gi"
@@ -358,10 +358,10 @@ osm-seed:
       PLANET_EPOCH_DATE: '1970-01-01'
       # --- Upload to S3
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
       PUBLIC_BASE_URL: https://planet.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -382,9 +382,9 @@ osm-seed:
       SLACK_WEBHOOK_URL: {{OHM_SLACK_WEBHOOK_URL}}
       # --- Upload to S3
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -403,9 +403,9 @@ osm-seed:
     enabled: false
     env:
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
 
   # ====================================================================================================
   # Variables for restoring the DB
@@ -433,9 +433,9 @@ osm-seed:
         RETENTION_DAYS: '30'
         # --- Upload to S3
         CLOUDPROVIDER: aws
-        AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
-        AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-        AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+        AWS_S3_BUCKET: {{DB_BACKUP_S3_BUCKET}}
+        AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
@@ -458,9 +458,9 @@ osm-seed:
         BACKUP_CLOUD_FILE: ohm-tm-db
         # --- Upload to S3
         CLOUDPROVIDER: aws
-        AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
-        AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-        AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+        AWS_S3_BUCKET: {{DB_BACKUP_S3_BUCKET}}
+        AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
@@ -486,9 +486,9 @@ osm-seed:
         RETENTION_DAYS: '30'
         # --- Upload to S3
         CLOUDPROVIDER: aws
-        AWS_S3_BUCKET: {{PRODUCTION_DB_BACKUP_S3_BUCKET}}
-        AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-        AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+        AWS_S3_BUCKET: {{DB_BACKUP_S3_BUCKET}}
+        AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
@@ -505,7 +505,7 @@ osm-seed:
     env:
       POSTGRES_DB: tiler_osm_production
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "{{PRODUCTION_TILER_DB_PASSWORD}}"
+      POSTGRES_PASSWORD: "{{TILER_DB_PASSWORD}}"
       POSTGRES_PORT: 5432
     sharedMemorySize: 2Gi
     persistenceDisk:
@@ -624,8 +624,8 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       LAND_POLYGONS_URL: https://planet.openhistoricalmap.org/osmdata/land-polygons-split-3857.zip
     persistenceDisk:
       enabled: true
@@ -654,8 +654,8 @@ osm-seed:
       MARTIN_POOL_SIZE: 25
       # --- Upload to S3
       AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -692,12 +692,12 @@ osm-seed:
       PORT: 8000
       VARNISH_URL: ""
       ZOOM_LEVELS_TO_DELETE: 7,8,9,10,11,12,13,14,15,16,17,18,19,20
-      SQS_QUEUE_URL: {{PRODUCTION_SQS_QUEUE_URL}}
+      SQS_QUEUE_URL: {{SQS_QUEUE_URL}}
       EXPIRED_TILES_BASE_URL: https://planet.openhistoricalmap.org
       # --- AWS
       AWS_REGION_NAME: us-east-1
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -744,7 +744,7 @@ osm-seed:
       tag: "14-3.3"
     env:
       POSTGRES_DB: tm
-      POSTGRES_PASSWORD: {{PRODUCTION_TM_DB_PASSWORD}}
+      POSTGRES_PASSWORD: {{TM_DB_PASSWORD}}
       POSTGRES_USER: postgres
     persistenceDisk:
       enabled: true
@@ -783,7 +783,7 @@ osm-seed:
       OSM_REGISTER_URL: https://www.openhistoricalmap.org/user/new
       ID_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://www.openhistoricalmap.org/edit?editor=potlatch2
-      TM_SECRET: {{PRODUCTION_TM_API_SECRET}}
+      TM_SECRET: {{TM_API_SECRET}}
       TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
       TM_EMAIL_CONTACT_ADDRESS: dev@openhistoricalmap.org
       TM_SMTP_HOST: email-smtp.us-east-1.amazonaws.com
@@ -797,8 +797,8 @@ osm-seed:
       TM_MAX_AOI_AREA: 15000
       TM_APP_API_VERSION: v4
       # The following environment variables are for future versions of TM
-      TM_CLIENT_ID: 2L3O78gSiOX6HHYa-Ktv7ckJqI-qGy3GxkgEf9b5FsM
-      TM_CLIENT_SECRET: nQ-QkUiMftNm0yXRrKcZgrdjo4zkAfQWObTVxDECqNM
+      TM_CLIENT_ID: "{{TM_CLIENT_ID}}"
+      TM_CLIENT_SECRET: "{{TM_CLIENT_SECRET}}"
       TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
       TM_REDIRECT_URI: https://tm-api.openhistoricalmap.org/authorized
       TM_SCOPE: 'read_prefs write_api'
@@ -852,7 +852,7 @@ osm-seed:
       UPDATE_MODE: continuous
       IMPORT_STYLE: /app/ohm-import.lua
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
-      NOMINATIM_PASSWORD: "{{PRODUCTION_NOMINATIM_PG_PASSWORD}}"
+      NOMINATIM_PASSWORD: "{{NOMINATIM_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
       enabled: true
@@ -939,8 +939,8 @@ osm-seed:
       ENVIRONMENT: production
       # --- Upload to S3
       AWS_S3_BUCKET: planet.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: "{{PRODUCTION_AWS_KEY}}"
-      AWS_SECRET_ACCESS_KEY: "{{PRODUCTION_AWS_KEY_SECRET}}"
+      AWS_ACCESS_KEY_ID: "{{AWS_KEY}}"
+      AWS_SECRET_ACCESS_KEY: "{{AWS_KEY_SECRET}}"
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -954,9 +954,9 @@ osm-seed:
     enabled: true
     env:
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
@@ -975,9 +975,9 @@ osm-seed:
     enabled: false
     env:
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
 
   # ====================================================================================================
   # Variables for changeset-replication-job, Configuration to create the replication files by, minute, hour, or day
@@ -986,9 +986,9 @@ osm-seed:
     enabled: true
     env:
       CLOUDPROVIDER: aws
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       COPYRIGHT_OWNER: "OpenHistoricalMap is dedicated to the public domain except where otherwise noted."
       ATTRIBUTION_URL: "https://www.openhistoricalmap.org/copyright"
       LICENSE_URL: "https://creativecommons.org/public-domain/cc0/"
@@ -1025,7 +1025,7 @@ osm-seed:
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-      DJANGO_SECRET_KEY: "{{PRODUCTION_OSMCHA_DJANGO_SECRET_KEY}}"
+      DJANGO_SECRET_KEY: "{{OSMCHA_DJANGO_SECRET_KEY}}"
       DJANGO_SECURE_SSL_REDIRECT: "False"
       OSM_SERVER_URL: https://www.openhistoricalmap.org
       OAUTH_REDIRECT_URI: https://osmcha.openhistoricalmap.org/authorized
@@ -1033,8 +1033,8 @@ osm-seed:
       ## frontend
       OSMCHA_URL: https://osmcha.openhistoricalmap.org
       OSMCHA_API_URL: www.openhistoricalmap.org
-      OAUTH2_OSM_KEY: "{{PRODUCTION_OSMCHA_OAUTH2_OSM_KEY}}"
-      OAUTH2_OSM_SECRET: "{{PRODUCTION_OSMCHA_OAUTH2_OSM_SECRET}}"
+      OAUTH2_OSM_KEY: "{{OSMCHA_OAUTH2_OSM_KEY}}"
+      OAUTH2_OSM_SECRET: "{{OSMCHA_OAUTH2_OSM_SECRET}}"
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -1053,7 +1053,7 @@ osm-seed:
     env:
       POSTGRES_DB: osmcha
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "{{PRODUCTION_OSMCHA_PG_PASSWORD}}"
+      POSTGRES_PASSWORD: "{{OSMCHA_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
       enabled: true
@@ -1109,11 +1109,11 @@ osm-seed:
       MR_OSM_SERVER: https://www.openhistoricalmap.org
       MR_FRONTEND_URL: https://maproulette.openhistoricalmap.org
       MR_PUBLIC_ORIGIN: https://maproulette.openhistoricalmap.org
-      MR_OAUTH_CONSUMER_KEY: "FkbZhVs8cGv8UYwFvdfo8mu4VDmQRNVz_5n3fBeeYaQ"
-      MR_OAUTH_CONSUMER_SECRET: "zONcW4fH0yYwQ4yGvN97LGVT4ECYR_gKYj1r8OnKtFQ"
+      MR_OAUTH_CONSUMER_KEY: "{{MR_OAUTH_CONSUMER_KEY}}"
+      MR_OAUTH_CONSUMER_SECRET: "{{MR_OAUTH_CONSUMER_SECRET}}"
       MR_OSM_OAUTH2SCOPE: "read_prefs write_prefs write_api"
-      APPLICATION_SECRET: "{{PRODUCTION_MAPROULETTE_APPLICATION_SECRET}}"
-      MAPROULETTE_SECRET_KEY: "{{PRODUCTION_MAPROULETTE_SECRET_KEY}}"
+      APPLICATION_SECRET: "{{MAPROULETTE_APPLICATION_SECRET}}"
+      MAPROULETTE_SECRET_KEY: "{{MAPROULETTE_SECRET_KEY}}"
       # OSM user IDs with admin rights, comma separated
       MR_SUPER_ACCOUNTS: "1,675,1525"
       JAVA_OPTS: "-Xms512m -Xmx2g"
@@ -1135,7 +1135,7 @@ osm-seed:
     env:
       POSTGRES_DB: mrdata
       POSTGRES_USER: mrdbuser
-      POSTGRES_PASSWORD: "{{PRODUCTION_MAPROULETTE_PG_PASSWORD}}"
+      POSTGRES_PASSWORD: "{{MAPROULETTE_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
       enabled: true
@@ -1189,8 +1189,8 @@ osm-seed:
       # --- Upload to S3
       AWS_S3_BUCKET: planet.openhistoricalmap.org
       AWS_S3_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     persistenceDisk:
       enabled: true
       mountPath: /data
@@ -1227,10 +1227,10 @@ osm-seed:
       PUBLISH_TARGET: "s3"
       PLANET_STATS_STATE_S3_URI: "s3://planet.openhistoricalmap.org"
       # --- Upload to S3
-      AWS_S3_BUCKET: {{PRODUCTION_S3_BUCKET}}
+      AWS_S3_BUCKET: {{S3_BUCKET}}
       AWS_S3_ENDPOINT: ""
-      AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     # resources enabled with high memory/cpu for the processing job;
     resources: {}
     nodeSelector: {}
@@ -1261,8 +1261,8 @@ osm-seed:
     env:
       OSM_WEBSITE_URL: https://www.openhistoricalmap.org
       OSM_API_URL: https://www.openhistoricalmap.org/api/0.6/
-      OAUTH2_CLIENT_ID: "rs99ze6oTxDbwRW-05qIspMV1Lnl9jt3VyfnAp3oLUA"
-      OAUTH2_CLIENT_SECRET: "arHSio3aAlxy6FXTf40Jq23PM_byt-Q2pHsbpvBt6BI"
+      OAUTH2_CLIENT_ID: "{{LEVEL0_OAUTH2_CLIENT_ID}}"
+      OAUTH2_CLIENT_SECRET: "{{LEVEL0_OAUTH2_CLIENT_SECRET}}"
       OVERPASS_API: "overpass-api.openhistoricalmap.org"
       MAX_REQUEST_OBJECTS: "500"
     resources: {}
@@ -1332,7 +1332,7 @@ ohmCoastline:
     AWS_S3_BUCKET: s3://planet.openhistoricalmap.org
     S3_PREFIX: coastline
     PUBLIC_URL: https://planet.openhistoricalmap.org/coastline
-    AWS_ACCESS_KEY_ID: {{PRODUCTION_AWS_KEY}}
-    AWS_SECRET_ACCESS_KEY: {{PRODUCTION_AWS_KEY_SECRET}}
+    AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+    AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     LOAD_TILER_DB: "false"
     MAX_DROP_PCT: "20"

@@ -31,9 +31,9 @@ osm-seed:
     enabled: true
     priorityClass: "high-priority"
     env:
-      POSTGRES_DB: {{STAGING_DB}}
-      POSTGRES_USER: {{STAGING_DB_USER}}
-      POSTGRES_PASSWORD: {{STAGING_DB_PASSWORD}}
+      POSTGRES_DB: {{DB}}
+      POSTGRES_USER: {{DB_USER}}
+      POSTGRES_PASSWORD: {{DB_PASSWORD}}
       PGDATA: /var/lib/postgresql/data/pgdata
     persistenceDisk:
       enabled: true
@@ -109,9 +109,9 @@ osm-seed:
       # k3s (no IRSA): set webDb.serviceAccount.enabled=false and use static keys.
       # Keep the same bucket, path and cipherPass to restore from the EKS backups.
       s3KeyType: shared
-      s3Key: "{{STAGING_AWS_KEY}}"
-      s3KeySecret: "{{STAGING_AWS_KEY_SECRET}}"
-      cipherPass: "{{STAGING_PGBACKREST_CIPHER_PASS}}"
+      s3Key: "{{AWS_KEY}}"
+      s3KeySecret: "{{AWS_KEY_SECRET}}"
+      cipherPass: "{{PGBACKREST_CIPHER_PASS}}"
       retentionFull: 2
       archiveTimeout: 60
       backupIntervalHours: 24
@@ -142,8 +142,8 @@ osm-seed:
       # --- Rails
       RAILS_ENV: production
       RAILS_LOG_LEVEL: debug
-      RAILS_CREDENTIALS_YML_ENC: {{STAGING_RAILS_CREDENTIALS_YML_ENC}}
-      RAILS_MASTER_KEY: {{STAGING_RAILS_MASTER_KEY}}
+      RAILS_CREDENTIALS_YML_ENC: {{RAILS_CREDENTIALS_YML_ENC}}
+      RAILS_MASTER_KEY: {{RAILS_MASTER_KEY}}
       PASSENGER_MAX_POOL_SIZE: 3
       # --- Mail
       MAILER_ADDRESS: {{MAILER_ADDRESS}}
@@ -154,19 +154,19 @@ osm-seed:
       MAILER_FROM: web@noreply.openhistoricalmap.org
       # --- Login: OAuth apps (iD, website) and external providers
       OPENSTREETMAP_id_key: 7E0Rn-ZjZpEW5cjM-CheEQAbp8nDiCuyB_UmIZOHysA
-      OAUTH_CLIENT_ID: CiBBpurbtUj1np_QZOTngIePlS7K9uGvKDW2Pcw5O7Y
-      OAUTH_KEY: 1O8WtBWivoefehDMT6sbm9TNUU_h_EXznI4cM5XMyJw
-      OPENSTREETMAP_AUTH_ID: {{STAGING_OPENSTREETMAP_AUTH_ID}}
-      OPENSTREETMAP_AUTH_SECRET: {{STAGING_OPENSTREETMAP_AUTH_SECRET}}
-      WIKIPEDIA_AUTH_ID: {{STAGING_WIKIPEDIA_AUTH_ID}}
-      WIKIPEDIA_AUTH_SECRET: {{STAGING_WIKIPEDIA_AUTH_SECRET}}
+      OAUTH_CLIENT_ID: "{{ID_OAUTH_CLIENT_ID}}"
+      OAUTH_KEY: "{{ID_OAUTH_KEY}}"
+      OPENSTREETMAP_AUTH_ID: {{OPENSTREETMAP_AUTH_ID}}
+      OPENSTREETMAP_AUTH_SECRET: {{OPENSTREETMAP_AUTH_SECRET}}
+      WIKIPEDIA_AUTH_ID: {{WIKIPEDIA_AUTH_ID}}
+      WIKIPEDIA_AUTH_SECRET: {{WIKIPEDIA_AUTH_SECRET}}
       # --- Uploads (avatars, GPX traces) to S3
       RAILS_STORAGE_SERVICE: s3
       RAILS_STORAGE_REGION: us-east-1
       RAILS_STORAGE_BUCKET: ohm-website-staging
       # k3s (no IRSA): static keys for the bucket above
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       # --- Monitoring
       NEW_RELIC_LICENSE_KEY: "none"
       NEW_RELIC_APP_NAME: "none"
@@ -252,8 +252,8 @@ osm-seed:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
       PUBLIC_BASE_URL: https://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -281,8 +281,8 @@ osm-seed:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
       PUBLIC_BASE_URL: https://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeAffinity:
       enabled: true
@@ -309,8 +309,8 @@ osm-seed:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
       PUBLIC_BASE_URL: https://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     nodeAffinity:
       enabled: true
       key: "nodegroup_type"
@@ -331,8 +331,8 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -352,8 +352,8 @@ osm-seed:
     env:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
 
   # ====================================================================================================
   # Variables for restoring the DB
@@ -383,8 +383,8 @@ osm-seed:
         # --- Upload to S3
         CLOUDPROVIDER: aws
         AWS_S3_BUCKET: osmseed-staging
-        AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-        AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+        AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
@@ -408,8 +408,8 @@ osm-seed:
         # --- Upload to S3
         CLOUDPROVIDER: aws
         AWS_S3_BUCKET: osmseed-staging
-        AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-        AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+        AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
@@ -436,8 +436,8 @@ osm-seed:
         # --- Upload to S3
         CLOUDPROVIDER: aws
         AWS_S3_BUCKET: osmseed-staging
-        AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-        AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+        AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+        AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       resources: {}
       nodeSelector: {}
       nodeAffinity:
@@ -454,7 +454,7 @@ osm-seed:
     env:
       POSTGRES_DB: tiler_osm_production
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "{{STAGING_TILER_DB_PASSWORD}}"
+      POSTGRES_PASSWORD: "{{TILER_DB_PASSWORD}}"
       POSTGRES_PORT: 5432
     sharedMemorySize: 2Gi
     persistenceDisk:
@@ -557,8 +557,8 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     persistenceDisk:
       enabled: true
       accessMode: ReadWriteOnce
@@ -587,8 +587,8 @@ osm-seed:
       # --- Upload to S3
       # Solo para subir vtiles_languages.geojson a S3 (si AWS_S3_BUCKET vacio, se salta)
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -624,12 +624,12 @@ osm-seed:
       PORT: 8000
       VARNISH_URL: ""
       ZOOM_LEVELS_TO_DELETE: 7,8,9,10,11,12,13,14,15,16,17,18,19,20
-      SQS_QUEUE_URL: {{STAGING_SQS_QUEUE_URL}}
+      SQS_QUEUE_URL: {{SQS_QUEUE_URL}}
       EXPIRED_TILES_BASE_URL: https://planet.ohmstaging.org
       # --- Upload to S3
       AWS_REGION_NAME: us-east-1
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -676,7 +676,7 @@ osm-seed:
       tag: "14-3.3"
     env:
       POSTGRES_DB: tm
-      POSTGRES_PASSWORD: {{STAGING_TM_DB_PASSWORD}}
+      POSTGRES_PASSWORD: {{TM_DB_PASSWORD}}
       POSTGRES_USER: postgres
     persistenceDisk:
       enabled: true
@@ -712,7 +712,7 @@ osm-seed:
       OSM_REGISTER_URL: https://ohmstaging.org/user/new
       ID_EDITOR_URL: https://ohmstaging.org/edit?editor=id
       POTLATCH2_EDITOR_URL: https://ohmstaging.org/edit?editor=potlatch2
-      TM_SECRET: {{STAGING_TM_API_SECRET}}
+      TM_SECRET: {{TM_API_SECRET}}
       TM_EMAIL_FROM_ADDRESS: web@noreply.openhistoricalmap.org
       TM_EMAIL_CONTACT_ADDRESS: dev@openhistoricalmap.org
       # Mail off: the database is a copy of production, with real users. This host does not resolve.
@@ -727,8 +727,8 @@ osm-seed:
       TM_MAX_AOI_AREA: 15000
       TM_APP_API_VERSION: v2
       # The following environment variables are for future versions of TM
-      TM_CLIENT_ID: EeFtCc-qwJEsKZWrD1jFQZfPHp5JpRq-da9jw55z86U
-      TM_CLIENT_SECRET: g0TLdrT-IAu8VEhyuvJ_YBMWWUhSXXO75SpTxG2P3OI
+      TM_CLIENT_ID: "{{TM_CLIENT_ID}}"
+      TM_CLIENT_SECRET: "{{TM_CLIENT_SECRET}}"
       TM_DEFAULT_CHANGESET_COMMENT: '#ohm-project'
       TM_REDIRECT_URI: https://tasks.ohmstaging.org/authorized
       TM_SCOPE: 'read_prefs write_api'
@@ -785,7 +785,7 @@ osm-seed:
       UPDATE_MODE: continuous
       IMPORT_STYLE: /app/ohm-import.lua
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
-      NOMINATIM_PASSWORD: "{{STAGING_NOMINATIM_PG_PASSWORD}}"
+      NOMINATIM_PASSWORD: "{{NOMINATIM_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
       enabled: true
@@ -873,8 +873,8 @@ osm-seed:
       ENVIRONMENT: production
       # --- Upload to S3
       AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: "{{STAGING_AWS_KEY}}"
-      AWS_SECRET_ACCESS_KEY: "{{STAGING_AWS_KEY_SECRET}}"
+      AWS_ACCESS_KEY_ID: "{{AWS_KEY}}"
+      AWS_SECRET_ACCESS_KEY: "{{AWS_KEY_SECRET}}"
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -889,8 +889,8 @@ osm-seed:
     env:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     priorityClass: medium-priority
     serviceAccount:
       enabled: false
@@ -919,8 +919,8 @@ osm-seed:
       # --- Upload to S3
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -935,8 +935,8 @@ osm-seed:
     env:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
       COPYRIGHT_OWNER: "OpenHistoricalMap is dedicated to the public domain except where otherwise noted."
       ATTRIBUTION_URL: "https://www.openhistoricalmap.org/copyright"
       LICENSE_URL: "https://creativecommons.org/public-domain/cc0/"
@@ -973,7 +973,7 @@ osm-seed:
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       OSMCHA_FRONTEND_VERSION: "v0.86.0-production"
-      DJANGO_SECRET_KEY: "{{STAGING_OSMCHA_DJANGO_SECRET_KEY}}"
+      DJANGO_SECRET_KEY: "{{OSMCHA_DJANGO_SECRET_KEY}}"
       DJANGO_SECURE_SSL_REDIRECT: "False"
       OSM_SERVER_URL: https://www.ohmstaging.org
       OAUTH_REDIRECT_URI: https://osmcha.ohmstaging.org/authorized
@@ -981,8 +981,8 @@ osm-seed:
       ## frontend
       OSMCHA_URL: https://osmcha.ohmstaging.org
       OSMCHA_API_URL: www.ohmstaging.org
-      OAUTH2_OSM_KEY: "{{STAGING_OSMCHA_OAUTH2_OSM_KEY}}"
-      OAUTH2_OSM_SECRET: "{{STAGING_OSMCHA_OAUTH2_OSM_SECRET}}"
+      OAUTH2_OSM_KEY: "{{OSMCHA_OAUTH2_OSM_KEY}}"
+      OAUTH2_OSM_SECRET: "{{OSMCHA_OAUTH2_OSM_SECRET}}"
     resources: {}
     nodeSelector: {}
     nodeAffinity:
@@ -1001,7 +1001,7 @@ osm-seed:
     env:
       POSTGRES_DB: osmcha
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "{{STAGING_OSMCHA_PG_PASSWORD}}"
+      POSTGRES_PASSWORD: "{{OSMCHA_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
       enabled: true
@@ -1057,11 +1057,11 @@ osm-seed:
       MR_OSM_SERVER: https://www.ohmstaging.org
       MR_FRONTEND_URL: https://maproulette.ohmstaging.org
       MR_PUBLIC_ORIGIN: https://maproulette.ohmstaging.org
-      MR_OAUTH_CONSUMER_KEY: "I-JsJ09m9kzMnRcgNIY4TgawA1EnZpyykmCjXUt4s3M"
-      MR_OAUTH_CONSUMER_SECRET: "GHV9O9uWCDSPG3ecnYvflLoBoOwO2aNwW5Kpr3vvURc"
+      MR_OAUTH_CONSUMER_KEY: "{{MR_OAUTH_CONSUMER_KEY}}"
+      MR_OAUTH_CONSUMER_SECRET: "{{MR_OAUTH_CONSUMER_SECRET}}"
       MR_OSM_OAUTH2SCOPE: "read_prefs write_prefs write_api"
-      APPLICATION_SECRET: "{{STAGING_MAPROULETTE_APPLICATION_SECRET}}"
-      MAPROULETTE_SECRET_KEY: "{{STAGING_MAPROULETTE_SECRET_KEY}}"
+      APPLICATION_SECRET: "{{MAPROULETTE_APPLICATION_SECRET}}"
+      MAPROULETTE_SECRET_KEY: "{{MAPROULETTE_SECRET_KEY}}"
       # OSM user IDs with admin rights, comma separated
       MR_SUPER_ACCOUNTS: "1,675,1525"
       JAVA_OPTS: "-Xms512m -Xmx2g"
@@ -1083,7 +1083,7 @@ osm-seed:
     env:
       POSTGRES_DB: mrdata
       POSTGRES_USER: mrdbuser
-      POSTGRES_PASSWORD: "{{STAGING_MAPROULETTE_PG_PASSWORD}}"
+      POSTGRES_PASSWORD: "{{MAPROULETTE_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
       enabled: true
@@ -1137,8 +1137,8 @@ osm-seed:
       # --- Upload to S3
       AWS_S3_BUCKET: planet-staging.openhistoricalmap.org
       AWS_S3_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     persistenceDisk:
       enabled: true
       mountPath: /data
@@ -1173,8 +1173,8 @@ osm-seed:
       CLOUDPROVIDER: aws
       AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
       AWS_S3_ENDPOINT: ""
-      AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-      AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+      AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+      AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     # resources enabled with high memory/cpu for the processing job;
     resources: {}
     nodeSelector: {}
@@ -1205,8 +1205,8 @@ osm-seed:
     env:
       OSM_WEBSITE_URL: https://www.ohmstaging.org
       OSM_API_URL: https://www.ohmstaging.org/api/0.6/
-      OAUTH2_CLIENT_ID: "Zt8qjPDUx9H_upbhNrR0Q91hkw2Pl1VzM3pxjRxGnUU"
-      OAUTH2_CLIENT_SECRET: "hokGQq7NznsxA2tQ5Hij7a1vn8rKItf6ApVaxd08dCc"
+      OAUTH2_CLIENT_ID: "{{LEVEL0_OAUTH2_CLIENT_ID}}"
+      OAUTH2_CLIENT_SECRET: "{{LEVEL0_OAUTH2_CLIENT_SECRET}}"
       OVERPASS_API: "overpass-api.openhistoricalmap.org"
       MAX_REQUEST_OBJECTS: "500"
     resources: {}
@@ -1274,7 +1274,7 @@ ohmCoastline:
     PLANET_DOWNLOAD_URL: https://planet.openhistoricalmap.org
     AWS_S3_BUCKET: s3://planet-staging.openhistoricalmap.org
     S3_PREFIX: coastline
-    AWS_ACCESS_KEY_ID: {{STAGING_AWS_KEY}}
-    AWS_SECRET_ACCESS_KEY: {{STAGING_AWS_KEY_SECRET}}
+    AWS_ACCESS_KEY_ID: {{AWS_KEY}}
+    AWS_SECRET_ACCESS_KEY: {{AWS_KEY_SECRET}}
     LOAD_TILER_DB: "true"
     MAX_DROP_PCT: "20"

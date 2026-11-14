@@ -24,6 +24,8 @@ jobs:
   preview:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    # preview values (rails key, iD client) live in the "preview" environment as vars
+    environment: preview
     steps:
       - name: Resolve names
         id: n
@@ -112,12 +114,10 @@ jobs:
           MAILER_ADDRESS: ${{ secrets.MAILER_ADDRESS }}
           MAILER_USERNAME: ${{ secrets.MAILER_USERNAME }}
           MAILER_PASSWORD: ${{ secrets.MAILER_PASSWORD }}
-          STAGING_OPENSTREETMAP_AUTH_ID: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_ID }}
-          STAGING_OPENSTREETMAP_AUTH_SECRET: ${{ secrets.STAGING_OPENSTREETMAP_AUTH_SECRET }}
-          STAGING_WIKIPEDIA_AUTH_ID: ${{ secrets.STAGING_WIKIPEDIA_AUTH_ID }}
-          STAGING_WIKIPEDIA_AUTH_SECRET: ${{ secrets.STAGING_WIKIPEDIA_AUTH_SECRET }}
-          STAGING_RAILS_CREDENTIALS_YML_ENC: ${{ secrets.STAGING_RAILS_CREDENTIALS_YML_ENC }}
-          STAGING_RAILS_MASTER_KEY: ${{ secrets.STAGING_RAILS_MASTER_KEY }}
+          RAILS_CREDENTIALS_YML_ENC: ${{ vars.RAILS_CREDENTIALS_YML_ENC }}
+          RAILS_MASTER_KEY: ${{ vars.RAILS_MASTER_KEY }}
+          ID_OAUTH_CLIENT_ID: ${{ vars.ID_OAUTH_CLIENT_ID }}
+          ID_OAUTH_KEY: ${{ vars.ID_OAUTH_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
