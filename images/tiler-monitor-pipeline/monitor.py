@@ -15,7 +15,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 
-from checks.imposm_import import check_pipeline, check_single_changeset, recheck_retries
+from checks.imposm_import import (
+    check_pipeline, check_single_changeset, recheck_retries, _parse_replication_state,
+)
 from config import Config
 import retry_store
 
@@ -214,6 +216,93 @@ def health():
         },
         status_code=status_code,
     )
+
+
+_STATUS_VALUE = {"ok": 0, "warning": 1, "critical": 2}
+
+# Replication and imposm state files, read on scrape (not on the hourly check)
+# so Prometheus sees a stalled imposm within minutes.
+_STATE_CACHE_SECONDS = 60
+_state_cache = {"at": 0.0, "data": {}}
+_state_lock = threading.Lock()
+
+
+def _fetch_state(url):
+    """Return (sequence, unix_timestamp) of a replication-style state file, or None."""
+    try:
+        resp = requests.get(url, headers={"User-Agent": "ohm-pipeline-monitor/1.0"}, timeout=10)
+        resp.raise_for_status()
+        seq, ts = _parse_replication_state(resp.text)
+        if not seq or ts is None:
+            return None
+        return seq, int(ts.timestamp())
+    except Exception as e:
+        logger.warning(f"Could not read state file {url}: {e}")
+        return None
+
+
+def _get_states():
+    with _state_lock:
+        if time.time() - _state_cache["at"] > _STATE_CACHE_SECONDS:
+            _state_cache["data"] = {
+                "replication": _fetch_state(Config.REPLICATION_STATE_URL),
+                "imposm": _fetch_state(Config.IMPOSM_STATE_URL),
+            }
+            _state_cache["at"] = time.time()
+        return _state_cache["data"]
+
+
+@app.get("/metrics")
+def metrics():
+    """Prometheus metrics: replication and imposm state, and the latest pipeline check."""
+    with _lock:
+        result = _latest_result
+
+    lines = []
+
+    def gauge(name, help_text, samples):
+        lines.append(f"# HELP {name} {help_text}")
+        lines.append(f"# TYPE {name} gauge")
+        for labels, value in samples:
+            lines.append(f"{name}{labels} {value}")
+
+    # A source that could not be read is left out, so the alert rules can tell
+    # "no data" from "stale data".
+    states = {k: v for k, v in _get_states().items() if v}
+    if states:
+        gauge("ohm_tiler_state_sequence",
+              "Sequence number of the minute replication (source=replication) "
+              "and of the last diff imposm applied (source=imposm)",
+              [(f'{{source="{k}"}}', v[0]) for k, v in states.items()])
+        gauge("ohm_tiler_state_timestamp_seconds",
+              "Unix time of the data in the replication state and in the imposm state",
+              [(f'{{source="{k}"}}', v[1]) for k, v in states.items()])
+
+    if result is not None:
+        gauge("ohm_tiler_monitor_status",
+              "Latest pipeline check status (0=ok, 1=warning, 2=critical)",
+              [("", _STATUS_VALUE.get(result.get("status"), 2))])
+        try:
+            checked_ts = datetime.fromisoformat(result["checked_at"]).timestamp()
+            gauge("ohm_tiler_monitor_last_check_timestamp_seconds",
+                  "Unix time of the latest pipeline check",
+                  [("", int(checked_ts))])
+        except (KeyError, ValueError):
+            pass
+
+    try:
+        counts = retry_store.summary()
+    except Exception as e:
+        logger.warning(f"Could not read retry store for metrics: {e}")
+        counts = None
+    if counts is not None:
+        gauge("ohm_tiler_monitor_missing_elements",
+              "Elements missing from the tiler DB, by retry status",
+              [(f'{{status="{st}"}}', counts.get(st, 0))
+               for st in ("pending", "warning", "failed")])
+
+    return Response(content="\n".join(lines) + "\n",
+                    media_type="text/plain; version=0.0.4; charset=utf-8")
 
 
 @app.get("/checks")

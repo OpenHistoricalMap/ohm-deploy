@@ -324,6 +324,14 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
                         )
                         continue
 
+                    # imposm only builds polygons from closed ways
+                    if (elem_type == "way" and detail["geometry"] == "polygon"
+                            and elem.get("is_closed") is False):
+                        rejection_reasons.append(
+                            f"{table_name} requires a closed way (polygon), but this way is not closed"
+                        )
+                        continue
+
                     # Check reject filters
                     rejected = False
                     for reject_key, reject_values in detail["rejects"].items():
@@ -368,6 +376,12 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
                 if not detail:
                     continue
                 compatible_elem_types = _GEOM_TO_ELEM_TYPES.get(detail["geometry"], set())
+                if (elem_type == "way" and detail["geometry"] == "polygon"
+                        and elem.get("is_closed") is False):
+                    rejection_reasons.append(
+                        f"{table_name} requires a closed way (polygon), but this way is not closed"
+                    )
+                    continue
                 if elem_type in compatible_elem_types:
                     return None
 

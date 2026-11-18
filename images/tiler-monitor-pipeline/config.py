@@ -45,6 +45,13 @@ class Config:
         "https://planet.openhistoricalmap.org/imposm/imposm3.json",
     )
 
+    # Imposm state (last.state.txt uploaded by tiler-imposm every 30s): the
+    # last replication diff imposm applied to the tiler DB.
+    IMPOSM_STATE_URL = os.getenv(
+        "IMPOSM_STATE_URL",
+        "https://planet.openhistoricalmap.org/imposm/last.state.txt",
+    )
+
     # How often to run the pipeline check (e.g. "1h", "30m", "3600")
     CHECK_INTERVAL = _parse_duration("TILER_MONITORING_CHECK_INTERVAL", 3600)
 

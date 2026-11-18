@@ -191,6 +191,12 @@ def _check_replication_covers(changeset, repl_seq, repl_ts):
 # Step 2: tiler DB check
 # ---------------------------------------------------------------------------
 
+def _way_is_closed(way_el):
+    """Return True if the way XML element forms a closed ring (first nd == last nd, 4+ nodes)."""
+    refs = [nd.attrib.get("ref") for nd in way_el.findall("nd")]
+    return len(refs) >= 4 and refs[0] == refs[-1]
+
+
 def _get_changeset_elements(changeset_id):
     """Download changeset diff and extract way/relation elements with versions."""
     url = f"{Config.OHM_API_BASE}/changeset/{changeset_id}/download"
@@ -218,6 +224,7 @@ def _get_changeset_elements(changeset_id):
                 timestamp = elem.attrib.get("timestamp", "")
                 # Count nodes for ways (to detect invalid geometries)
                 node_count = len(elem.findall("nd")) if elem_type == "way" else 0
+                is_closed = _way_is_closed(elem) if elem_type == "way" else None
                 # Count members for relations (to detect empty relations)
                 member_count = len(elem.findall("member")) if elem_type == "relation" else 0
                 elements.append({
@@ -228,6 +235,7 @@ def _get_changeset_elements(changeset_id):
                     "tags": tags,
                     "timestamp": timestamp,
                     "node_count": node_count,
+                    "is_closed": is_closed,
                     "member_count": member_count,
                 })
     return elements
@@ -597,7 +605,8 @@ def _get_current_element_info(element_type, osm_id):
                     if k and v:
                         tags[k] = v
                 node_count = len(el.findall("nd")) if element_type == "way" else 0
-                return {"tags": tags, "node_count": node_count}
+                is_closed = _way_is_closed(el) if element_type == "way" else None
+                return {"tags": tags, "node_count": node_count, "is_closed": is_closed}
         return None
     except Exception:
         return None
@@ -983,7 +992,8 @@ def check_pipeline():
             retry_store.mark_resolved(cs_id, etype, oid)
             continue
         current_elem = {"type": etype, "tags": current_info["tags"],
-                        "node_count": current_info["node_count"]}
+                        "node_count": current_info["node_count"],
+                        "is_closed": current_info.get("is_closed")}
         skip_info = imposm_config_loader.get_skip_reason(
             current_elem, TAG_TO_CHECK, _TABLE_DETAILS, _IMPORTABLE_RELATION_TYPES
         )
@@ -1301,7 +1311,8 @@ def recheck_retries():
                              "reason": "element deleted"})
             continue
         current_elem = {"type": etype, "tags": current_info["tags"],
-                        "node_count": current_info["node_count"]}
+                        "node_count": current_info["node_count"],
+                        "is_closed": current_info.get("is_closed")}
         skip_info = imposm_config_loader.get_skip_reason(
             current_elem, TAG_TO_CHECK, _TABLE_DETAILS, _IMPORTABLE_RELATION_TYPES
         )
