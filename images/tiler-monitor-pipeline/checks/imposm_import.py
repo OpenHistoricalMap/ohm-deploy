@@ -197,6 +197,11 @@ def _way_is_closed(way_el):
     return len(refs) >= 4 and refs[0] == refs[-1]
 
 
+def _count_way_members(relation_el):
+    """Number of way members of a relation XML element (imposm builds polygons from ways only)."""
+    return sum(1 for m in relation_el.findall("member") if m.attrib.get("type") == "way")
+
+
 def _get_changeset_elements(changeset_id):
     """Download changeset diff and extract way/relation elements with versions."""
     url = f"{Config.OHM_API_BASE}/changeset/{changeset_id}/download"
@@ -227,6 +232,7 @@ def _get_changeset_elements(changeset_id):
                 is_closed = _way_is_closed(elem) if elem_type == "way" else None
                 # Count members for relations (to detect empty relations)
                 member_count = len(elem.findall("member")) if elem_type == "relation" else 0
+                way_member_count = _count_way_members(elem) if elem_type == "relation" else None
                 elements.append({
                     "type": elem_type,
                     "osm_id": int(osm_id),
@@ -237,6 +243,7 @@ def _get_changeset_elements(changeset_id):
                     "node_count": node_count,
                     "is_closed": is_closed,
                     "member_count": member_count,
+                    "way_member_count": way_member_count,
                 })
     return elements
 
@@ -606,7 +613,9 @@ def _get_current_element_info(element_type, osm_id):
                         tags[k] = v
                 node_count = len(el.findall("nd")) if element_type == "way" else 0
                 is_closed = _way_is_closed(el) if element_type == "way" else None
-                return {"tags": tags, "node_count": node_count, "is_closed": is_closed}
+                way_member_count = _count_way_members(el) if element_type == "relation" else None
+                return {"tags": tags, "node_count": node_count, "is_closed": is_closed,
+                        "way_member_count": way_member_count}
         return None
     except Exception:
         return None
@@ -993,7 +1002,8 @@ def check_pipeline():
             continue
         current_elem = {"type": etype, "tags": current_info["tags"],
                         "node_count": current_info["node_count"],
-                        "is_closed": current_info.get("is_closed")}
+                        "is_closed": current_info.get("is_closed"),
+                        "way_member_count": current_info.get("way_member_count")}
         skip_info = imposm_config_loader.get_skip_reason(
             current_elem, TAG_TO_CHECK, _TABLE_DETAILS, _IMPORTABLE_RELATION_TYPES
         )
@@ -1312,7 +1322,8 @@ def recheck_retries():
             continue
         current_elem = {"type": etype, "tags": current_info["tags"],
                         "node_count": current_info["node_count"],
-                        "is_closed": current_info.get("is_closed")}
+                        "is_closed": current_info.get("is_closed"),
+                        "way_member_count": current_info.get("way_member_count")}
         skip_info = imposm_config_loader.get_skip_reason(
             current_elem, TAG_TO_CHECK, _TABLE_DETAILS, _IMPORTABLE_RELATION_TYPES
         )

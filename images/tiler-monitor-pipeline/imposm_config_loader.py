@@ -324,6 +324,16 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
                         )
                         continue
 
+                    # imposm builds relation polygons from way members only
+                    # (a multipolygon made of other relations has no geometry)
+                    if (elem_type == "relation" and detail["geometry"] == "polygon"
+                            and elem.get("way_member_count") == 0):
+                        rejection_reasons.append(
+                            f"{table_name} requires way members to build the polygon, "
+                            f"but this relation has none"
+                        )
+                        continue
+
                     # imposm only builds polygons from closed ways
                     if (elem_type == "way" and detail["geometry"] == "polygon"
                             and elem.get("is_closed") is False):
@@ -384,6 +394,9 @@ def get_skip_reason(elem, tag_to_check, table_details, importable_relation_types
                     continue
                 if elem_type in compatible_elem_types:
                     return None
+                rejection_reasons.append(
+                    f"{table_name} requires {detail['geometry']} geometry (not compatible with {elem_type})"
+                )
 
     if not matched_any_tag:
         return {
