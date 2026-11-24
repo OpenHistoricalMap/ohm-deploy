@@ -1,0 +1,8 @@
+{
+  "priority": [
+    { "if": "!car_access", "multiply_by": "0" }
+  ],
+  "speed": [
+    { "if": "true", "limit_to": "8" }
+  ]
+}

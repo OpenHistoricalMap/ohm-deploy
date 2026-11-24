@@ -35,14 +35,14 @@ class Config:
     # Replication
     REPLICATION_STATE_URL = os.getenv(
         "REPLICATION_STATE_URL",
-        "https://s3.amazonaws.com/planet.openhistoricalmap.org/replication/minute/state.txt",
+        "https://planet.openhistoricalmap.org/replication/minute/state.txt",
     )
     OHM_API_BASE = os.getenv("OHM_API_BASE", "https://www.openhistoricalmap.org/api/0.6")
 
     # Imposm config URL (compiled imposm3.json uploaded by tiler-imposm to S3)
     IMPOSM_CONFIG_URL = os.getenv(
         "IMPOSM_CONFIG_URL",
-        "https://s3.amazonaws.com/planet.openhistoricalmap.org/imposm/imposm3.json",
+        "https://planet.openhistoricalmap.org/imposm/imposm3.json",
     )
 
     # How often to run the pipeline check (e.g. "1h", "30m", "3600")

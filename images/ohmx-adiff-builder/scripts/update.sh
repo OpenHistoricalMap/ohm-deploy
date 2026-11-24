@@ -22,32 +22,66 @@ for bin in "$OSMX_BIN" "$OSMX_RS_BIN" osm; do
 done
 
 mkdir -p "$SPLIT_ADIFFS_DIR" "$BAD_CHANGESETS_DIR"
+# Only one update.sh runs at a time, so anything left in the work dir comes from
+# a run that start.sh killed on timeout. Remove it, or it piles up on disk.
+rm -rf "$ADIFF_WORK_DIR" && mkdir -p "$ADIFF_WORK_DIR"
 # The db is the single source of truth for position: create_database seeds the
 # seqnum from the planet header, every osmx update --commit advances it.
 seqno_start=$("$OSMX_BIN" query "$OSMX_DB_PATH" seqnum)
 echo ">>> starting from seqno=$seqno_start"
 
+# Run osmx-rs for one .osc with memory, output size and time caps. A changeset
+# that edits many large relations can make osmx-rs grow until the container is
+# OOM-killed, and then the pod restarts on the same seqno forever. It can also
+# write an adiff of many GB per minute, which fills the disk and is too big for
+# OSMCha to load. Killing only osmx-rs lets the loop skip the adiff and keep
+# going. The memory cap uses RssAnon because the LMDB mmap of the db counts as
+# file pages and is not a leak.
+run_adiff() {
+  local osc=$1 outdir=$2 pid start rss elapsed out_mb
+  "$OSMX_RS_BIN" augmented-diff --split "$OSMX_DB_PATH" "$osc" "$outdir" &
+  pid=$!; start=$SECONDS
+  while kill -0 "$pid" 2>/dev/null; do
+    rss=$(awk '/^RssAnon:/{print int($2/1024)}' "/proc/$pid/status" 2>/dev/null || true)
+    out_mb=$(du -sm "$outdir" 2>/dev/null | cut -f1 || true)
+    elapsed=$((SECONDS - start))
+    if [ "${rss:-0}" -gt "$ADIFF_MAX_RSS_MB" ] || [ "${out_mb:-0}" -gt "$ADIFF_MAX_OUTPUT_MB" ] ||
+       [ "$elapsed" -gt "$ADIFF_TIMEOUT" ]; then
+      echo "!!! osmx-rs over limit (rss=${rss:-0}MB, output=${out_mb:-0}MB, ${elapsed}s), killing it"
+      kill -KILL "$pid" 2>/dev/null || true
+      break
+    fi
+    sleep 0.2
+  done
+  wait "$pid"
+}
+
 osm replication minute --seqno "$seqno_start" | while read -r seqno timestamp url; do
   [ -z "${seqno:-}" ] && { echo ">>> end of stream"; break; }
 
   echo ">>> [$seqno] fetching $url"
+  # Stop on a failed download instead of skipping it: the next seqno would commit
+  # and the db would silently miss this minute. The next run retries this seqno.
   if ! curl -fsSL --retry 3 --retry-delay 2 --max-time 120 "$url" | gzip -d > "$seqno.osc"; then
-    echo "!!! [$seqno] download failed, skipping"; rm -f "$seqno.osc"; continue
+    echo "!!! [$seqno] download failed, will retry on the next run"; rm -f "$seqno.osc"; exit 1
   fi
 
   # Generate one adiff per changeset into a tmp dir, then file each fragment under
   # split-adiffs/<changeset>/<seqno>.adiff so they accumulate across replication files.
-  tmpdir=$(mktemp -d)
-  if ! "$OSMX_RS_BIN" augmented-diff --split "$OSMX_DB_PATH" "$seqno.osc" "$tmpdir"; then
-    rm -rf "$tmpdir"; mv "$seqno.osc" "$BAD_CHANGESETS_DIR/"
-    echo "!!! [$seqno] osmx-rs failed, osc moved to $BAD_CHANGESETS_DIR"; continue
+  tmpdir=$(mktemp -d -p "$ADIFF_WORK_DIR")
+  if run_adiff "$seqno.osc" "$tmpdir"; then
+    for f in "$tmpdir"/*.adiff; do
+      [ -e "$f" ] || continue
+      cs=$(basename -s .adiff "$f")
+      mkdir -p "$SPLIT_ADIFFS_DIR/$cs"
+      mv "$f" "$SPLIT_ADIFFS_DIR/$cs/$seqno.adiff"
+    done
+  else
+    # Only the adiff is lost. Keep a copy of the osc as a record and still apply
+    # it below, so the db stays complete and the seqnum keeps moving.
+    cp "$seqno.osc" "$BAD_CHANGESETS_DIR/"
+    echo "!!! [$seqno] osmx-rs failed, no adiff for this file, osc copied to $BAD_CHANGESETS_DIR"
   fi
-  for f in "$tmpdir"/*.adiff; do
-    [ -e "$f" ] || continue
-    cs=$(basename -s .adiff "$f")
-    mkdir -p "$SPLIT_ADIFFS_DIR/$cs"
-    mv "$f" "$SPLIT_ADIFFS_DIR/$cs/$seqno.adiff"
-  done
   rm -rf "$tmpdir"
 
   echo ">>> [$seqno] osmx update"

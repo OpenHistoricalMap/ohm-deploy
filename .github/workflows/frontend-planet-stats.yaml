@@ -29,14 +29,14 @@ jobs:
         uses: allenevans/set-env@v4.0.0
         with:
           CLOUDFLARE_PROJECT: ohm-planet-stats-dash-staging
-          DASHBOARD_SERVER: https://s3.amazonaws.com/planet-staging.openhistoricalmap.org/planet-stats
+          DASHBOARD_SERVER: https://planet.ohmstaging.org/planet-stats
 
       - name: Set environment variables - Production
         if: github.ref == 'refs/heads/main'
         uses: allenevans/set-env@v4.0.0
         with:
           CLOUDFLARE_PROJECT: ohm-planet-stats-dash-production
-          DASHBOARD_SERVER: https://s3.amazonaws.com/planet.openhistoricalmap.org/planet-stats
+          DASHBOARD_SERVER: https://planet.openhistoricalmap.org/planet-stats
 
       - name: Checkout dashboard repo
         uses: actions/checkout@v6

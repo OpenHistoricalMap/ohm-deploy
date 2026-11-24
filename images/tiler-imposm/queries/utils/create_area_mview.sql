@@ -6,7 +6,7 @@
 --
 --   - Applies ST_SimplifyPreserveTopology for geometry simplification
 --   - Filters by minimum area (in square meters)
---   - Includes area_m2 (rounded area in m²) and area_km2 (rounded area in km²)
+--   - Rounds area to whole m²
 --   - Includes multilingual name columns using get_language_columns()
 --   - Includes temporal fields: start_date, end_date, and their decimal equivalents
 --
@@ -85,9 +85,10 @@ BEGIN
             WHEN column_overrides IS NOT NULL AND column_overrides ? column_name THEN
                 format('%s AS %I', column_overrides->>column_name, column_name)
             WHEN column_name = 'geometry' THEN format('%s AS geometry', simplify_expr)
+            -- Whole m², so it encodes as a short varint in the tile.
             WHEN column_name = 'area' THEN format(
-                '%I, ROUND(CAST(%I AS numeric), 1)::numeric(20,1) AS area_m2, ROUND(CAST(%I AS numeric) / 1000000, 1)::numeric(20,1) AS area_km2',
-                column_name, column_name, column_name
+                'ROUND(CAST(%I AS numeric))::bigint AS area',
+                column_name
             )
             WHEN data_type IN ('text', 'character varying') THEN format('NULLIF(%I, '''') AS %I', column_name, column_name)
             ELSE quote_ident(column_name)

@@ -21,6 +21,9 @@ RUN apt-get -y update && apt-get install -y \
     ca-certificates \
     software-properties-common \
     python3-pip \
+    python3-shapely \
+    python3-scipy \
+    python3-networkx \
     postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 

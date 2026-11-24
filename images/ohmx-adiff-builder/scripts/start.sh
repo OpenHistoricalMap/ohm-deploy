@@ -43,13 +43,33 @@ create_database() {
   echo "Database ready at seqnum=$seqnum (from planet header)"
 }
 
+# Run update.sh in its own process group and kill the whole group on timeout.
+# `timeout` only signals update.sh itself, so its children (osm replication,
+# osmx-rs) kept running and a new osmx-rs started on top of them every retry.
+run_update() {
+  local pid start=$SECONDS
+  setsid ./update.sh &
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    if [ $((SECONDS - start)) -gt "$UPDATE_TIMEOUT" ]; then
+      echo "update.sh ran over ${UPDATE_TIMEOUT}s, killing its process group"
+      kill -TERM -- "-$pid" 2>/dev/null
+      sleep 5
+      kill -KILL -- "-$pid" 2>/dev/null
+      break
+    fi
+    sleep 5
+  done
+  wait "$pid"
+}
+
 make_diffs() {
   while true; do
     beat make_diffs
-    # timeout caps a run below the watchdog limit, so a stalled replication stream
-    # gets killed and retried instead of wedging the loop. The db is transactional,
-    # so the next run just resumes from the last committed seqno.
-    timeout "$UPDATE_TIMEOUT" ./update.sh || echo "update.sh failed/timed out, retrying"
+    # The timeout caps a run below the watchdog limit, so a stalled replication
+    # stream gets killed and retried instead of wedging the loop. The db is
+    # transactional, so the next run just resumes from the last committed seqno.
+    run_update || echo "update.sh failed/timed out, retrying"
     sleep 60
   done
 }

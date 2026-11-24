@@ -59,13 +59,16 @@ SELECT create_area_mview(
 
 -- ============================================================================
 -- Areas z14-15, derived from z16-20.
--- Light 5m simplification, drops buildings under 5,000 m².
+-- Light 5m simplification, all buildings (#1346).
+-- Columns the style doesn't read below z16 are dropped to keep the tile small.
 -- ============================================================================
 SELECT derive_area_mview(
     source           => 'mv_buildings_areas_z16_20',
     target           => 'mv_buildings_areas_z14_15',
     simplify_tol     => 5,
-    min_metric       => 5000
+    min_metric       => 0,
+    exclude_columns  => ARRAY['tags', 'hide_3d', 'is_building_part', 'official_name', 'short_name', 'golf'],
+    exclude_patterns => ARRAY['name\_%', 'addr\_%', 'roof\_%', 'building\_%', 'render\_%', 'area%']
 );
 
 -- ============================================================================
@@ -78,11 +81,14 @@ SELECT derive_centroid_mview(
     union_source     => 'mv_buildings_points',
     only_named       => TRUE
 );
+-- Reads z16-20, not the z14-15 mview: labels keep the 5,000 m² cutoff and the
+-- name_* columns that mview no longer has.
 SELECT derive_centroid_mview(
-    source           => 'mv_buildings_areas_z14_15',
+    source           => 'mv_buildings_areas_z16_20',
     target           => 'mv_buildings_points_centroids_z14_15',
     union_source     => 'mv_buildings_points',
-    only_named       => TRUE
+    only_named       => TRUE,
+    min_metric       => 5000
 );
 
 

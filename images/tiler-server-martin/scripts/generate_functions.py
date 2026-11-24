@@ -126,6 +126,16 @@ def get_mvt_geom_params(max_zoom):
         return 4096, 256
 
 
+def parse_zoom_entry(entry):
+    """[max_zoom, table] or [max_zoom, table, group_by_columns].
+
+    With group_by, the branch returns one feature per column combination
+    instead of one per row. Smaller tiles, but rows lose their identity.
+    """
+    group_by = entry[2] if len(entry) > 2 else None
+    return entry[0], entry[1], group_by
+
+
 def generate_function_sql(func_def, columns_per_table):
     """Generate the CREATE FUNCTION SQL with hardcoded columns."""
     fn = func_def["function_name"]
@@ -137,22 +147,26 @@ def generate_function_sql(func_def, columns_per_table):
     # Build the IF/ELSIF/ELSE blocks
     blocks = []
     quoted_geom = f'"{geom_col}"'
-    for i, (max_zoom, table_name) in enumerate(zoom_mapping):
-        cols = columns_per_table[table_name]
+    for i, entry in enumerate(zoom_mapping):
+        max_zoom, table_name, group_by = parse_zoom_entry(entry)
         # Quote each column with double quotes so identifiers with hyphens or
         # mixed case (e.g. localized name columns like "name_zh-Hant-TW")
         # remain valid PostgreSQL identifiers. safe_col() rejects any name that
         # falls outside [A-Za-z_][A-Za-z0-9_-]* to prevent SQL injection via
         # crafted column names from the catalog.
+        cols = group_by if group_by else columns_per_table[table_name]
         col_list = ", ".join(f't."{safe_col(c)}"' for c in cols)
         extent, buffer = get_mvt_geom_params(max_zoom)
+
+        geom_expr = f"ST_Collect(t.{quoted_geom})" if group_by else f"t.{quoted_geom}"
+        group_clause = f"\n            GROUP BY {col_list}" if group_by else ""
 
         query = (
             f"SELECT ST_AsMVT(q, '{sl}', {extent}) INTO mvt FROM (\n"
             f"            SELECT {col_list},\n"
-            f"                   ST_AsMVTGeom(t.{quoted_geom}, bounds, {extent}, {buffer}, true) AS geometry\n"
+            f"                   ST_AsMVTGeom({geom_expr}, bounds, {extent}, {buffer}, true) AS geometry\n"
             f"            FROM public.{table_name} t\n"
-            f"            WHERE t.{quoted_geom} && bounds\n"
+            f"            WHERE t.{quoted_geom} && bounds{group_clause}\n"
             f"        ) q;"
         )
 
@@ -333,11 +347,18 @@ def main():
             # Get columns for each table
             columns_per_table = {}
             skip = False
-            for _, table_name in zoom_mapping:
+            for entry in zoom_mapping:
+                _, table_name, group_by = parse_zoom_entry(entry)
                 cols = get_columns(cur, table_name, exclude)
                 if not cols:
                     skip = True
                     break
+                if group_by:
+                    missing = [c for c in group_by if c not in cols]
+                    if missing:
+                        print(f"SKIPPED (group_by columns not in {table_name}: {missing})")
+                        skip = True
+                        break
                 columns_per_table[table_name] = cols
 
             if skip:

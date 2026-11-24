@@ -14,7 +14,7 @@ WORKDIR $workdir
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git curl gnupg build-essential \
-    libarchive-dev zlib1g-dev libcurl4-openssl-dev libgd-dev \
+    libarchive-dev zlib1g-dev libcurl4-openssl-dev libgd-dev libvips-dev \
     apache2 apache2-dev libapache2-mod-fcgid libapr1-dev libaprutil1-dev \
     postgresql-client libpq-dev libxml2-dev libyaml-dev \
     pngcrush optipng advancecomp pngquant jhead jpegoptim gifsicle libjpeg-progs unzip\
@@ -24,7 +24,7 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download OHM Website using gitsha, faster than cloning
-ENV OPENHISTORICALMAP_WEBSITE_GITSHA=c7d674d9c25aa2e97681c45c7c3631f64f2660af
+ENV OPENHISTORICALMAP_WEBSITE_GITSHA=d5255a6b1e4a25cc23f04a846547552c17b74104
 ENV OHM_WEBSITE_URL=https://github.com/OpenHistoricalMap/ohm-website/archive/${OPENHISTORICALMAP_WEBSITE_GITSHA}.zip
 RUN rm -rf $workdir/* && curl -fsSL $OHM_WEBSITE_URL -o /tmp/ohm-website.zip && \
     unzip /tmp/ohm-website.zip -d /tmp && \

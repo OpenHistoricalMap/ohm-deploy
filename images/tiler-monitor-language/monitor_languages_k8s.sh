@@ -16,7 +16,7 @@ FORCE_LANGUAGES_GENERATION="${TILER_MONITORING_FORCE_LANGUAGES_GENERATION:-false
 
 # Targets to act on (namespace + release-scoped resource names)
 NAMESPACE="${K8S_NAMESPACE:-default}"
-IMPOSM_STS="${IMPOSM_STATEFULSET}"            # e.g. ohm-staging-tiler-imposm-sts
+IMPOSM_STS="${IMPOSM_STATEFULSET}"            # e.g. ohm-staging-tiler-imposm
 MARTIN_DEPLOY="${MARTIN_DEPLOYMENT}"          # e.g. ohm-staging-tiler-server-martin
 
 log "Checking for new languages (threshold=${NIM_NUMBER_LANGUAGES}, force=${FORCE_LANGUAGES_GENERATION})"

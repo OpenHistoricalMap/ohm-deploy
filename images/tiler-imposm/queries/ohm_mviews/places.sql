@@ -6,8 +6,8 @@
 --
 --   Includes:
 --     - Centroids of polygonal areas (from `osm_place_areas`) calculated using
---       ST_MaximumInscribedCircle, with area in m² stored in `area_m2`.
---     - Direct points (from `osm_place_points`) with NULL for `area_m2`.
+--       ST_MaximumInscribedCircle, with area in m² stored in `area`.
+--     - Direct points (from `osm_place_points`) with NULL for `area`.
 --
 --   Both sources include:
 --     - Name (only non-empty)
@@ -65,7 +65,7 @@ BEGIN
       NULLIF(end_date, '') AS end_date,
       isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
       isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-      ROUND(area)::bigint AS area_m2,
+      ROUND(area)::bigint AS area,
       tags->'capital' AS capital,
       %s
     FROM osm_place_areas
@@ -82,7 +82,7 @@ BEGIN
       NULLIF(end_date, '') AS end_date,
       isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
       isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-      NULL AS area_m2,
+      NULL::bigint AS area,
       tags->'capital' AS capital,
       %s
     FROM osm_place_points
@@ -111,7 +111,7 @@ $$ LANGUAGE plpgsql;
 --     - Temporal fields `start_date` and `end_date` (as-is),
 --     - Precomputed fields `start_decdate` and `end_decdate` using the
 --       `isodatetodecimaldate` function for date filtering,
---     - Area in square meters (`area_m2`),
+--     - Area in square meters (`area`),
 --     - `capital` tag (if available),
 --     - Complete `tags` column,
 --     - Multilingual name columns dynamically generated from the `languages` table.
@@ -156,7 +156,7 @@ BEGIN
             NULLIF(end_date, '') AS end_date,
             isodatetodecimaldate(pad_date(start_date, 'start'), FALSE) AS start_decdate,
             isodatetodecimaldate(pad_date(end_date, 'end'), FALSE) AS end_decdate,
-            ROUND(ST_Area(geometry))::bigint AS area_m2,
+            ROUND(ST_Area(geometry))::bigint AS area,
             tags->'capital' AS capital,
             %s
         FROM osm_place_areas

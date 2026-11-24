@@ -133,6 +133,9 @@ setup_production() {
   # Tiler host. Defaults to vtiles.<server domain>; override VTILES_DOMAIN to use a
   # shared tiler (e.g. a preview that has no tiler of its own).
   VTILES_DOMAIN="${VTILES_DOMAIN:-vtiles.${SERVER_URL_}}"
+  # API host used by iD. Defaults to api.<server domain>; override API_DOMAIN when the
+  # API is served from the same host (e.g. a preview).
+  API_DOMAIN="${API_DOMAIN:-api.${SERVER_URL_}}"
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|openhistoricalmap.github.io|${SERVER_URL}|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" {} +
   find /var/www/node_modules/@openhistoricalmap/map-styles/dist/ -type f -name "*.json" -exec sed -i.bak "s|www.openhistoricalmap.org|${SERVER_URL}|g" {} +
@@ -155,6 +158,7 @@ setup_production() {
       -e "s|openhistoricalmap.github.io|${SERVER_URL}|g" \
       -e "s|http://localhost:8888|https://${SERVER_URL}/map-styles|g" \
       -e "s|www.openhistoricalmap.org|${SERVER_URL}|g" \
+      -e "s|\"api.openhistoricalmap.org\"|\"${API_DOMAIN}\"|g" \
       -e "s|vtiles.openhistoricalmap.org|${VTILES_DOMAIN}|g" \
       -e "s|vtiles.staging.openhistoricalmap.org|${VTILES_DOMAIN}|g" \
       "$file"

@@ -133,15 +133,15 @@ imagery_blacklist:
 overpass_url: "https://overpass-api.openhistoricalmap.org/api/interpreter"
 overpass_credentials: false
 # Routing endpoints
-graphhopper_url: "https://graphhopper.com/api/1/route"
+graphhopper_url: "https://routing.openhistoricalmap.org/route"
 fossgis_osrm_url: "https://routing.openstreetmap.de/"
 fossgis_valhalla_url: "https://valhalla1.openstreetmap.de/route"
 
 # Endpoints for Wikimedia integration
 wikidata_api_url: "https://www.wikidata.org/w/api.php"
-wikimedia_commons_url: "https://commons.wikimedia.org/wiki/"
+wikimedia_commons_url: "https://commons.wikimedia.org"
 # URL to donation form
-donation_url: "https://openstreetmap.app.neoncrm.com/forms/ohm"
+donation_url: "https://donate.openhistoricalmap.org"
 
 # External authentication credentials
 #google_auth_id: ""

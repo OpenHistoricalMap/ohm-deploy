@@ -108,6 +108,13 @@
               "__any__"
             ]
           }
+        },
+        "junction": {
+          "mapping": {
+            "junction": [
+              "yes"
+            ]
+          }
         }
       }
     }

@@ -5,9 +5,8 @@ import json
 import threading
 import datetime
 
-from tiler_cache_cleaner.utils.files import get_list_expired_tiles
 from config import Config
-from utils.utils import (check_tiler_db_postgres_status, get_logger, s3_path_to_url)
+from utils.utils import (check_tiler_db_postgres_status, get_list_expired_tiles, get_logger, s3_path_to_url)
 from utils.varnish_purger import ban_tile_strings
 
 logger = get_logger()

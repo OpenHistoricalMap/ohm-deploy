@@ -19,6 +19,8 @@ export CGIMAP_MAP_AREA="0.25"
 export CGIMAP_MAP_NODES="100000"
 export CGIMAP_MAX_WAY_NODES="2000"
 export CGIMAP_MAX_RELATION_MEMBERS="32000"
+# Count created/modified/deleted nodes, ways and relations per changeset (num_*_* columns)
+export CGIMAP_CHANGESET_ENHANCED_STATS="true"
 # export CGIMAP_RATELIMIT_UPLOAD="true"
 export CGIMAP_MODERATOR_RATELIMIT="1048576"
 export CGIMAP_MODERATOR_MAXDEBT="2048"

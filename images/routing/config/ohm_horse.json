@@ -1,0 +1,9 @@
+{
+  "priority": [
+    { "if": "road_class == MOTORWAY", "multiply_by": "0" },
+    { "else_if": "!car_access && !foot_access && road_class != BRIDLEWAY && road_class != TRACK", "multiply_by": "0" }
+  ],
+  "speed": [
+    { "if": "true", "limit_to": "10" }
+  ]
+}

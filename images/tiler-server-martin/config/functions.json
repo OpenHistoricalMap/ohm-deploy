@@ -9,13 +9,13 @@
           "exclude_columns": ["geometry"],
           "min_zoom": 0,
           "zoom_mapping": [
-            [2, "mv_admin_boundaries_lines_z0_2"],
-            [5, "mv_admin_boundaries_lines_z3_5"],
-            [7, "mv_admin_boundaries_lines_z6_7"],
-            [9, "mv_admin_boundaries_lines_z8_9"],
-            [12, "mv_admin_boundaries_lines_z10_12"],
-            [15, "mv_admin_boundaries_lines_z13_15"],
-            [null, "mv_admin_boundaries_lines_z16_20"]
+            [2, "land_ohm_lines_z0_2"],
+            [5, "land_ohm_lines_z3_5"],
+            [7, "land_ohm_lines_z6_7"],
+            [9, "land_ohm_lines_z8_9"],
+            [12, "land_ohm_lines_z10_12"],
+            [15, "land_ohm_lines_z13_15"],
+            [null, "land_ohm_lines_z16_20"]
           ]
         },
         {
@@ -90,6 +90,18 @@
             [12, "mv_water_areas_centroids_z10_12"],
             [15, "mv_water_areas_centroids_z13_15"],
             [null, "mv_water_areas_centroids_z16_20"]
+          ]
+        },
+        {
+          "function_name": "water_name",
+          "source_layer": "water_name",
+          "exclude_columns": ["geometry", "tags"],
+          "min_zoom": 8,
+          "zoom_mapping": [
+            [9, "mv_water_name_z8_9"],
+            [12, "mv_water_name_z10_12"],
+            [15, "mv_water_name_z13_15"],
+            [null, "mv_water_name_z16_20"]
           ]
         },
         {
@@ -171,7 +183,7 @@
           "exclude_columns": ["geometry", "tags"],
           "min_zoom": 14,
           "zoom_mapping": [
-            [15, "mv_amenity_areas_z14_15"],
+            [14, "mv_amenity_areas_z14_15"],
             [null, "mv_amenity_areas_z16_20"]
           ]
         },
@@ -191,7 +203,7 @@
           "exclude_columns": ["geometry", "tags"],
           "min_zoom": 14,
           "zoom_mapping": [
-            [15, "mv_buildings_areas_z14_15"],
+            [15, "mv_buildings_areas_z14_15", ["start_decdate", "end_decdate"]],
             [null, "mv_buildings_areas_z16_20"]
           ]
         },

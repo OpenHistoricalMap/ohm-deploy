@@ -216,11 +216,21 @@ water_views=(
     mv_water_areas_z6_7
     mv_water_areas_z3_5
     mv_water_areas_z0_2
+    # centerlines (#1374), before water_name because they are merged into it
+    mv_water_areas_centerlines_z16_20
+    mv_water_areas_centerlines_z13_15
+    mv_water_areas_centerlines_z10_12
+    mv_water_areas_centerlines_z8_9
     # centroids
     mv_water_areas_centroids_z16_20
     mv_water_areas_centroids_z13_15
     mv_water_areas_centroids_z10_12
     mv_water_areas_centroids_z8_9
+    # water_name (#1374): centroids + centerlines
+    mv_water_name_z16_20
+    mv_water_name_z13_15
+    mv_water_name_z10_12
+    mv_water_name_z8_9
     # lines
     mv_water_lines_z16_20
     mv_water_lines_z13_15
@@ -237,8 +247,8 @@ natural_views=(
 
 buildings_views=(
     # areas
-    mv_buildings_areas_z14_15
     mv_buildings_areas_z16_20
+    mv_buildings_areas_z14_15
     # points
     mv_buildings_points
     # points centroids
@@ -279,6 +289,16 @@ no_admin_boundaries_views=(
     mv_non_admin_boundaries_centroids_z0_2
 )
 
+no_admin_boundaries_lines_views=(
+    mv_non_admin_boundaries_lines_z16_20
+    mv_non_admin_boundaries_lines_z13_15
+    mv_non_admin_boundaries_lines_z10_12
+    mv_non_admin_boundaries_lines_z8_9
+    mv_non_admin_boundaries_lines_z6_7
+    mv_non_admin_boundaries_lines_z3_5
+    mv_non_admin_boundaries_lines_z0_2
+)
+
 addresses_views=(
     mv_address_points_z16_20
 )
@@ -304,4 +324,5 @@ refresh_mviews_group "NATURAL" 180 light "${natural_views[@]}" &
 refresh_mviews_group "BUILDINGS" 180 light "${buildings_views[@]}" &
 refresh_mviews_group "ROUTES" 180 light "${routes_views[@]}" &
 refresh_mviews_group "NO_ADMIN_BOUNDARIES" 180 light "${no_admin_boundaries_views[@]}" &
+refresh_mviews_group "NO_ADMIN_BOUNDARIES_LINES" 180 light "${no_admin_boundaries_lines_views[@]}" &
 refresh_mviews_group "ADDRESSES" 180 light "${addresses_views[@]}" &

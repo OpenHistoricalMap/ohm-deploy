@@ -1,0 +1,65 @@
+{{- if .Values.ohmRouting.enabled }}
+{{- $server := .Values.ohmRouting.server }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-routing-server
+  labels:
+    {{- include "routing.labels" (dict "root" . "component" "routing-server") | nindent 4 }}
+spec:
+  replicas: {{ $server.replicaCount | default 1 }}
+  # The new pod loads the new graph before the old one stops, so restarts have no downtime
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "routing.selector" (dict "root" . "component" "routing-server") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "routing.selector" (dict "root" . "component" "routing-server") | nindent 8 }}
+    spec:
+      {{- include "routing.scheduling" . | nindent 6 }}
+      containers:
+        - name: {{ .Release.Name }}-routing-server
+          image: {{ include "routing.image" . }}
+          command: ["/app/scripts/start.sh"]
+          env:
+            - name: JAVA_OPTS
+              value: {{ $server.javaOpts | default "-Xms1g -Xmx3g" | quote }}
+          ports:
+            - name: http
+              containerPort: 8989
+          # The first start downloads the planet and builds a graph
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            failureThreshold: {{ $server.startupFailureThreshold | default 60 }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            failureThreshold: 4
+          {{- include "routing.resources" $server | nindent 10 }}
+          volumeMounts:
+            - name: routing-data
+              mountPath: {{ .Values.ohmRouting.persistenceDisk.mountPath }}
+            # Each pod loads its own copy of the graph
+            - name: graph
+              mountPath: /tmp/graph
+      volumes:
+        {{- include "routing.dataVolume" . | nindent 8 }}
+        - name: graph
+          emptyDir: {}
+{{- end }}

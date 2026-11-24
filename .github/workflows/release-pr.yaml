@@ -1,0 +1,47 @@
+name: Open release PR (staging to main)
+# Keep one open PR from staging to main, so a production release is a
+# single merge. Each push to staging creates the PR or refreshes its
+# commit list.
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: release-pr
+  cancel-in-progress: true
+
+jobs:
+  release-pr:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Create or update the release PR
+        run: |
+          # commits on staging that main does not have yet
+          COMMITS=$(gh api "repos/$GH_REPO/compare/main...staging" \
+            --jq '.commits[] | "- " + (.commit.message | split("\n")[0])')
+          if [ -z "$COMMITS" ]; then
+            echo "staging has nothing new for main; nothing to do"
+            exit 0
+          fi
+
+          printf 'Commits on staging that are not in production yet:\n\n%s\n\nMerge with a merge commit, not squash.\n' "$COMMITS" > body.md
+
+          PR=$(gh pr list --base main --head staging --state open --json number --jq '.[0].number')
+          if [ -n "$PR" ]; then
+            gh pr edit "$PR" --body-file body.md
+            echo "updated PR #$PR"
+          else
+            gh pr create --base main --head staging \
+              --title "Production release: staging to main ($(date -u +%Y-%m-%d))" \
+              --body-file body.md
+          fi

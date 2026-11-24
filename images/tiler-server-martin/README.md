@@ -75,6 +75,7 @@ https://vtiles.openhistoricalmap.org/maps/osm_land/{z}/{x}/{y}
 | `place_points_centroids` | z0–20 |
 | `water_areas` | z0–20 |
 | `water_areas_centroids` | z8–20 |
+| `water_name` | z8–20 |
 | `water_lines` | z8–20 |
 | `transport_areas` | z10–20 |
 | `transport_lines` | z5–20 |
@@ -104,6 +105,8 @@ https://vtiles.openhistoricalmap.org/maps/osm_land/{z}/{x}/{y}
 |---|---|
 | `non_admin_boundaries_areas` | z0–20 |
 | `non_admin_boundaries_centroids` | z0–20 |
+
+`non_admin_boundaries_areas` also has the boundaries that do not close into a polygon (open ways and incomplete relations). Filter them by geometry type.
 
 ### `osm_land` — Land polygons (static)
 
