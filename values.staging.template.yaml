@@ -787,8 +787,8 @@ osm-seed:
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
       # Read only at import. Needs a fresh import to take effect.
       NOMINATIM_USE_DATES: "yes"
-      NOMINATIM_RESULT_ATTRIBUTION: "Data © OpenHistoricalMap contributors, CC0. https://www.openhistoricalmap.org/copyright"
-      NOMINATIM_RESULT_LICENCE: "CC0"
+      NOMINATIM_RESULT_ATTRIBUTION: "Map data courtesy of the OpenHistoricalMap project, in the public domain unless otherwise noted. https://www.openhistoricalmap.org/copyright"
+      NOMINATIM_RESULT_LICENCE: "CC0-1.0"
       NOMINATIM_PASSWORD: "{{NOMINATIM_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
