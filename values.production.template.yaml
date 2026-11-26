@@ -852,6 +852,10 @@ osm-seed:
       UPDATE_MODE: continuous
       IMPORT_STYLE: /app/ohm-import.lua
       EXTRA_TAGS: "start_date,start_date:edtf,end_date,end_date:edtf"
+      # Read only at import. Needs a fresh import to take effect.
+      NOMINATIM_USE_DATES: "yes"
+      NOMINATIM_RESULT_ATTRIBUTION: "Map data courtesy of the OpenHistoricalMap project, in the public domain unless otherwise noted. https://www.openhistoricalmap.org/copyright"
+      NOMINATIM_RESULT_LICENCE: "CC0-1.0"
       NOMINATIM_PASSWORD: "{{NOMINATIM_PG_PASSWORD}}"
     resources: {}
     persistenceDisk:
@@ -860,7 +864,7 @@ osm-seed:
       mountPath: /var/lib/postgresql/16/main
       subPath: nominatim-pgdata
       staticHostPath: true
-      localVolumeHostPath: /mnt/nominatim-db-data-v006
+      localVolumeHostPath: /mnt/nominatim-db-data-v007
     nodeSelector: {}
     nodeAffinity:
       enabled: true
