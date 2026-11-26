@@ -22,6 +22,7 @@ local function relation_as_any(o)
     return geom
 end
 
+flex.RELATION_TYPES['multilinestring'] = flex.relation_as_multiline
 flex.RELATION_TYPES['street'] = flex.relation_as_multiline
 flex.RELATION_TYPES['route'] = flex.relation_as_multiline
 flex.RELATION_TYPES['collection'] = relation_as_any
