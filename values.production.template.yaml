@@ -1082,16 +1082,17 @@ osm-seed:
     ingress:
       enabled: false
     env:
-      MR_URL: https://maproulette.openhistoricalmap.org
-      MR_OSM_SERVER: https://www.openhistoricalmap.org
-      MR_OSM_API_SERVER: https://www.openhistoricalmap.org
-      MR_ID_EDITOR_URL: https://www.openhistoricalmap.org/edit
-      MR_RAPID_EDITOR_URL: https://rapid.openhistoricalmap.org
-      # Any REACT_APP_* key here replaces the same key in the frontend env.json
-      REACT_APP_LEVEL0_EDITOR_SERVER_URL: https://level0.openhistoricalmap.org/index.php
-      REACT_APP_OSMCHA_SERVER: https://osmcha.openhistoricalmap.org
-      REACT_APP_TAGINFO_SERVER_URL: https://taginfo.openhistoricalmap.org
-      REACT_APP_IMAGERY_OPENSTREETCAM: disabled
+      # Any VITE_* key here replaces the same key in the frontend env.json
+      VITE_API_BASE_URL: https://maproulette.openhistoricalmap.org
+      VITE_OSM_SERVER: https://www.openhistoricalmap.org
+      VITE_OSM_API_SERVER: https://www.openhistoricalmap.org
+      VITE_ID_EDITOR_SERVER_URL: https://www.openhistoricalmap.org/edit
+      VITE_RAPID_EDITOR_SERVER_URL: https://rapid.openhistoricalmap.org
+      VITE_LEVEL0_EDITOR_SERVER_URL: https://level0.openhistoricalmap.org/index.php
+      VITE_NOMINATIM_BASE_URL: https://nominatim.openhistoricalmap.org
+      # Empty: no mpr.lt short links in changeset comments
+      VITE_SHORT_URL: ""
+      VITE_ENABLE_WEBSOCKET: "true"
     resources: {}
     nodeSelector: {}
     nodeAffinity:
