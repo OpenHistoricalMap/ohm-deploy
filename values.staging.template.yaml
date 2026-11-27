@@ -1030,16 +1030,17 @@ osm-seed:
     ingress:
       enabled: false
     env:
-      MR_URL: https://maproulette.ohmstaging.org
-      MR_OSM_SERVER: https://www.ohmstaging.org
-      MR_OSM_API_SERVER: https://www.ohmstaging.org
-      MR_ID_EDITOR_URL: https://www.ohmstaging.org/edit
-      MR_RAPID_EDITOR_URL: https://rapid.ohmstaging.org
-      # Any REACT_APP_* key here replaces the same key in the frontend env.json
-      REACT_APP_LEVEL0_EDITOR_SERVER_URL: https://level0.ohmstaging.org/index.php
-      REACT_APP_OSMCHA_SERVER: https://osmcha.ohmstaging.org
-      REACT_APP_TAGINFO_SERVER_URL: https://taginfo.openhistoricalmap.org
-      REACT_APP_IMAGERY_OPENSTREETCAM: disabled
+      # Any VITE_* key here replaces the same key in the frontend env.json
+      VITE_API_BASE_URL: https://maproulette.ohmstaging.org
+      VITE_OSM_SERVER: https://www.ohmstaging.org
+      VITE_OSM_API_SERVER: https://www.ohmstaging.org
+      VITE_ID_EDITOR_SERVER_URL: https://www.ohmstaging.org/edit
+      VITE_RAPID_EDITOR_SERVER_URL: https://rapid.ohmstaging.org
+      VITE_LEVEL0_EDITOR_SERVER_URL: https://level0.ohmstaging.org/index.php
+      VITE_NOMINATIM_BASE_URL: https://nominatim.ohmstaging.org
+      # Empty: no mpr.lt short links in changeset comments
+      VITE_SHORT_URL: ""
+      VITE_ENABLE_WEBSOCKET: "true"
     resources: {}
     nodeSelector: {}
     nodeAffinity:
