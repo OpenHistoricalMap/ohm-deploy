@@ -2,12 +2,11 @@
 # Built from the OHM fork, which adds the OHM basemap as the default map style.
 FROM node:24-alpine AS builder
 
-ARG GIT=OpenHistoricalMap/maproulette-frontend
-ARG VERSION=ohm-basemap
+ENV MAPROULETTE_FRONTEND_GITSHA=d157f4b5a7474fc041d4891a071e424026da26c8
+ENV MAPROULETTE_FRONTEND_URL=https://codeload.github.com/OpenHistoricalMap/maproulette-frontend/tar.gz/${MAPROULETTE_FRONTEND_GITSHA}
 
-RUN apk add --no-cache git
-RUN git clone --depth 1 --branch ${VERSION} https://github.com/${GIT}.git /app
 WORKDIR /app
+RUN wget -qO- ${MAPROULETTE_FRONTEND_URL} | tar -xz --strip-components=1
 
 # The postinstall hook seeds .env from .env.example; env.json gets its defaults from it.
 RUN npm ci
