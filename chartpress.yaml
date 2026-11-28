@@ -30,6 +30,8 @@ charts:
         valuesPath: osm-seed.overpassApi.image
       nominatim:
         valuesPath: osm-seed.nominatimApi.image
+      maproulette-web:
+        valuesPath: osm-seed.maprouletteWeb.image
       routing:
         valuesPath: ohmRouting.image
       coastline:

@@ -39,13 +39,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.x"
+          node-version: "24"
 
       - name: Checkout overpass-turbo repo
         uses: actions/checkout@v6
         with:
           repository: OpenHistoricalMap/overpass-turbo
-          ref: d10732ea33ef79b2f79a8132f73d0034272155f4
+          ref: f986777f7f8752272535b90b124d3e9e26185a97
           path: overpass-turbo
 
       - name: Enable Corepack
